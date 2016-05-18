@@ -1,7 +1,7 @@
 # blitz2
 Official Acid Software Amiga development tools
 
-The source code to Blitz2 is here. It is 68000 assembler with tabs bext set to 8 or 12.
+The source code to Blitz2 is here. It is 68000 assembler with tabs best set to 8 or 12.
 
 src/blitz2.s
 
