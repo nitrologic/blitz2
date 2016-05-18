@@ -1,0 +1,114 @@
+	;to be included to allow things to be run from WBENCH
+	;
+	;
+wb_header	move.l	4,a6
+	move.l	276(a6),a4
+	move.l	a4,us
+	tst.l	$ac(a4)
+	bne	fromcli
+	;
+	;program was run from workbench - somehoew, we have
+	;to eventually get stacksize into D2!
+	;
+	lea	$5c(a4),a0
+	jsr	waitport(a6)
+	jsr	getmsg(a6)
+	move.l	d0,wbmess
+	move.l	d0,a5
+	bsr	dosopen
+	beq	wb_exit
+	move.l	dos(pc),a6
+	;
+	;Read in the .info file to find stack size!
+	;
+	move.l	$24(a5),a4
+	move.l	(a4),d1
+	jsr	currentdir(a6)	;dir of BLITZ2!
+	;
+	move.l	4(a4),a0		;pointer to name?
+	lea	progfile(pc),a1	;make name+.info
+.loop0	move.b	(a0)+,(a1)+
+	bne	.loop0
+	subq	#1,a1
+	lea	wb_infoname(pc),a0
+.loopm1	move.b	(a0)+,(a1)+
+	bne	.loopm1
+	;
+	move.l	#progfile,d1
+	move.l	#1005,d2
+	jsr	open(a6)
+	move.l	d0,d7
+	beq	.openfailed
+	move.l	d7,d1
+	move.l	#progfile,d2
+	moveq	#$4e,d3
+	jsr	read(a6)
+	cmp.l	#$4e,d0
+	bne	.openfailed
+	move.l	d7,d1
+	jsr	close(a6)
+	clr.b	progfile
+	move.l	progfile+$4a,d2
+	beq	.openfailed
+	;
+;	moveq	#-1,d0
+;.fll	move	d0,$dff180
+;	dbf	d0,.fll
+	;
+	bra	.openok
+	;
+.openfailed	move.l	#4000,d2
+.openok	cmp	#2,$1e(a5)
+	bcs	wb_allgo
+	;
+.allgo	move.l	$24(a5),a4
+	move.l	8(a4),d1
+	jsr	currentdir(a6)
+	move.l	12(a4),a0
+	lea	progfile(pc),a1
+.loop	move.b	(a0)+,(a1)+
+	bne	.loop	
+	bra	wb_allgo
+
+fromcli	move.l	4(a7),d2	;stacksize from CLI
+	clr.l	wbmess
+	subq	#1,d0
+	beq	.skip2
+	lea	progfile(pc),a1
+.loop	move.b	(a0)+,(a1)+
+	cmp.b	#32,-1(a1)
+	beq	.skip
+	cmp.b	#10,-1(a1)
+	bne	.loop
+.skip	clr.b	-1(a1)
+.skip2	bsr	dosopen
+	beq	wb_exit
+	bra	wb_allgo
+
+wb_exit	move.l	wbmess(pc),d0
+	beq	.done
+	move.l	4,a6
+	jsr	forbid(a6)
+	move.l	wbmess(pc),a1
+	jsr	replymsg(a6)
+	jsr	permit(a6)
+.done	rts
+
+dosopen	move.l	4,a6
+	lea	wb_dosname(pc),a1
+	jsr	oldopenlibrary(a6)
+	move.l	d0,dos
+	rts
+	
+wb_infoname	dc.b	'.info',0
+	even
+wb_dosname	dc.b	'dos.library',0
+	even
+dos	dc.l	0
+us	dc.l	0
+wbmess	dc.l	0
+progfile	dcb.b	192,0
+
+wb_allgo	;
+
+

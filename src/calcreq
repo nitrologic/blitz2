@@ -1,0 +1,144 @@
+calcreq	dc.l	0
+	dc.w	100,34,376,84,0,0
+	dc.l	calcreqga1,calcreqbo1,calcreqin1
+	dc.w	0
+	dc.b	0,0
+	dc.l	0
+	ds.b	32
+	dc.l	0,0
+	ds.b	36
+
+calcreqbo1	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla1,calcreqla2
+calcreqla1	dc.w	351,28,120,28,120,39
+calcreqla2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla3,calcreqbo2
+calcreqla3	dc.w	351,29,351,39,121,39
+calcreqbo2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla4,calcreqla5
+calcreqla4	dc.w	359,24,16,24,16,43
+calcreqla5	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla6,calcreqbo3
+calcreqla6	dc.w	359,25,359,43,17,43
+calcreqbo3	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla7,calcreqla8
+calcreqla7	dc.w	367,20,8,20,8,63
+calcreqla8	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla9,calcreqbo4
+calcreqla9	dc.w	367,21,367,63,9,63
+calcreqbo4	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla10,calcreqla11
+calcreqla10	dc.w	375,0,0,0,0,83
+calcreqla11	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla12,0
+calcreqla12	dc.w	375,1,375,83,1,83
+calcreqbo5	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla16,calcreqla17
+calcreqla16	dc.w	47,0,0,0,0,11
+calcreqla17	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla18,0
+calcreqla18	dc.w	47,1,47,11,1,11
+calcreqbo6	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla20,calcreqla21
+calcreqla20	dc.w	47,0,0,0,0,11
+calcreqla21	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla22,0
+calcreqla22	dc.w	47,1,47,11,1,11
+calcreqbo7	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla24,calcreqla25
+calcreqla24	dc.w	47,0,0,0,0,11
+calcreqla25	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla26,0
+calcreqla26	dc.w	47,1,47,11,1,11
+calcreqbo8	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	calcreqla28,calcreqla29
+calcreqla28	dc.w	79,0,0,0,0,11
+calcreqla29	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	calcreqla30,0
+calcreqla30	dc.w	79,1,79,11,1,11
+
+calcreqin1	dc.b	1,0,1,0
+	dc.w	28,30
+	dc.l	0
+	dc.l	calcreqla13,calcreqin2
+calcreqla13	dc.b	'EXPRESSION:',0
+	even
+calcreqin2	dc.b	1,0,1,0
+	dc.w	12,6
+	dc.l	0
+	dc.l	calcreqla14,0
+calcreqla14	dc.b	'Calculator',0
+	even
+calcreqin3	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	calcreqla19,0
+calcreqla19	dc.b	' DEC ',0
+	even
+calcreqin4	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	calcreqla23,0
+calcreqla23	dc.b	' BIN ',0
+	even
+calcreqin5	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	calcreqla27,0
+calcreqla27	dc.b	' HEX ',0
+	even
+calcreqin6	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	calcreqla31,0
+calcreqla31	dc.b	' BYE BYE ',0
+	even
+
+
+calcreqga1	dc.l	calcreqga2
+	dc.w	124,30,224,8,0,1,$1004
+	dc.l	0,0,0,0,calcreqsg1
+	dc.w	1
+	dc.l	0
+calcreqsg1	dc.l	calcreqla15,undobuffer
+	dc.w	0,128,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	0,0
+calcreqla15	dcb.b	128,0
+	even
+calcreqga2	dc.l	calcreqga3
+	dc.w	16,48,48,12,128,257,1
+	dc.l	calcreqbo5,0,calcreqin3,0,0
+	dc.w	2
+	dc.l	0
+calcreqga3	dc.l	calcreqga4
+	dc.w	312,48,48,12,0,257,1
+	dc.l	calcreqbo6,0,calcreqin4,0,0
+	dc.w	3
+	dc.l	0
+calcreqga4	dc.l	calcreqga5
+	dc.w	168,48,48,12,0,257,1
+	dc.l	calcreqbo7,0,calcreqin5,0,0
+	dc.w	4
+	dc.l	0
+calcreqga5	dc.l	0
+	dc.w	152,68,80,12,0,5,1
+	dc.l	calcreqbo8,0,calcreqin6,0,0
+	dc.w	5
+	dc.l	0

@@ -1,0 +1,255 @@
+typereq	dc.l	0
+	dc.w	148,2,272,172,0,0
+	dc.l	typereqga1,typereqbo1,typereqin1
+	dc.w	0
+	dc.b	0,0
+	dc.l	0
+	ds.b	32
+	dc.l	0,0
+	ds.b	36
+
+typereqbo1	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla1,typereqla2
+typereqla1	dc.w	239,24,16,24,16,123
+typereqla2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla3,typereqbo2
+typereqla3	dc.w	239,25,239,123,17,123
+typereqbo2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla4,typereqla5
+typereqla4	dc.w	263,20,8,20,8,127
+typereqla5	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla6,typereqbo3
+typereqla6	dc.w	263,21,263,127,9,127
+typereqbo3	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla7,typereqla8
+typereqla7	dc.w	263,132,8,132,8,151
+typereqla8	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla9,typereqbo4
+typereqla9	dc.w	263,133,263,151,9,151
+typereqbo4	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla10,typereqla11
+typereqla10	dc.w	255,136,72,136,72,147
+typereqla11	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla12,typereqbo5
+typereqla12	dc.w	255,137,255,147,73,147
+typereqbo5	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla13,typereqla14
+typereqla13	dc.w	271,0,0,0,0,171
+typereqla14	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla15,typereqbo6
+typereqla15	dc.w	271,1,271,171,1,171
+typereqbo6	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla18,typereqla19
+typereqla18	dc.w	259,26,244,26,244,121
+typereqla19	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla20,0
+typereqla20	dc.w	259,27,259,121,245,121
+typereqbo7	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla22,typereqla23
+typereqla22	dc.w	47,0,0,0,0,11
+typereqla23	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla24,0
+typereqla24	dc.w	47,1,47,11,1,11
+typereqbo8	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	typereqla26,typereqla27
+typereqla26	dc.w	87,0,0,0,0,11
+typereqla27	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	typereqla28,0
+typereqla28	dc.w	87,1,87,11,1,11
+
+typereqin1	dc.b	1,0,1,0
+	dc.w	12,6
+	dc.l	0
+	dc.l	typereqla16,0
+typereqla16	dc.b	'View Type Information',0
+	even
+typereqin2	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	typereqla25,0
+typereqla25	dc.b	'TYPE:',0
+	even
+typereqin3	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	typereqla29,0
+typereqla29	dc.b	' FAREWELL ',0
+	even
+typereqin4	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla30,0
+typereqla30	dc.b	'                           ',0
+	even
+typereqin5	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla31,0
+typereqla31	dc.b	'                           ',0
+	even
+typereqin6	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla32,0
+typereqla32	dc.b	'                           ',0
+	even
+typereqin7	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla33,0
+typereqla33	dc.b	'                           ',0
+	even
+typereqin8	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla34,0
+typereqla34	dc.b	'                           ',0
+	even
+typereqin9	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla35,0
+typereqla35	dc.b	'                           ',0
+	even
+typereqin10	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla36,0
+typereqla36	dc.b	'                           ',0
+	even
+typereqin11	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla37,0
+typereqla37	dc.b	'                           ',0
+	even
+typereqin12	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla38,0
+typereqla38	dc.b	'                           ',0
+	even
+typereqin13	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla39,0
+typereqla39	dc.b	'                           ',0
+	even
+typereqin14	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla40,0
+typereqla40	dc.b	'                           ',0
+	even
+typereqin15	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	typereqla41,0
+typereqla41	dc.b	'                           ',0
+	even
+
+
+typereqga1	dc.l	typereqga2
+	dc.w	247,28,10,92,0,3,3
+	dc.l	typereqla17,0,0,0,typereqvp1
+	dc.w	1
+	dc.l	0
+typereqla17	dc.l	0,0,0,0,0
+typereqvp1	dc.w	13,-1,0,-1,32768,0,0,0,0,0,0
+typereqga2	dc.l	typereqga3
+	dc.w	76,138,176,8,0,1,4
+	dc.l	0,0,0,0,typereqsg1
+	dc.w	2
+	dc.l	0
+typereqsg1	dc.l	typereqla21,undobuffer
+	dc.w	0,32,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	0,0
+typereqla21	dcb.b	32,0
+	even
+typereqga3	dc.l	typereqga4
+	dc.w	16,136,48,12,0,1,1
+	dc.l	typereqbo7,0,typereqin2,0,0
+	dc.w	3
+	dc.l	0
+typereqga4	dc.l	typereqga5
+	dc.w	96,156,88,12,0,5,1
+	dc.l	typereqbo8,0,typereqin3,0,0
+	dc.w	4
+	dc.l	0
+typereqga5	dc.l	typereqga6
+	dc.w	20,26,216,8,0,1,1
+	dc.l	0,0,typereqin4,0,0
+	dc.w	5
+	dc.l	0
+typereqga6	dc.l	typereqga7
+	dc.w	20,34,216,8,0,1,1
+	dc.l	0,0,typereqin5,0,0
+	dc.w	6
+	dc.l	0
+typereqga7	dc.l	typereqga8
+	dc.w	20,42,216,8,0,1,1
+	dc.l	0,0,typereqin6,0,0
+	dc.w	7
+	dc.l	0
+typereqga8	dc.l	typereqga9
+	dc.w	20,50,216,8,0,1,1
+	dc.l	0,0,typereqin7,0,0
+	dc.w	8
+	dc.l	0
+typereqga9	dc.l	typereqga10
+	dc.w	20,58,216,8,0,1,1
+	dc.l	0,0,typereqin8,0,0
+	dc.w	9
+	dc.l	0
+typereqga10	dc.l	typereqga11
+	dc.w	20,66,216,8,0,1,1
+	dc.l	0,0,typereqin9,0,0
+	dc.w	10
+	dc.l	0
+typereqga11	dc.l	typereqga12
+	dc.w	20,74,216,8,0,1,1
+	dc.l	0,0,typereqin10,0,0
+	dc.w	11
+	dc.l	0
+typereqga12	dc.l	typereqga13
+	dc.w	20,82,216,8,0,1,1
+	dc.l	0,0,typereqin11,0,0
+	dc.w	12
+	dc.l	0
+typereqga13	dc.l	typereqga14
+	dc.w	20,90,216,8,0,1,1
+	dc.l	0,0,typereqin12,0,0
+	dc.w	13
+	dc.l	0
+typereqga14	dc.l	typereqga15
+	dc.w	20,98,216,8,0,1,1
+	dc.l	0,0,typereqin13,0,0
+	dc.w	14
+	dc.l	0
+typereqga15	dc.l	typereqga16
+	dc.w	20,106,216,8,0,1,1
+	dc.l	0,0,typereqin14,0,0
+	dc.w	15
+	dc.l	0
+typereqga16	dc.l	0
+	dc.w	20,114,216,8,0,1,1
+	dc.l	0,0,typereqin15,0,0
+	dc.w	16
+	dc.l	0
