@@ -1,0 +1,742 @@
+Blitz library 'blitzlibs:basic/animlib.obj' (#94)
+  Anim - IFF Anim
+  LoadAnim Anim#,Filename$[,Palette#]
+  InitAnim Anim#[,BitMap#]
+  NextFrame Anim#
+  Frames (Anim#)
+
+Blitz library 'blitzlibs:basic/arexxlib.obj' (#92)
+  CreateRexxMsg MsgPtr=CreateRexxMsg(ReplyPort,Exten,Host)
+  DeleteRexxMsg rexxmsg.l
+  FillRexxMsg rexxmsg,&FillStruct
+  ClearRexxMsg rexxmsg
+  CreateArgString ArgString=CreateArgString(String)
+  DeleteArgString argstring
+  SendRexxCommand rexxmsg,CommandString,ActionCodes
+  ReplyRexxMsg rexxmsg,Result1,Result2,ResultString
+  GetRexxResult Result=GetRexxResult(rexxmsg,ResultNum)
+  GetRexxCommand String=GetRexxCommand(rexxmsg,ARGNum)
+  GetResultString String=GetResultString(rexxmsg)
+  RexxEvent rexxmsg=RexxEvent(PortAddress)
+  IsRexxMsg Boolean=IsRexxMsg(rexxmsg)
+  RexxError ErrorString=RexxError(ErrorCode)
+
+Blitz library 'blitzlibs:basic/audiolib.obj' (#116)
+  DiskPlay Filename$,Channelmask[,Vol1[,Vol2...]]
+  DiskBuffer Bufferlen
+  LoadSound Sound#,Filename$
+  Sound Sound#,Channelmask[,Vol1[,Vol2...]]
+  Volume Channelmask,Vol1[,Vol2...]
+  Filter On|Off
+  LoopSound Sound#,Channelmask[,Vol1[,Vol2...]]
+  InitSound Sound#,Length[,Period[,Repeat]]
+  SoundData Sound#,Offset,Data
+  PeekSound (Sound#,Offset)
+  DecodeSound Sound#,MemoryLocation
+  SetPeriod Sound#,Period
+
+Blitz library 'blitzlibs:basic/banklib.obj' (#76)
+  Bank (bank#)  ;returns location of bank, 0 if not in use
+  InitBank bank#,size,memtype ;0=fast 2=chip 65536=clrmem
+  FreeBank bank#
+  LoadBank bank#,filename$[,memtype]
+  SaveBank bank#,filename$
+  BankLoc (bank#)
+  BankSize (bank#)
+  AllocMem (size,memtype) memtype: 0=fast 2=chip 65536=clrmem
+  FreeMem address,size
+
+Blitz library 'blitzlibs:basic/bbasllib.obj' (#80)
+  ASLFileRequest$ Title$,Pathname$,Filename$ [,Pattern$] [,x,y,w,h]
+  ASLFontRequest enable flags (1=pen 2=bckgrnd 4=style 8=drawmode 16=fixedsize)
+  ASLScreenRequest enable flags (1=width 2=height 4=depth 8=overscan 16=scroll)
+  ASLPathRequest$ Title$,Pathname$ [,x,y,w,h]
+
+Blitz library 'blitzlibs:basic/bbgtlib.obj' (#141)
+  GTList A GadgTools GadgetList
+  GTButton GTList#,id,x,y,w,h,Text$,flags
+  GTCheckBox GTList#,id,x,y,w,h,Text$,flags
+  GTCycle GTList#,id,x,y,w,h,Text$,flags,Options$[,active]
+  GTInteger GTList#,id,x,y,w,h,Text$,flags,default
+  GTListView GTList#,id,x,y,w,h,Text$,flags,list()[,selected[,top]]
+  GTMX GTList#,id,x,y,w,h,Text$,flags,Options$[,active]
+  GTNumber GTList#,id,x,y,w,h,Text$,flags,value
+  GTPalette GTList#,id,x,y,w,h,Text$,flags,depth[,Color]
+  GTScroller GTList#,id,x,y,w,h,Text$,flags,Visible,Total[,Top]
+  GTSlider GTList#,id,x,y,w,h,Text$,flags,Min,Max[,Level]
+  GTString GTList#,id,x,y,w,h,Text$,flags,MaxChars [,default$]
+  GTText GTList#,id,x,y,w,h,Text$,flags,Display$
+  AttachGTList GTList#,Window#
+  GTTags Tag,Value [,Tag,Value...]
+  GTGadPtr (GTList#,id)
+  GTBevelBox GTList#,x,y,w,h,flags
+  GTChangeList GTList#,id [ ,List() ]
+  GTSetAttrs GTList#,id [,Tag,Value...]
+  GTSetString GTList#,id,string$
+  GTSetInteger GTList#,id,value
+  GTGetString GTList#,id
+  GTGetInteger GTList#,id
+  GTShape GTList#,id,x,y,flags,Shape#[,Shape#]
+  GTGetAttrs (GTList#,id,Tag)
+  GTEnable GTList#,Id
+  GTDisable GTList#,Id
+  GTToggle GTList#,Id [,On|Off]
+  GTStatus GTList#,Id
+  GTArrowSize size
+
+Blitz library 'blitzlibs:basic/bblitlib.obj' (#146)
+  Buffer Buffer#,Memorylen
+  BBlit Buffer#,Shape#,X,Y[,Excessonoff]
+  UnBuffer Buffer#
+  BBlitMode BLTCON0
+  ShowStencil Buffer#,Stencil#
+  FlushBuffer Buffer#
+
+Blitz library 'blitzlibs:basic/bitmaplib.obj' (#160)
+  BitMap BitMap#,Width,Height,Depth
+  LoadBitMap BitMap#,Filename$[,Palette#]
+  ScreensBitMap Screen#,BitMap#
+  CopyBitMap Src BitMap#,Dest BitMap#
+  ShapesBitMap Shape#,BitMap#
+  CludgeBitMap BitMap#,Width,Height,Depth,Memory
+
+Blitz library 'blitzlibs:basic/blitlib.obj' (#150)
+  Blit Shape#,X,Y[,Excessonoff]
+  BlitMode BLTCON0
+  CookieMode
+  EraseMode
+  InvMode
+  SolidMode
+  Block Shape#,X,Y
+  BlitColl (Shape#,x,y)
+
+Blitz library 'blitzlibs:basic/blitzcoplib.obj' (#144)
+  Slice [Slice#,Y,Flags]|[Slice#,Y,Width,Hite,Flgs,Bitplns,Sprts,Colrs,Fscrnw,Bscrnw]
+  CopLoc
+  CustomCop Copins$,Y
+  Show Bitmap#[,X,Y]
+  ShowF Bitmap#[,X,Y[,ShowB X]]
+  ShowB Bitmap#[,X,Y[,ShowF X]]
+  CopLen
+  ColSplit Colour Register,Red,Green,Blue,Y
+  ShowBlitz
+  FreeSlices
+  DisplayOff
+  DisplayOn
+  SetBPLCON0 BPLCON0 Default
+  SetBLWait Wait move for line 256 (eg:$ffe1fffe
+
+Blitz library 'blitzlibs:basic/blitzkeyslib.obj' (#98)
+  BlitzKeys On|Off
+  RawStatus (Rawkey)
+  BlitzRepeat Delay,Speed
+  BlitzQualifier
+  HandleRawKey
+  BlitzKey ;same as inkey$ after a bitmapinput
+
+Blitz library 'blitzlibs:basic/brexxlib.obj' (#132)
+  Record [Tape#]
+  PlayBack [Tape#]
+  SaveTape Tape#,Filename$
+  LoadTape Tape#,filename$
+  AbsMouse X,Y
+  RelMouse X Offset,Y Offset
+  MouseButton Button,On|Off : 0=Left
+  ClickButton Button : 0=Left
+  MacroKey Tape#,Rawkey,Qualifier
+  TapeTrap [Tape#]
+  QuietTrap On|Off
+  Type String$
+  QuickPlay On|Off
+  XStatus
+  PlayWait
+  Tape A BREXX Macro
+  FreeMacroKey Rawkey,Qualifier
+
+Blitz library 'blitzlibs:basic/cliargslib.obj' (#106)
+  NumPars   pars.w=NumPars  Number of paramters passed to program.
+  Par$   parameter$=Par$(Paramter#)   Returns the string value of a parameter.
+  FromCLI   result=FromCLI   0=Run from WorkBench, -1=Run from CLI
+  ParPath$   path$=ParPath$(Par#,#type)  Full/Dir path of WB arg. (v36+ only!)
+
+Blitz library 'blitzlibs:basic/collslib.obj' (#104)
+  SetCollOdd
+  SetColl Colour,Bitplanes[,Playfield 1=front, 2=back]
+  SetCollHi Bitplanes
+  ShapesHit (Shape#,X,Y,Shape#,X,Y)
+  ShapeSpriteHit (Shape#,X,Y,Sprite#,X,Y)
+  SpritesHit (Sprite#,X,Y,Sprite#,X,Y)
+  RectsHit (X1,Y1,Width1,Height1,X2,Y2,Width2,Height2)
+  SColl (Sprite Channel,Sprite Channel)
+  PColl (Sprite Channel)
+  DoColl
+
+Blitz library 'blitzlibs:basic/datelib.obj' (#78)
+  SystemDate Returns system date as number of days since 1/1/1978
+  Date$ days.l ;converts days since 1/1/1978 to date string
+  NumDays date$ ;converts dd/mm/yyyy to days since 1/1/1978
+  DateFormat 0=dd/mm/yyyy 1=mm/dd/yyyy
+  Days  ;returns day calculated in last call to date$
+  Months  ;returns month calculated in last call to date$
+  Years  ;returns year calculated in last call to date$
+  WeekDay  ;returns day of week calculated in last call to date$
+  Hours  ;gets system time and returns hour of day
+  Mins  ;returns minutes calculated at last call to hour
+  Secs  ;returns seconds calculated at last call to hour
+
+Blitz library 'blitzlibs:basic/dhandlerlib.obj' (#1)
+
+Blitz library 'blitzlibs:basic/displaylib.obj' (#143)
+  CopList
+  InitCopList CopList#[,type]|[,ypos,height,type,sprites,colors,numcustoms]
+  CreateDisplay CopList#[,CopList#..]
+  DisplayBitMap CopList#,bmap[,x,y] [,bmap[,x,y]]
+  DisplaySprite CopList#,Sprite#,X,Y,Sprite Channel
+  DisplayPalette CopList#,Palette# [,coloroffset] [,coloroffset,bankoffset]
+  DisplayControls CopList#,BPLCON2,BPLCON3,BPLCON4
+  DisplayAdjust CopList#,fetchwid,ddfstrt,ddfstop,diwstrt,diwstop
+  CustomColors CopList#,CCOffset,YPos,Palette,startcol,numcols[,thru256flag]  ;ecs=2+n aga=2+n+n+n/16
+  CustomString CopList#,CCOffset,YPos,Copper$  ;2+n {n=len(a$)/4}
+  DisplayDblScan CopList#,Mode[,copoffset]   ;2
+  DisplayRainbow CopList#,Register,Palette[,copoffset] ;ecs=1 aga=4
+  DisplayRGB CopList#,Register,line,r,g,b[,copoffset] ;ecs=1 aga=4
+  DisplayUser CopList#,Line,String[,Offset]
+  DisplayScroll CopList#,&xpos.q(n),&xpos.q(n)[,Offset]   ;3
+  CustomSprites CopList#,CCOffset,YPos,NumSprites ;4n+2
+  CustomChunky CopList#,CCOffset,YPos,width,height,res ;4n+2
+  CustomChunkySize width,height
+
+Blitz library 'blitzlibs:basic/editlib.obj' (#186)
+  Edit$ ([DefaultString$,]Characters)
+  Inkey$ [(Characters)]
+  Edit ([DefaultValue,]Characters)
+
+Blitz library 'blitzlibs:basic/environlib.obj' (#193)
+  WBWidth
+  WBHeight
+  WBDepth
+  WBViewMode
+  Processor
+  cr_vbr
+  ExecVersion
+  WBExtViewMode
+
+Blitz library 'blitzlibs:basic/fadelib.obj' (#157)
+  FadeIn Palette#[,Rate[,Low Colour,High Colour]]
+  FadeOut Palette#[,Rate[,Low Colour,High Colour]]
+  ASyncFade On|Off
+  DoFade
+  FadeStatus
+
+Blitz library 'blitzlibs:basic/fileiolib.obj' (#124)
+  OpenFile (File#,Filename$)
+  CloseFile File#
+  KillFile Filename$
+  Fields File#,Var1[,Var2...]
+  Put File#,Record
+  Get File#,Record
+  FileOutput File#
+  FileInput File#
+  Lof (File#)
+  FileSeek File#,Position
+  Loc (File#)
+  Eof (File#)
+  DosBuffLen Bytes
+  File
+  ReadFile (File#,Filename$)
+  WriteFile (File#,Filename$)
+  WriteMem File#,Address,Length
+  ReadMem File#,Address,Length
+  Exists (Filename$)
+
+Blitz library 'blitzlibs:basic/fontlib.obj' (#142)
+  LoadBlitzFont BlitzFont#,Fontname.font$
+  BitMapOutput Bitmap#
+  Colour Foreground Colour[,Background Colour]
+  Locate X,Y
+  CursX
+  CursY
+  BitMapInput
+  BlitzFont
+
+Blitz library 'blitzlibs:basic/freqlib.obj' (#152)
+  FileRequest$ Title$,Pathname$,Filename$
+
+Blitz library 'blitzlibs:basic/gadgetslib.obj' (#140)
+  TextGadget GadgetList#,X,Y,Flags,Id,Text$
+  StringGadget GadgetList#,X,Y,Flags,Id,Maxlen,Width
+  PropGadget GadgetList#,X,Y,Flags,Id,Width,Height
+  ShapeGadget GadgetList#,X,Y,Flags,Id,Shape#[,Shape#]
+  SetHProp GadgetList#,Id,Pot,Body
+  SetVProp GadgetList#,Id,Pot,Body
+  HPropPot (GadgetList#,Id)
+  HPropBody (GadgetList#,Id)
+  VPropPot (GadgetList#,Id)
+  VPropBody (GadgetList#,Id)
+  Redraw Window#,Id
+  Toggle GadgetList#,Id [,On|Off]
+  GadgetBorder X,Y,Width,Height
+  Borders [On|Off]|[Width,Height]
+  ActivateString Window#,Id
+  ResetString GadgetList#,Id
+  StringText$ (GadgetList#,Id)
+  ClearString GadgetList#,Id
+  GadgetList List of Gadgets
+  GadgetPens Foreground Colour[,Background Colour]
+  BorderPens Highlight Colour,Shadow Colour
+  GadgetJam Jammode
+  SelectMode 1=Box, 0=Inverse
+  SetString GadgetList#,Id,String$
+  ButtonGroup Group
+  GadgetStatus (GadgetList#,Id)
+  ButtonId (GadgetList#,ButtonGroup)
+  Enable (GadgetList#,Id)
+  Disable (GadgetList#,Id)
+  SetGadgetStatus (GadgetList#,Id,Value)
+
+Blitz library 'blitzlibs:basic/gameiolib.obj' (#190)
+  Joyx (Port)
+  Joyy (Port)
+  Joyr (Port)
+  Joyb (Port)
+  Gameb (Port)
+
+Blitz library 'blitzlibs:basic/iffiolib.obj' (#162)
+
+Blitz library 'blitzlibs:basic/iffmakelib.obj' (#114)
+  SaveBitmap BitMap#,Filename$[,Palette#]
+  SaveScreen Screen#,Filename$
+  SaveShape Shape#,Filename$[,Palette#]
+  SavePalette Palette#,Filename$
+
+Blitz library 'blitzlibs:basic/ilbmifflib.obj' (#161)
+  ILBMInfo Filename$
+  ILBMWidth
+  ILBMHeight
+  ILBMDepth
+  ILBMViewMode
+  DecodeILBM Bitmap#,MemoryLocation
+
+Blitz library 'blitzlibs:basic/inputoutputlib.obj' (#164)
+  DefaultInput
+  DefaultOutput
+  PopInput
+  PopOutput
+
+Blitz library 'blitzlibs:basic/intuifontlib.obj' (#134)
+  LoadFont IntuiFont#,Fontname.font$,Y size [,style]
+  IntuiFont A Font for use by intuition
+
+Blitz library 'blitzlibs:basic/linklistlib.obj' (#128)
+  FirstItem (Arrayname())
+  AddItem (Arrayname())
+  NextItem (Arrayname())
+  ResetList Arrayname()
+  KillItem Arrayname()
+  AddFirst (Arrayname())
+  ClearList Arrayname()
+  AddLast (Arrayname())
+  PushItem Arrayname()
+  PopItem Arrayname()
+  PrevItem Arrayname()
+  LastItem Arrayname()
+  ItemStackSize Max Items
+  SortList Arrayname(),sizeof .type\offset
+
+Blitz library 'blitzlibs:basic/mathtranslib.obj' (#192)
+  ACos (Float)
+  ASin (Float)
+  ATan (Float)
+  Cos (Float)
+  HCos (Float)
+  Exp (Float)
+  Log10 (Float)
+  Log (Float)
+  Sin (Float)
+  HSin (Float)
+  Sqr (Float)
+  Tan (Float)
+  HTan (Float)
+
+Blitz library 'blitzlibs:basic/medlib.obj' (#82)
+  LoadMedModule MedModule#,Name
+  StartMedModule MedModule#
+  PlayMed
+  StopMed
+  JumpMed Pattern#
+  SetMedVolume Volume
+  GetMedVolume Channel
+  GetMedNote Channel
+  GetMedInstr Channel
+  SetMedMask Channel Mask
+  DecodeMedModule MedModule#,MemoryLocation
+  MedModule
+
+Blitz library 'blitzlibs:basic/memacclib.obj' (#180)
+  Poke [.Type] Address,Data
+  Peek [.Type](Address)
+  Peeks$ (Address,Length)
+  Call Address
+
+Blitz library 'blitzlibs:basic/menuslib.obj' (#136)
+  MenuTitle MenuList#,Menu,Title$
+  SetMenu Menulist#
+  MenuItem MenuList#,Flags,Menu,Item,Itemtext$[,Shortcut$]
+  SubItem MenuList#,Flags,Menu,Item,Subitem,Subitemtext$[,Shortcut$]
+  ShapeItem MenuList#,Flags,Menu,Item,Shape#
+  ShapeSub MenuList#,Flags,Menu,Item,Subitem,Shape#
+  MenuGap X Gap,Y Gap
+  SubItemOff X Offset,Y Offset
+  MenuState MenuList#[,Menu[,Item[,Subitem]]],On|Off
+  MenuColour Colour
+  MenuChecked (MenuList#,Menu,Item[,Subitem])
+  MenuList List of Menus
+
+Blitz library 'blitzlibs:basic/mouselib.obj' (#108)
+  Mouse On|Off
+  Pointer Sprite#,Sprite Channel
+  MouseArea Minx,Miny,Maxx,Maxy
+  MouseX
+  MouseY
+  MouseXSpeed
+  MouseYSpeed
+
+Blitz library 'blitzlibs:basic/palettelib.obj' (#156)
+  LoadPalette Palette#,Filename$[,Palette Offset]
+  Cycle Palette#
+  RGB Colour Register,Red,Green,Blue
+  Red (Colour Register)
+  Green (Colour Register)
+  Blue (Colour Register)
+  Palette colour and cycling information
+  PalRGB Palette#,Colour Register,Red,Green,Blue
+  SetCycle Palette#,Cycle,Low Colour,High Colour[,Speed]
+  StopCycle
+  AGARGB Colour Register,Red,Green,Blue
+  AGAPalRGB Palette#,Colour Register,Red,Green,Blue
+  AGARed (Colour Register)
+  AGAGreen (Colour Register)
+  AGABlue (Colour Register)
+  ShowPalette Palette#
+  NewPaletteMode On|Off
+  CyclePalette Palette#
+  FadePalette SrcPalette#,DestPalette#,Brightness.q
+  InitPalette Palette#,NumColors
+  PaletteRange Palette#,StartCol,EndCol,r0,g0,b0,r1,g1,b1
+  DuplicatePalette SrcPalette#,DestPalette#
+  DecodePalette Palette#,MemoryLocation[,Palette Offset]
+
+Blitz library 'blitzlibs:basic/printlib.obj' (#187)
+  Print Expression[,Expression...]
+  NPrint Expression[,Expression...]
+  Str$ (Expression)
+  Format FormatString
+  FloatMode Mode : -1=standard, 0=guess, 1=exp
+  UStr$ (Expression)
+
+Blitz library 'blitzlibs:basic/qblitlib.obj' (#148)
+  Queue Queue#,Max Items
+  QBlit Queue#,Shape#,X,Y[,Excessonoff]
+  UnQueue Queue#[,BitMap#]
+  QBlitMode BLTCON0
+  FlushQueue Queue#
+
+Blitz library 'blitzlibs:basic/rawkeylib.obj' (#130)
+
+Blitz library 'blitzlibs:basic/screenslib.obj' (#158)
+  Screen [Screen#,Mode[,Title$]]|[Screen#,X,Y,W,H,D,Viewmode,Title$,Dpen,Bpen[,BitMap#]
+  WbToScreen Screen#
+  LoadScreen Screen#,Filename$[,Palette#]
+  FindScreen Screen#[,Title$]
+  SMouseX
+  SMouseY
+  ShowScreen Screen#
+  ScreenPens Text,Shine,Shadow,Fill,FillText,Background,HighLight
+  ViewPort (Screen#)
+  ShowBitMap [BitMap#]
+  CloseScreen Screen#
+  HideScreen Screen#
+  BeepScreen Screen#
+  MoveScreen Screen#,deltax,deltay
+  ScreenTags Screen#,Title$ [&TagList] or [[,Tag,Data]...]
+
+Blitz library 'blitzlibs:basic/scrolllib.obj' (#100)
+  Scroll X1,Y1,Width,Height,X2,Y2[,BitMap#]
+  Plot X,Y,Colour
+  Point X,Y,Colour
+  Cls [Colour]
+  BlockScroll X1,Y1,Width,Height,X2,Y2[,BitMap#]
+
+Blitz library 'blitzlibs:basic/seriallib.obj' (#90)
+  OpenSerial device$,unit#,baud,io_serflags
+  WriteSerial unit#,byte
+  WriteSerialString unit#,string[,Flags 1=DoIO 2=TrueString]
+  ReadSerial (unit#[,flags 1=wait on])  returns -1 if nothing waiting
+  ReadSerialString (unit#)  returns null if nothing waiting
+  CloseSerial unit#
+  SetSerialBuffer unit#,bufferlength
+  SetSerialLens unit#,readlen,writelen,stopbits
+  SetSerialParams unit#
+  SerialEvent (unit#)
+  ReadSerialMem unit#,Address,Length
+  WriteSerialMem unit#,Address,Length
+
+Blitz library 'blitzlibs:basic/shapeslib.obj' (#154)
+  LoadShape Shape#,Filename$[,Palette#]
+  MakeCookie Shape#
+  ShapeWidth (Shape#)
+  ShapeHeight (Shape#)
+  Handle Shape#,X,Y
+  AutoCookie On|Off
+  CopyShape Shape#,Shape#
+  GetaShape Shape#,X,Y,Width,Height
+  SaveShapes Shape#,Shape#,Filename$
+  LoadShapes Shape#[,Shape#],Filename$
+  Shape - image
+  MidHandle Shape#
+  DecodeShapes Shape#[,Shape#],MemoryLocation
+  InitShape Shape#,Width,Height,Depth
+
+Blitz library 'blitzlibs:basic/shapetrixlib.obj' (#118)
+  Scale Shape#,X Ratio,Y Ratio[,Palette#]
+  XFlip Shape#
+  YFlip Shape#
+  Rotate Shape#,Angle Ratio
+
+Blitz library 'blitzlibs:basic/sis2dlib.obj' (#119)
+  Circle x,y,rx[,ry],color
+  Circlef x,y,rx[,ry],color
+  Box x1,y1,x2,y2,color
+  Boxf x1,y1,x2,y2,color
+  Line [x1,y1,]x2,y2,color
+  FreeFill frees memory allocated for 2d fill routines
+  AllocFill for internal use only (polylib.obj)
+  ReMap colour# to replace,destination colour# [,BitMap destintion
+  FloodFill x,y,colour [,border colour]
+  Poly numpts,*coords.w,color
+  Polyf numpts,*coords.w,color[,color2]
+  BitPlanesBitMap srcbitmap,destbitmap,planepick
+  ClipBlit Shape#,X,Y
+  ClipBlitMode BPLCON0
+  BitMapWindow srcbitmap,destbitmap,x,y,w,h
+  BitMapOrigin BitMap#,x,y
+
+Blitz library 'blitzlibs:basic/sortlib.obj' (#110)
+  Sort Arrayname()
+  SortUp
+  SortDown
+
+Blitz library 'blitzlibs:basic/speaklib.obj' (#88)
+  Speak string
+  SetVoice rate(150),pitch(110),expression(1),sex,volume(64),freq(22200)
+  Translate$ returns phoneme translation of a string
+  PhoneticSpeak phonetic string
+  VoiceLoc returns location of newvoice struct
+
+Blitz library 'blitzlibs:basic/spriteslib.obj' (#112)
+  GetaSprite Sprite#,Shape#
+  ShowSprite Sprite#,X,Y,Sprite Channel
+  InFront Sprite Channel
+  InFrontF Sprite Channel
+  InFrontB Sprite Channel
+  SaveSprites Sprite#,Sprite#,Filename$
+  LoadSprites Sprite#[,Sprite#],Filename$
+  SpriteMode 0=16 1=32 2=64
+  Sprite
+
+Blitz library 'blitzlibs:basic/stencillib.obj' (#122)
+  Stencil Stencil#,BitMap#
+  SBlit Stencil#,Shape#,X,Y[,Excessonoff]
+  SBlitMode BLTCON0
+
+Blitz library 'blitzlibs:basic/stringfunclib.obj' (#185)
+  Left$ (String$,Length)
+  Right$ (String$,Length)
+  Mid$ (String$,Startchar[,Length])
+  Hex$ (Expression)
+  Bin$ (Expression)
+  Chr$ (Expression)
+  Asc (String$)
+  String$ (String$,Repeats)
+  Instr (String$,Findstring$[,Startpos])
+  Replace$ (String$,Findstring$,Replacestring$)
+  Mki$ (Integer)
+  Mkl$ (Long)
+  Cvi (String$)
+  Cvl (String$)
+  Len (String$)
+  UnLeft$ (String$,Length)
+  UnRight$ (String$,Length)
+  StripLead$ (String$,Ascii)
+  StripTrail$ (String$,Ascii)
+  LSet$ (String$,Characters)
+  RSet$ (String$,Characters)
+  Centre$ (String$,Characters)
+  LCase$ (String$)
+  UCase$ (String$)
+  CaseSense On|Off
+  Mkq$ (Quick)
+  Cvq (String$)
+
+Blitz library 'blitzlibs:basic/trackerlib.obj' (#96)
+  Module A Sound or Noise tracker module
+  LoadModule Module#,Filename$
+  PlayModule Module#
+  StopModule
+
+Blitz library 'blitzlibs:basic/utillib.obj' (#194)
+  CreateMsgPort  *UserPort.port=CreateMsgPort(PortName$)
+  DeleteMsgPort  *UserPort
+  Wait
+
+Blitz library 'blitzlibs:basic/vallib.obj' (#120)
+  Val (String$)
+  Int (Expression)
+  Sgn (Expression)
+  Frac (Expression)
+  QFrac (Quick)
+  QWrap (Quick,Low,High)
+  Rnd [(Range)]
+  QAbs (Quick)
+  Abs (Expression)
+  QLimit (Quick,Low,High)
+  NTSC
+  DispHeight
+  VPos
+  True
+  False
+  QAngle (Src X,Src Y,Dest X,Dest Y)
+
+Blitz library 'blitzlibs:basic/windowslib.obj' (#138)
+  Window Window#,X,Y,Width,Height,Flags,Title$,Dpen,Bpen[,GadgetList#[,BitMap#]]
+  WaitEvent
+  Event
+  GadgetHit
+  EventWindow
+  DefaultIDCMP IDCMP_Flags
+  MenuHit
+  ItemHit
+  SubHit
+  WindowFont IntuiFont# [,SoftStyle]
+  WPlot X,Y,Colour
+  WBox X1,Y1,X2,Y2,Colour
+  WCircle X,Y,Radius,Colour
+  WEllipse X,Y,X Radius,Y Radius,Colour
+  WCls [Colour]
+  WLocate Cursor x,Cursor y
+  WindowInput Window#
+  WindowOutput Window#
+  Qualifier
+  RawKey
+  Cursor Thickness : <0 - block, >=0 - underline thickness
+  Editat
+  EditFrom [Characterpos]
+  EditExit
+  WScroll X1,Y1,X2,Y2,Delta X,Delta Y
+  WMouseX
+  WMouseY
+  WColour Foreground Colour[,Background Colour]
+  WJam Jammode
+  WLine X1,Y1,X2,Y3[,Xn,Yn...],Colour
+  Activate Window#
+  WindowX
+  WindowY
+  MButtons
+  Menus On|Off
+  WCursX
+  WCursY
+  WPointer Shape#
+  MenusOn
+  MenusOff
+  WMove X,Y
+  WSize Width,Height
+  WindowWidth
+  WindowHeight
+  InnerWidth
+  InnerHeight
+  InnerCls [Colour]
+  WTopOff
+  WLeftOff
+  SizeLimits Min Width,Min Height,Max Width,Max Height
+  EMouseX
+  EMouseY
+  AddIDCMP IDCMP_Flags
+  SubIDCMP IDCMP_Flags
+  FlushEvents [IDCMP_Flag]
+  CatchDosErrs
+  RastPort (Window#)
+  SetEventFilter preprocess,postprocess
+  WTitle windowtitle$,screentitle$
+  CloseWindow Window#
+  WPrintScroll
+  WBlit Shape#,x,y
+  BitMaptoWindow Bitmap#,Window#[,srcx,srcy,destx,desty,wid,height]
+  EventCode
+  EventQualifier
+  PositionSuperBitMap x,y
+  GetSuperBitMap
+  PutSuperBitMap
+  WindowTags Window#,Flags,Title$ [,&TagList] or [[,Tag,Data]...]
+
+Blitz library 'blitzlibs:basic/polylib.obj' (#121)
+  ChunkyCLS color
+  ChunkyPlot x,y,color,[,CLIP]
+  ChunkyVlin x,y1,y2,color,[,CLIP]
+  ChunkyPoly numpts,*coords.w,color[,noblitter]
+  BitMapPoly numpts,*coords.w,color[,ditherbitmap]
+  RenderToBitmap BitMap#[,DitherBitMap#]
+  RenderToChunky CopList#
+  RenderPoly numpts,*coords.w,color
+
+Blitz library 'blitzlibs:basic/3dlib.obj' (#166)
+  ShapeTD Shape3D#,MatrixId[,CollType,CollId]
+  Matrix3D MatrixId,X,Y,Z[,X Rot,Y Rot,Z Rot]
+  Angle3D MatrixId,X Rot,Y Rot,Z Rot
+  Camera3D X,Y,Z,X Rot,Y Rot,Z Rot[,Distance]
+  Init3D MaxShapeVerts,MaxScenePolys,MaxSceneVerts,MaxCollisions
+  Verts3D
+  Render3D [WindowX,Y,Width,Height]
+  First3D
+  QSin3D (angle)
+  QCos3D (angle)
+  Horizon3D ground col,sky col
+  XRot3D angleid,scale
+  YRot3D angleid,scale
+  ZRot3D angleid,scale
+  CheckHit3D Shape3D#,MatrixId,CollType
+  DrawRange3D DrawRange
+  WindowSize3D width,height[,focalshift]
+
+Blitz library 'blitzlibs:basic/skidlib.obj' (#10)
+  SetMaptr maptr.l
+  SetConDt condt.l
+  SetIO io.l
+  DDistance (x1.w,y1.w,x2.w,y2.w)
+  RDistance (x.w,y.w)
+  Angle (x.w,y.w)
+  FindLo distance.q
+  FindDif distance.q
+  FindWid (distance.q,pta.w,ptb.w,ptc.w)
+  QHite (i.q,j.q)
+  MapX (i.q,j.q)
+  MapY (i.q,j.q)
+  MoveAll *FirstCar,*ShCar,numcars
+  FindPos *FirstCar,*ShCar,numcars
+  ScrlSlc *TopCar,midy,maxy,maxout
+  ReDoAgaSprite *source,*sprite
+  DoAgaQuad *verticies,*spritebitmap
+  ReDoOldSprite *source,*destination
+  DoOldQuad *verticies,*spritebitmap,pattern.l
+  FindSprNum *shcar,flag.w
+  CheckCollQuad *quadratic,*parse
+  FixHitLine *quadratic,*parse
+  FixHitQuad *quadratic,*parse,^squlu
+  FastCollide *Player1,*Player2,*Shadow
+  PPrint *bitmap,*shape,char
+
+Blitz library 'blitzlibs:basic/crunchlib.obj' (#74)
+  Implode Error/CrunchedLen=Bufferadr,DataLen
+  Deplode Success=Startadr
+  CrMDecrunch Bufferadr
+  PPDecrunch Bufferadr,Bufferend,Destinationadr
+

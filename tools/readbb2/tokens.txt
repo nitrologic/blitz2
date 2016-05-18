@@ -1,0 +1,175 @@
+tok1="NEWTYPE,End,Let,Dim,Goto,Gosub,Return,Statement,Function,MouseWait,If,While,Macro"
+tok14="Select,Case,Default,AsmExit,XInclude,Include,Jimi,Shared,For,Next,To,Step,Data,Read"
+tok28="CNIF,CSIF,CELSE,CEND,CERR,Then,Else"
+tok35="Even4,Even8,Dc,Ds,Event,Dcb,GetReg,IncBin"
+tok43="Free,Use,Stop,Cont,SizeOf,SetInt,ClrInt,MaxLen,DEFTYPE,BLITZ,AMIGA,QAMIGA,VWait,ALibJsr,TokeJsr,BLibJsr,AbortVB"
+
+wbstart=$bf00
+;
+;	lib - 65534: varslib
+;
+allocvars=65534
+;
+;	lib - 65530: memlib
+;
+localloc=$c000
+locfree=$c001
+globalloc=$c002
+globfree=$c003
+newmem=$c004
+freelast=$c005
+;
+;	lib - 65520: intlib
+;
+setint=$c100
+clrint=$c101
+newint=$c102
+oldint=$c103
+intvwait=$c104
+intcleanup=$c105
+intgoblitz=$c106
+intgoamiga=$c107
+;
+;	lib - 65510: switchlib
+;
+goblitz=$c200
+goamiga=$c201
+goqamiga=$c202
+ownblit=$c203
+disownblit=$c204
+;
+;	lib - runerrlib
+;
+runerrlib=65500
+	;
+finalscheck=$c300
+remline=$c301
+;
+contjmp=$c304
+chkret=$c305
+snxtchk=$c306
+lnxtchk=$c307
+stchk=$c308
+arrerr=$c309
+maxerr=$c30a
+gosup=$c30b
+gouse=$c30c
+eschk=$c30d
+sachk=$c30e
+arrchk=$c30f
+datachk=$c310
+inblitz=$c311
+inamiga=$c312
+casechkw=$c313
+casechkl=$c314
+currentchk=$c315
+ltobover=$c316
+wtobover=$c317
+ltowover=$c318
+qtobover=$c319
+ftobover=$c31a
+ftowover=$c31b
+ftolover=$c31c
+;
+;	lib - 65434: arrayslib
+;
+newarr=$c400
+newlocarr=$c401
+arrmult=$c402
+;
+;	lib - 65335: staticslib
+;
+alstat=$c500
+localstat=$c501
+;
+;	lib - 65235: stringslib1
+;
+copstring=$c600
+workstart=$c601
+;
+;	lib - 65135: stringslib2
+;
+lastring=$c700
+astring=$c701
+;
+;	lib - 65035: exitslib
+;
+endjmp=$c800
+;
+;	lib - 64935: ffplib
+;
+getffpbase=$c900
+;
+;	lib - 64835: lmullib
+;
+quickmult=$ca00
+longmult=$ca01
+;
+;	lib - 64735: ldivlib
+;
+quickdiv=$cb00
+longdiv=$cb01
+;
+;	lib - 64635: clrlib
+;
+clrloc=$cc00
+;
+;	lib - 64535: datalib
+;
+getdstart=$cd00
+;
+;	lib - 64435: strcomplib
+;
+strcomp=$ce00
+casestrcomp=$ce01
+;
+;	lib - 64335: maxslib
+;
+setmaxs=$cf00
+allocst=$cf01
+freest=$cf02
+;
+;	lib - 64135: maxlenlib
+;
+maxlen=$d000
+lmaxlen=$d001
+;
+;	lib - 64100: chipbaselib
+;
+;	lib - 64080: floatquicklib
+;
+qutofl=$d300
+fltoqu=$d301
+;
+;	lib - 64070:modlib
+;
+modbyte=$d400
+modword=$d401
+modlong=$d402
+modquick=$d403
+modfloat=$d404
+;
+loclabch=39
+inclen=1024	;how much of an include to load.
+maxmacros=8
+ifmacmax=8
+vcodelen=256
+mostres=8
+userand=$7f80
+
+;
+;	lib - 64060:debug lib
+;
+
+debuglib=64060
+
+;	lib - 1 : dhandlerlib!
+;
+dhandlerlib=1
+			;$d500...
+
+rundebuglib=64050
+
+			;$d600...
+
+
