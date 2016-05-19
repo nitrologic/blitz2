@@ -1,31 +1,37 @@
 ' a blitzmax tool to untokenise old bb2 files
 
+Global func:String[65536]
+
 path$="/Users/simon/blitz2/husker3.bb2"
 
 libs$="libs.txt"
 tokens$="tokens.txt"
+opcodes$="opcodes.txt"
 
-Function HexToDecimal(h$)
-	Local t2$=Upper$(Trim$(h$))
-	Local d=0
-	For Local z=1 To Len(t2$)
-		Local i=Instr("0123456789ABCDEF",Mid$(t2$,z,1))
-		If i>0 Then d=d*16+i-1
-	Next
-	Return d
-End Function
+' asm opcodes
+
+cmdnum=60
+lines$=LoadText(opcodes)
+For line$=EachIn lines.Split("~n")
+	p=line.find("=")
+	pr=line.find(",")
+	op$=line[p+1..pr]
+'	Print cmdnum+op
+	func[cmdnum]=op
+	cmdnum:+1
+Next
+
+
+' standard bum6 libs
 
 lines$=LoadText(libs)
 libnum=0
 cmdnum=0
-
-Global func:String[65536]
-
 For line$=EachIn lines.Split("~n")
 	If libnum=0
 		p=line.Find("(#")
 		libnum=line[p+2..].toInt()		
-		cmdnum=libnum*128
+		cmdnum=libnum*64
 	Else
 		line=line.Trim()
 		If line="" 
@@ -43,6 +49,8 @@ For line$=EachIn lines.Split("~n")
 		EndIf
 	EndIf
 Next
+
+' tokens from source
 
 lines$=LoadText(tokens)
 For token$=EachIn lines.Split("~n")
@@ -91,22 +99,33 @@ If b>31 And b<127
 EndIf
 
 If b>127
-	cmd=(b&127)*256+b1
-	src:+func[cmd]	
-''	Print (b&127)+","+b1+","
-'	Print "#"+Hex(cmd)+" "+func[cmd]
-'	i:+1
+	cmd=(b&127)	
+	cmd=cmd*256+b1
+	i:+1
+
+	token$=func[cmd]
+	If token="" token="###["+b+","+b1+" $"+Hex(cmd)+"]"
+	src:+token	
 EndIf
 
 Next
 
 Print src
 
+SaveText src,"test.txt"
+
 'src$=LoadString(path)
 'Print src.length
 
-
-
+Function HexToDecimal(h$)
+	Local t2$=Upper$(Trim$(h$))
+	Local d=0
+	For Local z=1 To Len(t2$)
+		Local i=Instr("0123456789ABCDEF",Mid$(t2$,z,1))
+		If i>0 Then d=d*16+i-1
+	Next
+	Return d
+End Function
 
 Function ScanBB2(path$)
 	For Local dir$=EachIn LoadDir(path)	
