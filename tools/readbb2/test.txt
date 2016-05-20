@@ -2,13 +2,13 @@
 ;  Skidmarks demo version release   27/01/94, late..
 ;
 
-snd.w=##[$80C5]:med.w=##[$80C5]
+snd.w=On:med.w=On
 
 pg$=""
-##[$80C3]
-#bars=##[$80C6]
-#errs=##[$80C6]
-#collisions=##[$80C5]
+80c4
+#bars=Off
+#errs=Off
+#collisions=On
 
 #serdat =$dff030
 #serdatr=$dff018
@@ -16,7 +16,7 @@ pg$=""
 #posx=144:#posy=74:#shad=5
 #xs=123:#ys=32
 #grass=1:#snow=2:#beach=4:#seal=64
-master.w=0:port.w=0:connect.w=##[$80C6]:sldpitch.w=130
+master.w=0:port.w=0:connect.w=Off:sldpitch.w=130
 
 NEWTYPE .ShadPt
   ri0.q:rj0:ri1:rj1:ri2:rj2:ri3:rj3:ri4:rj4:ri5:rj5
@@ -29,7 +29,7 @@ SpriteMode 2
 CNIF 1=0
   If WriteMem (0,"Skid.Readme")
     FileInput 0
-    While NOT DosBuffLen(0):NPrint Edit$(79):##[$80C1]
+    While NOT DosBuffLen(0):NPrint Edit$(79):Wend
     DefaultInput:CloseFile 0
   Else
     NPrint "Oi!  someone's nicked off with my readme!"
@@ -37,7 +37,7 @@ CNIF 1=0
 CEND
 
 ;opd.w=OpenSerial ("serial.device",0,2400,0)
-twin=##[$80C6]
+twin=Off
 
 #goff=SizeOf.ShadPt*32 ;<sniff> kludged again
 #AGAleng=440000           ;800*256     ; yeah right!?
@@ -65,7 +65,7 @@ VWait 20
 
 Free Bank 5
 ;If opd.w Then CloseSerial 0
-##[$FFB5]:Filter ##[$80C6]
+##[$FFB5]:Filter Off
 End
 
 
@@ -351,19 +351,19 @@ Return
   If snd
     If WriteMem(0,pg$+"Tune")
       If ##[$FE9A]($20002) > (95520+32768)
-        InitBank 7,95520,2:med.w=##[$80C5]
+        InitBank 7,95520,2:med.w=On
         ##[$BE14]  0,BankLoc(7),FileSeek(0)
 
         CrMDecrunch BankLoc(7)
         DecodeMedModule 0,BankLoc(7)
       Else
-        med.w=##[$80C6]
+        med.w=Off
       EndIf
       CloseFile 0
     Else
       NPrint "<Sniff>  if you steal my tune I'll probably crash!"
 ;      LoadMedModule 0,g$+"Tune3.Med"
-      med.w=##[$80C6]
+      med.w=Off
     EndIf
   EndIf
 Return
@@ -1171,7 +1171,7 @@ Return
 .
 .Bmode
   BLITZ
-  BlitzKeys ##[$80C5]
+  BlitzKeys On
 
   Poke.w $dff032,1477
   BSET #7,$bfd200
@@ -1190,12 +1190,12 @@ Return
       Gosub InitRace
       Gosub Race
     EndIf
-  ##[$80C1]
+  Wend
 
   If med Then StopMed
   ClrInt 5:If twin Then ClrInt 11
   ##[$80BB]:##[$80BC] NOT RawStatus($45)
-  BlitzKeys ##[$80C6]
+  BlitzKeys Off
 
 Return
 
@@ -1346,7 +1346,7 @@ Statement bounce{result.w,first.l,second.l}
   *e.quadratic=first
   *par.parse=second
   col=3
-  here.w=##[$80C6] ; in case we crash more than once?
+  here.w=Off ; in case we crash more than once?
 
   result+16
   ##[$80BB]
@@ -1480,7 +1480,7 @@ Shared cbuf(),clast
     idx+1
     rrx=Asc(Mid$(s$,idx,1))
     !DispChar{rrx}
-  ##[$80C1]
+  Wend
 End Statement
 
 Function.w DoChatSimple{}
@@ -1569,8 +1569,8 @@ End Statement
 
 
 
-  BlitzKeys ##[$80C6]:BlitzKeys ##[$80C5]:BlitzRepeat -1,-1
-  BitMapInput:newer.w=##[$80C6]
+  BlitzKeys Off:BlitzKeys On:BlitzRepeat -1,-1
+  BitMapInput:newer.w=Off
 ;  Gosub InitRace
 Return
 
@@ -1583,7 +1583,7 @@ Return
       Sound 10,15,0,0,0,0
       VWait 2
     EndIf
-    newer=##[$80C5]
+    newer=On
   EndIf
   ##[$80BB]:##[$80BC] NOT RawStatus($45)
 
@@ -1630,9 +1630,9 @@ Return
 ;  For i.w=17 To 31:Poke.w i ASL 1+$dff180,0:Next:; reset the blacks...
 
 
-  update=##[$80C5]:bob.w=147:hy.w=0:slide.w=##[$80C6]
+  update=On:bob.w=147:hy.w=0:slide.w=Off
   *tp=*p0:*bp=*p0
-  sc.w=256:done=##[$80C6]:esc.w=0:button.w=##[$80C5]
+  sc.w=256:done=Off:esc.w=0:button.w=On
   plyrs.w=-1:oplyrs.w=-1:master.w=0
   clkt=-1
 
@@ -1657,7 +1657,7 @@ Return
 
     ojoy.w=joy.w:joy=QLimit(RawStatus($4c)-RawStatus($4d)+Joyy(1),-1,1)
     ojob.w=jb.w:jb=QLimit(Joyb(1)+RawStatus($40)+RawStatus($44),-1,1)
-    job.w=##[$80C6]:If jb<>ojob Then job=jb
+    job.w=Off:If jb<>ojob Then job=jb
     If ojoy<>joy Then nu.w=QLimit(selmen+joy,0,3)
     If nu<>selmen
       sh.w=selmen+#menshap:nx=xx+210:ny=yy+50+selmen*50
@@ -1689,8 +1689,8 @@ Return
 ;      If sc=$fe Then oplyrs= 1:writeser{$fd}   ;other end wants to play!
 ;      If sc=$ff Then oplyrs= 2        ;other end wants to play!
 
-      If sc=$f0 Then fast.w=##[$80C5] :Gosub ReDispMen; :ProcChatSimple{70}:ProcChatSimple{97}:ProcChatSimple{115}:ProcChatSimple{116}
-      If sc=$f1 Then fast.w=##[$80C6]:Gosub ReDispMen; :ProcChatSimple{83}:ProcChatSimple{108}:ProcChatSimple{111}:ProcChatSimple{119}
+      If sc=$f0 Then fast.w=On :Gosub ReDispMen; :ProcChatSimple{70}:ProcChatSimple{97}:ProcChatSimple{115}:ProcChatSimple{116}
+      If sc=$f1 Then fast.w=Off:Gosub ReDispMen; :ProcChatSimple{83}:ProcChatSimple{108}:ProcChatSimple{111}:ProcChatSimple{119}
 
 
       Use lmaxlen 0:UnBuffer 1
@@ -1698,7 +1698,7 @@ Return
       If oplyrs>0 Then BBlit 1,47,804,180:;491,186
       If oplyrs>1 Then BBlit 1,47,827,182:;04,506,203
 
-    ##[$80C1]
+    Wend
 
     If RawStatus($52) OR ((selmen=3) AND (job<>0))
       If NOT plbut.w
@@ -1709,10 +1709,10 @@ Return
           ProcChatSimple{83}:ProcChatSimple{108}:ProcChatSimple{111}:ProcChatSimple{119}
         EndIf
         Gosub ReDispMen
-        plbut=##[$80C5]
+        plbut=On
       EndIf
     Else
-      plbut=##[$80C6]
+      plbut=Off
     EndIf
 
     If plyrs<1
@@ -1740,9 +1740,9 @@ Return
     EndIf
 
     If RawStatus($45) OR (selmen=2 AND job<>0)
-      If button=##[$80C6] Then level-1 ;quit conditions
+      If button=Off Then level-1 ;quit conditions
     Else
-      button=##[$80C6]
+      button=Off
     EndIf
 
   ##[$80BC] level<>14
@@ -1796,7 +1796,7 @@ Return
 
   jox=0:FindPos{*p0,shcar}
   For ipl=0 To 3
-    pl=ipl:*p=Pl(pl):*p\idle=##[$80C6]:*p\drop=##[$80C6]
+    pl=ipl:*p=Pl(pl):*p\idle=Off:*p\drop=Off
     Gosub DrawShadow
   Next
 
@@ -1912,7 +1912,7 @@ Return
 
   jox=0:FindPos{*p0,shcar}:toffee.w=1-toffee
   For ipl=0 To 3
-    pl=ipl:*p=Pl(pl):*p\idle=##[$80C6]:*p\drop=##[$80C6]
+    pl=ipl:*p=Pl(pl):*p\idle=Off:*p\drop=Off
     If toffee=(ipl AND 1) Then Gosub DrawShadow
   Next
 Return
@@ -1988,12 +1988,12 @@ Cred
   distort=0
   race.w=1
 
-  done.w=##[$80C6]:esc.w=0
+  done.w=Off:esc.w=0
   BitMapOutput 0:Use lmaxlen 0:Colour 1,0
 
   Select fast
-    Case ##[$80C6]: cmpacc=-0.6
-    Case ##[$80C5] :cmpacc=-1.0
+    Case Off: cmpacc=-0.6
+    Case On :cmpacc=-1.0
   End Select
   dtp.q=((opp-1.5)*0.1)
   cmpacc+dtp
@@ -2068,7 +2068,7 @@ CEND
 
   jox=0:For ipl=0 To 3:pl=ipl:*p=Pl(pl):Gosub DrawShadow:Next
   fps.w=0:ipl=3:*cp0=Pl(ipl)
-  pl=ipl:esc.w=0:done=##[$80C6]:Gosub PlaceSprites
+  pl=ipl:esc.w=0:done=Off:Gosub PlaceSprites
 
   For pl.w=0 To 3
     Pl(pl)\control=6 ;computer - change me for serial
@@ -2137,10 +2137,10 @@ hymax=0:##[$80C8] Cred
 
   If \cdn<101
     \cdn=\cdn-1
-    If \cdn=0 Then \idle=##[$80C5]:\drop=##[$80C5]:\pcst=0
+    If \cdn=0 Then \idle=On:\drop=On:\pcst=0
   Else
     If \cdn=128
-      \drop=##[$80C5]
+      \drop=On
       If (*p0\drop) AND (*p1\drop) AND (*p2\drop) AND (*p3\drop)
         If hoppy>499 Then hoppy.w=128*3+40
 ;        *p0\cdn=49
@@ -2149,7 +2149,7 @@ hymax=0:##[$80C8] Cred
 ;        *p3\cdn=49
       EndIf
     EndIf
-    If \cdn=129 Then \drop=##[$80C5]:\idle=##[$80C5]:\cdn=1
+    If \cdn=129 Then \drop=On:\idle=On:\cdn=1
   EndIf
 
   If hoppy=500 Then Gosub Credits
@@ -2170,8 +2170,8 @@ hymax=0:##[$80C8] Cred
       If dum=3 Then Poke.w (##[$80B8] Sound(4) +4) , sndper ASL 1
       If dum=0
         Poke.w (##[$80B8] Sound(4) +4) , sndper
-        *p0\idle=##[$80C5]:*p1\idle=##[$80C5]:*p2\idle=##[$80C5]:*p3\idle=##[$80C5]
-        *p0\drop=##[$80C5]:*p1\drop=##[$80C5]:*p2\drop=##[$80C5]:*p3\drop=##[$80C5]
+        *p0\idle=On:*p1\idle=On:*p2\idle=On:*p3\idle=On
+        *p0\drop=On:*p1\drop=On:*p2\drop=On:*p3\drop=On
         *p0\cdn=-50:*p1\cdn=-50:*p2\cdn=-50:*p3\cdn=-50
       EndIf
       If snd Then Sound 4,6,64,64
@@ -2218,8 +2218,8 @@ hymax=0:##[$80C8] Cred
     cop.w=tim.w+20
     CNIF #bars:MOVE #$0f0,$dff180:CEND
     While blast=bfirst
-      If cop<tim Then bfirst=(bfirst+1) AND #maxleng:done=##[$80C5]:connect=##[$80C6]
-    ##[$80C1]
+      If cop<tim Then bfirst=(bfirst+1) AND #maxleng:done=On:connect=Off
+    Wend
     CNIF #bars:MOVE #$000,$dff180:CEND
 
     blast.w=(blast+1) AND #maxleng
@@ -2230,8 +2230,8 @@ hymax=0:##[$80C8] Cred
     rrx+(in AND $C0)
     If ipl=1
       If rrx.w<>0 Then ProcChat{rrx}
-      If (rrx=$ff) Then done=##[$80C5]:level=14
-      If prequit=1 Then done=##[$80C5]:prequit=0:level=14
+      If (rrx=$ff) Then done=On:level=14
+      If prequit=1 Then done=On:prequit=0:level=14
       If prequit=2 Then prequit=1
       rrx=0
     EndIf
@@ -2245,7 +2245,7 @@ hymax=0:##[$80C8] Cred
       rrx=0
     EndIf
 
-    If RawStatus($45) OR RawStatus($58) OR (ReadJoy{3}=$20000)Then done=##[$80C5]
+    If RawStatus($45) OR RawStatus($58) OR (ReadJoy{3}=$20000)Then done=On
   EndIf
   pl=(ipl+2)&3:*p=*cp2:jox=(in AND 3)-1:in ASR 2:Gosub DrawShadow
   pl= ipl     :*p=*cp0:jox=(in AND 3)-1:in ASR 2:Gosub DrawShadow
@@ -2281,7 +2281,7 @@ hymax=0:##[$80C8] Cred
     *p\rev+*p\nrev
 
     Select \side
-      Case 0:impact.w=##[$80C6]
+      Case 0:impact.w=Off
       Case 1:impact.w=(\i+\headi) >= \swai
       Case 2:impact.w=(\i+\headi) <= \swai
     End Select
@@ -2403,8 +2403,8 @@ Return
 Return
 
 
-#mung=##[$80C5]; ff
-#clip=##[$80C5]; ff
+#mung=On; ff
+#clip=On; ff
 
 .MoveIndiv
 
@@ -2524,7 +2524,7 @@ Return
     EndIf
 
 CNIF #clip
-    test\boom=##[$80C6]
+    test\boom=Off
     ddi1=-ddi1
     ddj1=-ddj1
     test\i =*p\i:test\j =*p\j
@@ -2545,7 +2545,7 @@ CNIF #clip
       *e=edge(dt)
       result.w=TestNew{*e,*par}
       If result<>0
-        *par\boom=##[$80C6]
+        *par\boom=Off
         bounce{result,*e,*par}
         If test\boom
           \swai=test\fi
@@ -2661,7 +2661,7 @@ CEND
 
 .DrawLaps
 
-  If (laps<*p\lap) AND (race.w>0) Then done=##[$80C5]:esc=3
+  If (laps<*p\lap) AND (race.w>0) Then done=On:esc=3
 
   roll.w=QLimit(*p\lap,1,10)
   If roll>1
@@ -2778,14 +2778,14 @@ Return
     tx=\i+\headi+\headi:tz=\j+\headj+\headj
     soonk=!qhite{tx,tz}
     If newk >soonk
-      \inair=##[$80C5]:\traction=1
+      \inair=On:\traction=1
       Select (Peek.w($dff006) AND 7)=0  ;quick random..
         Case 0:\pitch=QLimit(\pitch+\mpitch,0,4)
         Case 1:\roll =QLimit(\roll +\mroll ,0,4)
       End Select
     Else
       If \inair
-        \inair=##[$80C6]
+        \inair=Off
         tempk=!qhite{\i,\j}
         \headk=(\headk+(tempk-soonk) ASL 1)*\bounce-0.2
         If (\k-oldk+\headk+\headk)<0 Then \headk=(soonk-oldk)ASR 1
@@ -2868,22 +2868,22 @@ SetMod
   cop.w=tim.w+120
   ##[$80BB]
     VWait:writeser{$3f}
-    If cop<tim Then sr.w=$3f:done=##[$80C5]
+    If cop<tim Then sr.w=$3f:done=On
   ##[$80BC] (sr=$70) OR (sr=$3f)
   If NOT done
     VWait 5:tv=$70:writeser{tv}:cop.w=tim.w+60
     ##[$80BB]
-      If cop<tim Then sr=$70:done=##[$80C5]
+      If cop<tim Then sr=$70:done=On
     ##[$80BC] sr=$70
   EndIf
-  If done Then connect=##[$80C6]:twin=##[$80C6]:ClrInt 5:done=##[$80C5]
+  If done Then connect=Off:twin=Off:ClrInt 5:done=On
 
   VWait 5:master.w=0
   While master=0
     trx.w=Rnd(50)+10:writeser{trx}:VWait 10:rrx=sr
     If rrx<trx Then master=1
     If rrx>trx Then master=2
-  ##[$80C1]
+  Wend
 
 
   bfirst.w=blast.w:bword.w=bfirst.w       :;<does rap thing with hands
@@ -2897,25 +2897,25 @@ HandShake
   For cnt= 1 To 4
     VWait:writeser{cnt}
   Next
-  VWait 10:bcopy.w=bfirst:connect=##[$80C5]
+  VWait 10:bcopy.w=bfirst:connect=On
   For cnt=0 To 3
-    If (las((bcopy-cnt) AND #maxleng))<>(4-cnt) Then connect=##[$80C6]:Goto Damage
+    If (las((bcopy-cnt) AND #maxleng))<>(4-cnt) Then connect=Off:Goto Damage
   Next
   VWait 10
   cnt=0
   If connect Then writeser{12}
   While connect AND (sr<>12)
     VWait:cnt+1
-    If cnt>50 Then connect=##[$80C6]:Goto Damage
-  ##[$80C1]
-  connect=##[$80C5]
+    If cnt>50 Then connect=Off:Goto Damage
+  Wend
+  connect=On
   If connect Then VWait 15
 Return
 
 .SetStartCar
   ##[$80CA] *p
-  \idle=##[$80C6]:\drop=##[$80C6]
-  \inair=##[$80C5]:\ch=2
+  \idle=Off:\drop=Off
+  \inair=On:\ch=2
   \pitch=2:\roll=2:\mpitch=0:\mroll=0
   \qc=qcos(\head):\qs=qsin(\head):\rot=0:\movi=0:\movj=0
   \headi=0:\headj=0:\headk=0:\rev=0:\nrev=0:\vel=0:\traction=0
@@ -2979,7 +2979,7 @@ Return
   VWait 7:sr=-1
   ##[$80BB]
     VWait 3:cop-3
-    If cop<0 Then connect=##[$80C6]:##[$80BE] Gosub:Goto Damage
+    If cop<0 Then connect=Off:##[$80BE] Gosub:Goto Damage
     writesafer{29}
   ##[$80BC] (sr=29):sr=-1
   VWait 7
@@ -3045,9 +3045,9 @@ End Statement
     difi/pdist:difj/pdist
     fac=(ni*difj-nj*difi)
     If QAbs(fac)<0.1
-      *e\lstraight=##[$80C5]
+      *e\lstraight=On
     Else
-      *e\lstraight=##[$80C6]
+      *e\lstraight=Off
       *e\lodd1=(fac<0)
       *e\lodd3=(fac>0)
     EndIf
@@ -3074,9 +3074,9 @@ End Statement
     difi/pdist:difj/pdist
     fac=ni*difj-nj*difi
     If QAbs(fac)<0.17
-      *e\lstraight=##[$80C5]
+      *e\lstraight=On
     Else
-      *e\lstraight=##[$80C6]
+      *e\lstraight=Off
       *e\lodd1=(fac>0)
       *e\lodd3=(fac>0)
     EndIf
