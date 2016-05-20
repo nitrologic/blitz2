@@ -10,7 +10,7 @@ opcodes$="opcodes.txt"
 
 ' asm opcodes
 
-cmdnum=60
+cmdnum=60+$8000
 lines$=LoadText(opcodes)
 For line$=EachIn lines.Split("~n")
 	p=line.find("=")
@@ -21,9 +21,25 @@ For line$=EachIn lines.Split("~n")
 	cmdnum:+1
 Next
 
-
 ' standard bum6 libs
 
+' Blitz library 'blitzlibs:basic/audiolib.obj' (#116)
+' [322]  ###[186,3 $00003A03]  3,g$+"Motor.IFF" 
+
+
+'Blitz library 'blitzlibs:basic/gameiolib.obj' (#190)  JoyX (Port)
+'    ojoy.w=joy.w:joy=###[188,10 $0000BC0A](###[177,2 $0000B102]($4c)-###[177,2 $0000B102]($4d)+###[223,2 $0000DF02](1),-1,1)
+
+
+' Blitz library 'blitzlibs:basic/memacclib.obj' (#180) $B4
+'  Poke [.Type] Address,Data
+'  Peek [.Type](Address)
+'  Peeks$ (Address,Length)
+'  Call Address
+'   ##[$DA01].w $dff032,1477
+
+' da-b4 = 26
+' 8e->da
 lines$=LoadText(libs)
 libnum=0
 cmdnum=0
@@ -31,21 +47,25 @@ For line$=EachIn lines.Split("~n")
 	If libnum=0
 		p=line.Find("(#")
 		libnum=line[p+2..].toInt()		
-		cmdnum=libnum*64
+		cmdnum=(libnum+256)*128
+		Print line +"->"+ libnum +"->"+ Hex(cmdnum)	'(libnum+257)/2)'4+19+16+38+180
+'		libnum:+257
+'		libnum:+38
+'		cmdnum=libnum*256
 	Else
 		line=line.Trim()
 		If line="" 
 			libnum=0
 			cmdnum=0
 		Else		
+			cmdnum:+1
 			p=line.find(" ")
 			If p=-1 p=line.length
-'			Print "*"+num+":"+line[..p]	'+"---"+line[p..]
+'			Print "$"+Hex(cmdnum)[4..]+":"+line[..p]	'+"---"+line[p..]
 			If func[cmdnum]
 				Print "Name Collison"
 			EndIf
 			func[cmdnum]=line[..p]
-			cmdnum:+1
 		EndIf
 	EndIf
 Next
@@ -66,7 +86,7 @@ For token$=EachIn lines.Split("~n")
 			func[cmd]=lhs
 		ElseIf rhs[..1]="~q"
 			If lhs[..3]="tok"
-				cmd=Int(lhs[3..])
+				cmd=Int(lhs[3..])+$8000
 				rhs=rhs[1..rhs.length-1]
 				For name$=EachIn rhs.Split(",")					
 '					Print cmd +"<-"+name
@@ -98,19 +118,24 @@ If b>31 And b<127
 	src:+Chr(b)
 EndIf
 
-If b>127
-	cmd=(b&127)	
-	cmd=cmd*256+b1
-	i:+1
+If b<32 And b>0
+	Print b
+EndIf
 
-	token$=func[cmd]
-	If token="" token="###["+b+","+b1+" $"+Hex(cmd)+"]"
+If b>127
+	cmd=(b Shl 8)|(b1&255)
+	i:+1
+	
+'	If b>128 Print Hex(cmd)[4..]
+	token$=func[cmd]	
+'	If token="" token="###["+b+","+b1+" $"+Hex(cmd)[4..]+"]"
+	If token="" token="##[$"+Hex(cmd)[4..]+"]"
 	src:+token	
 EndIf
 
 Next
 
-Print src
+'Print src
 
 SaveText src,"test.txt"
 
