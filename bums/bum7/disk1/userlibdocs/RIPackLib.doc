@@ -1,0 +1,193 @@
+Library Name:
+  ripacklib #73
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, impriving Blitz2's IFF handling skills.
+
+Commands:
+  UnpackIFF address.l,bitmap#[,lines,offset]
+  suc=UnpackIFF (address.l,bitmap#[,lines,offset])
+  ILBMPalette address.l,palette#
+  suc=ILBMPalette (address.l,palette#)
+  ILBMGrab address.l,bitmap#,palette#
+  LoadIFF filename$,bitmap#[,palette#]
+  suc=LoadIFF (filename$,bitmap#[,palette#])
+  DeIce source_address,dest_address
+  suc=DeIce (source_address,dest_address)
+  val.l=ChunkHeader (A$)
+
+Authors Documentation:
+
+PACK Library v0.1
+=================
+
+By Stephen McNamara with a little help from Steve Matty
+(c)1994 Reflective Images
+
+This library contains commands for the unpacking of ILBM's (IFF pictures)
+and the grabbing of their palettes (CMAP chunks).  Nearly all the commands
+in this library can be used as either STATEMENTS or FUNCTIONS.  Usage is
+identical in both cases but if used as a function then the command will
+return:
+    FALSE for failure
+    TRUE for success
+
+Please feel free to critisise (or praise!) this library, send me anything
+you want to say about it at:
+
+      Stephen McNamara,
+        17 Mayles Road,
+              Southsea,
+            Portsmouth,
+             Hampshire,
+               England.
+               PO4 8NP.
+  Telephone: (England) 0705 781507.
+
+Or send us anything you've written........
+
+
+Command list:
+      UnpackIFF address.l,bitmap#[,lines,offset]
+      suc=UnpackIFF (address.l,bitmap#[,lines,offset])
+      ILBMPalette address.l,palette#
+      suc=ILBMPalette (address.l,palette#)
+      ILBMGrab address.l,bitmap#,palette#
+      LoadIFF filename$,bitmap#[,palette#]
+      suc=LoadIFF (filename$,bitmap#[,palette#])
+      DeIce source_address,dest_address
+      suc=DeIce (source_address,dest_address)
+      val.l=ChunkHeader (A$)
+
+Statement/Function: UnpackIFF
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: UnpackIFF address.l,bitmap#[,lines,offset]
+  suc=UnpackIFF (address.l,bitmap#[,lines,offset])
+
+  This command is used to unpack an IFF picture file from memory onto a
+bitmap.  Address.l should point to the START of the iff file header in
+memory (either CHIP or FAST mem can be used), bitmap should be the number
+of a previously initialised bitmap.  The optional lines parameter allows
+you to specify the number of lines to unpack from the IFF file.
+  This command checks the size of the bitmap against the size of the IFF
+before it unpacks the IFF onto it.  Checks are made for width, height and
+depth of the bitmap and the IFF and the following is done:
+
+(size=WIDTH, HEIGHT and DEPTH)
+
+    BITMAP 'size' < IFF 'size' : unpack aborted
+    BITMAP 'size' = IFF 'size' : pic is unpacked
+    BITMAP 'size' > IFF 'size' : pic is unpacked
+
+  Extra aborts can be caused by:
+    - not using a previously installed bitmap
+    - given the optional lines parameter as 0 or less
+    - not giving ADDRESS.l as a pointer to a valid IFF ILBM
+      header
+
+  When using the optional parameters, you should note that if you try to
+unpack more lines than the IFF has, the unpack routine will automatically
+stop at the last line of the IFF.  It will not reject the UnpackIFF
+command.  Also note that the offset is a byte offset from the start of the
+bitplanes.  You can use the AddValue command to calculate this value.
+
+  NOTE: you should save your IFF pictures with the STENCIL OFF because at
+the moment this routine does not check to see if STENCIL data is present in
+the IFF file.
+
+Statement/Function: ILBMPalette
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: ILBMPalette address.l,palette#
+  suc=ILBMPalette (address.l,palette#)
+
+  This command is used to grab the palette from a IFF picture file held in
+memory (CHIP or FAST mem).  Address.l should be given as the address of
+either an IFF file in memory or a CMAP chunk in memory.  When you use the
+SAVE PALETTE command from inside an art program (e.g. DPaint) or from
+inside Blitz2, the program saves out a CMAP chunk which gives details
+about the palette.  The CMAP chunk is also saved with IFF picture files to
+give the palette of the picture.
+  This command will look at the address you gave and try and find a CMAP
+chunk from the address given to address+5120.  If it finds a chunk it will
+grab the palette into the given palette object.  If the palette object
+already contains palette information then this information is deleted.
+This routine looks in the CMAP chunk and reserves the palette object to
+have the same number of colour entries.
+  This command will fail if it doesn't find a CMAP chunk.
+
+
+Statment: ILBMGrab
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: ILBMGrab address.l,bitmap#,palette#
+
+  This command lets you grab both the palette and the graphics from an IFF
+picture file with just one command.  It returns to success parameter to
+say whether or not it succeeded in grabbing the data, so if you need to know
+if the grabbing was successful you'll have to use the separate commands
+for grabbing palettes and graphics.
+
+  NOTE: this command essentially just calls both UnpackIFF and ILBMPalette
+so everything said about these commands is relevent for ILBMGrab.
+
+
+Statment/Function: LoadIFF
+------------------------------------------------------------------------
+Modes : Amiga
+Syntax: LoadIFF filename$,bitmap#[,palette#]
+  suc=LoadIFF (filename$,bitmap#[,palette#])
+
+  This command is a direct replacement for Blitz2's LoadBitmap.  It is a
+lot faster than Blitz's command since it loads the file into memory and
+then unpacks it from there.  Thus you need to ensure that you have enough
+free memory to load the IFF into before trying to use this command.
+  This command is also more stable than Blitz's since it checks for the
+existence of the file before trying to load it in.
+  The optional parameter allows you to load in the palette of the IFF
+picture.  Refer to UnpackIFF and ILBMPalette for more information about
+unpacking the graphics and grabbing the palettes.
+
+IMPORTANT NOTE: to use this command you must have our FUNC library
+installed in your copy of Blitz2.  Use of this command without this library
+will probably lead to a bad crash of your Amiga!
+
+Statement/Function: DeIce
+------------------------------------------------------------------------
+Modes : Amiga
+Syntax: DeIce source_address,dest_address
+  suc=DeIce (source_address,dest_address)
+
+  This is a command from my (Stephen McNamara) past.
+  It is used to unpack data files packed by my favourite Atari ST packer -
+PACK ICE v2.40.  I've put it into Blitz because still have loads of files
+that I've packed with it.  To use it, source_address should (obviously)
+contain the address of the data, dest_address should be where to unpack the
+data to.  In the function form, this command returns either 0 for unpack
+failed or -1 for success.
+  Note: The size of the data unpacked is the long word at source_address+8
+(I think, or is it 4?) if anybody is interested......
+
+
+Function: ChunkHeader
+------------------------------------------------------------------------
+Modes : Amiga
+Syntax: val.l=ChunkHeader (A$)
+
+  This command was put in by me (Stephen McNamara) before I realised Blitz
+already had a command that does exactly the same.  I've left it in just
+because I want to.  It is useful when looking through IFF files for chunks
+(e.g. ILBM, CMAP, etc.) as it gives you a longword value to look for in
+memory to find the chunk.  The string should be a four character string
+(e.g. CMAP), you'll be returned the longword value of the string.
+  This command does the job of the following bit of Blitz2 code:
+
+    a$="CMAP"
+    val.l=Peek.l(&a$)
+
+
+>> END

@@ -1,0 +1,305 @@
+Library Name:
+  riamosfunclib #75
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Renamed by me as not only is it funcy but cool for AMos converts.
+
+Authors Docs:
+
+Func Library v1.0
+=================
+
+By Steven Matty
+©1994 Reflective Images
+
+  This library was written primarily to emulate the functions that were
+present in AM*S but not in Blitz Basic 2. It began life as a load of Blitz
+Statements but was then converted to high speed 680x0. The library will
+continually be expanded upon and free updates will be sent on request.
+If you decide to use any of the function please give me a little cred, not
+a lot, just something. Anyway, enough of this baloney....on with the
+command list. 
+
+    success=Reserve(banknumber,length)
+    Erase(banknumber)
+    EraseAll
+    address.l=Start(banknumber)
+    length.l=Length(banknumber)
+    success=BLoad(filename$,banknumber/address[,length,offset])
+    success=BSave(filename$,banknumber/address,length)
+    success=PLoad(filename$,banknumber/address)
+    bytes.l=FileSize(filename$)
+    banknumber=NextBank
+    bytes.l=MemFree
+    value.l=Max(value1.l,value2.l)
+    value.l=Min(value1.l,value2.l)
+    value.l=XOR(value1.l,value2.l)
+    id.w=Lisa
+    Reboot
+    code.b=KeyCode
+    CopyByte sourceaddress.l,destaddress.l,numbytes.l
+    CopyWord sourceaddress.l,destaddress.l,numwords.l
+    CopyLong sourceaddress.l,destaddress.l,numlongs.l
+    FillMem sourceaddress.l,numberbytes.l[,bytevalue.l]
+    CacheOff
+    number.l=Timer
+    ResetTimer
+    success=Rename(source$,dest$)
+    success=MakeDir(dirname$)
+    tagnumber.l=GTTagValue[(tagnumber)]
+    success=CludgeShapes(shapenum#,numshapes,address)
+    success=CludgeSound(soundnumber,address)
+
+********************************* NOTE **************************************
+* VALID BANKS RANGE FROM 0-49 INCLUSIVE. DO NOT USE A VALUE GREATER THAN 49 *
+* OR IT WILL BE INTERPRETED AS AN ADDRESS RATHER THAN A BANKNUMBER          *
+*****************************************************************************
+
+Function: Reserve
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : success=Reserve(banknumber,length)
+
+  This will attempt to reserve <length> bytes of memory. If succesfull,
+it will return the address of the bank. If unsuccessfull, 0 is returned.
+Banks are limited by the Compiler Options Menu.
+
+
+Statement: Erase
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : Erase(banknumber)
+
+  The Erase command will erase the specified memory bank.
+
+
+Statement: EraseAll
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : EraseAll
+
+  This command will erase ALL allocated memory banks.
+
+
+Function: BLoad
+--------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : success=BLoad(filename$,bank/address[,length,offset,memtype])
+
+  If bank is specified, then the file is loaded into that bank. If address
+is specified then it is loaded to the address. Valid banks are 0-49. 
+If the bank does not exist, Blitz will reserve a bank for you.
+If the bank does exist, Blitz will erase the bank from memory, and
+allocate a new one.
+The return result is -1 for success, or 0 for failure  (not enough RAM, 
+file not exist). If offset is specified, then <length> bytes will be read
+from the specified offset position in the file.
+If memtype is specified, then the file is loaded into a memory block
+of that particular memtype (%10=Chip, %1=Public)
+
+
+Function: PLoad
+-------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : success=PLoad(filename$,bank/address)
+
+  This will attempt to load the executable file to the specified address.
+  -1 is success, 0 is failure.
+
+
+Function: BSave
+--------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : success=BSave(filename$,bank/address,length)
+
+  This will save <length> bytes at bank/address to the file. Return result
+is -1 for success, 0 for failure. If length > bank length then the length
+of the bank is saved instead. If 0 is specified, the entire bank is saved.
+
+
+Function: Start
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : start_address.l=Start(banknumber.b)
+
+  This will return the start address of the specified bank. (0=no bank)
+
+
+Function: Length
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : length_of_bank.l=Length(banknumber.b)
+
+  This will return the length of the specified bank in bytes. (0=No bank)
+
+
+Function: MemFree
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : bytes.l=MemFree
+
+  This will return the total amount of Public Free RAM available to the
+system.
+
+
+Function: NextBank
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : bank.b=NextBank
+
+  This will return the number of the first available bank (-1 if none free).
+
+
+Statement: FillMem
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : FillMem(address.l,length.l,value.b)
+
+   This will fill 'length' bytes starting from the specified address with 
+   'value'.
+
+
+Statement: CopyByte
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : CopyByte(source.l,dest.l,num.l)
+
+  This will copy <num> bytes from <source> to <dest> 
+
+Statement: CopyWord
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : CopyByte(source.l,dest.l,num.l)
+
+  This will copy <num> words from <source> to <dest> 
+
+Statement: CopyLong
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : CopyByte(source.l,dest.l,num.l)
+
+  This will copy <num> longwords from <source> to <dest> 
+
+
+Function: MakeDir
+--------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : success=MakeDir(name$)
+
+   This function attempts to create a directory called <name$>
+   If it is unsuccessfull, 0 is returned else -1 is returned.
+
+Function: Rename
+--------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : success=Rename(source$,dest$)
+
+   This attempts to rename the file <source$> to <dest$>
+   NOTE: It is not possible to rename across devices.
+   -1 is returned if successfull, else 0.
+
+
+Function: Timer
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : t.l=Timer
+
+   This will return the number of 50ths of a second since startup or the
+   last call to ResetTimer.
+
+Statement: ResetTimer
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : ResetTimer
+
+   This will recent the CIA timer to 0.
+
+
+Function: Lisa
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : chipver=Lisa
+
+   This will return the current Lisa chip version :
+
+    $00 for OCS Denise
+    $F7 for ECS Denise
+    $F8 for AGA Lisa
+
+Statement: Reboot
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : Reboot
+
+   This will perform a cold reboot
+
+
+Function: FileSize
+--------------------------------------------------------------------------------
+Mode   : Amiga
+Syntax : size.l=FileSize(filename$)
+
+  This return the length (in bytes) of the file.
+
+Statement: CacheOff
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : Cache Off
+
+  This will turn off the instruction cache of the CPU.
+
+Function: XOR
+--------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : x.l=XOR(x.l,y.l)
+
+  This will perform an Exclusive-Or operation between X and Y and put the
+result back into X 
+e.g
+
+    x=XOR(%101,%100)
+
+Will place %001 into X (%101 XOR %100 = %001)
+
+
+Function: Max/Min
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : value=Max(first_var,second_var)
+         value=Min(first_var,second_var)
+
+  This will compare both values and return either the Higher of the values
+  (Max) or the Lower (Min). This currently supports INTEGERs only.
+
+
+Function: KeyCode
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : keycode=KeyCode
+
+    This will return the status of the keyboard in the form of a keycode.
+    You will need to experiment to find out the desired keycode for
+    a particular key.
+    This merely peeks address $bfec01 and returns the value found.
+
+Statement/Function : CludgeShapes
+-------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : [success]=CludgeShapes(shape#,numshapes,address)
+
+   This allows the creation of shapes through INCBIN statements. It
+allocates chip memory for each shape and copies the data into this.
+It does the same as LoadShapes except it grabs shapes from memory.
+
+
+Statement/Function : CludgeSound
+------------------------------------------------------------------------------
+Mode   : Amiga/Blitz
+Syntax : [success]=CludgeSound(sound#,address)
+
+  This does that same for CludgeShapes but works on only 1 sound at a time
+NOTE: Looped sounds are not currently supported! The sound must be a valid
+8SVX sample.

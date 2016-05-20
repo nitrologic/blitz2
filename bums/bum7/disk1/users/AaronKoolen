@@ -1,0 +1,92 @@
+
+Dear Simon,
+
+My name is Aaron Koolen.
+
+I just thought I'd drop you a quick note after finally
+receiving BUM6 you colour vision author you!
+
+Small things I'd like to see added to Blitz2:
+
+  Don't close and reopen the editor when
+  1) Changing defaults
+  2) Clearing/Setting mouseables!
+
+  3) Selection of display mode! (ASL)
+
+  Amiga-s = save,  Amiga-A = SaveAS
+  or something like that.
+
+  Some macro keys.
+
+  Use clipboard for cut and pastc also.
+  A-v, A-c, A-x.  I use the clipboard heaps in other
+  editors.
+
+Large things I'd like to see added to Blitz2:
+  Better editor
+  Command line compiler
+  No loading of all libs at once into editor (selectable?)
+
+  Better error handling during runtime.
+    Make a lot of the noe commands, have function options
+    eg.
+    if Window(x,y,w,h,flags,....)=0
+; Window open failed!
+    else
+; Window opened!
+    endif
+
+    So if it returns 0, the open window failed.
+    Most commands should be like this so we don't have to use
+    the bloody stupid and out dated SET ERR type thing.
+
+  MORE EFFICIENT CODE GENERATION!!!!  PLEASE!!
+
+  TOOLTYPES!
+
+  Linkable object modules.  Even if the were written
+  in blitz it's ok. At least it would be a start.
+
+  Type defs!  Definately!
+
+
+
+
+I think the new commands this issue are groovy!.
+
+(Y ) I'd like to register with the authors via Acid
+     Software so I can receive upgrades and docs
+     directly from them
+
+(Y ) I'd like to see the user libraries continually
+     updated in BUM magazine and the authors paid
+     by Acid and not some shareware system
+
+(  ) I don't think I'm quite ready for new commands
+     Blitz2 has enough for me already
+
+I'm currently working on....
+  New menu rendering system (a la magic menu)
+  Some commodities. (Enclosed is the main one)
+
+I have enclosed the following for publishing in BUM7...
+
+My most awesome AppIcon util, that is so amazing only
+people with the ability of being a BUM editor could have
+written it! :-)
+
+(Y ) Seeing as the article I have enclosed is so good I would
+     like you to send me more information about becoming a full
+     time BUM editor.
+
+
+
+Cheers!
+
+
+Oh yeah.  I may be keen on writing a totally new TED for ya.
+It may be a hassle getting someone other than Mark to do it
+due to the internal stuff, but gis a ring if you're keen and
+maybe we can suss something out.
+

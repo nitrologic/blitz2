@@ -1,0 +1,247 @@
+;BB.Mosaic - Blanker-module for BlitzBlank
+;Copyright 1993 by Thomas Boerkel
+
+CloseEd
+NoCli
+
+NEWTYPE.table
+r.l
+g.l
+b.l
+End NEWTYPE
+
+NEWTYPE.tags
+a.l
+b
+c
+d
+e
+f
+End NEWTYPE
+
+DEFTYPE.Screen *fs,*myscreen
+DEFTYPE.ViewPort *vp
+DEFTYPE.RastPort *rp
+DEFTYPE.ColorMap *cm
+DEFTYPE.NewScreen newscreen
+DEFTYPE.Message *msg
+DEFTYPE.table tab
+DEFTYPE.MsgPort *port
+DEFTYPE.tags tags
+DEFTYPE.l
+
+Statement stringborder{x,y,w,h}
+Wline x+1,y+h+2,x+1,y,x+w+8,y,1
+Wline x+w+10,y-1,x+w+10,y+h+4,x-1,y+h+4,1
+Wline x,y+h+3,x,y,1
+Wline x+w+11,y-1,x+w+11,y+h+4,1
+Wline x-1,y+h+3,x-1,y-1,x+w+10,y-1,2
+Wline x+w+9,y,x+w+9,y+h+3,x+1,y+h+3,2
+Wline x-2,y+h+4,x-2,y-1,2
+Wline x+w+8,y+1,x+w+8,y+h+2,2
+End Statement
+
+Select Par$(1)
+  Case "BLANK"
+    name$="BB.BlankModule"+Chr$(0)
+    *port=CreateMsgPort_()
+    *port\mp_Node\ln_Name=&name$
+    *port\mp_Node\ln_Pri=1
+    AddPort_ *port
+    SetTaskPri_ FindTask_(0),Val(Par$(8))
+    Gosub readconfig
+    speed+30
+    lib$="intuition.library"+Chr$(0)
+    *ibase.IntuitionBase=OpenLibrary_(&lib$,39)
+    CloseLibrary_(*ibase)
+
+    If *ibase
+      v39=1
+    Else
+      *ibase.IntuitionBase=OpenLibrary_(&lib$,37)
+      CloseLibrary_(*ibase)
+    EndIf
+
+    *fs=*ibase\FirstScreen
+
+
+
+    left=*fs\LeftEdge
+    top=*fs\TopEdge
+    width=*fs\Width
+    height=*fs\Height
+    modeid=GetVPModeID_(*fs\ViewPort)
+
+    depth=*fs\BitMap\Depth
+
+    title$="BB.Mosaic.Screen"+Chr$(0)
+    newscreen\LeftEdge=left,top,width,height,depth
+    newscreen\ViewModes=0,#CUSTOMSCREEN|#SCREENBEHIND,0,&title$
+    tags\a=#SA_DisplayID
+    tags\b=modeid
+    tags\c=0
+    *myscreen=OpenScreenTagList_(newscreen,tags)
+    If *myscreen
+      *vp=*myscreen\ViewPort
+      *rp=*myscreen\RastPort
+      BltBitMap_ *fs\BitMap,0,0,*myscreen\BitMap,0,0,width,height,$C0,$FF,0
+      *cm=*fs\ViewPort\ColorMap
+      For i=0 To 2^depth
+        If v39
+          GetRGB32_ *cm,i,1,tab
+          SetRGB32_ *vp,i,tab\r,tab\g,tab\b
+        Else
+          c=GetRGB4_(*cm,i)
+          SetRGB4_ *vp,i,(c LSR 8) AND 15,(c LSR 4) AND 15,c AND 15
+        EndIf
+      Next i
+      ScreenToFront_ *myscreen
+      sizex=size
+      sizey=sizex*height/width
+      sizex2=sizex/2
+      sizey2=sizey/2
+      Repeat
+        VWait
+        For i=1 To speed
+          x=Rnd(width-sizex)+sizex2
+          y=Rnd(height-sizey)+sizey2
+          c=ReadPixel_(*rp,x,y)
+          If 1
+            SetAPen_ *rp,c
+            RectFill_ *rp,x-sizex2,y-sizey2,x+sizex2,y+sizey2
+            a+1
+          EndIf
+        Next i
+        If a>500000
+          BltBitMap_ *fs\BitMap,0,0,*myscreen\BitMap,0,0,width,height,$C0,$FF,0
+          a=0
+        EndIf
+
+        *msg=GetMsg_(*port)
+      Until *msg
+
+      CloseScreen_ *myscreen
+    EndIf
+    RemPort_ *port
+    DeleteMsgPort_ *port
+
+  Case "INFO"
+    title$="Mosaic"+Chr$(0)
+    reqtext$="Mosaic - Module for BlitzBlank"+Chr$(10)
+    reqtext$+Chr$(169)+" 1993 by Thomas Brkel"+Chr$(10)+Chr$(10)
+    reqtext$+"Your actual screen will be turned into a mosaic."+Chr$(10)+Chr$(10)
+    reqtext$+"Choose the speed and size in the config-window."+Chr$(0)
+
+    gadget$="OK"+Chr$(0)
+    easy.EasyStruct\es_StructSize=SizeOf.EasyStruct
+    easy\es_Title=&title$
+    easy\es_TextFormat=&reqtext$
+    easy\es_GadgetFormat=&gadget$
+    EasyRequestArgs_ 0,easy,0,0
+  Case "CONFIG"
+    *myscreen=LockPubScreen_(0)
+    width=*myscreen\Width
+    height=*myscreen\Height
+    font=*myscreen\Font\ta_YSize
+    Gosub readconfig
+    WbToScreen 0
+    BorderPens 0,0
+    StringGadget 0,100,25,0,0,4,40
+    StringGadget 0,100,50,0,1,4,40
+    SetString 0,0,Str$(speed)
+    SetString 0,1,Str$(size)
+    Window 0,width/2-90,height/2-40,180,80,$100e,"Mosaic",1,2,0
+    stringborder{100,25,40,8}
+    stringborder{100,50,40,8}
+    WColour 2
+    WLocate 30,24-font
+    Print "Speed:"
+    WLocate 30,24-font+8
+    Print "(1-150)"
+    WLocate 30,49-font
+    Print "Size:"
+    WLocate 30,49-font+8
+    Print "(3-100)"
+    ActivateString 0,0
+    Repeat
+      ev=WaitEvent
+      If ev=$40
+        Select GadgetHit
+          Case 0
+            ActivateString 0,1
+          Case 1
+            e=1
+        End Select
+      EndIf
+    Until ev=$200 OR e
+    speed=Val(StringText$(0,0))
+    size=Val(StringText$(0,1))
+    Free Window 0
+    Gosub writeconfig
+    UnlockPubScreen_ 0,*myscreen
+End Select
+
+End
+
+.readconfig
+path$=Par$(9)
+For i=10 To NumPars
+  path$=path$+" "+Par$(i)
+Next i
+If ReadFile(0,path$+"BB.Modules.config")
+  FileInput 0
+  While NOT Eof(0)
+    If Edit$(100)="*** Mosaic ***"
+      speed=Val(Edit$(5))
+      size=Val(Edit$(5))
+    EndIf
+  Wend
+  DefaultInput
+  CloseFile 0
+EndIf
+Gosub checkval
+Return
+
+
+.writeconfig
+Gosub checkval
+If ReadFile(0,path$+"BB.Modules.config")
+  If WriteFile(1,path$+"BB.Modules.temp")
+    FileInput 0
+    FileOutput 1
+    While NOT Eof(0)
+      f$=Edit$(100)
+      If f$="*** Mosaic ***"
+        Repeat
+          f2$=Edit$(100)
+        Until Eof(0) OR Left$(f2$,3)="***"
+        If NOT Eof(0) Then NPrint f2$
+      Else
+        NPrint f$
+      EndIf
+    Wend
+    CloseFile 1
+  EndIf
+  CloseFile 0
+EndIf
+KillFile path$+"BB.Modules.config"
+f$=path$+"BB.Modules.temp"+Chr$(0)
+f2$=path$+"BB.Modules.config"+Chr$(0)
+Rename_ &f$,&f2$
+If OpenFile(0,path$+"BB.Modules.config")
+  FileOutput 0
+  FileSeek 0,Lof(0)
+  NPrint "*** Mosaic ***"
+  NPrint speed
+  NPrint size
+  CloseFile 0
+EndIf
+Return
+
+.checkval
+If speed<1 Then speed=100
+If speed>150 Then speed=100
+If size<3 Then size=8
+If size>100 Then size=8
+Return
+

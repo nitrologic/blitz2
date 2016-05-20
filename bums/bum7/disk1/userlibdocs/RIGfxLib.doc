@@ -1,0 +1,168 @@
+Library Name:
+  rigfxlib #65
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, hmmm, I just fixed up the palette
+  library heaps but thought I better include this incase....
+
+Authors Docs:
+
+GFX Library v0.1
+================
+
+By Stephen McNamara and Steve Matty
+(c)1994 Reflective Images
+
+This library contains commands for the control of palette objects inside
+Blitz2.  These are just simple commands that allow either interrogation of
+the palette objects are modifications to the colour values contained in
+them.  After changing the palette with these commands, you'll have to do
+either a USE PALETTE or DISPLAYPALETTE (whichever is applicable to what
+you're doing) to make the changes come into effect on your screen.
+
+Please feel free to critisise (or praise!) this library, send me anything
+you want to say about it at:
+
+  SIS3149@SISVAX.PORT.AC.UK
+    or
+  SIS3147@SISVAX.PORT.AC.UK
+
+Or send us anything you've written........
+
+
+Command list:
+      PaletteInfo palette#
+      r.w=PalRed (Colour#)
+      g.w=PalGreen (Colour#)
+      b.w=PalBlue (Colour#)
+      r.w=AGAPalRed (Colour#)
+      g.w=AGAPalGreen (Colour#)
+      b.w=AGAPalBlue (Colour#)
+      PalAdjust dest_palette#,ration.q[,start_col,end_col]
+      FillPalette palette#,r,g,b[start_col,end_col]
+      AGAFillPalette palette#,r,g,b[start_col,end_col]
+
+Statement: PaletteInfo
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: PaletteInfo Palette#
+
+  This command is used to specify the palette object that all palette
+interrogations should look at.  The majority of the commands use this
+palette object as the source for their data, e.g. PalRed(1) will look at
+the red value of colour 1 of the palette last used in a PaletteInfo
+command.
+
+
+Function: PalRed
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: r.w=PalRed (Colour#)
+
+  This command is used to get the red value of colour number Colour#.  You
+should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 15
+
+Function: PalGreen
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: g.w=PalGreen (Colour#)
+
+  This command is used to get the green value of colour number Colour#.
+You should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 15
+
+Function: PalBlue
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: b.w=PalBlue (Colour#)
+
+  This command is used to get the blue value of colour number Colour#.  You
+should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 15
+
+Function: AGAPalRed
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: r.w=AGAPalRed (Colour#)
+
+  This command is used to get the red value of colour number Colour#.  You
+should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 255, this number of shades, though,
+can only be displayed on an AGA machine.
+
+Function: AGAPalGreen
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: g.w=AGAPalGreen (Colour#)
+
+  This command is used to get the green value of colour number Colour#.
+You should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 255, this number of shades, though,
+can only be displayed on an AGA machine.
+
+Function: AGAPalBlue
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: b.w=AGAPalBlue (Colour#)
+
+  This command is used to get the blue value of colour number Colour#.  You
+should use the PaletteInfo command to specify what palette this command
+takes its information from.
+  The value returned will be from 0 to 255, this number of shades, though,
+can only be displayed on an AGA machine.
+
+
+Statement: PalAdjust
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: PalAdjust dest_palette#,ration.q[,start_col,end_col]
+
+  This command is used to multiple all the colours, or a range of colours,
+in a palette object, by a ratio.  The dest_palette# arguement is used to
+give a destination for the adjusted colour information.  This destination
+should be a pre-reserved palette and should be AT LEAST as big and the
+source palette.  The source palette is taken as being the palette last used
+in the PaletteInfo command.
+  The ratio should be given as either a quick value or a float and should
+be below one for a fade or above to lighten a palette.  If you give a ratio
+of 1 then a palette copy will occur.
+  The optional start and end parameters let you specify the range of
+colours to adjust.  Only this range of colours, though, will be adjusted
+and stored in the destination palette.
+
+
+Statement: FillPalette
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: FillPalette palette#,r,g,b[start_col,end_col]
+
+  This command lets you fill a given palette object with specific r,g,b
+values.  The values given should be between 0 to and 15.  Optionally, you
+can give start and end colour numbers to set a range for the fill.  You
+should be careful, though, because when you specify a range, no checking is
+done (at the moment) to make sure that you don't exceed the colour limit of
+the palette.
+  You should note that this command does not work on the palette last
+PaletteInfo'ed.
+
+
+Statement: AGAFillPalette
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: AGAFillPalette palette#,r,g,b[start_col,end_col]
+
+  This command is identical to FillPalette except that it lets you specify
+AGA shade values for the r,g,b parameters.
+  See FillPalette for more information.
+
+
+>> END

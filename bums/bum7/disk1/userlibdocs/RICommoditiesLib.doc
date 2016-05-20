@@ -1,0 +1,131 @@
+Library Name:
+  ricommoditieslib #89
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, nice header...
+
+Authors Docs:
+
+-----------------------------------------------------------------------------
+====          Reflective Images Commodities Library V0.9 (C)1994         ====
+-----------------------------------------------------------------------------
+
+Introduction
+============
+
+This library allows the easy use of Commodities. It requires Kickstart 2 or
+higher.
+
+
+
+Function : MakeCommodity
+-----------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=MakeCommodity(name$,title$,description$)
+
+This command attempts to add your Commodity to the list of commodities.
+A return value of -1 indicates success, 0 means failure. (not enough memory)
+
+name$ refers to the name of the Commodity and it should be unique. This is
+the name that appears when running the Commodity Exchange program.
+title$ is the title of your program, e.g. "My Screen Blanker".
+description$ is a brief description of your program.
+
+The Commodity Exchange program will then have 'name$' in its list of
+Commodities and when a user clicks on your commodity, it will display
+the title$ and description$. 
+
+
+Function : SetHotKey
+----------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=SetHotKey(hotkey#,hotkeydescription$)
+
+This will add a hotkey event to your commodity so that after a hotkey
+has been pressed you can find out which one.
+
+e.g.    success=SetHotKey(0,"lalt lshift a")
+
+
+Function : HotKeyHit
+----------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : hitkeynum=HotKeyHit
+
+This will return the number of the hot key which has been hit since the
+last 'CommodityEvent' was called, or -1 if no such hotkey has been activated.
+
+
+Function : CommodityEvent
+----------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : anyevent=CommodityEvent
+
+This looks to see if either
+  a) A hotkey has been pressed
+  b) A message from Exchange has been received
+
+and returns -1 if such an event occurred, of 0 is nothing has yet happened.
+This should be inside a Repeat-Until loop, e.g.
+
+  Repeat
+    VWait
+    ev.l=Event
+    ce.l=CommodityEvent
+    hk.l=HotKeyHit    ; This must be used after CommodityEvent
+  Until ev or ce or hk
+
+
+Statement : SetStatus
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : SetStatus on|off
+
+This sets the status of your Commodity to either Active (on) or Inactive
+(off) - this can be seen by running the Commodities Exchange program.
+
+
+Function : ExchangeMessage
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : messnum.l=ExchangeMessage
+
+This looks to see if the Commodities Exchange has issued you with as message,
+e.g. Hide Interface, Show Interface. It returns the message ID of the incoming
+message or 0 for no message.
+
+
+Functions: CxAppear/CxDisAppear/CxEnable/CxDisable/CxKill/CxChangeList/CxUnique
+-------------------------------------------------------------------------------
+Modes : Amiga
+
+These are to be used in conjunction with ExchangeMessage, ie
+
+  em.l=ExchangeMessage
+  Select em
+    Case CxAppear
+      Gosub _appear
+    Case CxDisAppear
+            Gosub _disappear
+        End Select
+
+The functions merely return the ID value associated with that particular
+Commodities Exchange message.
+
+Functions: ExchangeAppear/ExchangeDisAppear/ExchangeEnable/ExchangeDisable
+     ExchangeKill/ExchangeChangeList/ExchangeUnique
+Modes : Amiga
+
+
+To be used in conjunction with ExchangeMessage, ie
+
+  em.l=ExchangeMessage
+  If em
+    If ExchangeAppear then Gosub _appear
+    If ExchangeDisAppear then Gosub _dispappear
+  EndIf
+
+This is intended as an alternative way of acting upon Exchange Messages.

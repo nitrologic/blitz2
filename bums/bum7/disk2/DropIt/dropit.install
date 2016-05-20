@@ -1,0 +1,49 @@
+;======================================================================
+; DROPIT INSTALL SCRIPT
+; Written on 26-Apr-1994 (My 23rd Birthday!!!)
+;======================================================================
+
+( set @default-dest "SYS:Wbstartup" )
+
+(if ( < (getversion) 2359296 )
+	(
+		(abort "You must have OS version 36 or greater.")
+	)
+)
+
+(makedir "envarc:dropit" 
+	(prompt "Creating directory \"ENVARC:dropit\"")
+	(help @makedir-help)
+	(infos)
+)
+
+(copylib (source "dropit") (dest "sys:wbstartup")
+	(prompt "Copying DropIt to SYS:WbStartup/")
+	(infos)
+	(help @copylib-help)
+	(confirm)
+)
+
+(copyfiles (source "dropiticon.info") (dest "envarc:dropit")
+	(prompt "Copying the AppIcon to ENVARC:DropIt")
+	(help @copyfiles-help)
+)
+
+(copyfiles (source "dropit.config") (dest "envarc:dropit")
+	(prompt "Copying DropIt.config to ENVARC:DropIt")
+	(help @copyfiles-help)
+)
+
+(if (= (askchoice 
+		(prompt "Copy ENVARC:DROPIT to ENV:DROPIT so it can be used straight away?")
+		(help @askchoice-help)
+		(choices "Yo!" "No Way!")
+		(default 0)
+	) 0)
+	(copyfiles
+		(prompt "Copying from ENVARC:DROPIT to ENV:DROPIT")
+		(source "envarc:dropit")
+		(dest "env:dropit")
+		(all)
+	)
+)

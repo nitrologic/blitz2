@@ -1,0 +1,421 @@
+			       DROPIT v2.16
+			       ============
+
+CONTENTS
+--------
+
+	INTRO
+
+	INSTALLATION
+
+	SETTING UP
+
+	REPLACE TAGS
+
+	USING
+
+	QUITTING
+
+	LIMITS AND NO NO'S
+
+	HISTORY
+
+	BUGS (FEATURES)
+
+	FUTURE ENHANCEMENTS
+
+	FEE
+
+	DISCLAIMER
+
+
+============================================================================
+
+
+INTRO
+-----
+    DROPIT allows you to select an icon (or shift-select a group of icons)
+and when dropped on the DROPIT AppIcon, execute certain programs (based on
+pattern matching criteria) passing the selected files as parameters to the
+appropriate programs.
+"Isn't that what tool types basically do?" I hear you ask?  Well, sort of,
+but what about files you don't have icons for?  You may have a collection of
+graphics or modules that don't have icons and want to play or view one.  Just
+drag it and drop it on DropIt and it will be shown, played, whatever.
+
+Whoop de doo!
+
+============================================================================
+
+INSTALLATION
+------------
+
+There are 2 ways to install DropIt
+
+Method 1
+
+1)	Make a directory ENVARC:DROPIT
+2)	Place dropiticon.info and dropit.config in it.
+3)	Reboot your machine or
+	a) Make a directory in ENV: called DROPIT and then
+	b) copy ENVARC:DROPIT to ENV:DROPIT
+
+4)	You can now place DROPIT in your WBStartup and reboot or run it.
+
+5)	If you want, you can install another icon as dropiticon.info icon
+	instead of the supplied one.
+
+
+Method 2
+
+Click on the install icon!!
+
+============================================================================
+
+SETTING UP
+----------
+The file ENV:dropit/dropit.config contains the info on what programs you
+want to be able to run from the AppIcon and their related info.  With
+DropIt v2.13, you no longer have to edit the config file by hand.  There is
+now a groovy config editor! Yaaay!
+
+Call up the config window with left-alt d, double click on the DropIt
+AppIcon, or use Exchange to get the config window to pop up.
+
+Here's a run down of it you will be presented with:
+
+File-type list view
+	This list view shows the name of the different types you have on your
+	config.  You can select an item to view/edit by clicking with the mouse.
+
+Add
+	Adds another entry (up to max of 40) to the bottom of the config list.
+
+Del
+	Deletes the currently selected entry from the list.
+
+Up
+	Moves the currently selected entry up the list.
+
+Down
+	Moves the currently selected entry down the list.
+
+Name
+	This is a string for the name of an entry.  It's there so you can
+	recognise what a filetype does more easily.
+
+Execute list view
+	This smaller listview, contains multiple execution strings to run for
+	this particular file type.  If you are using only one execute string,
+	only the path to the file needs to be present.	If you want multiple
+	options, you preceed each option by a word, followed by an equals sign,
+	followed by the string to execute. EG
+
+	If the only thing you wanted to do with an iff file was view, you would
+	simply have
+
+	utils:viewers/iffview {f}
+
+	in that entry.	If you wanted to optionally test, view or unarc an
+	archive you could have something like this
+
+	TEST=utils:lha t {f}
+	VIEW=utils:lha v {f}
+	UNARC=utils:lha x {f} #? {d}
+
+
+	What would happen for the later one, is that you would be presented
+	with a requester asking for your selection.
+
+	You can edit these entries, by clicking on the entry to edit, and
+	editing it in the string gadget below the listview and pressing return
+	when finished.
+
+Add (execute)
+	This allows you to add an execute option to this filetype.
+
+Del (execute)
+	Removes the currently selected execute option from the list.
+
+Message
+	This is a string that is displayed in a title bar sized window when the
+	appropriate program is being run.  Would hold something like
+	"Now running Octamed Player..."
+
+Pattern
+	This is a normal Amiga regular expression pattern used to match against
+	the various icon names dropped on DropIt.  If you don't want  any name
+	pattern matching (Maybe you want only signature matching), leave this
+	field blank.
+
+Signature
+	The signature pattern match is checked only if the filename	pattern match
+	fails.	A signature is simply a collection of bytes in the file (DROPIT
+	will match any of the first 100) that identify that file in some way.
+	EG IFF picture files usually start with FORM followed by 4 bytes followed
+	by ILBM. So a signature pattern to match this would be FORM????ILBM.
+
+	Normal AmigaDOS regular expressions are used in all pattern
+	matches.
+
+NOTE:  The first three of the four following options are local to each
+	execute within each type.  IE For an filetype whichhas multiple execute
+	strings (an LHA type for example) you can set Async, Shell, and Wait
+	for each specify option within the type.  Your LHA viewer may wantto
+	open a shell and wait at the end so you can see it, whereas you LHA unarcer
+	may want to simply unarc it and then return straight away.
+
+Async
+	When doing operations on multiple files (shift selected) after an action
+	is started the next action is started for the next icon in the selection
+	before the previous one may have finished totally.  When not selected,
+	each dropped icon will be checked in order, after the previous one has
+	finished.  NOTE:  When Async is OFF, DropIt will be frozen until all
+	dropped icons have finished being processed.
+
+Shell
+	A Shell will open so you can see output, and enter input from/to the
+	executed program.
+
+Wait After
+	This flag can only be selected when Async is OFF AND you have the Shell
+	option turned ON.  When on though,	DropIt will prompt you and wait for
+	you to press return, before closing the shell.
+
+Sig First
+	Normally the name pattern is checked, and if that fails the signature
+	is matched.  With this flag, the signature is checked first.
+
+Save
+	This saves the configuration to the Env:dropit/dropit.config and
+	Envarc:dropit/dropit.config.
+
+Hide
+	Removes the config window.
+
+Reload
+	Reloads the config from disk.
+
+About
+	The normal guff.
+
+Quit
+	Removes DropIt altogether.
+
+============================================================================
+
+REPLACE TAGS
+------------
+A replace tag is a simple few characters that will be replaced by certain
+strings before the string is used.  Notice in the suppiled config {f} is
+used.  This is the sequence which is replaced by the dropped icons complete
+filename.  Here are the implemented tags.
+
+{f}	    Replaces with the complete pathname of the dropped icon.
+{d}	    Replaces with the complete pathname of the destination directory.
+
+When you drop a device or directory on DROPIT that device or directory
+becomes the current destination string. (see the UN-LHARC entry in the
+supplied config) You can then use {d} in your config to use it.
+
+NOTE: DROPIT processes icons in order of their selection and each time a
+new directory or device is found it becomes the current destination string.
+Here's an example.
+
+Say you wanted to unarc a file (say FOO.LHA) to your work: directory and
+then unarc another (BAR.LHA) to your workbench: directory.  You can do this
+all at one time.
+
+1)	Click on the WORK: Icon.
+2)	Shift-Click on the FOO.LHA icon.
+3)	Shift-Click on the WORKBENCH: Icon.
+4)	Shift-Click on the BAR.LHA icon and drag the whole lot and drop it
+	on the AppIcon.
+
+As DROPIT processes the list of icons, it first finds WORK:, and since it's
+a device (or dir) it becomes the current destination string.  Then it finds
+FOO.LHA which matches an LHA archive so calls LHA with the destination
+string as an argument.	Then it finds WORKBENCH: so it becomes the current
+destination string, then it finds BAR.LH and calls lha again and the
+unarc'ed files go to WORKBENCH:.  This all works provided you have the
+correct config to handle it of course.
+
+(See the dropit.config file)
+
+Whenever a new list of icons are dropped, the destination string is
+cleared.  This has the affect of of making the destination the same
+directory as where DROPIT was run from, which is probabaly not what you
+want.  But since the destination replacing is for things just like LHA you
+will have to specifiy a directory some how, so you'll have to explicity
+shift-select a destination directory.  I may change this in future
+versions.
+
+When a replace tag is expanded, the inserted text is enclosed in quotes.
+So a line like:
+
+octamedplayer {f}
+
+If passed the file FRED, would expand to:
+
+octamedplayer "FRED"
+
+The reason for this is that sometimes you may pass a filename which has
+spaces in it.  If quotes weren't added then the program being called will
+get confused thinking that there are more parameters that should be. EG
+
+Passing the file 'MY MODULE' to the above would expand to
+
+    octamedplayer MY MODULE
+
+And octamedplayer would attempt to load the files MY and MODULE which is
+obviously not what is wanted.
+
+============================================================================
+
+USING
+-----
+Simply run the program from WB, CLI or in your WBStartup.
+
+Select (or shift select) some files and drop them on the DROPIT icon to
+process them.
+
+When DROPIT is checking a file for a pattern match it checks from the first
+to the last pattern in your config.  If a match is found, then the command
+is executed and the search ends for that particular icon, after executing,
+or if it is being run Asynchronously, the next icon will be matched against
+the config, and so on.	So, place your patterns in decending order of importance.  Notice in the example above
+there is the #? pattern, which is "match everything".  This will only be
+checked if the other matches have all failed, so it's like a 'try this as a
+last resort!' entry.
+
+NOTE:
+	A program is run for each icon.  You cannot as yet pass more than one
+	file to the same program in one instance.  IE to view a lot of
+	pictures, the view program will be loaded once for each icon dropped
+	and each successive icon passed, one at a time.
+
+============================================================================
+
+QUITTING
+--------
+To quit the program use Exchange, or press Quit from the config window.
+
+============================================================================
+
+LIMITS AND NO NO's
+------------------
+As you probably have guessed DROPIT runs only on 2.04+.
+
+There is now a limit on the number of entries you have have (40) as Blitz
+Basic's ListView interface only works with a maximum number of entries. :-(
+
+Tooltypes are not supported in Blitz Basic at the moment.  You can change
+them, but nothing will happen.	I'm working on it.
+
+============================================================================
+
+HISTORY
+-------
+
+v1.0	- Had separate icons for each type and you dropped your icons on
+	      the respective one.
+
+v2.0	- Went to one icon, and it checked the name of the file for a
+	      pattern match to see what action should be taken.
+	    - Had a maximum of 20 different entries.
+	    - Could set some environment flags.
+
+v2.1	- Entries limited only by memory now.
+	    - Can do matches on file signatures as well as filenames.
+	    - New icon (Though it's still ugly)
+	    - New options added and each entry has it's own set.
+	    - Added support for output window.
+
+v2.11	- Changed from Execute() for program running to SystemTagList().
+
+v2.12	- CLI's are now both Input and Output.
+	    - Fixed bug that caused DROPIT to die if the Workbench screen
+	      was closed and reopened for some reason (EG change of screen
+	      mode).
+
+v2.13	- Added a config editor window. Yaay!
+		- Made it a commodity.
+		- Re-instated limit on # of entries. :-(
+
+v2.14	- Fixed bug, that caused it to crash when reopening config window
+		  after WB had been closed and reopened.
+		- Fixed config window listview colours/drawmodes from crapping out
+		  after reopening of WB.
+
+v2.15	- Added a nicer icon.
+
+		- Fixed error checking for non existent icons/configs etc.  If
+		  config file is not found, the config window is opened
+		  automatically.
+
+v2.16
+		- Added multiple execute lines.  The user is asked to select one
+	      via an EasyRequest()
+
+		- Added reloading of config
+
+		- Can now set flags local to each execution variation.
+
+		- Blitz got some errors fixed, so it should work on < 3.0 now!
+
+		- Made an install script
+
+		- After the WB screen had been closed and reopened for some reason,
+		  the next time the config window was popped up the gadgets didn't
+		  appear until you closed the window and opened it again.  It is
+		  now fixed.
+
+============================================================================
+
+BUGS (FEATURES)
+---------------
+Please let me know if you find any.
+
+============================================================================
+
+FUTURE ENHANCEMENTS
+-------------------
+
+Add passing of more that one file to a program at a time.
+
+CD to directories passed as opposed to setting destination string.
+
+Flags, so that a directory HAS to be specified.
+
+Add more replace tags.
+
+Instead of doing things based on files, allow things to be set based on
+different icon types.  EG with directories cd to it.
+
+============================================================================
+
+FEE
+---
+Haaaaaaaaaaaaa Haaaaaaaaaaaaaaaaaaaaaaaa! ;-)
+
+If you use DROPIT a lot and feel the program's worth something you can send
+some $$, a postcard, or some of your programs to
+
+Aaron Koolen
+1a Smith Street
+Freemans Bay
+Auckland
+New Zealand
+
+============================================================================
+
+DISCLAIMER
+----------
+The usual stuff,
+
+"I do not accept responsibiliy for loss of anything......when using dropit"
+
+Cheers!
+
+Aaron Koolen	(aaron@mserve.kiwi.gen.nz)
+

@@ -21,25 +21,6 @@ For line$=EachIn lines.Split("~n")
 	cmdnum:+1
 Next
 
-' standard bum6 libs
-
-' Blitz library 'blitzlibs:basic/audiolib.obj' (#116)
-' [322]  ###[186,3 $00003A03]  3,g$+"Motor.IFF" 
-
-
-'Blitz library 'blitzlibs:basic/gameiolib.obj' (#190)  JoyX (Port)
-'    ojoy.w=joy.w:joy=###[188,10 $0000BC0A](###[177,2 $0000B102]($4c)-###[177,2 $0000B102]($4d)+###[223,2 $0000DF02](1),-1,1)
-
-
-' Blitz library 'blitzlibs:basic/memacclib.obj' (#180) $B4
-'  Poke [.Type] Address,Data
-'  Peek [.Type](Address)
-'  Peeks$ (Address,Length)
-'  Call Address
-'   ##[$DA01].w $dff032,1477
-
-' da-b4 = 26
-' 8e->da
 lines$=LoadText(libs)
 libnum=0
 cmdnum=0
@@ -48,10 +29,7 @@ For line$=EachIn lines.Split("~n")
 		p=line.Find("(#")
 		libnum=line[p+2..].toInt()		
 		cmdnum=(libnum+256)*128
-		Print line +"->"+ libnum +"->"+ Hex(cmdnum)	'(libnum+257)/2)'4+19+16+38+180
-'		libnum:+257
-'		libnum:+38
-'		cmdnum=libnum*256
+		Print line +"->"+ libnum +"->"+ Hex(cmdnum)
 	Else
 		line=line.Trim()
 		If line="" 
@@ -95,7 +73,7 @@ For token$=EachIn lines.Split("~n")
 				Next
 			EndIf
 		Else
-			Print lhs + " : " +rhs
+			Print lhs + " : " +rhs + " "+Hex(Int(rhs))
 		EndIf
 	EndIf
 Next
@@ -104,36 +82,48 @@ bank:TBank=LoadBank(path)
 Print bank.Size()
 
 src$=""
+lost$=""
 
 For i=0 Until bank.size()-1
 
-b=bank.PeekByte(i)
-b1=bank.PeekByte(i+1)
-
-If b=0 
-	src:+"~r~n"
-EndIf
-
-If b>31 And b<127 
-	src:+Chr(b)
-EndIf
-
-If b<32 And b>0
-	Print b
-EndIf
-
-If b>127
-	cmd=(b Shl 8)|(b1&255)
-	i:+1
+	b=bank.PeekByte(i)
+	b1=bank.PeekByte(i+1)
 	
-'	If b>128 Print Hex(cmd)[4..]
-	token$=func[cmd]	
-'	If token="" token="###["+b+","+b1+" $"+Hex(cmd)[4..]+"]"
-	If token="" token="##[$"+Hex(cmd)[4..]+"]"
-	src:+token	
-EndIf
+	If b=0 
+		src:+"~r~n"
+	EndIf
+	
+	If b=32 And b1=32
+		src:+"~t"
+		i:+1
+		Continue
+	EndIf
+		
+	
+	If b>31 And b<127 
+		src:+Chr(b)
+	EndIf
+	
+	If b<32 And b>0
+		Print b
+	EndIf
+	
+	If b>127
+		cmd=(b Shl 8)|(b1&255)
+		i:+1
+		token$=func[cmd]	
+		If token="" 
+			token="##[$"+Hex(cmd)[4..]+"]"
+			If Not lost.Contains(token)
+				lost:+token
+			EndIf
+		EndIf
+		src:+token	
+	EndIf
 
 Next
+
+Print "Lost Tokens:"+lost
 
 'Print src
 

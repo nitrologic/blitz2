@@ -1,0 +1,13 @@
+;
+;Quick Startup-Sequence for Blitz2
+;
+;For correct operation, Blitz2 requires the files
+;'ted' (the source code editor) and 'deflibs' (blitz 2's libraries)
+;to be in a 'blitz2:' drawer
+;
+;If you're running under 1.3, you may want to 'un-rem' the following:
+;
+;mount newcon:
+;
+loadwb
+endcli

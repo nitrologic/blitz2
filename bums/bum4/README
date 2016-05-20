@@ -1,0 +1,51 @@
+HI,
+
+Welcome to the BUM4 cover disk, no workbench interface this time, I
+figure Blitz2 programmers are up to using the CLI!
+
+Anyway, I've tried to put a README in each directory.
+
+This root directory contains:
+
+New Blitz2 v1.6 including Blitz2 Ted and Deflibs all should be copied
+to your Blitz2: volume as usual.
+
+The blitzlibs.lha is only for those developing their own libraries, also
+for these advanced users is the libsdev drawer that has some good source
+code. Oh, anyone with Opal or Retina graphics boards will want to have
+a look in there too.
+
+The quikasm and insectoids archives have been included as they both have
+had to been changed with the new version of Blitz2.
+
+Then theres SKIDMARKS, sorry no source code as yet, still tidying it up,
+we'll try and include it in the next issue.
+
+Oh, to use LHA, Stefan Boberg's choice archive standard do this:
+
+lha e archivename dirctory/  (don't forget the / after the directory name)
+
+I find it best to:
+
+ lha e archivename ram:
+
+Then copy the files from ram, this way you know what's going where.
+
+Hey Blitz Users, we need some contributions for next month so get onto it!
+
+
+Hmm, better add a bit more description:
+
+  README
+  blitz2.lha    ;blitz2 ted & deflibs (need to go in your Blitz2: volume)
+  examples.lha  ;lots of examples
+  includes.lha  ;system includes for accessing system libraries
+  insect.lha    ;new insectoids2 files (to work with new palette object)
+  quikasm.lha   ;new source to work with v1.6
+  skidmarks.lha ;new pd game to show your mates (its in Blitz2)
+  blitzlibs.lha ;for advanced library development
+  lha           ;the program you need to use to unarchive the above
+
+Hope I haven't stuffed up too many things.
+
+Simon

@@ -1,0 +1,290 @@
+WBStartup:NoCli
+
+
+;* * * * * * * * * * * * * * * * * * * * * * * *
+;*                                             *
+;*      Projektion eines Hauses mit Fahne      *
+;*                                             *
+;*---------------------------------------------*
+;*  Demo von: Michael Paulwitz / Berlin        *
+;*            im Februar 1994 (PD)             *
+;*---------------------------------------------*
+;*  Verwendung von:                            *
+;*                                             *
+;* Linke Maustaste: Neuer x/y Mittelpunkt      *
+;* Rechte Maustaste: Programmende              *
+;* Joystick oben: Drehung x Achse nach oben    *
+;* Joystick unten: Drehung x Achse nach unten  *
+;* Joystick rechts: Drehung y Achse nach rechts*
+;* Joystick links: Drehung y Achse nach links  *
+;* ---> Joystick mit Knopf gedrckt:           *
+;* Joystick oben: Vergroessern                 *
+;* Joystick unten: Verkleinern                 *
+;* Joystick rechts: Drehung x/y Achse          *
+;* Joystick links: Drehung x/y Achse           *
+;*                                             *
+;* fuellen = 1 gefllt: = 0 Drahtgitter        *
+;*                                             *
+;* * * * * * * * * * * * * * * * * * * * * * * *
+
+
+; Groesse und Startpunkt
+ja = 1
+v1 = 160
+v2 = 123
+fuellen = 1 ; Drahtgitter mit 0
+
+
+;Start-Rotationswinkel der Projektionsebene (Grad):
+ag = 10            ;Drehung um x-Achse
+bg = -10           ;Drehung um y-Achse
+
+a = Pi * ag/180    ;Umrechnung nach RAD
+b = Pi * bg/180
+
+;Drehinkrementwert (Grad):
+dig = 5
+
+di = Pi * dig/180  ;Umrechnung nach RAD
+
+NEWTYPE .duo
+    x0.w
+    y0.w
+End NEWTYPE
+
+maxflaechen = 10 ; Maximal 10 Kanten
+
+Dim ort.duo(maxflaechen) ; Definition fr Polyf
+
+; Einen neuen Bildschirm mit Fenster ffnen:
+
+Screen 0,4
+ScreensBitMap 0,0
+
+
+;Objekt-Daten in DIM-Arrays einlesen:
+;xr(), yr(), zr()  - Koordinaten der Raumpunkte
+;ls(), le()        - Linienverbindungen
+;farbl()           - Farben der Linien
+;fla(,)            - Flaechenverbindungen
+;farbf()           - Farbe der Flaechen
+
+
+; Punktdaten einlesen:
+Read ap.w
+Dim xr.w(ap),yr.w(ap),zr.w(ap)
+Dim xe.w(ap),ye.w(ap)
+
+For i=0 To ap-1
+  Read xr(i),yr(i),zr(i)
+Next i
+
+; Liniendefinition einlesen:
+
+Read al.w
+Dim ls.w(al),le.w(al),farbl.w(al)
+
+For i=0 To al-1
+  Read farbl(i),ls(i),le(i)
+Next i
+
+;Flchendefinitionen einlesen:
+
+Restore _Flaechen    ; Sicherheitshalber zurcksetzen
+Read anz.w          ; Anzahl Farben
+
+Dim af.w(anz),farbf.w(anz),fla.w(anz,maxflaechen)
+
+For j=0 To anz-1
+  Read af(j)
+  Read farbf(j)
+  For i=0 To af(j)-1
+    Read fla(j,i)
+  Next i
+Next j
+
+; Hauptschleife:
+._Haupt
+ende=0
+While ende<>1
+
+  Gosub _Projektion       ;Alle Punkte neu berechnen
+
+  Cls
+
+  ;Koordinatenachsen einzeichnen:
+  For i=0 To 2
+    Line xe(ls(i)),ye(ls(i)),xe(le(i)),ye(le(i)),farbl(i)
+  Next i
+
+  ;Linien ausgeben (Linien zeichnen falls vorhanden):
+  For i=3 To al-1
+    Line xe(ls(i)),ye(ls(i)),xe(le(i)),ye(le(i)),farbl(i)
+  Next i
+
+  ;Flaechen zeichnen (Objekt zeichen falls vorhanden)
+  For j = 0 To anz-1
+    For i = 0 To af(j)-1
+      ort(i)\x0=xe(fla(j,i)),ye(fla(j,i))
+    Next i
+    If fuellen
+      Polyf af(j),ort(0),farbf(j),-1      ;(...-1 = 3D-Effekt)
+    Else
+      Poly af(j),ort(0),farbf(j)
+    End If
+  Next j
+
+    flag = 0
+    While flag <> -1
+    If Joyb(0) = 1
+      v1=SMouseX
+      v2=SMouseY
+      flag = -1
+    End If
+    If Joyb (1) = 0
+      If Joyx(1) = 1
+       b=b+di      ;y-Achsendrehwinkel erhhen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+      If Joyx(1) = -1
+       b=b-di      ;y-Achsendrehwinkel erniedrigen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+      If Joyy(1) = 1
+       a=a+di      ;x-Achsendrehwinkel erhhen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+      If Joyy(1) = -1
+       a=a-di      ;x-Achsendrehwinkel erniedrigen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+    End If
+    If Joyb (1) = 1
+      If Joyy(1) = 1
+       ja = ja+.1    ;Vergroessern um .1
+       flag = -1     ;Neuzeichnen
+      End If
+      If Joyy(1) = -1
+       ja = ja - .1  ;Verkleinern
+       flag = -1     ;Neuzeichnen
+      End If
+      If Joyx(1) = 1
+       b=b+di      ;y-Achsendrehwinkel erhhen
+       a=a-di      ;x-Achsendrehwinkel erhhen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+      If Joyx(1) = -1
+       b=b-di      ;y-Achsendrehwinkel erniedrigen
+       a=a+di      ;x-Achsendrehwinkel erniedrigen
+       flag = -1   ;Flag fr Neuzeichnen
+      End If
+    End If
+    If Joyb(0) = 2
+      flag = -1
+      ende = 1
+    End If
+    Wend
+Wend
+
+CloseScreen 0
+End
+
+
+
+
+;Projektion aller Raum-Koordinaten in die Ebene:
+
+._Projektion
+
+  ;Konstanten fr die Projektion berechnen:
+  sina=Sin(a)
+  cosa=Cos(a)
+  sinb=Sin(b)
+  cosb=Cos(b)
+
+  For i=0 To ap-1
+
+    Qx = xr(i)
+    Qy = yr(i)
+    Qz = -zr(i)   ;ins Linkssystem wandeln
+
+    xe(i) = v1 + ja*(Qx*cosb + Qz*sinb)
+    ye(i) = v2 - ja*(Qx*sina*sinb + Qy*cosa - Qz*sina*cosb)
+
+  Next i
+Return
+
+
+;Objektdaten:
+;************
+._Daten
+;3-D-Punktkoordinaten:
+
+;Anzahl der Punkte:
+Data.w 47
+
+;Koordinatenachsen:
+Data.w -10,  0,  0,   80, 0,  0
+Data.w   0,-10,  0,    0,90,  0
+Data.w   0,  0,-10,    0, 0, 180
+
+._Punkte
+;Objektpunkte:
+;(Punkt1) x,y,z, (Punkt2) x,y,z, (Punkt3) x,y,z
+Data.w  5,10, 5,   5,45, 5,  15,65, 5  ;  Haus
+Data.w 25,45, 5,  25,10, 5,   5,10,55
+Data.w  5,45,55,  15,65,55,  25,45,55
+Data.w 25,10,55,  13,10, 5,  13,20, 5
+Data.w 17,20, 5,  17,10, 5,   7,33, 5
+Data.w  7,38, 5,  12,38, 5,  12,33, 5
+Data.w 18,33, 5,  18,38, 5,  23,38, 5
+Data.w 23,33, 5,  25,33,12,  25,38,12
+Data.w 25,38,23,  25,33,23,  25,33,32
+Data.w 25,38,32,  25,38,43,  25,33,43
+
+Data.w 40,10,5 ,  40,21,5 ,  40,24,5   ; Fahne
+Data.w 40,27,5 ,  40,30,5 ,  50,30,5
+Data.w 50,27,5,   50,24,5 ,  50,21,5
+Data.w 39,10,5,   39,30,5
+
+
+;Linienverbindungen:
+._Linien:
+
+Data.w 3  ;  Anzahl der Linien
+
+;Koordinatenachsen:
+;Farbe,Punk1,Punk2,  Farbe....
+Data.w  2, 0,1,   2, 2,3,  2, 4,5
+
+;Objektlinien:
+;Farbe,Punkt1,Punkt2,  Farbe....
+;z.B. Data.w 2,36,37  Punkt 36,37 wird mit Farbe 2 verbunden
+
+; Flaechen:
+._Flaechen:
+
+Data.w 16 ; Anzahl der Flchen
+
+;Punktanzahl,Farbe,   Punk1,Punk2.....
+Data.w 5,3,   6,7,8,9,10        ; Vorderteil
+Data.w 5,3,   15,14,13,12,11    ; Hinterteil
+Data.w 4,6,   6,11,12,7         ; Vorderseite
+Data.w 4,6,   10,9,14,15        ; Hinterseite
+Data.w 4,8,   9,8,13,14         ; Vorderdach
+Data.w 4,8,   7,12,13,8         ; Hinterdach
+Data.w 4,1,   10,15,11,6        ; Boden
+Data.w 4,1,   16,17,18,19       ; Tr
+Data.w 4,4,   20,21,22,23       ; Fenster 1
+Data.w 4,4,   24,25,26,27       ; Fenster 2
+Data.w 4,4,   28,29,30,31       ; Fenster 3
+Data.w 4,4,   32,33,34,35       ; Fenster 4
+
+Data.w 4,1,    37,38,43,44      ; Fahne unten
+Data.w 4,9,    38,39,42,43      ; Fahne mitte
+Data.w 4,11,   39,40,41,42      ; Fahne oben
+Data.w 4,2,    40,36,45,46      ; Fahnen Stange
+
+
+
+

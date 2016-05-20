@@ -1,0 +1,68 @@
+Blitz2 v1.80
+------------
+
+
+Ted
+---
+
+Yipeee, Ted now supports AGA screen modes! It should open a screen
+the same frequency as WorkBench now.
+
+Also, a new Debugger cludge is in the examples drawer that will
+re-rout debugger to a screen instead of the sprite display which
+is not much use to the few "power" users out there.
+
+
+Library Fixes
+-------------
+String gadgets now give a gadgetup event when deselected, this means
+that the user does not have to hit return after altering a string
+gadget for the program to register the change.
+
+Strings now have null termination in string memory. This means that
+passing of multiple string parameters etc. works a lot better.
+
+Debugger might start working on 040 machines, a flush cache was
+missing in the evaluate function making it unusable. It's actually
+quite useful being able to find out what variables are equal to
+etc. There is also a cludge for
+
+ASLPathRequest$ Title$,Pathname$ [,x,y,w,h] added to the ASL library
+thanks to Andre Bergman, he's also changed "No more writes to a
+ReadFile", ILBMInfo returns now a value(True or False), no need
+for debuger, let the user check it out... WindowTags added, works
+like ScreenTags, syntax:
+
+WindowTags Window#,Flags,Title$ [,&TagList] or [[,Tag,Data]...]
+
+GadTools and Display libraries have had many revisions so hopefully
+they are ready for full use now.
+
+
+Compiler History
+----------------
+
+Taken from the top of the Blitz2.s source code.
+
+;
+;      Modifications
+;
+;V98 - change date on startup requester
+;V99 - clear 'inerr' flag at start of compile
+;V100 - max object size fixed to over 128
+;     - pop next changed to pop for
+;V110 - blitz2:deflibs - blitz2:blitzopts#?
+;V120 - .info ignored on libs and opts
+;V130 - square brackets bug fixed
+;V140 - .info lock fixed, & exec Flush cache used
+;V150 - optimizer removed! debugger added -
+;       directtrap added - runtime errors majorly
+;       overhauled! cont removed - ignore installed
+;
+;V160 - vbr handled
+;v170 - runerrson & runerrsoff added, label runerrs removed
+;v180 - separate strings out with clr.b (a3)+ in 'sbtolong'
+;       fixed \a="Hello","goodbye"
+;       removed 'library not found' error for maximum not found
+;       flushc installed in direct mode (directtrap)
+;
