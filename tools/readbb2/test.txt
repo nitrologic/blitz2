@@ -5,7 +5,7 @@
 snd.w=On:med.w=On
 
 pg$=""
-80c4
+##[$80C3]
 #bars=Off
 #errs=Off
 #collisions=On

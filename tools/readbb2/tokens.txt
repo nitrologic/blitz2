@@ -3,7 +3,9 @@ tok14="Select,Case,Default,AsmExit,XInclude,Include,Jimi,Shared,For,Next,To,Step
 tok28="CNIF,CSIF,CELSE,CEND,CERR,Then,Else"
 tok35="Even4,Even8,Dc,Ds,Event,Dcb,GetReg,IncBin"
 tok43="Free,Use,Stop,Cont,SizeOf,SetInt,ClrInt,MaxLen,DEFTYPE,BLITZ,AMIGA,QAMIGA,VWait,ALibJsr,TokeJsr,BLibJsr,AbortVB"
-tok192="EndIf,Wend,80c3,80c4,80c5,On,Off"
+tok192="EndIf,Wend"
+;,80c3,80c4,80c5,
+tok197="On,Off"
 
 wbstart=$bf00
 ;
