@@ -15,10 +15,17 @@ The contents of the BUM disks are here.
 
 Ascii source and pdf versions of magazines to be added shortly.
 
+Fans of Blitz Research can check out the founder's CV here:
+
+bums/bum7/disk1/readme/aboutmark
+
 ## History
 
 Source was rescued from Simon's A4000 hard disk archives from 1994/1995 period.
 
+A tokeniser based on the blitz2 source files has been coded in BlitzMax and is located in the tools folder.
+
 Ths readbb2 tool was used to generate the ascii translations in the scan folder.
 
-A tokeniser based on these files written in BlitzMax may be found in the tools folder.
+Improved attribution to respective authors is planned and no rights are presumed or given.
+
