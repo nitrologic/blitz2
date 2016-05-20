@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Cls.bb
++; ; simple cls example; Screen 0,3					 ;open an intuition screen ScreensBitMap 0,0				;use it's bitmapCls 2							;fill bitmap with colour 2MouseWait 

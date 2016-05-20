@@ -1,0 +1,25 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/old/makepalette.bb
++casestrcomp 0,"sega.palette"
+allocst 0,4
+ScreensBitMap 0,0
+BitMapOutput 0:NPrint ""
+
+For i=0 To 15:Boxf i*8,0,i*8+7,7,i:Next
+
+Use SetCycle 0
+
+If ReadMem (0,"palette.dat")
+	For i=0 To 15
+		r.w=Blue(i)/2
+		g.w=Palette(i)/2
+		b.w=PalRGB(i)/2
+		col.w=(PalRGB(i)*256+Palette(i)*16+Blue(i)) AND $eee
+		Exists 0,&col,2
+		NPrint Hex$(col)
+	Next
+	CloseFile 0
+EndIf
+
+MouseWait
+
+End

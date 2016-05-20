@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/sincosreader.bb2
++
+If WriteMem(0,"sincos.table")
+	Fields 0,c,s
+	For i=0 To 360
+		Get 0,i
+		c(i)=c*80
+		s(i)=s*80
+	Next i
+	CloseFile 0
+End If

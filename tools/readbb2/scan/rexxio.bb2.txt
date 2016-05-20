@@ -1,0 +1,71 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/rexx/rexxio.bb2
++;
+; $VER: rexxio.bb2 40.0 (03.03.94)
+;
+
+XInclude"rexx/storage.bb2"
+
+#RXBUFFSZ=204;/* buffer length	*/
+
+;/*
+; * The IoBuff is a resource node used to maintain the File List.	Nodes
+; * are allocated and linked into the list whenever a file is opened.
+; */
+NEWTYPE.IoBuff
+iobNode.RexxRsrc;/* structure for files/strings */
+*iobRpt.b ;/* read/write pointer	*/
+iobRct.l ;/* character count	*/
+iobDFH.l ;/* DOS filehandle	*/
+*iobLock.b ;/* DOS lock	 */
+iobBct.l ;/* buffer length	*/
+iobArea.b[#RXBUFFSZ] ;/* buffer area	 */
+End NEWTYPE
+;/* size: 256 bytes	*/
+
+;/* Access mode definitions			*/
+#RXIO_EXIST=-1;/* an external filehandle */
+#RXIO_STRF=0;/* a "string file"	*/
+#RXIO_READ=1;/* read-only access	*/
+#RXIO_WRITE=2;/* write mode	 */
+#RXIO_APPEND=3;/* append mode (existing file) */
+
+;/*
+; * Offset anchors for SeekF()
+; */
+#RXIO_BEGIN=-1;/* relative to start	*/
+#RXIO_CURR=0;/* relative to current position */
+#RXIO_END=1;/* relative to end	*/
+
+;/* The Library List contains just plain resource nodes.	*/
+
+Macro LLOFFSET:(`1\rr_Arg1):End Macro;/* "Query" offset	*/
+Macro LLVERS:(`1\rr_Arg2):End Macro;/* library version	*/
+
+;/*
+; * The RexxClipNode structure is used to maintain the Clip List.	The value
+; * string is stored as an argstring in the rr_Arg1 field.
+; */
+Macro CLVALUE`1:(*`1\rr_Arg1):End Macro
+
+;/*
+; * A message port structure, maintained as a resource node.	The ReplyList
+; * holds packets that have been received but haven't been replied.
+; */
+NEWTYPE.RexxMsgPort
+rmp_Node.RexxRsrc;/* linkage node	 */
+rmp_Port.MsgPort;/* the message port	*/
+rmp_ReplyList.List;/* messages awaiting reply */
+End NEWTYPE
+
+;/*
+; * DOS Device types
+; */
+#DT_DEV=0;/* a device	 */
+#DT_DIR=1;/* an ASSIGNed directory */
+#DT_VOL=2;/* a volume	 */
+
+;/*
+; * Private DOS packet types
+; */
+#ACTION_STACK=2002;/* stack a line	 */
+#ACTION_QUEUE=2003;/* queue a line	 */

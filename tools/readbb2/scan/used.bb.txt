@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/USED.bb
++; ; used example; BitMap 0,320,200,1BitMap 1,320,200,1Use BitMap 0NPrint Used BitMap ;used returns currently used object number MouseWait See also:Use

@@ -1,0 +1,34 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/disolve.bb2
++;
+;disolve table creator...
+;
+lmaxlen 0,320,256,4
+
+Dim x(1023),y(1023)
+
+For k=0 To 1023
+again:x=Int(Rnd(32)):y=Int(Rnd(32))
+For j=0 To k-1
+If x=x(j) AND y=y(j) Then ##[$80BE] For:Goto again
+Next
+x(k)=x:y(k)=y
+Next
+
+LoadBitMap 0,"background1",0
+
+BLITZ
+
+Slice 0,44,320,256,$fff0,4,8,32,320,320
+Use SetCycle 0:Show 0
+
+For k=0 To 1023
+If k&15=0	Then VWait
+h=x(k):v=y(k)
+For x=0 To 319 Step 32
+For y=0 To 255 Step 32
+Point x+h,y+v,0
+Next y,x
+MOVE #$f00,$dff180
+Next
+
+MouseWait

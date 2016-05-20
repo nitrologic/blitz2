@@ -1,0 +1,183 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/maketri.bb
++lmaxlen 1,320,256,3
+
+lmaxlen 0,320,256,3
+
+BLITZ
+InitCopList 0,3
+CreateDisplay 0
+
+
+Dim fred.w(10)
+
+
+
+NEWTYPE .vec
+	x.w:y.w:z.w
+End NEWTYPE
+
+NEWTYPE.xy
+	y.w:x.w:c1.w:c2.w
+End NEWTYPE
+
+
+DEFTYPE.l base
+DEFTYPE.vec *dest,*dest2,*dest3,*dest4
+
+
+InitBank 0,16384,0 ;!
+InitBank 1,16384,0 ;!
+base.l=Bank(0)
+map.l=Bank(1)
+
+
+
+sx1=-20:sy1=-60
+sx2=-30:sy2=60
+sx3=50:sy3=20
+
+
+Mouse On
+
+Gosub Init
+	Gosub Make
+
+##[$80BB]
+	VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db:BlockScroll
+	BitMapOutput db
+;	sx3=MouseX:sy3=MouseY
+
+
+	Gosub Rot
+	Gosub Draw
+
+##[$80BC] Joyb(0)<>0
+End
+
+Macro calc
+;	`1=base+((`2)*17+`3)*SizeOf.vec
+	`1=base+(`2+ ((`3)*((`3)+1)) ASR 1)*SizeOf.vec
+End Macro
+
+Macro mpc
+;	`1=map+((`2)*17+`3)*SizeOf.xy
+	`1=map+(`2+ ((`3)*((`3)+1)) ASR 1)*SizeOf.xy
+End Macro
+
+
+.Init
+	For y=0 To 16
+		For x=0 To y
+
+			!calc{*dest,x,y}
+			*dest\x=x*5+10
+			*dest\y=y*5+10
+
+
+			!mpc{*res.xy,x,y}
+			col.q=(##[$8481](x,2*y)+1)*3+1:temp.l=col&255
+			*res\c1=temp ASL 8 + temp
+			col.q=(##[$8481](x,2*y+1)+1)*3+1:temp.l=col&255
+			*res\c2=temp ASL 8 + temp
+
+		Next
+	Next
+Return
+
+
+.Make
+	!calc{*dest,0,0}
+	*dest\x=sx1,sy1
+	!calc{*dest,0,16}
+	*dest\x=sx2,sy2
+	!calc{*dest,16,16}
+	*dest\x=sx3,sy3
+
+
+	scal=16:hscal=scal ASR 1
+	For cnt.w=0 To 3
+
+		For y=hscal To 15 Step scal
+			For x=hscal To y Step scal
+
+
+
+				!calc{*dest2,x-hscal,y-hscal}
+				!calc{*dest3,x-hscal,y+hscal}
+				!calc{*dest4,x+hscal,y+hscal}
+
+				x2=*dest2\x:y2=*dest2\y
+				x3=*dest3\x:y3=*dest3\y
+				x4=*dest4\x:y4=*dest4\y
+
+				!calc{*dest,x,y}
+				!calc{*dest2,x-hscal,y}
+				!calc{*dest3,x,y+hscal}
+
+
+				*dest\x =(x2+x4) ASR 1
+				*dest\y =(y2+y4) ASR 1
+				*dest2\x=(x2+x3) ASR 1
+				*dest2\y=(y2+y3) ASR 1
+				*dest3\x=(x3+x4) ASR 1
+				*dest3\y=(y3+y4) ASR 1
+
+			Next
+		Next
+		scal ASR 1:hscal ASR 1
+	Next
+Return
+
+
+
+.Rot
+	ang=ang+0.01
+	qs=HSin(ang)
+	qc=HCos(ang)
+	For y=0 To 16
+		For x=0 To y
+			!calc{*dest,x,y}
+			!mpc{*mp.xy,x,y}
+
+			*mp\x=*dest\x*qc-*dest\y*qs +160
+			*mp\y=*dest\x*qs+*dest\y*qc +100
+;			Plot *mp\x,*mp\y,1
+		Next
+	Next
+
+Return
+
+
+.Draw
+
+	For y=0 To 15
+		!mpc{*mp.xy,0,y}
+		*mpn.xy=*mp+SizeOf.xy*(y+1)
+		*dt2.xy=*mpn+SizeOf.xy
+
+
+		fred(0)=*mp\x:fred(1)=*mp\y
+		fred(2)=*mpn\x:fred(3)=*mpn\y
+		fred(4)=*dt2\x:fred(5)=*dt2\y
+		Polyf 3,&fred(0),*mp\c2
+
+
+		For x=0 To y-1
+			*mp+SizeOf.xy
+			fred(2)=*mp\x:fred(3)=*mp\y
+			Polyf 3,&fred(0),*mp\c1
+			*mpn=*dt2:*dt2+SizeOf.xy
+
+			fred(0)=*mp\x:fred(1)=*mp\y
+			fred(2)=*mpn\x:fred(3)=*mpn\y
+			fred(4)=*dt2\x:fred(5)=*dt2\y
+			Polyf 3,&fred(0),*mp\c2
+
+
+
+
+		Next
+	Next
+
+
+Return

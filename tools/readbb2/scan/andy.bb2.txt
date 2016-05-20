@@ -1,0 +1,10 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/andy.bb2
++
+DEFTYPE.l
+
+s=##[$FE15]("sw")
+
+s LSL 2+4
+
+GetReg a0,s:JSR (a0)
+

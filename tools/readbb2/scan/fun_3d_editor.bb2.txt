@@ -1,0 +1,624 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_3D_Editor.bb2
++##[$80CC]
+##[$80C3]
+
+;INCDIR	""
+Include "FUN_Matrix.bb2"
+
+MaxLen pa$=192
+MaxLen fi$=192
+
+pa$="Example_Shapes"
+
+#PMAX=64
+#FMAX=64
+
+#M_RAW=0
+#M_SOLID=1
+#M_LIGHT=2
+#M_POINT=3
+#M_PLINE=4
+
+#V_PERS=1
+
+#FM_VIEW=0
+#FM_EVER=1
+#FM_SAME=2
+
+NEWTYPE.Facet_Type
+	Points.w[4]
+	FColour.w
+	FCMask.w
+	FMode.w
+	FMSame.w
+	Drawn.w
+End NEWTYPE
+
+NEWTYPE.Poly_Points_Type
+	x.w
+	y.w
+End NEWTYPE
+
+DEFTYPE.b quit : quit=False
+DEFTYPE.w pcount : pcount=-1
+DEFTYPE.w fcount : fcount=-1
+DEFTYPE.w cpoint : cpoint=-1
+DEFTYPE.w cfacet : cfacet=-1
+DEFTYPE.w dxrot : dxrot=0
+DEFTYPE.w dyrot : dyrot=0
+DEFTYPE.w dzrot : dzrot=0
+DEFTYPE.b dmode : dmode=0
+DEFTYPE.b vmode : vmode=0
+DEFTYPE.b highl : highl=True
+DEFTYPE.w dscale: dscale=100
+
+DEFTYPE.b d_axis : d_axis=True
+
+Dim point_list.Vector_Type(#PMAX)
+Dim output_list.Vector_Type(#PMAX)
+Dim facet_list.Facet_Type(#FMAX)
+
+Statement update_display_window{}
+	Shared d_axis,pcount,fcount,dxrot,dyrot,dzrot,dmode,vmode,cpoint,cfacet,highl,dscale
+	Shared point_list(),output_list(),facet_list()
+
+	DEFTYPE.Matrix_Type Final
+	DEFTYPE.Matrix_Type Temp1
+	DEFTYPE.Matrix_Type Temp2
+	DEFTYPE.Matrix_Type Temp3
+
+	DEFTYPE.Vector_Type Normal
+	DEFTYPE.Vector_Type VTemp1
+	DEFTYPE.Vector_Type VTemp2
+
+	Dim polygon.Poly_Points_Type(12)
+	Dim output_list2.Vector_Type(#PMAX)
+
+	Use lmaxlen 0
+	BlockScroll 0
+
+	sby=dscale/100.0
+		;Build matrix
+		 build_rotation_matrix{#ABOUT_Y,&Temp2,dyrot}
+		build_rotation_matrix{#ABOUT_X,&Temp1,dxrot}
+		concatenate_matrix{&Temp1,&Temp2,&Temp3}
+		build_rotation_matrix{#ABOUT_Z,&Temp1,dzrot}
+		concatenate_matrix{&Temp1,&Temp3,&Temp2}
+		build_scale_matrix{&Temp1,sby,sby,sby}
+		concatenate_matrix{&Temp1,&Temp2,&Temp3}
+
+		If vmode=#V_PERS
+			For points=0 To pcount
+				apply_matrix{&Temp3,&point_list(points),&output_list2(points)}
+				output_list2(points)\x=output_list2(points)\x/((output_list2(points)\z+1100)*0.0009)
+				output_list2(points)\y=output_list2(points)\y/((output_list2(points)\z+1100)*0.0009)
+			Next points
+			build_translation_matrix{&Final,94,60,0}
+			For points=0 To pcount
+				apply_matrix{&Final,&output_list2(points),&output_list(points)}
+			Next points
+		Else
+			build_translation_matrix{&Temp1,94,60,0}
+			concatenate_matrix{&Temp1,&Temp3,&Final}
+			For points=0 To pcount
+				apply_matrix{&Final,&point_list(points),&output_list(points)}
+			Next points
+			If d_axis
+				Use lmaxlen 0
+				VTemp1\x=0,0,0,1
+				apply_matrix{&Final,&VTemp1,&VTemp2}
+				ax.w=VTemp2\x
+				ay.w=VTemp2\y
+				VTemp1\x=30,0,0,1 : apply_matrix{&Final,&VTemp1,&VTemp2}
+				x.Poly_Points_Type\x=VTemp2\x-4,VTemp2\y-4
+				VTemp1\x=0,-30,0,1 : apply_matrix{&Final,&VTemp1,&VTemp2}
+				y.Poly_Points_Type\x=VTemp2\x-4,VTemp2\y-4
+				VTemp1\x=0,0,30,1 : apply_matrix{&Final,&VTemp1,&VTemp2}
+				z.Poly_Points_Type\x=VTemp2\x-4,VTemp2\y-4
+				BitMapOutput 1
+				Locate 0,0 : Print "x"
+				Scroll 0,0,8,8,x\x,x\y,1
+				Locate 0,0 : Print "y"
+				Scroll 0,0,8,8,y\x,y\y,1
+				Locate 0,0 : Print "z"
+				Scroll 0,0,8,8,z\x,z\y,1
+				Line ax,ay,x\x+4,x\y+4,3
+				Line ax,ay,y\x+4,y\y+4,3
+				Line ax,ay,z\x+4,z\y+4,3
+			EndIf
+		EndIf
+
+	dsel.b=False
+	If pcount>=0
+		If (fcount=-1) OR (dmode=#M_POINT)
+			For points=0 To pcount
+				Point output_list(points)\x,output_list(points)\y,2
+			Next points
+		Else
+			For sides=0 To fcount
+				Select facet_list(sides)\FMode
+					Case #FM_VIEW
+						subtract_vectors{&output_list(facet_list(sides)\Points[1]),&output_list(facet_list(sides)\Points[0]),&VTemp1}
+						subtract_vectors{&output_list(facet_list(sides)\Points[2]),&output_list(facet_list(sides)\Points[0]),&VTemp2}
+						cross_product{&VTemp2,&VTemp1,&Normal}
+						overide.b=False
+					Case #FM_EVER
+						overide.b=True
+					Case #FM_SAME
+						If facet_list(facet_list(sides)\FMSame)\Drawn=True Then overide=True Else overide=False
+				End Select
+				If (Normal\z>0) OR (dmode=#M_RAW) OR (dmode=#M_PLINE) OR (overide=True)
+					If dmode=#M_LIGHT
+						VTemp1\x=1,0.25,0.5,1
+						e.q=vector_angle{&Normal,&VTemp1}*8+7
+						If e<1 Then e=1
+						If e>15 Then e=15
+						If sides=cfacet Then dsel=True
+						c.w=facet_list(sides)\FColour
+					Else
+						If sides=cfacet Then dsel=True
+						c=1
+					EndIf
+					pnum.b=4
+					If facet_list(sides)\Points[3]=-1 Then pnum=3
+					For points=0 To pnum-1
+						polygon(points)\x=output_list(facet_list(sides)\Points[points])\x,output_list(facet_list(sides)\Points[points])\y
+					Next points
+					If dmode=#M_LIGHT
+						Polyf pnum,&polygon(0),c
+					Else
+						Poly	pnum,&polygon(0),c
+					EndIf
+					facet_list(sides)\Drawn=True
+				Else
+					facet_list(sides)\Drawn=False
+				EndIf
+			Next sides
+			If dsel AND highl
+				pnum=4
+				sides=cfacet
+				If facet_list(cfacet)\Points[3]=-1 Then pnum=3
+				For points=0 To pnum-1
+					polygon(points)\x=output_list(facet_list(sides)\Points[points])\x,output_list(facet_list(sides)\Points[points])\y
+				Next points
+				Poly	pnum,&polygon(0),2
+			EndIf
+		EndIf
+		If dmode=#M_PLINE
+			For points=0 To pcount
+				Point output_list(points)\x,output_list(points)\y,2
+			Next points
+		EndIf
+		Boxf output_list(cpoint)\x-1,output_list(cpoint)\y-1,output_list(cpoint)\x+1,output_list(cpoint)\y+1,2
+	EndIf
+	BitMaptoWindow 0,1,0,0,5,14,190,123
+
+End Statement
+
+Statement update_design_window{}
+Shared	cpoint,cfacet,pcount,fcount
+Shared point_list(),facet_list()
+
+Use localstat 0
+WindowOutput 0
+WLocate 50,29.5
+If cpoint>-1
+	Print "Point:",cpoint,"/",pcount,"	 "
+	GTSetInteger 0,0,point_list(cpoint)\x
+	GTSetInteger 0,1,point_list(cpoint)\y
+	GTSetInteger 0,2,point_list(cpoint)\z
+Else
+	Print "Point:					"
+EndIf
+WLocate 210,29.5
+If cfacet>-1
+	Print "Facet:",cfacet,"/",fcount,"	 "
+	GTSetInteger 0,10,facet_list(cfacet)\Points[0]
+	GTSetInteger 0,11,facet_list(cfacet)\Points[1]
+	GTSetInteger 0,12,facet_list(cfacet)\Points[2]
+	GTSetInteger 0,13,facet_list(cfacet)\Points[3]
+	GTSetInteger 0,14,facet_list(cfacet)\FColour
+	GTSetInteger 0,15,facet_list(cfacet)\FCMask
+	GTSetAttrs	0,24,$80080000+15,facet_list(cfacet)\FMode
+Else
+	Print "Facet:					"
+EndIf
+End Statement
+
+Statement set_up_gadgets{}
+
+	GTInteger	0,0,8,42,58,12,"	x",$2,0
+	GTInteger	0,1,8,56,58,12,"	y",$2,0
+	GTInteger	0,2,8,70,58,12,"	z",$2,0
+	GTButton	 0,3,8,86,80,12,"Add Point",0
+	GTButton	 0,4,8,100,80,12,"Del Point",0
+	GTButton	 0,5,8,118,12,10,"<",0
+	GTButton	 0,6,136,118,12,10,">",0
+	GTButton	 0,7,68,42,14,12,"<",$80
+	GTButton	 0,8,103,42,14,12,">",$80
+
+	GTButton	 0,30,68,56,14,12,"<",$80
+	GTButton	 0,31,103,56,14,12,">",$80
+	GTButton	 0,32,68,70,14,12,"<",$80
+	GTButton	 0,33,103,70,14,12,">",$80
+
+
+	GTInteger	0,10,164,38,42,12,"p1",$2,0
+	GTInteger	0,11,238,38,42,12,"p2",$2,0
+	GTInteger	0,12,164,50,42,12,"p3",$2,0
+	GTInteger	0,13,238,50,42,12,"p4",$2,0
+	GTInteger	0,14,164,64,42,12,"Colour",$2,0
+	GTInteger	0,15,164,76,42,12,"RGB Mask",$2,0
+	GTButton	 0,16,164,104,36,12,"Add",0
+	GTButton	 0,17,268,104,36,12,"Del",0
+	GTButton	 0,18,164,118,12,10,"<",0
+	GTButton	 0,19,292,118,12,10,">",0
+	GTCycle		0,24,164,90,60,12," as",$2,"View|Ever|Same"
+	GTInteger	0,25,264,90,40,12,"",0,0
+	GTButton	 0,26,200,104,40,12,"Down",0
+	GTButton	 0,27,240,104,28,12,"Up",0
+
+	GTButton	 0,20,2,4,100,12,"Load Shape",0
+	GTButton	 0,21,210,4,100,12,"Save Shape",0
+	GTButton	 0,22,106,4,100,12,"New Shape",0
+
+	GTCheckBox 1,50,2,2,58,12,"Axis",$2|$100
+	GTCycle		1,51,2,26,70,12,"Mode",$2,"Raw|Solid|Color|Point|PLine"
+	GTCycle		1,52,2,38,70,12,"View",$2,"Orth|Persp"
+	GTCheckBox 1,53,2,14,70,12,"Hi Select",$2|$100
+
+	GTButton	 1,60,2,50,70,12,"Demo",0
+
+	GTSlider	 1,80,18,98,64,12,"X",$1|$800|$200,1,360
+	GTSlider	 1,81,18,110,64,12,"Y",$1|$800|$200,1,360
+	GTSlider	 1,82,18,122,64,12,"Z",$1|$800|$200,1,360
+	GTButton	 1,83,83,98,14,12,"<",$80
+	GTButton	 1,84,97,98,14,12,">",$80
+	GTButton	 1,85,83,110,14,12,"<",$80
+	GTButton	 1,86,97,110,14,12,">",$80
+	GTButton	 1,87,83,122,14,12,"<",$80
+	GTButton	 1,88,97,122,14,12,">",$80
+	GTSlider	 1,89,18,86,64,12,"S",$1|$800|$200,10,185,100
+	GTButton	 1,90,83,86,14,12,"<",$80
+	GTButton	 1,91,97,86,14,12,">",$80
+
+
+
+	GTButton	 2,100,22,10,50,14,"STOP",0
+
+End Statement
+
+Statement initialise_editor{}
+
+
+	freest 0
+	##[$FFB5]
+	set_up_gadgets{}
+
+	lmaxlen 1,10,10,1
+	lmaxlen 0,200,150,WBDepth
+
+	DefaultIDCMP $20|$40|$200
+
+	localstat 1,320,0,200,150,$2,"F3D - Display Window",0,1
+	localstat 2,520,0,120,150,$2,"F3D - Display Control",0,1
+	AttachGTList 1,2
+
+	localstat 0,0,0,320,150,$8|$2|$1000,"FUNdamental 3D Editor - Design Window",0,1
+
+	AttachGTList 0,0
+	GTBevelBox 0,6,35,150,110,0
+	GTBevelBox 0,162,35,150,110,0
+
+	update_display_window{}
+	update_design_window{}
+
+End Statement
+
+
+Statement save_file{fname.s}
+	Shared pcount,fcount
+	Shared facet_list(),point_list()
+
+	If ReadMem(0,fname)
+		FileOutput 0
+		NPrint pcount
+		NPrint fcount
+		For count.w=0 To pcount
+			NPrint point_list(count)\x
+			NPrint point_list(count)\y
+			NPrint point_list(count)\z
+		Next count
+		For count.w=0 To fcount
+			For count2.w=0 To 3
+				NPrint facet_list(count)\Points[count2]
+			Next count2
+			NPrint facet_list(count)\FColour
+			NPrint facet_list(count)\FCMask
+			NPrint facet_list(count)\FMode
+			NPrint facet_list(count)\FMSame
+
+		Next count
+		CloseFile 0
+	EndIf
+End Statement
+
+Statement load_file{fname.s}
+	Shared pcount,fcount,cpoint,cfacet
+	Shared point_list(),facet_list()
+
+	If WriteMem(0,fname)
+		FileInput 0
+		pcount=Edit(80)
+		fcount=Edit(80)
+		For count.w=0 To pcount
+			point_list(count)\x=Edit(80),Edit(80),Edit(80),1
+		Next count
+		For count.w=0 To fcount
+			For count2.w=0 To 3
+				facet_list(count)\Points[count2]=Edit(80)
+			Next count2
+			facet_list(count)\FColour=Edit(80),Edit(80),Edit(80),Edit(80)
+		Next count
+		CloseFile 0
+		cfacet=0
+		cpoint=0
+		update_display_window{}
+		update_design_window{}
+	EndIf
+End Statement
+
+Statement delete_facet{}
+	Shared facet_list(),fcount,cfacet
+
+	If fcount=cfacet
+		fcount-1 : cfacet-1
+	Else
+		For sides.b=cfacet To fcount-1
+			For points.b=0 To 3
+				facet_list(sides)\Points[points]=facet_list(sides+1)\Points[points]
+				facet_list(sides)\FColour=facet_list(sides+1)\FColour,facet_list(sides+1)\FCMask
+			Next points
+			facet_list(sides)\FColour=facet_list(sides+1)\FColour,facet_list(sides+1)\FCMask
+		Next sides
+		fcount-1
+	EndIf
+End Statement
+
+Statement delete_point{}
+	Shared cpoint,pcount,fcount
+	Shared facet_list(),point_list()
+
+	inf.b=0
+	For count.b=0 To fcount
+		For points.w=0 To 3
+			If facet_list(count)\Points[points]=cpoint Then inf+1
+		Next points
+	Next count
+
+	If inf>0
+		dummy.l=##[$A281](0,"F3D Request","This point is in "+Str$(inf)+Chr$(10)+"facets, delete point ?","OK|Cancel")
+		If dummy=0 Then Statement Return
+	EndIf
+
+	If cpoint=pcount
+		pcount-1 : cpoint-1
+	Else
+		For points=cpoint To pcount-1
+			point_list(points)\x=point_list(points+1)\x,point_list(points+1)\y,point_list(points+1)\z,1
+		Next points
+		pcount-1
+	EndIf
+End Statement
+
+Statement demo{}
+	Shared dxrot,dyrot,dzrot
+
+	ox.w=dxrot
+	oy.w=dyrot
+	oz.w=dzrot
+
+	localstat 3,(WBWidth-100)/2,(WBHeight-50)/2,100,50,$1000|$2,"F3D Demo",0,1
+	AttachGTList	2,3
+
+	##[$80BB]
+		dxrot+1 : If dxrot>359 Then dxrot=0
+		dyrot+1 : If dyrot>359 Then dyrot=0
+		dzrot+1 : If dzrot>359 Then dzrot=0
+		update_display_window{}
+		ev.l=Event
+	##[$80BC] (ev=$40) AND (GadgetHit=100)
+
+	Free localstat 3
+
+	dxrot=ox
+	dyrot=oy
+	dzrot=oz
+
+	update_display_window{}
+End Statement
+
+Statement gadget_hold{gh.l}
+	Shared cpoint,dxrot,dyrot,dzrot,dscale
+	Shared point_list()
+
+	##[$80BB]
+		VWait
+		ev.l=Event
+		If (ev<>$40) AND (cpoint<>-1)
+			Select gh
+				Case 7
+					point_list(cpoint)\x-1
+				Case 8
+					point_list(cpoint)\x+1
+				Case 30
+					point_list(cpoint)\y-1
+				Case 31
+					point_list(cpoint)\y+1
+				Case 32
+					point_list(cpoint)\z-1
+				Case 33
+					point_list(cpoint)\z+1
+				Case 83
+					dxrot-2 : If dxrot<0 Then dxrot=359
+					GTSetAttrs	1,80,$80080000+40,dxrot
+				Case 84
+					dxrot+2 : If dxrot>360 Then dxrot=0
+					GTSetAttrs	1,80,$80080000+40,dxrot
+				Case 85
+					dyrot-2 : If dyrot<0 Then dyrot=359
+					GTSetAttrs	1,81,$80080000+40,dyrot
+				Case 86
+					dyrot+2 : If dyrot>360 Then dyrot=0
+					GTSetAttrs	1,81,$80080000+40,dyrot
+				Case 87
+					dzrot-2 : If dzrot<0 Then dzrot=359
+					GTSetAttrs	1,82,$80080000+40,dzrot
+				Case 88
+					dzrot+2 : If dzrot>360 Then dzrot=0
+					GTSetAttrs	1,82,$80080000+40,dzrot
+				Case 90
+					dscale-1 : If dscale<10 Then dscale=10
+					GTSetAttrs	1,89,$80080000+40,dscale
+				Case 91
+					dscale+1 : If dscale>185 Then dscale=185
+					GTSetAttrs	1,89,$80080000+40,dscale
+
+			End Select
+		EndIf
+		update_display_window{}
+		update_design_window{}
+	##[$80BC] (ev=$40) OR (Joyb(0)=0)
+
+End Statement
+
+
+Statement gadget_press{gh.l}
+	Shared d_axis,dzrot,dyrot,dxrot,dmode,vmode,cpoint,cfacet,pcount,fcount,highl,dscale
+	Shared point_list(),facet_list()
+
+	ud.b=False
+	uc.b=False
+	DEFTYPE.Facet_Type TempFacet
+
+	Select gh
+		Case 0
+			If cpoint>-1 Then point_list(cpoint)\x=GTGetInteger(0,0) : ud=True
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,1),Peek.l(##[$80B8] localstat (0)),0)
+		Case 1
+			If cpoint>-1 Then point_list(cpoint)\y=GTGetInteger(0,1) : ud=True
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,2),Peek.l(##[$80B8] localstat (0)),0)
+		Case 2
+			If cpoint>-1 Then point_list(cpoint)\z=GTGetInteger(0,2) : ud=True
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,0),Peek.l(##[$80B8] localstat (0)),0)
+		Case 3
+			If pcount<#PMAX Then pcount+1 : cpoint=pcount : ud=True : uc=True : point_list(pcount)\x=0,0,0,1
+		Case 4
+			If pcount>-1 Then delete_point{} : ud=True : uc=True
+		Case 5
+			If cpoint>0 Then cpoint-1 : uc=True : ud=True
+		Case 6
+			If cpoint<pcount Then cpoint+1 : uc=True : ud=True
+		Case 10
+			If cfacet>-1 Then facet_list(cfacet)\Points[0]=GTGetInteger(0,10) : ud=True
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,11),Peek.l(##[$80B8] localstat (0)),0)
+		Case 11
+			If cfacet>-1 Then facet_list(cfacet)\Points[1]=GTGetInteger(0,11) : ud=True
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,12),Peek.l(##[$80B8] localstat (0)),0)
+		Case 12
+			If cfacet>-1 Then facet_list(cfacet)\Points[2]=GTGetInteger(0,12) : ud=True
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,13),Peek.l(##[$80B8] localstat (0)),0)
+		Case 13
+			If cfacet>-1 Then facet_list(cfacet)\Points[3]=GTGetInteger(0,13) : ud=True
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,14),Peek.l(##[$80B8] localstat (0)),0)
+		Case 14
+			If cfacet>-1 Then facet_list(cfacet)\FColour=GTGetInteger(0,14) : ud=True
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,15),Peek.l(##[$80B8] localstat (0)),0)
+		Case 15
+			If cfacet>-1 Then facet_list(cfacet)\FCMask=GTGetInteger(0,15)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,10),Peek.l(##[$80B8] localstat (0)),0)
+		Case 16
+			If fcount<#FMAX Then fcount+1 : cfacet=fcount : ud=True : uc=True
+		Case 17
+			If fcount>-1 Then delete_facet{} : ud=True : uc=True
+		Case 18
+			If cfacet>0 Then cfacet-1 : uc=True : ud=True
+		Case 19
+			If cfacet<fcount Then cfacet+1 : uc=True : ud=True
+		Case 22
+			dummy.l=##[$A281](0,"F3D Request","Delete Shape Info?","Yes|No")
+			If dummy=1 Then cpoint=0 : cfacet=0 : pcount=-1 : fcount=-1 : ud=True : uc=True
+		Case 24
+			If cfacet>-1 Then facet_list(cfacet)\FMode=EventCode : ud=True
+			If cfacet>-1 AND facet_list(cfacet)\FMode=#FM_SAME
+				facet_list(cfacet)\FMSame=GTGetInteger(0,25)
+			EndIf
+		Case 25
+			If cfacet>-1 Then facet_list(cfacet)\FMSame=GTGetInteger(0,25) : ud=True
+		Case 26
+;			If cfacet>0
+;				For p.b=0 To 3
+;					TempFacet\Points[p]=facet_list(cfacet)\Points[p]
+;				Next p
+;					TempFacet\FColour=facet_list(cfacet)\FColour,facet_list(cfacet)\FCMask,facet_list(cfacet)\FMode
+;					TempFacet\FCMode
+;				ud=True
+;				uc=True
+;			EndIf
+		Case 50
+			If d_axis=True Then d_axis=False Else d_axis=True
+			ud=True
+		Case 51
+			dmode=EventCode : ud=True
+		Case 52
+			vmode=EventCode : ud=True
+		Case 53
+			If EventCode=0 Then highl=False Else highl=True
+			ud =True
+		Case 60
+			demo{}
+		Case 80
+			dxrot=EventCode : ud=True
+		Case 81
+			dyrot=EventCode : ud=True
+		Case 82
+			dzrot=EventCode : ud=True
+		Case 89
+			dscale=EventCode : ud=True
+;		Default
+;			WindowOutput 1:NPrint EventCode," ",EventQualifier," ",gh
+	End Select
+
+	If ud=True Then update_display_window{}
+	If uc=True Then update_design_window{}
+
+End Statement
+
+initialise_editor{}
+
+##[$80BB]
+	ev.l=WaitEvent
+	Select ev
+		Case $200
+			dummy.l=##[$A281](0,"FUN Request","Quit FUN 3d?","OK|Cancel")
+			If dummy=1 Then quit=True
+		Case $20
+			gadget_hold{GadgetHit}
+		Case $40
+			If GadgetHit=20
+				fname$=ASLFileRequest$("Select Shape to Load",pa$,fi$,"#?.SHP")
+				If fname$ Then load_file{fname$}
+			Else
+				If GadgetHit=21
+					fname$=ASLFileRequest$("Select Shape to Save",pa$,fi$,"#?.SHP")
+					If fname$ Then save_file{fname$}
+				Else
+					gadget_press{GadgetHit}
+				EndIf
+			EndIf
+	End Select
+##[$80BC] quit
+
+##[$FFB4]
+
+End

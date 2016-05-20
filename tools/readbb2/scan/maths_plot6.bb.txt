@@ -1,0 +1,56 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot6.bb
++;Animations can be created using these patterns.
+;Introduce a third variable related to the frame number. (u in this example)
+;Animated lattices are quick and easy on memory
+;because the whole screen is filled with the same shape.
+##[$80C3]
+lmaxlen 0,320,256,5
+lmaxlen 1,320,256,5
+p2.f=2*##[$80BA]
+AutoCookie Off
+VWait 250
+BLITZ
+Slice 0,44,320,256,$fff8,5,8,32,320,320
+Green 0,0,0,0:For i=16 To 31:Green i,i-16,31-i,(i-16)/2:Next
+;----------------------------------------------------------
+;The number of frames depends only on memory available.
+;Good effects can still be obtained with fewer bitplanes.
+Use lmaxlen 0:Show 0
+u.f=0
+For s=0 To 6
+	u+0.1
+	BlockScroll 0
+	For i=0 To 63
+		x.f=(6*i)/64:x=HSin((p2*x)/6)
+		If Joyb(1)<>0:##[$80BE] For:##[$80BE] For:Goto l1:EndIf
+		For j=0 To 63
+			y.f=6-(6*j)/64:y=HSin((p2*y)/6)
+;----------------------------------------------------------
+;Concoct a reasonably juicy, unpredictable function.
+			z.f=u*u+y*y+x*x+HSin(u*y*x)+u+y+x
+			zz.f=Frac(z)
+			If zz<0:zz+1:EndIf
+			zz*2:If zz>1:zz=2-zz:EndIf
+			c.w=Int(zz*16+16)
+			If c=32:c=31:EndIf
+			Point i,j,c
+	Next:Next
+	GetaShape s,0,0,64,64
+Next
+db=0:s=1:si=-1
+While Joyb(1)=0
+	db=1-db
+	If s=0 OR s=6:si=-si:EndIf
+	s+si
+	Use lmaxlen db
+	For i=0 To 256 Step 64:For j=0 To 192 Step 64
+		BlitColl s,i,j
+	Next:Next
+;----------------------------------------------------------
+;Animations of this sort sometimes require slowing down a little.
+	VWait 4:Show db
+Wend
+l1:AMIGA
+VWait 50
+
+

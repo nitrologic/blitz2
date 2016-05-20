@@ -1,0 +1,205 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/Bouncers1.bb
++;
+;			 Bouncing Balls							by Raith 9/5/94
+;			 --------------
+;
+;			 for Doug,	a simple lesson in Blitz Basic 2
+;
+;
+;
+;
+;
+;
+; IMPORTANT NOTE :	Int(Rnd(10)) gives value in range 0 - 9	!!!
+;									 Rnd(10) gives value in range 0 - 9.99 etc.
+;
+;
+
+
+;--------------------------------------------------------------------
+.System
+
+
+##[$80CC]							 ; Don't open a CLI window
+##[$80C3]					 ; Don't crash when I open you on Work Bench
+##[$FFB5]			; Bring WB screen to front (Intuition call)
+
+##[$80B4]							; Set ERROR HANDLER as follows ...
+	End							 ;	 End, Wow, complex stuff
+End ##[$80B4]					; That's all for the Error Handler
+
+;--------------------------------------------------------------------
+.Variables
+
+
+NEWTYPE .Bouncer		; New Variable Type called a .Bouncer
+	x.q							 ; It's got an "x" and it's a "Quick" variable
+	y								 ; Now it's got a "y" (This will be Quick too)
+	x1								; "x1" (These will all be "Quick" Type ...)
+	y1								; "y1" (until I specify a new one like ...)
+	color.b					 ; This "color" which is a "Byte" type
+	oldx.q						; It now has an "oldx" ("Quick" type again)
+	oldy.q						; And finally and "oldy"
+End NEWTYPE				 ; That's all for my .Bouncer type
+
+Dim Ball.Bouncer(50)	 ; I've 50 balls defined as .Bouncers
+
+;--------------------------------------------------------------------
+.GadgetLists
+
+
+	; Set up Gadget List 0 with three Buttons.
+	;					_________/
+	;				 /
+workstart 0,8,12,%1,1,"Gravity"	; Set up a "Gravity Button"
+																	; The "Flags" are %1 which
+																	; means it is an ON or OFF
+																	; "Switch" rather than a
+																	; simple button.
+
+workstart 0,120,12,0,2,"10 Balls|20 Balls|30 Balls|40 Balls|50 Balls"
+																	; This is not a toggle button
+																	; so no "Flags" but it does
+																	; have a selection of titles
+																	; separated with "|" which
+																	; makes it a "Cycle" gadget.
+																	; Nice and Easy.
+
+workstart 0,260,12,0,3,"Random Balls" ; This is the simplest
+																			 ; type of button.
+																			 ; It returns an event
+																			 ; when pressed/released
+																			 ; but stays de-selected.
+
+;--------------------------------------------------------------------
+.Screen
+
+
+freest 0					; Get the WB screen as Blitz Screen 0
+Use allocst 0					; Use the screen
+
+localstat 0,64,14,400,200,$100a,"Bouncers",0,1,0
+											; Window 0 opened at 64,14, size 400x200
+											; $100a Flags give it a close gadget and
+											; make it draggable and also Activate it
+											; i.e. it is the selected window.
+											; 0,1 means colours 0 and 1
+											; The final 0 means use Gadgetlist 0
+
+;--------------------------------------------------------------------
+.Initialise
+
+
+Gosub _Random_Balls	; Set up balls with random data
+
+Gravity.b = False	 ; "Byte" variable says NO gravity thanks
+Borders 0,1,Off			; GadgetList 0, Button 1, Off please (Gravity)
+Redraw 0,1					; Window 0, Button 1, redraw please	(Gravity)
+
+NumBalls.b = 30		 ; "Byte" variable says 30 balls please
+##[$C621] 0,2,3	; GList 0, Button 2, Cycle-option 3 please
+Redraw 0,2						 ; Update it on screen ; Win 0, Button 2
+
+;--------------------------------------------------------------------
+.Mainloop
+
+
+##[$80BB]											 ; A good place to start
+
+	ev.l = Event							 ; "Long" variable	ev	is set to
+														 ; indicate the next queued "Event"
+
+	If ev= $40								 ; Event $40 (Gadget Released) ?
+		GaddyUpBoy= GadgetHit		;	 Hmmm, but which one eh?
+		Select GaddyUpBoy				;	 Dependent on outcome
+			Case 2								 ;	 YOU RELEASED 2 (# Balls)
+				B2= Disable(0,2) ;		 What does it say now ?
+				NumBalls= B2 * 10		 ;		 Set the Number of Balls
+			Case 3									; YOU RELEASED 3 (Random Balls)
+				Gosub _Random_Balls	 ;		 Call the routine
+		End Select
+	End If
+
+	Gosub _Bounce_Balls				; Do the bounce bit
+
+	Gosub _Update_Balls				; Do the drawing bit
+
+ ##[$80BC] ev= $200							; Loop until $200 (Window Close)
+
+;--------------------------------------------------------------------
+.Close
+
+
+Free localstat 0						 ; Bye Bye Window
+##[$FFB4]						 ; WB screen to back to see editor
+
+End											 ; Bye Bye Program
+
+;====================================================================
+._Random_Balls
+
+
+For b= 1 To 50											 ; For each of 50 balls ...
+	Ball(b)\x = 2 + Int(Rnd(396))			;	 Random \x
+	Ball(b)\y = 28 + Int(Rnd(170))		 ;					\y
+	Ball(b)\x1 = Int(Rnd(12)-Rnd(12))	;					\x1
+	Ball(b)\y1 = Int(Rnd(6)-Rnd(6))	;					\y1
+	Ball(b)\color = 1+Int(Rnd(3))			;			and \color
+Next
+
+Return
+
+;--------------------------------------------------------------------
+._Bounce_Balls
+
+
+Gravity= Disable(0,1)	 ; Set Gravity TRUE or FALSE by
+														 ; reading the Cycle Gadget
+
+If Gravity= True Then YBounce= 0.6 Else YBounce= 1
+													;	Less Upwards Bounce if Gravity is ON
+
+For b=1 To NumBalls					; For each ball ...
+	##[$80CA] Ball(b)						; Save some typing of Variable-names
+
+	\x= \x + \x1							 ; Make NEW positins
+	\y= \y + \y1
+
+	If \x < 4 Then \x= 4 : \x1= -\x1			; Check for valid co-ords
+	If \x > 395 Then \x= 395 : \x1= -\x1	; to fit in window.
+	If \y < 30 Then \y= 30 : \y1= -\y1		; If over edge, put ON
+	If \y > 196 Then \y= 196 : \y1= -(\y1 * YBounce)	; edge.
+
+	If Gravity Then \y1= \y1+.5	 ; If gravity TRUE then increase y1
+																; i.e. add downwards movement
+Next
+
+Return
+
+;--------------------------------------------------------------------
+._Update_Balls
+
+
+Use localstat 0											; Just to make sure
+
+For b= 1 To NumBalls							; For each ball
+	##[$80CA] Ball(b)								 ; Save some Variable-name typing
+	WPlot \oldx , \oldy , 0				 ; Unplot old ball
+	WPlot \x , \y , \color					; Plot at new position
+	\oldx= \x											 ; Set Last positions as OLD
+	\oldy= \y											 ; Ready for next time
+
+Next
+
+Return
+
+;--------------------------------------------------------------------
+
+
+
+
+
+
+
+
+

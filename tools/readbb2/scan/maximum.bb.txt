@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Maximum.bb
++; ; maximum program example ; NPrint "Maximum Windows available:",Maximum WindowMouseWait 

@@ -1,0 +1,26 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makesp.bb2
++If NumPars<>2 Then End
+
+LoadShape 0,Par$(1),0
+While Peek.w(##[$80B8] MidHandle(s))
+	s+1
+Wend
+
+For k=0 To s-1
+GetaSprite k,k
+h$+Mkl$(Len(f$)+s*4)
+*sp.sprite=##[$80B8] SpriteMode(k):d.l=*sp\_data
+f$+Mki$(*sp\_height-1)+Mki$(*sp\_nextoff+4)
+For l=1 To *sp\_channels
+f$+Mkl$(0)
+For j=0 To *sp\_nextoff-2 Step 4
+f$+Mkl$(Peek.l(d)):d+4
+Next j,l,k
+
+If ReadMem(0,Par$(2))
+	FileOutput 0
+	Print h$,f$
+	CloseFile 0
+Else
+	##[$FF8C] 0
+EndIf

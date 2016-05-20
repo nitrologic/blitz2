@@ -1,0 +1,79 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/code/cc.bb
++;
+; chunky copper display: 92x120
+;
+
+; copper loads 91 colors in alternate banks switching display bit at end
+; bank1 = 32...127
+; bank2 = 160..255
+
+Function.w chunkycol{ch.l,x.w,y.w}
+	MOVE d1,d3:ADD d2,d3
+	MOVE.l d0,a0:MOVE 22(a0),d0:MOVE.l (a0),a0
+	MULU #3,d2:MULU d0,d2:ADD.l d2,a0:ADD d1,a0
+	MOVE.b (a0),d2:MOVE.b 0(a0,d0),d1:ADD d0,d0:MOVE.b 0(a0,d0),d0
+	BTST#0,d3:BEQ nod
+	ADDQ.b#8,d0:BCC c0:MOVEQ#-1,d0:c0
+	ADDQ.b#8,d1:BCC c1:MOVEQ#-1,d1:c1
+	ADDQ.b#8,d2:BCC c2:MOVEQ#-1,d2:c2:nod
+	LSR#4,d0:AND#$f0,d1:OR d1,d0:AND #$f0,d2:ASL#4,d2:OR d2,d0:AsmExit
+End Function
+
+DecodePalette 0,256:StopCycle 0,1,15,15,15:StopCycle 0,129,15,15,15
+
+#chw=92												 ;chunky width
+#chh=120												;chunky height
+#chc=#chw+#chw/32+1+2					 ;coppers per line
+
+; copper list = bank + 32 + bank + 32 + bank + 28 + wait + swapdisplay = 97
+
+Statement cplot{cp.l,x.w,y.w,c.w}						 ;cp is address of coplist
+	MOVE.l d0,a0:MOVE.l 28(a0),a0:ADD#6,a0
+	MOVE d1,d0:AND#31,d0:ASL#2,d0:ADD d0,a0
+	LSR #5,d1:MULU #132,d1:ADD.l d1,a0
+	MULU #chc*4,d2:ADD.l d2,a0:MOVE d3,(a0):AsmExit
+End Statement
+
+Statement buildcopper{cp.l}
+	MOVE.l d0,a0:MOVE 36(a0),d5:ADD #chh*2,36(a0):MOVE.l 28(a0),a0:MOVE #chh-1,d7
+	ADDQ#2,d5:EXT.l d5:SWAP d5:ASL.l#8,d5:OR.l#$d5fffe,d5
+	MOVE.l #$10c0011,d6:MOVE.l #$1062c00,d4
+	nxline:MOVE #chw-1,d2:MOVE #$1c0,d1:MOVE.l d4,d3:BCHG#15,d4
+	nxcol:CMP #$1c0,d1:BNE nc:MOVE#$180,d1:MOVE.l d3,(a0)+:ADD#$2000,d3:nc
+	MOVE d1,(a0)+:MOVE#0,(a0)+:ADDQ#2,d1:DBRA d2,nxcol
+	dunline:MOVE.ld5,(a0)+:MOVE.ld6,(a0)+:BCHG#15,d6:ADD.l #$2000000,d5
+	DBRA d7,nxline:AsmExit
+End Statement
+
+Statement showchunky{cp.l,ch.l}
+	For x=0 To #chw-1:For y=0 To #chh-1
+		cplot {cp,x,y,chunkycol{ch,x,y}}
+	Next y,x
+End Statement
+
+builddisplay:
+	lmaxlen 0,320,256,7
+	For x=0 To #chw-1:xx=x*2:Boxf xx,3,xx+2,2+#chh*2,x+32:Next
+	Box 0,0,319,255,1
+	Box 0,2,#chw*2.5+2,#chh*2+3,1
+	InitCopList 0,44,256,$13007,8,256,#chh*#chc
+	cp.l=##[$80B8] CopList(0):buildcopper{cp}
+
+;	For y=0 To #chh-1:For x=0 To #chw-1:cplot {cp,x,y,Rnd(4096)}:Next:Next
+
+goforit:
+	BLITZ
+	CreateDisplay 0
+	DisplayBitMap 0,0
+	DisplayPalette 0,0
+	QAMIGA
+
+	 For i=1 To 800; Step 4
+		 f$="porsche.pix/"+Right$(Str$(10000+i),4)
+		 ##[$A404] 0,f$:##[$A40B] 0,1,120:##[$A40A] 1,0,92
+		 showchunky{cp,##[$80B8] ##[$A401](0)}
+		 If Joyb(0)<>0 Then End
+	 Next
+
+	MouseWait
+	End

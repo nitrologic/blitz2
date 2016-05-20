@@ -1,0 +1,36 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/drawsh.bb2
++
+Dim qs(256),qc(256)
+
+co.f=##[$80BA]*2/256
+For k=0 To 255
+qs(k)=HSin(k*co):qc(k)=HCos(k*co)
+Next
+
+NEWTYPE.sh
+c.w ;colour
+x.w ;x move
+y.w ;y move
+End NEWTYPE
+
+Statement drawshape{*sh.sh,x.q,y.q,sc.q,rot.q}
+;
+Shared qs(),qc()
+;
+qs=qs(rot):qc=qc(rot)
+;
+##[$80BB]
+	c=*sh\c:If c=-2 Then Statement Return
+	x2=*sh\x
+	y2=*sh\y
+	If rot
+		x3=qc*x2-qs*y2
+		y2=qs*x2+qc*y2
+		x2=x3
+	EndIf
+	x2*sc+x:y2*sc+y:If c Then Line x,y,x2,y2,c
+	x=x2:y=y2:*sh+SizeOf.sh
+##[$80C7]
+;
+End Statement
+

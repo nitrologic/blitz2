@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKESCALEPIC.BB
++
+lmaxlen 0,640,402,3
+LoadBitMap 0,"scaleypic.iff"
+
+ad.l=##[$80B8] lmaxlen(0)
+
+p.l=ad+8
+p1.l=Peek.l(p)
+p2.l=Peek.l(p+4)
+p3.l=Peek.l(p+8)
+
+NPrint Hex$(p1)
+NPrint Hex$(p2)
+NPrint Hex$(p3)
+
+c.l=ReadMem(0,"SCALEYPIC.BIN")
+
+For l.l=0 To 401
+		Exists 0,p1,80
+		Exists 0,p2,80
+		Exists 0,p3,80
+		p1+80
+		p2+80
+		p3+80
+Next
+
+CloseFile 0
+
+
+
+

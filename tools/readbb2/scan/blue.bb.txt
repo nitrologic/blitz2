@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Blue.bb
++; ; blue() program example; Screen 0,3ScreensBitMap 0,0 BitMapOutput 0RGB 0,8,4,2 NPrint "Blue of colour 0 = ";Blue(0)MouseWait 

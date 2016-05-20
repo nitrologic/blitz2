@@ -1,0 +1,889 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/gasm.bb
++
+;
+;GPU assembler
+;
+DEFTYPE.l
+
+NEWTYPE.cc
+	cc$
+	n.w
+End NEWTYPE
+
+NEWTYPE.label
+	la$
+	pc.l
+	mac$
+	macl.l					 ;length of label name
+End NEWTYPE
+
+NEWTYPE.opcode
+	op$
+	o.w ;<0 then src/dest swapped
+	s.w
+	d.w
+End NEWTYPE
+
+NEWTYPE.exp
+	r.l
+	cc$
+End NEWTYPE
+
+Statement err{e$}
+	Shared li$,ers
+	NPrint li$
+	NPrint e$,".":##[$FF8C] 0
+	ers+1
+	##[$FFB5]
+End Statement
+
+Statement err2{e$,e2$}
+	Shared li$,ers
+	NPrint li$
+	NPrint e$,e2$,".":##[$FF8C] 0
+	ers+1
+	##[$FFB5]
+End Statement
+
+Function$ hex{n}
+	Function Return Mid$(Hex$(n),5)
+End Function
+
+Statement pokew{n}
+Shared pc,pass,lst
+If pass
+	Exists 1,&n+2,2
+	If lst
+		FileOutput 2
+		NPrint Hex$(pc),":",hex{n}," Opcode:",n LSR 10," Src:",(n LSR 5)&31," Dest:",n&31
+		DefaultOutput
+	EndIf
+EndIf
+pc+2
+End Statement
+
+Statement pokel{n}
+Shared pc,pass,lst
+If pass
+	Exists 1,&n+2,2
+	Exists 1,&n,2
+	If lst
+		FileOutput 2
+		NPrint Hex$(pc),":",hex{n & $ffff}," Immediate data"
+		NPrint Hex$(pc+2),":",hex{n LSR 16}," Immediate data"
+		DefaultOutput
+	EndIf
+EndIf
+pc+4
+End Statement
+
+Statement pokeld{n}							;for data
+Shared pc,pass,lst
+If pass
+	Exists 1,&n,2
+	Exists 1,&n+2,2
+	If lst
+		FileOutput 2
+		NPrint Hex$(pc),":",hex{n LSR 16}," Long data"
+		NPrint Hex$(pc+2),":",hex{n & $ffff}," Long data"
+		DefaultOutput
+	EndIf
+EndIf
+pc+4
+End Statement
+
+Statement pokewd{n}							;for data
+Shared pc,pass,lst
+If pass
+	Exists 1,&n+2,2
+	If lst
+		FileOutput 2
+		NPrint Hex$(pc),":",hex{n LSR 16}," Word data"
+		DefaultOutput
+	EndIf
+EndIf
+pc+2
+End Statement
+
+Statement skip{n}
+Shared pc,pass,lst,zbuff
+If pass
+	Exists 1,zbuff,n
+	If lst
+		FileOutput 2
+		NPrint Hex$(pc),":",hex{n}," byte buffer"
+		DefaultOutput
+	EndIf
+EndIf
+pc+n
+End Statement
+
+##[$80B4]
+	err
+;	Stop
+
+	##[$FF8C] 0
+	NPrint NumPars
+	NPrint Par$(2)
+	NPrint Par$(3)
+	NPrint "Usage: GASM inputfile outputfile [listfile]"
+
+	End
+End ##[$80B4]
+
+If NumPars<2 OR NumPars>3 Then Goto err
+
+in$=Par$(1)
+out$=Par$(2)
+;If NumPars=3 Then lst$=Par$(4):lst=-1
+
+NPrint "Opening input file: ",in$
+If WriteMem(0,in$)=0
+	##[$FF8C] 0:NPrint "FAILED!":End
+EndIf
+
+NPrint "Opening output file: ",out$
+If ReadMem(1,out$)=0
+	##[$FF8C] 0:NPrint "FAILED!":End
+EndIf
+
+If lst
+	NPrint "Opening list file: ",lst$
+	If ReadMem(2,lst$)=0
+		##[$FF8C] 0:NPrint "FAILED!":End
+	EndIf
+EndIf
+
+Dim la.label(1000)
+Dim op.opcode(100)	;opcodes
+Dim cc.cc(100)			;condition codes!
+Dim lform(4),sform(4)
+Dim es.exp(100)				 ;expression stack
+
+la=-1 ;labels
+no=-1
+nc=-1
+
+lform(0)=41:lform(1)=43:lform(2)=44:lform(3)=58:lform(4)=59
+sform(0)=-47:sform(1)=-49:sform(2)=-50:sform(3)=-60:sform(4)=-61
+
+readops
+Read op$
+If op$
+	Read o,s,d:no+1
+	op(no)\op=op$,o,s,d
+	Goto readops
+EndIf
+
+readccs
+Read cc$
+If cc$
+	Read n:nc+1
+	cc(nc)\cc=cc$,n
+	Goto readccs
+EndIf
+
+zbuff=##[$FE97](8192,$10001)
+
+FileInput 0
+pass=0:Gosub dopass
+If ers=0
+	pass=1:Gosub dopass
+EndIf
+
+##[$FE99] zbuff,8192
+
+NPrint "Done! ",ers," error(s)."
+
+If lst
+	FileOutput 2
+	NPrint "Symbol table:"
+	For k=0 To la
+	Print LSet$(la(k)\la,40)
+	If la(k)\macl
+		If la(k)\macl>0
+			NPrint "Macro: ",la(k)\mac
+		Else
+			NPrint "Value: $",Hex$(la(k)\pc)," ",la(k)\pc
+		EndIf
+	Else
+		NPrint "Label: $",Hex$(la(k)\pc)," ",la(k)\pc
+	EndIf
+	Next
+	DefaultOutput
+EndIf
+
+End
+
+.dopass
+;
+lins.l=0
+pc=0:llab=-1:Loc 0,0:NPrint "Pass ",pass
+;
+While NOT(DosBuffLen(0))
+	li$=Edit$(256)
+	lins+1:li$=li$+";"+Str$(lins)
+	If lst<>0 AND pass<>0
+		FileOutput 2
+		NPrint li$
+		DefaultOutput
+	EndIf
+	Gosub asmline
+Wend
+;
+Return
+
+.asmline
+;
+;assemble line in li$
+;
+If li$="" Then Return Else l$=LCase$(li$)
+;
+remtry
+si=Instr(l$,";")
+If si
+	l$=StripTrail$(Left$(l$,si-1),32)
+	Goto remtry
+EndIf
+;
+mactry
+si=Instr(l$,"!")
+If si
+	mml=0
+	For k=0 To la
+	If la(k)\macl>mml
+		If Mid$(l$,si+1,la(k)\macl)=la(k)\la ;found?
+			mml=la(k)\macl:mac=k
+		EndIf
+	EndIf
+	Next
+	If mml=0 Then err{"Macro not found!"}:Return
+	l$=Left$(l$,si-1)+la(mac)\mac+Mid$(l$,si+mml+1)
+	Goto mactry
+EndIf
+l$=StripTrail$(l$,32):If l$="" Then Return
+;
+;check for labels...
+;
+If Left$(l$,1)<>" "	;a label?
+	si=Instr(l$," ")
+	If si
+		la$=Left$(l$,si-1):l$=StripLead$(Mid$(l$,si+1),32)
+	Else
+		la$=l$:l$=""
+	EndIf
+	;
+	If pass
+		For k=0 To la
+		If la$=la(k)\la
+			llab=k	;last label for 'equ'
+			k=la
+		EndIf
+		Next
+	Else
+		For k=0 To la
+		If la$=la(k)\la
+			If la(k)\macl=0
+				err2{"Duplicate label:",la$}:##[$80BE] For:Return
+			Else
+				##[$80BE] For:llab=k:Goto labout
+			EndIf
+		EndIf
+		Next
+		la+1:la(la)\la=la$,pc:llab=la
+		labout
+	EndIf
+	If l$="" Then Return
+Else
+	l$=StripLead$(l$,32)
+EndIf
+;
+si=Instr(l$," ")
+If si
+	op$=Left$(l$,si-1):l$=StripLead$(Mid$(l$,si+1),32)
+Else
+	op$=l$:l$=""
+EndIf
+;
+For k=0 To no
+If op$=op(k)\op
+	o=op(k)\o:s=op(k)\s:d=op(k)\d:##[$80BE] For:Goto opfound
+EndIf
+Next
+;
+err2{"Mnemonic not found:",op$}:Return
+;
+opfound
+;
+.asmdir
+If o>127	;assembler directive?
+	;
+	e$=l$
+	;
+	Select o
+	Case 128	;org
+		Gosub eval:pc=r
+	Case 129	;label equate!
+		If llab<0
+			err{"No label to equate!"}
+		Else
+			Gosub eval:la(llab)\pc=r:la(llab)\macl=-Len(la(llab)\la)
+		EndIf
+	Case 130	;dsb
+		Gosub eval:skip{r}
+	Case 131	;dsw
+		Gosub eval:skip{r LSL 1}
+	Case 132	;dsl
+		Gosub eval:skip{r LSL 2}
+	Case 133	;dsp
+		Gosub eval:skip{r LSL 3}
+	Case 134	;dl
+		##[$80BB]
+			temp.w=Instr(l$,",",0)
+
+			If temp>0
+				e$=Left$(l$,temp-1)
+				l$=UnLeft$(l$,temp)
+			Else
+				e$=l$
+			EndIf
+
+			Gosub eval:pokeld{r}
+
+		##[$80BC] temp<1
+
+	Case 135			;mac!
+		If llab<0
+			err{"No label for macro!"}
+		Else
+			la(llab)\mac=e$,Len(la(llab)\la)
+		EndIf
+	Case 136	;dw
+		Gosub eval:pokewd{r}
+	Case 137
+		If (pc&2)=2 Then pokewd{0}
+	End Select
+	Return
+EndIf
+;
+po=QAbs(o) LSL 10
+;
+If l$=""	;no operands?
+	If s=-1 AND d=-1
+		pokew{po}
+	Else
+		err2{op$," is in need of some operands"}
+	EndIf
+	Return
+EndIf
+;
+si=Instr(l$,",")
+If si ;2 opcodes?
+	;
+	If s=-1 OR d=-1
+		err2{op$," can't handle 2 operands"}
+		Return
+	EndIf
+	;
+	s$=Left$(l$,si-1):d$=Mid$(l$,si+1)
+	;
+	If o=34 AND s$="pc" ;kludge move pc,rn
+		sop=0:o=51:po=o LSL 10
+	Else
+		ot=s:o$=s$:Gosub calcop:sop=op:sform=form
+	EndIf
+	;
+	ot=d:o$=d$:Gosub calcop
+	;
+	If o>63
+		Select o
+		Case 64 ;load
+			o=lform(sform)
+		Case 65 ;store
+			o=sform(form)
+		End Select
+		po=QAbs(o) LSL 10
+	EndIf
+	;
+	If o>=0
+		If o=38 ;movei kludge
+			pokew{po+op}
+			pokel{sop}
+		Else
+			pokew{po+sop LSL 5+op}
+		EndIf
+	Else
+		pokew{po+op LSL 5+sop}
+	EndIf
+	;
+Else	;1 opcode!
+	If o<>-53 AND o<>-52 ;jr or jump?
+		If s<>-1 AND d<>-1
+			err2{op$," needs 2 operands"}
+			Return
+		EndIf
+	EndIf
+	;
+	ot=d:o$=l$:Gosub calcop
+	;
+	If o>=0
+		pokew{po+op}
+	Else
+		If o=-63 ;unpack
+			pokew{po+op+32}
+		Else
+			pokew{po+op LSL 5}
+		EndIf
+	EndIf
+	;
+EndIf
+;
+Return
+
+.calcop
+;
+;ot=operand type
+;o$=operand
+;
+;return op=operand val!
+;
+o$=StripTrail$(o$,32)
+Select ot
+	;
+Case 0	;rn?
+	;
+	If Left$(o$,1)<>"r"
+		operr
+		err2{"Error in operand:",o$}
+		operr2
+		##[$80BE] Select:##[$80BE] Gosub:Return
+	EndIf
+	;
+	o2$=Mid$(o$,2):op=Val(o2$)
+	If op<0 OR op>31 OR Str$(op)<>o2$ Then Goto operr
+	;
+Case 1	;immediate (1...32)?
+	;
+	e$=o$:Gosub eval:op=r
+	If pass
+		If op<1 OR op>32 Then Goto operr
+		op & 31
+	EndIf
+	;
+Case 2	;condition code?
+	;
+	For k=0 To nc
+	If o$=cc(k)\cc Then op=cc(k)\n:##[$80BE] For:Goto ccout
+	Next
+	err2{"Illegal condition code:",o$}:Goto operr2
+	ccout
+	;
+Case 3	;PC relative (for JR)
+	;
+	e$=o$:Gosub eval:op=r-(pc+2)
+	If pass
+		If op>30 OR op<-32 OR op&1<>0
+			err{"Relative branch out of range"}:Goto operr2
+		EndIf
+	EndIf
+	op ASR 1:op & 31
+	;
+Case 4	;(RN) ?
+	;
+	rnind
+	;
+	If Left$(o$,2)<>"(r" Then Goto operr
+	o$=Mid$(o$,3)
+	If Right$(o$,1)<>")"
+		Goto operr
+	Else
+		o$=UnLeft$(o$,1)
+	EndIf
+	;
+	op=Val(o$):If Str$(op)<>o$ Then Goto operr
+	;
+Case 5	;can be (rn), (r14+n), (r15+n), (r14+rn), (r15+rn)!
+	;
+	is=Instr(o$,"+"):If is=0 Then form=0:Goto rnind
+	;
+	o2$=Left$(o$,is-1)
+	If o2$="(r14" Then form=1:Goto fgot
+	If o2$<>"(r15" Then Goto operr Else form=2
+	fgot:o$=Mid$(o$,is+1)
+	If Right$(o$,1)<>")" Then Goto operr Else o$=UnLeft$(o$,1)
+	If Left$(o$,1)="r"
+		o2$=Mid$(o$,2):op=Val(o2$)
+		If op>=0 AND op<=31
+			If Str$(op)=o2$ Then form+2:Goto fout
+		EndIf
+	EndIf
+	;
+	e$=o$:Gosub eval
+	If pass
+		If r&3<>0 OR r<4 OR r>124
+			err{"Illegal offset"}:Goto operr2
+		EndIf
+		op=r LSR 2
+	EndIf
+	;
+	fout
+	;
+Case 6	;immediate (0...31)?
+	;
+	e$=o$:Gosub eval
+	If pass
+		If r<0 OR r>31 Then Goto operr
+		op=r & 31
+	EndIf
+	;
+Case 7	;immediate (1...32)?
+	;
+	e$=o$:Gosub eval
+	If pass
+		If r<1 OR r>32 Then Goto operr
+		op=r & 31
+	EndIf
+	;
+Case 8	;immediate (-16...+15)?
+	;
+	e$=o$:Gosub eval
+	If pass
+		If r<-16 OR r>15 Then Goto operr
+		op=r & 31
+	EndIf
+	;
+Case 9	;immediate long!
+	;
+	e$=o$:Gosub eval:op=r
+	;
+Case 10	;immediate (1...32)? sub from 32 if so (for shl)
+	;
+	e$=o$:Gosub eval
+	If pass
+		If r<1 OR r>32 Then Goto operr
+		op=(-r & 31)
+	EndIf
+	;
+Default
+	err{"Internal Error!"}:##[$80BE] Gosub
+End Select
+Return
+
+.eval
+;
+;e$=what to evaluate, return r=result
+;
+esp=0
+
+;
+eval2
+
+Gosub evalel:r=r_
+;
+While e$
+	e$=StripLead$(e$,32)
+	e$=StripTrail$(e$,32)
+
+	;
+	cc$=Left$(e$,1):e$=Mid$(e$,2)
+	;
+	If cc$=")"
+		If esp=0 Then err{"Spurious(!) close bracket"}
+		Return
+	EndIf
+	;
+	Gosub evalel
+	;
+	Select cc$
+	Case "+"
+		r+r_
+	Case "-"
+		r-r_
+	Case "*"
+		r*r_
+	Case "/"
+		r/r_
+	Case "<"
+		r LSL r_
+	Case ">"
+		r ASR r_
+	Case "&"
+		r & r_
+	Case "|"
+		r | r_
+	Default
+		err{"Expression error"+cc$}:##[$80BE] Select:Goto exout
+	End Select
+
+Wend
+;
+If esp Then err{"Spurious (mmm...) open bracket"}
+;
+exout
+Return
+
+.evalel	;evaluate an element!
+e$=StripLead$(e$,32)
+e$=StripTrail$(e$,32)
+
+r_=0:c$=Left$(e$,1)
+
+;
+If c$="$" ;hex?
+	e$=Mid$(e$,2):c$=Left$(e$,1)
+	While (c$>="0" AND c$<="9") OR (c$>="a" AND c$<="f")
+		r2=Asc(c$)-48:If r2>9 Then r2-39
+		r_ LSL 4+r2
+		e$=Mid$(e$,2):c$=Left$(e$,1)
+	Wend
+	Return
+EndIf
+;
+If c$>="0" AND c$<="9"	;decimal?
+	##[$80BB]
+		e$=Mid$(e$,2)
+		r_*10+Asc(c$)-48
+		c$=Left$(e$,1)
+	##[$80BC] c$<"0" OR c$>"9"
+	Return
+EndIf
+;
+If c$>="a" AND c$<="z"	;label?
+	lb$=""
+	##[$80BB]
+		e$=Mid$(e$,2)
+		lb$+c$
+		c$=Left$(e$,1)
+	##[$80BC] (c$<"0" OR c$>"z") OR (c$>"9" AND c$<"a") AND c$<>"_"
+	If pass
+		For k=0 To la
+		If lb$=la(k)\la
+			r_=la(k)\pc:##[$80BE] For:Return
+		EndIf
+		Next
+		err{"Label not found"}:Return
+	EndIf
+	Return
+EndIf
+;
+If c$="%" ;binary?
+	e$=Mid$(e$,2):c$=Left$(e$,1)
+	While c$="1" OR c$="0"
+		r_ LSL 1+Asc(c$)-48
+		e$=Mid$(e$,2):c$=Left$(e$,1)
+	Wend
+	Return
+EndIf
+;
+If c$="-"
+	e$=Mid$(e$,2):Gosub evalel:r_=-r_:Return
+EndIf
+;
+If c$="("
+	e$=Mid$(e$,2)
+	es(esp)\r=r,cc$:esp+1
+	Gosub eval2:r_=r
+	esp-1:r=es(esp)\r:cc$=es(esp)\cc:Return
+EndIf
+;
+exerr
+err{"Expression error"}:Return
+
+Data$ "abs"
+Data 22,-1,0
+Data$ "add"
+Data 0,0,0
+Data$ "addc"
+Data 1,0,0
+Data$ "addq"
+Data 2,7,0
+Data$ "addqt"
+Data 3,7,0
+Data$ "and"
+Data 9,0,0
+Data$ "bclr"
+Data 15,6,0
+Data$ "bset"
+Data 14,6,0
+Data$ "btst"
+Data 13,6,0
+Data$ "cmp"
+Data 30,0,0
+Data$ "cmpq"
+Data 31,8,0
+Data$ "div"
+Data 21,0,0
+Data$ "imacn"
+Data 20,0,0
+Data$ "imult"
+Data 17,0,0
+Data$ "imultn"
+Data 18,0,0
+Data$ "jr"
+Data -53,2,3
+Data$ "jump"
+Data -52,2,4
+Data$ "load"
+Data 64,5,0		;special!
+Data$ "loadb"
+Data 39,4,0
+Data$ "loadw"
+Data 40,4,0
+Data$ "loadp"
+Data 42,4,0
+Data$ "mmult"
+Data 54,0,0
+Data$ "move"
+Data 34,0,0
+Data$ "movefa"
+Data 37,0,0
+Data$ "movei"
+Data 38,9,0
+Data$ "moveq"
+Data 35,6,0
+Data$ "moveta"
+Data 36,0,0
+Data$ "mtoi"
+Data 55,0,0
+Data$ "mult"
+Data 16,0,0
+Data$ "neg"
+Data 8,-1,0
+Data$ "nop"
+Data 57,-1,-1
+Data$ "normi"
+Data 56,0,0
+Data$ "not"
+Data 12,-1,0
+Data$ "or"
+Data 10,0,0
+Data$ "pack"
+Data 63,-1,0
+Data$ "resmac"
+Data 19,-1,0
+Data$ "ror"
+Data 28,0,0
+Data$ "rorq"
+Data 29,7,0
+Data$ "sat8"
+Data 32,-1,0
+Data$ "sat16"
+Data 33,-1,0
+Data$ "sat24"
+Data 62,-1,0
+Data$ "sh"
+Data 23,0,0
+Data$ "sha"
+Data 26,0,0
+Data$ "sharq"
+Data 27,7,0
+Data$ "shlq"
+Data 24,10,0
+Data$ "shrq"
+Data 25,7,0
+Data$ "store"
+Data 65,0,5
+Data$ "storeb"
+Data -45,0,4
+Data$ "storep"
+Data -48,0,4
+Data$ "storew"
+Data -46,0,4
+Data$ "sub"
+Data 4,0,0
+Data$ "subc"
+Data 5,0,0
+Data$ "subq"
+Data 6,7,0
+Data$ "subqt"
+Data 7,7,0
+Data$ "unpack"
+Data -63,-1,0	;set!!
+Data$ "xor"
+Data 11,0,0
+;
+Data$ "org"
+Data 128,0,0
+Data$ "equ"
+Data 129,0,0
+Data$ "="
+Data 129,0,0
+Data$ "dsb"
+Data 130,0,0
+Data$ "dsw"
+Data 131,0,0
+Data$ "dsl"
+Data 132,0,0
+Data$ "dsp"
+Data 133,0,0
+Data$ "dl"
+Data 134,0,0
+Data$ "mac"
+Data 135,0,0
+Data$ "dw"
+Data 136,0,0
+Data$ "align"
+Data 137,0,0
+
+;
+Data$ ""
+
+Data$ "nz"
+Data 1
+Data$ "z"
+Data 2
+Data$ "nc"
+Data 4
+Data$ "nc/nz"
+Data 5
+Data$ "nc/z"
+Data 6
+Data$ "c"
+Data 8
+Data$ "c/nz"
+Data 9
+Data$ "c/z"
+Data 10
+Data$ "nn"
+Data 20
+Data$ "nn/nz"
+Data 21
+Data$ "nn/z"
+Data 22
+Data$ "n"
+Data 24
+Data$ "n/nz"
+Data 25
+Data$ "n/z"
+Data 26
+;
+;my own conds...
+;
+Data$ "ne"
+Data 1
+;
+Data$ "eq"
+Data 2
+;
+Data$ "cc"
+Data 4
+;
+Data$ "cs"
+Data 8
+;
+Data$ "lt"
+Data 24
+;
+Data$ "mi"
+Data 24
+;
+Data$ "gt"
+Data 21
+;
+Data$ "ge"
+Data 20
+
+Data$ "pl"
+Data 20
+;
+Data$ ""

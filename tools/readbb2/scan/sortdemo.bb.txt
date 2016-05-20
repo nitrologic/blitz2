@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/examples/sortdemo.bb
++;
+; sort demo
+;
+
+;note the field used to sort by must be either .w or .l
+;no strings as yet
+
+NEWTYPE .t
+	a.w
+	b.l
+	c.w
+	d$
+End NEWTYPE
+
+Dim ##[$80B3] b.t(10)
+
+For i=1 To 20
+	If globalloc(b())
+		b()\d="name"+Str$(i)
+		b()\b=Rnd(1024)
+	EndIf
+Next
+
+SortList b(),SizeOf .t\b	;here we sort the list using the b field
+
+newmem b()
+While globfree(b())
+	NPrint b()\d," with id ",b()\b
+Wend
+
+MouseWait

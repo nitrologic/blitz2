@@ -1,0 +1,46 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/spectre/jellylogo.bb2
++
+lmaxlen 0,640,256,4
+LoadBitMap 0,"strlogo.iff",0
+
+
+VWait 100
+BLITZ
+
+lmaxlen 1,320,256,4
+lmaxlen 2,320,256,4
+Slice 1,44,320,256,$fff8,4,8,16,320,320
+Use SetCycle 0
+
+destx=10 : desty=50
+wid=293	: hi=78
+Dim x(12),y(12)
+
+##[$80C8] strdat
+For i=1 To 12
+	Read x(i),y(i)
+Next i
+
+t=1 : db=1
+##[$80BB]
+	VWait
+	db=3-db
+	Use lmaxlen db
+	Scroll x(t),y(t),wid,hi,destx,desty,0
+	Show db
+	t=t+1 : If t=13 Then t=1
+##[$80BC] Joyb(0)=1
+
+.strdat
+Data 1,1
+Data 1,80
+Data 1,159
+Data 295,1
+Data 295,80
+Data 295,159
+Data 295,159
+Data 295,80
+Data 295,1
+Data 1,159
+Data 1,80
+Data 1,1

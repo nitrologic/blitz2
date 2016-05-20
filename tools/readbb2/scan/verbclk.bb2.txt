@@ -1,0 +1,107 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Examples/verbclk.bb2
++;
+; VerbClk 1.00
+;
+; Created by Christopher Jennings.
+; ** Released to the public domain. **
+;
+; No amazing new technology here or anything,
+; just speaks the time and date properly, and,
+; if "alarm" is on the command, beeps and tells
+; you to get up (designed for use with a cron
+; utility).
+;
+; Enjoy!
+;
+
+##[$80CC]:##[$80C3]
+
+DEFTYPE .l
+
+Dim dow$(6),month$(12),hour$(12),minute$(59),dom$(31)
+
+For t.w=0 To	6:Read dow$(t):Next
+For t.w=1 To 12:Read month$(t):Next
+For t.w=1 To 12:Read hour$(t):Next
+For t.w=0 To 59:Read minute$(t):Next
+For t.w=1 To 31:Read dom$(t):Next
+
+; Is the "alarm" option enabled?
+alarm=0
+If NumPars<>0
+ If LCase$(Par$(1))="alarm" Then alarm=1
+EndIf
+
+; Create simple sine waveform for alarm
+If alarm=1
+ InitSound 0,16
+ RadTo16.f=##[$80BA]/8
+ For t.w=0 To 15
+	 SoundData 0,t,HSin(t*RadTo16)*127
+ Next
+EndIf
+
+; Init time values
+a$=Date$(SystemDate)
+h=Hours:m=Mins
+
+; Do some calculations
+
+; Morning, Afternoon, or Evening?
+MAE$="morning"								; Default to morning
+If h>11 Then MAE$="afternoon" ; At 12 or later, it's afternoon
+If h>16 Then MAE$="eevning"	 ; From 16-23, it's evening
+
+; AM or PM?
+ampm=0
+If h=12 Then ampm=1				; It's lunch hour, so it's PM
+If h>12 Then h=h-12:ampm=1 ; It's past lunch, so it's PM (and sub. mil. time)
+If h=0 Then h=12					 ; It's midnight
+pm$="ay.m."
+If ampm=1 Then pm$="p.m."
+
+
+text$="Good "+MAE$+". It is "+hour$(h)+". "+minute$(m)+" "+pm$+", and the date is "
+text$=text$+dow$(WeekDay)+", "+month$(Months)+" "+dom$(Days)+"."
+
+; Perform alarm component
+If alarm=1
+ For repetitions.w=1 To 3
+	For beeps.w=1 To 3
+		LoopSound 0,10,64,64
+		##[$FE1B](15)
+		LoopSound 0,10,0,0
+		##[$FE1B](15)
+	Next
+	##[$FE1B](30)
+ Next
+EndIf
+
+Speak text$
+If alarm=1 Then Speak "Time to get up lazy guy!"
+																							\
+End
+
+; Days of the week
+Data.s "Sunday","Monday","Tuesday","Wednesday","Thurzday","Fryday","Saturday"
+
+; Months of the year
+Data.s "Januayry","February","March","Ayprel","May","June","Juli","August"
+Data.s "September","October","November","December"
+
+; Hours of the day
+Data.s "1","2","3","4","5","6","7","8","9","ten","eelehven","twelve"
+
+; Minutes of the hour
+Data.s "oh clock","oh 1","oh 2","oh 3","oh 4","oh 5","oh 6","oh 7","oh 8","oh 9"
+Data.s "ten","eelehven","twelve","thirt teen","4 teen","fif teen","6 teen","7 teen","8 teen","9 teen"
+Data.s "twenty","twenty 1","twenty 2","twenty 3","twenty 4","twenty 5","twenty 6","twenty 7","twenty 8","twenty 9"
+Data.s "thirty","thirty 1","thirty 2","thirty 3","thirty 4","thirty 5","thirty 6","thirty 7","thirty 8","thirty 9"
+Data.s "forty","forty 1","forty 2","forty 3","forty 4","forty 5","forty 6","forty 7","forty 8","forty 9"
+Data.s "fifty","fifty 1","fifty 2","fifty 3","fifty 4","fifty 5","fifty 6","fifty 7","fifty 8","fifty 9"
+
+; Days of the month
+Data.s "first","sekend","third","forth","fifth","sixth","seventh","ayth","nyneth","tenth"
+Data.s "eeleventh","twelveth","thirt teenth","4 teenth","fif teenth","6 teenth","7 teenth","8 teenth","9 teenth","twentyeth"
+Data.s "twenty first","twenty sekend","twenty third","twenty forth","twenty fifth","twenty sixth","twenty seventh"
+Data.s "twenty ayth","twenty nyneth","thirtyeth","thirty first"

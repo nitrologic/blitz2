@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ClrInt.bb
++;; end setint program example; SetInt 5								;interupt handler follows... a+1									;add one to 'a'  Poke.w $dff180,a						;set background colourEnd SetInt							 ;end of handler NPrint "Hit return..."				 ;handler going till return is hit...b=Edit(1)								;do an edit functionClrInt 5								;turn of all type 5 interupt handlers NPrint "Click Mouse button..."MouseWait 

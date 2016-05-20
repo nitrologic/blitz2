@@ -1,0 +1,1367 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/DropIt/dropit.bb2
++;=========================================================
+;
+; DROPIT Auto exec AppIcon. v2.16
+;
+; By Aaron Koolen
+;
+; Last modification: 13-May-94
+;
+;=========================================================
+#FINAL=1
+
+XInclude "mystructs.bb"
+
+##[$80C3]
+##[$80CC]
+##[$80CB]
+
+CNIF #FINAL:##[$80D3]:CEND
+
+DEFTYPE.Screen *s
+DEFTYPE.w sh,sw
+
+#EVT_HOTKEY=1							 ; Id for hotkey message
+
+#MAX_ENTRIES=100						; Maximum number of entries available
+#MAX_EXECUTES=20						; Number of executes per entry
+#READ_BUF_LEN=160					 ; Read buffer lenght for signature matching
+
+#FB_ASYNC=0								 ; Flag bit for asynchronous execution
+#FB_CLI=1									 ; Flag bit for a shell output
+#FB_WAITAFTER=2						 ; Wait for return char after executed
+#FB_SIGFIRST=3							; Check signature first
+
+; Tags for the execution of programs
+#TAG_USER=1 LSL 31
+
+#SYS_Dummy=#TAG_USER+32
+#SYS_Input=#SYS_Dummy+1
+#SYS_Output=#SYS_Dummy+2
+#SYS_Asynch=#SYS_Dummy+3
+#SYS_UserShell=#SYS_Dummy+4
+
+; Define maxlens for strings we use so we don't get yukky
+; out of memory errors, when doing string operations
+DEFTYPE.l
+MaxLen name$=108
+MaxLen t$=108
+MaxLen d$=108
+MaxLen a$=108
+MaxLen arg$=256
+MaxLen op$=100
+
+NEWTYPE.tt
+	a.l
+End NEWTYPE
+
+; Structure for our entries
+NEWTYPE.Entry
+	*nextEntry.Entry
+	oldExec.w
+	curExec.w
+	numExec.w
+	exec.l[#MAX_EXECUTES]
+	execFlags.w[#MAX_EXECUTES]
+	nPat.b[82]
+	sPat.b[82]
+	mess.b[82]
+	simpName.b[82]
+	flags.w
+End NEWTYPE
+
+NEWTYPE.MyDiskObject
+do_Magic.w ;/* a magic number at the start of the file */
+do_Version.w ;/* a version number, so we can change it */
+do_Gadget.Gadget;/* a copy of in core gadget */
+do_Type.b
+do_AARONPAD.b
+*do_DefaultTool.b
+*do_ToolTypes.do_ToolTypes
+do_CurrentX.l
+do_CurrentY.l
+*do_DrawerData.DrawerData
+*do_ToolWindow.b ;/* only applies to tools */
+do_StackSize.l ;/* only applies to tools */
+End NEWTYPE
+
+DEFTYPE.Entry *fEntry,*cEntry
+
+NEWTYPE.tags
+	a.l:b:c:d:e:f:g:h:i:j:k:l
+End NEWTYPE
+
+DEFTYPE.MyDiskObject *diskOb
+DEFTYPE.FileInfoBlock *fib
+DEFTYPE.tags tags
+DEFTYPE.w w,count,popup,curExec,opExec
+DEFTYPE.AARONWindow *win
+DEFTYPE.l curCon,cxSig
+DEFTYPE.Entry dummyEntry
+DEFTYPE.NewBroker newBroker
+DEFTYPE.MsgPort *msgPort,*brokerMsgPort
+DEFTYPE.Screen *s
+
+
+
+;==============================================
+; Statements and functions
+;==============================================
+
+; Checks the signature of a file to see if it matches
+
+Function.w CheckSig{patTokenBuf.l,sigBuff.l}
+Shared t$,*cEntry
+; Check signature
+	If WriteMem(0,t$)
+		l.l=FileSeek(0)
+; Read 20 bytes in for match
+		If l>20 Then l=20
+		##[$BE14] 0,sigBuff,l
+		CloseFile 0
+; Remove null characters, so as not to fool system into thinking
+; it's at the end of the string
+		For p=0 To #READ_BUF_LEN-1
+			If Peek.b(sigBuff+p)=0 Then Poke.b sigBuff+p,1
+		Next
+		Poke.b (sigBuff)+l,0
+; Tokenise pattern for matching
+		p=##[$FC97](&*cEntry\sPat,patTokenBuf,100)
+; Check to see if signature matches
+		If ##[$FC98](patTokenBuf,sigBuff)>0 Then Function Return -1
+	EndIf
+	Function Return 0
+End Function
+
+;==============================================
+; Remove all messages from a message port
+Statement FlushMessages{*m.MsgPort}
+	*msg.Message=##[$FEB4](*m)
+	While *msg
+		##[$FEB5](*msg)
+		*msg=##[$FEB4](*m)
+	Wend
+End Statement
+
+;==============================================
+; Shows a requester
+Statement Message{a$}
+	dummy=##[$A281]("Listen up!",a$,"I HAVE READ AND UNDERSTOOD!")
+End Statement
+
+;==============================================
+; Frees an execute entry
+Statement FreeExec{*e.Entry,n.w}
+	If *e\exec[n]
+		##[$FE99] *e\exec[n],Len(Peek$(*e\exec[n]))+1
+		*e\exec[n]=0
+	EndIf
+End Statement
+
+;==============================================
+; Sets execute # n in entry pointed to by *e to string
+Function.l SetExec{*e.Entry,n.w,string.l}
+	mem.l=##[$FE97](Len(Peek$(string))+1,#MEMF_PUBLIC|#MEMF_CLEAR)
+	If mem
+		FreeExec{*e,n}
+		*e\exec[n]=mem
+		Poke$ mem,Peek$(string)
+	EndIf
+	Function Return mem
+End Function
+
+;==============================================
+; GADTOOLS GADGETS FOR THE CONFIG WINDOW
+;==============================================
+
+.GTSTUFF
+
+; Listview structure
+NEWTYPE.lv
+	dumm.w
+	l$
+End NEWTYPE
+
+; Gadtools constants and stuff
+#CW_WIDTH=458
+
+#GTG_LV=0
+#GTG_NAME=1
+#GTG_MESS=2
+#GTG_EXEC=3
+#GTG_PAT=4
+#GTG_SIG=5
+
+#GTG_SYNC=6
+#GTG_CLI=7
+
+#GTG_QUIT=10
+#GTG_HIDE=9
+#GTG_SAVE=8
+
+#GTG_ADD=11
+#GTG_DEL=13
+#GTG_UP=14
+#GTG_DOWN=15
+#GTG_ABOUT=12
+
+#GTG_ELV=16
+#GTG_ENAME=3 ;17
+#GTG_EADD=17
+#GTG_EDEL=18
+
+#GTG_SIGFIRST=19
+#GTG_WAITAFTER=20
+
+#GTG_RELOAD=21
+
+#GTG_SAVEICON=22
+
+#LV_X=5
+
+#LV_Y=5
+#LV_HEIGHT=196-60-4
+#LV_WIDTH=195
+
+#ELV_Y=5
+#ELV_X=#LV_X+#LV_WIDTH+5
+#ELV_HEIGHT=#LV_HEIGHT/2-6
+#ELV_WIDTH=#CW_WIDTH-#ELV_X-12
+
+#ENAME_Y=#ELV_Y+#ELV_HEIGHT
+
+#EAD_Y=#ELV_Y+#ELV_HEIGHT+14
+#EAD_HEIGHT=12
+#EAD_WIDTH=#ELV_WIDTH/2
+#EAD_GAP=#ELV_WIDTH/2+1
+
+
+#AD_Y=#LV_HEIGHT+#LV_Y+14
+#AD_HEIGHT=12
+#AD_WIDTH=45
+#AD_GAP=50
+
+#SQ_Y=#AD_Y+#AD_HEIGHT+10
+#SQ_HEIGHT=12
+#SQ_X=5
+#SQ_WIDTH=80
+#SQ_GAP=90
+
+#NAME_Y=#LV_Y+#LV_HEIGHT
+
+#NUM_STRINGS=3
+
+#STRING_Y=#EAD_Y+#EAD_HEIGHT+4
+#STRING_HEIGHT=13
+#STRING_GAP=#STRING_HEIGHT+1
+
+#F_Y=#NUM_STRINGS*#STRING_GAP+#STRING_Y
+#F_GAP=100
+
+
+#CW_HEIGHT=#SQ_HEIGHT+#SQ_Y+5
+
+
+; START OF CODE
+
+	Dim ##[$80B3] lv.lv(#MAX_ENTRIES)				; Our listviews
+	Dim ##[$80B3] elv.lv(#MAX_EXECUTES)
+
+	If ExecVersion<36 Then End		; Make sure we are using the correct OS
+
+	ver$=Peek$(?vers+13)
+
+	out.l=##[$FE06]								 ; Set default output
+
+	Gosub GetWBInfo
+
+
+	Gosub ReadConfig
+
+	Gosub InitCommodity
+
+	Gosub InitAppIcon
+
+
+;==============================================
+; MAINLOOP
+;==============================================
+.
+
+	active.w=1													; Set our active flag
+
+	If popup=1 Then Gosub OpenWindow		; Should we popup?
+
+.MainLoop
+	go.w=1
+	While go
+
+; Wait for a signal from anywhere
+		signal.l=##[$FEAB](cxSig | msgPortSig | winPortSig)
+
+;----------------------------------
+; Was this a commodities message??
+;----------------------------------
+		If signal & cxSig
+
+; Get message information
+			*cxMsg.Message=##[$FEB4](*brokerMsgPort)
+			msgID.l=##[$F814](*cxMsg)
+			msgType.l=##[$F812](*cxMsg)
+
+			Select msgType
+				Case #CXM_COMMAND
+					Select msgID
+						Case #CXCMD_KILL:go=0
+						Case #CXCMD_DISABLE:Gosub CloseConfigWin:active.w=0
+						Case #CXCMD_ENABLE:active.w=1
+						Case #CXCMD_APPEAR:Gosub OpenWindow:Gosub NewCon
+						Case #CXCMD_DISAPPEAR:Gosub CloseConfigWin
+						Case #CXCMD_UNIQUE:Gosub OpenWindow:Gosub NewCon
+					End Select
+				Case #CXM_IEVENT
+				Select msgID
+					Case #EVT_HOTKEY
+						Gosub OpenWindow
+						Gosub NewCon
+				End Select
+			End Select
+			##[$FEB5] *cxMsg
+		EndIf
+
+.IconMessage
+;-------------------------------------
+; Was this a message for our AppIcon?
+;-------------------------------------
+		If (signal & msgPortSig)
+
+; If we aren't active we don't do anything
+
+			If active=1
+				*msg.AppMessage=##[$FEB4](*msgPort)
+
+				If *msg\am_Type=8
+; If no args passed to us, it was a double-click message
+					If *msg\am_NumArgs=0
+						Gosub OpenWindow
+						Gosub NewCon
+					Else
+
+; Args were passed to us, so it was an icon drop
+						dirLock=0:retval=0
+						d$=""
+; Loop through all the arguments and fetch there complete
+; pathnames
+						For whatArg=0 To *msg\am_NumArgs-1
+							Gosub GetIconName
+
+							Select good
+; If we got the name ok.............
+								Case -1
+
+; Find the command associated with this type if icon
+									Gosub FindCommand
+
+; If we found a type, then do something to it!
+									If *cEntry>0
+										Gosub OpenWin
+										Gosub RunFile
+										Gosub CloseWin
+									EndIf
+							 Case 1: ;This was a directory, so do nothing
+							 Default:;DisplayBeep_0
+							End Select
+						Next
+					EndIf
+				EndIf
+				##[$FEB5](*msg)
+			EndIf
+		EndIf
+
+.WindowMsg
+;----------------------------------
+; A window message?
+;----------------------------------
+		If signal & winPortSig
+			##[$80BB]
+				ev.l=Event
+				Select ev
+					Case #IDCMP_CLOSEWINDOW:Gosub CloseConfigWin
+					Case #GADGETUP
+						Select GadgetHit
+; User clicked on the main listview
+							Case #GTG_LV:
+								oldCon=curCon
+								curCon.l=EventCode
+								If oldCon<>curCon Then Gosub NewCon
+								ClearString 1,#GTG_NAME
+
+; User clicked on the execute listview
+							Case #GTG_ELV
+								Gosub GetCurEntry
+								*cEntry\oldExec=*cEntry\curExec
+								*cEntry\curExec=EventCode
+								If *cEntry\oldExec<>*cEntry\curExec Then Gosub NewCon
+								ClearString 1,#GTG_ENAME
+
+; Add an execution
+							Case #GTG_EADD:Gosub AddExec
+								ClearString 1,#GTG_ENAME
+
+; Delete an execution
+							Case #GTG_EDEL:Gosub DelExec
+								If *cEntry Then If *cEntry\numExec>0 Then ClearString 1,#GTG_ENAME
+
+; Move a type up in the list
+							Case #GTG_UP:Gosub UpEntry
+
+; Move a type down in the list
+							Case #GTG_DOWN:Gosub DownEntry
+
+; Delete a type in the list
+							Case #GTG_DEL:Gosub DelEntry
+								If count Then ClearString 1,#GTG_NAME
+
+; About
+							Case #GTG_ABOUT:Gosub About
+
+							Case #GTG_RELOAD
+								Gosub FreeConfig
+								Gosub ReadConfig
+								Gosub NewCon
+
+; Hide the window
+							Case #GTG_HIDE:Gosub CloseConfigWin
+
+; BYE BYE!
+							Case #GTG_QUIT:go=0
+
+; Add a type to the list
+							Case #GTG_ADD:Gosub AddEntry
+								ClearString 1,#GTG_NAME
+
+; Save the config!
+							Case #GTG_SAVE:Gosub GetStrings:Gosub SaveConfig
+
+; Toggle wait after flag
+							Case #GTG_WAITAFTER
+								Gosub GetCurEntry
+;								*cEntry\flags BitChg #FB_WAITAFTER
+								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_WAITAFTER
+
+; Toggle sig first flag
+							Case #GTG_SIGFIRST
+								Gosub GetCurEntry
+								*cEntry\flags ##[$80D0] #FB_SIGFIRST
+
+; Toggle sync flag
+							Case #GTG_SYNC
+								Gosub GetCurEntry
+								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_ASYNC
+
+; If asynch was toggled, then en/disable the wait after gadget
+								f=*cEntry\execFlags[*cEntry\curExec]
+								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+
+; Toggle shell flag
+							Case #GTG_CLI
+								Gosub GetCurEntry
+								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_CLI
+
+; If shell was toggled, then en/disable the wait after gadget
+								f=*cEntry\execFlags[*cEntry\curExec]
+								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+
+; Changed the message string
+							Case #GTG_MESS:
+								Gosub GetStrings
+
+; Change the signature match string
+							Case #GTG_SIG:
+								Gosub GetStrings
+
+; Change the filename pattern match string
+							Case #GTG_PAT:
+								Gosub GetStrings
+
+; Change the name of the entry
+							Case #GTG_NAME:
+								Gosub GetStrings
+
+; Change the name of the current execute string
+							Case #GTG_EXEC:
+								Gosub GetStrings
+								Gosub MakeELV
+						End Select
+				End Select
+			##[$80BC] ev=0
+		EndIf
+	Wend
+.EndIt
+
+; Cleanup everything we have allocated
+
+	If *broker Then ##[$F805](*broker)
+
+	If *brokerMsgPort
+		FlushMessages{*brokerMsgPort}
+		##[$FEE3](*brokerMsgPort)
+	EndIf
+
+	If *msgPort Then FlushMessages{*msgPort}
+
+	Gosub CloseConfigWin
+
+	Gosub FreeConfig
+
+
+	If *fib Then ##[$FE99] *fib,SizeOf.FileInfoBlock
+	If appIcon Then ##[$EE04](appIcon)
+	If *diskOb Then ##[$F587](*diskOb)
+	If *msgPort Then ##[$FEE3](*msgPort)
+
+End
+
+.FreeConfig
+	While *fEntry
+		*cEntry=*fEntry\nextEntry
+		For t=1 To *fEntry\numExec
+			FreeExec{*fEntry,t-1}
+		Next
+		##[$FE99]*fEntry,SizeOf.Entry
+		*fEntry=*cEntry
+	Wend
+	*fEntry=0
+	*cEntry=0
+	curCon=0
+	count=0
+	Gosub DelLV
+	Gosub DelELV
+Return
+
+
+; ==============================================================
+.
+.GetIconName
+
+; PRE whatArg holds the number of the argument we need to process
+; POST t$ holds the complete pathname of the icon dropped
+;		 *fib is the file info block of the icon name
+
+	t$=""
+	args.l=*msg\am_ArgList+(whatArg*SizeOf.WBArg)
+	lock.l=Peek.l(args)							 ; Lock of parent!
+	name$=Peek$(Peek.l(args+4))			 ; Name of icon
+
+; Get info about the file
+	good.l=##[$FE0D](lock,*fib)
+	gotLock.w=0
+	If good<>0
+			t$=Peek$(&*fib\fib_FileName)
+
+; Make the entire pathname for the file
+			##[$80BB]
+				lock=##[$FE1D](lock)
+				If lock
+					gotLock=1
+					If ##[$FE0D](lock,*fib)
+						t$=t$+"/"+name$
+						name$=t$
+						t$=Peek$(&*fib\fib_FileName)
+					EndIf
+				EndIf
+			##[$80BC] lock=0
+
+		t$=t$+":"+name$
+
+; Examine this name to check if it's a directory or not!
+		lock.l=##[$FE0A](t$,-2)
+		If lock
+			If ##[$FE0D](lock,*fib)
+					If *fib\fib_DirEntryType>0
+						good=1:dirLock.l=lock
+						d$=t$
+					EndIf
+			EndIf
+			##[$FE0B] lock
+			lock=0
+		EndIf
+	EndIf
+Return
+
+; ==============================================================
+
+.FindCommand
+
+; PRE t$ holds the name of the icon dropped
+;		 An initialised entry list exists
+; POST Returns the pointer to command to execute or NULL if
+;			None exists (Returned in *cEntry)
+
+	c=-1:*cEntry=*fEntry
+	While *cEntry
+
+; Tokenise pattern for matching
+		p=##[$FC97](&*cEntry\nPat,?patTokenBuf,#READ_BUF_LEN)
+
+		If *cEntry\flags ##[$80CD] #FB_SIGFIRST
+; Need to check the signature first
+			If CheckSig{?patTokenBuf,?sigBuff} Then ##[$80BE] While:Goto jjj
+; Check to see if name matches
+			If ##[$FC98](?patTokenBuf,t$)>0 Then ##[$80BE] While:Goto jjj
+		Else
+; Check to see if name matches
+			If ##[$FC98](?patTokenBuf,t$)>0 Then ##[$80BE] While:Goto jjj
+			If CheckSig{?patTokenBuf,?sigBuff}=1 Then ##[$80BE] While:Goto jjj
+		EndIf
+		*cEntry=*cEntry\nextEntry
+	Wend
+jjj:
+Return
+
+; ==============================================================
+; Show the message for this file type
+
+.OpenWin
+; PRE: *cEntry points to a legal entry
+; POST: Message window is opened if it's needed
+
+	If *cEntry\mess[0]<>0
+		a$=Replace$(Peek$(&*cEntry\mess),"{f}",t$)
+		Gosub GetWBInfo
+		l.l=##[$FF05](*s\_RastPort,a$,Len(a$))+10
+		If l>sw-10 Then l=sw-10
+		w.w=0
+CNIF #FINAL
+		##[$80B4]:Goto blob:End ##[$80B4]
+CEND
+		localstat 0,(sw-l)/2,(sh-30)/2,l,*s\BarHeight,#WFLG_DRAGBAR,a$,0,1
+		w=1
+blob:
+CNIF #FINAL
+		##[$80B4]:Goto EndIt:End ##[$80B4]
+CEND
+		DefaultOutput
+	EndIf
+Return
+
+; ==============================================================
+
+.OpenOutput
+; PRE: *cEntry points to a legal entry
+;			opExec is the number of the execute we are running
+; POST: Output window is opened if it's needed
+	out=0:openedOut=1
+	If *cEntry\execFlags[opExec] ##[$80CD] #FB_CLI
+		out.l=##[$FE01]("con:0/0/"+Str$(sw)+"/"+Str$(sh/4)+"/DROPIT Output",1004)
+		If out=0 Then ##[$FF8C]0:openedOut=0
+	EndIf
+Return
+
+; ==============================================================
+
+.RunFile
+; PRE: *cEntry points to valid entry
+; POST: File has been run
+
+; Check for multiple options, and if more than one, request
+; from user the input
+	##[$80CA] *cEntry
+
+; Make sure there is something to execute!
+	If *cEntry\numExec<=0 Then Message{"No execution command(s)"}:Return
+
+; If there is more than one execution option.	We need to
+; go through them, and collect the options, and present them
+; to the user for selection.
+
+	If *cEntry\numExec>1
+		op$="":numOps.w=0
+		For t=1 To \numExec
+			If \exec[t-1]
+				numOps+1
+				If t>1 Then op$+"|"
+				a$=Peek$(\exec[t-1])
+				i=Instr(a$,"=")
+				If i>1
+					op$+Left$(a$,i-1)
+				Else
+					Message{"Illegal execute string! ("+a$+")"}
+					##[$80BE] For:Return
+				EndIf
+			EndIf
+		Next
+
+		t=##[$A281]("Select time..","Select an Option.",op$)-1
+
+		If t=-1 Then t=numOps-1
+
+		a$=Peek$(\exec[t])
+		i=Instr(a$,"=")
+		a$=UnRight$(Peek$(\exec[t]),i)
+	Else
+		t=0
+		a$=Peek$(\exec[0])
+	EndIf
+
+; Replace the auto insert strings
+	a$=Replace$(a$,"{f}",Chr$(34)+t$+Chr$(34))
+
+	a$=Replace$(a$,"{d}",Chr$(34)+d$+Chr$(34))
+
+
+	opExec.w=t
+; NOTE: At this point, 'opExec' holds the number of the execute
+; that is being called
+
+; Run it now!
+
+	If *cEntry\execFlags[opExec] ##[$80CD] *FB_ASYNC
+		Gosub OpenOutput
+
+; If openedOut =0 then OpenOutput couldn't open the output
+; window so we shall quit
+		If openedOut=0 Then Return
+
+		tags\a=#SYS_Asynch,1,#SYS_Input,out,#SYS_Output,0,0
+		Select ##[$FE5E](a$,&tags)
+			Case -1
+				If out Then ##[$FE02](out)
+				##[$FF8C]0
+			Case 0: ; OK
+			Default: ; Some error
+		End Select
+	Else
+
+; Synchronous execution
+		Gosub OpenOutput
+
+; If openedOut =0 then OpenOutput couldn't open the output
+; window so we shall quit
+		If openedOut=0 Then Return
+
+		tags\a=#SYS_Asynch,0,#SYS_Output,out,0
+		##[$FE5E] a$,&tags
+
+; If we wanted a shell, and also wanted to wait after execution
+; we now print the prompt and wait.
+		f=*cEntry\execFlags[opExec]
+		If (f ##[$80CD] #FB_WAITAFTER) AND (f ##[$80CD] #FB_CLI)
+			##[$FE04] out,"Press RETURN to exit.",21
+			##[$FE03] out,&a,1
+		EndIf
+
+		If out Then ##[$FE02] out
+	EndIf
+
+Return
+
+; ==============================================================
+
+; Close the message window if it is open
+CloseWin
+	If w Then Free localstat 0:w=0
+Return
+
+
+
+; ==============================================================
+; Get information about the current public screen
+.GetWBInfo
+;	FindScreen 0
+	freest 0
+	*s.Screen=Peek.l(##[$80B8] allocst(0))
+	sh.w=*s\Height
+	sw.w=*s\Width
+Return
+
+
+; ==============================================================
+; Open the config window!
+
+.OpenWindow
+; Open the config window!
+	If *win Then Return
+
+	Gosub GetWBInfo
+
+	Gosub InitGadTools
+
+CNIF #FINAL
+	##[$80B4]:Return:End ##[$80B4]
+CEND
+	AddIDCMP #IDCMP_INTUITICKS|#IDCMP_MOUSEMOVE
+	screenTitleHeight.w=*s\BarHeight
+
+#CFW_FLAGS=#WFLG_ACTIVATE|#WFLG_DRAGBAR|#WFLG_CLOSEGADGET|#WFLG_DEPTHGADGET
+
+	localstat 1,0,0,#CW_WIDTH,screenTitleHeight+#CW_HEIGHT,#CFW_FLAGS,"DROPIT Config",0,1
+
+	AttachGTList 0,1
+
+CNIF #FINAL
+	##[$80B4]:Goto EndIt:End ##[$80B4]
+CEND
+	*win=Peek.l(##[$80B8] localstat(1))
+	winPortSig=1 LSL *win\UserPort\mp_SigBit
+
+Return
+
+; ==============================================================
+
+.CloseConfigWin
+	If *win=0 Then Return
+	CloseWindow 1
+	winPortSig=0
+	*win=0
+	Free GTList 0
+Return
+
+; ==============================================================
+; Return a pointer to the current entry
+
+.GetCurEntry
+	*pEntry.Entry=0
+	*cEntry=*fEntry
+	For t=1 To curCon
+		*pEntry=*cEntry
+		*cEntry=*cEntry\nextEntry
+	Next
+Return
+
+; ==============================================================
+; Deletes an execute entry
+.DelExec
+	Gosub GetCurEntry
+	If *cEntry
+		If *cEntry\numExec
+			FreeExec{*cEntry,*cEntry\curExec}
+			*cEntry\numExec-1
+			Gosub SetGads
+			For t=*cEntry\curExec+1 To #MAX_EXECUTES-1
+				*cEntry\exec[t-1]=*cEntry\exec[t]
+			Next
+			*cEntry\exec[#MAX_EXECUTES-1]=0
+			*cEntry\curExec-1
+			Gosub NewCon ;MakeELV
+		EndIf
+	EndIf
+Return
+
+; ==============================================================
+; We have changed the current entry, so we now have to update
+; all the gadgets and things..........
+
+.NewCon
+; PRE: 'curCon' should hold the # of the listview entry that is to be configured
+;			'curExec' should hold the current exec number
+
+	Gosub GetCurEntry
+
+	##[$80CA] *cEntry
+	If *cEntry
+		Gosub MakeELV
+
+		GTSetAttrs 0,0,#GTLV_Selected,curCon
+		GTSetAttrs 0,#GTG_ELV,#GTLV_Selected,*cEntry\curExec
+		GTSetString 0,#GTG_NAME,Peek$(&\simpName)
+
+		If \numExec
+			GTSetString 0,#GTG_ENAME,Peek$(\exec[\curExec])
+		Else
+			GTSetString 0,#GTG_ENAME,""
+		EndIf
+
+
+		GTSetString 0,#GTG_PAT,Peek$(&\nPat)
+		GTSetString 0,#GTG_SIG,UnLeft$(Peek$(&\sPat),2)
+		GTSetString 0,#GTG_MESS,Peek$(&\mess)
+		GTSetAttrs 0,#GTG_SYNC,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_ASYNC ;f
+		GTSetAttrs 0,#GTG_CLI,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_CLI ;f
+
+
+		GTSetAttrs 0,#GTG_WAITAFTER,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_WAITAFTER ;f
+		GTSetAttrs 0,#GTG_SIGFIRST,#GTCB_Checked,\flags ##[$80CD] #FB_SIGFIRST ;f
+
+
+		Gosub SetGads
+
+	Else
+		GTSetString 0,#GTG_NAME,""
+		GTSetString 0,#GTG_EXEC,""
+		GTSetString 0,#GTG_PAT,""
+		GTSetString 0,#GTG_SIG,""
+		GTSetString 0,#GTG_MESS,""
+		GTSetAttrs 0,#GTG_SYNC,#GTCB_Checked,0
+		GTSetAttrs 0,#GTG_CLI,#GTCB_Checked,0
+	EndIf
+Return
+
+; ==============================================================
+
+.AddExec
+	##[$80CA] *cEntry
+	Gosub GetCurEntry
+	If *cEntry
+		If \numExec < #MAX_EXECUTES
+			a$="NEW EXECUTE"
+			If SetExec{*cEntry,\numExec,&a$}
+				\curExec=\numExec
+				\numExec+1
+				Gosub SetGads
+			EndIf
+			Gosub NewCon
+		EndIf
+	EndIf
+Return
+
+; ==============================================================
+
+.AddEntry
+	mem.l=##[$FE97](SizeOf.Entry,#MEMF_PUBLIC|#MEMF_CLEAR)
+	If mem
+		oldCon=curCon
+		curCon=count-1
+		Gosub GetCurEntry
+		curCon=count
+		count+1
+		If *cEntry Then *cEntry\nextEntry=mem
+		*cEntry=mem
+		If *fEntry=0 Then *fEntry=mem
+		##[$80CA] *cEntry
+		Poke$ &\simpName,"NEW ENTRY"
+		Gosub SetGads
+		Gosub MakeLV
+		Gosub NewCon
+	EndIf
+Return
+
+; ==============================================================
+
+.DelELV
+	newmem elv()
+	While globfree(elv()):freelast elv():Wend
+Return
+
+; ==============================================================
+; Makes the list view for the execute options
+
+.MakeELV
+	Gosub DelELV
+
+	GTChangeList 0,#GTG_ELV
+	Gosub GetCurEntry
+	If *cEntry
+		For t=1 To *cEntry\numExec
+			If globalloc(elv())
+				elv()\l=Peek$(*cEntry\exec[t-1])
+			EndIf
+		Next
+	EndIf
+	GTChangeList 0,#GTG_ELV,elv()
+Return
+
+; ==============================================================
+
+.DelLV
+	newmem lv()
+	While globfree(lv()):freelast lv():Wend
+Return
+
+; ==============================================================
+; Makes the main listview
+
+.MakeLV
+	Gosub DelLV
+	GTChangeList 0,#GTG_LV
+	*cEntry=*fEntry
+	While *cEntry
+		If globalloc(lv())
+			lv()\l=Peek$(&*cEntry\simpName)
+			*cEntry=*cEntry\nextEntry
+		Else
+			##[$80BE] While:Goto JumpOut
+		EndIf
+	Wend
+JumpOut
+	GTChangeList 0,#GTG_LV,lv()
+Return
+
+; ==============================================================
+; Get the values of the strings (pattern,sig etc) and
+; then save them
+
+.GetStrings
+	Gosub GetCurEntry
+	If *cEntry
+		Poke$ &*cEntry\mess,GTGetString(0,#GTG_MESS)
+		Poke$ &*cEntry\sPat,GTGetString( 0,#GTG_SIG)+"#?"
+		Poke$ &*cEntry\nPat,GTGetString( 0,#GTG_PAT)
+		Poke$ &*cEntry\simpName,GTGetString( 0,#GTG_NAME)
+
+		If *cEntry\numExec
+			a$=GTGetString(0,#GTG_ENAME)
+			If SetExec{*cEntry,\curExec,&a$}=0 Then ##[$FF8C]0
+		EndIf
+
+		GTChangeList 0,#GTG_LV
+
+		Gosub GetCurLv
+		lv()\l=GTGetString(0,#GTG_NAME)
+		GTChangeList 0,#GTG_LV,lv()
+	EndIf
+Return
+
+; ==============================================================
+; Sets the current element of lv() based on our current
+; entry
+
+GetCurLv
+	newmem lv()
+	For t=0 To curCon:f=globfree(lv()):Next
+Return
+
+; ==============================================================
+
+.SaveConfig
+	If ##[$B68D]("envarc:dropit/dropit.config","envarc:dropit/dropit.config.bak")=0
+		If ##[$A281]("OOPS!","Can't create backup of config!","SAVE ANYWAY|DON'T SAVE")=0 Then Return
+	EndIf
+
+; Open the file for writing..........
+	If ReadMem(0,"envarc:dropit/dropit.config")
+CNIF #FINAL
+	##[$80B4]:CloseFile 0:Goto BADWRITE:End ##[$80B4]
+CEND
+		FileOutput 0
+		*cEntry=*fEntry
+		##[$80CA] *cEntry
+		While *cEntry
+			f=0
+
+			NPrint \flags
+
+			NPrint Peek$(&\simpName)
+			NPrint \numExec
+			For t=1 To \numExec
+				NPrint Peek$(\exec[t-1])
+				NPrint \execFlags[t-1]
+			Next
+			NPrint Peek$(&\nPat)
+			NPrint UnLeft$(Peek$(&\sPat),2)
+			NPrint Peek$(&\mess)
+			NPrint "======== DROPIT SEPARATOR ========"
+
+			*cEntry=*cEntry\nextEntry
+		Wend
+		CloseFile 0
+		If ##[$B68D]("envarc:dropit/dropit.config","env:dropit/dropit.config")=0
+			dummy=##[$A281]("YO DUDE!","Can't copy ENVARC: config to ENV:","CHEERS!")
+		EndIf
+	Else
+BADWRITE:
+		##[$A281] "HEY!","Can't save config!","THANKS!"
+		If ##[$B68D]("envarc:dropit/dropit.config.bak","envarc:dropit/dropit.config")=0
+			dummy=##[$A281]("OH NO!","Can't restore old config! (envarc:dropit/dropit.config.bak)","OKEE DOKES!")
+		EndIf
+	EndIf
+
+CNIF #FINAL
+	##[$80B4]:Goto EndIt:End ##[$80B4]
+CEND
+Return
+
+; ==============================================================
+
+.ReadConfig
+	If WriteMem(0,"env:dropit/dropit.config")
+		FileInput 0:count.w=0:newmem lv()
+		GTChangeList 0,#GTG_LV
+		While DosBuffLen(0)=0
+			mem.l=##[$FE97](SizeOf.Entry,#MEMF_PUBLIC|#MEMF_CLEAR)
+			If mem
+				If *cEntry Then *cEntry\nextEntry=mem
+				*cEntry=mem
+				If *fEntry=0 Then *fEntry=mem
+
+				*cEntry\flags=Edit(20)
+
+				a$=Edit$(255)						; SIMPLE NAME
+				Poke$ &*cEntry\simpName,a$
+				If globalloc(lv())
+					lv()\l=a$
+				EndIf
+
+				*cEntry\numExec=Edit(50)
+
+; Read in the executes
+				For t=1 To *cEntry\numExec
+					a$=Edit$(255)						; execute
+					*cEntry\execFlags[t-1]=Edit(20)
+					If SetExec{*cEntry,t-1,&a$}=0
+						Message{"Can't load entire config!"}
+						##[$80BE] For:##[$80BE] While
+						*cEntry\numExec=t-1
+						Goto EndReadConfig
+;						Goto EndIt
+					EndIf
+				Next
+
+				a$=Edit$(255)						; Name pattern
+				Poke$ &*cEntry\nPat,a$
+				a$=Edit$(255)						; Signature pattern
+				If a$<>"" Then a$+"#?"
+				Poke$ &*cEntry\sPat,a$
+				a$=Edit$(255)						; Message
+				Poke$ &*cEntry\mess,a$
+				a$=Edit$(255)					 ; Skip a line
+			Else
+				Gosub GetWBInfo
+				##[$FF8C]*s:Goto EndIt
+			EndIf
+			count+1
+		Wend
+EndReadConfig
+		GTChangeList 0,#GTG_LV,lv()
+		CloseFile 0
+		DefaultInput
+	Else
+		Message{"Can't find ENV:DROPIT/DROPIT.CONFIG"}
+		Gosub OpenWindow:Gosub NewCon
+	EndIf
+Return
+
+; ==============================================================
+
+.About
+	a$="A most wonderful auto execute AppIcon written in BLITZ Basic 2 by Aaron Koolen (13-May-1994)."
+	a$+Chr$(10)+Chr$(10)+"THANKS TO:"+Chr$(10)+"		Twilight for testing and ideas."
+	a$+Chr$(10)+"		The Amiga soft/hardware creators for a groovy machine."
+	a$+Chr$(10)+"		The A.L.F and all other animal freedom fighters."
+
+	a$+Chr$(10)+Chr$(10)+"BIG SOD OFFS TO:"
+	a$+Chr$(10)+"		Racial supremists &	Religious dogmatists."
+	a$+Chr$(10)+"		Governments who spend billions on warfare while millions of people die from starvation and poverty."
+	a$+Chr$(10)+"		B.R.T and other mega capatilists."
+
+	a$+Chr$(10)+Chr$(10)+"Take control, dont be controlled."
+	a$+Chr$(10)+Chr$(10)+"Anarchy and Peace."+Chr$(0)
+
+	dummy=##[$A281]("About DROPIT "+ver$,a$,"ENOUGH, I'D RATHER WATCH TV!")
+Return
+
+; ==============================================================
+
+.DelEntry
+	Gosub GetCurEntry
+;	Gosub GetCurLv
+	If *cEntry
+		*nEntry.Entry=*cEntry\nextEntry
+
+; If there is one previous to the one we are to delete,
+; join the previous one to the one after the one to delete
+		If *pEntry Then *pEntry\nextEntry=*nEntry
+
+; If deleting the first one, then set the first one to
+; the one after the one we are deleting
+		If curCon=0 Then *fEntry=*nEntry
+
+		For t=1 To *cEntry\numExec
+			FreeExec{*cEntry,t-1}
+		Next
+
+		##[$FE99] *cEntry,SizeOf.Entry
+		Gosub MakeLV
+		Gosub MakeELV
+		count-1
+		If curCon=count Then curCon-1
+		If count<=0 Then Gosub DelELV
+		Gosub SetGads
+		Gosub NewCon
+	EndIf
+
+Return
+
+; ==============================================================
+
+.UpEntry
+	If curCon>0 AND count>1
+		Gosub GetCurEntry
+		##[$FEDB] *pEntry,&dummyEntry,SizeOf.Entry
+		##[$FEDB] *cEntry+4,*pEntry+4,(SizeOf.Entry)-4
+		##[$FEDB] &dummyEntry+4,*cEntry+4,(SizeOf.Entry)-4
+		Gosub MakeLV
+		curCon-1
+		Gosub NewCon
+	EndIf
+Return
+
+; ==============================================================
+
+.DownEntry
+	If curCon<count-1 AND count>1
+		Gosub GetCurEntry
+		##[$FEDB] *cEntry,&dummyEntry,SizeOf.Entry
+		##[$FEDB] (*cEntry\nextEntry)+4,*cEntry+4,(SizeOf.Entry)-4
+		##[$FEDB] &dummyEntry+4,(*cEntry\nextEntry)+4,(SizeOf.Entry)-4
+		Gosub MakeLV
+		curCon+1
+		Gosub NewCon
+	EndIf
+Return
+
+; ==============================================================
+
+.InitAppIcon
+	*msgPort.MsgPort=##[$FEE2]()
+	If *msgPort=0 Then Goto EndIt
+	*diskOb=##[$F585]("env:dropit/dropiticon")
+
+	If *diskOb=0 Then Message{"Can't load icon."}:Goto EndIt
+
+	appIcon.l=##[$EE03](0,0,"Drop Icons Here",*msgPort,0,*diskOb,0)
+
+	If appIcon=0 Then Message{"Can't initialise AppIcon."}:Goto EndIt
+
+	*fib=##[$FE97](SizeOf.FileInfoBlock,#MEMF_PUBLIC|#MEMF_CLEAR)
+	If *fib=0 Then Goto EndIt
+
+	msgPortSig.l=1 LSL *msgPort\mp_SigBit
+	winPortSig.l=0
+Return
+
+; ==============================================================
+
+.InitCommodity
+
+	raw$="lalt d"+Chr$(0)							 ; Set default hotkey
+
+	brokertitle$="DropIt "+ver$+" Aaron Koolen"+Chr$(0)
+	brokername$="DROPIT"+Chr$(0)
+	brokerdesc$="Auto execute AppIcon"+Chr$(0)
+
+;Create Broker-port
+	*brokerMsgPort.MsgPort=##[$FEE2]()
+	newBroker\nb_Port=*brokerMsgPort
+
+	If *brokerMsgPort=0 Then Message{"Error initialising DropIt (*brokerMsgPort)"}:Goto EndIt ;<>0
+
+	;Fill in Broker-data
+
+	newBroker\nb_Version=#NB_VERSION
+	newBroker\nb_Name=&brokername$
+	newBroker\nb_Title=&brokertitle$
+	newBroker\nb_Descr=&brokerdesc$
+
+	;We want to be unique and informed about 2nd attempt to start
+	newBroker\nb_Unique=#NBU_NOTIFY|#NBU_UNIQUE
+
+	;We have a window
+	newBroker\nb_Flags=#COF_SHOW_HIDE
+
+	;Create Broker
+	*broker=##[$F802](&newBroker,0)
+
+	If *broker=0 Then Goto EndIt: ;Message{"Error initialising DropIt (*broker)"}:Goto EndIt
+
+	cxSig=1LSL*brokerMsgPort\mp_SigBit
+
+	;This is our popkey
+	*cxfilter=##[$F801](#CX_FILTER,&raw$,0)
+	If *cxfilter=0 Then Message{"Error initialising DropIt (*filter)"}:Goto EndIt
+	##[$F80A] *broker,*cxfilter
+
+	*cxsender=##[$F801](#CX_SEND,*brokerMsgPort,#EVT_HOTKEY)
+	If *cxsender=0 Then Message{"Error initialising DropIt (*sender)"}:Goto EndIt
+	##[$F80A] *cxfilter,*cxsender
+
+	;Activate all
+	##[$F803] *broker,1
+
+Return
+
+; ==============================================================
+
+.InitGadTools
+CNIF #FINAL
+	##[$80B4]:Return:End ##[$80B4]
+CEND
+
+GTListView 0,#GTG_LV,#LV_X,5,#LV_WIDTH,#LV_HEIGHT,"",0,lv()
+GTString 0,1,#LV_X,#NAME_Y,#LV_WIDTH,14,"",2,80
+
+GTListView 0,#GTG_ELV,#ELV_X,#ELV_Y,#ELV_WIDTH,#ELV_HEIGHT,"",0,elv()
+GTString 0,#GTG_ENAME,#ELV_X,#ENAME_Y,#ELV_WIDTH,14,"",0,80
+
+;GTSetAttrs 0,#GTG_ELV,#GTLV_ShowSelected,0
+;GTSetAttrs 0,0,#GTLV_ShowSelected,0
+
+GTString 0,2,#ELV_X,#STRING_Y,160,#STRING_HEIGHT,"Message",2,80
+GTString 0,4,#ELV_X,#STRING_Y+#STRING_GAP,160,#STRING_HEIGHT,"Pattern",2,80
+GTString 0,5,#ELV_X,#STRING_Y+#STRING_GAP*2,160,#STRING_HEIGHT,"Signature",2,80
+
+GTCheckBox 0,6,#ELV_X,#F_Y,10,10,"ASync",2
+GTCheckBox 0,7,#ELV_X+#F_GAP,#F_Y,10,10,"Shell",2
+GTCheckBox 0,#GTG_SIGFIRST,#ELV_X,#F_Y+11,10,10,"Sig 1st",2
+GTCheckBox 0,#GTG_WAITAFTER,#ELV_X+#F_GAP,#F_Y+11,10,10,"Wait After",2
+
+GTButton 0,#GTG_SAVE,#SQ_X,#SQ_Y,#SQ_WIDTH,#SQ_HEIGHT,"Save",16
+;GTButton 0,#GTG_SAVEICON,#SQ_X+#SQ_WIDTH-12,#SQ_Y,12,#SQ_HEIGHT,"I",16
+GTButton 0,#GTG_HIDE,#SQ_X+#SQ_GAP,#SQ_Y,#SQ_WIDTH,#SQ_HEIGHT,"Hide",16
+
+GTButton 0,#GTG_RELOAD,#SQ_X+#SQ_GAP*2,#SQ_Y,#SQ_WIDTH,#SQ_HEIGHT,"Reload",16
+
+GTButton 0,#GTG_QUIT,#SQ_X+#SQ_GAP*4,#SQ_Y,#SQ_WIDTH,#SQ_HEIGHT,"Quit",16
+GTButton 0,#GTG_ABOUT,#SQ_X+#SQ_GAP*3,#SQ_Y,#SQ_WIDTH,#SQ_HEIGHT,"About",16
+
+; Add Del Up Down for main list view
+GTButton 0,#GTG_ADD,#LV_X,#AD_Y,#AD_WIDTH,#AD_HEIGHT,"Add",16
+GTButton 0,#GTG_DEL,#LV_X+#AD_GAP,#AD_Y,#AD_WIDTH,#AD_HEIGHT,"Del",16
+GTButton 0,#GTG_UP,#LV_X+#AD_GAP*2,#AD_Y,#AD_WIDTH,#AD_HEIGHT,"Up",16
+GTButton 0,#GTG_DOWN,#LV_X+#AD_GAP*3,#AD_Y,#AD_WIDTH,#AD_HEIGHT,"Down",16
+
+; Add Del for execute lsit view
+GTButton 0,#GTG_EADD,#ELV_X,#EAD_Y,#EAD_WIDTH,#EAD_HEIGHT,"Add",16
+GTButton 0,#GTG_EDEL,#ELV_X+#EAD_GAP,#EAD_Y,#EAD_WIDTH,#EAD_HEIGHT,"Del",16
+
+CNIF #FINAL
+	##[$80B4]:Goto EndIt:End ##[$80B4]
+CEND
+
+Return
+
+; ==============================================================
+; Turns gadgets on and off based on other status of config
+
+.SetGads
+	##[$80CA] *cEntry
+	Gosub GetCurEntry
+	If *cEntry
+		GTSetAttrs 0,#GTG_ENAME,#GA_Disabled,\numExec<=0
+	Else
+		GTSetAttrs 0,#GTG_ENAME,#GA_Disabled,*cEntry=0
+	EndIf
+
+	GTSetAttrs 0,#GTG_NAME,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_EADD,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_EDEL,#GA_Disabled,(count<=0) OR \numExec<=0
+
+	GTSetAttrs 0,#GTG_SIG,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_PAT,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_MESS,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_SYNC,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_CLI,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_UP,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_DOWN,#GA_Disabled,count<=0
+	GTSetAttrs 0,#GTG_DEL,#GA_Disabled,count<=0
+
+	f=\execFlags[\curExec]
+	GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(count<=0) OR (f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+	GTSetAttrs 0,#GTG_SIGFIRST,#GA_Disabled,count<=0
+
+Return
+
+patTokenBuf:	Dcb.b #READ_BUF_LEN,0
+sigBuff: Dcb.b #READ_BUF_LEN,0
+vers:		 Dc.b "$VER: DropIt 2.16 (13-May-94)",0
+Event

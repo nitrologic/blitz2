@@ -1,0 +1,30 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/Function_error~3f.bb
++;This mystifies me completely, but if there really is an error
+;it would be a nasty one so I'm sending it in without delay.
+;Ted Jones 16/12/93
+
+Function.f func{y.f}
+	Function Return HCos(y)
+;	Function Return 0+Cos(y)
+End Function
+
+Format "##.######-			"
+
+For y.f=0 To 1 Step 0.1
+	f1.f=func{y}
+	z1.f=2*f1+f1
+
+;The following statement seems to process incorrectly.
+;If I replace it with just 2*func{y} it's okay.
+;Even more puzzling, if I replace the returned value in
+;the function definition by 0+cos(y) instead of just cos(y) it also works.
+
+	z2.f=2*func{y}+func{y}
+
+;z1 and z2 should be the same.
+
+	NPrint f1,z1,z2
+Next
+
+MouseWait
+VWait 50

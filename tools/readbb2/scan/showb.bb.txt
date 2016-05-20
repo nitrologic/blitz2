@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ShowB.bb
++; ; showb and showf program example ; BLITZ										;blitz modeBitMap 0,640,200,2							;create a bitmap Circlef 320,100,80,1						 ;put a circle on itCirclef 320,100,40,2						 ;and another Slice 0,44,320,200,$fffa,4,8,32,640,640	 ;dual-playfield slice! ShowF 0,160,0								;show background bitmapFor k=0 To 319								;begin a loop VWait									 ;wait for vertical blank  ShowB 0,k,0								;show foreground bitmapNext										 ;end of loop MouseWait 

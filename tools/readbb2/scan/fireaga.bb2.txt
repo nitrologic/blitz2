@@ -1,0 +1,645 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fire/FireAGA.bb2
++;#############################################################
+;#		Fire AGA v0.9 by Vaughan Roberts.											#
+;#		Email: vroberts@yoyo.cc.monash.edu.au									#
+;#		WWW:	 http://yoyo.cc.monash.edu.au/~vroberts					#
+;#############################################################
+;#	This program is incomplete and without docs or comments	#
+;#	However it is useable and hopefully someone can learn		#
+;#	something from it.	This is a rushed release to try and	#
+;#	get it onto BUM 8.	If anyone wants to contact me about	#
+;#	future versions or what ever, then use my email address	#
+;#	above.	Following are some _very_ short docs.						#
+;#############################################################
+;# Fire generates frames of fire animation that can be saved #
+;# disk for use in something(?)	Use the different controls	#
+;# to adjust how the flames grow and change over time.	Some #
+;# controls don't do anything (most of these are in the menu #
+;# bar).	When generating fire, use the amiga-n key or click #
+;# in the upper right of the screen to see the fire.				 #
+;# The offset field controls how many frames are rendered		#
+;# before the program start to save the frames.	Well any-	 #
+;# thing else you can find out for yourselves ;-)						#
+;#############################################################
+;# The progress indicater used in this program is an altered #
+;# version of David Cole's indicater statements (see previous#
+;# BUM (6 or 7), so thank you to him.												#
+;#############################################################
+
+
+
+
+##[$80C3]
+##[$80CB]
+##[$80CC]
+
+If NOT ##[$9B1A] Then Gosub ExitFire
+
+.Declare
+#W1=0 : #W2=1
+#TAG=$80080000
+#MOUSEMOVE=$10
+#INTUITICKS=$400000
+#NEWLOOK=$200000
+
+MaxLen pa$=192
+MaxLen fi$=192
+
+NEWTYPE .fireinfo
+	width.w		 ; Width of fire
+	height			; Height of fire
+	hotspots		; # of hotspots in fire
+	hotarea.q	 ; % of fire to place hotspots
+	chunky.b		; Pixel size
+	fade				; Rate of fire fade
+	hotstgth		; Strenght of each hotspot
+	hotsize		 ; Size of each hotspot
+	matrix			; # of active matrix points
+	percent.q
+	percinc.q
+End NEWTYPE
+
+NEWTYPE .miscinfo
+	savetype.b	; Type of render
+	pri				 ; Priority of program
+End NEWTYPE
+
+NEWTYPE .events
+	ev.l				; Last event
+	gh					; Last gadget event
+	mh.b				; Last Menu event
+	mi					; Last Menu item
+	si					; Last Sub menu item
+End NEWTYPE
+
+NEWTYPE .frameinfo
+	frame.q		 ; # of frames to render
+	begin			 ; # of frames to render before saving
+	framestep	 ; Step rate between frames
+	current		 ; Current frame to render
+End NEWTYPE
+
+NEWTYPE .screeninfo
+	id.l
+	width.l
+	height.l
+	colours.w
+	overscan.w
+	autoscroll.w
+	bmapwidth.l
+	bmapheight.l
+End NEWTYPE
+
+NEWTYPE .rendinfo
+	width.l		 ; Width of render
+	height.l		; Height of render
+	colours.w	 ; # of colours in render
+End NEWTYPE
+
+.Variables
+	Dim oldarray.w(1,1)
+	Dim newarray.w(1,1)
+	Dim matrix.b(2,2)
+	DEFTYPE .rendinfo rendscreen
+	DEFTYPE .fireinfo fire
+	DEFTYPE .frameinfo fireanim
+	DEFTYPE .events whatnow
+	DEFTYPE .miscinfo misc
+
+.Statements
+Statement SaveRender{frame,name$}
+	Shared exitrender
+	If exitrender Then Statement Return
+	postfix$=Str$(frame)
+	SaveBitmap 0,name$+"."+postfix$,0
+End Statement
+
+Statement SetUpProgress{}
+	GTButton #W2,1,134,73,76,14,"Cancel",16
+	localstat #W2,WindowX+140,WindowY+47,360,106,$2|$4,"Generating Fire",0,1
+	AttachGTList #W2,#W2
+	Activate #W2
+	WLocate 116,8 : Print "Current Frame:"
+	WLine 44,30,300,30,1
+	WLine 44,30,44,41,1
+	WLine 44,41,300,41,2
+	WLine 300,30,300,41,2
+	WLocate 12,21 : Print "0%"
+	WLocate 308,21 : Print "100%"
+	WLine 44,62,300,62,1
+	WLine 44,62,44,73,1
+	WLine 44,73,300,73,2
+	WLine 300,62,300,73,2
+	WLocate 12,53 : Print "0%"
+	WLocate 308,53 : Print "100%"
+End Statement
+
+Statement Progress{percent,mode,frame$}
+	Shared fireanim
+	pos=QLimit(((percent ASL 8)/100),0,253)
+	yoff=mode ASL 5
+	If percent=0
+		WBox 45,31+yoff,299,40+yoff,0
+	Else
+		WBox 46,32+yoff,45+pos,39+yoff,3
+		WLine 45,31+yoff,46+pos,31+yoff,2
+		WLine 45,31+yoff,45,39+yoff,2
+		WLine 45,40+yoff,46+pos,40+yoff,1
+		WLine 46+pos,32+yoff,46+pos,40+yoff,1
+	EndIf
+	If mode=1
+		xoff=172-(Len(frame$)*4)
+		WLocate xoff,40 : Print frame$
+	EndIf
+End Statement
+
+Statement UpdateProgress{}
+	Shared fire,exitrender
+	fire\percent+fire\percinc
+	Progress{fire\percent,0,""}
+	ev.l=Event
+	If ev=$40
+		If EventWindow=#W2
+			If GadgetHit=1
+				exitrender=On
+			EndIf
+		EndIf
+	EndIf
+End Statement
+
+Statement MakeBlits{}
+	Shared fire
+	Use lmaxlen 0
+	BlockScroll
+	For i=0 To 127
+		Boxf 100,100,99+fire\chunky,99+fire\chunky,i
+		GetaShape i,100,100,fire\chunky,fire\chunky
+	Next
+	BlockScroll
+End Statement
+
+Statement InitArrays{}
+	Shared oldarray(),newarray(),fire
+	For x=0 To fire\width
+		For y=0 To fire\height+8
+			oldarray(x,y)=0
+			newarray(x,y)=0
+		Next
+	Next
+End Statement
+
+Statement SumNewArray{}
+	Shared oldarray(),newarray(),matrix(),fire,exitrender
+	If exitrender Then Statement Return
+	For yy=0 To fire\height-2+6
+		UpdateProgress{}
+		For xx=1 To fire\width-1
+			newval=0
+			For x=0 To 2
+				For y=0 To 2
+					If matrix(x,y) Then newval+oldarray(xx+x-1,yy+y)
+				Next
+			Next
+			newval=(newval / fire\matrix)-fire\fade
+			newval=newval*((Rnd ASR 3)+0.9375)
+			newarray(xx,yy)=QLimit(newval,0,256)
+		Next
+	Next
+End Statement
+
+Statement CopyNewToOld{}
+	Shared oldarray(),newarray(),fire,exitrender
+	If exitrender Then Statement Return
+	For y=0 To fire\height+8
+		UpdateProgress{}
+		For x=0 To fire\width
+			oldarray(x,y)=newarray(x,y)
+		Next
+	Next
+End Statement
+
+Statement AddHotSpot{hx,hy,sz}
+	Shared oldarray(),newarray(),fire
+	scaler=(sz ASR 1)
+	For x=-sz To sz
+		For y=-sz To 7
+			tx=hx+x : ty=hy+y
+			If ty>-1
+				If tx>-1 AND tx<fire\width+1
+					heat.q=255-QLimit((Abs(x*y)-scaler)*sz,0,255)
+					oldarray(tx,ty)=##[$B486](heat,oldarray(tx,ty))
+				EndIf
+			EndIf
+		Next
+	Next
+End Statement
+
+Statement PutHotSpots{}
+	Shared oldarray(),newarray(),fire,exitrender
+	maxwidth=Int(fire\width*(fire\hotarea / 100))
+	maxoff=Int((fire\width ASR 1)-(maxwidth ASR 1))+1
+	y=fire\height
+	For hotspot=1 To fire\hotspots
+		x=Int(Rnd * (maxwidth-3)) + maxoff
+		AddHotSpot{x,y,Int(fire\hotsize ASR 1)+1}
+	Next
+End Statement
+
+Statement DisplayPixels{}
+	Shared oldarray(),newarray(),fire,exitrender
+	If exitrender Then Statement Return
+	For y=0 To fire\height
+		UpdateProgress{}
+		For x=0 To fire\width
+			longdiv QLimit(oldarray(x,y) ASR 1,0,127),x * fire\chunky,y * fire\chunky
+		Next
+	Next
+End Statement
+
+;LoadPalette 0,"PROG:fire.pal"
+##[$A484] ?pal_data,0
+lmaxlen 0,320,256,7
+
+allocst 1,0,0,320,256,7,0,"",0,0,0
+Use allocst 1
+Use SetCycle 0
+freest 0
+##[$FFB5]
+Use allocst 0
+
+
+AddIDCMP #MOUSEMOVE+#INTUITICKS
+
+GTSlider #W1,1,316,17,240,8,"Pixel Size:",388,1,8,1
+GTSlider #W1,2,316,45,240,8,"Fade Rate:",388,0,16,1
+GTSlider #W1,3,316,73,240,8,"Hot Spots:",388,1,256,32
+GTSlider #W1,4,316,101,240,8,"Hot Spot Area (%):",4,25,100,75
+GTSlider #W1,5,316,129,240,8,"Strength of Hot Spots (%):",4,1,100,50
+GTSlider #W1,6,316,157,240,8,"Size of Hot Spots:",388,1,32,1
+GTInteger #W1,7,564,13,48,16,"",1,1
+GTInteger #W1,8,564,41,48,16,"",1,1
+GTInteger #W1,9,564,69,48,16,"",1,32
+GTInteger #W1,10,564,97,48,16,"",1,75
+GTInteger #W1,11,564,125,48,16,"",1,50
+GTInteger #W1,12,564,153,48,16,"",1,1
+GTText #W1,13,28,21,160,20,"Average Matrix:",16,""
+GTCheckBox #W1,14,196,9,26,11,"",257
+GTCheckBox #W1,15,228,9,26,11,"",257
+GTCheckBox #W1,16,260,9,26,11,"",257
+GTCheckBox #W1,17,196,25,26,11,"",257
+GTCheckBox #W1,18,228,25,26,11,"",1
+GTCheckBox #W1,19,260,25,26,11,"",257
+GTCheckBox #W1,20,196,41,26,11,"",257
+GTCheckBox #W1,21,228,41,26,11,"",257
+GTCheckBox #W1,22,260,41,26,11,"",257
+GTButton #W1,23,28,69,112,12,"Screen Mode",16
+GTNumber #W1,24,236,69,48,12,"Colours:",1,8
+GTNumber #W1,25,92,85,48,12,"Width:",1,320
+GTNumber #W1,26,236,85,48,12,"Height:",1,256
+GTInteger #W1,27,92,113,48,16,"Fire X:",1,320
+GTInteger #W1,28,236,113,48,16,"Fire Y:",1,256
+GTInteger #W1,29,92,133,48,16,"Frames:",1,1
+GTInteger #W1,30,236,133,48,16,"Step:",1,1
+GTInteger #W1,31,92,153,48,16,"Offset:",1,0
+GTButton #W1,32,156,153,128,16,"Calculate",16
+localstat #W1,0,12,640,188,4110+#NEWLOOK,"Fire AGA v0.9",1,2:AttachGTList #W1,#W1
+
+newlocarr 0,0,"Project"
+newlocarr 0,1,"Config"
+MenuItem 0,0,0,0,"Open Project			","O"
+MenuItem 0,0,0,1,"Close Project		 ","C"
+MenuItem 0,0,0,2,"About						 ","A"
+MenuItem 0,0,0,3,"Quit							","Q"
+MenuItem 0,0,1,0,"Set Screen Mode	"
+MenuItem 0,0,1,1,"Set Save Mode	 "+Chr$(187)
+MenuItem 0,0,1,2,"Set Priority		"+Chr$(187)
+MenuItem 0,0,1,3,"Alter Palette		"
+MenuItem 0,0,1,4,"Default Config	 ","D"
+MenuItem 0,0,1,5,"Load Config			","L"
+MenuItem 0,0,1,6,"Save Config			","S"
+SubItemOff 128,-12
+SubItem 0,2,1,1,0,"	Display/Save"
+SubItem 0,2,1,1,1,"	Save Only	 "
+SubItem 0,4,1,1,2,"	Display Only"
+SubItemOff 128,-12
+SubItem 0,2,1,2,0,"	-1"
+SubItem 0,4,1,2,1,"	 0"
+SubItem 0,2,1,2,2,"	 1"
+
+MenuColour 0,0,1,Off
+arrmult 0
+;GTDisable 0,32
+
+Gosub SetDefaults ;--- Should kill these
+Gosub UpdateAllGT ;		one day!					---
+
+.Main
+##[$80BB]
+	WindowInput #W1
+	whatnow\ev=WaitEvent
+	If whatnow\ev=$40 Then Gosub GetGadget
+	If whatnow\ev=$100
+		whatnow\mh=MenuHit
+		whatnow\mi=ItemHit
+		whatnow\si=SubHit
+		Select whatnow\mh
+			Case 0
+				If whatnow\mi=0 Then Gosub OpenProj
+				If whatnow\mi=1 Then Gosub CloseProj
+				If whatnow\mi=2 Then Gosub About
+				If whatnow\mi=3 Then Gosub ExitFire
+				;
+			Case 1
+				If whatnow\mi=0 Then Gosub ChangeScrn
+				If whatnow\mi=1 Then Gosub ChangeSave
+				If whatnow\mi=2 Then Gosub ChangePri
+				If whatnow\mi=3 Then Gosub AlterPal
+				If whatnow\mi=4 Then Gosub SetDefaults : Gosub UpdateAllGT
+				If whatnow\mi=5 Then Gosub LoadConfig
+				If whatnow\mi=6 Then Gosub SaveConfig
+		End Select
+	EndIf
+	If whatnow\ev=$200 Then Gosub ExitFire
+##[$80C7]
+
+End
+
+.GetGadget
+	If EventWindow=#W1
+		whatnow\gh=GadgetHit
+		Select whatnow\gh
+	;--- Sliders ---
+			Case 1
+				fire\chunky=EventCode
+				GTSetInteger 0,7,fire\chunky
+			Case 2
+				fire\fade=EventCode
+				GTSetInteger 0,8,fire\fade
+			Case 3
+				fire\hotspots=EventCode
+				GTSetInteger 0,9,fire\hotspots
+			Case 4
+				fire\hotarea=EventCode
+				GTSetInteger 0,10,fire\hotarea
+			Case 5
+				fire\hotstgth=EventCode
+				GTSetInteger 0,11,fire\hotstgth
+			Case 6
+				fire\hotsize=EventCode
+				GTSetInteger 0,12,fire\hotsize
+	;--- Integers of sliders ---
+			Case 7
+				fire\chunky=QLimit(GTGetInteger(0,7),1,8)
+				GTSetInteger 0,7,fire\chunky
+				GTSetAttrs #W1,1,#TAG+40,fire\chunky
+			Case 8
+				fire\fade=QLimit(GTGetInteger(0,8),0,16)
+				GTSetInteger 0,8,fire\fade
+				GTSetAttrs #W1,2,#TAG+40,fire\fade
+			Case 9
+				fire\hotspots=QLimit(GTGetInteger(0,9),1,256)
+				GTSetInteger 0,9,fire\hotspots
+				GTSetAttrs #W1,3,#TAG+40,fire\hotspots
+			Case 10
+				fire\hotarea=QLimit(GTGetInteger(0,10),25,100)
+				GTSetInteger 0,10,fire\hotarea
+				GTSetAttrs #W1,4,#TAG+40,fire\hotarea
+			Case 11
+				fire\hotstgth=QLimit(GTGetInteger(0,11),1,100)
+				GTSetInteger 0,11,fire\hotstgth
+				GTSetAttrs #W1,5,#TAG+40,fire\hotstgth
+			Case 12
+				fire\hotsize=QLimit(GTGetInteger(0,12),1,32)
+				GTSetInteger 0,12,fire\hotsize
+				GTSetAttrs #W1,6,#TAG+40,fire\hotsize
+	;--- Fire X,Y ---
+			Case 27
+				fire\width=GTGetInteger(0,27)
+				If fire\width<8Then fire\width=8
+				If fire\width>rendscreen\width Then fire\width=rendscreen\width
+				GTSetInteger 0,27,fire\width
+			Case 28
+				fire\height=GTGetInteger(0,28)
+				If fire\height<8 Then fire\height=8
+				If fire\height>rendscreen\height Then fire\height=rendscreen\height
+				GTSetInteger 0,28,fire\height
+	;--- Frames ---
+			Case 29
+				fireanim\frame=QLimit(GTGetInteger(0,29),1,999)
+				GTSetInteger 0,29,fireanim\frame
+			Case 30
+				fireanim\framestep=QLimit(GTGetInteger(0,30),1,999)
+				GTSetInteger 0,30,fireanim\framestep
+			Case 31
+				fireanim\begin=QLimit(GTGetInteger(0,31),0,999)
+				GTSetInteger 0,31,fireanim\begin
+	;--- Buttons ---
+			Case 23
+				Gosub ChangeScrn
+			Case 32
+				Gosub Calculate
+		End Select
+	;--- Matrix array ---
+		If whatnow\gh>13 AND whatnow\gh<23
+			i=0 : For y=0 To 2
+				For x=0 To 2
+					If i=whatnow\gh-14 Then matrix(x,y)=-EventCode
+					i=i+1
+				Next
+			Next
+		EndIf
+	EndIf
+Return
+
+.OpenProj
+	FindScreen 0
+	rendname$=ASLFileRequest$("Open Project",pa$,fi$)
+	If rendname$
+		fi$=rendname$
+		MenuColour 0,0,0,Off
+		MenuColour 0,0,1,On
+		GTEnable 0,32
+	EndIf
+Return
+
+.CloseProj
+	MenuColour 0,0,0,On
+	MenuColour 0,0,1,Off
+	GTDisable 0,32
+
+Return
+
+.About
+
+Return
+
+.ExitFire
+	End
+Return
+
+.ChangeScrn
+	*scrntemp.screeninfo=ASLScreenRequest(7)
+	If *scrntemp
+		rendscreen\width=*scrntemp\width
+		rendscreen\height=*scrntemp\height
+		rendscreen\colours=2^*scrntemp\colours
+		GTSetAttrs #W1,24,#TAG+13,rendscreen\colours
+		GTSetAttrs #W1,25,#TAG+13,rendscreen\width
+		GTSetAttrs #W1,26,#TAG+13,rendscreen\height
+		If fire\width>rendscreen\width Then fire\width=rendscreen\width
+		GTSetInteger 0,27,fire\width
+		If fire\height>rendscreen\height Then fire\height=rendscreen\height
+		GTSetInteger 0,28,fire\height
+	EndIf
+Return
+
+.ChangeSave
+	Select whatnow\si
+		Case 0
+			misc\savetype=0
+		Case 1
+			misc\savetype=1
+		Case 2
+			misc\savetype=2
+	End Select
+Return
+
+.ChangePri
+	Select whatnow\si
+		Case 0
+			misc\pri=-1
+		Case 1
+			misc\pri=0
+		Case 2
+			misc\pri=1
+	End Select
+Return
+
+.AlterPal
+Return
+
+.LoadConfig
+	Gosub SetDefaults
+	Gosub UpdateAllGT
+Return
+
+.SaveConfig
+Return
+
+.UpdateAllGT
+	GTSetAttrs #W1,1,#TAG+40,fire\chunky
+	GTSetAttrs #W1,7,#TAG+47,fire\chunky
+	GTSetAttrs #W1,2,#TAG+40,fire\fade
+	GTSetAttrs #W1,8,#TAG+47,fire\fade
+	GTSetAttrs #W1,3,#TAG+40,fire\hotspots
+	GTSetAttrs #W1,9,#TAG+47,fire\hotspots
+	GTSetAttrs #W1,4,#TAG+40,fire\hotarea
+	GTSetAttrs #W1,10,#TAG+47,fire\hotarea
+	GTSetAttrs #W1,5,#TAG+40,fire\hotstgth
+	GTSetAttrs #W1,11,#TAG+47,fire\hotstgth
+	GTSetAttrs #W1,6,#TAG+40,fire\hotsize
+	GTSetAttrs #W1,12,#TAG+47,fire\hotsize
+	i=0 : For x=0 To 2
+		For y=0 To 2
+			GTSetAttrs #W1,14+i,#TAG+4,matrix(x,y)
+			i=i+1
+		Next
+	Next
+	GTSetAttrs #W1,24,#TAG+13,rendscreen\colours
+	GTSetAttrs #W1,25,#TAG+13,rendscreen\width
+	GTSetAttrs #W1,26,#TAG+13,rendscreen\height
+	GTSetAttrs #W1,27,#TAG+47,fire\width
+	GTSetAttrs #W1,28,#TAG+47,fire\height
+	GTSetAttrs #W1,29,#TAG+47,fireanim\frame
+	GTSetAttrs #W1,30,#TAG+47,fireanim\framestep
+	GTSetAttrs #W1,31,#TAG+47,fireanim\begin
+Return
+
+.SetDefaults
+	fi$="Flame" : rendname$=fi$
+	pa$="Work:temp/testfire"
+	fire\width=32, 32, 6, 75
+	fire\chunky=2, 0, 75, 1, 0
+	fireanim\frame=16, 4, 1, 1
+	rendscreen\width=320, 256, 8
+	misc\savetype=2
+	##[$80C8] MatrixData
+	fire\matrix=0
+	For y=0 To 2
+		For x=0 To 2
+			Read matrix.b(x,y)
+			If matrix(x,y) Then fire\matrix=fire\matrix+1
+		Next
+	Next
+Return
+
+.Calculate
+	Dim oldarray.w(fire\width,fire\height+8)
+	Dim newarray.w(fire\width,fire\height+8)
+	winlock.l=##[$9B0C](#W1)
+	exitrender=Off
+	SetUpProgress{}
+	Format "000"
+	If fireanim\begin>0
+		s$="Offset frame: "+Str$(1)+"/"+Str$(fireanim\begin)
+		Progress{(1/fireanim\begin)*100,1,s$}
+	Else
+		s$="Rendering frame: "+Str$(1)+"/"+Str$(fireanim\frame)
+		Progress{0,1,s$}
+	EndIf
+	Use allocst 1
+	Use lmaxlen 0
+	Use SetCycle 0
+
+	InitArrays{}
+	MakeBlits{}
+	fireanim\current=0
+
+	fire\percinc=100/((fire\height * 3)-2)
+ ; If misc\savetype<>1 Then ShowScreen 1
+	##[$80BB]
+		fire\percent=0
+		Progress{fire\percent,0,""}
+		fireanim\current=fireanim\current+1
+		If fireanim\current=fireanim\begin+1
+			s$="Rendering frame: "+Str$(1)+"/"+Str$(fireanim\frame)
+			Progress{0,1,s$}
+		EndIf
+		PutHotSpots{}
+		SumNewArray{}
+		CopyNewToOld{}
+		If fireanim\current>fireanim\begin
+			DisplayPixels{}
+			If misc\savetype<2
+				SaveRender{fireanim\current-(fireanim\begin),rendname$}
+			EndIf
+			s$="Rendering frame: "+Str$(fireanim\current-fireanim\begin)+"/"+Str$(fireanim\frame)
+			Progress{((fireanim\current-fireanim\begin)/fireanim\frame)*100,1,s$}
+		Else
+			s$="Offset frame: "+Str$(fireanim\current+1)+"/"+Str$(fireanim\begin)
+			Progress{((fireanim\current+1)/fireanim\begin)*100,1,s$}
+		EndIf
+		If fireanim\current=fireanim\frame+fireanim\begin Then exitrender=On
+	##[$80BC] exitrender
+	Format ""
+	VWait 50
+	##[$9B0D] #W1,winlock
+	Free localstat #W2
+	Use localstat #W1
+	##[$FFB5]
+	Use allocst 0
+Return
+
+.MatrixData
+Data.b 0, -1, -1
+Data.b 0, -1, -1
+Data.b -1, -1, -1
+
+.EndStuff
+Event
+##[$80BF] ""
+Event
+
+pal_data: IncBin "fire.pal"
+
+Print "poo"

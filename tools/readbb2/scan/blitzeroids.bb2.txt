@@ -1,0 +1,827 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/Blitzeroids.BB2
++##[$80C3]:##[$80CC]
+##[$80B4]:End:End ##[$80B4]
+MaxLen gdir$=28
+MaxLen sdir$=26
+MaxLen m$=374
+gdir$="Graphics/"
+sdir$="Sounds/"
+
+Filter Off
+
+DEFTYPE.b n,m,mm,db,dd,dir,fr,x,y,meteors,l,nexmet,dir2,jf,ojf
+DEFTYPE.b fire,status,stattime,tt,lifes,level,kind,keymode
+DEFTYPE.w xmex,ymex,time
+DEFTYPE.l score
+DEFTYPE .q ufoshoot
+
+lmaxlen 2,320,24,5
+lmaxlen 0,320+64,256+64,5	;foreground
+lmaxlen 1,320+64,256+64,5
+longmult 0,20 : longmult 1,20
+
+Gosub Takegraph
+
+BLITZ
+
+.Procedures
+Statement Mex {xmex,ymex,a$}
+	DEFTYPE .w
+	If xmex=-1
+		xmex=160-(Len(a$)ASL 3)
+	EndIf
+	For mm=0 To Len(a$)-1
+		longdiv 131+Asc(Mid$(a$,mm+1)),xmex+mm ASL 4,ymex
+	Next
+End Statement
+
+Statement bonus {bonus}
+	DEFTYPE .w
+	Shared score,db
+	Use Slice 1
+	Use lmaxlen 2
+	score+bonus
+	Boxf 0,0,95,19,0
+	Mex {0,0,Str$(score)}
+	Use Slice 0
+	Use lmaxlen db
+End Statement
+
+
+
+Slice 0,44-16,320,256,$fff8,5,8,32,320+64,320+64
+Slice 1,284,320,24,$fff8,5,8,32,320,320
+Show 2
+Use SetCycle 1
+
+Use Slice 0
+Show 0
+Use lmaxlen 0
+BitMapOutput 0
+Use SetCycle 1
+
+Dim qcos.q(35)
+Dim qsin.q(35)
+Dim tcos.q(35)
+Dim tsin.q(35)
+For n=0 To 35
+	qcos(n)=(Int((-HCos((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/5000
+	qsin(n)=(Int((HSin((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/5000
+	tcos(n)=(Int((-HCos((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/145
+	tsin(n)=(Int((HSin((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/145
+Next
+
+Dim xs.q(20,1)
+Dim ys.q(20,1)
+Dim sc.q(20,1)
+
+Dim ff.b(7)
+Dim fw.b(7)
+Dim fx.q(7)
+Dim fy.q(7)
+Dim fvx.b(7)
+Dim fvy.b(7)
+Dim fsh.w(7)
+
+Dim mx.q(12)
+Dim my.q(12)
+Dim vx.q(12)
+Dim vy.q(12)
+Dim mf.b(12)
+Dim md.b(12)
+Dim msh.w(12)
+Dim mhit.b(12)
+
+For l=0 To 20
+	xs(l,0)=Rnd(320+32)
+	ys(l,0)=Rnd(256+32)
+	xs(l,1)=Rnd(320+32)
+	ys(l,1)=Rnd(256+32)
+	sc(l,0)=Rnd(10)+22
+	sc(l,1)=Rnd(10)+22
+Next
+For l=0 To 7
+	ff(l)=0
+Next
+
+BLITZ
+Mouse On
+keymode=0
+
+.Newgame
+Use lmaxlen 0
+BlockScroll 0
+Use lmaxlen 1
+BlockScroll 0
+
+;											 Startup Variables
+kind=3
+lifes=3
+score=0
+level=1							 ; Try to set this to 50!!!!
+
+Goto Intro
+
+.Game
+Gosub Init
+Use Slice 1
+Use lmaxlen 2
+BlockScroll 0
+Green 0,0,2,1
+Use Slice 0
+Green 0,0,1,0
+Use lmaxlen 0
+BlockScroll 0
+Use lmaxlen 1
+BlockScroll 0
+Show 1,32,32
+
+If (level ##[$80B9] 7)=0
+	lifes+1
+	Mex {-1,135,"		BONUS LIFE"}
+	VWait 60
+	BlockScroll 0
+EndIf
+
+Mex {-1,120,"		LEVEL "+Str$(level)}
+Select kind
+Case 1
+	a$="		METEORS"
+Case 2
+	a$="		MINES"
+Case 3
+	a$="		TRAP"
+End Select
+Mex {-1,150,a$}
+
+For n=1 To lifes
+	Use lmaxlen 1
+	longdiv 127,192-20-10*lifes+20*n,220
+Next
+
+VWait 60
+Green 0,0,0,0
+BlockScroll 0
+Gosub UpdateLifes
+
+
+db=0
+dir=0
+vx.q=0
+vy.q=0
+ovx.q=0
+ovy.q=0
+fire=0
+fr=0
+ojf=0
+status=1
+stattime=0
+
+BlitzKeys On
+
+bonus {0}
+
+##[$80BB]
+	i$=Inkey$
+	If i$<>""
+		If i$="p"
+			Use lmaxlen 0
+			Show 0,32,32
+			Mex {-1,155,"		PAUSED"}
+			##[$80BB]
+				i$=Inkey$
+			##[$80BC] i$="p" OR Joyb(1)<>0
+			BlockScroll 0
+		EndIf
+		If i$=" " AND Joyy(1)=1
+			Use lmaxlen 0
+			Show 0,32,32
+			Colour 31
+			Locate 6,5
+			Print "Nr Flg Hits"
+			For n=0 To 11
+				Locate 6,6+n
+				Print n,"	 ",mf(n),"	 ",mhit(n)
+			Next
+			Locate 6,18
+			Print "Next:",nexmet
+			Locate 6,19
+			Print "Tot :",meteors
+			Locate 19,4
+			Print "VX:",vx
+			Locate 19,5
+			Print "VY:",vy
+			Locate 19,6
+			Print "% Shoot ",ufoshoot
+			While Inkey$<>" " AND Joyb(1)=0:Wend
+			BlockScroll 0
+		EndIf
+	EndIf
+	VWait
+	Show db,32,32
+	db=1-db
+	Use lmaxlen db
+	UnQueue db
+	;																						Stelle
+	For n=0 To 9
+		Point xs(n,db),ys(n,db),0
+		xs(n,db)=QWrap(xs(n,db)-vx,0,384)
+		ys(n,db)=QWrap(ys(n,db)-vy,0,320)
+		Point xs(n,db),ys(n,db),sc(n,db)
+	Next
+If status=2
+	Select keymode
+	Case 0
+		jf=Joyb(1)
+		dd=Joyx(1)
+		tt=Joyy(1)
+		dir=QWrap(dir-dd,0,36)
+	Case 1
+		jf=Joyb(0)
+		dd=Sgn(MouseXSpeed)
+		dir=QWrap(dir-dd,0,36)
+		tt=0
+		If jf=2
+			tt=-1
+		EndIf
+		If jf=3
+			tt=1
+		EndIf
+	Case 2
+		jf=Abs(RawStatus(42))
+		dd=0
+		If RawStatus(49) Then dd=-1
+		If RawStatus(50) Then dd=1
+		dir=QWrap(dir-dd,0,36)
+		tt=0
+		If RawStatus(41) Then tt=-1
+		If RawStatus(64) Then tt=1
+	End Select
+	If tt=-1
+		vx=vx+qcos(dir)
+		vy=vy+qsin(dir)
+		QBlit db,127+dir,184,152
+	Else
+		QBlit db,91+dir,184,152
+	EndIf
+;																							Hyperspace
+	If tt=1
+		Sound 3,1
+		status=1
+		Green 0,15,15,15
+		VWait 2
+		Green 0,0,0,0
+		ovx=vx
+		ovy=vy
+		mm=Rnd(36)
+		vx=tcos(mm)
+		vy=tsin(mm)
+	EndIf
+	;																						Tasto di fuoco
+
+	If jf=1 AND ojf=0
+		If ff(fire)=0
+			Sound 0,1
+			ff(fire)=1
+			fw(fire)=0
+			fx(fire)=190
+			fy(fire)=158
+			fvx(fire)=tcos(dir)+vx
+			fvy(fire)=tsin(dir)+vy
+			fsh(fire)=dir+283
+			fire=QWrap(fire+1,0,5)
+		EndIf
+	EndIf
+EndIf
+
+If status =0	 ;						 Booomm...
+	stattime=stattime+1
+	If 253+stattime<=268
+		QBlit db,253+stattime,184-8,152-8
+	EndIf
+	vx=vx*.95
+	vy=vy*.95
+	If stattime>100
+		If lifes<1
+			Goto Gameover
+		Else
+			mm.b=0
+			For n=0 To 11
+				If mf(n)>0
+					If PColl(178,146,28,28,mx(n),my(n),md(n),md(n))
+						mm=1
+					EndIf
+				EndIf
+			Next
+			If mm=0
+				status=2
+				stattime=0
+				vx=0
+				vy=0
+			Else
+				stattime=0
+			EndIf
+		EndIf
+	EndIf
+EndIf
+If status=1	 ;						 Zzwoop!
+	stattime=stattime+1
+	If stattime>100
+		If meteors=0
+			Gosub Init
+			level=QLimit(level+1,0,120)
+			Goto Game
+		EndIf
+		Sound 3,1
+		For n=15 To 0 Step -1
+			Green 0,n,n,n
+			VWait
+		Next
+		status=2
+		stattime=0
+		vx=ovx
+		vy=ovy
+	EndIf
+EndIf
+
+	;																						Proiettili
+	For n=0 To 4
+		If ff(n)=1
+			fx(n)=QWrap(fx(n)+fvx(n)-vx,0,384-5)
+			fy(n)=QWrap(fy(n)+fvy(n)-vy,0,320-5)
+			QBlit db,fsh(n),fx(n),fy(n)
+			fw(n)=fw(n)+1
+			For m=0 To 11
+				If mf(m)<>0
+					If PColl(fx(n),fy(n),4,4,mx(m),my(m),md(m),md(m))
+						mhit(m)=mhit(m)-1
+						If mhit(m)<1
+						Select mf(m)
+						Case 1
+							mf(m)=0
+							mhit(m)=0
+							meteors=meteors-1
+							bonus {100}
+							Sound 2,12
+						Case 2
+							mf(m)=1
+							md(m)=8
+							msh(m)=60
+							mhit(m)=1
+							mf(nexmet)=mf(m)
+							md(nexmet)=md(m)
+							msh(nexmet)=msh(m)
+							mhit(nexmet)=1
+							mx(nexmet)=mx(m)
+							my(nexmet)=my(m)
+							vx(nexmet)=vx(m)+Rnd*Sgn(fvx(n))
+							vy(nexmet)=vy(m)+Rnd*Sgn(fvy(n))
+							nexmet=nexmet+1
+							meteors=meteors+1
+							bonus{250}
+							Sound 2,12
+						Case 3
+							mf(m)=2
+							md(m)=16
+							msh(m)=30
+							mhit(m)=2+Rnd(2)
+							mf(nexmet)=mf(m)
+							md(nexmet)=md(m)
+							msh(nexmet)=msh(m)
+							mhit(nexmet)=2+Rnd(2)
+							mx(nexmet)=mx(m)
+							my(nexmet)=my(m)
+							vx(nexmet)=vx(m)+(Int((Rnd*3-1)ASL 1*level))ASR 5
+							vy(nexmet)=vy(m)+(Int((Rnd*3-1)ASL 1*level))ASR 5
+							vx(m)=vx(m)+(Int((Rnd*3-1)ASL 1 *level))ASR 5
+							vy(m)=vy(m)+(Int((Rnd*3-1)ASL 1*level))ASR 5
+							nexmet=nexmet+1
+							meteors=meteors+1
+							bonus{400}
+							Sound 2,12
+						Case 4
+							mf(m)=5
+							md(m)=32
+							msh(m)=253
+							mx(m)=mx(m)-8
+							my(m)=my(m)-8
+							mm=Rnd(36)
+							vx(m)=(tcos(mm)ASL1)/3
+							vy(m)=(tsin(mm)ASL1)/3
+							meteors=meteors-1
+							mhit(m)=0
+							bonus{500}
+							Sound 5,4
+						Case 6
+							mf(m)=5
+							md(m)=32
+							msh(m)=253
+							mx(m)=mx(m)-8
+							my(m)=my(m)-8
+							mm=Rnd(36)
+							meteors=meteors-1
+							mhit(m)=0
+							bonus{1000}
+							Sound 5,4
+						End Select
+						If meteors=0
+							Use Slice 1
+							Use lmaxlen 2
+							Boxf 100,0,351,19,0
+							Mex {160,0,"HYPERSPACE"}
+							Use Slice 0
+							Use lmaxlen db
+						EndIf
+						Else
+							Select mf(m)
+							Case 1
+								Sound 1,2
+							Case 2
+								Sound 1,2
+							Case 3
+								Sound 1,2
+							Case 4
+								Sound 4,2
+							Case 6
+								Sound 4,2
+						End Select
+						EndIf
+						ff(n)=0
+						##[$80BE] For
+						Goto ProxSparo
+					EndIf
+				EndIf
+			Next
+	ProxSparo
+			If fw(n)>24
+				ff(n)=0
+			EndIf
+		EndIf
+	Next
+
+	For n=0 To 11											;	Meteoriti
+		If mf(n)>0 AND mf(n)<4
+			mx(n)=QWrap(mx(n)+vx(n)-vx,0,352)
+			my(n)=QWrap(my(n)+vy(n)-vy,0,288)
+			QBlit db,msh(n)+fr,mx(n),my(n)
+			If PColl(188,156,8,8,mx(n),my(n),md(n),md(n))
+				If status=2
+					lifes=lifes-1
+					Gosub UpdateLifes
+					Sound 5,3
+					status=0
+				EndIf
+			EndIf
+		EndIf
+		If mf(n)=4											;		Mine
+			mx(n)=QWrap(mx(n)+vx(n)-vx,0,352)
+			my(n)=QWrap(my(n)+vy(n)-vy,0,288)
+			QBlit db,msh(n)+fr,mx(n),my(n)
+			If PColl(188,156,8,8,mx(n),my(n),md(n),md(n))
+				If status=2
+					Sound 5,3
+					lifes=lifes-1
+					Gosub UpdateLifes
+					status=0
+				EndIf
+			EndIf
+		EndIf
+		If mf(n)=6												 ;	Ufo
+			mx(n)=QWrap(mx(n)+vx(n)-vx,0,352)
+			my(n)=QWrap(my(n)+vy(n)-vy,0,288)
+			QBlit db,msh(n)+fr,mx(n),my(n)
+			If PColl(188,156,8,8,mx(n),my(n),md(n),md(n))
+				If status=2
+					Sound 5,3
+					lifes=lifes-1
+					Gosub UpdateLifes
+					status=0
+				EndIf
+			EndIf
+			If Rnd>.992
+				mm=Rnd(36)
+				vx(n)=tcos(mm)/5
+				vy(n)=tsin(mm)/5
+			EndIf
+			If Rnd<ufoshoot AND mf(11)=0
+				mf(11)=7
+				md(11)=5
+				msh(11)=90
+				mx(11)=mx(n)+8
+				my(11)=my(n)+6
+				vx(11)=Sgn(190-mx(11))*3
+				vy(11)=Sgn(160-my(11))*3
+				mhit(11)=0
+			EndIf
+		EndIf
+
+		If mf(n)=5												; Esplosioni
+			mx(n)=QWrap(mx(n)+vx(n)-vx,0,352)
+			my(n)=QWrap(my(n)+vy(n)-vy,0,288)
+			QBlit db,msh(n)+mhit(n),mx(n),my(n)
+			If PColl(188,156,8,8,mx(n),my(n),md(n),md(n))
+				If status=2
+					Sound 5,3
+					lifes=lifes-1
+					Gosub UpdateLifes
+					status=0
+				EndIf
+			EndIf
+			mhit(n)=mhit(n)+1
+			If mhit(n)>15
+				mf(n)=0
+			EndIf
+		EndIf
+
+		If mf(n)=7													; Sparo nemico
+			mx(n)=QWrap(mx(n)+vx(n)-vx,0,352)
+			my(n)=QWrap(my(n)+vy(n)-vy,0,288)
+			QBlit db,90,mx(n),my(n)
+			If PColl(188,156,8,8,mx(n),my(n),md(n),md(n))
+				If status=2
+					Sound 5,3
+					lifes=lifes-1
+					Gosub UpdateLifes
+					status=0
+				EndIf
+			EndIf
+			mhit(n)=mhit(n)+1
+			If mhit(n)>30
+				mf(n)=0
+			EndIf
+		EndIf
+
+	Next
+	If db
+		fr=QWrap(fr+1,0,30)
+	EndIf
+	ojf=jf
+##[$80BC] i$="q"
+End
+
+.Takegraph
+
+AMIGA
+LoadShapes 0,gdir$+"Shapes"
+
+casestrcomp 1,gdir$+"Meteor.PaletteN2"
+
+LoadSound 0,sdir$+"laser"
+LoadSound 1,sdir$+"x-bla"
+LoadSound 2,sdir$+"heart"
+LoadSound 3,sdir$+"zzoit"
+LoadSound 4,sdir$+"fight"
+LoadSound 5,sdir$+"kaboo"
+
+BlockScroll 0
+VWait 50
+
+BLITZ
+
+Return
+
+.Init
+kind=((level-1) ##[$80B9] 3)+1
+Select kind.b
+Case 1
+	meteors=QLimit(level/5+1,1,3)
+	other.b=QLimit(Rnd(level),0,(3-meteors)ASL 2)
+Case 2
+	meteors=0
+	other.b=QLimit(level/6+Rnd(3)+2,1,12)
+Case 3
+	mm=Rnd(3)+1
+	Select mm
+	Case 1
+		meteors=0
+		other.b=0
+	Case 2
+		meteors=Rnd(2)+1
+		other.b=0
+	Case 3
+		meteors=0
+		other.b=QLimit(Rnd(level)+1,0,9)
+	End Select
+End Select
+
+nexmet=0
+For l=0 To 11
+	mf(l)=0
+	mhit(l)=0
+Next
+
+For l=0 To 11
+	mx(nexmet)=0
+	my(nexmet)=Rnd(256)
+
+	If nexmet<meteors
+		vx(nexmet)=(Int((Rnd*3-1)*10))/15
+		vy(nexmet)=(Int((Rnd*3-1)*10))/15
+		mf(nexmet)=3
+		md(nexmet)=30
+		msh(nexmet)=0
+		mhit(nexmet)=4+Rnd(3)
+		nexmet=nexmet+1
+	Else
+		If other>0
+			vx(nexmet)=(Int((Rnd*3-1)*3*level))/50
+			vy(nexmet)=(Int((Rnd*3-1)*3*level))/50
+			mf(nexmet)=4
+			md(nexmet)=16
+			msh(nexmet)=223
+			mhit(nexmet)=5+Rnd(4)
+			other=other-1
+			nexmet=nexmet+1
+		Else
+			mf(nexmet)=0
+		EndIf
+	EndIf
+
+Next
+If kind=3
+	mm=Rnd(36)
+	vx(nexmet)=tcos(mm)/5
+	vy(nexmet)=tsin(mm)/5
+	mf(nexmet)=6
+	md(nexmet)=16
+	msh(nexmet)=319
+	mhit(nexmet)=8+level/6
+	nexmet=nexmet+1
+EndIf
+meteors=nexmet
+ufoshoot=level/280
+Return
+
+
+
+.Intro
+BlitzKeys On
+Use lmaxlen 2
+BlockScroll 0
+FlushQueue 0
+FlushQueue 1
+dd=0
+##[$80BB]
+	Select keymode
+	Case 0
+		a$="USING JOYSTICK"
+	Case 1
+		a$="USING MOUSE"
+	Case 2
+		a$="USING KEYBOARD"
+	End Select
+	Use Slice 1
+	Green 0,0,0,2
+	Use lmaxlen 2
+	BlockScroll 0
+	Mex {-1,0,a$}
+	Use Slice 0
+	Green 0,0,0,2
+	VWait
+	Use lmaxlen 0
+	BlockScroll 0
+	Show 0
+	Mex {-1,20,"BLITZEROIDS"}
+	Mex {-1,220,"PRESS FIRE TO START"}
+If dd=0
+	m$=""
+	m$=m$+"		A GAME BY		"+"	ANDREA	DOIMO	"
+	m$=m$+"	 MADE	WHITH	 "+"	BLITZ BASIC 2	"
+	m$=m$+"		 FOR THE		 "
+	m$=m$+"	AMIGA	FORMAT	"+"	 COMPETITION	 "
+	m$=m$+"	 PROGRAMMING	 "+"	ANDREA	DOIMO	"
+	m$=m$+" FIDONET ADDRESS "+"	 2:333/714.8	 "
+	m$=m$+"RAYTRACED GRAPHIC"+"	LIVIO ROSSANI	"
+	m$=m$+"	DRAWING	AIDS	"+" TOMMASO DABALA' "
+	m$=m$+"	 SUPPORT BBS	 "+"	TOTALLY WIRED	"
+	m$=m$+" ++39-41-5269419 "+" SYSTEM OPERATOR "
+	m$=m$+" ANDREA MODENESE "+"								 "
+	m$=m$+"								 "
+Else
+	m$=""
+	m$=m$+"	 HOW TO PLAY:	"+"DESTROY	ANYTHING"
+	m$=m$+" MOVES AND DON'T "+"	BE DESTROYED!	"
+	m$=m$+"								 "
+	m$=m$+"		COMMANDS:		"+" LEFT AND	RIGHT "
+	m$=m$+" TO ROTATE	YOUR "+"	 SPACE SHIP,	 "
+	m$=m$+" FIRE	TO SHOOT, "+"UP FOR THRUSTING,"
+	m$=m$+"	 AND DOWN TO	 "+"HYPERSPACE	IF IN"
+	m$=m$+"SERIOUS TROUBLES."+"								 "
+	m$=m$+" USE	HYPERSPACE "
+	m$=m$+"WHEN A	ZONE HAVE"+"	BEEN	CLEARED	"
+	m$=m$+" TO WARP	IN THE "+"		NEXT AREA		"
+	m$=m$+"								 "+"								 "
+
+EndIf
+	For m=1 To 20
+		Boxf 0,200,320,119+50,0
+		Mex {-1,150,Mid$(m$,1,17)}
+		m$=Mid$(m$,18,Len(m$)-17)+Mid$(m$,1,17)
+
+		For n=1 To 30
+			VWait
+			i$=Inkey$
+			If Joyb(1)=1 OR Joyb(0)=1 OR i$=" " Then Goto Game
+			Gosub CheckKeyMode
+		Next
+		VWait
+		For time=1 To 8
+			VWait
+			For n=0 To 70
+				Scroll 0,n*1.1+100,320,1,0,n+100
+			Next
+			i$=Inkey$
+			If Joyb(1)=1 OR Joyb(0)=1 OR i$=" " Then Goto Game
+			Gosub CheckKeyMode
+		Next
+	Next
+
+		For time=1 To 20
+			VWait
+			For n=0 To 70
+				Scroll 0,n*1.1+100,320,1,0,n+100
+			Next
+			i$=Inkey$
+			If Joyb(1)=1 OR Joyb(0)=1 OR i$=" " Then Goto Game
+		Next
+		Gosub CheckKeyMode
+
+	dd=1-dd
+	Use lmaxlen 1
+	BlockScroll 0
+	Mex {-1,10,"SCOREBOARD"}
+	Mex {100,40,"100"}
+	Mex {100,75,"250"}
+	Mex {100,110,"400"}
+	Mex {100,145,"500"}
+	Mex {92,180,"1000"}
+	Mex {-1,220,"PRESS FIRE TO START"}
+	Use Slice 1
+	Green 0,2,0,0
+	Use Slice 0
+	Green 0,2,0,0
+	VWait
+	Show 1
+	ShapesBitMap 1,0
+	db=1
+	For time=1 To 400
+		Show 1-db
+		db=1-db
+		Use lmaxlen db
+		UnQueue db
+		VWait
+		QBlit db,0+fr,180,38
+		QBlit db,30+fr,188,79
+		QBlit db,60+fr,192,117
+		QBlit db,223+fr,190,149
+		QBlit db,319+fr,187,184
+		i$=Inkey$
+		If Joyb(1)=1 OR Joyb(0)=1 OR i$=" " Then Goto Game
+		If db
+			fr=QWrap(fr+1,0,30)
+		EndIf
+		Gosub CheckKeyMode
+	Next
+##[$80C7]
+
+.Gameover
+	Use lmaxlen 1-db
+	Show 1-db,32,32
+	Mex {-1,120,"		GAME OVER"}
+	Mex {-1,160,"		SCORE:"+Str$(score)}
+	VWait 50
+	While Joyb(1)=0 AND	Joyb(0)=0 AND Inkey$="" :Wend
+	Goto Newgame
+
+.UpdateLifes
+	Use Slice 1
+	Use lmaxlen 2
+	Boxf 100,0,351,19,0
+	ll.b=QLimit(lifes,0,8)
+	For n=1 To ll
+		longdiv 127,300-20*ll+20*n,2
+	Next
+	Use Slice 0
+	Use lmaxlen db
+	Return
+
+.CheckKeyMode
+	key.w=Asc(i$)
+	If key>=129 AND key<=131
+		keymode=key-129
+		Select keymode
+		Case 0
+			a$="USING JOYSTICK"
+		Case 1
+			a$="USING MOUSE"
+		Case 2
+			a$="USING KEYBOARD"
+		End Select
+		Use Slice 1
+		Use lmaxlen 2
+		BlockScroll 0
+		Mex {-1,0,a$}
+		Use Slice 0
+		Use lmaxlen db
+	EndIf
+	Return

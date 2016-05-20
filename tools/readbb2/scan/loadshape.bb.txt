@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadShape.bb
++; ; simple blit shape example ; Screen 0,3					;open an intuition screen ScreensBitMap 0,0			 ;get its bitmap LoadShape 0,"MyShape.iff",0	;load a shape from disk Use Palette 0				 ;use its paletteBlit 0,0,0					;blit it onto the screenMouseWait 

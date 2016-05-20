@@ -1,0 +1,255 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Examples/savebmp.bb2
++;									 +++++++++++++++++;;;;;;;;;;;;;;;;;
+;									 SaveBMP Routine for Blitz Basic II
+;									 +++++++++++++++++;;;;;;;;;;;;;;;;;
+;
+;															 7 Contents 7
+
+;					SECTION																					 LINE
+;
+;					Abstract ......................................... 17
+;					Introduction ..................................... 23
+;					SaveBMP .......................................... 42
+;					Usage Notes ...................................... 56
+;					IFF Conversion ................................... 78
+;					Implementaion Notes .............................. 85
+;					Copyright/Disclaimer ............................ 111
+;
+;															 7 Abstract 7
+
+;The routine "SaveBMP" provided in SaveBMP.src can save a bitmap object
+;in Blitz Basic as a ".BMP" file, the file format used by the OS/2
+;Presentation Manager and Microsoft Windows 3.x+ (including "Windows '95").
+;
+;														 7 Introduction 7
+
+;We all know that the best bitmap graphics editors are on the Amiga (it's
+;too bad for them that the IBM version of DPaint died at "version 2
+;enchanced"). Games programmers for other platforms have used Amiga editors
+;for years to great effect (Check the graphics files for the PC version of
+;UFP: Enemy Unknown, for example. You'll notice they all end in ".LBM", as
+;in IFF ILBM.	They can be loaded directly into Amiga graphics editors!)
+;
+;It is very common for someone who uses both Amiga and PC systems to want
+;to share data or work on a project for one platform with tools from
+;another platform. This is often the case especially with graphical data.
+;Since the Amiga relies upon the IFF ILBM standard and Windoze uses BMPs,
+;it would be useful to have a routine that could create BMP files.
+;
+;This can cause problems when you want to send over a graphic, though,
+;because virtually no applications in the IBM world support the IFF file
+;format. The statement contained in the file SaveBMP.src does exactly this.
+;
+;															 7 SaveBMP 7
+
+;The function will take any Blitz Basic "bitmap" object and write out an
+;equivalent "BMP" file. As written, it uses the colour map of the currently
+;used screen or slice for colour data. The calling sequence is as follows:
+;
+;SaveBMP{ofile.s, bmpobj.w, width.w, height.w, numcol.w}
+;
+;ofile	 The filename to use for the BMP file which will be written.
+;bmpobj	Number of the bitmap object to use.
+;width	 Width of the bitmap, or highest x-coordinate to save.
+;height	Height of the bitmap, or highest y-coordinate to save.
+;numcol	Number of colours in the bitmap (and palette).
+;
+;														7 Usage Notes 7
+
+;[1] You can save only a rectangular area of the region from (0,0)
+;to (x,y) instead of the full image if you use width=x and height=y.
+;
+;[2] The SaveBMP routine could easily be changed to save any aribtrary
+;rectangle of the image by modifying the horizontal and vertical run loops.
+;
+;[3] The constant #BMPFH should be set to the number of the Blitz file object
+;that you wish the routine to use when it writes the file. The SaveBMP.src
+;file sets this to `0', but you can change it to any legal value.
+;
+;[4] The routine does no special conversion for HAM images, so they will not
+;come out properly with this routine alone.
+;
+;[5] All images are saved as 256 colour uncompressed images; this is highly
+;compatible with Windows, and many newer DOS applications, but tends to
+;greatly increase the file size compared to the equivalent IFF file.
+;
+;[6] The source code is easy to follow and well-commented, and contains
+;further notes on program operation and BMP file format.
+;
+;													7 IFF Conversion 7
+
+;It is especially easy to write an IFF -> BMP conversion program using this
+;routine and Blitz's built-in IFF handling commands. This would be a good
+;project for new Blitz programmers looking for something to increase there
+;programming skills and/or familiarity with the language.
+;
+;											 7 Implementation Notes 7
+
+;[1] A few words on 12 -> 24-bit colour conversion: Most programs that
+;convert images from 12 -> 24-bit colour data do so incorrectly. In fact,
+;even the IFF standard bungles this task. To see why, you first need to
+;understand a few things about how the colours are stored. Recall that
+;colours are coded as triplets of red, green and blue values. One pre-AGA
+;Amigas, these colours are values from 0-15 (one hexadecimal digit), while
+;on AGA and other 24-bit systems, they are values from 0-255 (two hex
+;digits).	So "pure white" on an old system is R=15=$F, G=15=$F, B=15=$F,
+;and on an AGA system R=255=$FF, G=255=$FF, B=255=$FF.
+;
+;Most conversion software multiples a 12-bit value by 16, which effectively
+;shifts the hex digit to the left, like this: R=240=$F0, G=240=$F0,
+;B=240=$F0. While this simplifies conversion in general, it does not
+;properly duplicate the original colours (colours become darker overall).
+;What we want to do instead of shifting digits is to duplicate the digit,
+;so that $F=$FF, $8=$88, and so on. The way to do this is to multiply
+;by 16 and add the original value again: NewCol = Col * 16 + Col, or,
+;in other words, to multiply by 17 instead of 16.
+;
+;[2] The code assumes that you were reading and writing with StdIn and
+;StdOut (DefaultInput / DefaultOutput). You will want to adjust this for
+;most applictaions. Sections needing to be changed are commented in the
+;listing.
+;
+;											 7 Copyright/Disclaimers 7
+
+;Software and documentation written by Christopher Jennings.
+;
+;Software and documentation copyright ) 1995 by Enchanted Blade Associates.
+;
+;This software and documentation ("the package") may be distributed freely.
+;You are free to use the package in your own software, as long as credit
+;is given to the author and copyright holder in your documentation and
+;credits.
+;
+;Use of or reliance on this software is entirely at the risk of the user.
+;
+;I hope you enjoy and use this software.
+;Comments and questions may be directed to:
+;
+; Christopher Jennings, Soft. Eng. Dept.
+; Enchanted Blade Associates
+; R. R. 4 Langton, ON
+; Canada			N0E 1G0
+;
+; or to u9303286@muss.cis.mcmaster.ca
+;		or lynnjenn@village.ca
+;
+;I hope that this is at least somewhat lucid. As usual, it's a last-minute
+;write documentation and do two other things at the same time job.
+;
+;END OF TEXT
+
+;-------------------------------------------------------------------------
+
+;
+; Save a bitmap and current palette as a Windows .BMP image file
+;
+; A pretty simple routine, always saves as 256 colour picture,
+; does not handle HAM mode pictures.	Performs no
+; compression, and doesn't like anything "weird" in general.
+; It currently uses old-style (pre-AGA) 12-bit colour data
+; To use AGA colours, use AGA instructions instead of Red(),
+; Green(), etc., and remove the multiply.
+;
+
+; INPUTS: ofile.s			Filename for the BMP to be written out
+;				 bmpobj.w		 Number of the bitmap object to use
+;				 width.w			Width of the bitmap (or amount to save)
+;				 height.w		 Height of the bitmap (or amount to save)
+;				 numcol.w		 Number of colours in the bitmap and palette
+;				 #BMPFH			 This constant can be changed to use any
+;											Blitz file object desired (default=0)
+;
+; NOTE: Colour data is taken from the palette of the current screen
+;			 (or slice in Blitz mode), but this could be changed to use
+;			 another source easily.
+
+#BMPFH=0
+
+; These two procedures convert the Motorola CPU's Big-Endian data
+; format to Intel's Little-Endian data format when writing data out.
+
+Statement WriteLittleEndian16{word.w}
+	Exists #BMPFH,&word+1,1
+	Exists #BMPFH,&word	,1
+End Statement
+
+Statement WriteLittleEndian32{dword.l}
+	Exists #BMPFH,&dword+3,1
+	Exists #BMPFH,&dword+2,1
+	Exists #BMPFH,&dword+1,1
+	Exists #BMPFH,&dword	,1
+End Statement
+
+Statement SaveBMP{ofile.s,bmpobj.w,width.w,height.w,numcol.w}
+	If ReadMem(#BMPFH,ofile)
+		Use lmaxlen	bmpobj
+		FileOutput #BMPFH
+
+		; Perform calculations for later use:
+		;	 Offset from start of file to bitmap data
+		offset.l= numcol*4+52
+
+		;	 Total size of completed BMP file
+		tsize.l = width*height+offset
+
+		;	 Number of pad bytes required for each row:
+		padbytes= 4-(width ##[$80B9] 4) : If padbytes=4 Then padbytes=0
+
+		; Create the BITMAPFILEHEADER
+		Print "BM"											; bfType				 : Identifies as a BMP
+		WriteLittleEndian32{tsize}			; bfSize				 : Total size of file
+		WriteLittleEndian16{0}					; bfReserved1		: Always zero
+		WriteLittleEndian16{0}					; bfReserved2		: Always zero
+		WriteLittleEndian32{offset}		 ; bfOffBits			: Offset to bitmap data
+
+		; Create the BITMAPINFOHEADER
+		WriteLittleEndian32{40}				 ; biSize				 : Size of this struc
+		WriteLittleEndian32{width}			; biWidth				: Width of bitmap
+		WriteLittleEndian32{height}		 ; biHeight			 : Height of bitmap
+		WriteLittleEndian16{1}					; biPlanes			 : Bitplanes in file
+		WriteLittleEndian16{8}					; biBitCount		 : Colour bits/pixel
+		WriteLittleEndian32{0}					; biCompression	: Compression type
+		WriteLittleEndian32{0}					; biSizeImage		: Uncompressed size
+		WriteLittleEndian32{0}					; biXPelsPerMeter: X-pixels/m resolution
+		WriteLittleEndian32{0}					; biYPelsPerMeter: Y-pixels/m resolution
+		WriteLittleEndian32{numcol}		 ; biClrUsed			: Number of colours used
+		WriteLittleEndian32{0}					; biClrImportant : Number of important cols
+
+		; Create the RGBQUAD colour table
+
+		For col.w=0 To numcol-1
+			Print Chr$(PalRGB(col)*17)			; rgbBlue
+			Print Chr$(Palette(col)*17)		 ; rgbGreen
+			Print Chr$(Blue(col)*17)			 ; rgbRed
+			Print Chr$(0)								 ; rgbReserved
+		Next
+
+		; Write the actual bitmap data
+		For y.w=(height-1) To 0 Step -1
+
+;		 Uncomment the next line to cause the routine to print simple
+;		 status information of the form "Line: 0/199" to StdOut (CLI)
+;		 DefaultOutput:Print Chr$($D)+"Line: "+Str$((height-1)-y)+"/"+Str$(height-1):FileOutput 0
+
+			For x.w=0 To (width-1)
+				Print Chr$(Cls(x,y))
+			Next
+			If padbytes<>0
+				For pad.w=1 To padbytes
+					Print Chr$(0)
+				Next
+			EndIf
+		Next
+
+	Free WriteFile #BMPFH
+
+	Else
+		; Insert any error handling you like here
+		NPrint "Unable to write output file"
+		End
+	EndIf
+
+	; You may want to redirect output to somewhere other than StdOut,
+	; such as a bitmap or window.
+	DefaultOutput
+End Statement

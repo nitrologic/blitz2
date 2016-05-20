@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Buffer.bb
++; ; buffer blitting example ; BitMap 0,64,64,1Boxf 0,0,63,63,1GetaShape 0,0,0,64,64 FindScreen 0ScreensBitMap 0,0 Buffer 0,16384		 ;16384 bytes for buffer For x=0 To 600 VWait  UnBuffer 0			;undo eny blits  BBlit 0,0,x,192		;buffer blitNextMouseWait 

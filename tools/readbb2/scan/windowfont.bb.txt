@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WindowFont.bb
++; ; window font example ; Screen 0,3									 ;a simple screen and window...Window 0,0,0,320,200,$1000,"Groovy font",0,1LoadFont 0,"topaz.font",11			 ;get into topaz 11WindowFont 0							;set this as the font for the windowPrint "This is in Topaz 11"			 ;show the fontMouseWait End 

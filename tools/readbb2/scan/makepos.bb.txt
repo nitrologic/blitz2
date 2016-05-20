@@ -1,0 +1,40 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEPOS.BB
++
+MaxLen p$=192
+MaxLen n$=192
+
+allocst 0,0,0,320,256,8,0,"",0,1
+ScreensBitMap 0,0
+BlockScroll
+
+f$=ASLFileRequest$("Load Pos Map..",p$,n$,"MAP#?POS.IFF",4,10,310,240)
+If f$="" Then End
+
+If ##[$BE15](f$)
+		LoadBitMap 0,f$,0
+		Use SetCycle 0
+Else
+		End
+EndIf
+
+mem.l=##[$B781](4096,0)
+ptr.l=mem
+
+For y=0 To 63
+		For x=0 To 63
+				c.b=Cls(x,y)
+				Point x,y,255
+				Poke.b ptr,c
+				ptr+1
+		Next
+Next
+
+f$=ASLFileRequest$("Save Pos Data..",p$,n$,"MAP#?POS.BIN",4,10,310,240)
+If f$="" Then End
+
+cc.l=ReadMem(0,f$)
+Exists 0,mem,4096
+CloseFile 0
+
+##[$B782] mem,4096
+

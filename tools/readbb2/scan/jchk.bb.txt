@@ -1,0 +1,9 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/jchk.bb
++
+
+top
+	MOVE.l d0,$f0002a
+	ADDQ #1,d0
+BRA top
+
+##[$80C9] a.w,b.w

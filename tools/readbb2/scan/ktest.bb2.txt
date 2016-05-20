@@ -1,0 +1,38 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/ktest.bb2
++
+;
+;OK, keliediscope effect...
+;
+
+allocst 0,0,0,320,200,8,0,"",0,0:ScreensBitMap 0,0:BlockScroll
+
+xa=.125
+
+ya=.25
+
+minx=16:minxs=-4
+maxx=64:maxxs=4
+
+miny=16:minys=-4
+maxy=64:maxys=4
+
+x=minx:xs=minxs
+y=miny:ys=minys
+
+While Joyb(0)=0
+	VWait
+	If Rnd<.1 Then xa=-xa
+	If Rnd<.1 Then ya=-ya
+	xs=QLimit(xs+xa,minxs,maxxs)
+	ys=QLimit(ys+ya,minys,maxys)
+	x+xs:If x<minx OR x>maxx Then x-xs-xs:xs=-xs
+	y+ys:If y<miny OR y>maxy Then y-ys-ys:ys=-ys
+	Gosub kplot
+Wend
+
+kplot
+Point 160+x,128-y,1
+Point 160-x,128-y,1
+Point 160+x,128+y,1
+Point 160-x,128+y,1
+Return

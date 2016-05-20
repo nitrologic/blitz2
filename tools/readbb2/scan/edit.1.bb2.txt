@@ -1,0 +1,80 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/edit.1.bb2
++Dim ##[$80B3] lines$(40)
+
+freest 0; ,0,0,320,172,2,0,"test",1,2
+
+localstat 0,0,0,640,200,$143f,"",2,1
+y=0
+WLocate 0,2
+Format "##"
+
+;For k=1 To 20
+;	NPrint k,":"
+;Next
+
+##[$80BB]
+
+	##[$80BB]
+		ev.l=Event
+		Select ev
+			Case $8
+				x=Int(WMouseX/8)
+				y=QLimit(Int(WMouseY/8),0,20)
+				WTitle Str$(x)+","+Str$(y),""
+		End Select
+	##[$80BC] ev=0
+
+	WLocate 0,y*8+2
+	EditFrom x
+	lines$(y)=Edit$(lines$(y),77)
+	x=Editat
+
+	WTitle Str$(EditExit)+","+Str$(WCursX)+","+Str$(WCursY),""
+
+	Select EditExit
+		Case 13
+			x=0
+			If y<20
+				Gosub addline
+				y+1
+			EndIf
+			Gosub reprint
+		Case 28
+			If y>0 Then y-1
+		Case 29
+			If y<20 Then y+1
+	End Select
+
+##[$80BC] EditExit=27
+
+End
+
+.reprint
+
+newmem lines$()
+sy=y
+y=0
+
+InnerCls
+
+While globfree(lines$())
+	WLocate 0,y*8+2
+	Print lines$(y)
+	y+1
+Wend
+
+y=sy
+
+Return
+
+.addline
+
+newmem lines$()
+
+For n=0 To y
+	globfree lines$()
+Next
+
+globalloc lines$()
+
+Return

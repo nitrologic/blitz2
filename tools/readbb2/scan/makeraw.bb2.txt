@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makeraw.bb2
++allocst 0,3
+localstat 0,0,0,320,200,$100f,"",1,2
+
+If ReadMem(0,"raw.bin")
+Else
+	End
+EndIf
+
+##[$80BB]
+	ev.l=WaitEvent
+	i$=UCase$(Inkey$)
+	If i$=Chr$(27)
+		FileOutput 0:Print Chr$(-1):CloseFile 0:End
+	EndIf
+	If i$
+		WLocate 0,0:r=RawKey
+		NPrint i$," ",r,"		 "
+		FileOutput 0
+		Print Chr$(r),i$
+		WindowOutput 0
+	EndIf
+##[$80C7]

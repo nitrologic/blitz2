@@ -1,0 +1,182 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makesquare.bb
++
+Function.l jin{a.q,b.q}
+	SWAP d1:MOVE d1,d0:SWAP d0:AsmExit
+End Function
+
+Function.l jfr{a.q,b.q}
+	SWAP d0:MOVE d1,d0:SWAP d0:AsmExit
+End Function
+
+allocst 0,4
+ScreensBitMap 0,0
+Use lmaxlen 0
+
+
+#dep=4
+
+big=(1 ASL #dep)-1
+mass=1 ASL #dep
+stp=1 ASR #dep
+siz=1 ASL #dep ASL #dep
+
+qc1=HCos(-0.3)
+qs1=HSin(-0.3)
+
+
+
+Dim xx1.q(big,big),xx2.q(big,big)
+Dim yy.q(big,big),colr.b(big,big),colb.b(big,big)
+
+NEWTYPE.d
+
+	i.l
+	f.l
+End NEWTYPE
+
+Dim deln.d(big,big),dele.d(big,big),dels.d(big,big),delw.d(big,big)
+Dim dtln.d(big,big),dtle.d(big,big),dtls.d(big,big),dtlw.d(big,big)
+Dim lc.d(big,big)
+Dim lt.d(big,big)
+
+
+For ii=0 To big
+	i=ii/mass
+	For jj=0 To big
+		j=jj/mass
+
+
+		x=(i-0.5)
+;		y=0
+		y=HSin(jj/mass*##[$80BA])*HCos(ii/mass*##[$80BA]) *-0.1
+		z=(j-0.5)
+
+		tx=x
+		ty=y*qc1-z*qs1
+		tz=y*qs1+z*qc1 + 1.4
+
+		sx1=((tx-0.06)/tz)*160+168
+		sx2=((tx+0.06)/tz)*160+152
+		sy=100-(ty/tz)*160
+
+		Point sx1,sy,1
+		Point sx2,sy,2
+		col=QLimit(Int(Rnd(8))+8,8,15)
+
+
+		xx1(ii,jj)=sx1; ASL 2
+		xx2(ii,jj)=sx2; ASL 2
+		yy(ii,jj) =sy ; ASL 2
+		colr(ii,jj)=col
+		colb(ii,jj)=col ASL 4
+
+
+
+	Next
+Next
+
+BitMapOutput 0
+scalfac=1/7
+For ii=0 To big-1
+	For jj=0 To big-1
+
+
+
+		dx=(xx1(ii+1,jj)-xx1(ii,jj))*scalfac
+		dy=( yy(ii+1,jj)-yy(ii,jj) )*scalfac
+		deln(ii,jj)\i=jin{dx,dy}
+		deln(ii,jj)\f=jfr{dx,dy}
+
+		dx=(xx1(ii+1,jj+1)-xx1(ii+1,jj))*scalfac
+		dy=( yy(ii+1,jj+1)-yy(ii+1,jj) )*scalfac
+		dele(ii,jj)\i=jin{dx,dy}
+		dele(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx1(ii,jj+1)-xx1(ii+1,jj+1))*scalfac
+		dy=( yy(ii,jj+1)-yy(ii+1,jj+1) )*scalfac
+		dels(ii,jj)\i=jin{dx,dy}
+		dels(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx1(ii,jj)-xx1(ii,jj+1)		)*scalfac
+		dy=( yy(ii,jj)-yy(ii,jj+1)		 )*scalfac
+		delw(ii,jj)\i=jin{dx,dy}
+		delw(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=xx1(ii,jj)
+		dy=yy(ii,jj)
+		lc(ii,jj)\i=jin{dx,dy}
+		lc(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii+1,jj)-xx2(ii,jj))*scalfac
+		dy=( yy(ii+1,jj)-yy(ii,jj) )*scalfac
+		dtln(ii,jj)\i=jin{dx,dy}
+		dtln(ii,jj)\f=jfr{dx,dy}
+
+		dx=(xx2(ii+1,jj+1)-xx2(ii+1,jj))*scalfac
+		dy=( yy(ii+1,jj+1)-yy(ii+1,jj) )*scalfac
+		dtle(ii,jj)\i=jin{dx,dy}
+		dtle(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii,jj+1)-xx2(ii+1,jj+1))*scalfac
+		dy=( yy(ii,jj+1)-yy(ii+1,jj+1) )*scalfac
+		dtls(ii,jj)\i=jin{dx,dy}
+		dtls(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii,jj)-xx2(ii,jj+1)		)*scalfac
+		dy=( yy(ii,jj)-yy(ii,jj+1)		 )*scalfac
+		dtlw(ii,jj)\i=jin{dx,dy}
+		dtlw(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=xx2(ii,jj)
+		dy=yy(ii,jj)
+		lt(ii,jj)\i=jin{dx,dy}
+		lt(ii,jj)\f=jfr{dx,dy}
+
+
+
+	Next
+Next
+
+
+
+CNIF 1=0
+	If ReadMem (0,"ram:square.dat")
+		Exists 0,&xx1(0),el ASL 1
+		Exists 0,&xx2(0),el ASL 1
+		Exists 0,&yy(0) ,el ASL 1
+		Exists 0,&colr(0),el
+		Exists 0,&colb(0),el
+		CloseFile 0
+	EndIf
+CEND
+If ReadMem (0,"square.dat")
+	Exists 0,&deln(0,0),mass*mass*SizeOf.d
+	Exists 0,&dele(0,0),mass*mass*SizeOf.d
+	Exists 0,&dels(0,0),mass*mass*SizeOf.d
+	Exists 0,&delw(0,0),mass*mass*SizeOf.d
+	Exists 0,&lc(0,0),mass*mass*SizeOf.d
+	Exists 0,&colr(0,0),mass*mass
+
+	Exists 0,&dtln(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtle(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtls(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtlw(0,0),mass*mass*SizeOf.d
+	Exists 0,&lt(0,0),mass*mass*SizeOf.d
+	Exists 0,&colb(0,0),mass*mass
+
+
+
+EndIf
+
+
+
+MouseWait
+End
+

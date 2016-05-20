@@ -1,0 +1,85 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/hankie.bb2
++#dots=7				; CHANGE ME!!!
+
+
+lmaxlen 0,320,256,2:lmaxlen 1,320,256,2
+BLITZ:Slice 0,44,2:Show 0:Green 1,15,15,15
+
+
+;screen constants
+#midx=160:#midy=100:#sc=128
+#side=#dots*2+1 :	#maxelt=#side*#side
+
+NEWTYPE.pos
+	sx.w:sy.w:i.w:j.w
+End NEWTYPE
+
+Dim pl.pos(#side,#side)
+
+DEFTYPE.q vi,vj,curi,curj
+DEFTYPE.w ci,cj,i,j,ii,jj
+
+
+theta=##[$80BA]/7
+qc=HCos(theta):qs=HSin(theta)
+For i=0 To #side
+	ii=i-#dots
+	For j=0 To #side
+		*p.pos=pl(i,j)
+
+		jj=j-#dots
+
+		rx=ii*qc-jj*qs		 ; rotation matrix!!!
+		ry=		0
+		rz=ii*qs+jj*qc
+
+		tx=rx
+		ty=ry*0.866-rz*0.5									 ; another rotation matrix!!!
+		tz=ry*0.5	+rz*0.866 +#dots*2.2
+
+		*p\sx=tx/tz*#sc+#midx
+		*p\sy=ty/tz*#sc+#midy
+		*p\i=ii
+		*p\j=jj
+	Next
+Next
+
+Dim qsin.w(255),qcos.w(255)
+For fac.q=0 To 255
+	h.q=50*HSin(fac*##[$80BA]/128):qsin(fac)=h
+	h.q=50*HCos(fac*##[$80BA]/128):qcos(fac)=h
+Next
+
+
+#def=127:#hdef=#def/2		 ;n.b. #def *MUST* be 1,3,7,15,31,63,127,255,511 etc..
+Dim grnd.w(#def,#def)
+For i=0 To #def
+	curi=i-#hdef
+	For j=0 To #def
+		curj=j-#hdef
+		fac1.w=(curi*2) AND 255
+		fac2.w=(curj*2) AND 255
+		h.q=qsin(fac1)/50*qcos(fac2)
+		grnd(i,j)=h
+	Next
+Next
+
+
+Mouse On
+##[$80BB]
+	VWait:Show db:db=1-db:Use lmaxlen db	 ; double buffered
+	Boxf 0,0,319,255,0
+	vi=(vi+MouseXSpeed)*0.92:curi+vi:ci=curi	;damping...
+	vj=(vj+MouseYSpeed)*0.92:curj+vj:cj=curj
+	For i=0 To #side
+		For j=0 To #side
+			*p.pos=pl(i,j)
+			ii.w=(ci+*p\i) AND #def	; so we can "scroll" the
+			jj.w=(cj+*p\j) AND #def	;		underlying	surface
+			Point *p\sx,*p\sy+grnd(ii,jj),1
+		Next
+	Next
+##[$80BC] Joyb(0)<>0
+End
+
+

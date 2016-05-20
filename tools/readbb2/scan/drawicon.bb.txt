@@ -1,0 +1,113 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/drawicon.bb
++;An example of rendering an icon's image onto your OWN
+;screens (well, windows that is!)
+
+;Sorry, 1.3 Users!	I have the habit of using lots of
+;2.04+ features in programming even when not absolutely
+;necessary...	The truth is, I guess an end-user can
+;maybe get away with such an old OS, but developers
+;(like yourself) should really have the newest system
+;you can afford.	2.04 is about the oldest ROM you should
+;develop on, though I'd even go so far as to recommend
+;3.0 or 3.1!	(Yes, the 3.1 Roms *ARE* available now!)
+
+;Anyway, the point of this is:	I can't remember if this
+;source fragment uses any 2.0-specific calls...	I guess
+;you'll have to crash your 1.3 machine to find out!	:-)
+
+
+
+
+
+
+
+
+
+;Why the DEFTYPE.w????????
+
+;A common misconception among Blitz programmers is that
+;"quick" types are the fastest type of variable.... That
+;is only partly true.	If you need decimal accuracy, such
+;as 1.234, then yes, they're very quick.	However, if
+;the majority of your variables don't require decimal point
+;values, it's MUCH faster to use the "word" types.	They
+;require HALF the memory, and are over twice as fast!!
+
+
+;Even though in this case it's not really needed (as it's
+;not overly speed-intensive)	it's just a good habit to
+;use WORD types in all your programs as the default, and
+;define those other special variables such as strings,
+;quicks, etc. as you need them.
+
+DEFTYPE.w
+
+
+
+##[$80CC]
+
+
+;For filerequester....
+MaxLen apath$=260:MaxLen afile$=260
+
+
+
+
+
+;Function to display an icon on your own window!
+;supply the programs' name (without .info)
+;then the window #
+;then the x,y coordinates
+
+;Returns TRUE if icon could be displayed...
+
+Function.b drawicon{name$,win.l,x,y}
+	name$+Chr$(0)
+	icon.l=##[$F585](&name$)
+	If icon
+		icongr.l=Peek.l(icon+4+18)
+		##[$FF8F] RastPort(win),icongr,x,y
+		##[$F587] icon
+		Function Return -1
+	EndIf
+	Function Return 0
+End Statement
+
+
+
+
+
+.Example
+;Get WB palette....
+freest 0
+For i=0 To 7:StopCycle 0,i,Blue(i),Palette(i),PalRGB(i):Next
+
+;Now open our screen...
+
+allocst 0,0,0,640,200,WBDepth,$8000,"What do you think of *THIS*!!",1,2
+localstat 0,0,0,640,200,$1000,"Put Icons on your own windows!",1,2
+
+Use SetCycle 0
+
+
+
+
+getfilename:
+
+icon$=FileRequest$("Select an icon to view!",apath$,afile$)
+If icon$="" Then End
+
+icon$=Replace$(icon$,".info","")
+
+WCls
+
+If drawicon{icon$,0,WBWidth/2,50}=0
+	##[$B58D] "Ooops!","No icon for that file!","OK"
+	Goto getfilename
+EndIf
+
+
+MouseWait:Goto getfilename
+
+End
+

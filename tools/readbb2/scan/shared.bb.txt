@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Shared.bb
++; ; local variable program example; Statement test{a}		 ;start of procedure definition Shared k				;use global 'k' variable NPrint k*a			 ;output 'k' times parameter End Statement			 ;end of procedure definitionFor k=1 To 10			 ;start of loop NPrint test{5}		 ;call 'test Next					 ;end of loopMouseWait 

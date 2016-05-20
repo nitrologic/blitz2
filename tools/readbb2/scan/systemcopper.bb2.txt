@@ -1,0 +1,40 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/systemcopper.bb2
++;
+; basics for adding copper lists to a screen, might even
+; use this for combining my new display library with
+; screenslib for non-blitz wacko macko control.
+;
+
+allocst 0,3
+vp.l=ViewPort(0)
+Gosub makecop
+MouseWait
+End
+
+.makecop
+;
+; been called before?
+;
+If uc.l
+	##[$FF57] Peek.l(uc+4):Poke.l vp.l+20,0:##[$FE99] uc,12:uc=0
+EndIf
+;
+; allocate memory
+;
+uc.l=##[$FE97](12,$10001):##[$FF5F] uc,1+256*2+1
+;
+; create copper list with system calls
+;
+##[$FF3B] uc,13,0:##[$FF39] uc
+;
+For k=0 To 255
+	##[$FF3B] uc,k+14,0:##[$FF39] uc
+	##[$FF3A] uc,$180,k:##[$FF39] uc
+Next
+##[$FF3B] uc,10000,255
+;
+; attach to screen/vport
+;
+Poke.l vp+20,uc:##[$FFBC]
+;
+Return

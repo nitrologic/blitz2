@@ -1,0 +1,53 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/1stStarfield.bb2
++;
+; My first starfield in Blitz2
+;
+
+##[$80CC]
+
+NEWTYPE .p
+	speed.w
+	x.w
+	y.w
+End NEWTYPE
+
+Dim ##[$80B3] star.p(39)
+
+##[$80CA] star()
+
+BLITZ
+lmaxlen 0,320,256,2
+lmaxlen 1,320,256,2
+
+Slice 0,44,2
+Green 1,15,15,15
+db=0
+Gosub fillspace
+While Joyb(0)=0
+	VWait
+	Show db:db=1-db:Use lmaxlen db
+	BlockScroll
+	Gosub drawstars
+Wend
+
+End
+
+.fillspace
+	##[$80CA] star()
+	newmem star()
+	While globalloc(star())
+		\speed=Rnd(10)
+		If \speed=0 Then \speed=1
+		\x=Rnd(319)
+		\y=Rnd(250)
+	Wend
+Return
+
+.drawstars
+	##[$80CA] star()
+	newmem star()
+	While globfree(star())
+		Point \x,\y,1
+		\y=QWrap(\y+\speed,0,250)
+	Wend
+Return

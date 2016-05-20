@@ -1,0 +1,334 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/screenreq.bb2
++##[$80CB]
+
+;Screenmoderequester by Thomas Boerkel
+;
+;This routine displays a screenmoderequester and can be used in your own
+;programs, if you give credit.
+;The routine uses 4 global vars for the modeid, width, height and depth.
+;You can provide these vars with values and the routine will try to mark
+;that screenmode in it`s list.
+;If you want to open a screen with the given modeid, you have to open
+;it with OpenScreenTagList_() at this time. You then can use that screen with
+;Blitz2-commands with FindScreen 0 or FindScreen 0,"Name"
+
+DEFTYPE.l
+
+Statement screenreq{}
+Shared modeid.l,width.l,height.l,depth.l
+
+XInclude gadtools.bb2
+
+NEWTYPE.scrtags
+a.l
+b
+c
+d
+e
+f
+g
+h
+i
+j
+k
+l
+m
+n
+o
+p
+q
+r
+s
+End NEWTYPE
+
+DEFTYPE.List *scrlist
+DEFTYPE.Node *scrnode,*tempnode
+DEFTYPE.Screen *wbscreen
+DEFTYPE.NewWindow newwindow
+DEFTYPE.Window *mywindow
+DEFTYPE.NewGadget ng
+DEFTYPE.Gadget *gad
+DEFTYPE.NameInfo screenname
+DEFTYPE.DimensionInfo screendim
+DEFTYPE.DisplayInfo screendisp
+DEFTYPE.MonitorInfo moninfo
+DEFTYPE.scrtags tags
+DEFTYPE.IntuiMessage *imsg
+DEFTYPE.TextAttr			topaz80
+DEFTYPE.l mi,a,i,avail,prop,s,*vi,*glist,result,class,code,d,m
+
+;Special trick: Assembler subroutine which is called by GadTools to
+;calculate the colors from the depth. The colors are then displayed
+;beside the depth-slider
+If 0
+	lab:
+	MOVE.l d1,-(a7)
+	MOVE.l d0,d1
+	MOVE.l #1,d0
+	LSL.l d1,d0
+	MOVE.l (a7)+,d1
+	RTS
+EndIf
+
+#GAD_OK=0
+#GAD_CANCEL=1
+#GAD_LIST=2
+#GAD_SLIDER=3
+#GAD_RESOLUTION=4
+
+#US=95
+
+gtext0$="_OK"+Chr$(0)
+gtext1$="C_ancel"+Chr$(0)
+gtext2$="Available _Screenmodes"+Chr$(0)
+gtext3$="_Colors:		"+Chr$(0)
+fname$="topaz.font"+Chr$(0)
+topaz80\ta_Name=&fname$,8,0,0
+
+
+m=modeid
+d=depth
+s=-1
+*wbscreen=##[$FFD1](0)
+
+;Is the given mode available? If not: Use WB`s modeid
+If (m=0 AND d=0) OR ##[$FF7E] (m)
+	m=##[$FF7D](*wbscreen\ViewPort)
+	d=*wbscreen\BitMap\Depth
+EndIf
+
+;If it is the default-monitor then get the right monitor-ID
+If (m AND #MONITOR_ID_MASK)=0
+	##[$FF77] 0,moninfo,SizeOf.MonitorInfo,#DTAG_MNTR,m
+	m OR moninfo\Header\DisplayID
+EndIf
+
+a=0
+mi=##[$FF76](-1)
+##[$80BB]
+	a+1
+	mi=##[$FF76](mi)
+##[$80BC] mi=-1
+
+s=-1
+
+Dim scrn$(a)
+Dim scrm.l(a)
+Dim scrx.l(a)
+Dim scry.l(a)
+Dim scrd.l(a)
+*scrlist=##[$FE97](SizeOf.List,#MEMF_CLEAR)
+*scrlist\lh_Head=&*scrlist\lh_Tail
+*scrlist\lh_Tail=0
+*scrlist\lh_TailPred=&*scrlist\lh_Head
+mi=##[$FF76](-1)
+i=-1
+##[$80BB]
+	##[$FF77] 0,screendisp,SizeOf.DisplayInfo,#DTAG_DISP,mi
+	avail=screendisp\NotAvailable
+	prop=screendisp\PropertyFlags
+	If (prop AND #DIPF_IS_HAM)=0 AND (prop AND #DIPF_IS_DUALPF)=0 AND (prop AND #DIPF_IS_EXTRAHALFBRITE)=0 AND avail=0
+		If mi AND #MONITOR_ID_MASK
+
+			If ##[$FF77](0,screenname,SizeOf.NameInfo,#DTAG_NAME,mi)
+				i+1
+				##[$FF77] 0,screendim,SizeOf.DimensionInfo,#DTAG_DIMS,mi
+				scrd(i)=screendim\MaxDepth
+				scrx(i)=screendim\TxtOScan\MaxX+1
+				scry(i)=screendim\TxtOScan\MaxY+1
+				scrm(i)=mi
+				scrn$(i)=Peek$(&screenname\Name)
+				resolution$=Str$(scrx(i))+" x "+Str$(scry(i))
+				scrn$(i)+String$(" ",44-Len(resolution$)-Len(scrn$(i)))+resolution$+Chr$(0)
+				If mi=m
+					s=i
+				EndIf
+				*scrnode=##[$FE97](SizeOf.Node,#MEMF_CLEAR)
+				*scrnode\ln_Name=&scrn$(i)
+				##[$FE9F] *scrlist,*scrnode
+			EndIf
+		EndIf
+	EndIf
+	mi=##[$FF76](mi)
+##[$80BC] mi=-1
+a=i
+
+*glist=0
+*vi=##[$F611](*wbscreen,0)
+*gad=##[$F60F](&*glist)
+
+tags\a=#GT_Underscore
+tags\b=#US
+tags\c=0
+
+ng\ng_LeftEdge=30,160,60,12,&gtext0$,topaz80,#GAD_OK,0,*vi,0
+*gad=##[$F601](#BUTTON_KIND,*gad,ng,tags)
+
+ng\ng_LeftEdge=330,160,60,12,&gtext1$,topaz80,#GAD_CANCEL
+*gad=##[$F601](#BUTTON_KIND,*gad,ng,tags)
+
+tags\c=#GTLV_Labels
+tags\d=*scrlist
+tags\e=#GTLV_Top
+tags\f=s
+tags\g=#GTLV_ShowSelected
+tags\h=0
+tags\i=#GTLV_Selected
+tags\j=s
+tags\k=0
+ng\ng_LeftEdge=20,30,380,100,&gtext2$,topaz80,#GAD_LIST
+*gad1=##[$F601](#LISTVIEW_KIND,*gad,ng,tags)
+
+f$="%3ld"+Chr$(0)
+tags\c=#GTSL_Min
+tags\d=1
+tags\e=#GTSL_Max
+tags\f=scrd(s)
+tags\g=#GTSL_Level
+tags\h=d
+tags\i=#GTSL_LevelFormat
+tags\j=&f$
+tags\k=#GTSL_MaxLevelLen
+tags\l=3
+tags\m=#GTSL_DispFunc
+tags\n=?lab
+tags\o=#GA_RelVerify
+tags\p=True
+tags\q=0
+ng\ng_LeftEdge=190,140,130,11,&gtext3$,topaz80,#GAD_SLIDER
+*gad2=##[$F601](#SLIDER_KIND,*gad1,ng,tags)
+
+title$="Please choose screenmode..."+Chr$(0)
+newwindow\LeftEdge=*wbscreen\Width/2-210,*wbscreen\Height/2-90,420,180,0,1,#IDCMP_CLOSEWINDOW|#LISTVIEWIDCMP|#IDCMP_VANILLAKEY
+newwindow\Flags=#WFLG_CLOSEGADGET|#WFLG_DRAGBAR|#WFLG_DEPTHGADGET|#WFLG_ACTIVATE|#RMBTRAP
+newwindow\FirstGadget=*glist,0,&title$,0,0,-1,-1,-1,-1,#WBENCHSCREEN
+*mywindow=##[$FF9E](newwindow)
+If *mywindow
+	##[$F60A] *mywindow,0
+	result=1
+	##[$80BB]
+		##[$FEB6] *mywindow\UserPort
+		*imsg=##[$F608](*mywindow\UserPort)
+		If *imsg
+			class=*imsg\Class
+			*gad=*imsg\IAddress
+			code=*imsg\Code
+			##[$F609](*imsg)
+			Select class
+				Case #IDCMP_CLOSEWINDOW
+					result=0
+				Case #IDCMP_VANILLAKEY
+					Select code
+						Case 111 ;o
+							modeid=scrm(s)
+							width=scrx(s)
+							height=scry(s)
+							depth=d
+							result=0
+						Case 79 ;O
+							modeid=scrm(s)
+							width=scrx(s)
+							height=scry(s)
+							depth=d
+							result=0
+						Case 97 ;a
+							result=0
+						Case 65 ;A
+							result=0
+						Case 27 ;ESC
+							result=0
+						Case 99 ;c
+							If d<scrd(s)
+								d+1
+								tags\a=#GTSL_Level
+								tags\b=d
+								tags\c=0
+								##[$F603] *gad2,*mywindow,0,tags
+							EndIf
+						Case 67 ;C
+							If d>1
+								d-1
+								tags\a=#GTSL_Level
+								tags\b=d
+								tags\c=0
+								##[$F603] *gad2,*mywindow,0,tags
+							EndIf
+						Case 115 ;s
+							If s<a
+								s+1
+								tags\a=#GTLV_Top
+								tags\b=s
+								tags\c=#GTLV_Selected
+								tags\d=s
+								tags\e=0
+								##[$F603] *gad1,*mywindow,0,tags
+								modslide=1
+							EndIf
+						Case 83 ;S
+							If s>0
+								s-1
+								tags\a=#GTLV_Top
+								tags\b=s
+								tags\c=#GTLV_Selected
+								tags\d=s
+								tags\e=0
+								##[$F603] *gad1,*mywindow,0,tags
+								modslide=1
+							EndIf
+					End Select
+				Case #IDCMP_GADGETUP
+					Select *gad\GadgetID
+						Case #GAD_OK
+							modeid=scrm(s)
+							width=scrx(s)
+							height=scry(s)
+							depth=d
+							result=0
+						Case #GAD_CANCEL
+							result=0
+						Case #GAD_LIST
+							s=code
+							modslide=1
+						Case #GAD_SLIDER
+							d=code
+					End Select
+			End Select
+			If modslide=1
+				modslide=0
+				If scrd(s)<d
+					d=scrd(s)
+				EndIf
+				tags\a=#GTSL_Max
+				tags\b=scrd(s)
+				tags\c=#GTSL_Level
+				tags\d=d
+				tags\e=0
+				##[$F603] *gad2,*mywindow,0,tags
+			EndIf
+		EndIf
+	##[$80BC] result=0
+	##[$FF88] *mywindow
+	##[$F602] *glist
+	##[$F612] *vi
+
+EndIf
+*tempnode=*scrlist\lh_TailPred
+While *tempnode\ln_Pred
+	*scrnode=*tempnode\ln_Pred
+	##[$FE99] *tempnode,SizeOf.Node
+	*tempnode=*scrnode
+Wend
+##[$FE99] *scrlist,SizeOf.List
+##[$FFD2] 0,*myscreen
+End Statement
+
+;This is to test the requester:
+
+;screenreq{}
+;NPrint Hex$(modeid)
+;NPrint width
+;NPrint height
+;NPrint depth
+;End
+
+

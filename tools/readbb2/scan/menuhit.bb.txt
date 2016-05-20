@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MenuHit.bb
++; ; simple menu example program ; Screen 0,3							 ;open a simple Intuition screen Window 0,0,0,320,200,0,"Window with menus",0,1MenuColour 2							;change menu rendering pensMenuTitle 0,0,"Menus"			 ;create a simple menuMenuItem 0,0,0,0,"Item"			;with only one item in it. MenuItem 0,0,0,1,"Quit"			;and a quit item!SetMenu 0								;add it to windowWhile MenuHit<>0 ev.l=WaitEventWend

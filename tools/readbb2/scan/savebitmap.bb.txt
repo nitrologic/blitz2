@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SaveBitmap.bb
++; ; saving a bitmap to disk program example ; Screen 0,3,"My Screen"ScreensBitMap 0,0 Circlef 160,100,50,3SaveBitmap 0,"MyBitMap.iff"			 ;create an IFF! End 

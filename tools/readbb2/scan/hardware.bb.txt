@@ -1,0 +1,468 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/hardware.bb
++;********************************************************
+;*																											*
+;*			 BlitzII hardware.library Include file					*
+;*																											*
+;********************************************************
+
+;***********File:custom.h
+
+NEWTYPE.AudChannel
+*ac_ptr.w
+ac_len.w
+ac_per.w
+ac_vol.w
+ac_dat.w
+ac_pad.w[2]
+End NEWTYPE
+
+NEWTYPE.SpriteDef
+pos.w
+ctl.w
+dataa.w
+datab.w
+End NEWTYPE
+
+NEWTYPE.Custom
+bltddat.w
+dmaconr.w
+vposr.w
+vhposr.w
+dskdatr.w
+joy0dat.w
+joy1dat.w
+clxdat.w
+adkconr.w
+pot0dat.w
+pot1dat.w
+potinp.w
+serdatr.w
+dskbytr.w
+intenar.w
+intreqr.w
+*dskpt.b
+dsklen.w
+dskdat.w
+refptr.w
+vposw.w
+vhposw.w
+copcon.w
+serdat.w
+serper.w
+potgo.w
+joytest.w
+strequ.w
+strvbl.w
+strhor.w
+strlong.w
+bltcon0.w
+bltcon1.w
+bltafwm.w
+bltalwm.w
+*bltcpt.b
+*bltbpt.b
+*bltapt.b
+*bltdpt.b
+bltsize.w
+pad2d.b
+bltcon0l.b
+bltsizv.w
+bltsizh.w
+bltcmod.w
+bltbmod.w
+bltamod.w
+bltdmod.w
+pad34.w[4]
+bltcdat.w
+bltbdat.w
+bltadat.w
+pad3b.w[3]
+deniseid.w
+dsksync.w
+cop1lc.l
+cop2lc.l
+copjmp1.w
+copjmp2.w
+copins.w
+diwstrt.w
+diwstop.w
+ddfstrt.w
+ddfstop.w
+dmacon.w
+clxcon.w
+intena.w
+intreq.w
+adkcon.w
+aud.AudChannel[4]
+*bplpt.w[8]
+bplcon0.w
+bplcon1.w
+bplcon2.w
+bplcon3.w
+bpl1mod.w
+bpl2mod.w
+bplhmod.w
+pad86.w[1]
+bpldat.w[8]
+*sprptr.w[8]
+spr.SpriteDef[8]
+color.w[32]
+htotal.w
+hsstop.w
+hbstrt.w
+hbstop.w
+vtotal.w
+vsstop.w
+vbstrt.w
+vbstop.w
+sprhstrt.w
+sprhstop.w
+bplhstrt.w
+bplhstop.w
+hhposw.w
+hhposr.w
+beamcon0.w
+hsstrt.w
+vsstrt.w
+hcenter.w
+diwhigh.w
+End NEWTYPE
+
+#VARVBLANK= $1000
+#LOLDIS= $0800
+#CSCBLANKEN= $0400
+#VARVSYNC= $0200
+#VARHSYNC= $0100
+#VARBEAM= $0080
+#DISPLAYDUAL= $0040
+#DISPLAYPAL= $0020
+#VARCSYNC= $0010
+#CSBLANK= $0008
+#CSYNCTRUE= $0004
+#VSYNCTRUE= $0002
+#HSYNCTRUE= $0001
+#USE_BPLCON3= 1
+#BPLCON2_ZDCTEN= (1LSL10)
+#BPLCON2_ZDBPEN= (1LSL11)
+#BPLCON2_ZDBPSEL0= (1LSL12)
+#BPLCON2_ZDBPSEL1= (1LSL13)
+#BPLCON2_ZDBPSEL2= (1LSL14)
+#BPLCON3_EXTBLNKEN= (1LSL0)
+#BPLCON3_EXTBLKZD= (1LSL1)
+#BPLCON3_ZDCLKEN= (1LSL2)
+#BPLCON3_BRDNTRAN= (1LSL4)
+#BPLCON3_BRDNBLNK= (1LSL5)
+
+;***********File:cia.h
+
+NEWTYPE.CIA
+ciapra.b
+pad0.b[255]
+ciaprb.b
+pad1.b[255]
+ciaddra.b
+pad2.b[255]
+ciaddrb.b
+pad3.b[255]
+ciatalo.b
+pad4.b[255]
+ciatahi.b
+pad5.b[255]
+ciatblo.b
+pad6.b[255]
+ciatbhi.b
+pad7.b[255]
+ciatodlow.b
+pad8.b[255]
+ciatodmid.b
+pad9.b[255]
+ciatodhi.b
+pad10.b[255]
+unusedreg.b
+pad11.b[255]
+ciasdr.b
+pad12.b[255]
+ciaicr.b
+pad13.b[255]
+ciacra.b
+pad14.b[255]
+ciacrb.b
+End NEWTYPE
+
+#CIAICRB_TA= 0
+#CIAICRB_TB= 1
+#CIAICRB_ALRM= 2
+#CIAICRB_SP= 3
+#CIAICRB_FLG= 4
+#CIAICRB_IR= 7
+#CIAICRB_SETCLR= 7
+#CIACRAB_START= 0
+#CIACRAB_PBON= 1
+#CIACRAB_OUTMODE= 2
+#CIACRAB_RUNMODE= 3
+#CIACRAB_LOAD= 4
+#CIACRAB_INMODE= 5
+#CIACRAB_SPMODE= 6
+#CIACRAB_TODIN= 7
+#CIACRBB_START= 0
+#CIACRBB_PBON= 1
+#CIACRBB_OUTMODE= 2
+#CIACRBB_RUNMODE= 3
+#CIACRBB_LOAD= 4
+#CIACRBB_INMODE0= 5
+#CIACRBB_INMODE1= 6
+#CIACRBB_ALARM= 7
+#CIAICRF_TA= (1LSL#CIAICRB_TA)
+#CIAICRF_TB= (1LSL#CIAICRB_TB)
+#CIAICRF_ALRM= (1LSL#CIAICRB_ALRM)
+#CIAICRF_SP= (1LSL#CIAICRB_SP)
+#CIAICRF_FLG= (1LSL#CIAICRB_FLG)
+#CIAICRF_IR= (1LSL#CIAICRB_IR)
+#CIAICRF_SETCLR= (1LSL#CIAICRB_SETCLR)
+#CIACRAF_START= (1LSL#CIACRAB_START)
+#CIACRAF_PBON= (1LSL#CIACRAB_PBON)
+#CIACRAF_OUTMODE= (1LSL#CIACRAB_OUTMODE)
+#CIACRAF_RUNMODE= (1LSL#CIACRAB_RUNMODE)
+#CIACRAF_LOAD= (1LSL#CIACRAB_LOAD)
+#CIACRAF_INMODE= (1LSL#CIACRAB_INMODE)
+#CIACRAF_SPMODE= (1LSL#CIACRAB_SPMODE)
+#CIACRAF_TODIN= (1LSL#CIACRAB_TODIN)
+#CIACRBF_START= (1LSL#CIACRBB_START)
+#CIACRBF_PBON= (1LSL#CIACRBB_PBON)
+#CIACRBF_OUTMODE= (1LSL#CIACRBB_OUTMODE)
+#CIACRBF_RUNMODE= (1LSL#CIACRBB_RUNMODE)
+#CIACRBF_LOAD= (1LSL#CIACRBB_LOAD)
+#CIACRBF_INMODE0= (1LSL#CIACRBB_INMODE0)
+#CIACRBF_INMODE1= (1LSL#CIACRBB_INMODE1)
+#CIACRBF_ALARM= (1LSL#CIACRBB_ALARM)
+#CIACRBF_IN_PHI2= 0
+#CIACRBF_IN_CNT= (#CIACRBF_INMODE0)
+#CIACRBF_IN_TA= (#CIACRBF_INMODE1)
+#CIACRBF_IN_CNT_TA= (#CIACRBF_INMODE0|#CIACRBF_INMODE1)
+#CIAB_GAMEPORT1= (7)
+#CIAB_GAMEPORT0= (6)
+#CIAB_DSKRDY= (5)
+#CIAB_DSKTRACK0= (4)
+#CIAB_DSKPROT= (3)
+#CIAB_DSKCHANGE= (2)
+#CIAB_LED= (1)
+#CIAB_OVERLAY= (0)
+#CIAB_COMDTR= (7)
+#CIAB_COMRTS= (6)
+#CIAB_COMCD= (5)
+#CIAB_COMCTS= (4)
+#CIAB_COMDSR= (3)
+#CIAB_PRTRSEL= (2)
+#CIAB_PRTRPOUT= (1)
+#CIAB_PRTRBUSY= (0)
+#CIAB_DSKMOTOR= (7)
+#CIAB_DSKSEL3= (6)
+#CIAB_DSKSEL2= (5)
+#CIAB_DSKSEL1= (4)
+#CIAB_DSKSEL0= (3)
+#CIAB_DSKSIDE= (2)
+#CIAB_DSKDIREC= (1)
+#CIAB_DSKSTEP= (0)
+#CIAF_GAMEPORT1= (1LSL7)
+#CIAF_GAMEPORT0= (1LSL6)
+#CIAF_DSKRDY= (1LSL5)
+#CIAF_DSKTRACK0= (1LSL4)
+#CIAF_DSKPROT= (1LSL3)
+#CIAF_DSKCHANGE= (1LSL2)
+#CIAF_LED= (1LSL1)
+#CIAF_OVERLAY= (1LSL0)
+#CIAF_COMDTR= (1LSL7)
+#CIAF_COMRTS= (1LSL6)
+#CIAF_COMCD= (1LSL5)
+#CIAF_COMCTS= (1LSL4)
+#CIAF_COMDSR= (1LSL3)
+#CIAF_PRTRSEL= (1LSL2)
+#CIAF_PRTRPOUT= (1LSL1)
+#CIAF_PRTRBUSY= (1LSL0)
+#CIAF_DSKMOTOR= (1LSL7)
+#CIAF_DSKSEL3= (1LSL6)
+#CIAF_DSKSEL2= (1LSL5)
+#CIAF_DSKSEL1= (1LSL4)
+#CIAF_DSKSEL0= (1LSL3)
+#CIAF_DSKSIDE= (1LSL2)
+#CIAF_DSKDIREC= (1LSL1)
+#CIAF_DSKSTEP= (1LSL0)
+
+;***********File:blit.h
+
+#HSIZEBITS= 6
+#VSIZEBITS= 16-#HSIZEBITS
+#HSIZEMASK= $3f
+#VSIZEMASK= $3FF
+
+#MINBYTESPERROW= 128
+#MAXBYTESPERROW= 4096
+
+#ABC= $80
+#ABNC= $40
+#ANBC= $20
+#ANBNC= $10
+#NABC= $8
+#NABNC= $4
+#NANBC= $2
+#NANBNC= $1
+#A_OR_B= #ABC|#ANBC|#NABC|#ABNC|#ANBNC|#NABNC
+#A_OR_C= #ABC|#NABC|#ABNC|#ANBC|#NANBC|#ANBNC
+#A_XOR_C= #NABC|#ABNC|#NANBC|#ANBNC
+#A_TO_D= #ABC|#ANBC|#ABNC|#ANBNC
+#BC0B_DEST= 8
+#BC0B_SRCC= 9
+#BC0B_SRCB= 10
+#BC0B_SRCA= 11
+#BC0F_DEST= $100
+#BC0F_SRCC= $200
+#BC0F_SRCB= $400
+#BC0F_SRCA= $800
+#BC1F_DESC= 2
+#DEST= $100
+#SRCC= $200
+#SRCB= $400
+#SRCA= $800
+#ASHIFTSHIFT= 12
+#BSHIFTSHIFT= 12
+#LINEMODE= $1
+#FILL_OR= $8
+#FILL_XOR= $10
+#FILL_CARRYIN= $4
+#ONEDOT= $2
+#OVFLAG= $20
+#SIGNFLAG= $40
+#BLITREVERSE= $2
+#SUD= $10
+#SUL= $8
+#AUL= $4
+#OCTANT8= 24
+#OCTANT7= 4
+#OCTANT6= 12
+#OCTANT5= 28
+#OCTANT4= 20
+#OCTANT3= 8
+#OCTANT2= 0
+#OCTANT1= 16
+
+NEWTYPE.bltnode
+*n.bltnode
+*function.w
+stat.b
+blitsize.w
+beamsync.w
+*cleanup.w
+End NEWTYPE
+
+#CLEANUP= $40
+#CLEANME= #CLEANUP
+
+;***********File:dmabits.h
+
+#HARDWARE_DMABITS_H
+#DMAF_SETCLR= $8000
+#DMAF_AUDIO= $000F
+#DMAF_AUD0= $0001
+#DMAF_AUD1= $0002
+#DMAF_AUD2= $0004
+#DMAF_AUD3= $0008
+#DMAF_DISK= $0010
+#DMAF_SPRITE= $0020
+#DMAF_BLITTER= $0040
+#DMAF_COPPER= $0080
+#DMAF_RASTER= $0100
+#DMAF_MASTER= $0200
+#DMAF_BLITHOG= $0400
+#DMAF_ALL= $01FF
+#DMAF_BLTDONE= $4000
+#DMAF_BLTNZERO= $2000
+#DMAB_SETCLR= 15
+#DMAB_AUD0= 0
+#DMAB_AUD1= 1
+#DMAB_AUD2= 2
+#DMAB_AUD3= 3
+#DMAB_DISK= 4
+#DMAB_SPRITE= 5
+#DMAB_BLITTER= 6
+#DMAB_COPPER= 7
+#DMAB_RASTER= 8
+#DMAB_MASTER= 9
+#DMAB_BLITHOG= 10
+#DMAB_BLTDONE= 14
+#DMAB_BLTNZERO= 13
+
+;***********File:adkbits.h
+
+#HARDWARE_ADKBITS_H
+#ADKB_SETCLR= 15
+#ADKB_PRECOMP1= 14
+#ADKB_PRECOMP0= 13
+#ADKB_MFMPREC= 12
+#ADKB_UARTBRK= 11
+#ADKB_WORDSYNC= 10
+#ADKB_MSBSYNC= 9
+#ADKB_FAST= 8
+#ADKB_USE3PN= 7
+#ADKB_USE2P3= 6
+#ADKB_USE1P2= 5
+#ADKB_USE0P1= 4
+#ADKB_USE3VN= 3
+#ADKB_USE2V3= 2
+#ADKB_USE1V2= 1
+#ADKB_USE0V1= 0
+#ADKF_SETCLR= (1LSL15)
+#ADKF_PRECOMP1= (1LSL14)
+#ADKF_PRECOMP0= (1LSL13)
+#ADKF_MFMPREC= (1LSL12)
+#ADKF_UARTBRK= (1LSL11)
+#ADKF_WORDSYNC= (1LSL10)
+#ADKF_MSBSYNC= (1LSL9)
+#ADKF_FAST= (1LSL8)
+#ADKF_USE3PN= (1LSL7)
+#ADKF_USE2P3= (1LSL6)
+#ADKF_USE1P2= (1LSL5)
+#ADKF_USE0P1= (1LSL4)
+#ADKF_USE3VN= (1LSL3)
+#ADKF_USE2V3= (1LSL2)
+#ADKF_USE1V2= (1LSL1)
+#ADKF_USE0V1= (1LSL0)
+#ADKF_PRE000NS= 0
+#ADKF_PRE140NS= (#ADKF_PRECOMP0)
+#ADKF_PRE280NS= (#ADKF_PRECOMP1)
+#ADKF_PRE560NS= (#ADKF_PRECOMP0|#ADKF_PRECOMP1)
+
+;***********File:intbits.h
+
+#INTB_SETCLR= (15)
+#INTB_INTEN= (14)
+#INTB_EXTER= (13)
+#INTB_DSKSYNC= (12)
+#INTB_RBF= (11)
+#INTB_AUD3= (10)
+#INTB_AUD2= (9)
+#INTB_AUD1= (8)
+#INTB_AUD0= (7)
+#INTB_BLIT= (6)
+#INTB_VERTB= (5)
+#INTB_COPER= (4)
+#INTB_PORTS= (3)
+#INTB_SOFTINT= (2)
+#INTB_DSKBLK= (1)
+#INTB_TBE= (0)
+#INTF_SETCLR= (1LSL15)
+#INTF_INTEN= (1LSL14)
+#INTF_EXTER= (1LSL13)
+#INTF_DSKSYNC= (1LSL12)
+#INTF_RBF= (1LSL11)
+#INTF_AUD3= (1LSL10)
+#INTF_AUD2= (1LSL9)
+#INTF_AUD1= (1LSL8)
+#INTF_AUD0= (1LSL7)
+#INTF_BLIT= (1LSL6)
+#INTF_VERTB= (1LSL5)
+#INTF_COPER= (1LSL4)
+#INTF_PORTS= (1LSL3)
+#INTF_SOFTINT= (1LSL2)
+#INTF_DSKBLK= (1LSL1)
+#INTF_TBE= (1LSL0)
+

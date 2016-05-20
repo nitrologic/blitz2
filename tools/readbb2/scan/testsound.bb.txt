@@ -1,0 +1,30 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/testsound.bb
++LoadSound 0,"sfx/motor3.iff"
+LoadSound 1,"sfx/crash3.iff"
+LoadSound 2,"sfx/screech2.iff"
+LoadSound 3,"sfx/horn.iff"
+
+BLITZ
+Mouse On
+
+Dim pitch.w(256),vol.w(256)
+For i=0 To 256
+	pitch(i)=800-HSin(i*##[$80BA]/350)*650
+	vol(i)=10+HSin(i*##[$80BA]/350)*54
+Next
+Filter Off
+my=0:tt=1
+
+While RawStatus($45)=0		 ;Joyb(0)<>3
+	VWait
+	If tt>0
+		tt-1:If tt=0 LoopSound 0,1,0
+	Else
+		Volume 1,vol(MouseY)
+		Poke.w$dff0a6,pitch(MouseY)				;100+MouseY
+		If Joyb(0)=1 Then Sound 1,1,30:tt=11
+		If Joyb(0)=2 Then Sound 3,1,20:tt=12
+	EndIf
+Wend
+
+End

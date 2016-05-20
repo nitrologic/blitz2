@@ -1,0 +1,26 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/CARSTAT.BB
++
+
+DEFTYPE.f
+
+wheeldia=40		 ;15 inch wheel diametre (in cm)
+
+gearrat=2.66
+
+erpm=1000
+
+
+wheelcir=##[$80BA]*wheeldia
+
+wheelrpm=1/(gearrat/erpm)
+
+cmpermin=wheelrpm*wheelcir
+
+kpm=cmpermin/100/1000
+
+kph=kpm*60
+
+NPrint kph
+
+
+MouseWait

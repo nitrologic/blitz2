@@ -1,0 +1,2435 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/figz/figz.bb
++;FigZ rendering programme
+;(c) Mike Cooper 1995
+
+DEFTYPE.q
+
+DEFTYPE.obj *ptr
+DEFTYPE.vec rayx,rayu,tmpx,tmpu,tmap,tmap1,light,nmx,nmy
+DEFTYPE.pt impact,max
+
+##[$80C3]
+#edonly=0
+
+##[$80B4]:End:End ##[$80B4]
+MaxLen path$=160:path$="FigZ:":MaxLen path2$=160:path2$=""
+MaxLen fnmobj$=64
+MaxLen fnmbm2$=64
+MaxLen fnmshp$=64
+MaxLen fnmcol$=64
+
+root2=1.4142
+root2r=0.7071
+root5r=0.4472
+
+Function$ sn{x,n}
+ a$=Right$("000"+Str$(Abs(Int(x+0.5*Sgn(x)))),n)
+ If x>=0 Then a$="+"+a$
+ If x<0 Then a$="-"+a$
+ Function Return a$
+End Function
+
+Function$ unsn{x,n}
+ a$=Right$("000"+Str$(Abs(Int(x+0.5*Sgn(x)))),n)
+ Function Return a$
+End Function
+
+Function.w wrap{x.q,y.q}
+ If y<>0
+	tang.f=x/y:a=Cos(tang)*32/##[$80BA]:If y<0 Then a+32
+	Function Return a
+ Else
+	Function Return 32-16*x
+ EndIf
+End Function
+
+Dim object.obj(100),oldobj.obj(100)
+Dim nongrata.b(100)
+Dim col.b(15,11,1),spec(15),diff(15),buff.b(481)
+Dim rangle(3),mirpl(3)
+Dim nlines(100),npts(100,7),xx(100,11,7),yy(100,11,7),zz(100,11,7)
+Dim trace.w(71)
+Dim ngroup(16),ngroup0(16)
+Dim supermap(16),id1(16),shadowcol(1)
+Dim tmx0(20),tmy0(20)
+Dim lut.b(15,15,15)
+Dim xl1(100),xl2(100),yl1(100),yl2(100)
+Dim ray0.vec(100)
+Dim xpand.l(255)
+Dim radi(8,8)
+
+For i=0 To 255
+xpand(i)=0
+For j=0 To 7
+ If (i ##[$80CD] j) Then xpand(i)|(15 ASL (j ASL 2))
+Next
+Next
+
+Menus Off
+longmult 0,4
+lmaxlen 3,256,256,2
+CNIF #edonly=0
+allocst 3,4:ScreensBitMap 3,6;texture mapping screen
+Use lmaxlen 6:Boxf 0,0,319,255,0
+localstat 7,72,64,64,64,$800,"",0,1
+lmaxlen 1,64,64,4:lmaxlen 2,64,64,4;texmap utility bitmaps
+CEND
+allocst 1,2;object editor screen
+Green 0,0,0,0:Green 1,8,4,0:Green 2,12,7,2:Green3,15,12,6
+Gosub panel
+For i=1 To 16:supermap(i)=0:Next
+Use allocst 1
+localstat 0,0,0,256,256,$800,"",3,1;editor
+CNIF #edonly=0
+For i=0 To 15:spec(i)=0:diff(i)=1:Next
+For i=0 To 31:For j=0 To 2:buff(i*3+j)=1&15:Next:Next
+If WriteMem(0,"FigZ:def.col")
+ ##[$BE14] 0,&buff(0),482
+ ##[$BE14] 0,&spec(0),64
+ ##[$BE14] 0,&diff(0),64
+ For i=0 To 11:For j=0 To 15:i0=96+(i+j*12)*2
+	col(j,i,0)=buff(i0):col(j,i,1)=buff(i0+1)
+ Next:Next
+ shadowcol(0)=buff(480):shadowcol(1)=buff(481)
+ CloseFile(0)
+ Use allocst 3
+ For k=0 To 15
+	For i=0 To 11:For j=0 To 1
+	 col0=3*col(k,i,j):r0+buff(col0):b0+buff(col0+2):g0+buff(col0+1)
+	Next:Next
+	r0/24:g0/24:b0/24
+	Green k,r0,g0,b0
+ Next
+EndIf
+For i=0 To 4:For j=0 To 3
+ tmx0(1+i+j*5)=i ASL 6:tmy0(1+i+j*5)=j ASL 6
+Next:Next
+CEND
+qflag=0:rangle(1)=0:rangle(2)=0:rangle(3)=0:mirgrp=2:nbpl=5:ldist=4:shadowcol(0)=1:shadowcol(1)=0
+hx=0:hy=0:hz=0:nframe=16:dangle=360:xsize=32:ysize=42:group=1:id=0:nobj=-1
+elev=45:merid=45:rmerid=8:amerid=360:relev=1:aelev=0
+edmode=1:xlen=8:ylen=8:map0=1:supergrp=1
+For i=1 To 16:ngroup(i)=0:Next
+Use allocst 1:WindowOutput 1
+.selector
+ev.l=WaitEvent:evw=EventWindow
+If evw<>1 OR ev<>$40 Then Goto endselector
+ Use localstat 1
+ gadg=GadgetHit
+ Select gadg
+	Case 1:cama=QWrap(cama+10,0,355):On edmode Gosub draw,qwkdraw
+	Case 2:cama=QWrap(cama-10,0,355):On edmode Gosub draw,qwkdraw
+	Case 3:edmode=Disable(0,3):Gosub draw
+	Case 4:!arrow{0,1,5,group,QLimit(group-1,1,16),unsn{group,2}}
+	 oid=id
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
+	 Next
+	Case 5:!arrow{0,1,5,group,QLimit(!vl{0,5},1,16),unsn{group,2}}
+	 oid=id
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
+	 Next
+	Case 6:!arrow{0,1,5,group,QLimit(group+1,1,16),unsn{group,2}}
+	 oid=id
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
+	 Next
+	Case 11:oid=id
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid-1 Then obj=i:id=\id:Gosub update
+	 Next
+	Case 13:oid=id
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid+1 Then obj=i:id=\id:Gosub update
+	 Next
+	Case 12:oid=!vl{0,12}
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
+	 Next
+	Case 57
+	 *ptr=object(obj)
+	 rotax=SetGadgetStatus(0,2)-57
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		 If !yes1 OR !yes2
+			cosa=HCos(rangle(rotax)*0.0174533):sina=HSin(rangle(rotax)*0.0174533)
+			Select rotax
+			 Case 1;x-axis rotation
+				y1=\c\y-*ptr\c\y:z1=\c\z-*ptr\c\z
+				\c\y=*ptr\c\y+cosa*y1+sina*z1:\c\z=*ptr\c\z+cosa*z1-sina*y1
+				y1=\r1\y:z1=\r1\z:\r1\y=cosa*y1+sina*z1:\r1\z=cosa*z1-sina*y1
+				y1=\r2\y:z1=\r2\z:\r2\y=cosa*y1+sina*z1:\r2\z=cosa*z1-sina*y1
+				y1=\r3\y:z1=\r3\z:\r3\y=cosa*y1+sina*z1:\r3\z=cosa*z1-sina*y1
+			 Case 2;y-axis rotation
+				x1=\c\x-*ptr\c\x:z1=\c\z-*ptr\c\z
+				\c\x=*ptr\c\x+cosa*x1+sina*z1:\c\z=*ptr\c\z+cosa*z1-sina*x1
+				x1=\r1\x:z1=\r1\z:\r1\x=cosa*x1+sina*z1:\r1\z=cosa*z1-sina*x1
+				x1=\r2\x:z1=\r2\z:\r2\x=cosa*x1+sina*z1:\r2\z=cosa*z1-sina*x1
+				x1=\r3\x:z1=\r3\z:\r3\x=cosa*x1+sina*z1:\r3\z=cosa*z1-sina*x1
+			 Case 3;z-axis rotation
+				y1=\c\y-*ptr\c\y:x1=\c\x-*ptr\c\x
+				\c\y=*ptr\c\y+cosa*y1+sina*x1:\c\x=*ptr\c\x+cosa*x1-sina*y1
+				y1=\r1\y:x1=\r1\x:\r1\y=cosa*y1+sina*x1:\r1\x=cosa*x1-sina*y1
+				y1=\r2\y:x1=\r2\x:\r2\y=cosa*y1+sina*x1:\r2\x=cosa*x1-sina*y1
+				y1=\r3\y:x1=\r3\x:\r3\y=cosa*y1+sina*x1:\r3\x=cosa*x1-sina*y1
+			End Select
+			iobj=i:Gosub objtoshp
+		 EndIf
+	 Next
+	 Gosub draw
+	Case 61:!arrow{0,1,62,rangle(rotax),QWrap(rangle(rotax)-5,-180,180),sn{rangle(rotax),3}}
+	Case 63:!arrow{0,1,62,rangle(rotax),QWrap(rangle(rotax)+5,-180,180),sn{rangle(rotax),3}}
+	Case 62:!arrow{0,1,62,rangle(rotax),QLimit(!vl{0,62},-180,180),sn{rangle(rotax),3}}
+	Case 50;copy
+	 nnshp=0:id0=0:If Disable(0,7)=0 Then id0=id-1
+	 For i=0 To nobj
+		##[$80CA] object(i)
+		 If !yes1 OR !yes2
+			nobj+1:nnshp+1:*ptr=object(nobj)
+			*ptr\typ=\typ,mirgrp,ngroup(mirgrp)+\id-id0,\col
+			*ptr\c\x=\c\x,\c\y,\c\z:*ptr\bump=\bump
+			*ptr\r1\x=\r1\x,\r1\y,\r1\z
+			*ptr\r2\x=\r2\x,\r2\y,\r2\z
+			*ptr\r3\x=\r3\x,\r3\y,\r3\z
+			##[$80CA] object(nobj)
+			If Disable(0,51) Then \c\x=-\c\x:\r1\x=-\r1\x:\r2\x=-\r2\x:\r3\x=-\r3\x
+			If Disable(0,52) Then \c\y=-\c\y:\r1\y=-\r1\y:\r2\y=-\r2\y:\r3\y=-\r3\y
+			If Disable(0,53) Then \c\z=32-\c\z:\r1\z=-\r1\z:\r2\z=-\r2\z:\r3\z=-\r3\z
+			iobj=nobj:Gosub objtoshp
+		 EndIf
+	 Next
+	 ngroup(mirgrp)+nnshp
+	 Gosub draw
+	Case 54:!arrow{0,1,55,mirgrp,QLimit(mirgrp-1,1,16),unsn{mirgrp,2}}
+	Case 55:!arrow{0,1,55,mirgrp,QLimit(!vl{0,55},1,16),unsn{mirgrp,2}}
+	Case 56:!arrow{0,1,55,mirgrp,QLimit(mirgrp+1,1,16),unsn{mirgrp,2}}
+ End Select
+ Select gadg
+	Case 46;delete
+	 nnshp=0
+	 For i=nobj To 0 Step -1
+	 ##[$80CA] object(i)
+		 If !yes1 OR !yes2
+			*ptr=object(i):If *ptr\group=group Then nnshp+1
+			ngroup(*ptr\group)-1
+			##[$80CA] object(nobj)
+			*ptr\typ=\typ,\group,\id,\col
+			*ptr\c\x=\c\x,\c\y,\c\z:*ptr\bump=\bump
+			*ptr\r1\x=\r1\x,\r1\y,\r1\z
+			*ptr\r2\x=\r2\x,\r2\y,\r2\z
+			*ptr\r3\x=\r3\x,\r3\y,\r3\z
+			nobj-1
+		 EndIf
+	 Next
+	 If Disable(0,8)=0
+		For ii=0 To nobj
+		 If object(ii)\group=group AND object(ii)\id>id Then object(ii)\id-nnshp
+		Next
+	 EndIf
+	 If ngroup(group)<>0
+		If Disable(0,7)=0
+		 id=1
+		Else
+		 id=QLimit(id-nnshp,1,ngroup(nnshp))
+		EndIf
+	 Else
+		For i=15 To 0 Step -1
+		 If ngroup(i)<>0 Then group=i:id=1:ButtonId 0,5,unsn{group,2}:Redraw 1,5
+		Next
+	 EndIf
+	 For i=0 To nobj
+		If object(i)\group=group AND object(i)\id=id Then obj=i
+		iobj=i:Gosub objtoshp
+	 Next
+	 Gosub update
+	Case 45;insert
+	 ##[$80CA] object(obj)
+	 typ0=\typ:col0=\col
+	 r10=QLimit(Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z),1,16)
+	 r20=QLimit(Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z),1,16)
+	 r30=QLimit(Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z),1,16)
+	 nobj+1:obj=nobj:iobj=nobj
+	 For i=0 To nobj-1
+		If object(i)\group=group AND object(i)\id>id Then object(i)\id+1
+	 Next
+	 ngroup(group)+1:id=QLimit(id+1,1,ngroup(group))
+	 \typ=typ0,group,id,col0
+	 \c\x=0,0,16:\bump=0
+	 \r1\x=r10,0,0:\r2\x=0,r20,0:\r3\x=0,0,r30
+	 iobj=nobj:Gosub objtoshp
+	 Gosub update
+	CNIF #edonly=0
+	Case 72:Gosub rendmenu
+	CEND
+	Case 69:Gosub load:Gosub update
+	Case 71:Gosub save
+	Case 14:qflag=1
+	Case 47:For i=0 To nobj;><
+	 ##[$80CA] object(i)
+	 If !yes1 OR !yes2
+		If Disable(0,51) Then \r1\x*0.9:\r2\x*0.9:\r3\x*0.9
+		If Disable(0,52) Then \r1\y*0.9:\r2\y*0.9:\r3\y*0.9
+		If Disable(0,53) Then \r1\z*0.9:\r2\z*0.9:\r3\z*0.9
+		iobj=i:Gosub objtoshp
+		If Disable(0,49)=2 AND i<>obj
+		 If Disable(0,51) Then x0=\c\x-object(obj)\c\x:\c\x=object(obj)\c\x+x0*0.9
+		 If Disable(0,52) Then y0=\c\y-object(obj)\c\y:\c\y=object(obj)\c\y+y0*0.9
+		 If Disable(0,53) Then z0=\c\z-object(obj)\c\z:\c\z=object(obj)\c\z+z0*0.9
+		EndIf
+	 EndIf
+	 Next
+	 Gosub update
+	Case 48:For i=0 To nobj;<>
+	 ##[$80CA] object(i)
+	 If !yes1 OR !yes2
+		If Disable(0,51) Then \r1\x*1.11:\r2\x*1.11:\r3\x*1.11
+		If Disable(0,52) Then \r1\y*1.11:\r2\y*1.11:\r3\y*1.11
+		If Disable(0,53) Then \r1\z*1.11:\r2\z*1.11:\r3\z*1.11
+		iobj=i:Gosub objtoshp
+		If Disable(0,49)=2 AND i<>obj
+		 If Disable(0,51) Then x0=\c\x-object(obj)\c\x:\c\x=object(obj)\c\x+x0*1.11
+		 If Disable(0,52) Then y0=\c\y-object(obj)\c\y:\c\y=object(obj)\c\y+y0*1.11
+		 If Disable(0,53) Then z0=\c\z-object(obj)\c\z:\c\z=object(obj)\c\z+z0*1.11
+		EndIf
+	 EndIf
+	 Next
+	 Gosub update
+	 ##[$80CA] object(i)
+	 Case 15
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\x-0.25
+		Next:Gosub update
+	 Case 16:dx=(!vl{0,16})/4-16-object(obj)\c\x
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\x+dx
+		Next:Gosub update
+	 Case 17
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\x+0.25
+		Next:Gosub update
+	 Case 18
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\y-0.25
+		Next:Gosub update
+	 Case 19:dy=(!vl{0,19})/4-16-object(obj)\c\y
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\y+dy
+		Next:Gosub update
+	 Case 20
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\y+0.25
+		Next:Gosub update
+	 Case 21
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\z-0.25
+		Next:Gosub update
+	 Case 22:dz=(!vl{0,22})/4-object(obj)\c\z
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\z+dz
+		Next:Gosub update
+	 Case 23
+		For i=0 To nobj
+		 If !yes1 OR !yes2 Then \c\z+0.25
+		Next:Gosub update
+	 Case 24:!dilate{object(obj)\r1,d0-0.25}
+	 Case 25:!dilate{object(obj)\r1,!vl{0,25}/4}
+	 Case 26:!dilate{object(obj)\r1,d0+0.25}
+	 Case 27:!dilate{object(obj)\r2,d0-0.25}
+	 Case 28:!dilate{object(obj)\r2,!vl{0,28}/4}
+	 Case 29:!dilate{object(obj)\r2,d0+0.25}
+	 Case 30:!dilate{object(obj)\r3,d0-0.25}
+	 Case 31:!dilate{object(obj)\r3,!vl{0,31}/4}
+	 Case 32:!dilate{object(obj)\r3,d0+0.25}
+	 Case 33:!arrow{0,1,34,object(obj)\col,QLimit(object(obj)\col-1,-17,15),sn{object(obj)\col,2}}
+	 Case 34:!arrow{0,1,34,object(obj)\col,QLimit(!vl{0,34},-17,15),sn{object(obj)\col,2}}
+	 Case 35:!arrow{0,1,34,object(obj)\col,QLimit(object(obj)\col+1,-17,15),sn{object(obj)\col,2}}
+	 Case 73:!arrow{0,1,74,object(obj)\bump,QLimit(object(obj)\bump-1,0,20),unsn{object(obj)\bump,3}}
+	 Case 74:!arrow{0,1,74,object(obj)\bump,QLimit(!vl{0,74},0,20),unsn{object(obj)\bump,3}}
+	 Case 75:!arrow{0,1,74,object(obj)\bump,QLimit(object(obj)\bump+1,0,20),unsn{object(obj)\bump,3}}
+	End Select
+	Select gadg
+	 Case 36:!arrow{0,1,37,object(obj)\C[0],QLimit(object(obj)\C[0]-0.05,0,1),unsn{100*object(obj)\C[0],3}}
+		iobj=obj:Gosub objtoshp:Gosub draw
+	 Case 37:!arrow{0,1,37,object(obj)\C[0],QLimit((!vl{0,37})/100,0,1),unsn{100*object(obj)\C[0],3}}
+		iobj=obj:Gosub objtoshp:Gosub draw
+	 Case 38:!arrow{0,1,37,object(obj)\C[0],QLimit(object(obj)\C[0]+0.05,0,1),unsn{100*object(obj)\C[0],3}}
+		iobj=obj:Gosub objtoshp:Gosub draw
+	 Case 64
+		If nobj>-1
+		 ##[$80CA] object(obj)
+		 Select SetGadgetStatus(0,3)
+			Case 66
+			 tmpx\x=\r2\x+\r3\x,\r2\y+\r3\y,\r2\y+\r3\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r2\x+tmpx\y*\r2\y+tmpx\z*\r2\z)/r0
+			 dot3=(tmpx\x*\r3\x+tmpx\y*\r3\y+tmpx\z*\r3\z)/r0
+			 rayx\x=\r2\x-dot2*tmpx\x,\r2\y-dot2*tmpx\y,\r2\z-dot2*tmpx\z
+			 rayu\x=\r3\x-dot2*tmpx\x,\r3\y-dot2*tmpx\y,\r3\z-dot2*tmpx\z
+			 norm1=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 norm2=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 \r2\x=\r2\x-0.1*rayx\x,\r2\y-0.1*rayx\y,\r2\z-0.1*rayx\z
+			 \r3\x=\r3\x-0.1*rayu\x,\r3\y-0.1*rayu\y,\r3\z-0.1*rayu\z
+			 norm3=norm1/Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 norm4=norm2/Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 \r2\x=\r2\x*norm3,\r2\y*norm3,\r2\z*norm3
+			 \r3\x=\r3\x*norm4,\r3\y*norm4,\r3\z*norm4
+			Case 67
+			 tmpx\x=\r3\x+\r1\x,\r3\y+\r1\y,\r3\y+\r1\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r3\x+tmpx\y*\r3\y+tmpx\z*\r3\z)/r0
+			 dot3=(tmpx\x*\r1\x+tmpx\y*\r1\y+tmpx\z*\r1\z)/r0
+			 rayx\x=\r3\x-dot2*tmpx\x,\r3\y-dot2*tmpx\y,\r3\z-dot2*tmpx\z
+			 rayu\x=\r1\x-dot2*tmpx\x,\r1\y-dot2*tmpx\y,\r1\z-dot2*tmpx\z
+			 norm1=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 norm2=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 \r3\x=\r3\x-0.1*rayx\x,\r3\y-0.1*rayx\y,\r3\z-0.1*rayx\z
+			 \r1\x=\r1\x-0.1*rayu\x,\r1\y-0.1*rayu\y,\r1\z-0.1*rayu\z
+			 norm3=norm1/Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 norm4=norm2/Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 \r3\x=\r3\x*norm3,\r3\y*norm3,\r3\z*norm3
+			 \r1\x=\r1\x*norm4,\r1\y*norm4,\r1\z*norm4
+			Case 68
+			 tmpx\x=\r1\x+\r2\x,\r1\y+\r2\y,\r1\y+\r2\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r1\x+tmpx\y*\r1\y+tmpx\z*\r1\z)/r0
+			 dot3=(tmpx\x*\r2\x+tmpx\y*\r2\y+tmpx\z*\r2\z)/r0
+			 rayx\x=\r1\x-dot2*tmpx\x,\r1\y-dot2*tmpx\y,\r1\z-dot2*tmpx\z
+			 rayu\x=\r2\x-dot2*tmpx\x,\r2\y-dot2*tmpx\y,\r2\z-dot2*tmpx\z
+			 norm1=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 norm2=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 \r1\x=\r1\x-0.1*rayx\x,\r1\y-0.1*rayx\y,\r1\z-0.1*rayx\z
+			 \r2\x=\r2\x-0.1*rayu\x,\r2\y-0.1*rayu\y,\r2\z-0.1*rayu\z
+			 norm3=norm1/Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 norm4=norm2/Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 \r1\x=\r1\x*norm3,\r1\y*norm3,\r1\z*norm3
+			 \r2\x=\r2\x*norm4,\r2\y*norm4,\r2\z*norm4
+			End Select
+		 iobj=obj:Gosub objtoshp:Gosub draw
+		EndIf
+	 Case 65
+		If nobj>-1
+		 ##[$80CA] object(obj)
+		 Select SetGadgetStatus(0,3)
+			Case 66
+			 tmpx\x=\r2\x+\r3\x,\r2\y+\r3\y,\r2\y+\r3\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r2\x+tmpx\y*\r2\y+tmpx\z*\r2\z)/r0
+			 dot3=(tmpx\x*\r3\x+tmpx\y*\r3\y+tmpx\z*\r3\z)/r0
+			 rayx\x=\r2\x-dot2*tmpx\x,\r2\y-dot2*tmpx\y,\r2\z-dot2*tmpx\z
+			 rayu\x=\r3\x-dot2*tmpx\x,\r3\y-dot2*tmpx\y,\r3\z-dot2*tmpx\z
+			 norm1=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 norm2=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 \r2\x=\r2\x+0.1*rayx\x,\r2\y+0.1*rayx\y,\r2\z+0.1*rayx\z
+			 \r3\x=\r3\x+0.1*rayu\x,\r3\y+0.1*rayu\y,\r3\z+0.1*rayu\z
+			 norm3=norm1/Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 norm4=norm2/Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 \r2\x=\r2\x*norm3,\r2\y*norm3,\r2\z*norm3
+			 \r3\x=\r3\x*norm4,\r3\y*norm4,\r3\z*norm4
+			Case 67
+			 tmpx\x=\r3\x+\r1\x,\r3\y+\r1\y,\r3\y+\r1\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r3\x+tmpx\y*\r3\y+tmpx\z*\r3\z)/r0
+			 dot3=(tmpx\x*\r1\x+tmpx\y*\r1\y+tmpx\z*\r1\z)/r0
+			 rayx\x=\r3\x-dot2*tmpx\x,\r3\y-dot2*tmpx\y,\r3\z-dot2*tmpx\z
+			 rayu\x=\r1\x-dot2*tmpx\x,\r1\y-dot2*tmpx\y,\r1\z-dot2*tmpx\z
+			 norm1=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 norm2=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 \r3\x=\r3\x+0.1*rayx\x,\r3\y+0.1*rayx\y,\r3\z+0.1*rayx\z
+			 \r1\x=\r1\x+0.1*rayu\x,\r1\y+0.1*rayu\y,\r1\z+0.1*rayu\z
+			 norm3=norm1/Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+			 norm4=norm2/Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 \r3\x=\r3\x*norm3,\r3\y*norm3,\r3\z*norm3
+			 \r1\x=\r1\x*norm4,\r1\y*norm4,\r1\z*norm4
+			Case 68
+			 tmpx\x=\r1\x+\r2\x,\r1\y+\r2\y,\r1\y+\r2\y
+			 r0=(tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z)
+			 dot2=(tmpx\x*\r1\x+tmpx\y*\r1\y+tmpx\z*\r1\z)/r0
+			 dot3=(tmpx\x*\r2\x+tmpx\y*\r2\y+tmpx\z*\r2\z)/r0
+			 rayx\x=\r1\x-dot2*tmpx\x,\r1\y-dot2*tmpx\y,\r1\z-dot2*tmpx\z
+			 rayu\x=\r2\x-dot2*tmpx\x,\r2\y-dot2*tmpx\y,\r2\z-dot2*tmpx\z
+			 norm1=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 norm2=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 \r1\x=\r1\x+0.1*rayx\x,\r1\y+0.1*rayx\y,\r1\z+0.1*rayx\z
+			 \r2\x=\r2\x+0.1*rayu\x,\r2\y+0.1*rayu\y,\r2\z+0.1*rayu\z
+			 norm3=norm1/Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+			 norm4=norm2/Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+			 \r1\x=\r1\x*norm3,\r1\y*norm3,\r1\z*norm3
+			 \r2\x=\r2\x*norm4,\r2\y*norm4,\r2\z*norm4
+		 End Select
+		 iobj=obj:Gosub objtoshp:Gosub draw
+		EndIf
+	Default
+	 If gadg>6 AND gadg<11 Then Gosub draw
+	 If gadg>57 AND gadg<61 Then rotax=SetGadgetStatus(0,2)-57:ButtonId 0,62,sn{rangle(rotax),3}:Redraw 1,62
+	 If gadg>38 AND gadg<45 Then object(obj)\typ=(SetGadgetStatus(0,1)-39)*2+(Disable(0,44)&1):iobj=obj:Gosub objtoshp:Gosub draw
+ End Select
+.endselector
+If evw=0 AND ev=$8
+ Use localstat 0
+ ##[$80CA] object(obj)
+ If Joyb(0)<>0
+	Select edmode
+	 Case 1;isometric
+		mx=EMouseX:my=EMouseY
+		cosa=HCos(cama*0.0174533):sina=HSin(cama*0.0174533)
+		nz=-0.1397*(my-camy-8*root5r*(\c\y*cosa-\c\x*sina))
+		dx=((mx ASR 3)-16-\c\x*cosa-\c\y*sina)
+		nx=\c\x+dx*cosa:ny=\c\y+dx*sina
+	 Case 2;techie drawing
+		zone=(EMouseX ASR 7)&1+(EMouseY ASR 6)&2
+		mx=EMouseX&127:my=EMouseY&127
+		Select zone
+		 Case0
+			nx=(mx ASR 2)-16
+			ny=16-(my ASR 2)
+			nz=object(obj)\c\z
+		 Case2
+			nx=(mx ASR 2)-16
+			ny=object(obj)\c\y
+			nz=32-(my ASR 2)
+		 Case3
+			nx=object(obj)\c\x
+			ny=(mx ASR 2)-16
+			nz=32-(my ASR 2)
+		End Select
+	End Select
+ dx=nx-object(obj)\c\x:dy=ny-object(obj)\c\y:dz=nz-object(obj)\c\z
+ ##[$80CA] object(i)
+ For i=0 To nobj
+	If !yes1 OR !yes2 Then \c\x+dx:\c\y+dy:\c\z+dz
+ Next
+ Gosub update
+ EndIf
+EndIf
+FlushEvents
+If qflag=0 Then Goto selector
+End
+
+.update
+##[$80CA] object(obj)
+d1=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
+d2=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
+d3=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
+ButtonId 0,12,unsn{id,3}:GadgetList 0,12:Redraw 1,12
+ButtonId 0,16,unsn{(\c\x+16)ASL2,3}:GadgetList 0,16:Redraw 1,16
+ButtonId 0,19,unsn{(\c\y+16)ASL2,3}:GadgetList 0,19:Redraw 1,19
+ButtonId 0,22,unsn{(\c\z)ASL2,3}:GadgetList 0,22:Redraw 1,22
+ButtonId 0,25,unsn{(d1)ASL2,3}:GadgetList 0,25:Redraw 1,25
+ButtonId 0,28,unsn{(d2)ASL2,3}:GadgetList 0,28:Redraw 1,28
+ButtonId 0,31,unsn{(d3)ASL2,3}:GadgetList 0,31:Redraw 1,31
+ButtonId 0,34,sn{\col,2}:GadgetList 0,34:Redraw 1,34
+ButtonId 0,37,unsn{100*\C[0],3}:GadgetList 0,37:Redraw 1,37
+ButtonId 0,74,unsn{\bump,3}:GadgetList 0,74:Redraw 1,74
+For i=39 To 44:Borders 0,i,Off:Next
+If \typ&1 Then Borders 0,44,On
+Borders 0,39+Int(\typ/2),On:For i=39 To 44:Redraw 1,i:Next
+camy=192+QLimit(3*\c\z-1,0,94)
+Gosub draw
+Return
+
+Statement blok{x0,y0,col1,col2}
+ x=17+(x0 ASL3):y=y0 ASL 3
+ WBox x,y+1,x+7,y+7,col1
+ If col1<>col2
+	WLine x,y+1,x+6,y+7,col2
+	WLine x+2,y+1,x+7,y+6,col2
+	WLine x,y+3,x+2,y+1,col2
+	WLine x,y+5,x+4,y+1,col2
+	WLine x,y+7,x+6,y+1,col2
+	WLine x+2,y+7,x+7,y+2,col2
+	WLine x+4,y+7,x+7,y+4,col2
+ EndIf
+End Statement
+
+Function.q best{r,g,b}
+Shared numcol
+Use allocst 4
+ dist=100
+ For i=1 To numcol
+	d0=Abs(r-Blue(i))+Abs(g-Palette(i))+Abs(b-PalRGB(i))
+	If dist>d0 Then col=i:dist=d0
+ Next
+ Function Return col
+End Function
+
+Function hval{a$}
+v=Asc(UCase$(a$))
+If v>64 AND v<71
+ v0=v-55
+Else
+ v0=Val(a$)
+EndIf
+Function Return v0
+End Function
+
+Macro setrgb
+ButtonId 2,14,Right$(Hex$(Blue(`1)),1)
+ButtonId 2,17,Right$(Hex$(Palette(`1)),1)
+ButtonId 2,20,Right$(Hex$(PalRGB(`1)),1)
+GadgetList 2,14:Redraw 5,14
+GadgetList 2,17:Redraw 5,17
+GadgetList 2,20:Redraw 5,20
+End Macro
+
+CNIF #edonly=0
+.colours
+ButtonId 2,8,unsn{spec(rng)*100,3}:ButtonId 2,11,unsn{diff(rng)*100,3}
+ButtonId 2,24,unsn{nbpl,1}
+allocst 4,5:Use allocst 4
+For i=0 To 31:i0=i*3:Green i,buff(i0),buff(i0+1),buff(i0+2):Next
+localstat 5,72,64,176,130,$800,"",0,3,2
+Use localstat 5
+!setrgb{1}
+For j=0 To 11:For i=0 To 15
+ blok{j,i,col(i,j,0),col(i,j,1)}
+Next:Next
+For i=0 To 15:WLocate 0,i ASL 3:Print Right$(Hex$(i),1)+":":Next
+For i=0 To 31
+ x0=144+(i&3)ASL 3:y0=64+((i ASR 2)&7) ASL 3:WBox x0,y0+1,x0+6,y0+7,i
+Next
+WLocate 112,56:Print"Shadow:":blok{19,7,shadowcol(0),shadowcol(1)}
+WLocate 114,31:Print"Sp":WLocate 114,41:Print"Df"
+pal0=1:pal1=7:rng=0:numcol=(1 ASL nbpl)-1
+y0=rng ASL 3:WLine 16,y0,16,y0+8,113,y0+8,113,y0,16,y0,31
+x0=16+(((pal0&3)+16)ASL 3)-1:y0=((pal0 ASR2)&7+8)ASL3
+WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal0
+x0=16+(((pal1&3)+16)ASL 3)-1:y0=((pal1 ASR2)&7+8)ASL3
+WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal1
+##[$80BB]
+ ev=WaitEvent
+ evw=EventWindow
+ If evw=5
+	Use localstat 5
+	If ev=$40
+	 gadg=GadgetHit
+	 r0=Blue(pal0):g0=Palette(pal0):b0=PalRGB(pal0)
+	 Select gadg
+		Case 13:r0-1:r0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 14:r0=hval{GadgetPens(2,14)}:r0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 15:r0+1:r0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 16:g0-1:g0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 17:g0=hval{GadgetPens(2,17)}:g0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 18:g0+1:g0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 19:b0-1:b0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 20:b0=hval{GadgetPens(2,20)}:b0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 21:b0+1:b0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
+		Case 22;spread rgb
+		 If Abs(pal1-pal0)>1
+			col1=pal0:col2=pal1:If col2<col1 Then ##[$80C9] col1,col2
+			dr=Blue(col2)-Blue(col1):dg=Palette(col2)-Palette(col1):db=PalRGB(col2)-PalRGB(col1)
+			r0=Blue(col1):g0=Palette(col1):b0=PalRGB(col1)
+			dcol=col2-col1:dr/dcol:dg/dcol:db/dcol
+			For i=col1+1 To col2-1
+			 r0+dr:g0+dg:b0+db:Green i,r0,g0,b0
+			Next
+		 EndIf
+		Case 3;matte
+		 r0=Blue(col(rng,0,0)):g0=Palette(col(rng,0,0)):b0=PalRGB(col(rng,0,0))
+		 r1=Blue(col(rng,11,0)):g1=Palette(col(rng,11,0)):b1=PalRGB(col(rng,11,0))
+		 dr=(r1-r0)/11:dg=(g1-g0)/11:db=(b1-b0)/11
+		 For i=1 To 10:r0+dr:g0+dg:b0+db:col(rng,i,0)=best{r0,g0,b0}:Next
+		 diff(rng)=1:spec(rng)=0:ButtonId 2,8,"000":ButtonId 2,11,"100":Redraw 5,8:Redraw 5,1
+		 For i=0 To 11:col(rng,i,1)=col(rng,i,0):Next
+		 If Disable(2,5)<>0
+			For i=1 To 10
+			 If col(rng,i-1,0)=col(rng,i,0) AND col(rng,i,0)<>col(rng,i+1,0) Then col(rng,i,1)=col(rng,i+1,0)
+			Next
+		 EndIf
+		 For i=0 To 11:blok{i,rng,col(rng,i,0),col(rng,i,1)}:Next
+		Case 4;plastic
+		 col(rng,10,0)=col(rng,11,0)
+		 col(rng,11,0)=best{15,15,15}
+		 r0=Blue(col(rng,0,0)):g0=Palette(col(rng,0,0)):b0=PalRGB(col(rng,0,0))
+		 r1=Blue(col(rng,10,0)):g1=Palette(col(rng,10,0)):b1=PalRGB(col(rng,10,0))
+		 dr=(r1-r0)/10:dg=(g1-g0)/10:db=(b1-b0)/10
+		 For i=1 To 9:r0+dr:g0+dg:b0+db:col(rng,i,0)=best{r0,g0,b0}:Next
+		 diff(rng)=.95:spec(rng)=.4:ButtonId 2,8,"040":ButtonId 2,11,"095":Redraw 5,8:Redraw 5,11
+		 For i=0 To 11:col(rng,i,1)=col(rng,i,0):Next
+		 If Disable(2,5)<>0
+			For i=1 To 10
+			 If col(rng,i-1,0)=col(rng,i,0) AND col(rng,i,0)<>col(rng,i+1,0) Then col(rng,i,1)=col(rng,i+1,0)
+			Next
+		 EndIf
+		 For i=0 To 11:blok{i,rng,col(rng,i,0),col(rng,i,1)}:Next
+		Case 6;metal
+		 col(rng,10,0)=col(rng,11,0):col(rng,11,0)=best{15,15,15}
+		 r0=Blue(col(rng,0,0)):g0=Palette(col(rng,0,0)):b0=PalRGB(col(rng,0,0))
+		 r1=Blue(col(rng,10,0)):g1=Palette(col(rng,10,0)):b1=PalRGB(col(rng,10,0))
+		 dr=(r1-r0)/15:dg=(g1-g0)/15:db=(b1-b0)/15:r0+(dr ASL2):g0+(dg ASL2):b0+(db ASL2)
+		 For i=1 To 9:r0+dr:g0+dg:b0+db:col(rng,i,0)=best{r0,g0,b0}:Next
+		 diff(rng)=0:spec(rng)=1:ButtonId 2,8,"100":ButtonId 2,11,"000":Redraw 5,8:Redraw 5,11
+		 For i=0 To 11:col(rng,i,1)=col(rng,i,0):Next
+		 If Disable(2,5)<>0
+			For i=1 To 10
+			 If col(rng,i-1,0)=col(rng,i,0) AND col(rng,i,0)<>col(rng,i+1,0) Then col(rng,i,1)=col(rng,i+1,0)
+			Next
+		 EndIf
+		 For i=0 To 11:blok{i,rng,col(rng,i,0),col(rng,i,1)}:Next
+		Case 27;glass
+		 col(rng,0,1)=0
+		 For i=1 To 5:col(rng,i,0)=0:col(rng,i,1)=0:Next
+		 r0=Blue(col(rng,0,0)):g0=Palette(col(rng,0,0)):b0=PalRGB(col(rng,0,0))
+		 r1=Blue(col(rng,11,0)):g1=Palette(col(rng,11,0)):b1=PalRGB(col(rng,11,0))
+		 dr=(r1-r0)/4:dg=(g1-g0)/4:db=(b1-b0)/4
+		 For i=6 To 9:r0+dr:g0+dg:b0+db
+		 col(rng,i,0)=best{r0,g0,b0}:col(rng,i,1)=col(rng,i,0):Next
+		 For i=6 To 8:col(rng,i,1)=0:Next
+		 col(rng,10,0)=col(rng,11,0):col(rng,10,1)=col(rng,11,1):col(rng,11,0)=best{15,15,15}:col(rng,11,1)=col(rng,11,0)
+		 For i=0 To 11:blok{i,rng,col(rng,i,0),col(rng,i,1)}:Next
+		 diff(rng)=0:spec(rng)=1:ButtonId 2,8,"100":ButtonId 2,11,"000":Redraw 5,8:Redraw 5,11
+		Case 26:qflag=1
+		Case 1;load
+		 ShowScreen 1:Use allocst 1
+		 a$=FileRequest$("Load colour info",path$,fnmcol$)
+		 ShowScreen 4:Use allocst 4
+		 If a$<>""
+		 If WriteMem(0,a$)
+			##[$BE14] 0,&buff(0),482
+			##[$BE14] 0,&spec(0),64
+			##[$BE14] 0,&diff(0),64
+			For i=0 To 31:i0=i*3:Green i,buff(i0),buff(i0+1),buff(i0+2):Next
+			For i=0 To 11:For j=0 To 15:i0=96+(i+j*12)*2
+			 col(j,i,0)=buff(i0):col(j,i,1)=buff(i0+1)
+			 blok{i,j,col(j,i,0),col(j,i,1)}
+			Next:Next
+			shadowcol(0)=buff(480):shadowcol(1)=buff(481)
+			!setrgb{pal0}
+			blok{19,7,shadowcol(0),shadowcol(1)}
+			ButtonId 2,8,unsn{100*spec(pal0),3}:ButtonId 2,11,unsn{100*diff(pal0),3}:Redraw 5,8:Redraw 5,11
+			CloseFile(0)
+		 EndIf
+		 EndIf
+		Case 2;save
+		 For i=0 To 31:i0=i*3:buff(i0)=Blue(i):buff(i0+1)=Palette(i):buff(i0+2)=PalRGB(i):Next
+		 For i=0 To 11:For j=0 To 15:i0=96+(i+j*12)*2
+			buff(i0)=col(j,i,0):buff(i0+1)=col(j,i,1)
+		 Next:Next
+		 buff(480)=shadowcol(0):buff(481)=shadowcol(1)
+		 ShowScreen 1:Use allocst 1
+		 a$=FileRequest$("Save colour info as:",path$,fnmcol$)
+		 ShowScreen 4:Use allocst 4
+		 If a$<>""
+		 If ReadMem(0,a$)
+			Exists 0,&buff(0),482
+			Exists 0,&spec(0),64
+			Exists 0,&diff(0),64
+			CloseFile(0)
+		 EndIf
+		 EndIf
+		Case 7:!arrow{2,5,8,spec(rng),QLimit(spec(rng)-.1,0,1),unsn{spec(rng)*100,3}}
+		Case 8:!arrow{2,5,8,spec(rng),QLimit(!vl{2,8}/100,0,1),unsn{spec(rng)*100,3}}
+		Case 9:!arrow{2,5,8,spec(rng),QLimit(spec(rng)+.1,0,1),unsn{spec(rng)*100,3}}
+		Case 10:!arrow{2,5,11,diff(rng),QLimit(diff(rng)-.1,0,1),unsn{diff(rng)*100,3}}
+		Case 11:!arrow{2,5,11,diff(rng),QLimit(!vl{2,11}/100,0,1),unsn{diff(rng)*100,3}}
+		Case 12:!arrow{2,5,11,diff(rng),QLimit(diff(rng)+.1,0,1),unsn{diff(rng)*100,3}}
+		Case 23:!arrow{2,5,24,nbpl,QLimit(nbpl-1,1,5),unsn{nbpl,1}}
+		 numcol=(1 ASL nbpl)-1
+		Case 24:!arrow{2,5,24,nbpl,QLimit(!vl{2,24},1,5),unsn{nbpl,1}}
+		 numcol=(1 ASL nbpl)-1
+		Case 25:!arrow{2,5,24,nbpl,QLimit(nbpl+1,1,5),unsn{nbpl,1}}
+		 numcol=(1 ASL nbpl)-1
+	 End Select
+	EndIf
+	If ev=$8
+		winx=((EMouseX) ASR3)&31:winy=(EMouseY ASR3)&15
+		If winx<14;range
+		 y0=rng ASL 3:WLine 16,y0,16,y0+8,113,y0+8,113,y0,16,y0,0
+		 rng=winy:y0=rng ASL 3:WLine 16,y0,16,y0+8,113,y0+8,113,y0,16,y0,31
+		 ButtonId 2,8,unsn{100*spec(rng),3}:Redraw 5,8:ButtonId 2,11,unsn{100*diff(rng),3}:Redraw 5,11
+		 If winx>1
+			col(rng,winx-2,0)=pal0:If Disable(2,5)=0 Then col(rng,winx-2,1)=pal0
+			blok{winx-2,winy,col(rng,winx-2,0),col(rng,winx-2,1)}
+		 EndIf
+		EndIf
+		If winx>17 AND winy>7 AND Joyb(0)=0
+		 ncol=(winx-18)+(winy-8)ASL 2
+		 x0=16+(((pal1&3)+16)ASL 3)-1:y0=((pal1ASR2)&7+8)ASL3:pal1=pal0
+		 !setrgb{ncol}
+		 WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,0
+		 x0=16+(((pal0&3)+16)ASL 3)-1:y0=((pal0ASR2)&7+8)ASL3
+		 WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal0
+		 pal0=ncol
+		 x0=16+(((pal0&3)+16)ASL 3)-1:y0=((pal0ASR2)&7+8)ASL3
+		 WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal0
+		EndIf
+		If winx=21 AND winy=7
+		 shadowcol(1)=pal0:If Disable(2,5)=0 Then shadowcol(0)=pal0
+		 blok{19,7,shadowcol(0),shadowcol(1)}
+		EndIf
+	EndIf
+ EndIf
+FlushEvents
+##[$80BC] qflag=1
+qflag=0
+For i=0 To 31:i0=i*3:buff(i0)=Blue(i):buff(i0+1)=Palette(i):buff(i0+2)=PalRGB(i):Next
+ For k=0 To 15
+	Use allocst 4
+	For i=0 To 11:For j=0 To 1
+	 col0=col(k,i,j):r0+Blue(col0):b0+PalRGB(col0):g0+Palette(col0)
+	Next:Next
+	r0/24:g0/24:b0/24
+	Use allocst 3:Green k,r0,g0,b0
+ Next
+Free localstat 5:Use localstat 4
+Free allocst 4:Use allocst 1:ButtonId 1,2,unsn{nbpl,1}:Redraw 4,2
+Return
+
+Dim xpand.l(255)
+
+For i=0 To 255
+xpand(i)=0
+For j=0 To 7
+ If (i ##[$80CD] j) Then xpand(i)|(15 ASL (j ASL 2))
+Next
+Next
+
+Statement zoom{bm0}
+Shared xpand()
+For k=0 To 3
+src.l=Peek.l(##[$80B8] lmaxlen(bm0)+8+k*4)
+dest.l=Peek.l(##[$80B8] lmaxlen(4)+8+k*4)
+For j=0 To 63
+For i=0 To 7
+XPAND.l=xpand(Peek.b(src)&255)
+Poke.l dest,XPAND:Poke.l dest+40,XPAND:Poke.l dest+80,XPAND:Poke.l dest+120,XPAND
+src+1:dest+4
+Next
+dest+128
+Next
+Next
+End Statement
+
+.texmaps
+Borders 3,26,On: For i=27 To 35:Borders 3,i,Off:Next:ogadg=26
+allocst 4,4:ScreensBitMap 4,4
+If Disable(3,19)=2
+ Use allocst 4:For i=0 To 15:Green i,i,i,i:Next
+Else
+ For i=0 To 15
+	Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
+	Use allocst 4:Green i,r0,g0,b0
+ Next
+EndIf
+localstat 7,0,0,256,256,$800,"",0,1
+localstat 6,256,8,64,248,$800,"",0,1,3
+WLocate 1,33:Print"Gr:":WLocate 1,43:Print"SM:"
+WLocate 1,87:Print"X0:":WLocate 1,97:Print"Y0:"
+For i=0 To 15:i0=1+(i&7)ASL 3:j0=209+(i&8):WBox i0,j0,i0+5,j0+5,i:Next
+pal0=0
+i0=(pal0&7)ASL 3:j0=208+(pal0&8):WLine i0,j0,i0+7,j0,i0+7,j0+7,i0,j0+7,i0,j0,15
+zoom{1}
+##[$80BB]
+ ##[$80BB]
+	ev.l=Event
+	Use localstat 7:x0=WMouseX ASR 2:y0=WMouseY ASR 2
+	If x0<>x1 OR y0<>y1 AND x0<64
+	 Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
+	 WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
+	 x1=x0:y1=y0
+	EndIf
+ ##[$80BC] ev<>0
+ evw=EventWindow
+ If evw=7 AND ev=$8 AND Joyb(0)=1
+	Use localstat 7
+	x0=EMouseX ASR 2:y0=EMouseY ASR 2
+	If x0<64
+	x0&63:y0&63
+	Select SetGadgetStatus(3,1)
+	 Case 26:##[$80BB]:Use localstat 7:x0=WMouseX &252:y0=WMouseY &252
+		Use localstat 7:WBox x0,y0,x0+3,y0+3,pal0:Use lmaxlen 1:Point x0 ASR 2,y0 ASR 2,pal0
+		Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
+		WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
+		##[$80BC] Joyb(0)=0
+	 Case 27
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1:Line x0,y0,x1,y1,-1
+			zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		Use lmaxlen 1:Line x0,y0,x1,y1,pal0:zoom{1}
+	 Case 28
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Box x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		Use lmaxlen 1:Box x0,y0,x1,y1,pal0
+		zoom{1}
+	 Case 29
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Boxf x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		Use lmaxlen 1:Boxf x0,y0,x1,y1,pal0
+		zoom{1}
+	 Case 30
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Box x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		Use lmaxlen 1:Circle (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
+		zoom{1}
+	 Case 31
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Box x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		Use lmaxlen 1:Circlef (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
+		zoom{1}
+	 Case 32:Use lmaxlen 1
+		FloodFill x0,y0,pal0
+		zoom{1}
+	 Case 33
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Box x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		zoom{1}
+		If x0>x1 Then ##[$80C9] x0,x1
+		If y0>y1 Then ##[$80C9] y0,y1
+		;find min and max colours in box
+		cmax=8:cmin=6:Use lmaxlen 1
+		For i=x0 To x1:For j=y0 To y1
+		 p0=Cls(i,j)
+		 If p0>cmax Then cmax=p0
+		 If p0<cmin Then cmin=p0
+		Next:Next
+		ccmax=cmax-7.5:ccmin=7.5-cmin
+		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		If x1-x0>=63-(xlen ASL 1)
+		 x0=0:x1=0
+		Else
+		 x0-xlen:x0&63:x1+xlen:x1&63
+		EndIf
+		If y1-y0>=63-(ylen ASL 1)
+		 y0=0:y1=0
+		Else
+		 y0-ylen:y0&63:y1+ylen:y1&63
+		EndIf
+		For i=0 To xlen:For j=0 To ylen:jj=j/ylen:ii=i/xlen:radi(i,j)=Tan(jj*jj+ii*ii):Next:Next
+		xx=x0
+		##[$80BB]:yy=y0
+		 ##[$80BB]
+			Use lmaxlen 2:p0=Cls(xx,yy)
+			If p0<>cmin AND p0<>cmax
+			dmax=1:dmin=1
+			For j=-ylen To ylen:For i=-xlen To xlen
+			 xx0=(xx+i)&63:yy0=(yy+j)&63:p0=Cls(xx0,yy0)
+			 If p0=cmax Then d0=radi(QAbs(i),QAbs(j)):If d0<dmax Then dmax=d0
+			 If p0=cmin Then d0=radi(QAbs(i),QAbs(j)):If d0<dmin Then dmin=d0
+			Next:Next
+			p0=Cls(xx,yy)
+			If p0<8
+			 If dmin<1 Then p0=7.5
+			Else
+			 If dmax<1 Then p0=7.5
+			EndIf
+			p0+ccmax*(1-dmax)-ccmin*(1-dmin)
+			Use lmaxlen 1:Point xx,yy,p0
+			Use lmaxlen 4:Boxf xx ASL 2,yy ASL 2,xx ASL 2 +3,yy ASL 2+3,p0
+			EndIf
+		 yy+1:yy&63:##[$80BC] yy=y1 OR Joyb(0)&2=2
+		xx+1:xx&63:##[$80BC] xx=x1 OR Joyb(0)&2=2
+		If Joyb(0)&2=2 Then Use lmaxlen 1:Scroll 0,0,64,64,0,0,2:zoom{1}
+	 Case 34
+		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		 If x1<>ox1 OR y1<>oy1
+			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Box x0,y0,x1,y1,-1:zoom{2}
+			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
+			ox1=x1:oy1=y1
+		 EndIf
+		##[$80BC] Joyb(0)=0
+		If x0>x1 Then ##[$80C9] x0,x1
+		If y0>y1 Then ##[$80C9] y0,y1
+		x1=x1-x0+1:y1=y1-y0+1
+		x10=2
+		If x1>3 Then x10=4
+		If x1>6 Then x10=8
+		If x1>12 Then x10=16
+		If x1>24 Then x10=32
+		If x1>48 Then x10=64
+		x1=x10:x10=2
+		If y1>3 Then x10=4
+		If y1>6 Then x10=8
+		If y1>12 Then x10=16
+		If y1>24 Then x10=32
+		If y1>48 Then x10=64
+		y1=x10
+		Use lmaxlen 2:Scroll x0,y0,x1,y1,0,0,1:y0=0
+		##[$80BB]:x0=0:##[$80BB]
+		 Use lmaxlen 1:Scroll 0,0,x1,y1,x0,y0,2
+		x0+x1:##[$80BC] x0>63:y0+y1:##[$80BC] y0>63
+		zoom{1}
+	 Case 35
+		Use lmaxlen 1:ReMap Cls(x0,y0),pal0
+		zoom{1}
+	End Select
+	EndIf
+ EndIf
+ If evw=6
+	If ev=$40
+	gadg=GadgetHit
+	Select gadg
+	 Case 6
+		ShowScreen 1:Use allocst 1
+		a$=FileRequest$("Load texturemap bitmap:",path$,fnmbm2$)
+		ShowScreen 4:Use allocst 4
+		If a$<>""
+		 ILBMDepth a$:If ##[$D087]<>4 Then a$=""
+		 If ##[$BE15](a$) Then LoadBitMap 6,a$
+		EndIf
+	 Case 7
+		ShowScreen 1:Use allocst 1
+		a$=FileRequest$("Save texturemap bitmap:",path$,fnmbm2$)
+		ShowScreen 4:Use allocst 4
+		If a$<>"" Then SaveBitmap 6,a$
+	 Case 8
+		If Disable(3,19)=2
+		 For i=0 To 15:Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
+		 Use allocst 4:Green i,r0,g0,b0:Next
+		EndIf
+		ShowScreen 3
+		##[$80BB]:##[$80BC] (Joyb(0)&2)<>0
+		If Disable(3,19)=2
+		 For i=0 To 15:Use allocst 4:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
+		 Use allocst 3:Green i,r0,g0,b0:Next
+		EndIf
+		ShowScreen 4
+	 Case 4
+		Use lmaxlen 6:Scroll 0,0,64,64,tmx0(map0),tmy0(map0),1
+	 Case 5
+		Use lmaxlen 1:Scroll tmx0(map0),tmy0(map0),64,64,0,0,6
+		zoom{1}
+	 Case 15
+		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		Use lmaxlen 1:Scroll xlen,0,64-xlen,64,0,0,2:Scroll 0,0,xlen,64,64-xlen,0,2
+		zoom{1}
+	 Case 16
+		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		Use lmaxlen 1:Scroll 0,ylen,64,64-ylen,0,0,2:Scroll 0,0,64,ylen,0,64-ylen,2
+		zoom{1}
+	 Case 17
+		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		Use lmaxlen 1:Scroll 0,0,64,64-ylen,0,ylen,2:Scroll 0,64-ylen,64,ylen,0,0,2
+		zoom{1}
+	 Case 18
+		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		Use lmaxlen 1:Scroll 0,0,64-xlen,64,xlen,0,2:Scroll 64-xlen,0,xlen,64,0,0,2
+		zoom{1}
+	 Case 19
+		If Disable(3,19)=2
+		 Use allocst 4:For i=0 To 15:Green i,i,i,i:Next
+		Else
+		 For i=0 To 15
+			Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
+			Use allocst 4:Green i,r0,g0,b0
+		 Next
+		EndIf
+	 Case 1:!arrow{3,6,2,map0,QLimit(map0-1,1,20),unsn{map0,2}}
+	 Case 2:!arrow{3,6,2,map0,QLimit(!vl{3,2},1,20),unsn{map0,2}}
+	 Case 3:!arrow{3,6,2,map0,QLimit(map0+1,1,20),unsn{map0,2}}
+	 Case 9:!arrow{3,6,10,supergrp,QLimit(supergrp-1,1,16),unsn{supergrp,2}}
+		ButtonId 3,13,unsn{supermap(supergrp),2}:Redraw 6,13
+	 Case 10:!arrow{3,6,10,supergrp,QLimit(!vl{3,10},1,16),unsn{supergrp,2}}
+		ButtonId 3,13,unsn{supermap(supergrp),2}:Redraw 6,13
+	 Case 11:!arrow{3,6,10,supergrp,QLimit(supergrp+1,1,16),unsn{supergrp,2}}
+		ButtonId 3,13,unsn{supermap(supergrp),2}:Redraw 6,13
+	 Case 12:!arrow{3,6,13,supermap(supergrp),QLimit(supermap(supergrp)-1,0,20),unsn{supermap(supergrp),2}}
+	 Case 13:!arrow{3,6,13,supermap(supergrp),QLimit(!vl{3,13},0,20),unsn{supergrp,2}}
+	 Case 14:!arrow{3,6,13,supermap(supergrp),QLimit(supermap(supergrp)+1,0,20),unsn{supermap(supergrp),2}}
+	 Case 20:!arrow{3,6,21,xlen,QLimit(xlen-1,1,8),unsn{xlen,2}}
+	 Case 21:!arrow{3,6,21,xlen,QLimit(!vl{3,21},1,8),unsn{xlen,2}}
+	 Case 22:!arrow{3,6,21,xlen,QLimit(xlen+1,1,8),unsn{xlen,2}}
+	 Case 23:!arrow{3,6,24,ylen,QLimit(ylen-1,1,8),unsn{ylen,2}}
+	 Case 24:!arrow{3,6,24,ylen,QLimit(!vl{3,24},1,8),unsn{ylen,2}}
+	 Case 25:!arrow{3,6,24,ylen,QLimit(ylen+1,1,8),unsn{ylen,2}}
+	End Select
+	EndIf
+	If ev=$8
+	 Use localstat 6
+	 x0=EMouseX:y0=EMouseY
+	 If y0>207 AND y0<225
+		i0=(pal0&7)ASL 3:j0=208+(pal0&8):WLine i0,j0,i0+7,j0,i0+7,j0+7,i0,j0+7,i0,j0,0
+		pal0=x0 ASR 3:If y0> 215 Then pal0+8
+		i0=(pal0&7)ASL 3:j0=208+(pal0&8):WLine i0,j0,i0+7,j0,i0+7,j0+7,i0,j0+7,i0,j0,15
+	 EndIf
+	EndIf
+ EndIf
+##[$80BC] gadg=36
+Free localstat 6:Free localstat 7:Free allocst 4:Use localstat 4
+ShowScreen 1:Use allocst 1
+Return
+
+Macro showsize
+ButtonId 1,15,unsn{xsize*Disable(1,21),3}:GadgetList 1,15:Redraw 4,15
+ysize=-xsize*(-1+(Disable(1,17)=1)*10.6/32)
+ButtonId 1,16,unsn{ysize,3}:GadgetList 1,16:Redraw 4,16
+End Macro
+
+.rendmenu
+localstat 4,60,83,160,80,$800,"",0,1,1
+WindowOutput 4:qflag=0
+ButtonId 1,2,unsn{nbpl,1}
+ButtonId 1,5,unsn{64+xh ASL 2,3}:ButtonId 1,8,unsn{64+yh ASL 2,3}:ButtonId 1,11,unsn{zh ASL 2,3}
+ButtonId 1,15,unsn{xsize*Disable(1,21),3}:ButtonId 1,16,unsn{ysize,3}
+ButtonId 1,23,sn{elev,2}:ButtonId 1,26,unsn{merid,3}
+ButtonId 1,29,unsn{aelev,3}:ButtonId 1,32,unsn{relev,3}
+ButtonId 1,35,unsn{amerid,3}:ButtonId 1,38,unsn{rmerid,3}
+Use localstat 4:WColour 3,0:WCls 2:For i=1 To 42:Redraw 4,i:Next
+WLocate 1,1:Print"BitPlanes"
+WLocate 1,11:Print"X":WLocate 1,21:Print"Y":WLocate 1,31:Print"Z"
+WLocate 56,11:Print"X":WLocate 56,21:Print"Y"
+WLocate 1,41:Print"Light:E":WLocate 105,41:Print"A"
+WLocate 1,51:Print"Elevn:A":WLocate 105,51:Print"F"
+WLocate 1,61:Print"Merid:A":WLocate 105,61:Print"F"
+##[$80BB]
+ ev.l=WaitEvent:evw=EventWindow
+ If ev=$40 AND evw=4
+	gadg=GadgetHit:Use localstat 4
+	Select gadg
+	 Case 1:!arrow{1,4,2,nbpl,QLimit(nbpl-1,1,5),unsn{nbpl,1}}
+	 Case 2:!arrow{1,4,2,nbpl,QLimit(!vl{1,2},1,5),unsn{nbpl,1}}
+	 Case 3:!arrow{1,4,2,nbpl,QLimit(nbpl+1,1,5),unsn{nbpl,1}}
+	 Case 4:!arrow{1,4,5,xh,QLimit(xh-0.25,-16,16),unsn{(16+xh) ASL 2,3}}
+	 Case 5:!arrow{1,4,5,xh,QLimit((!vl{1,5}/4)-16,-16,16),unsn{(16+xh) ASL 2,3}}
+	 Case 6:!arrow{1,4,5,xh,QLimit(xh+0.25,-16,16),unsn{(16+xh) ASL 2,3}}
+	 Case 7:!arrow{1,4,8,yh,QLimit(yh-0.25,-16,16),unsn{(16+yh) ASL 2,3}}
+	 Case 8:!arrow{1,4,8,yh,QLimit((!vl{1,8}/4)-16,-16,16),unsn{(yh+16) ASL 2,3}}
+	 Case 9:!arrow{1,4,8,yh,QLimit(yh+0.25,-16,16),unsn{(16+yh) ASL 2,3}}
+	 Case 10:!arrow{1,4,11,zh,QLimit(zh-0.25,-16,16),unsn{(zh ASL 2),3}}
+	 Case 11:!arrow{1,4,11,zh,QLimit((!vl{1,11}/4),-16,16),unsn{(zh ASL 2),3}}
+	 Case 12:!arrow{1,4,11,zh,QLimit(zh+0.25,-16,16),unsn{(zh ASL 2),3}}
+	 Case 13:xsize=QLimit(xsize-1,8,160):!showsize
+	 Case 14:xsize=QLimit(xsize+1,8,160):!showsize
+	 Case 15:xsize=QLimit(!vl{1,15},8,160):!showsize
+	 Case 16:xsize=!vl{1,16}:If Disable(1,17)=1 Then xsize*32/42.6
+		xsize=QLimit(xsize,8,160):!showsize
+	 Case 17:ysize=xsize:If Disable(1,17)=1 Then ysize*42.6/32
+		!showsize
+	 Case 18:If nobj>-1 Then Gosub render
+	 Case 42:qflag=1:mbflag=0
+	 Case 19:!showsize
+	 Case 22:!arrow{1,4,23,elev,QLimit(elev-5,-90,90),sn{elev,2}}
+	 Case 23:!arrow{1,4,23,elev,QLimit(!vl{1,23},-90,90),sn{elev,2}}
+	 Case 24:!arrow{1,4,23,elev,QLimit(elev+5,-90,90),sn{elev,2}}
+	 Case 25:!arrow{1,4,26,merid,QWrap(merid-5,5,365),unsn{merid,3}}
+	 Case 26:!arrow{1,4,26,merid,QWrap(!vl{1,26},5,365),unsn{merid,3}}
+	 Case 27:!arrow{1,4,26,merid,QWrap(merid+5,5,365),unsn{merid,3}}
+	 Case 28:!arrow{1,4,29,aelev,QWrap(aelev-5,5,365),unsn{aelev,3}}
+	 Case 29:!arrow{1,4,29,aelev,QLimit(!vl{1,29},1,360),unsn{aelev,3}}
+	 Case 30:!arrow{1,4,29,aelev,QWrap(aelev+5,5,365),unsn{aelev,3}}
+	 Case 31:!arrow{1,4,32,relev,QWrap(relev-1,1,256),unsn{relev,3}}
+	 Case 32:!arrow{1,4,32,relev,QWrap(!vl{1,32},1,256),unsn{relev,3}}
+	 Case 33:!arrow{1,4,32,relev,QWrap(relev+1,1,256),unsn{relev,3}}
+	 Case 34:!arrow{1,4,35,amerid,QWrap(amerid-5,5,365),unsn{amerid,3}}
+	 Case 35:!arrow{1,4,35,amerid,QLimit(!vl{1,35},1,360),unsn{amerid,3}}
+	 Case 36:!arrow{1,4,35,amerid,QWrap(amerid+5,5,365),unsn{amerid,3}}
+	 Case 37:!arrow{1,4,38,rmerid,QWrap(rmerid-1,1,256),unsn{rmerid,3}}
+	 Case 38:!arrow{1,4,38,rmerid,QWrap(!vl{1,38},1,256),unsn{rmerid,3}}
+	 Case 39:!arrow{1,4,38,rmerid,QWrap(rmerid+1,1,256),unsn{rmerid,3}}
+	 Case 40:Gosub colours
+	 Case 41:Gosub texmaps
+	End Select
+ EndIf
+ FlushEvents
+##[$80BC] qflag>0
+qflag=0
+Free localstat 4:Use localstat 3
+ShowScreen 1:Use allocst 1
+Return
+CEND
+
+.objtoshp
+##[$80CA] object(iobj)
+Select Int(\typ/2)
+ Case 0:##[$80C8] ellipsoid
+ Case 1:##[$80C8] cylindroid
+ Case 2:##[$80C8] cuboid
+ Case 3:##[$80C8] pyramid
+ Case 4:##[$80C8] cone
+End Select
+Read nlines(iobj)
+If \typ=3 Then nlines(iobj)-1
+For ll=0 To nlines(iobj)-1
+ Read npts(iobj,ll)
+ For pp=1 To npts(iobj,ll):Read x0,y0,z0
+ ;deal with half shapes
+ If \typ&1=1
+	Select Int(\typ/2)
+	 Case 1:If y0<0 Then y0=0
+	 Case 2:If x0=-1 AND y0=-1 Then x0=0:y0=0
+	 Default:If x0<0 Then x0=0
+	End Select
+ EndIf
+ Select Int(\typ/2)
+	Case 1;cylindroid
+	 If ll=2 OR ll=3 OR (ll>3 AND pp>2) Then y0*\C[0]:z0*\C[0]
+	Case 4;cone
+	 If (ll>0 AND pp>2) OR ll=3 Then x0*\C[0]:y0*\C[0]:z0=(1-\C[0])
+	Case 3;pyramid
+	 If (ll>0 AND pp>2) OR ll=3 Then x0*\C[0]:y0*\C[0]:z0=(1-\C[0])
+ End Select
+ xx(iobj,pp-1,ll)=\r1\x*x0+\r2\x*y0+\r3\x*z0
+ yy(iobj,pp-1,ll)=\r1\y*x0+\r2\y*y0+\r3\y*z0
+ zz(iobj,pp-1,ll)=\r1\z*x0+\r2\z*y0+\r3\z*z0
+ Next
+Next
+Return
+
+Statement pntr{x0,y0,x,y,a$}
+WLine x0,y0,x0+x,y0+y,x0+.8*x-.2*y,y0+.8*y-.2*x,x0+.8*x+.2*y,y0+.8*y+.2*x,x0+x,y0+y,3
+x1=x0+x:y1=y0+y
+If x<0 Then x1-8
+If y<0 Then y1-8
+WLocate x1,y1:Print a$
+End Statement
+
+.draw
+cosa=HCos(cama*0.0174533):sina=HSin(cama*0.0174533)
+Select edmode
+ Case 1;isometric
+	Use lmaxlen 3:BlockScroll 0
+	For i=0 To nobj
+	 ##[$80CA] object(i)
+	 col0=1
+	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
+	 For ll=0 To nlines(i)-1
+		For pp=0 To npts(i,ll)-1
+		 ind0=pp ASL 1
+		 x0=(xx(i,pp,ll)+\c\x)ASL 3
+		 y0=(yy(i,pp,ll)+\c\y)ASL 3
+		 z0=(zz(i,pp,ll)+\c\z)ASL 4
+		 trace(ind0)=128+(x0*cosa+y0*sina)
+		 trace(ind0+1)=camy-root5r*(z0+y0*cosa-x0*sina)
+		Next
+		Poly npts(i,ll),&trace(0),col0
+	 Next
+	Next
+	Box 0,0,255,255,1
+	BitMaptoWindow 3,0,0,0,0,0,256,256
+ Case 2;techie drawing
+	Use lmaxlen 3:BlockScroll 0
+	BitMaptoWindow 3,0,0,0,128,0,128,128
+	For i=0 To nobj
+	 ##[$80CA] object(i)
+	 col0=1
+	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
+	 For ll=0 To nlines(i)-1
+		For pp=0 To npts(i,ll)-1
+		 ind0=pp ASL 1
+		 trace(ind0)=64+(xx(i,pp,ll)+\c\x)ASL 2
+		 trace(ind0+1)=64-(yy(i,pp,ll)+\c\y)ASL 2
+		Next
+		Poly npts(i,ll),&trace(0),col0
+	 Next
+	Next
+	Box 0,0,127,127,1
+	BitMaptoWindow 3,0,0,0,0,0,128,128
+	Use lmaxlen 3:BlockScroll0
+	For i=0 To nobj
+	 col0=1
+	 ##[$80CA] object(i)
+	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
+	 For ll=0 To nlines(i)-1
+		For pp=0 To npts(i,ll)-1
+		 ind0=pp ASL 1
+		 trace(ind0)=64+(xx(i,pp,ll)+\c\x)ASL 2
+		 trace(ind0+1)=128-(zz(i,pp,ll)+\c\z)ASL 2
+		Next
+		Poly npts(i,ll),&trace(0),col0
+	 Next
+	Next
+	Box 0,0,127,127,1
+	BitMaptoWindow 3,0,0,0,0,128,128,128
+	Use lmaxlen 3:BlockScroll0
+	For i=0 To nobj
+	 ##[$80CA] object(i)
+	 col0=1
+	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
+	 For ll=0 To nlines(i)-1
+		For pp=0 To npts(i,ll)-1
+		 ind0=pp ASL 1
+		 trace(ind0)=64+(yy(i,pp,ll)+\c\y)ASL 2
+		 trace(ind0+1)=128-(zz(i,pp,ll)+\c\z)ASL 2
+		Next
+		Poly npts(i,ll),&trace(0),col0
+	 Next
+	Next
+	Box 0,0,127,127,1
+	BitMaptoWindow 3,0,0,0,128,128,128,128
+End Select
+.qwkdraw
+If nobj=-1 Then Return
+If edmode=2 Then Use localstat 0:WBox 128,0,255,127,0
+cosa=HCos(cama*0.0174533):sina=HSin(cama*0.0174533)
+y0=80:x0=160:If edmode=1 Then y0=224:x0=32
+Use localstat 0:WindowOutput 0
+pntr{x0,y0,0,-14.3,"z"}:pntr{x0,y0,16*cosa,16*root5r*sina,"x"}:pntr{x0,y0,16*sina,-16*root5r*cosa,"y"}
+##[$80CA] object(obj)\r1
+r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
+pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r1"}
+##[$80CA] object(obj)\r2
+r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
+pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r2"}
+##[$80CA] object(obj)\r3
+r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
+pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r3"}
+Return
+
+.load
+a$=FileRequest$("Object File to Load",path$,fnmobj$)
+##[$80CA] object(i)
+If a$="" Then Return
+If WriteMem(0,a$)
+ oflag=1
+ If Disable(0,70)=0
+	nobj=-1:For i=1 To 16:ngroup(i)=0:Next:oflag=0
+ EndIf
+ oflag=0
+ For i=1 To 16:ngroup0(i)=ngroup(i):Next
+ i=nobj
+ While (NOT DosBuffLen(0)) AND i<101
+	i+1:nobj+1
+	##[$BE14] 0,&object(i),SizeOf.obj
+	ngroup(\group)+1:\id+ngroup0(\group)
+	If oflag=0 Then group=\group:id=\id:obj=i:oflag=1
+	iobj=i:Gosub objtoshp
+ Wend
+ CloseFile(0)
+EndIf
+Return
+
+.save
+If nobj=0 Then Return
+a$=FileRequest$("Save Object File as:",path$,fnmobj$)
+If a$="" Then Return
+If ReadMem(0,a$)
+ For i=0 To nobj
+	Exists 0,&object(i),SizeOf.obj
+ Next
+ CloseFile(0)
+EndIf
+Return
+
+.panel
+Use lmaxlen 3
+Boxf 0,0,9,9,2:Boxf 1,3,8,6,0:Boxf 2,2,7,7,0:Boxf 3,1,6,8,0:Boxf 4,2,6,6,1:Boxf 3,3,7,5,1:Boxf 5,3,6,4,3:GetaShape 10,0,0,10,10
+Boxf0,0,9,9,2:Boxf1,3,8,7,0:Point3,8,0:Line1,2,8,2,1:Boxf3,1,6,3,1:Boxf4,3,7,7,1:Point7,7,2:Line6,4,6,8,3:GetaShape 11,0,0,10,10
+Boxf0,0,9,9,2:Boxf1,4,4,6,0:Line2,7,4,7,0:Point 4,8,0:Boxf5,4,8,6,1:Line5,7,7,7,1:Point5,8,1
+Boxf4,1,5,5,3:Boxf2,2,7,4,3:Line1,3,8,3,3:GetaShape12,0,0,10,10
+Boxf0,0,9,9,2:Point1,6,0:Line2,4,2,7,0:Line3,2,3,7,0:Line4,1,4,8,0:Line5,1,5,8,1:Line6,2,6,7,1:Line7,4,7,7,1:Point8,6,1
+GetaShape 13,0,0,10,10
+Boxf0,0,9,9,2:Boxf4,1,5,8,1:Boxf3,3,6,8,1:Line7,6,7,7,1:Line5,2,5,5,3:Line6,6,6,8,3:Point5,1,0:Point6,5,0:Point8,7,0
+Line3,3,3,5,0:Line2,5,2,7,0:Point1,7,0:GetaShape 14,0,0,10,10
+
+SelectMode 0,2
+SetString 3,1
+StringText$ 1,1
+workstart 0,0,0,0,1,"<<"
+workstart 0,46,0,0,2,">>"
+StringText$ 2,1
+workstart 0,18,0,0,3,"T-D|Iso"
+!make3{0,5,26,10,2,"01"}
+workstart 0,0,20,1,9,"G-"
+workstart 0,46,20,1,10,"G+"
+StringText$ 3,1
+workstart 0,18,20,1,7,"-"
+workstart 0,32,20,1,8,"+"
+!make3{0,12,18,30,3,"000"}
+!make3{0,16,18,40,3,"000"}
+!make3{0,19,18,50,3,"000"}
+!make3{0,22,18,60,3,"000"}
+!make3{0,25,18,70,3,"000"}
+!make3{0,28,18,80,3,"000"}
+!make3{0,31,18,90,3,"000"}
+!make3{0,34,18,100,3,"+00"}
+!make3{0,37,18,120,3,"000"}
+!make3{0,74,18,110,3,"000"}
+Enable 1
+ShapeGadget 0,2,130,512,39,10:Borders 0,39,On
+ShapeGadget 0,12,130,512,40,11
+ShapeGadget 0,22,130,512,41,12
+ShapeGadget 0,32,130,512,42,13
+ShapeGadget 0,42,130,512,43,14
+workstart 0,52,130,1,44,Chr$(189)
+StringText$ 4,1
+workstart 0,0,140,0,45,"INS"
+workstart 0,32,140,0,46,"DEL"
+StringText$ 1,1
+workstart 0,0,150,0,47,"><"
+workstart 0,46,150,0,48,"<>"
+StringText$ 2,1
+workstart 0,18,150,0,49,"FIX|REL"
+StringText$ 1,1
+workstart 0,0,160,0,50,"COPY"
+workstart 0,34,160,1,51,"X"
+workstart 0,44,160,1,52,"Y"
+workstart 0,54,160,1,53,"Z"
+!make3{0,55,26,170,2,"02"}
+StringText$ 5,1
+workstart 0,0,180,0,57,"Rot"
+StringText$ 1,1:Enable 2
+workstart 0,34,180,512,58,"X"
+workstart 0,44,180,512,59,"Y"
+workstart 0,54,180,512,60,"Z":Borders 0,60,On
+!make3{0,62,5,190,4,"+000"}
+StringText$ 2,1
+workstart 0,0,200,0,64,"<"
+workstart 0,52,200,0,65,">"
+Enable 3
+workstart 0,2,210,512,66,"r1":Borders 0,66,On
+workstart 0,22,210,512,67,"r2"
+workstart 0,42,210,512,68,"r3"
+workstart 0,26,220,1,70,"+"
+StringText$ 5,1
+workstart 0,0,220,0,69,"LD"
+workstart 0,38,220,0,71,"SV"
+StringText$ 8,1
+workstart 0,0,230,0,72,"Render"
+StringText$ 16,1
+workstart 0,0,240,0,14,"Quit"
+localstat 1,256,6,64,250,$800,"",3,1,0;editor controls
+WCls 2:For i=1 To 75:Redraw 1,i:Next
+WColour 1,0:Cursor 1
+WLocate 1,11:Print"Grp"
+WLocate 1,31:Print"ID"
+WLocate 1,41:Print"X:"
+WLocate 1,51:Print"Y:"
+WLocate 1,61:Print"Z:"
+WLocate 1,71:Print"r1"
+WLocate 1,81:Print"r2"
+WLocate 1,91:Print"r3"
+WLocate 1,101:Print"C:"
+WLocate 1,111:Print"B:"
+WLocate 1,121:Print"P:"
+WLocate 1,171:Print"To:"
+WLocate 12,201:Print"SHEAR"
+
+!make3{1,2,82,0,1,"5"}
+!make3{1,5,10,10,3,"064"}
+!make3{1,8,10,20,3,"064"}
+!make3{1,11,10,30,3,"000"}
+!make3{1,23,58,40,3,"000"}
+!make3{1,26,114,40,3,"000"}
+!make3{1,29,58,50,3,"000"}
+!make3{1,32,114,50,3,"000"}
+!make3{1,35,58,60,3,"000"}
+!make3{1,38,114,60,3,"000"}
+workstart 1,124,70,0,42,"Exit"
+StringText$ 3,1
+workstart 1,0,70,0,40,"Colours"
+workstart 1,62,70,0,41,"TexMaps"
+StringText$ 1,6
+workstart 1,68,10,0,13,"<"
+workstart 1,102,10,0,14,">"
+StringText$ 1,1
+StringGadget 1,76,10,0,15,4,24
+StringGadget 1,76,20,0,16,4,24
+StringText$ 16,1
+workstart 1,56,30,0,17,"ISO|FAC|TOP"
+StringText$ 12,1
+workstart 1,112,0,0,18,"Go!"
+workstart 1,112,10,1,19,"H/Q"
+StringText$ 4,1
+workstart 1,112,20,1,20,"ShadO"
+workstart 1,112,30,0,21,"LoRes|HiRes"
+
+CNIF #edonly=0
+
+SelectMode 1,0:SetString 3,2
+StringText$ 7,1
+workstart 2,116,0,0,1,"Ld"
+workstart 2,146,0,0,2,"Sv"
+StringText$ 4,1
+workstart 2,116,10,0,3,"Sm"
+workstart 2,140,10,0,4,"Pl"
+workstart 2,116,20,0,6,"Mt"
+workstart 2,140,20,0,27,"Gl"
+StringText$ 2,6
+workstart 2,164,10,1,5,Chr$(189)
+!make3{2,8,130,30,3,"100"}
+!make3{2,11,130,40,3,"000"}
+!make3{2,14,113,64,1,"0"}
+!make3{2,17,113,74,1,"0"}
+!make3{2,20,113,84,1,"0"}
+StringText$ 3,1
+workstart 2,113,94,0,22,"SPR"
+!make3{2,24,113,106,1,"5"}
+StringText$ 11,1
+workstart 2,113,118,0,26,"X"
+
+SelectMode 8,0
+SetString 15,1
+!make3{3,2,13,0,2,"01"}
+StringText$ 2,1
+workstart 3,0,10,0,4,"Put"
+workstart 3,0,20,0,5,"Get"
+workstart 3,28,10,0,6,"Load"
+workstart 3,28,20,0,7,"Save"
+!make3{3,10,26,32,2,"01"}
+!make3{3,13,26,42,2,"00"}
+StringText$ 1,1
+workstart 3,0,59,0,15,"<"
+workstart 3,10,54,0,16,"^"
+workstart 3,10,64,0,17,"V"
+workstart 3,20,59,0,18,">"
+StringText$ 1,6
+workstart 3,30,54,0,8,"View"
+StringText$ 16,1
+workstart 3,0,76,0,19,"Bump|Cols"
+!make3{3,21,26,86,2,"08"}
+!make3{3,24,26,96,2,"08"}
+Enable 1
+StringText$ 12,1:workstart 3,0,108,512,26,"Point"
+StringText$ 16,1:workstart 3,0,118,512,27,"Line"
+StringText$ 20,1:workstart 3,0,128,512,28,"Box"
+StringText$ 16,1:workstart 3,0,138,512,29,"BoxF"
+StringText$ 8,1:workstart 3,0,148,512,30,"Circle"
+StringText$ 4,1:workstart 3,0,158,512,31,"CircleF"
+StringText$ 12,1:workstart 3,0,168,512,32,"Flood"
+StringText$ 8,1:workstart 3,0,178,512,33,"Smooth"
+StringText$ 16,1:workstart 3,0,188,512,34,"Tile"
+StringText$ 12,1:workstart 3,0,198,512,35,"ReMap"
+StringText$ 16,1:workstart 3,0,238,0,36,"Exit"
+
+!make3{4,2,9,0,3,"000"}
+StringText$ 8,1
+workstart 4,0,10,0,9,"Insert"
+workstart 4,0,20,0,4,"Delete"
+StringText$ 4,1
+workstart 4,0,30,0,6,"Save BB"
+workstart 4,0,40,0,7,"Load BB"
+StringText$ 8,1
+workstart 4,8,50,0,8,"O.K."
+CEND
+Return
+
+CNIF #edonly=0
+Statement gimme{shap0}
+Shared scrsize,nbpl
+adress.l=##[$80B8] MidHandle(shap0+343)
+Use lmaxlen 4:Boxf 64,0,scrsize-1,255,0:Boxf 0,150,63,180,0
+If Peek.w(adress)<>0
+ nplanes=Peek.w(adress+4):gw=Peek.w(adress):gh=Peek.w(adress+2):gcol=(1 ASL nplanes)-1
+ If nplanes>nbpl Then Poke.w adress+4,nbpl
+ xhand=Peek.w(adress+10):yhand=Peek.w(adress+12)
+ xpos=QLimit(128,64+xhand,scrsize+xhand-gw):ypos=QLimit(128,yhand,255+yhand-gh)
+ Use lmaxlen 4:longdiv shap0+343,xpos,ypos,0
+ Poke.w adress+4,nplanes
+ WindowOutput 8:WColour 3,0
+ WLocate 4,61:NPrint unsn{gw,3},"x",unsn{gh,3}
+ WLocate 4,71:NPrint "BP",unsn{nplanes,1}," C",unsn{gcol,2}
+ WLocate 4,81:NPrint unsn{xhand,3},",",unsn{yhand,3}
+EndIf
+End Statement
+
+.shapeman
+owin=##[$80D1] localstat
+Use allocst 4:ButtonId 4,2,unsn{shap0,3}:gadg=0
+Boxf 0,0,scrsize-1,255,0:localstat 8,0,90,64,90,$800,"",0,1,4
+gimme{shap0}
+##[$80BB]
+ ev.l=WaitEvent
+ If ev=$40 AND EventWindow=8
+	gadg=GadgetHit
+	Select gadg
+	 Case 1:!arrow{4,8,2,shap0,(shap0-1)&255,unsn{shap0,3}}
+		gimme{shap0}
+	 Case 2:!arrow{4,8,2,shap0,QLimit(!vl{4,2},0,255),unsn{shap0,3}}
+		gimme{shap0}
+	 Case 3:!arrow{4,8,2,shap0,(shap0+1)&255,unsn{shap0,3}}
+		gimme{shap0}
+	 Case 9;insert
+		For i=255 To shap0+2 Step -1
+		 If Peek.w(##[$80B8] MidHandle(i+342))<>0 Then CopyShape i+342,i+343
+		Next
+		Free MidHandle shap0+344
+		gimme{shap0}
+	 Case 4;delete
+		shapid=shap0+1
+		For i=shap0+1 To 255:If Peek.w(##[$80B8] MidHandle(343+i))<>0 Then CopyShape 343+i,342+i
+		Next
+		If Peek.w(##[$80B8] MidHandle(599))<>0 Then Free MidHandle 599
+		gimme{shap0}
+	 Case 6
+		ShowScreen 1:Use allocst 1
+		a$=FileRequest$("Save Blitz2 shapes as:",path2$,fnmshp$)
+		ShowScreen 4:Use allocst 4
+		If a$<>"" Then SaveShapes 343,599,a$
+	 Case 7
+		ShowScreen 1:Use allocst 1
+		a$=FileRequest$("Load Blitz2 shapes:",path2$,fnmshp$)
+		ShowScreen 4:Use allocst 4
+		If a$<>"" Then LoadShapes shap0+343,a$
+	End Select
+ EndIf
+##[$80BC] gadg=8
+Free localstat 8
+Use localstat owin
+Return
+
+.invert
+ ##[$80CA] object(i)
+ \C[1]=\r2\y*\r3\z-\r2\z*\r3\y
+ \C[2]=\r2\z*\r3\x-\r2\x*\r3\z
+ \C[3]=\r2\x*\r3\y-\r2\y*\r3\x
+ \C[4]=\r3\y*\r1\z-\r3\z*\r1\y
+ \C[5]=\r3\z*\r1\x-\r3\x*\r1\z
+ \C[6]=\r3\x*\r1\y-\r3\y*\r1\x
+ \C[7]=\r1\y*\r2\z-\r1\z*\r2\y
+ \C[8]=\r1\z*\r2\x-\r1\x*\r2\z
+ \C[9]=\r1\x*\r2\y-\r1\y*\r2\x
+ det=\r1\x*\C[1]+\r2\x*\C[4]+\r3\x*\C[7]
+ For ii=1 To 9:\C[ii]/det:Next
+ ;set domains and ray0`s
+ x0=Abs(\r1\x)+Abs(\r2\x)+Abs(\r3\x):xl1(i)=(16+\c\x-x0)/drayx:xl2(i)=(16+\c\x+x0)/drayx:xl1(i)-1:xl2(i)+1
+ y0=Abs(\r1\y)+Abs(\r2\y)+Abs(\r3\y):z0=Abs(\r1\z)+Abs(\r2\z)+Abs(\r3\z)
+ yl1(i)=((-16+\c\y+y0)*drayy+(-32+\c\z+z0)*drayz)/(drayx*drayx):yl1(i)-1
+ yl2(i)=((-16+\c\y-y0)*drayy+(-32+\c\z-z0)*drayz)/(drayx*drayx):yl2(i)+1
+ ray0(i)\x=\C[2]*rayuy+\C[3]*rayuz
+ ray0(i)\y=\C[5]*rayuy+\C[6]*rayuz
+ ray0(i)\z=\C[8]*rayuy+\C[9]*rayuz
+ norm=Tan(ray0(i)\x*ray0(i)\x+ray0(i)\y*ray0(i)\y+ray0(i)\z*ray0(i)\z)
+ ray0(i)\x/norm:ray0(i)\y/norm:ray0(i)\z/norm
+Return
+
+.render
+mode=nbpl:scrsize=320:If Disable(1,21)=2 Then mode=QLimit(mode,2,4)+8:scrsize=640
+hqflag=Abs(Disable(1,19)):numcol=(1 ASL nbpl)-1
+If hqflag=1 Then xsize*2:ysize*2
+allocst 4,mode:Use allocst 4:bpmask=(1 ASL nbpl)-1
+ScreensBitMap 4,4:Use lmaxlen 4:Boxf 0,0,scrsize-1,255,0
+For i=0 To 31:i0=i*3:Green i,buff(i0),buff(i0+1),buff(i0+2):Next
+Gosub shapeman:Use lmaxlen 4:Boxf 0,0,scrsize-1,255,0
+merid0=merid*0.0174533:elev0=elev*0.0174533
+light\x=HSin(merid0)*HCos(elev0),-HCos(merid0)*HCos(elev0),HSin(elev0)
+For i=0 To nobj
+ ##[$80CA] object(i)
+ oldobj(i)\c\x=\c\x,\c\y,\c\z:oldobj(i)\r1\x=\r1\x,\r1\y,\r1\z
+ oldobj(i)\r2\x=\r2\x,\r2\y,\r2\z:oldobj(i)\r3\x=\r3\x,\r3\y,\r3\z
+Next
+For i=1 To 16:id1(i)=-1:Next
+For i=0 To nobj
+ If object(i)\id=1 Then id1(object(i)\group)=i
+Next
+view=Disable(1,17)
+drayx=32/xsize:rayx00=-16:shadow=0
+Select view
+ Case 1:drayy=-root5r:drayz=-2*root5r:rayy00=-9.6:rayz00=44.8:rayuy=2*root5r:rayuz=-root5r:shy=(80-2*zh-yh)*root5r;isometric
+	If Disable(1,20) Then shadow=1:jjshad=2*xsize*root5r
+ Case 2:drayy=0:drayz=-1:rayy00=-16:rayz00=32:rayuy=1:rayuz=0:shy=32-zh;facing
+ Case 3:drayy=-1:drayz=0:rayy00=16:rayz00=32:rayuy=0:rayuz=-1:shy=16-yh;top view
+End Select
+drayy*drayx:drayz*drayx:shx=(16+xh)/drayx:shy/drayx:If scrsize=640 Then xsize*2:drayx/2:shx*2
+If hqflag=1
+ lmaxlen 8,xsize,2,nbpl:For i=0 To 15:For j=0 To 15:For k=0 To 15:lut(i,j,k)=-1:Next:Next:Next
+ shx ASR 1:shy ASR 1
+EndIf
+ii0=0:jj0=0:cosa=HCos(ang*0.0174533):sina=HSin(ang*0.0174533)
+nframe=rmerid*relev
+kkk=0:nkkk=0:nnkk=0:##[$80BB]:kkk+1:nkkk+1
+rayx0=rayx00-0.5*drayx:rayy0=rayy00-0.5*drayy:rayz0=rayz00-0.5*drayz
+shxl=xsize ASR hqflag:shxr=0:shyt=ysize ASR hqflag:shyb=0
+For i=0 To nobj:Gosub invert:Next
+new_pixel=1:ii=0:jj=1
+##[$80BB]
+ If new_pixel=1
+	rayx0+drayx:ii+1
+	If ii>xsize Then rayx0=rayx00+0.5*drayx:ii=1:jj+1:rayy0+drayy:rayz0+drayz
+	For i=0 To nobj
+	 nongrata(i)=0
+	Next
+	scrx=((ii-1) ASR hqflag)+ii0:scry=((jj-1) ASR hqflag)+jj0:Use lmaxlen 4:Point scrx,scry,bpmask
+	imask=(((ii-1) ASR hqflag)&1+((jj-1) ASR hqflag)&1)&1
+ EndIf
+ rayx\x=rayx0,rayy0,rayz0
+ rayu\x=0,rayuy,rayuz
+ flag=0:nref=0:oproobj=-1:new_pixel=1:fshp=-1:specular=1
+ ##[$80BB]
+	max\dist=255:proobj=-1
+	For i=0 To nobj
+	 impact\dist=255
+	 goflag=(nref<>0) OR (ii<xl1(i)) OR (ii>xl2(i)) OR (jj<yl1(i)) OR (jj>yl2(i))
+	 If i<>oproobj AND nongrata(i)=0 AND goflag=0
+		##[$80CA] object(i)
+		;Transform ray to object coordinates
+		x0=rayx\x-\c\x
+		y0=rayx\y-\c\y
+		z0=rayx\z-\c\z
+		tmpx\x=\C[1]*x0+\C[2]*y0+\C[3]*z0
+		tmpx\y=\C[4]*x0+\C[5]*y0+\C[6]*z0
+		tmpx\z=\C[7]*x0+\C[8]*y0+\C[9]*z0
+		If nref=0
+		 tmpu\x=ray0(i)\x,ray0(i)\y,ray0(i)\z
+		Else
+		 tmpu\x=\C[1]*rayu\x+\C[2]*rayu\y+\C[3]*rayu\z
+		 tmpu\y=\C[4]*rayu\x+\C[5]*rayu\y+\C[6]*rayu\z
+		 tmpu\z=\C[7]*rayu\x+\C[8]*rayu\y+\C[9]*rayu\z
+		 norm=Tan(tmpu\x*tmpu\x+tmpu\y*tmpu\y+tmpu\z*tmpu\z)
+		 tmpu\x/norm:tmpu\y/norm:tmpu\z/norm
+		EndIf
+		;determine hits with objects
+		Select Int(\typ/2)
+		 Case 0:Gosub ellipsoid
+		 Case 1:Gosub cylindroid
+		 Case 2:Gosub cuboid
+		 Case 3:Gosub pyramid
+		 Case 4:Gosub cone
+		End Select
+		If impact\dist<max\dist
+		 max\dist=impact\dist:proobj=i
+		 max\x0\x=impact\x0\x:max\x0\y=impact\x0\y:max\x0\z=impact\x0\z
+		 max\n\x=impact\n\x:max\n\y=impact\n\y:max\n\z=impact\n\z
+		 max\map\x=impact\map\x,impact\map\y,impact\map\z
+		 If nref=0 Then fshp=i:tmap1\x=impact\map\x,impact\map\y,impact\map\z
+		EndIf
+	 EndIf
+	Next
+	oproobj=proobj
+	If max\dist=255
+	 flag=1
+	 If nref<>0
+		dot=light\x*rayu\x+light\y*rayu\y+light\z*rayu\z
+		If dot>=0
+		 eye=diffuse+(11*dot*dot*dot*dot*specular)
+		Else
+		 eye=diffuse
+		EndIf
+		eye=QLimit(eye,0,11)
+		shp00=fshp:tmap\x=tmap1\x,tmap1\y,tmap1\z
+		Gosub findcol
+		col0=col(col00,eye,imask)
+		If col0=0 Then new_pixel=0:nongrata(fshp)=1:flag=1
+	 EndIf;nref<>0
+	 If nref=0
+		col0=0
+		If shadow AND jj>=jjshad
+		 ##[$80CA] object(i)
+		 yshad=-16
+		 If jjshad<>ysize Then yshad=16-32*(jjshad-jj)/(jjshad-ysize)
+		 rayx\x=rayx0,yshad,0:rayu\x=0,0,1
+		 For i=0 To nobj
+			x0=rayx\x-\c\x
+			y0=rayx\y-\c\y
+			z0=rayx\z-\c\z
+			tmpx\x=\C[1]*x0+\C[2]*y0+\C[3]*z0
+			tmpx\y=\C[4]*x0+\C[5]*y0+\C[6]*z0
+			tmpx\z=\C[7]*x0+\C[8]*y0+\C[9]*z0
+			tmpu\x=\C[3]*rayu\z,\C[6]*rayu\z,\C[9]*rayu\z
+			norm=Tan(tmpu\x*tmpu\x+tmpu\y*tmpu\y+tmpu\z*tmpu\z)
+			tmpu\x/norm:tmpu\y/norm:tmpu\z/norm
+			;determine hits with objects
+			Select Int(\typ/2)
+			 Case 0:Gosub ellipsoid
+			 Case 1:Gosub cylindroid
+			 Case 2:Gosub cuboid
+			 Case 3:Gosub pyramid
+			 Case 4:Gosub cone
+			End Select
+			If impact\dist<255 Then col0=shadowcol(imask)
+		 Next
+		EndIf;shadow & jjshad>jj
+	 EndIf;nref=0
+	EndIf;maxdist=255
+	If flag=0; (a shape has been hit)
+	 shp00=proobj:tmap\x=max\map\x,max\map\y,max\map\z:Gosub findcol
+	 If nref=0;calculate diffuse light
+		dot=max\n\x*light\x+max\n\y*light\y+max\n\z*light\z
+		If dot>=0
+		 impact\dist=255
+		 i=0:While impact\dist=255 AND i<=nobj
+			If i<>shp00
+			x0=max\x0\x-\c\x
+			y0=max\x0\y-\c\y
+			z0=max\x0\z-\c\z
+			tmpx\x=\C[1]*x0+\C[2]*y0+\C[3]*z0
+			tmpx\y=\C[4]*x0+\C[5]*y0+\C[6]*z0
+			tmpx\z=\C[7]*x0+\C[8]*y0+\C[9]*z0
+			tmpu\x=\C[1]*light\x+\C[2]*light\y+\C[3]*light\z
+			tmpu\y=\C[4]*light\x+\C[5]*light\y+\C[6]*light\z
+			tmpu\z=\C[7]*light\x+\C[8]*light\y+\C[9]*light\z
+			norm=Tan(tmpu\x*tmpu\x+tmpu\y*tmpu\y+tmpu\z*tmpu\z)
+			tmpu\x/norm:tmpu\y/norm:tmpu\z/norm
+			Select Int(\typ/2)
+			 Case 0:Gosub ellipsoid
+			 Case 1:Gosub cylindroid
+			 Case 2:Gosub cuboid
+			 Case 3:Gosub pyramid
+			 Case 4:Gosub cone
+			End Select
+			EndIf
+		 i+1:Wend
+		 diffuse=QLimit(1+dot*(10.2*diff(col00)),1,11)
+		 If impact\dist<255 Then diffuse=0
+		Else
+		 diffuse=0
+		EndIf
+	 EndIf
+	 nref+1:specular*spec(col00)
+	 If specular<>0
+		rayx\x=max\x0\x:rayx\y=max\x0\y:rayx\z=max\x0\z
+		dot=max\n\x*rayu\x+max\n\y*rayu\y+max\n\z*rayu\z
+		rayu\x-2*dot*max\n\x
+		rayu\y-2*dot*max\n\y
+		rayu\z-2*dot*max\n\z
+		norm=Tan(rayu\x*rayu\x+rayu\y*rayu\y+rayu\z*rayu\z)
+		rayu\x/norm:rayu\y/norm:rayu\z/norm
+	 Else
+		shp00=fshp:tmap\x=tmap1\x,tmap1\y,tmap1\z
+		Gosub findcol
+		col0=col(col00,diffuse,imask):flag=1
+		If col0=0 Then new_pixel=0:nongrata(fshp)=1
+	 EndIf
+	EndIf
+ ##[$80BC] flag<>0
+ Select hqflag
+	Case 0
+	 Use lmaxlen 4:Point scrx,scry,col0&bpmask
+	 If (col0&bpmask)>0
+		If ii-1>shxr Then shxr=ii-1
+		If ii-1<shxl Then shxl=ii-1
+		If jj-1>shyb Then shyb=jj-1
+		If jj-1<shyt Then shyt=jj-1
+	 EndIf
+	Case 1
+.hq
+	 Use lmaxlen 4:Point scrx,scry,col0&bpmask
+	 Use lmaxlen 8:Point ii-1,(jj-1)&1,col0&bpmask
+	 If ii=xsize AND jj&1=0 AND new_pixel=1
+		For i=0 To (xsize ASR 1)-1
+		 r0=-30:g0=-30:b0=-30:ppflag=0
+		 For j0=0 To 1:For i0=0 To 1
+			 Use lmaxlen 8:pp=Cls((i ASL1)+i0,j0):ppflag|pp
+			 Use allocst 4:r0+Blue(pp):g0+Palette(pp):b0+PalRGB(pp)
+		 Next:Next
+		 If ppflag=0
+			col0=0
+		 Else
+			r0 ASR 2:g0 ASR 2:b0 ASR2
+			intens=(r0+g0+b0)/22.5
+			mult=1.2-0.2*intens*intens
+			r0*mult:r0=QLimit(r0+7.5,0,15)
+			g0*mult:g0=QLimit(g0+7.5,0,15)
+			b0*mult:b0=QLimit(b0+7.5,0,15)
+			If lut(r0,g0,b0)=-1 Then lut(r0,g0,b0)=best{r0,g0,b0}
+			col0=lut(r0,g0,b0)
+			If i>shxr Then shxr=i
+			If i<shxl Then shxl=i
+			jjj0=(jj ASR 1)-1
+			If jjj0>shyb Then shyb=jjj0
+			If jjj0<shyt Then shyt=jjj0
+		 EndIf
+		 Use lmaxlen 4:Point ii0+i-1,scry,col0
+		Next
+	 EndIf
+ End Select
+ mbflag=Joyb(0)&2
+##[$80BC] (ii=xsize AND jj=Int(ysize)) OR mbflag=2
+If mbflag<>2
+ If shxl<shxr AND shyb>shyt
+	shed=342+(kkk+shap0)&255
+	Use lmaxlen 4:GetaShape shed,ii0+shxl,jj0+shyt,shxr-shxl+1,shyb-shyt+1
+	Handle shed,shx-shxl,shy-shyt
+ EndIf
+ ii0+xsize ASR hqflag:If ii0>scrsize+1-(xsize ASR hqflag) Then ii0=0:jj0+(Int(ysize)ASR hqflag)
+ If jj0>255-(Int(ysize)ASR hqflag)
+	jj0=0
+	Boxf 0,0,scrsize-1,255,0
+ EndIf
+ If nkkk=rmerid
+	nkkk=0:nnkk+1
+	aang=(aelev/relev)*0.0174533:aang*nnkk:cosa=HCos(aang):sina=HSin(aang)
+	For i=0 To nobj
+	 ##[$80CA] object(i)
+	 *ptr=oldobj(i)
+	 x1=*ptr\c\y:z1=*ptr\c\z-16
+	 \c\y=cosa*x1+sina*z1:\c\z=16+cosa*z1-sina*x1
+	 x1=*ptr\r1\y:z1=*ptr\r1\z:\r1\x=*ptr\r1\x,cosa*x1+sina*z1,cosa*z1-sina*x1
+	 x1=*ptr\r2\y:z1=*ptr\r2\z:\r2\x=*ptr\r2\x,cosa*x1+sina*z1,cosa*z1-sina*x1
+	 x1=*ptr\r3\y:z1=*ptr\r3\z:\r3\x=*ptr\r3\x,cosa*x1+sina*z1,cosa*z1-sina*x1
+	Next
+ Else
+	cosa=HCos(amerid/rmerid*0.0174533):sina=HSin(amerid/rmerid*0.0174533)
+	For i=0 To nobj
+	 y1=\c\y:x1=\c\x:\c\y=cosa*y1+sina*x1:\c\x=cosa*x1-sina*y1
+	 y1=\r1\y:x1=\r1\x:\r1\y=cosa*y1+sina*x1:\r1\x=cosa*x1-sina*y1
+	 y1=\r2\y:x1=\r2\x:\r2\y=cosa*y1+sina*x1:\r2\x=cosa*x1-sina*y1
+	 y1=\r3\y:x1=\r3\x:\r3\y=cosa*y1+sina*x1:\r3\x=cosa*x1-sina*y1
+	Next
+ EndIf
+EndIf
+##[$80BC] kkk=nframe OR mbflag=2
+ If scrsize=640 Then xsize/2
+ For i=0 To nobj
+	##[$80CA] oldobj(i)
+	object(i)\c\x=\c\x,\c\y,\c\z:object(i)\r1\x=\r1\x,\r1\y,\r1\z
+	object(i)\r2\x=\r2\x,\r2\y,\r2\z:object(i)\r3\x=\r3\x,\r3\y,\r3\z
+ Next
+ If mbflag=0 Then Gosub shapeman
+ If mbflag<>0 Then ##[$80BB]:##[$80BC] Joyb(0)&2=0
+FlushEvents
+If hqflag=1 Then Free lmaxlen 8:xsize/2:ysize/2
+Free allocst 4:Free lmaxlen 4:Use allocst 1:Use localstat 4
+Return
+
+.findcol
+;input shp00 and tmap.vec to get out col00
+##[$80CA] object(shp00)
+grp0=\group
+If supermap(grp0)<>0;supermap present
+ *ptr=object(id1(grp0))
+ ;convert map to box coordinates
+ tmpu\x=\c\x+\r1\x*tmap\x+\r2\x*tmap\y+\r3\x*tmap\z-*ptr\c\x
+ tmpu\y=\c\y+\r1\y*tmap\x+\r2\y*tmap\y+\r3\y*tmap\z-*ptr\c\y
+ tmpu\z=\c\z+\r1\z*tmap\x+\r2\z*tmap\y+\r3\z*tmap\z-*ptr\c\z
+ ;convert box coordinates to object coordinates
+ tmap\x=*ptr\C[1]*tmpu\x+*ptr\C[2]*tmpu\y+*ptr\C[3]*tmpu\z
+ tmap\y=*ptr\C[4]*tmpu\x+*ptr\C[5]*tmpu\y+*ptr\C[6]*tmpu\z
+ tmap\z=*ptr\C[7]*tmpu\x+*ptr\C[8]*tmpu\y+*ptr\C[9]*tmpu\z
+ ##[$80CA] tmap
+ Select (*ptr\typ)/2
+	Case 1;cylindroid
+	 tmx=wrap{\y,\z}:tmy=(1+\x) ASL 5
+	Case 2;cuboid
+	 tmx=(1+\y) ASL 5:tmy=(1+\z) ASL 5
+	Default:tmx=wrap{\y,\z}:tmy=(32+wrap{-\x,Tan(\y*\y+\z*\z)}ASL 1)
+ End Select
+ tm.w=supermap(grp0):tx0=tmx0(tm):ty0=tmy0(tm):tmx&63:tmy&63
+ Use lmaxlen 6:col00=Cls(tx0+tmx,ty0+tmy)
+EndIf
+If supermap(grp0)=0
+ col00=object(shp00)\col
+ If col00<0
+	;texture map
+	##[$80CA] tmap
+	typ0=object(shp00)\typ
+	Select Int(typ0/2)
+	Case 0;ellipsoid
+	 tmx=wrap{\y,\z}
+	 r0=Tan(\y*\y+\z*\z)
+	 tmy=(32+wrap{-Sgn(\x)*Tan(1-(r0*r0)),r0}ASL 1)
+	Case 1;cylindroid
+	 If Abs(\x)=1
+		tmx=(1+\y)ASL 5:tmy=(1+\z)ASL 5
+	 Else
+		tmy=(1+\x) ASL 5:tmx=wrap{\y,\z}
+	 If typ0&1 AND Abs(\y)=0 Then tmx=48-(1+\z) ASL 4
+	 EndIf
+	Case 2;cuboid
+	 If typ0&1 AND \x+\y=0 Then \x=1
+	 If Abs(\x)=1 Then tmx=(1+\y) ASL 5:tmy=(1+\z) ASL 5
+	 If Abs(\y)=1 Then tmx=(1+\z) ASL 5:tmy=(1+\x) ASL 5
+	 If Abs(\z)=1 Then tmx=(1+\x) ASL 5:tmy=(1+\y) ASL 5
+	Case 3;pyramid
+	 r0=1-\z
+	 If \z=0 OR \z=object(shp00)\C[0]
+		tmx=(1+\x)ASL 5:tmy=(1+\y)ASL 5
+		If \z=object(shp00)\C[0] AND object(shp00)\C[0]<>0 Then tmx/object(shp00)\C[0]:tmy/object(shp00)\C[0]
+	 Else
+		If r0<>0
+		 If \x=r0 Then tmx=((r0+\y)ASL 3)/r0
+		 If \y=r0 Then tmx=32-((r0+\x)ASL 3)/r0
+		 If \x=-r0 Then tmx=48-((r0+\y)ASL 3)/r0
+		 If \y=-r0 Then tmx=48+((r0+\x)ASL 3)/r0
+		 If \x=0 AND typ0&1=1 Then tmx=56-((r0+\y)ASL 4)/r0
+		Else
+		 tmx=0
+		EndIf
+		tmy=r0 ASL 6
+	 EndIf
+	Case 4;cone
+	 r0=1-\z
+	 If \z=0 Then r0=Tan(\x*\x+\y*\y)
+	 tmy=r0 ASL 6
+	 tmx=wrap{\y,Sgn(\x)*Tan(r0*r0-\y*\y)}
+	End Select
+	tm.w=Abs(col00):tx0=tmx0(tm):ty0=tmy0(tm):tmx&63:tmy&63
+	Use lmaxlen 6:col00=Cls(tx0+tmx,ty0+tmy)
+ EndIf;map or no map
+EndIf;supermap/none
+Return
+CEND
+
+.ellipsoid
+b=2*(tmpu\x*tmpx\x+tmpu\y*tmpx\y+tmpu\z*tmpx\z)
+c=tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z-1
+d=b*b-4*c
+If d<=0 Then Return
+t=(-b-Tan(d))*0.5:If t<0 Then Return
+##[$80CA] impact
+\x0\x=tmpx\x+t*tmpu\x:\x0\y=tmpx\y+t*tmpu\y:\x0\z=tmpx\z+t*tmpu\z
+\map\x=\x0\x,\x0\y,\x0\z:\id=i
+*ptr.obj=object(i)
+fflag=0
+If *ptr\typ=1 AND \x0\x<0
+ fflag=1
+ If tmpu\x>0
+	t=-tmpx\x/tmpu\x:\x0\y=tmpx\y+t*tmpu\y:\x0\z=tmpx\z+t*tmpu\z
+	If (\x0\y*\x0\y+\x0\z*\x0\z)<1 AND t>0
+	 \x0\x=0:\map\x=\x0\x,\x0\y,\x0\z:\id=i:fflag=2
+	EndIf
+ EndIf
+EndIf
+If fflag=1 Then Return
+\n\x=\x0\x,\x0\y,\x0\z
+If fflag=2 Then \n\x=-1,0,0
+;deviate normal for bump maps
+If *ptr\bump>0
+ If *ptr\typ=1 AND \x0\x=0
+	nmx\x=0,1,0:nmy\x=0,0,1
+ Else
+	nmx\x=0,-\x0\z,\x0\y
+	r0=Tan(\x0\z*\x0\z+\x0\y*\x0\y):r1=-\x0\x/(2*r0)
+	nmy\x=r0 ASR 1,\x0\y*r1,\x0\z*r1
+ EndIf
+ tmx=wrap{\x0\y,\x0\z}&63
+ r0=Tan(\x0\y*\x0\y+\x0\z*\x0\z):tmy=(32+wrap{-Sgn(\x0\x)*Tan(1-r0*r0),r0}ASL 1)&63
+ tmx+tmx0(*ptr\bump):tmy+tmy0(*ptr\bump)
+ Use lmaxlen 6
+ dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
+ dby=(Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63)-Cls(tmx,tmy))ASR 1
+ \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
+EndIf
+;transform normal and x0 back
+\map\x=\x0\x,\x0\y,\x0\z:\id=i
+*ptr.obj=object(i)
+x2=\x0\x:y2=\x0\y:z2=\x0\z:x1=\n\x:y1=\n\y:z1=\n\z
+\n\x=*ptr\r1\x*x1+*ptr\r2\x*y1+*ptr\r3\x*z1
+\n\y=*ptr\r1\y*x1+*ptr\r2\y*y1+*ptr\r3\y*z1
+\n\z=*ptr\r1\z*x1+*ptr\r2\z*y1+*ptr\r3\z*z1
+d0=Tan(\n\x*\n\x+\n\y*\n\y+\n\z*\n\z):\n\x/d0:\n\y/d0:\n\z/d0
+\x0\x=*ptr\c\x+*ptr\r1\x*x2+*ptr\r2\x*y2+*ptr\r3\x*z2
+\x0\y=*ptr\c\y+*ptr\r1\y*x2+*ptr\r2\y*y2+*ptr\r3\y*z2
+\x0\z=*ptr\c\z+*ptr\r1\z*x2+*ptr\r2\z*y2+*ptr\r3\z*z2
+x1=\x0\x-rayx\x:y1=\x0\y-rayx\y:z1=\x0\z-rayx\z
+\dist=Tan(x1*x1+y1*y1+z1*z1)
+Return
+Data.q 3
+Data.q 12, 1,0,0, 0.866,0.5,0, 0.5,0.866,0, 0,1,0, -0.5,0.866,0, -0.866,0.5,0,	-1,0,0, -0.866,-0.5,0
+Data.q -0.5,-0.866,0, 0,-1,0, 0.5,-0.866,0, 0.866,-0.5,0
+Data.q 12, 0,1,0,0, 0.866,0.5,0, 0.5,0.866,0, 0,1,0, -0.5,0.866,0, -0.866,0.5,0,	-1,0,0, -0.866,-0.5,0
+Data.q -0.5,-0.866,0, 0,-1,0, 0.5,-0.866,0, 0.866,-0.5
+Data.q 12, 1,0,0, 0.866,0,0.5, 0.5,0,0.866, 0,0,1, -0.5,0,0.866, -0.866,0,0.5,	-1,0,0, -0.866,0,-0.5
+Data.q -0.5,0,-0.866, 0,0,-1, 0.5,0,-0.866, 0.866,0,-0.5
+
+.cylindroid
+zz1=object(i)\C[0]
+a=tmpu\y*tmpu\y+tmpu\z*tmpu\z:If a=0 Then Return
+b=2*(tmpu\y*tmpx\y+tmpu\z*tmpx\z)
+c=tmpx\y*tmpx\y+tmpx\z*tmpx\z-1
+d=b*b-4*a*c
+If d<=0 AND c>0 Then Return
+t=(-b-Tan(d))*0.5/a:If t<0 AND (c>0 OR zz1=0) Then Return
+##[$80CA] impact
+fflag=0
+x1=tmpx\x+t*tmpu\x
+If Abs(x1)<=1
+ fflag=1:\x0\x=x1:\x0\y=tmpx\y+t*tmpu\y:\x0\z=tmpx\z+t*tmpu\z
+EndIf
+If tmpx\x>1 AND tmpu\x<0
+ t=(1-tmpx\x)/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+ r0=(y2*y2+z2*z2):If r0<=1
+ If r0>=zz1*zz1
+	\x0\x=1,y2,z2:fflag=2
+ Else
+	c=tmpx\y*tmpx\y+tmpx\z*tmpx\z-zz1*zz1
+	d=b*b-4*a*c
+	If d<=0 Then fflag=0
+	t=(-b+Tan(d))*0.5/a
+	x1=tmpx\x+t*tmpu\x
+	If Abs(x1)<1 AND t>0
+	 fflag=5:\x0\x=x1,tmpx\y+t*tmpu\y,tmpx\z+t*tmpu\z
+	 cosa=\x0\y*tmpu\y+\x0\z*tmpu\z:l=2*cosa
+	 dx=l*rayu\x/a
+	 If \x0\x+dx<-1 Then specular=0
+	EndIf
+ EndIf
+EndIf
+EndIf
+If tmpx\x<-1 AND tmpu\x>0
+ t=(-1-tmpx\x)/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+ r0=(y2*y2+z2*z2):If r0<=1
+ If r0>=zz1*zz1
+	\x0\x=-1,y2,z2:fflag=3
+ Else
+	c=tmpx\y*tmpx\y+tmpx\z*tmpx\z-zz1*zz1
+	d=b*b-4*a*c
+	If d<=0 Then fflag=0
+	t=(-b+Tan(d))*0.5/a
+	x1=tmpx\x+t*tmpu\x
+	If Abs(x1)<1 AND t>0
+	 fflag=5:\x0\x=x1,tmpx\y+t*tmpu\y,tmpx\z+t*tmpu\z
+	 cosa=\x0\y*tmpu\y+\x0\z*tmpu\z:l=2*cosa
+	 dx=l*rayu\x/a
+	 If \x0\x+dx>1 Then specular=0
+	EndIf
+ EndIf
+EndIf
+EndIf
+If fflag=0 Then Return
+*ptr.obj=object(i)
+If *ptr\typ=3 AND \x0\y<=0;half cylindroid w/ hit on missing half
+ fflag=0
+ If tmpu\y>0;check rectangular back face
+	t=-tmpx\y/tmpu\y:x2=tmpx\x+t*tmpu\x:z2=tmpx\z+t*tmpu\z
+	If Abs(x2)<=1 AND Abs(z2)<=1
+	 If Abs(z2)>=zz1
+		fflag=4:\x0\x=x2,0,z2
+	 Else
+		c=tmpx\y*tmpx\y+tmpx\z*tmpx\z-zz1*zz1
+		d=b*b-4*a*c
+		t=(-b+Tan(d))*0.5/a
+		x1=tmpx\x+t*tmpu\x
+		If Abs(x1)<=1
+		 fflag=5:\x0\x=x1,tmpx\y+t*tmpu\y,tmpx\z+t*tmpu\z
+		 dot=2*(tmpu\y*\x0\y+tmpu\z*\x0\z)/(zz1*zz1*a)
+		 nuv=tmpu\y-dot*\x0\y:nuw=tmpu\z-dot*\x0\z
+		 a=nuv*nuv+nuw*nuw
+		 b=2*(nuv*\x0\y+nuw*\x0\z)
+		 t=-b/a:x1=\x0\x+t*tmpu\x:y1=\x0\y+t*nuv
+		 If Abs(x1)<=1 AND y1<=0 Then nref=7
+		EndIf
+	 EndIf
+	EndIf
+ EndIf
+EndIf
+\map\x=\x0\x,\x0\y,\x0\z:\id=i
+If fflag=0 Then Return
+x1=*ptr\r1\x*\x0\x+*ptr\r2\x*\x0\y+*ptr\r3\x*\x0\z
+y1=*ptr\r1\y*\x0\x+*ptr\r2\y*\x0\y+*ptr\r3\y*\x0\z
+z1=*ptr\r1\z*\x0\x+*ptr\r2\z*\x0\y+*ptr\r3\z*\x0\z
+Select fflag
+ Case 1;curved face
+	\n\x=0,\x0\y,\x0\z
+	tmx=wrap{\x0\y,\x0\z}:tmy=(1+\x0\x)ASL 5
+	nmx\x=0,-\x0\z,\x0\y:nmy\x=1,0,0
+ Case 2;top circle
+	\n\x=1,0,0
+	tmx=(1+\x0\y)ASL 5:tmy=(1+\x0\z)ASL 5
+	nmx\x=0,1,0:nmy\x=0,0,1
+ Case 3;bottom circle
+	\n\x=-1,0,0
+	tmx=-(1+\x0\y)ASL 5:tmy=-(1+\x0\z)ASL 5
+	nmx\x=0,-1,0:nmy\x=0,0,-1
+ Case 4;rectangular half-slice
+	\n\x=0,1,0
+	tmx=48-(1+\x0\z)ASL 4:tmy=(1+\x0\x)ASL 5
+	nmx\x=0,0,1:nmy\x=1,0,0
+ Case 5;inner face of ring
+	\n\x=0,\x0\x,\x0\y
+	tmx=wrap{\x0\y,\x0\z}:tmy=(1+\x0\x)ASL 5
+End Select
+If *ptr\bump>0 AND fflag<5
+ tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
+ Use lmaxlen 6
+ dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
+ dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
+ \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
+EndIf
+x1=*ptr\r1\x*\n\x+*ptr\r2\x*\n\y+*ptr\r3\x*\n\z
+y1=*ptr\r1\y*\n\x+*ptr\r2\y*\n\y+*ptr\r3\y*\n\z
+z1=*ptr\r1\z*\n\x+*ptr\r2\z*\n\y+*ptr\r3\z*\n\z
+r0=Tan(x1*x1+y1*y1+z1*z1)
+\n\x=x1/r0,y1/r0,z1/r0
+x1=*ptr\r1\x*\x0\x+*ptr\r2\x*\x0\y+*ptr\r3\x*\x0\z
+y1=*ptr\r1\y*\x0\x+*ptr\r2\y*\x0\y+*ptr\r3\y*\x0\z
+z1=*ptr\r1\z*\x0\x+*ptr\r2\z*\x0\y+*ptr\r3\z*\x0\z
+\x0\x=*ptr\c\x+x1:\x0\y=*ptr\c\y+y1:\x0\z=*ptr\c\z+z1
+x1=\x0\x-rayx\x:y1=\x0\y-rayx\y:z1=\x0\z-rayx\z
+\dist=Tan(x1*x1+y1*y1+z1*z1)
+Return
+
+Data.q 8
+Data.q 12, 1,1,0,1, 0.866,0.5,1, 0.5,0.866,1, 0,1,1, -0.5,0.866,1, -0.866,0.5,1,	-1,0,1, -0.866,-0.5,1
+Data.q -0.5,-0.866,1, 0,-1,1, 0.5,-0.866,1, 0.866,-0.5
+Data.q 12, -1,1,0,-1, 0.866,0.5,-1, 0.5,0.866,-1, 0,1,-1, -0.5,0.866,-1, -0.866,0.5,-1,	-1,0,-1, -0.866,-0.5,-1
+Data.q -0.5,-0.866,-1, 0,-1,-1, 0.5,-0.866,-1, 0.866,-0.5
+Data.q 12, 1,1,0,1, 0.866,0.5,1, 0.5,0.866,1, 0,1,1, -0.5,0.866,1, -0.866,0.5,1,	-1,0,1, -0.866,-0.5,1
+Data.q -0.5,-0.866,1, 0,-1,1, 0.5,-0.866,1, 0.866,-0.5
+Data.q 12, -1,1,0,-1, 0.866,0.5,-1, 0.5,0.866,-1, 0,1,-1, -0.5,0.866,-1, -0.866,0.5,-1,	-1,0,-1, -0.866,-0.5,-1
+Data.q -0.5,-0.866,-1, 0,-1,-1, 0.5,-0.866,-1, 0.866,-0.5
+Data.q 4, 1,0,1, -1,0,1, -1,0,1, 1,0,1
+Data.q 4, 1,0,-1, -1,0,-1, -1,0,-1, 1,0,-1
+Data.q 4, 1,1,0, -1,1,0, -1,1,0, 1,1,0
+Data.q 4, 1,-1,0, -1,-1,0, -1,-1,0, 1,-1,0
+
+.cuboid
+##[$80CA] impact
+fflag=0
+If tmpx\x>1 AND tmpu\x<0; check x=1 plane
+ t=(1-tmpx\x)/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+ If Abs(y2)<=1 AND Abs(z2)<=1
+	\x0\x=1,y2,z2:\n\x=1,0,0:fflag=1
+	tmx=(1+y2)ASL 5:tmy=(1+z2)ASL 5:nmx\x=0,1,0:nmy\x=0,0,1
+ EndIf
+EndIf
+If tmpx\x<-1 AND tmpu\x>0; check x=-1 plane
+ t=(-1-tmpx\x)/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+ If Abs(y2)<=1 AND Abs(z2)<=1
+	\x0\x=-1,y2,z2:\n\x=-1,0,0:fflag=1
+	tmx=(1+y2)ASL 5:tmy=(1+z2)ASL 5:nmx\x=0,1,0:nmy\x=0,0,1
+ EndIf
+EndIf
+If tmpx\y>1 AND tmpu\y<0; check y=1 plane
+ t=(1-tmpx\y)/tmpu\y:x2=tmpx\x+t*tmpu\x:z2=tmpx\z+t*tmpu\z
+ If Abs(x2)<=1 AND Abs(z2)<=1
+	\x0\x=x2,1,z2:\n\x=0,1,0:fflag=1
+	tmx=(1+z2)ASL 5:tmy=(1+x2)ASL 5:nmx\x=0,0,1:nmy\x=1,0,0
+ EndIf
+EndIf
+If tmpx\y<-1 AND tmpu\y>0; check y=-1 plane
+ t=(-1-tmpx\y)/tmpu\y:x2=tmpx\x+t*tmpu\x:z2=tmpx\z+t*tmpu\z
+ If Abs(x2)<=1 AND Abs(z2)<=1
+	\x0\x=x2,-1,z2:\n\x=0,-1,0:fflag=1
+	tmx=(1+z2)ASL 5:tmy=(1+x2)ASL 5:nmx\x=0,0,1:nmy\x=1,0,0
+ EndIf
+EndIf
+If tmpx\z>1 AND tmpu\z<0; check z=1 plane
+ t=(1-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If Abs(x2)<=1 AND Abs(y2)<=1
+	\x0\x=x2,y2,1:\n\x=0,0,1:fflag=1
+	tmx=(1+x2)ASL 5:tmy=(1+y2)ASL 5:nmx\x=1,0,0:nmy\x=0,1,0
+ EndIf
+EndIf
+If tmpx\z<-1 AND tmpu\z>0; check z=-1 plane
+ t=(-1-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If Abs(x2)<=1 AND Abs(y2)<=1
+	\x0\x=x2,y2,-1:\n\x=0,0,-1:fflag=1
+	tmx=(1+x2)ASL 5:tmy=(1+y2)ASL 5:nmx\x=1,0,0:nmy\x=0,1,0
+ EndIf
+EndIf
+If fflag=0 Then Return
+If \x0\x+\x0\y<0 AND *ptr\typ=5;half shape
+ fflag=0
+ t0=tmpu\x+tmpu\y
+ If t0>0 AND (tmpx\x+tmpx\y)<0
+	t=-(tmpx\x+tmpx\y)/t0:x2=tmpx\x+t*tmpu\x:z2=tmpx\z+t*tmpu\z
+	If Abs(x2)<=1 AND Abs(z2)<=1
+	 \x0\x=x2,tmpx\y+t*tmpu\y,z2:\n\x=-0.707,-0.707,0:fflag=1
+	 tmx=(1+\x0\y)ASL 5:tmy=(1+\x0\z)ASL 5:nmx\x=0.707,-0.707,0:nmy\x=0,0,1
+	EndIf
+ EndIf
+EndIf
+If fflag=0 Then Return
+If *ptr\bump>0
+ tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
+ Use lmaxlen 6
+ dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
+ dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
+ \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
+EndIf
+;transform normal and x0 back
+\map\x=\x0\x,\x0\y,\x0\z:\id=i
+*ptr.obj=object(i)
+x2=\x0\x:y2=\x0\y:z2=\x0\z:x1=\n\x:y1=\n\y:z1=\n\z
+\n\x=*ptr\r1\x*x1+*ptr\r2\x*y1+*ptr\r3\x*z1
+\n\y=*ptr\r1\y*x1+*ptr\r2\y*y1+*ptr\r3\y*z1
+\n\z=*ptr\r1\z*x1+*ptr\r2\z*y1+*ptr\r3\z*z1
+d0=Tan(\n\x*\n\x+\n\y*\n\y+\n\z*\n\z):\n\x/d0:\n\y/d0:\n\z/d0
+\x0\x=*ptr\c\x+*ptr\r1\x*x2+*ptr\r2\x*y2+*ptr\r3\x*z2
+\x0\y=*ptr\c\y+*ptr\r1\y*x2+*ptr\r2\y*y2+*ptr\r3\y*z2
+\x0\z=*ptr\c\z+*ptr\r1\z*x2+*ptr\r2\z*y2+*ptr\r3\z*z2
+x1=\x0\x-rayx\x:y1=\x0\y-rayx\y:z1=\x0\z-rayx\z
+\dist=Tan(x1*x1+y1*y1+z1*z1)
+Return
+
+Data.q 4
+Data.q 4, 1,1,1, 1,1,-1, 1,-1,-1, 1,-1,1
+Data.q 4, -1,1,1, -1,1,-1, -1,-1,-1, -1,-1,1
+Data.q 4, 1,1,1, 1,-1,1, -1,-1,1, -1,1,1
+Data.q 4, 1,1,-1, 1,-1,-1, -1,-1,-1, -1,1,-1
+
+.pyramid
+fflag=0
+zz1=object(i)\C[0]:zz0=1-zz1
+##[$80CA] impact
+If tmpx\z<0 AND tmpu\z>0; check z=0 plane
+ t=(-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If Abs(x2)<1 AND Abs(y2)<1
+	\x0\x=x2,y2,-1:\n\x=0,0,-1:fflag=1
+	tmx=(1+x2)ASL 5:tmy=(1+y2)ASL 5:nmx\x=1,0,0:nmy\x=0,1,0
+ EndIf
+EndIf
+t0=tmpu\z+tmpu\x:If tmpx\x>0 AND tmpu\x<0 AND t0<>0
+ t=(1-tmpx\z-tmpx\x)/t0:z2=tmpx\z+t*tmpu\z:y2=tmpx\y+t*tmpu\y
+ If Abs(y2)<1-z2 AND z2>0 AND z2<zz0 AND t>0
+	\x0\x=tmpx\x+t*tmpu\x,y2,z2:\n\x=1,0,1:fflag=1
+	r0=QLimit(1-z2,0.005,1):tmx=((r0+y2)ASL3)/r0:tmy=r0 ASL6:nmy\x=-1,0,1:nmx\x=0,1,0
+ EndIf
+EndIf
+t0=tmpu\z-tmpu\x:If tmpx\x<0 AND tmpu\x>0 AND t0<>0
+ t=(1-tmpx\z+tmpx\x)/t0:z2=tmpx\z+t*tmpu\z:y2=tmpx\y+t*tmpu\y
+ If Abs(y2)<1-z2 AND z2>0 AND z2<zz0 AND t>0
+	\x0\x=tmpx\x+t*tmpu\x,y2,z2:\n\x=-1,0,1:fflag=1
+	r0=QLimit(1-z2,0.005,1):tmx=48-((r0+y2)ASL3)/r0:tmy=r0 ASL6:nmy\x=1,0,1:nmx\x=0,-1,0
+ EndIf
+EndIf
+t0=tmpu\z+tmpu\y:If tmpx\y>0 AND tmpu\y<0 AND t0<>0
+ t=(1-tmpx\z-tmpx\y)/t0:z2=tmpx\z+t*tmpu\z:x2=tmpx\x+t*tmpu\x
+ If Abs(x2)<1-z2 AND z2>0 AND z2<zz0 AND t>0
+	\x0\x=x2,tmpx\y+t*tmpu\y,z2:\n\x=0,1,1:fflag=1
+	r0=QLimit(1-z2,0.005,1):tmx=32-((r0+x2)ASL3)/r0:tmy=r0 ASL 6:nmy\x=0,-1,1:nmx\x=-1,0,0
+ EndIf
+EndIf
+t0=tmpu\z-tmpu\y:If tmpx\y<0 AND tmpu\y>0 AND t0<>0
+ t=(1-tmpx\z+tmpx\y)/t0:z2=tmpx\z+t*tmpu\z:x2=tmpx\x+t*tmpu\x
+ If Abs(x2)<1-z2 AND z2>0 AND z2<zz0 AND t>0
+	\x0\x=x2,tmpx\y+t*tmpu\y,z2:\n\x=0,-1,1:fflag=1
+	r0=QLimit(1-z2,0.005,1):tmx=48+((r0+x2)ASL3)/r0:tmy=r0 ASL 6:nmy\x=0,1,1:nmx\x=1,0,0
+ EndIf
+EndIf
+If tmpx\z>zz0 AND tmpu\z<0; check z=\C[0] plane
+ t=(zz0-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If Abs(x2)<=zz1 AND Abs(y2)<=zz1
+	\x0\x=x2,y2,zz0:\n\x=0,0,1:fflag=1
+	tmx=(1+x2)ASL 5:tmy=(1+y2)ASL 5
+	If zz1<>0 Then tmx/zz1:tmy/zz1:nmx\x=zz1,0,0:nmy\x=0,zz1,0
+ EndIf
+EndIf
+If fflag=0 Then Return
+*ptr.obj=object(i)
+If *ptr\typ=7 AND \x0\x<0;half-pyramid
+ fflag=0
+ If tmpu\x>0 AND tmpx\x<0
+	t=-tmpx\x/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+	If Abs(y2)<1-z2 AND z2<zz0 AND z2>0
+	 \x0\x=0,y2,z2:\n\x=-1,0,0:fflag=1
+	 r0=QLimit(1-z2,0.005,1):tmx=(56-(r0+y2)ASL4)/r0:tmy=r0 ASL 6:nmx\x=0,-1,0:nmy\x=0,0,1
+	EndIf
+ EndIf
+EndIf
+If fflag=0 Then Return
+\map\x=\x0\x,\x0\y,\x0\z:\id=i
+If *ptr\bump>0
+ tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
+ Use lmaxlen 6
+ dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
+ dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
+ \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
+EndIf
+;transform normal and x0 back
+x2=\x0\x:y2=\x0\y:z2=\x0\z:x1=\n\x:y1=\n\y:z1=\n\z
+\n\x=*ptr\r1\x*x1+*ptr\r2\x*y1+*ptr\r3\x*z1
+\n\y=*ptr\r1\y*x1+*ptr\r2\y*y1+*ptr\r3\y*z1
+\n\z=*ptr\r1\z*x1+*ptr\r2\z*y1+*ptr\r3\z*z1
+d0=Tan(\n\x*\n\x+\n\y*\n\y+\n\z*\n\z):\n\x/d0:\n\y/d0:\n\z/d0
+\x0\x=*ptr\c\x+*ptr\r1\x*x2+*ptr\r2\x*y2+*ptr\r3\x*z2
+\x0\y=*ptr\c\y+*ptr\r1\y*x2+*ptr\r2\y*y2+*ptr\r3\y*z2
+\x0\z=*ptr\c\z+*ptr\r1\z*x2+*ptr\r2\z*y2+*ptr\r3\z*z2
+x1=\x0\x-rayx\x:y1=\x0\y-rayx\y:z1=\x0\z-rayx\z
+\dist=Tan(x1*x1+y1*y1+z1*z1)
+Return
+
+Data.q 4
+Data.q 4, 1,1,0, 1,-1,0, -1,-1,0, -1,1,0
+Data.q 4, 1,1,0, -1,-1,0, -1,-1,1, 1,1,1
+Data.q 4, 1,-1,0, -1,1,0, -1,1,1, 1,-1,1
+Data.q 4, 1,1,1, 1,-1,1, -1,-1,1, -1,1,1
+
+.cone
+zz1=object(i)\C[0]:zz0=1-zz1
+fflag=0
+##[$80CA] impact
+If tmpx\z<0 AND tmpu\z>0; check z=0 plane
+ t=(-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If (x2*x2+y2*y2)<=1
+	\x0\x=x2,y2,0:\n\x=0,0,-1:fflag=1
+	r0=Tan(x2*x2+y2*y2):nmx\x=-\x0\y,\x0\x,0:nmy\x=-\x0\x,-\x0\y,0
+ EndIf
+EndIf
+If tmpx\z>zz0 AND tmpu\z<0; check z=zz0 plane
+ t=(zz0-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
+ If (x2*x2+y2*y2)<=zz1*zz1
+	\x0\x=x2,y2,zz0:\n\x=0,0,1:fflag=1
+	r0=Tan(x2*x2+y2*y2):nmx\x=-\x0\y,\x0\x,0:nmy\x=-\x0\x,-\x0\y,0
+ EndIf
+EndIf
+a=tmpu\x*tmpu\x+tmpu\y*tmpu\y-tmpu\z*tmpu\z
+b=2*(tmpu\x*tmpx\x+tmpu\y*tmpx\y+tmpu\z*(1-tmpx\z))
+c=tmpx\x*tmpx\x+tmpx\y*tmpx\y-(1-tmpx\z)*(1-tmpx\z)
+d=b*b-4*a*c
+If d>0
+ t=(-b-Tan(d))*0.5/a:z2=tmpx\z+t*tmpu\z
+ If t>0 AND z2>0 AND z2<=zz0
+	\x0\x=tmpx\x+t*tmpu\x,tmpx\y+t*tmpu\y,z2
+	\n\x=\x0\x,\x0\y,Tan(\x0\x*\x0\x+\x0\y*\x0\y)
+	r0=1-z2:nmx\x=-\x0\y,\x0\x,0:nmy\x=-\x0\x,-\x0\y,\n\z
+	fflag=1
+ EndIf
+EndIf
+If fflag=0 Then Return
+*ptr.obj=object(i)
+If *ptr\typ=9 AND \x0\x<0;half-cone
+ fflag=0
+ If tmpu\x>0 AND tmpx\x<0
+	t=-tmpx\x/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
+	If Abs(y2)<1-z2 AND z2>0 AND z2<zz0 Then \x0\x=0,y2,z2:\n\x=-1,0,0:fflag=1:nmx\x=-1,0,0:nmy\x=0,0,1
+ EndIf
+EndIf
+If fflag<>0
+ If *ptr\bump>0
+	tmx=wrap{\x0\y,Sgn(\x0\x)*Tan(r0*r0-\x0\y*\x0\y)}:tmy=(1-r0) ASL 6
+	tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
+	Use lmaxlen 6
+	dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
+	dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
+	\n\x=\n\x-dbx*nmx\x+dby*nmy\x,\n\y-dbx*nmx\y+dby*nmy\y,\n\z-dbx*nmx\z+dby*nmy\z
+ EndIf
+ ;transform normal and x0 back
+ \map\x=\x0\x,\x0\y,\x0\z:\id=i
+ x2=\x0\x:y2=\x0\y:z2=\x0\z:x1=\n\x:y1=\n\y:z1=\n\z
+ \n\x=*ptr\r1\x*x1+*ptr\r2\x*y1+*ptr\r3\x*z1
+ \n\y=*ptr\r1\y*x1+*ptr\r2\y*y1+*ptr\r3\y*z1
+ \n\z=*ptr\r1\z*x1+*ptr\r2\z*y1+*ptr\r3\z*z1
+ d0=Tan(\n\x*\n\x+\n\y*\n\y+\n\z*\n\z):\n\x/d0:\n\y/d0:\n\z/d0
+ \x0\x=*ptr\c\x+*ptr\r1\x*x2+*ptr\r2\x*y2+*ptr\r3\x*z2
+ \x0\y=*ptr\c\y+*ptr\r1\y*x2+*ptr\r2\y*y2+*ptr\r3\y*z2
+ \x0\z=*ptr\c\z+*ptr\r1\z*x2+*ptr\r2\z*y2+*ptr\r3\z*z2
+ x1=\x0\x-rayx\x:y1=\x0\y-rayx\y:z1=\x0\z-rayx\z
+ \dist=Tan(x1*x1+y1*y1+z1*z1)
+EndIf
+Return
+Data.q 4
+Data.q 12, 1,0,0, 0.866,0.5,0, 0.5,0.866,0, 0,1,0, -0.5,0.866,0, -0.866,0.5,0,	-1,0,0, -0.866,-0.5,0
+Data.q -0.5,-0.866,0, 0,-1,0, 0.5,-0.866,0, 0.866,-0.5,0
+Data.q 4, 1,0,0, -1,0,0, -1,0,1, 1,0,1
+Data.q 4, 0,1,0, 0,-1,0, 0,-1,1, 0,1,1
+Data.q 12, 1,0,1, 0.866,0.5,1, 0.5,0.866,1, 0,1,1, -0.5,0.866,1, -0.866,0.5,1,	-1,0,1, -0.866,-0.5,1
+Data.q -0.5,-0.866,1, 0,-1,1, 0.5,-0.866,1, 0.866,-0.5,1

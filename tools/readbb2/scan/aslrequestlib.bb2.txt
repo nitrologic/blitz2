@@ -1,0 +1,181 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/ASLRequestLib/ASLRequestLib.bb2
++; ##################################################################
+; #																																#
+; #								A S L	 F I L E R E Q U E S T									 #
+; #																																#
+; #														V1.01															 #
+; #																																#
+; #									 Written by Mark Tiffany											#
+; #																																#
+; #	Please feel free to modify this code as much as you like and	#
+; #	 include it in whatever you want.	I dont care - its just a	 #
+; # demo of using asl directly rather than the suss way Bliz does! #
+; #																																#
+; #	 Yes its FreeWare and all that other Guff - Just give me a		#
+; #	mention in the documents, thats all.	I mean - it is all in	 #
+; #		the RKM's and is pretty simple stuff really....		 ;}			#
+; #																																#
+; ##################################################################
+;
+; FUNCTIONS
+; =========
+; ASLFR_SETUP{x,y,w,h}	 MUST be called first
+; ASLFR_KILL{}		MUST be called once the requester is COMPLETELY finished with
+; ASLFR{Window,Title$,Path$,File$,Pattern$}
+;			 Window is a window on the screen you wish to open on
+;			 Title$ is the title bar of the window
+;			 Path$ is the initial path of the requester
+;			 File$ is the initial filename to use
+;			 Pattern$ is the pattern to show (using a chr$(126) hides files)
+
+; REQUIREMENTS
+; ============
+; Obviously,you need the asl library.	Gosh Hard life isnt it?
+; Also in this file you MUST have the amigalibs.res file listed in the compiler
+; options as a resident file, and also the asllib.bb2 header file.
+; And sorry - but the request option MUST be given a window to open on.	Use
+; my trick of the small window in the example code below if you like.
+
+; COMMENTS
+; ========
+; If you need to force a position or size, use the options at the start.
+; It is preferable to do this initially when ASLFR_SETUP{} is called,
+; and then left alone so that the user may reposition wherever they like.
+; It can be changed, and I could prob'ly make a move ASLFR func if anyone
+; really needs it, but its not necessary.
+; There are a LOT of things the asl requester can do.	Look through the asllib.bb2
+; and you'll find that with a little experimentation you can get the asl thang
+; to just go for directories, and other useful things.	Play and Enjoy...
+
+; AUTHOR INFO
+; ===========
+; Contact me (Mark Tiffany) at	 37 Norfolk Road
+;																Littlehampton
+;																West Sussex
+;																BN17 5PW						(Thats ENGLAND BTW)
+
+;INCDIR "work:"
+;XINCLUDE "Programming/blitz2/VS-Includes/ASLRequestLib/ASLLIB.BB2"
+
+; Tagitem for use in asl
+; Little taglist that is used for setting up the requester
+
+NEWTYPE.ASLFR_Tags
+a.l:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t
+End NEWTYPE
+
+Function.l ASLFR_SETUP{x,y,w,h}
+Shared *ASLFR_Fr.FileRequester,ASL_FileRequest
+	ASLFR_Tags.ASLFR_Tags\a=#ASL_LeftEdge
+	ASLFR_Tags\b=x
+	ASLFR_Tags\c=#ASL_TopEdge
+	ASLFR_Tags\d=y
+	ASLFR_Tags\e=#ASL_Width
+	ASLFR_Tags\f=w
+	ASLFR_Tags\g=#ASL_Height
+	ASLFR_Tags\h=h
+	ASLFR_Tags\i=0
+	*ASLFR_Fr.FileRequester=##[$FB84](ASL_FileRequest,ASLFR_Tags)
+	Function Return *ASLFR_Fr
+End Function
+
+Statement ASLFR_KILL{}
+Shared *ASLFR_Fr
+	If *ASLFR_Fr
+		##[$FB85] *ASLFR_Fr
+	EndIf
+End Statement
+
+Function.s ASLFR{Win,Title$,Path$,Fl$,Pattern$}
+Shared ASLFR_Tags.ASLFR_Tags,*ASLFR_Fr.FileRequester
+; This routine displays the ASL-filerequester
+; INPUTS :	Win			= Window to open on the same screen as
+;					 Title$	 = Title of file-requester
+;					 Path$		= Path to use
+;					 Fl$			= Initial Filename
+;					 Pattern$ = Pattern to search for
+; OUTPUTS : Directly - The path+filename
+;					 Use *Fr\rf_Dir	for path once ASLFR has been called	}_ Must have
+;							 *Fr\rf_File for file once ASLFR has been called	}	SHARED *Fr
+
+	r$=""	 ; Just in case we dont get anything out
+
+; Append a few Nulls to be happy	 :)
+
+	Pattern$=Pattern$+Chr$(0)
+	Title$=Title$+Chr$(0)
+
+	If Path$="" Then Path$=Peek$(*ASLFR_Fr\rf_Dir) Else Path$+Chr$(0)
+
+; Is there a file requester allocated?
+
+	If *ASLFR_Fr
+
+; Set up a few tags to organise the requester; for more see RKM:Incs+AutoDocs P721
+;																													 or the file asllib.bb2
+
+		ASLFR_Tags\a=#ASL_File							 ; Initial File
+		ASLFR_Tags\b=&Fl$
+		ASLFR_Tags\c=#ASL_Dir								; Initial Directory
+		ASLFR_Tags\d=&Path$
+		ASLFR_Tags\e=#ASL_Hail							 ; Window Title
+		ASLFR_Tags\f=&Title$
+		ASLFR_Tags\g=#ASL_Pattern						; Pattern to search for
+		ASLFR_Tags\h=&Pattern$
+		ASLFR_Tags\i=#ASL_Window						 ; Pointer to a window structure on whose screen
+		ASLFR_Tags\j=Peek.l(##[$80B8] localstat(Win))	; we shall open.
+
+		ASLFR_Tags\k=0											 ; Thats all folks!
+
+; Bring up the requester...
+
+		If ##[$FB86](*ASLFR_Fr,ASLFR_Tags)
+
+; Ok - lets get the path and file...
+
+			path$=Peek$(*ASLFR_Fr\rf_Dir)
+			fl$=Peek$(*ASLFR_Fr\rf_File)
+
+; Sort the path out so we cant get confused		:)
+
+			If Right$(path$,1)<>"/" AND Right$(path$,1)<>":"
+				path$=path$+"/"
+			EndIf
+
+; Set up the return string and the path used so we always return to that path..
+
+			r$=path$+fl$
+
+		EndIf
+	EndIf
+	Function Return r$
+End Function
+
+;########################## EXAMPLE STUFF ##################################
+
+; do a little test...
+
+;If ASLFR_SETUP{50,20,300,150}
+
+;	Screen 0,11,"ASL Test Screen - With lurve from Mark Tiffany"
+;	Use Screen 0
+;Set up a window on this screen - nice and small so you canna see it cap'n!
+;	Window 0,0,0,1,1,0,"You cant see me, but i can see you-hoo!",1,2
+;	ScreensBitMap 0,0
+;	Use BitMap 0
+
+;	Pattern$=Chr$(126)+"(#(#?.#?))"
+
+;	n$=ASLFR{0,"Move me and choose a file...","Work:","NEW",Pattern$}
+
+;	n$=ASLFR{0,"Choose again!",Peek$(*ASLFR_Fr\rf_Dir),"EVEN_NEWER_FILE",Pattern$}
+
+;	n$=ASLFR{0,"Back for more then?","","","#?.bb2"}
+
+;#########################################################
+;# YOU SHOULD HAVE THIS AFTER YOUVE FINISHED WITH ASLFR! #
+;#########################################################
+
+;	ASLFR_KILL{}
+
+;EndIf

@@ -1,0 +1,61 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/conviff.bb2
++
+DEFTYPE.l
+;
+;conviff
+;
+;conviff inputfile outputfile
+;
+;header...
+;
+;00.w : mod
+;02.w : offset to cookie from 00.w
+;04.w : bltsize
+;06.w : shape data
+;
+rowmod=40:hl=6		;header length
+;
+##[$80B4]
+	err
+	##[$FF8C] 0
+	NPrint "USAGE: CONVIFF inputfile outputfile [cookie]":End
+End ##[$80B4]
+
+If NumPars=3
+	If LCase$(Par$(3))<>"cookie" Then Goto err
+Else
+	If NumPars<>2 Then Goto err
+EndIf
+
+LoadShape 0,Par$(1)
+
+If ReadMem(0,Par$(2))=0 Then Goto err Else FileOutput 0
+
+s=##[$80B8] MidHandle(0)
+w=Peek.w(s)
+h=Peek.w(s+2)
+de=Peek.w(s+4)
+eb=Peek.w(s+6)
+ob=Peek.w(s+22)
+d=Peek.l(s+14)
+c=Peek.l(s+18)
+
+Print Mki$(rowmod-eb-2)
+If NumPars=3 Then Print Mki$(ob*de+hl) Else Print Mki$(0)
+Print Mki$(h*de*64+eb/2+1)
+
+For y=0 To h-1
+For k=0 To de-1
+For x=0 To eb-1 Step 2
+Print Mki$(Peek.w(d+y*eb+k*ob+x))
+Next x,k,y
+
+If NumPars=3
+	For y=0 To h-1
+	For k=0 To de-1
+	For x=0 To eb-1 Step 2
+	Print Mki$(Peek.w(c+y*eb+x))
+	Next x,k,y
+EndIf
+
+CloseFile 0:End

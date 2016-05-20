@@ -1,0 +1,155 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/blitzman.bb
++;
+; Dancing BlitzMan v0.0 by Simon Armstrong
+;
+
+NEWTYPE .seg
+	*kid.seg				 ;points to first offspring
+	*bro.seg				 ;links offspring together
+	x.w:y:a					;cartesian co-ordinates for editing
+	angle.w:length	 ;polar coordinates for drawing
+End NEWTYPE
+
+Dim qsin.q(256),qcos.q(256)
+Dim ##[$80B3] segs.seg(500)
+Dim *f.seg(20)
+
+DEFTYPE .seg *myman
+
+Statement readfigure{*temp.seg}
+	Shared segs()
+	Read numkids.w			 ;read next entry in data table
+	Read *temp\angle
+	Read *temp\length
+	*prev.seg=0
+	For i=1 To numkids	 ;no loop if numkids=0 (thanks Mark!)
+		globalloc segs()		 ;get a seg from the list array
+		segs()\bro=*prev	 ;link to last brother
+		*prev=segs()			 ;make last brother me
+		readfigure{segs()} ;and onto the next brother
+	Next
+	*temp\kid=*prev			;now join all the brothers to me
+End Statement
+
+Statement drawfigure{x.w,y,a,*temp.seg}
+	Shared qsin(),qcos(),ratio,size
+	##[$80CA] *temp
+	aa=(a+\angle)&255:slen=\length*size	 ;add delta angle, scale length
+	xx=x+qcos(aa)*slen:yy=y+qsin(aa)*slen ;polar to cartesian
+	\x=xx,yy,aa													 ;store for findpart{}
+	If \length<0													;wo it's a circle seg()
+		WEllipse xx,yy,-slen,-slen*ratio,1
+	Else
+		WLine x,y,xx,yy,1									 ;no it's a liner seg()
+	EndIf
+	WEllipse xx,yy,size*2,size*2*ratio,2	 ;add hot spot for editor
+	If \kid Then drawfigure{xx,yy,aa,\kid} ;recurse the kids
+	If \bro Then drawfigure{x,y,a,\bro}		;recurse the brothers
+End Statement
+
+Function.l findpart{x,y,*temp.seg}
+	DEFTYPE .l result
+	##[$80CA] *temp
+	If PColl(x,y,1,1,\x-2,\y-2,5,5)				;if hot spot
+		Function Return *temp									 ;exit
+	Else
+		If \kid Then result=findpart{x,y,\kid}	;recurse kids
+		If result Then Function Return result
+		If \bro Then result=findpart{x,y,\bro}	;recurse brothers
+	EndIf
+End Statement
+
+;
+; main program starts here
+;
+
+MaxLen pa$=160 ;set path string variable for filerequester
+MaxLen fi$=64	;set filename string variable for filerequester
+
+ratio=.5	;hires noninterlace pixel ratio
+
+For i=0 To 255
+	qsin(i)=HSin(i*##[$80BA]/128)*ratio:qcos(i)=HCos(i*##[$80BA]/128)
+Next
+
+allocst 0,10,"IF I WERE A BLITZMAN"
+
+newlocarr 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD MED			","L"
+MenuItem 0,0,0,1,"START MED		 ","S"
+MenuItem 0,0,0,2,"QUIT					","Q"
+
+g=0
+For y=0 To 3:For x=0 To 4
+	PropGadget 0,300+x*64,6+y*32,1,g,60,30:g+1
+Next:Next
+
+localstat 0,0,10,640,246,$1000,"",1,2,0:arrmult 0		;big window at back
+localstat 1,16,14,256,128,$1000,"",1,2:arrmult 0		 ;edit window
+
+SetInt 5:PlayMed:End SetInt
+
+##[$80BB]
+	ev.l=WaitEvent
+	Select ev
+		Case 8
+			If EventWindow=1 Then Gosub editman
+		Case $40
+			If GadgetHit<20 Then Gosub selectframe
+		Case $100
+			If MenuHit=0 AND ItemHit=0 Then Gosub loadmed
+			If MenuHit=0 AND ItemHit=1 Then StartMedModule 0
+			If MenuHit=0 AND ItemHit=2 Then End
+	End Select
+##[$80C7]
+
+.selectframe		;points *myman to existing or new frame
+	gman=GadgetHit
+	gadgetx=300+(gman ##[$80B9] 5)*64:gadgety=6+Int(gman/5)*32
+	If *f(gman)=0
+		globalloc segs():*f(gman)=segs():##[$80C8] mandata:readfigure{*f(gman)}
+	EndIf
+	*myman=*f(gman)
+	Gosub refreshgman
+	Return
+
+.refreshgman		;redraw a frame
+	Use localstat 0
+	WBox gadgetx+4,gadgety+2,gadgetx+55,gadgety+27,0
+	size=.25:drawfigure {gadgetx+30,gadgety+16,0,*myman}
+	Use localstat 1:InnerCls:size=1:drawfigure {128,64,0,*myman}
+	Return
+
+.editman:			 ;check for hotspot and if hit let user adjust angle
+	Use localstat 1
+	*part.seg=findpart{WMouseX,WMouseY,*myman}
+	If *part<>0
+		##[$80CA] *part
+		wx=WMouseX:wa=\angle:Use localstat 1
+		While Joyb(0)<>0
+			\angle=wa+wx-WMouseX:InnerCls:drawfigure {128,64,0,*myman}:VWait 10
+		Wend
+		Gosub refreshgman
+	EndIf
+	While Joyb(0)<>0 Wend
+	Return
+
+.loadmed:
+	a$=FileRequest$("SELECT MED MODULE TO LOAD",pa$,fi$)
+	If a$<>"" Then LoadMedModule 0,a$
+	Return
+
+.mandata:								;numbranches,angle,len (13 limbs)
+	Data.w 3,0,0					 ;origin
+		Data.w 1,32,40			 ;right thigh
+			Data.w 1,48,40		 ;right calf
+				Data.w 0,-80,16	;right foot
+		Data.w 1,96,40			 ;left thigh
+			Data.w 1,-48,40		;left calf
+				Data.w 0,80,16	 ;left foot
+		Data.w 3,192,20			;back bone
+			Data.w 1,76,40		 ;right top arm
+				Data.w 0,32,30	 ;right low arm
+			Data.w 1,192,40		;left top arm
+				Data.w 0,32,30	 ;left low arm
+			Data.w 0,128,-20

@@ -1,0 +1,232 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/casey/Game.bb2
++##[$80C3]
+
+allocst 0,4
+
+ScreensBitMap 0,0
+LoadBitMap 0,"SHAPES",0
+Use SetCycle 0
+;
+;MOVE TO RIGHT FRAMES
+GetaShape 0,1,1,14,31
+GetaShape 1,16,1,14,31
+GetaShape 2,31,1,14,31
+GetaShape 3,46,1,14,31
+GetaShape 4,61,1,14,31
+GetaShape 5,76,1,14,31
+;MOVE TO LEFT FRAMES
+GetaShape 6,91,1,14,31
+GetaShape 7,106,1,14,31
+GetaShape 8,121,1,14,31
+GetaShape 9,136,1,14,31
+GetaShape 10,151,1,14,31
+GetaShape 11,166,1,14,31
+;
+;MEDALLION SHAPES
+GetaShape 12,1,65,14,13
+GetaShape 13,16,65,14,13
+GetaShape 14,31,65,14,13
+GetaShape 15,46,65,14,13
+GetaShape 16,61,65,14,13
+GetaShape 17,76,65,14,13
+;
+;WIGGLER ALIEN1 SHAPES
+GetaShape 18,181,1,14,31
+GetaShape 19,196,1,14,31
+GetaShape 20,211,1,14,31
+GetaShape 21,226,1,14,31
+GetaShape 22,241,1,14,31
+GetaShape 23,256,1,14,31
+;
+;Character Ghost Shape
+GetaShape 24,271,1,14,31
+;Character Strike Right
+GetaShape 25,1,33,28,31
+;Character Strike Left
+GetaShape 26,32,33,28,31
+Handle 26,14,0		 ;adjust position
+
+;MOVE ALIEN3 TO RIGHT FRAMES
+GetaShape 27,1,79,14,31
+GetaShape 28,16,79,14,31
+GetaShape 29,31,79,14,31
+GetaShape 30,46,79,14,31
+GetaShape 31,61,79,14,31
+GetaShape 32,76,79,14,31
+;MOVE ALIEN3 TO LEFT FRAMES
+GetaShape 33,91,79,14,31
+GetaShape 34,106,79,14,31
+GetaShape 35,121,79,14,31
+GetaShape 36,136,79,14,31
+GetaShape 37,151,79,14,31
+GetaShape 38,166,79,14,31
+
+;BIRD ALIEN4
+GetaShape 39,61,33,32,18
+GetaShape 40,94,33,32,18
+GetaShape 41,127,33,32,18
+GetaShape 42,160,33,32,18
+
+Buffer 0,16384					 ;buffer
+
+BLITZ
+Boxf 0,0,319,255,0		 ;clear bitmap
+Boxf 0,0,319,32,12		 ;score board
+Boxf 0,223,319,255,13	;floor
+
+x=100:y=192		;position of character
+x1=0:y1=89		 ;position of first alien
+x2=288:y2=151	;position of second alien
+x3=200:y3=192	;position of third alien
+x4=30:y4=100	 ;position of fourth alien
+mx=100:my=200	;position of medallion
+a=0						;shape of character
+b1=18					;shape of first alien
+b2=18					;shape of second alien
+b3=33					;shape of third alien
+b4=39					;shape of fourth alien
+m=12					 ;medallion shape
+aa=25					;frame for strike character
+ka=0					 ;frame counter for character
+kb1=0					;frame counter for alien1
+kb2=0					;frame counter for alien2
+kb3=0					;frame counter for alien3
+kb4=0					;frame counter for alien4
+d=0	;
+dx1=1:dy1=1		;direction of alien1
+dx2=1:dy2=1		;direction of alien2
+dx3=-1:dy3=0	 ;direction of alien3
+dx4=-1:dy4=-1	;direction of alien4
+
+MainLoop:
+
+ VWait
+
+ UnBuffer 0			 ;erase all
+ BBlit 0,a,x,y		;draw character
+ BBlit 0,b1,x1,y1 ;draw first alien
+ BBlit 0,b2,x2,y2 ;draw second alien
+ BBlit 0,b3,x3,y3 ;draw third alien
+ BBlit 0,b4,x4,y4 ;draw fourth alien
+ BBlit 0,m,mx,my	;draw medallion
+
+;===================================================
+;MOVE MEDALLION?
+md=md+1													;medallion delay counter
+If md=200 Then md=0:mx=Int(Rnd(8))*32+4
+
+;Hit BETWEEN character and Medallion
+hit=SpritesHit(a,x,y,m,mx,my)		 ;medallion v character
+
+If hit<>0 AND Spin=0 Then Spin=Spin+1:my=120:md=0
+If Spin<>0 Then m=m+1:Spin=Spin+1
+If m=18 Then m=12
+If Spin=50 Then Spin=0:my=200:m=12:mx=Int(Rnd(8))*32+4
+;======================================================
+
+;HIT BETWEEN Aliens and Character
+If GotYa<>-1 Then Goto CharOK:
+a=24:y=y-1:If y=10 Then Goto ExitGame Else Goto skip
+
+CharOK:
+hit1= SpritesHit(a,x,y,b1,x1,y1) ;alien1 v character
+hit2= SpritesHit(a,x,y,b2,x2,y2) ;alien2 v character
+hit3= SpritesHit(a,x,y,b3,x3,y3) ;alien3 v character
+hit4= SpritesHit(a,x,y,b4,x4,y4) ;alien4 v character
+
+If hit1<>0 OR hit2<>0 Then GotYa=-1
+If hit3<>0 AND a<>25 AND a<>26 Then GotYa=-1
+
+;READ JOYSTICK
+xx=Joyx(1)
+d=xx												 ;DIRECTION
+yy=Joyy(1)
+bb=Joyb(1)
+
+;NEXT POSTION FOR CHARACTER
+x=x+xx*2												;next position
+If x>288 Then x=288						;limits
+If x<0 Then x=0
+y=192								 ;grounded
+
+;SELECT SHAPE a FOR CHARACTER
+ad=ad+1:If ad=4 Then ad=0			;character frame delay
+If xx=-1 Then aa=26
+If xx=1 Then aa=25
+a=aa
+If x>160 Then pp=2 Else pp=300
+If hit3=-1 AND a=25 Then x3=pp
+If hit3=-1 AND a=26 Then x3=pp
+
+If bb=1 Then Goto skip
+ If xx<>0 OR yy<>0 AND ad=0 Then ka=ka+1	;next frame
+ If ka=>6 Then ka=0							;reset counter
+ If d=-1 Then dd=6							 ;which direction
+ If d=1 Then dd=0
+ a=ka+dd
+skip:
+;=====================================================
+
+;NEXT POSTION FOR ALIEN1
+x1=x1+dx1:y1=y1+dy1						 ;add velocity
+If x1<0	 Then x1=0:dx1=1			;bounce
+If y1<50	Then y1=50:dy1=1		 ;around
+If x1>288 Then x1=288:dx1=-1	 ;the
+If y1>200 Then y1=200:dy1=-1	 ;room
+
+;SELECT SHAPE b1 FOR ALIEN1
+b1d=b1d+1:If b1d=2 Then b1d=0
+If dy1<0 AND b1d=0 Then kb1=kb1+1
+If kb1=>6 Then kb1=0
+b1=kb1+18
+;======================================================
+
+;NEXT POSTION FOR ALIEN2
+x2=x2+dx2:y2=y2+dy2						;add velocity
+If x2<0	 Then x2=0:dx2=1			;bounce
+If y2<50	Then y2=50:dy2=1		 ;around
+If x2>288 Then x2=288:dx2=-1	 ;the
+If y2>200 Then y2=200:dy2=-1	 ;room
+
+;SELECT SHAPE b2 FOR ALIEN2
+b2d=b2d+1:If b2d=2 Then b2d=0
+If dy2<0 AND b2d=0 Then kb2=kb2+1 ;wiggle going up
+If kb2=>6 Then kb2=0
+b2=kb2+18
+;======================================================
+
+;NEXT POSTION FOR ALIEN3 -walking alien
+
+x3=x3+dx3:y3=y3+dy3							;add velocity
+If x3>300 Then x3=300:dx3=-1			 ;limits
+If x3<0 Then x3=0:dx3=1
+y3=192												 ;grounded
+;SELECT SHAPE b1 FOR ALIEN3
+b3d=b3d+1:If b3d=2 Then b3d=0	;frame delay
+If b3d=0 Then kb3=kb3+1
+If kb3=6 Then kb3=0
+b3=kb3+27
+If dx3=-1 Then b3=b3+6
+;=====================================================
+
+;NEXT POSTION FOR ALIEN4 -bird
+x4=x4+dx4:y4=y4+dy4						 ;add velocity
+If x4<0	 Then x4=0:dx4=1			;bounce
+If y4<50	Then y4=50:dy4=1		 ;around
+If x4>288 Then x4=288:dx4=-1	 ;the
+If y4>200 Then y4=200:dy4=-1	 ;room
+
+;SELECT SHAPE FOR ALIEN4
+b4d=b4d+1:If b4d=2 Then b4d=0
+If dy4<0 AND b4d=0 Then kb4=kb4+1
+If kb4=>4 Then kb4=0
+b4=kb4+39
+;======================================================
+
+Goto MainLoop
+
+ExitGame:
+
+
+MouseWait
+

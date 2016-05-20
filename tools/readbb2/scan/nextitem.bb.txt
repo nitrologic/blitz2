@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/NextItem.bb
++; ; print list forwards program example ; Dim List a(10)				 ;initialize list arrayWhile AddLast(a())			 ;fill list a()=c						 ;with stuff... c+1 WendNPrint "List contents (forwards) are..."ResetList a()					;reset list While NextItem(a())			 ;output items in list... NPrint a()WendMouseWait 

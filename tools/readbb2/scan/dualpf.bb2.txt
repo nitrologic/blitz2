@@ -1,0 +1,33 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/dualpf.bb2
++;
+; silly dual playfield
+;
+BLITZ
+;
+Macro rndpt Rnd(640),Rnd(512):End Macro
+;
+lmaxlen 0,640,512,3	;foreground
+For i=0 To 255
+	Line !rndpt,!rndpt,Rnd(7)
+Next
+;
+lmaxlen 1,640,512,3 ;background
+For i=0 To 255
+	Circlef !rndpt,Rnd(15),Rnd(7)
+Next
+;
+Slice 0,44,320,256,$fffa,6,8,16,640,640
+;
+While Joyb(0)=0
+	VWait
+	x1=160+HSin(r)*160
+	y1=128+HCos(r)*128
+	x2=160-HSin(r)*160
+	y2=128-HCos(r)*128
+	ShowF 1,x1,y1,x2 ;have to pass x position of other playfield!
+	ShowB 0,x2,y2,x1 ;have to pass x position of other playfield!
+	r+.05
+Wend
+;
+End
+;

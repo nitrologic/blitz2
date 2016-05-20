@@ -1,0 +1,253 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/fun_matrix.bb2
++;================================================;
+; Blitz Basic 2 Library For Matrix Manipulations ;
+;																								;
+; Author: Nigel Hughes													 ;
+; Date	: 19th December 1994										 ;
+; Specifications:																;
+;		 o Matrix Data Structure										;
+;		 o concatenate_matrix											 ;
+;		 o build_translation_matrix								 ;
+;		 o build_rotation_matrix										;
+;		 o build_scale_matrix											 ;
+;		 o apply_matrix														 ;
+;		 o print_matrix														 ;
+;		 o build_all_rotate_matrix									;
+;																								;
+; This library and any routines and structures	 ;
+; within it, can be used freely in other programs;
+; provided I get credit for the routines used.	 ;
+; The librray it self can be destributed as long ;
+; as this file and the text file are distributed ;
+; togther. In the interests of consistency, any	;
+; changes and additions should be submitted to me;
+; and quthors will be given full credit for any	;
+; new routines or modifications to old routines. ;
+;																								;
+; This library forms a base for the simple 3d		;
+; library which is to be released in early 1995. ;
+;																								;
+; Please forward any comments to Nigel Hughes at ;
+; 2 Slimmons Drive, St.Albans, Herts, AL4 9AS, UK;
+;										 or												 ;
+;						 ngh94@aber.ac.uk									 ;
+;================================================;
+
+;---------------------------;
+; Set the Include Directory ;
+; to FUN_Math: and include	;
+; the vector library. This	;
+; means that you do not need;
+; to include it yourself		;
+; when using this matrix		;
+; library									 ;
+;---------------------------;
+
+;INCDIR	"FUN_Math:"
+Include "FUN_Vectors.bb2"
+
+;-----------;
+; Constants ;
+;-----------;
+
+#ABOUT_X=0
+#ABOUT_Y=1
+#ABOUT_Z=2
+
+;------------------------;
+; Name: .Column_Type		 ;
+; Type: Data Structure	 ;
+; Author: N. Hughes			;
+; Date: 19/12/94				 ;
+; Description:					 ;
+;	 Represents one column;
+;	 in a matrix. Capable ;
+;	 of dealing with up to;
+;	 three dimensions and ;
+;	 a scaling factors s. ;
+;------------------------;
+
+NEWTYPE.Column_Type
+	x.q
+	y.q
+	z.q
+	s.q
+End NEWTYPE
+
+;------------------------;
+; Name: .Matrix_Type		 ;
+; Type: Data Structure	 ;
+; Author: N. Hughes			;
+; Date: 19/12/94				 ;
+; Description:					 ;
+;	Uses an array of colum;
+;	n type to represent a ;
+;	matrix.							 ;
+;------------------------;
+
+NEWTYPE.Matrix_Type
+	Column.Column_Type[4]
+End NEWTYPE
+
+;--------------------------;
+; Name: concatenate_matrix ;
+; Type: statement					;
+; Author: N. Hughes				;
+; Date: 19/12/94					 ;
+; Description:						 ;
+;	Concatenates the two		;
+;	matrixs M1 and M2 into	;
+;	M3.										 ;
+;--------------------------;
+
+Statement concatenate_matrix{*M1.Matrix_Type,*M2.Matrix_Type,*Result.Matrix_Type}
+	For c.b=0 To 3
+		*Result\Column[c]\x=*M1\Column[0]\x**M2\Column[c]\x+*M1\Column[1]\x**M2\Column[c]\y+*M1\Column[2]\x**M2\Column[c]\z
+		*Result\Column[c]\x+*M1\Column[3]\x**M2\Column[c]\s
+	Next c
+
+	For c.b=0 To 3
+		*Result\Column[c]\y=*M1\Column[0]\y**M2\Column[c]\x+*M1\Column[1]\y**M2\Column[c]\y+*M1\Column[2]\y**M2\Column[c]\z
+		*Result\Column[c]\y+*M1\Column[3]\y**M2\Column[c]\s
+	Next c
+
+	For c.b=0 To 3
+		*Result\Column[c]\z=*M1\Column[0]\z**M2\Column[c]\x+*M1\Column[1]\z**M2\Column[c]\y+*M1\Column[2]\z**M2\Column[c]\z
+		*Result\Column[c]\z+*M1\Column[3]\z**M2\Column[c]\s
+	Next c
+
+	For c.b=0 To 3
+		*Result\Column[c]\s=*M1\Column[0]\s**M2\Column[c]\x+*M1\Column[1]\s**M2\Column[c]\y+*M1\Column[2]\s**M2\Column[c]\z
+		*Result\Column[c]\s+*M1\Column[3]\s**M2\Column[c]\s
+	Next c
+End Statement
+
+;--------------------------;
+; Name: concatenate_matrix ;
+; Type: statement					;
+; Author: N. Hughes				;
+; Date: 19/12/94					 ;
+; Description:						 ;
+;	Prints out a matrix to	;
+;	the current output			;
+;	nothing special.				;
+;--------------------------;
+
+Statement print_matrix{*M.Matrix_Type}
+	For c.b=0 To 3
+		Print *M\Column[c]\x," "
+	Next c
+	NPrint ""
+	For c.b=0 To 3
+		Print *M\Column[c]\y," "
+	Next c
+	NPrint ""
+	For c.b=0 To 3
+		Print *M\Column[c]\z," "
+	Next c
+	NPrint ""
+	For c.b=0 To 3
+		Print *M\Column[c]\s," "
+	Next c
+	NPrint ""
+End Statement
+
+;--------------------------------;
+; Name: build_translation_matrix ;
+; Type: statement								;
+; Author: N. Hughes							;
+; Date: 19/12/94								 ;
+; Description:									 ;
+;	Makes matrix M into a trans-	;
+;	lation matrix that will move	;
+;	any point by dx,dy,dz				 ;
+;--------------------------------;
+
+Statement build_translation_matrix{*M.Matrix_Type,dx.q,dy.q,dz.q}
+	*M\Column[0]\x=1,0,0,0
+	*M\Column[1]\x=0,1,0,0
+	*M\Column[2]\x=0,0,1,0
+	*M\Column[3]\x=dx,dy,dz,1
+End Statement
+
+;--------------------------------;
+; Name: build_scale_matrix			 ;
+; Type: statement								;
+; Author: N. Hughes							;
+; Date: 19/12/94								 ;
+; Description:									 ;
+;	Makes matrix M into a scale	 ;
+;	matrix that will move				 ;
+;	any point by dx,dy,dz				 ;
+;--------------------------------;
+
+Statement build_scale_matrix{*M.Matrix_Type,sx.q,sy.q,sz.q}
+	*M\Column[0]\x=sx,0,0,0
+	*M\Column[1]\x=0,sy,0,0
+	*M\Column[2]\x=0,0,sz,0
+	*M\Column[3]\x=0,0,0,1
+End Statement
+
+;--------------------------------;
+; Name: build_rotation_matrix		;
+; Type: statement								;
+; Author: N. Hughes							;
+; Date: 19/12/94								 ;
+; Description:									 ;
+;	Using the ABOUT constants this;
+;	procedure make a roation matri;
+;	x for theta degrees.					;
+;--------------------------------;
+
+Statement build_rotation_matrix{rtype.b,*M.Matrix_Type,theta.f}
+	thi.f=theta*(##[$80BA]/180.0)
+	Select rtype
+		Case #ABOUT_Z
+			*M\Column[0]\x=HCos(thi),HSin(thi),0,0
+			*M\Column[1]\x=0-HSin(thi),HCos(thi),0,0
+			*M\Column[2]\x=0,0,1,0
+			*M\Column[3]\x=0,0,0,1
+		Case #ABOUT_Y
+			*M\Column[0]\x=HCos(thi),0,0-HSin(thi),0
+			*M\Column[1]\x=0,1,0,0
+			*M\Column[2]\x=HSin(thi),0,HCos(thi),0
+			*M\Column[3]\x=0,0,0,1
+		Case #ABOUT_X
+			*M\Column[0]\x=1,0,0,0
+			*M\Column[1]\x=0,HCos(thi),HSin(thi),0
+			*M\Column[2]\x=0,0-HSin(thi),HCos(thi),0
+			*M\Column[3]\x=0,0,0,1
+		Default
+			NPrint "An error has occured!"
+	End Select
+End Statement
+
+Statement build_all_rotate_matrix{*M.Matrix_Type,x.f,y.f,z.f}
+ x=x*(##[$80BA]/180)
+ y=y*(##[$80BA]/180)
+ z=z*(##[$80BA]/180)
+
+ *M\Column[0]\x=HCos(y)*HCos(z),HSin(x)*HSin(y)*HCos(z),(0-HCos(x)*HSin(y)*HCos(z))+(HSin(x)*HSin(z)),0
+ *M\Column[1]\x=0-HCos(y)*HSin(z),(0-HSin(x)*HSin(y)*HSin(z))+(HCos(x)*HCos(z)),HCos(x)*HSin(y)*HSin(z)+HSin(x)*HCos(z),0
+ *M\Column[2]\x=HSin(y),0-HSin(x)*HCos(y),HCos(x)*HCos(y),0
+ *M\Column[3]\x=0,0,0,1
+End Statement
+
+;--------------------------------;
+; Name: apply_matrix						 ;
+; Type: statement								;
+; Author: N. Hughes							;
+; Date: 20/12/94								 ;
+; Description:									 ;
+;	Applys a matrix transformation;
+;	M to a vector V and places the;
+;	output in another vector,		 ;
+;	Output.											 ;
+;--------------------------------;
+
+Statement apply_matrix{*M.Matrix_Type,*V.Vector_Type,*Output.Vector_Type}
+	*Output\x=*M\Column[0]\x**V\x+*M\Column[1]\x**V\y+*M\Column[2]\x**V\z+*M\Column[3]\x**V\s
+	*Output\y=*M\Column[0]\y**V\x+*M\Column[1]\y**V\y+*M\Column[2]\y**V\z+*M\Column[3]\y**V\s
+	*Output\z=*M\Column[0]\z**V\x+*M\Column[1]\z**V\y+*M\Column[2]\z**V\z+*M\Column[3]\z**V\s
+	*Output\s=*M\Column[0]\s**V\x+*M\Column[1]\s**V\y+*M\Column[2]\s**V\z+*M\Column[3]\s**V\s
+End Statement

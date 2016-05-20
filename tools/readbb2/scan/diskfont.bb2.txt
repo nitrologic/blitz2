@@ -1,0 +1,6 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/diskfont.bb2
++;
+; $VER: diskfont.bb2 40.0 (02.03.94)
+;
+
+XInclude"diskfont/diskfont.bb2"

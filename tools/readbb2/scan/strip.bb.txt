@@ -1,0 +1,6 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/strip.bb
++;
+; separator strips
+;
+
+strip:Dcb.l 32,$89aba9811cdefedc

@@ -1,0 +1,95 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/crater.bb
++; andrews 3d library
+
+#size=16		 ;CHANGE ME!!!CHANGE ME!!!CHANGE ME!!!CHANGE ME!!!
+
+;yet another 3D landscape demo
+
+#bsize=(#size+1)*(#size+1)
+
+NEWTYPE.corner
+	x.q:y:z:sx.w:sy
+End NEWTYPE
+
+Dim hth.corner(#size,#size)
+
+;use reciprocal table to avoid divide in perspective calkulation
+
+Dim dlup.w(256)
+
+For i=1 To 255
+	dlup(i)=32000/i
+Next
+
+; a brutal demo of using pointers on arrays - ONLY FOR THE HARDCORE!
+
+BLITZ
+
+Function.q hite{x,y}
+	x*2*##[$80BA]:y*2*##[$80BA]
+	first=y*HSin(y+x*HCos(x))
+	second=x*HCos(x+y*HSin(y))
+	t=Tan(first*first+second*second)/30
+	Function Return t
+End Function
+
+lmaxlen 0,640,256,1:lmaxlen 1,640,256,1:Mouse On
+
+Slice 0,44,640,256,$fff9,1,0,32,640,640:Show 0:Green 1,15,13,13
+
+;assign heights to all points using hit{}
+
+For cnta=0 To #size
+	For cntb=0 To #size
+		*p.corner=hth(cnta,cntb)
+		*p\x=(cnta/#size)*2-1
+		*p\y=(cntb/#size)*2-1
+		*p\z=hite{*p\x,*p\y}
+	Next
+Next
+
+;setup timer for benchmarking
+
+SetInt 5:t.l+1:End SetInt
+
+;main loop
+
+t.l=0:f.l=0
+
+##[$80BB]
+	VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	ang +0.05:If ang>(2*##[$80BA]) Then ang-(2*##[$80BA])
+	qc=HCos(ang):qs=HSin(ang):Gosub Draw:f.l+1
+##[$80BC] Joyb(0)<>0
+
+rate.f=f*50/t
+
+AMIGA:NPrint "frames per second=",rate:VWait 50:End:BLITZ
+
+Draw
+	;
+	For cnta=0 To #size
+		For cntb=0 To #size
+			*p=hth(cnta,cntb)	;point to element to save overcalkulating
+			tx=*p\x*qc-*p\y*qs ;standard 2D rotation
+			ty=*p\x*qs+*p\y*qc
+			rz=ty ASR 1+0.866**p\z ;not so standard 2d rotation (**=freaky)
+			;
+			index.q=ty*27.7128-ty ASL 4+64	;index need to be .Q!!!!
+			dmult=dlup(index)							 ;before using it as an integer
+			;
+			*p\sx=320+tx*dmult,100-(rz ASR 1)*dmult
+		Next
+	Next
+	;
+	For cnta=0 To #size-1						 ; heres how to draw a grid
+		For cntb=0 To #size-1					 ;from a 2d array using brutal
+			*p.corner=hth(cnta,cntb)			;pointers
+			*p1.corner=*p +SizeOf.corner					; the next point across
+			*p2.corner=*p1+SizeOf.corner*(#size)	; the next point down
+			Line *p\sx,*p\sy,*p1\sx,*p1\sy,1
+			Line *p\sx,*p\sy,*p2\sx,*p2\sy,1	 ; draw all the L's..
+		Next
+	Next
+	;
+Return

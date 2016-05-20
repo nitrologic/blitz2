@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CloseEd.bb
++; ; closeed program example ; CloseEd Print "Hello...The editor screen has gone!" MouseWait 

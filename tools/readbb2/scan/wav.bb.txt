@@ -1,0 +1,127 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/cdr/wav.bb
++;
+; .WAV file reader
+;
+
+; HEADER
+;00h			rID				4h				Contains the characters "RIFF"					 
+;04h			rLen			 4h				The length of the data in the next chunk 
+;08h			rData		 rLen			 The data chunk													 
+
+; FORMAT
+;00h			wID				4h				Contains the characters "WAVE"						
+;04h			Format		14h				Contains data which specifies the format	
+;				 Chunk									of the Data in the Data Chunk					 
+;18h			WAVE Data	?				 Contains the WAV audio data							 
+;				 Chunk																													
+;00h		 fId							 4			 Contains the characters "fmt"				 
+;04h		 fLen							4			 Length of data in the format chunk		
+;08h		 wFormatTag				2			 *																		 
+;0Ah		 nChannels				 2			 Number of channels, 1=mono, 2=stereo	
+;0Ch		 nSamplesPerSec		2			 Playback frequency
+;0Eh		 nAvgBytesPerSec	 2			 **																		
+;10h		 nBlockAlign			 2			 ***																	 
+;12h		 FormatSpecific		2			 Format specific data area						 
+
+;* The wFormatTag specifies the wave format, eg 1 = Pulse Code Modulation
+;	(or in plain english, regular 8 bit sampled uncompressed sound)
+;
+;** Indicates the average number of bytes a second the data should be
+;	 transferred at = nChannels * nSamplesPerSec * (nBitsPerSample / 8)
+;
+;*** Indicates the block alignment of the data in the data chunk. Software
+;		needs to process a multiplt of nBlockAlign at a time.
+;		nBlockAlign = nChannels * (nBitsPerSample / 8)
+; 00h		 dId							4				Contains the characters "data"
+; 02h		 dLen						 4				Length of data in the dData field
+; 00h		 dData						dLen		 The actual waveform data
+
+;In mono 8-bit files each byte represents one sample. In stereo 8-bit files
+;two bytes are stored for each sample, the first byte is the left channel
+;value, the next is the right channel value.
+
+NEWTYPE .form
+	wFormatTag.w							 ;*																		 
+	channels.b:pad1.b					;Number of channels, 1=mono, 2=stereo	
+	samples.w[0]:s1.b:s2.b		 ;PlayBack frequency
+	nAvgBytesPerSec.w					;**																		
+	align.w[0]:a1.b:a2.b			 ;***																	 
+	FormatSpecific.w					 ;Format specific Data area						 
+	pad.l
+End NEWTYPE
+
+NEWTYPE .samp
+	l0.b:l1.b:r0.b:r1.b
+End NEWTYPE
+
+DEFTYPE .form f
+
+Function.l getlong{}
+	a$=Inkey$(4):Print Len(a$)
+;	a$=Edit$(4):Print Len(a$)
+	b$=Mid$(a$,4,1)+Mid$(a$,3,1)+Mid$(a$,2,1)+Mid$(a$,1,1)
+	Function Return Cvl(b$)
+End Function
+
+;0000: 52494646 3C6A0300 57415645 666D7420		RIFF<j..WAVEfmt
+;0010: 10000000 01000200 44AC0000 10B10200		........D,...1..
+;0020: 04001000 64617461 A4690300 6EC8A2C5		....data$i..nH"E
+
+f$="sex1";Par$(1) ;"b1:r1"
+
+;NPrint f$
+Statement process{ss.l,ll.l,rr.l,b.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2
+	nx
+	 MOVE (a0)+,d0:MOVE.b d0,(a1)+:LSR#8,d0:MOVE.b d0,(a1)+
+	 MOVE (a0)+,d0:MOVE.b d0,(a2)+:LSR#8,d0:MOVE.b d0,(a2)+
+	 SUBQ.l#4,d3:BNE nx:UNLK a4:RTS
+End Statement
+
+size.l=2*1048576
+
+InitBank 0,size,0:ss.l=BankLoc(0)
+InitBank 1,size,0:ll.l=BankLoc(1)
+InitBank 2,size,0:rr.l=BankLoc(2)
+
+If WriteMem(0,"cd:"+f$+".wav")
+	FileInput 0
+	a$=Edit$(4):Print a$,"	":If a$<>"RIFF" Then Goto error
+	a.l=getlong{}:NPrint "Length=",a
+	a$=Edit$(4):Print a$,"	":If a$<>"WAVE" Then Goto error
+	a$=Edit$(4):Print a$,"	":If a$<>"fmt " Then Goto error
+	a.l=getlong{}:NPrint "Length=",a
+	##[$BE14] 0,&f,16:##[$80C9] f\s1,f\s2:##[$80C9] f\a1,f\a2
+	NPrint "channels=",f\channels
+	sample.l=f\samples:s=s&$ffff:NPrint "samples=",s
+	NPrint "alignment=",f\align
+	a$=Edit$(4):Print a$,"	":If a$<>"data" Then Goto error
+	a.l=getlong{}:NPrint "Length=",a,"	numsamples=",a/4
+	;
+	If ReadMem (1,f$+".l") AND ReadMem (2,f$+".r")
+		While a>0
+			##[$BE14] 0,ss,size:process {ss,ll,rr,size}
+			Exists 1,ll,size/2
+			Exists 2,rr,size/2
+			a-size:If a<size Then size=a
+			Print "."
+		Wend
+		CloseFile 1:CloseFile 2
+	EndIf
+	CloseFile 0
+	NPrint "Finished!"
+Else
+	NPrint "Couldn't open file"
+EndIf
+
+MouseWait:End
+
+error:CloseFile 0:NPrint "Error in file":MouseWait:End
+
+;	Dim s.samp(a/4):ReadMem 0,&s(0),a:l.l=a/4
+;	l=l&$ffffffe:
+;	l=30000
+;	InitSound 0,l,160
+;	For i=0 To l-1:SoundData 0,i,s(i*2)\r1:Next
+;	NPrint "Playing...":Sound 0,1
+;	CloseFile 0

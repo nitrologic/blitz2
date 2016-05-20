@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/BlitzKeys.bb
++; ; bitmap output with blitzkeys on program example ; BLITZ BitMap 0,320,DispHeight,3 BitMapOutput 0Slice 0,44,3Show 0BlitzKeys OnNPrint "Type Away..... (Click mouse to exit)" While Joyb(0)=0  Print Inkey$WendEnd 

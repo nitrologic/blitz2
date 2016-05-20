@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Goto.bb
++; ; goto program example; Goto thereNPrint "What happened to me?" there:NPrint "Program flow has reached 'there'" MouseWait 

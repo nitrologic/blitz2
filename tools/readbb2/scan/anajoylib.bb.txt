@@ -1,0 +1,61 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/libs/AnaJoyLib/AnaJoyLib.bb
++!libheader{50,0,0,0,0}
+
+!astatement
+!args
+!libs
+!subs {_AnaJoyInit,0,0}
+!name {"AnaJoyInit",""}
+
+!afunction {#byte}
+!args {#byte}
+!libs
+!subs {_AnaJoyX,0,0}
+!name {"AnaJoyX","(port)"}
+
+!afunction {#byte}
+!args {#byte}
+!libs
+!subs {_AnaJoyY,0,0}
+!name {"AnaJoyY","(port)"}
+
+!afunction {#byte}
+!args {#byte}
+!libs
+!subs {_AnaJoyLb,0,0}
+!name {"AnaJoyLb","(port)"}
+
+!afunction {#byte}
+!args {#byte}
+!libs
+!subs {_AnaJoyRb,0,0}
+!name {"AnaJoyRb","(port)"}
+
+!libfin
+
+_AnaJoyInit:	MOVE.w #0,$dff036
+							RTS
+
+_AnaJoyX:		 MOVE.b #1,$dff035
+							MOVE.l #$dff012,a0
+							MULU #2,d0:ADD.l d0,a0
+							MOVE.w #1580,d7:label1:DBRA d7,label1
+							MOVE.b (a0),d0
+							RTS
+
+_AnaJoyY:		 MOVE.b #1,$dff035
+							MOVE.l #$dff013,a0
+							MULU #2,d0:ADD.l d0,a0
+							MOVE.w #1580,d7:label2:DBRA d7,label2
+							MOVE.b (a0),d0
+							RTS
+
+_AnaJoyLb:		MOVE.l #$dff00a,a0
+							MULU #2,d0:ADD.l d0,a0
+							MOVE.b (a0),d0
+							RTS
+
+_AnaJoyRb:		MOVE.l #$dff00b,a0
+							MULU #2,d0:ADD.l d0,a0
+							MOVE.b (a0),d0
+							RTS

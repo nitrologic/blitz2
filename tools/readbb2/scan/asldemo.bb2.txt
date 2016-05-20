@@ -1,0 +1,54 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/asldemo.bb2
++;
+; asl library example
+;
+
+;
+; more support coming!
+;
+
+;
+; commands:
+;
+; AllocFileRequest()()
+; FreeFileRequest(fileReq)(a0)
+; RequestFile(fileReq)(a0)
+; AllocAslRequest(reqType,tagList)(d0/a0)
+; FreeAslRequest(requester)(a0)
+; AslRequest(requester,tagList)(a0/a1)
+
+NEWTYPE .FileRequester
+	fr_Reserved0.b[4]
+	fr_File.l									 ;/* Contents of File gadget on exit		*/
+	fr_Drawer.l								 ;/* Contents of Drawer gadget on exit	*/
+	fr_Reserved1.b[10]
+	fr_LeftEdge.w							 ;/* Coordinates of requester on exit	 */
+	fr_TopEdge.w
+	fr_Width.w
+	fr_Height.w
+	fr_Reserved2.b[2]
+	fr_NumArgs.l								;/* Number of files selected		 */
+	*fr_ArgList.l ;was WBArg		;/* List of files selected		 */
+	fr_UserData.l							 ;/* You can store your own data here	 */
+	fr_Reserved3.b[8]
+	fr_Pattern.l								;/* Contents of Pattern gadget on exit */
+End NEWTYPE
+
+*f.FileRequester=##[$FB81]
+
+##[$FB83] *f
+
+d$=Peeks$(*f\fr_Drawer,256):f$=Peeks$(*f\fr_File,256)
+
+d$=Left$(d$,Instr(d$,Chr$(0))-1)
+f$=Left$(f$,Instr(f$,Chr$(0))-1)
+
+If d$<>""
+	If Right$(d$,1)=":" Then f$=d$+f$ Else f$=d$+"/"+f$
+EndIf
+
+NPrint f$,Len(f$)
+
+MouseWait
+
+##[$FB82] *f

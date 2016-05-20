@@ -1,0 +1,131 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/FileManager/FileManager.bb2
++;--------------------------------------------------
+; BRINGS UP STRING REQUESTER
+; SYNTAX: STRING=GETSTRING{CHRS}
+;--------------------------------------------------
+
+Function$ GETSTRING{TITLE$,MAXCHRS}
+	workstart 1,15,27,0,1,"OK":workstart 1,187,27,0,0,"Cancle"
+	SetString 1,2:StringGadget 1,8,13,0,2,MAXCHRS,236
+	localstat 1,190,106,260,44,$1006,TITLE$,2,1,1:ClearString 1,2
+	##[$80BB]:VWait:##[$80BC] WaitEvent=$40 AND GadgetHit<2
+	If GadgetHit=0
+		RET$=""
+	Else
+		RET$=GadgetPens(1,2)
+	EndIf
+	Free localstat 1:Free GadgetJam 1:SetString 2,1:Activate 0:Use localstat 0
+	Function Return RET$
+End Function
+
+#W1=0
+#TAG=$80080000
+
+NEWTYPE .item
+	a.w
+	NAME$
+	SIZE.w
+	DATE.q
+	BITS$
+	DIR.q
+End NEWTYPE
+
+Dim ##[$80B3] DIR.item(256)
+
+;For N=1 To 10
+;AddItem DIR()
+;DIR()\NAME="TEST"+Str$(N)
+;Next
+
+FNAME$="RAM:TEST"
+
+freest 0
+;Screen 0,0,0,640,256,2,-32768,"TEST",0,1
+GTButton #W1,8,156,92,88,16,"Disk",16
+GTButton #W1,7,156,76,88,16,"MakeDir",16
+GTButton #W1,6,156,60,88,16,"Info",16
+GTButton #W1,5,156,44,88,16,"Rename",16
+GTButton #W1,4,156,28,88,16,"Delete",16
+GTButton #W1,3,156,12,88,16,"Copy",16
+GTButton #W1,2,84,0,72,12,"Parents",16
+GTButton #W1,1,4,0,72,12,"Drives",16
+GTListView #W1,0,4,12,152,96,"",0,DIR()
+localstat #W1,104,45,255,152,4622,"GE FileManager",1,2:AttachGTList #W1,#W1
+ResetString 13,122,230,24
+
+;GTSetAttrs 0,0,#TAG+7,True
+
+GTChangeList 0,0
+
+newmem DIR()
+
+While ##[$B683]
+If AddFirst(DIR())
+	DIR()\NAME=##[$B684];,EntrySize,EntryDate,EntryBits$
+	;If EntryDIR Then DIR()\DIR=True Else DIR()\DIR=False
+	;NPrint EntryName$
+EndIf
+Wend
+
+GTChangeList 0,0,DIR()
+Redraw #W1,0
+;GTListView #W1,0,4,12,152,96,"",0,DIR()
+;Window #W1,104,45,255,152,4622,"GE FileManager",1,2:AttachGTList #W1,#W1
+
+##[$80BB]
+
+EV.l=WaitEvent
+
+Select EV
+
+	Case $40:
+		Gosub GADGETPRESS
+
+End Select
+
+##[$80BC] EV=$200 : End
+
+.GADGETPRESS:
+;Print GadgetHit
+Select GadgetHit
+;	Case 0:Gosub NEWFNAME
+;	Case 1:Gosub NEWDRIVE
+;	Case 2:Gosub PARENTS
+	Case 3:Gosub COPY
+	Case 4:Gosub DELETE
+	Case 5:Gosub RENAME
+;	Case 6:Gosub INFO
+;	Case 7:Gosub MAKEDIRECTORY
+;	Case 8:Gosub DISKINFO
+End Select
+
+Return
+
+.DELETE:
+If ##[$A281]("Delete","Delete file "+FNAME$+Chr$(10)+"Are you sure?"," Yes | No ")
+	If NOT ##[$FE08](FNAME$)
+		##[$A281] "ERROR","There was a problem deleting the file"," Ok "
+	EndIf
+EndIf
+
+Return
+
+.COPY:
+DESTNAME$=GETSTRING{"Copy "+FNAME$+" To :-",256}
+If NOT DESTNAME$=""
+	If NOT ##[$B68D](FNAME$,DESTNAME$)
+		##[$A281] "ERROR","There was a problem copying the file"," Ok "
+	EndIf
+EndIf
+
+Return
+
+.RENAME:
+NEWNAME$=GETSTRING{"Rename "+FNAME$+" To :-",256}
+If NOT NEWNAME$=""
+	If NOT ##[$B68F](FNAME$,NEWNAME$)
+		##[$A281] "ERROR","There was a problem renameing the file"," Ok "
+	EndIf
+EndIf
+
+Return

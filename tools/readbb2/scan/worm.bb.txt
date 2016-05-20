@@ -1,0 +1,73 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/cricket/worm.bb
++;
+; draw worm
+;
+
+Function.s numero{n.w}
+	a$=Str$(n)
+	a$=Replace$(a$,"0","O")
+	a$=RSet$(a$,3)
+	a$=Replace$(a$," ","	 ")
+	Function Return a$
+End Function
+
+.drawworm:
+	remline 1,"scala.font",11
+	Use IntuiFont 1
+	StopCycle 1,0,8,8,8
+	StopCycle 1,1,0,0,0		 ;1=black
+	StopCycle 1,2,15,15,15	;2=white
+	StopCycle 1,3,2,8,2		 ;3=dark green
+	StopCycle 1,4,4,6,8		 ;4=blue
+	StopCycle 1,5,5,7,9		 ;5=l-blue
+
+	StopCycle 1,6,12,12,4	 ;6=team1 (yellow)
+	StopCycle 1,7,12,4,10	 ;7=team2 (maroon)
+
+	lmaxlen 3,736,566,4
+	allocst 1,0,0,736,566,4,$8004,"",1,2,3
+	localstat 2,0,0,736,566,$800,"",1,2
+	Use SetCycle 1
+
+	Use lmaxlen 3
+	BlockScroll
+
+	Boxf 0,0,192,423,3
+	Boxf 192,0,688,419,4
+
+	Boxf 188,0,191,419,2
+	Boxf 188,420,688,423,2
+
+;	For i=1 To 50 ;Step 5
+;		x=192+i*496/50
+;		Boxf x-2,0,x-3,419,5
+;	Next
+
+	For i=5 To 50 Step 5
+		x=192+i*496/50:y=416
+		If (i ##[$80B9] 10)=0
+			y=412:WLocate x-24,428:WColour 1,0:Print numero{i}
+			Boxf x-2,0,x-3,411,5
+		EndIf
+		Boxf x,y,x-5,419,2
+	Next
+
+	For i=50 To 250 Step 50
+		y=420-i*1.5
+		Boxf 192,y,197,y-5,2:Boxf 198,y-2,688,y-3,5
+		WLocate 150,y-6:WColour 2,3:Print numero{i}
+	Next
+
+	For i=0 To 49
+		x=196+i*496/50
+		y=420-i*3
+;		Boxf x,y,x+8,y+3,2
+	Next
+
+;	Circlef 100,100,7,7:Circle 100,100,7,2:Circle 100,101,7,2
+
+	SaveBitmap 3,"worm.iff",1
+
+	MouseWait
+
+	End

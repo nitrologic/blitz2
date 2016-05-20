@@ -1,0 +1,50 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/converter.bb2
++;
+; decimal hex binary converter
+;
+FindScreen 0
+;
+StringGadget 0,64,12,0,0,18,144
+StringGadget 0,64,26,0,1,18,144
+StringGadget 0,64,40,0,2,18,144
+;
+localstat 0,100,50,220,56,$1008,"BASE CONVERTER",1,2,0
+;
+WLocate 2,04:Print "DECIMAL"
+WLocate 2,18:Print "	 HEX$"
+WLocate 2,32:Print "BINARY%"
+;
+DEFTYPE.l value
+;
+##[$80BB]
+	ev.l=WaitEvent
+	If ev=$40							;gadget up
+		Select GadgetHit
+			Case 0
+				value=Val(GadgetPens(0,0))
+			Case 1
+				r$=UCase$(GadgetPens(0,1))
+				value=0:i=Len(r$):b=1
+				While i>0
+					a=Asc(Mid$(r$,i,1))
+					If a>65 Then a-55 Else a-48
+					value+a*b
+					i-1:b*16
+				Wend
+			Case 2
+				r$=GadgetPens(0,2)
+				value=0:i=Len(r$):b=1
+				While i>0
+					a=Asc(Mid$(r$,i,1))-48
+					value+a*b
+					i-1:b*2
+				Wend
+		End Select
+		ClearString 0,GadgetHit
+		ButtonId 0,0,Str$(value)
+		ButtonId 0,1,Right$(Hex$(value),4)
+		ButtonId 0,2,Right$(Bin$(value),16)
+		Redraw 0,0:Redraw 0,1:Redraw 0,2
+	EndIf
+##[$80BC] ev=$200
+;

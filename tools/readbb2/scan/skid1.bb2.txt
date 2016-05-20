@@ -1,0 +1,118 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/skid1.bb2
++;
+; startup for SkidMarks (old old version)
+;
+
+Dim r$(30)
+
+##[$80C3]
+
+FindScreen 0
+
+For i=0 To 7			 ;32 gadgets
+	SetString 1,2
+	StringGadget 0,056,36+i*12,0,i+00,17,128	;name
+	StringGadget 0,194,36+i*12,0,i+08,17,128	;number
+	StringGadget 0,366,36+i*12,0,i+16,128,250	;function keys
+	SetString 2,1:workstart 0,12,36+i*12,0,30+i,"DIAL"
+Next
+
+SetString 1,2
+StringGadget 0,326,152,0,24,17,180
+StringGadget 0,566,152,0,25,3,32
+SetString 2,1
+
+workstart 0,10,12,0,40,Centre$("HIT F10 OR CLICK HERE TO START",76)
+workstart 0,040,138,0,41,"	 2400	|	 4800	|	 9600	|	 19200 |	 1200	"
+workstart 0,140,138,0,42,"		 ANSWER			"
+workstart 0,300,138,0,43,"		ORIGINATE		"
+workstart 0,460,138,0,44,"		 HANG UP		 "
+
+Dim sp.w(5):sp(1)=2400:sp(2)=4800::sp(3)=9600:sp(4)=19200:sp(5)=1200
+
+wt$="SKIDMARKS STARTUP																	 (C)1993 ACID SOFTWARE"
+
+localstat 0,(WBWidth-640)/2,(WBHeight-200)/2,640,200,$100e,wt$,1,2,0
+
+WColour 2:For i=1 To 8:WLocate 344,16+i*12:Print "F"+Str$(i):Next:WColour 3
+
+ResetString 10,32,320,100:ResetString 346,32,280,100
+ResetString 42,170,580,10:ResetString 42,185,580,10
+SetString 1,2:ResetString 68,154,186,8
+
+WLocate 138,16:NPrint "PHONE BOOK":WLocate 440,16:NPrint "MACRO COMMENTS"
+WLocate 2,160:NPrint "OUT:":WLocate 2,175:NPrint " IN:"
+
+WColour 1
+WLocate 4,143:Print "STATUS:"
+WLocate 260,143:Print "DEVICE:"
+WLocate 512,143:Print "UNIT#:"
+WColour 2
+
+If WriteMem (0,"skid.defaults")
+	FileInput 0
+	For i=0 To 25
+		If NOT DosBuffLen(0) Then r$(i)=Edit$(256):ButtonId 0,i,r$(i):Redraw 0,i
+	Next
+EndIf
+WindowInput 0
+
+Statement sendserial{a$}
+	Shared sop
+	If sop
+		For i=1 To Len(a$)
+			a=Asc(Mid$(a$,i,1))
+			If a>31 Then WScroll 44,171,620,178,8,0:WLocate 42+566,160:Print Chr$(a)
+			WriteSerial 0,a
+		Next
+	EndIf
+End Statement
+
+Statement charin{a$}
+	For i=0 To 31:a$=Replace$(a$,Chr$(i),""):Next
+	If Len(a$)>40 Then a$=Right$(a$,40)
+	WScroll 44,186,620,194,8*Len(a$),0:WLocate 50+566-Len(a$)*8,176:Print a$
+End Statement
+
+Statement status{a$}
+	WLocate 66,143:Print Centre$(a$,23)
+End Statement
+
+status {"0123456789012345678"}
+
+If OpenSerial(GadgetPens(0,24)+Chr$(0),Val(GadgetPens(0,25)),sp(Disable(0,41)),32)
+	status{"SERIAL PORT OPEN"}:sop=True
+Else
+	status{"OPEN SERIAL FAILED"}:sop=False
+EndIf
+
+##[$80BB]
+	Wait
+	If SerialEvent(0)=1 Then charin{ReadSerialString(0)}
+	ev.l=WaitEvent
+	If ev=$40 AND GadgetHit<26
+		g=GadgetHit:r$(g)=GadgetPens(0,g):GadgetList 0,g:Redraw 0,g
+		If g<9 Then ClearString 0,g+9
+	EndIf
+	If ev=$40 AND GadgetHit>29 AND GadgetHit<38
+		sendserial{"ATDT"+r$(GadgetHit-22)+Chr$(13)}
+	EndIf
+	If ev=$40 AND GadgetHit=42 Then sendserial{"ATA"+Chr$(13)}
+	If ev=$40 AND GadgetHit=43 Then sendserial{"ATO"+Chr$(13)}
+	If ev=$40 AND GadgetHit=44
+		VWait 75:sendserial{"+++"}:VWait 75:sendserial{"ATH0"+Chr$(13)}
+		FlushEvents
+	EndIf
+	If ev=$400
+		a=Asc(Inkey$(1)):If a=138 Then Goto startgame
+		If a>128 AND a<137 Then sendserial{r$(16+a-129)} Else sendserial{Chr$(a)}
+	EndIf
+##[$80BC] ev=$200
+
+startgame
+
+If ReadMem (0,"skid.defaults")
+	FileOutput 0:For i=0 To 25:NPrint r$(i):Next
+EndIf
+
+CloseWindow 0

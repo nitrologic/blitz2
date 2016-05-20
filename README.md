@@ -19,4 +19,6 @@ Ascii source and pdf versions of magazines to be added shortly.
 
 Source was rescued from Simon's A4000 hard disk archives from 1994/1995 period.
 
+Ths readbb2 tool was used to generate the ascii translations in the scan folder.
+
 A tokeniser based on these files written in BlitzMax may be found in the tools folder.

@@ -1,0 +1,8701 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/newmoo.bb
++;big things
+;	pause mode
+
+;medium things
+;	major shadow glitches
+;	wall bounce
+;	collision strength depends on speed ?
+
+;small things
+;	#skipval..
+;	signside is crap..
+;	wipes
+;	bonus point for best lap
+;	turb off fade-out shadows at end of race.
+;	computer names repeat sometimes..
+
+;simons list
+
+
+;misc
+;	smoke/dust
+
+
+
+DEFTYPE.l temp
+DEFTYPE.q blah
+
+.N
+
+#nts=Off
+
+#upload=On
+rsd=Peek.w($c00008)
+retch.w=Off
+
+
+
+CNIF #upload
+	#loadtime=5
+	#animtime=5
+	#titletime=500;0
+	#title=On
+	#race=On
+	#bilbo=On
+
+	#collisions=On;ff
+	#mus=On
+	#snd=On
+
+
+CELSE
+	#loadtime=3
+	#animtime=8
+	#titletime=300
+
+	#title=On
+	#race=Off
+	#bilbo=On
+
+	#collisions=On
+	#mus=On
+	#snd=On
+
+CEND
+
+#maxcar=7
+#contcomp=10
+
+
+#spoon=63
+
+
+
+#bars=Off
+#maketri=Off
+
+#uscar=5
+
+#a=1
+#j=2
+#s=3
+#n=4
+
+#c=#s
+
+#hicol=7
+;#selcol=6
+;#deselcol=5
+#selcol=3;0;6
+#deselcol=2;5
+
+
+#delay1=30
+#delay2=10
+
+
+
+	#debounce=-10
+	#scrollpast=0
+	#startscr=10
+	#trsel=20
+	#nextrace=30
+	#leave=40
+	#doattr=50
+
+#mybluecol=$c82;800
+
+
+Macro dotune
+	CNIF #mus
+		##[$C490] `1,-1
+	CEND
+End Macro
+
+Macro stoptune
+	CNIF #mus
+		##[$C491] `1
+	CEND
+End Macro
+
+Macro dosnd
+	CNIF #snd
+		##[$C490] `1,-1
+	CEND
+End Macro
+
+
+CNIF #c=#j
+	If Peek.w($f00004)=Peek.w($f00004)
+		End
+	EndIf
+CEND
+
+
+Statement Safe{}
+	CNIF #c=#j
+		MOVE.l #320000,d0
+		toplup
+			MOVE d0,$f0002a
+			SUBQ.l #1,d0
+		BGE toplup
+	CEND
+	CNIF #c=#a
+		For cnt.w=0 To 15
+			VWait:##[$80BB]:##[$80BC] VPos>50:Poke.w $dff180,cnt
+		Next
+		MouseWait
+	CEND
+	CNIF #c=#s
+		uphere
+		MOVE #$8701,$c00004
+		MOVE #$8702,$c00004
+		MOVE #$8703,$c00004
+		MOVE #$8704,$c00004
+		MOVE #$8705,$c00004
+		MOVE #$8706,$c00004
+		MOVE #$8707,$c00004
+		MOVE #$8708,$c00004
+		BRA uphere
+	CEND
+
+End Statement
+
+Macro showblk
+	CNIF (#c=#s) AND (#bars=On)
+
+	CEND
+End Macro
+Macro showwht
+	CNIF (#c=#s) AND (#bars=On)
+		MOVE #$8701,$c00004
+	CEND
+End Macro
+
+Macro showred
+	CNIF (#c=#s) AND (#bars=On)
+		MOVE #$8709,$c00004
+	CEND
+End Macro
+
+Macro showyel
+	CNIF (#c=#s) AND (#bars=On)
+		MOVE #$8708,$c00004
+	CEND
+End Macro
+
+Macro showgrn
+	CNIF (#c=#s) AND (#bars=On)
+		MOVE #$8707,$c00004
+	CEND
+End Macro
+
+
+CNIF #c=#j
+	BSR initjagos
+CEND
+
+;Safe{}
+
+
+Gosub InitOs
+Gosub InitMem
+
+Gosub InitVars
+
+CNIF #title
+	seebob
+	Gosub SetUpCloud
+	Gosub docodies
+;	Gosub SetUpCloud
+;	Gosub DoCloudScratch
+
+	Gosub DoAttract
+	Goto seebob
+
+
+
+	Gosub SetUpCloud
+;	Gosub doresults
+
+	##[$80BB]
+
+
+
+
+
+
+		!dotune{46}
+
+		playitagainsam
+
+		racenum.w=0:firstrace.w=On
+		bigdone.w=Off
+		Gosub DoCloudScratch
+
+
+
+		If done.w=#doattr
+			Gosub DoAttract
+			Gosub SetUpCloud
+			##[$80BE] If:Goto playitagainsam
+		EndIf
+
+
+		CNIF #mus
+			##[$C491] 46
+		CEND
+
+		##[$80BB]
+
+
+
+			Gosub NextRace
+
+			CNIF #mus
+				##[$C490] 59,-1
+			CEND
+
+			Gosub SetUpCloud
+			Gosub doresults
+
+
+
+
+
+			racenum+1
+			If racenum<6
+;				Gosub SetUpCloud
+				done.w=#nextrace:menu.w=1
+				Gosub DoCloudLogo
+				bigdone.w=Off
+			EndIf
+
+
+			CNIF #mus
+				##[$C491] 59
+			CEND
+
+		##[$80BC] racenum>5
+
+
+
+	##[$80BC] 1=0
+CEND
+
+
+
+.NTypes
+
+NEWTYPE .quadratic ; x=at*t+bt+c :y=dt*t+et+f
+	la.q:ma:lb:lc
+	ld	:md:le:lf
+	lb1 :lb2		 ;boundaries..
+	lstraight.w
+	lodd1.w:lodd3.w
+	langst.q:langadd.q
+
+	ra.q:na:rb:rc
+	rd	:nd:re:rf
+	rb1 :rb2
+	rstraight.w
+	rodd1.w:rodd3.w
+	rangst.q:rangadd.q
+End NEWTYPE:#hquad=SizeOf.quadratic ASR 1
+
+NEWTYPE .xtra
+	cai.q:caj:cbi:cbj:midi:midj	; just for fun
+	dai	:daj:dbi:dbj:diri:dirj
+	swivi:swivj
+	centi:centj	;centre or part-circle
+	desti:destj	; destination for computer cars..
+
+End NEWTYPE
+
+NEWTYPE .theader
+	nmp.l						;8k+ contours NOT CRUNCHED
+	blockmap.l			 ;8k crunched
+	blocks.l[8]			;40k+ crunched
+	info.l
+End NEWTYPE
+
+NEWTYPE .view
+	mx.q:my:sx:sy:px:py:dx:dy	; for new scrlnslc :-)
+End NEWTYPE
+NEWTYPE .scr
+	scrw.q:scrwh:scrh:scrhh
+End NEWTYPE
+;	scr.scr\scrw=scrw,scrwh,scrh,scrhh
+
+
+DEFTYPE.view tempview
+CNIF 1=0
+	ibm version
+	no myview.. sx, sy instead
+	no channel.w...
+;	CNIF #c=#s NOT in..
+	ibmpad.w(10)
+
+CEND
+
+
+NEWTYPE .segasp					 ;sort points here
+	dpth.w
+	sy.w:l.w:spdata.w:sx.w:wptr.l	;points to ?mytable+spwid*8
+
+	h0.w:p0.w[3]
+	h1.w:p1.w[3]
+	h2.w:p2.w[3]
+	h3.w:p3.w[3]
+
+;	dpth.w:car.w						;car=0 for car or numsprites for bridge
+;	binfo.l[0]							;ptr to bridge info in rom
+;	shady.w:rshady						;
+;	sx:sy:spdata.w			;bridge
+End NEWTYPE
+
+
+NEWTYPE .newp
+	nam1.l:nam2.l
+	humnam1.l:humnam2.l
+	sel.w:ed.w:moved.w:del.w:score.w
+	car.w:col.w:humcol.w:pl.w
+	x.w:vel.w:cx.w
+End NEWTYPE
+
+NEWTYPE .car
+		 i.q :	 j:k:	 headi:	 headj:headk:	 movi:	 movj:
+	swai.q:swaj:	swaheadi:swaheadj:			swamovi:swamovj
+
+	myview.view
+	dir.q[0]:head.w:bdir.w:rot.q:qc:qs:jox.q
+	pitch.w:roll:mpitch:mroll:lap.w	:control.w:fr.w
+	inair.w:channel.w:idle.w:drop.w:warp.w:pos.w:coll.w
+
+CNIF #c=#s
+	shady.w:carnum.w:dpth.w:upd.w	 ;DPTH=SPRNUM1 DAMNIT
+																	;CARNUM=SPR1+2
+	*segasp.segasp
+;	rshady.w:segapad.w
+CELSE
+	spr1.l:sprnum1.w:spr2.l:sprnum2.w
+CEND
+
+	spdat.l:bnk.w:vehicle.w:carcol.l:colowner.w
+
+	nrev.q:rev.q:vel:traction
+	lasttime.w:bestlap.w:tottime.w
+	accel.q:engfric:bounce:predef.w[0]:newp.w
+
+	op1car.l:op2car.l:fp2car.l
+
+	*towed.car[0]:engmin.w:shv.w
+	*hanged.car[0]:engpit.w:warptime.w
+	disc.w:oldpos.w	;the funky position thingee..
+
+	q.l			 :; Quadrilateral.. the shadow
+	retard.q:steering:
+	curdt.w:side.w:top.w
+	difi.q:difj.q:swiv		 :; normal for if there's a collision..
+
+
+	score.w:newscore.w
+	voldpos.w[0]:tune.w	 ;<= sega
+	newwarps.w
+	numwarps.w[0]:peak.w
+	gravity.q
+
+CNIF 1=0
+		 i.q :	 j:k:	 headi:	 headj:headk:	 movi:	 movj:
+	swai.q:swaj:	swaheadi:swaheadj:			swamovi:swamovj
+
+	myview.view
+	dir.q[0]:head.w:bdir.w:rot.q:qc:qs:jox.q
+	pitch.w:roll:mpitch:mroll:lap.w	:control.w:fr.w
+	inair.w:channel.w:idle.w:drop.w:warp.w:pos.w:coll.w
+
+	spr1.l:sprnum1.w:spr2.l
+
+	sprnum2.w[0]:shady.w
+
+	spdat.l:bnk.w:vehicle.w:carcol.l:colowner.w
+
+	nrev.q:rev.q:vel:traction
+	lasttime.w:bestlap.w:tottime.w
+	accel.q:engfric:bounce:predef.w
+
+	op1car.l:op2car.l:fp2car.l
+
+	*towed.car:*hanged.car
+	disc.w:oldpos.w	;the funky position thingee..
+
+	q.l			 :; Quadrilateral.. the shadow
+	retard.q:steering:
+	curdt.w:side.w:top.w
+	difi.q:difj.q:swiv		 :; normal for if there's a collision..
+
+
+	score.w:newscore.w:voldpos.w:newwarps.w:numwarps.w
+	gravity.q
+
+;	space.w[10]
+CEND
+End NEWTYPE
+NEWTYPE .shcar :car.w:h.w	:End NEWTYPE
+
+NEWTYPE .ij		:i.q:j:k:l				:End NEWTYPE
+NEWTYPE .frend :lti.w:ltj:rti:rtj:End NEWTYPE
+NEWTYPE.guide
+	mi.q:mj.q
+	di:dj
+	li:lj
+	ri:rj:dtp.q	;is dtp needed?
+End NEWTYPE
+
+
+NEWTYPE .parse
+	fi.q:fj:di:dj:i:j	 ; see below
+	diri:dirj					 ; artificial!
+	boom.w							; if impact with wall
+	norm								; normal.w at point(!) (lookup in cos/sins table)
+End NEWTYPE
+
+
+NEWTYPE .ShadPt
+	ri0.q:rj0:ri1:rj1:ri2:rj2:ri3:rj3:ri4:rj4:ri5:rj5
+	rx0.w:ry0:rx1:ry1:rx2:ry2:rx3:ry3
+End NEWTYPE
+NEWTYPE .quad	:v0x.w:v0y:v1x:v1y:v2x:v2y:v3x:v3y:End NEWTYPE
+
+
+NEWTYPE .phrase:a.l:b.l:End NEWTYPE
+NEWTYPE .jbmap
+
+	dwidth.w	 ;0
+	dheight.w	;2
+	iwidth.w	 ;4
+	iheight.w	;6
+
+	dtype.w		;8
+	depth.w		;10
+	pitch.w		;12
+
+	idata.l		;14
+	ilink.l		;18
+
+	xpos.w		 ;22
+	ypos.w		 ;24
+	iscroll.w	;26
+	flags.w		;28
+
+	hscale.b	 ;30
+	vscale.b	 ;31
+
+	firstphrase.phrase ;32
+	secondphrase.phrase
+	thirdphrase.phrase
+
+	pixwidth.w
+	realflags.l
+	bltwidth.w
+	blitflags.l
+
+End NEWTYPE
+
+
+
+
+
+
+
+;NEWTYPE .sprite
+;	vp.w
+;	size.b:
+;	spdata.w
+;	hp.w
+;End NEWTYPE
+
+
+
+
+.DefTypes
+DEFTYPE.w i,j,ipl,pl
+DEFTYPE.car *p
+DEFTYPE.l sincos
+DEFTYPE.l trisize
+DEFTYPE.ij bez
+DEFTYPE.w pts,pts1,pts2,pts3,pts3
+DEFTYPE.parse test
+
+CNIF #c=#j
+	DEFTYPE.l bld
+	DEFTYPE.jbmap *bmr1,*bmr2,*bmr
+	#framecnt=$440		;frames...
+
+CEND
+
+DEFTYPE.ij skidbasememory
+DEFTYPE.l skbm
+
+
+
+.Consts
+
+	CNIF #c=#s
+
+		DEFTYPE.l myinfo
+		;
+		; sega megadrive skidmarks code
+		;
+
+		; $0000 = 64x32 map	(4096)
+		; $1000 = blocks
+		; $e000 = sprite pointers (2048)?
+		; $f000 = sprites		(640)
+		; $f200 = spdata		 (start at #$760)
+		; $fc00 = scroll
+
+		#vd=$c00000	;vdp data port
+		#cp=$c00004	;vdp control port
+		#hv=$c00008	;hv counter
+
+		#wvram=$40000000:#wcram=$c0000000:#wsram=$40000010
+		#vram=$0:#cram=$80000000:#vsram=$40000000
+		#z80=$a11100:#z80sram=$a00000:#z80dram=$ff8000
+
+		Macro reg #$8000+`1*256:End Macro
+		Macro setreg:MOVE.w #$8000+`1*256+`2,cp:End Macro
+		Macro setmem:MOVE.l `1,cp:MOVE.w `2,vd:End Macro
+		Macro pokemem:MOVE.l `1,cp:Poke.w #vd,`2:End Macro
+
+
+		NEWTYPE .vp
+			sx.w:sy.w:wid:x.w:y.w			 ;top left
+		End NEWTYPE
+
+		NEWTYPE.nvp
+			y0.w:l0:s0:x0
+			y1.w:l1:s1:x1
+			y2.w:l2:s2:x2
+			y3.w:l3:s3:x3
+		End NEWTYPE
+
+
+
+		NEWTYPE.batman
+			numblocks.w
+			pal.w[16]
+			mmap.w[1200]
+			bloks.w[10000]
+		End NEWTYPE
+
+
+
+
+
+
+
+
+
+CNIF #race
+;	#dpth=SizeOf .car\dpth
+
+
+
+
+	Macro car SizeOf .segasp\`1(a2):End Macro
+
+
+
+
+
+Statement doSortSprites{cars.l}
+	MOVE.l d0,d1
+	sortem:MOVEQ#0,d0:MOVE.l d1,a1:MOVE.l(a1)+,a2:MOVE (a2),d2
+	nxvals:MOVE.l a2,a3:MOVE d2,d3
+	wowo:MOVE.l (a1)+,d7:BEQ endlist:MOVE.l d7,a2:MOVE (a2),d2
+	CMP d2,d3:BPL nxvals
+	flip:MOVEM.l a2-a3,-8(a1):MOVEQ#-1,d0:BRA wowo
+	endlist:TST d0:BNE sortem:AsmExit
+End Statement
+
+Statement doSegaSprites{cars.l,vp.l,vram.l,flip.w}
+	;
+	MOVEM.l a4-a6,-(a7):MOVE d3,-(a7)
+	MOVE.l d2,a2:LEA 640(a2),a3													;a2a3=ptrs
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVEM.l(a1),d0-d5/a4-a5		;d7
+	;
+nxtspri:																												 ;a6=?
+	MOVE.l (a0)+,a1:CMP.l #0,a1:BEQ dunspri:MOVEM.l 2(a1),d6-d7/a6 ;a4-a6
+	MOVEM.l d0-d1,-(a7)
+	;
+dotl:
+	ADD.l d0,d6:ADD d1,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
+	CMP#288,d7:BCC cltl:CMP#96,d7:BCS cltl
+	CMP (a6),d7:BLE dobl:MOVE d7,d0:SUB #288,d0:NEG d0
+	;
+	ADD d0,d0:MOVE d6,d1:AND #$3ff,d1:OR mytab(pc,d0),d1:MOVE d1,-6(a2)
+	;
+	TST8(a7):BEQ now0:MOVE d6,d0:OR #$3ff,d0:SUB d1,d0:AND #$c00,d0
+	BEQ now0:LSR#7,d0:MOVE 14-8(a1,d0),d1:ADD d1,-4(a2):now0
+	;
+	BRA dobl:cltl:MOVE#0,-8(a2):BRA dobl
+	;
+mytab:Dc.w 0,0,0,0,0,0,0,0
+			Dc.w $400,$400,$400,$400,$400,$400,$400,$400
+			Dc.w $800,$800,$800,$800,$800,$800,$800,$800
+			Dc.w $c00,$c00,$c00,$c00,$c00,$c00,$c00,$c00
+
+dobl:
+	ADD.l d2,d6:ADD d3,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
+	CMP#288,d7:BCC clbl:CMP#96,d7:BCS clbl
+	CMP (a6),d7:BLE dotr:MOVE d7,d0:SUB #288,d0:NEG d0
+	;
+	ADD d0,d0:MOVE d6,d1:AND #$3ff,d1:OR mytab(pc,d0),d1:MOVE d1,-6(a3)
+	;
+	TST8(a7):BEQ now1:MOVE d6,d0:OR #$3ff,d0:SUB d1,d0:AND #$c00,d0
+	BEQ now1:LSR#7,d0:MOVE 14-8(a1,d0),d1:ADD d1,-4(a3):now1
+	;
+	BRA dotr:clbl:MOVE#0,-8(a3)
+	;
+dotr:
+	ADD.l d4,d6:ADD d5,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
+	CMP #449,d7:BCC cltr:CMP #288,d7:BCC dobr
+	MOVE #288,d0:SUB d7,d0:CMP 2(a6),d0:BPL cltr
+	AND#$fff8,d0:TST8(a7):BNE now2:MOVE 14(a1,d0),d1:ADD d1,-4(a2):now2
+	MOVEM mytab2(pc,d0),d0-d1
+	SUB d0,-6(a2):ADD d1,-2(a2):BRA dobr:cltr:MOVE#0,-8(a2)
+	;
+dobr:
+	ADD.l a4,d6:ADD a5,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
+	CMP #449,d7:BCC clbr:CMP #288,d7:BCC donx
+	;
+	MOVE #288,d0:SUB d7,d0:CMP 2(a6),d0:BPL clbr
+	AND#$fff8,d0:TST8(a7):BNE now3:MOVE 14(a1,d0),d1:ADD d1,-4(a3):now3
+	MOVEM mytab2(pc,d0),d0-d1
+	SUB d0,-6(a3):ADD d1,-2(a3):BRA donx:clbr:MOVE#0,-8(a3):BRA donx
+	;
+mytab2:Dc $400,8,0,0,$800,16,0,0,$c00,24,0,0
+	;
+donx:
+	MOVEM.l (a7)+,d0-d1:ADDQ#2,d0:BRA nxtspri
+	;
+dunspri:
+	MOVE.b #0,-5(a2):MOVE.b #0,-5(a3):MOVE(a7)+,d3:MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Statement
+
+Statement dodoSegaSprites{cars.l,vp.l,vram.l}
+	;
+	MOVEM.l a4-a6,-(a7):MOVE.l d2,a2:LEA 640(a2),a3			;a2a3=ptrs
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVEM.l(a1),d0-d5/a4-a5		;d7
+	;
+nxtspri2:																												 ;a6=?
+	MOVE.l (a0)+,a1:CMP.l #0,a1:BEQ dunspri2:MOVEM.l 2(a1),d6-d7/a6	;a4-a6
+dotl2:
+	ADD.l d0,d6:ADD d1,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
+	CMP#96,d7:BCS cltl2:CMP #448,d7:BCS dobl2:cltl2:MOVE#0,-8(a2)
+dobl2:
+	ADD.l d2,d6:ADD d3,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
+	CMP#96,d7:BCS clbl2:CMP #448,d7:BCS donx2:clbl2:MOVE#0,-8(a3)
+donx2:
+	ADDQ#1,d0:BRA nxtspri2
+dunspri2:
+	MOVE.b #0,-5(a2):MOVE.b #0,-5(a3):MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Statement
+
+
+
+
+
+
+CEND
+
+
+
+mytable:
+	Dc.w 288-08,0
+	Dc.w 288-16,8
+	Dc.w 288-24,16
+	Dc.w 288-32,24
+
+
+
+
+Statement setupvps{nvbase.l,vpbase.l}
+	MOVE.l d0,a0:MOVE.l d1,a1
+
+	MOVEM SizeOf.vp\sx(a1),d2-d3
+	MOVE #$80,d0:MOVE.w #$80,d1
+	SUB d2,d0:SUB d3,d1:MOVE d0,SizeOf.nvp\x0(a0):MOVE d1,SizeOf.nvp\y0(a0)
+
+
+	MOVEQ #0,d0:MOVE #120,d1:ADD d2,d0:ADD d3,d1
+	LEA SizeOf.vp(a1),a1:MOVEM SizeOf.vp\sx(a1),d2-d3
+	SUB d2,d0:SUB d3,d1:MOVE d0,SizeOf.nvp\x1(a0):MOVE d1,SizeOf.nvp\y1(a0)
+
+
+	MOVE #168,d0:MOVE #-120,d1:ADD d2,d0:ADD d3,d1
+	LEA SizeOf.vp(a1),a1:MOVEM SizeOf.vp\sx(a1),d2-d3
+	SUB d2,d0:SUB d3,d1:MOVE d0,SizeOf.nvp\x2(a0):MOVE d1,SizeOf.nvp\y2(a0)
+
+	MOVEQ #0,d0:MOVE #120,d1:ADD d2,d0:ADD d3,d1
+	LEA SizeOf.vp(a1),a1:MOVEM SizeOf.vp\sx(a1),d2-d3
+	SUB d2,d0:SUB d3,d1:MOVE d0,SizeOf.nvp\x3(a0):MOVE d1,SizeOf.nvp\y3(a0)
+
+
+
+
+	AsmExit
+End Statement
+
+
+;		*nv0\x0= $80-vp(0)\sx
+;		*nv0\y0= $80-vp(0)\sy
+;
+;		*nv1\x0=	 0-vp(1)\sx+vp(0)\sx
+;		*nv1\y0= 120-vp(1)\sy+vp(0)\sy
+;
+;		*nv2\x0= 160-vp(2)\sx+vp(1)\sx
+;		*nv2\y0=-120-vp(2)\sy+vp(1)\sy
+;
+;		*nv3\x0=	 0-vp(3)\sx+vp(2)\sx
+;		*nv3\y0= 120-vp(3)\sy+vp(2)\sy
+
+
+
+;;		*nv1\y0= 120,1,0,0
+;;		*nv2\y0=-120,0,0,160
+;;		*nv3\y0= 120,1,0,0
+
+CEND
+
+
+
+
+
+
+	CNIF #c=#a
+		#sc=2
+	CEND
+
+
+
+
+
+Function .q jsin{a.q} ;0..1=2*pi
+Shared sincos.l
+	myang=##[$C383](a)ASL 9:ad.l=sincos+((myang&511) ASL 2)
+	f=##[$C383](myang):qs=Peek.w(ad	)*(1-f)+Peek.w(ad+4)*f
+	Function Return ##[$C583](qs) ASL 1
+End Function
+
+Function .q jcos{a.q} ;0..1
+Shared sincos.l
+	myang=##[$C383](a)ASL 9:ad.l=sincos+((myang&511) ASL 2)
+	f=##[$C383](myang):of=1-f
+	qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+	Function Return ##[$C583](qc) ASL 1
+End Function
+
+
+Function.q jsqr{a.q}	;worlds slowest sqr command
+
+	If a=0 Then Function Return 0
+	ntry.q=1:try=0
+
+	While ##[$C385](try-ntry)>0.01
+		try=ntry:fx=try*try-a
+		ntry=try-fx/try*0.5
+	Wend
+	Function Return try
+End Function
+
+
+
+Function.l GetMem32{size.l}
+	CNIF #c=#j
+		MOVEQ #0,d1:ADD.l #16,d0:##[$80C2] $c002
+
+		ADD.l #31,d0
+		AND #$ffe0,d0
+		AsmExit
+	CELSE
+		MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	CEND
+End Function
+
+
+
+Function.l GetMem{size.l}
+	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+End Function
+
+
+CNIF #c=#s
+
+;					For roll=0 To 63
+;						Poke.w base,mycloset{Peek.w(base),Peek.w(temp.l)}
+;						base+2:temp+2
+;					Next
+
+	Statement MyCloset{src.l,dest.l}
+		MOVE.l d0,a0:MOVE.l d1,a1:MOVE.w #63,d7
+
+		morecols:MOVE (a1),d0:MOVE (a0)+,d1
+
+
+		MOVE d0,d2:MOVE d1,d3:AND#$e00,d2:AND#$e00,d3
+		CMP d2,d3 :BGE nomoreblu:SUB #512,d0:BRA duncol:nomoreblu
+		MOVE d0,d2:MOVE d1,d3:AND #$e0,d2:AND #$e0,d3
+		CMP d2,d3 :BGE nomoregrn:SUB	#32,d0:BRA duncol:nomoregrn
+		MOVE d0,d2:MOVE d1,d3:AND	#$e,d2:AND	#$e,d3
+		CMP d2,d3 :BGE nomorered:SUBQ	#2,d0:BRA duncol:nomorered
+
+
+
+		MOVE d0,d2:MOVE d1,d3:AND	#$e,d2:AND	#$e,d3
+		CMP d2,d3 :BLE nolessred:ADDQ	#2,d0:BRA duncol:nolessred
+		MOVE d0,d2:MOVE d1,d3:AND #$e0,d2:AND #$e0,d3
+		CMP d2,d3 :BLE nolessgrn:ADD	#32,d0:BRA duncol:nolessgrn
+		MOVE d0,d2:MOVE d1,d3:AND#$e00,d2:AND#$e00,d3
+		CMP d2,d3 :BLE nolessblu:ADD #512,d0:BRA duncol:nolessblu
+
+
+		duncol
+		MOVE d0,(a1)+:DBRA d7,morecols
+	End Statement
+
+;	Statement MyCloset{src.l,dest.l}
+;		MOVE.l d0,a0:MOVE.l d1,a1:MOVE.w #63,d7
+;
+;		morecols:MOVE (a1),d0:MOVE (a0)+,d1
+;
+;		MOVE d0,d2:MOVE d1,d3:AND	#$e,d2:AND	#$e,d3
+;		CMP d2,d3:BEQ dogrn	:BPL morered:SUBQ	#2,d0:BRA duncol
+;															morered:ADDQ	#2,d0:BRA duncol :dogrn
+;
+;		MOVE d0,d2:MOVE d1,d3:AND #$e0,d2:AND #$e0,d3
+;		CMP d2,d3:BEQ doblu	:BPL moregrn:SUB	#32,d0:BRA duncol
+;															moregrn:ADD	#32,d0:BRA duncol :doblu
+;
+;		MOVE d0,d2:MOVE d1,d3:AND#$e00,d2:AND#$e00,d3
+;		CMP d2,d3:BEQ duncol :BPL moreblu:SUB #512,d0:BRA duncol
+;															moreblu:ADD #512,d0:duncol
+;		MOVE d0,(a1)+:DBRA d7,morecols
+;	End Statement
+
+;	Statement MyFurther{dest.l}
+;		MOVE.l d0,a0:MOVE.w #63,d7
+;		lesscols:MOVE.w (a0),d0
+;
+;					 CMP #$100,d0:BMI togren:SUB.w #$200,d0:BRA tonon
+;		togren:CMP #$10 ,d0:BMI tored:SUB.w #$20,d0:BRA tonon
+;		tored :CMP #1	 ,d0:BMI tonon:SUBQ #2,d0:tonon:
+;		MOVE d0,(a0)+:DBRA d7,lesscols
+;	End Statement
+
+	Statement MyCopy{src.l,dest.l,siz.l} ;in words
+		While siz>0
+			Poke.w dest,Peek.w(src):src+2:dest+2:siz-1
+		Wend
+	End Statement
+CEND
+
+;NEWTYPE .char
+;	y.w:t.w:l.w:x.w
+;	sx.w:sy.w
+;End NEWTYPE
+NEWTYPE .chara
+	y.w:t.w:l.w:x.w
+End NEWTYPE
+
+NEWTYPE.charb
+	id.w:dx.w:dy.w:l.w
+	fx.w:fy.w:cx.q:cy.q
+End NEWTYPE
+
+
+
+.InitMem
+	skbm.l=&skidbasememory.ij
+	sincos.l=?sincos
+	sqlu.l=?sqludat
+	fsize.l=?fsize
+
+
+	Poke.l &password.ij\i,$424f5454
+	Poke.w &password.ij\j,$4f4d
+	Poke.l &password.ij\k,&password\i
+	Poke.l &password.ij\l,&password\i+6
+
+
+	Dim chara.chara(80)
+	Dim charb.charb(80)
+
+	Dim Pl.car(#maxcar)
+	*p0.car=Pl(0):*p1.car=Pl(1):*p2.car=Pl(2):*p3.car=Pl(3):*maxp.car=Pl(#uscar)
+	CNIF #uscar>3:*p4.car=Pl(4):*p5.car=Pl(5):CEND
+
+	Dim newp.newp(#maxcar)
+
+	For cnt.w=0 To #uscar
+;		base.l=&newp(cnt)
+;		NewName{&newp(cnt)\nam1,1}
+;		newp(cnt)\humnam1=$40404040
+;		newp(cnt)\humnam2=$40404040
+		newp(cnt)\sel=0:newp(cnt)\ed=-32
+		newp(cnt)\col=cnt
+		newp(cnt)\humcol=newp(cnt)\col
+		newp(cnt)\pl=cnt
+	Next
+
+
+	Dim edge.quadratic(70):*e.quadratic=edge(0)
+	Dim grot.xtra(70)		 :*g.xtra		 =grot(0)
+	Dim mass.guide(137),firstmass.w(70)	;,leadtime.w(70)
+	Dim fram.w(64)
+	Dim spoon.w(#spoon)
+
+	Dim qsin(63),qcos(63)	 :; look up table for car motion
+	For cnt.w=0 To 63
+		qcos(cnt)=jcos{cnt/64}
+		qsin(cnt)=jsin{cnt/64}
+	Next
+
+	*par.parse=test
+
+	CNIF #c<>#s
+		Dim shcars.shcar(7):shcar.l=&shcars(0)
+
+
+	CEND
+
+
+
+	Dim tdist.shcar(7) :tdist.l=&tdist(0)
+	Dim startline.shcar(7)
+
+	CNIF #c=#j
+		*bmr1.jbmap=GetMem32{SizeOf.jbmap}
+		*bmr2.jbmap=GetMem32{SizeOf.jbmap}
+		*bmr.jbmap=*bmr1
+
+		CreateBmap{320,200,3,1,0,*bmr1.jbmap}
+		CreateBmap{320,200,3,1,0,*bmr2.jbmap}
+
+
+
+		MOVE #$ffff,$f00058
+		MOVE.l #$418f418f,$f00058
+
+		MOVE #$6c7,$f00028	 ;RGB!
+
+	CEND
+
+	CNIF #c=#a
+		allocst 0,4
+		ScreensBitMap 0,0
+		BitMapOutput 0:Locate 0,0
+	CEND
+
+
+
+
+	CNIF #maketri
+		trisize.l=(16*17/2)*8;SizeOf.xy
+		tritemp.l=$f1cf80-8-trisize;GetMem{dist.l} ;internal dsp ram!
+		Gosub InitLatMem
+	CEND
+
+
+	CNIF #c=#s
+		*nv0.nvp=GetMem32{SizeOf.nvp}
+		*nv1.nvp=*nv0+8
+		*nv2.nvp=*nv0+16
+		*nv3.nvp=*nv0+24
+
+
+		*nv0\y0= $80,0,0,$80
+		*nv1\y0= 120,0,0,0
+		*nv2\y0=-120,1,0,160
+		*nv3\y0= 120,0,0,0
+
+		Dim vp.vp(#uscar) ;don't ask me...
+		Dim quadverts.w(16)
+		buffa1.l=GetMem32{640*4}
+		buffb1.l=buffa1+ 640*1
+		buffa2.l=buffa1+ 640*2
+		buffb2.l=buffa1+ 640*3
+
+
+;		Dim map.w(63,63)
+
+
+		Dim map.w(63,127)	;16K
+		blockmap.l=&map(0,0)
+
+;;		hmmmmmmmmmmm
+;		Dim map.w(63,72)	;0..72 = 2*64*73= 9344..
+;		blockmap.l=&map(0,0)
+;;		blockmap.l=GetMem{9216+64}
+
+
+		tkptr.l=Peek.l(Peek.l($ff0004))
+		tkbin.l=tkptr+1056
+;		clist.l=Peek.l($ff0008) ;implied..
+;		cars.l=Peek.l(clist+0*4)
+
+; y.w:l.w:d.w:x.w:wptr.l	;points to ?mytable+spwid*8
+
+		Dim spr.segasp(64)
+		For ipl=0 To #uscar
+			Pl(ipl)\segasp=&spr(ipl)
+			CNIF #uscar<4
+				dkt.w=(ipl&2)ASR 1 + (ipl&1) ASL 1
+			CELSE
+				dkt.w=(ipl&1)*3+(ipl&6)ASR 1
+			CEND
+
+			spr(ipl)\wptr=?mytable+3*4-4
+
+			spr(ipl)\l=$b05
+			CNIF #uscar<4
+				spr(ipl)\spdata=$a798+21*dkt+(ipl&1)*$2000
+			CELSE
+				spr(ipl)\spdata=$a762+21*dkt+(ipl&1)*$2000 ;ASR 1
+			CEND
+
+			spr(ipl)\h0=4;3
+			spr(ipl)\h1=8;6
+			spr(ipl)\h2=12;9
+			spr(ipl)\h3=16;12
+
+			spr(ipl+#uscar+1)\wptr=spr(ipl)\wptr
+			spr(ipl+#uscar+1)\l=$a05
+			spr(ipl+#uscar+1)\h0=3
+			spr(ipl+#uscar+1)\h1=6
+			spr(ipl+#uscar+1)\h2=9
+			spr(ipl+#uscar+1)\h3=12
+			spr(ipl+#uscar+1)\spdata=(spr(ipl)\spdata&$1fff) + $e00c
+			spr(ipl+#uscar+1)\dpth=0
+
+
+;			spr(ipl)\spdata=$a798+18*dkt+(ipl&1)*$2000
+
+;			Pl(ipl)\carsn=$a770+18*ipl +(ipl&1)*$2000	;bit $2000
+
+
+			If ipl<2
+				CNIF #uscar<4
+					Pl(ipl)\q=GetMem{672*2}
+				CELSE
+					Pl(ipl)\q=GetMem{672*3}
+				CEND
+			Else
+				Pl(ipl)\q=Pl(ipl&1)\q+672*(ipl&6) ASR 1
+			EndIf
+
+		Next
+		Pl(0)\bnk=0
+		Pl(1)\bnk=0
+		Pl(2)\bnk=1
+		Pl(3)\bnk=1
+		Pl(4)\bnk=3
+		Pl(5)\bnk=2
+
+
+		Dim cptr.l(64)
+		Dim hisview.view(#uscar)
+
+
+	CEND
+
+
+
+Return
+
+
+	Statement NewName{dest.l,fin.w}
+		Shared rsd,newp()
+
+
+		doagain
+		blah=(?compnamf-?compnam)
+		blah.q=(##[$8481](2836.183,rsd)+1)*blah: rsd+35.479
+
+		blah=##[$C381](blah/12)
+		base.l=?compnam+blah*6
+
+		happy.w=On
+		For i.w=0 To #uscar
+			If newp(i)\nam1 = Peek.l(base)
+				If (newp(i)\nam2 ASR 16)= Peek.w(base+4) Then happy=Off
+			EndIf
+		Next
+		If happy=Off Then Goto doagain
+
+		Poke.l dest,Peek.l(base):dest+4:base+4
+		Poke.w dest,Peek.w(base):dest+2:base+2
+		Poke.w dest,fin
+
+
+
+
+
+		Goto doneit
+		compnam	:Dc.b "SIMONS","RAFAEL"
+						 :Dc.b "FERGIE","YELLOW"
+						 :Dc.b "RADISH","RACHEL"
+						 :Dc.b "BARNEY","ENNZED"
+						 :Dc.b "RICHIE","PROLOG"
+						 :Dc.b "CODIES","LADYDI"
+						 :Dc.b "PERDIE","WATCOM"
+						 :Dc.b "ACIDIC","GENIUS"
+						 :Dc.b "CICADA","JUNIOR"
+						 :Dc.b "NEWTON","BLONDE"
+						 :Dc.b "GENGIS","SADIST"
+						 :Dc.b "CHIRAC"
+
+
+		compnamf
+		doneit
+
+
+	End Statement
+
+
+
+
+
+
+
+;jaguar stuff
+
+CNIF #c=#j
+	Macro rungpu
+		MOVE.l `1 LSL 2+$f03000,$f02110:MOVE.l #1,$ff8:MOVE.l #1,$f02114
+	End Macro
+
+	Macro waitgpu
+		'w_g`@:MOVE.l $ff8,d0:BTST #0,d0:BNE 'w_g`@
+	End Macro
+
+	Macro rundsp
+		MOVE.l `1 LSL 2+$f1b000,$f1a110:MOVE.l #1,$ff0:MOVE.l #1,$f1a114
+	End Macro
+
+	Macro waitdsp
+		'w_d`@:MOVE.l $ff0,d0:BTST #0,d0:BNE 'w_d`@
+	End Macro
+
+	Macro waitblit
+		MOVE.l $f02238,d0
+		w_b`@
+		MOVE.l $f02238,d0:BTST #0,d0:BEQ w_b`@
+	End Macro
+
+
+.JagBlitter
+
+	Include jblit.inc
+
+	Macro bm SizeOf .jbmap\`1(a0):End Macro
+	Statement RefrBmap{*bmap.jbmap}
+		;
+		MOVE.l d0,a0
+		;
+		MOVE.l !bm{idata},d0:LSR.l#3,d0:MOVEQ#43-32,d2:ASL.l d2,d0
+		MOVE.l !bm{ilink},d1:LSR.l#3,d1:MOVE.l d1,d2:LSR.l#8,d2:OR d2,d0
+		MOVEQ#24,d2:LSL.ld2,d1
+		MOVE !bm{dheight},d2:EXT.l d2:MOVEQ#14,d3:ASL.ld3,d2:OR.ld2,d1
+		MOVE !bm{ypos},d2:ASL#3,d2:OR d2,d1:OR !bm{dtype},d1
+		MOVEM.l d0-d1,!bm{firstphrase}
+		;
+		MOVE !bm{iscroll},d0:EXT.l d0:ASL.l#8,d0:ASL.l#3,d0
+		OR !bm{flags},d0:ASL.l#6,d0
+		MOVE !bm{iwidth},d1:EXT.l d1:ROR.l#4,d1:OR d1,d0
+		ROL.l#8,d1:ROL.l#6,d1
+		OR!bm{dwidth},d1:ASL.l#3,d1:OR!bm{pitch},d1:ASL.l#3,d1:OR!bm{depth},d1
+		ASL.l#8,d1:ASL.l#4,d1:OR !bm{xpos},d1
+		MOVEM.l d0-d1,!bm{secondphrase}
+
+		MOVEQ #0,d0:MOVE.w !bm{hscale},d0:ROR.w #8,d0
+		MOVE.l d0,!bm{thirdphrase+4}
+
+		;
+		AsmExit
+		;
+	End Statement
+
+
+	Statement HeadBmap{*bmap1.jbmap}
+		ADD.l #32,d0:SWAP d0:MOVE.l d0,$f00020:AsmExit
+	End Statement
+
+
+
+	Statement BlPoly{*bm.jbmap,dat.l,cols.l}
+	Shared bld
+
+		!waitblit
+		!waitgpu
+
+
+		Poke.l $f03f00,dat
+		Poke.l $f03f04,cols
+
+		!waitblit
+		Poke.l bld		,*bm\idata											;destination
+		Poke.l bld+	4,*bm\blitflags;+$10000					;
+		Poke.l bld+ $8,##[$C581](*bm\bltwidth,*bm\iheight)	;clip
+		Poke.l bld+$10,##[$C581](-24,1)	;step
+
+		!rungpu{0}
+
+	End Statement
+
+
+	Statement BlRot{*bms.jbmap,*bmd.jbmap,xfac,yfac}	;a2=dest a1=source
+	Shared bld
+
+	;	srcxadd=3
+	;	desxadd=1
+
+		!waitblit
+
+		Poke.l bld+$24,*bmd\idata					 ;dest
+		Poke.l bld+$28,*bmd\blitflags +(1 ASL 16)			;flags
+		Poke.l bld+$30,0										;start xy
+		temp.l=1 LSL 16										 ;plus one y
+		temp=temp+(-*bmd\bltwidth&$ffff)		;minus width
+		Poke.l bld+$34,temp
+
+
+		Poke.l bld,*bms\idata							 ;source
+		Poke.l bld+$4,*bms\blitflags +(3 ASL 16)			 ;flags
+		Poke.l bld+$8,jin{*bms\bltwidth,*bms\iheight} ;clip x
+		Poke.l bld+$c,jin{30,30}										 ;start xy
+
+		pw=*bmd\bltwidth
+
+		xdif=-yfac-pw*xfac
+		ydif=xfac-pw*yfac
+
+		Poke.l bld+$10,jin{xdif,ydif}
+		Poke.l bld+$14,jfr{xdif,ydif}
+
+		Poke.l bld+$18,0 ;start value! HAH!
+
+		Poke.l bld+$1c,jin{xfac,yfac}
+		Poke.l bld+$20,jfr{xfac,yfac}
+
+		Poke.l bld+$3c,(*bmd\iheight ASL 16) + *bmd\bltwidth ;counter
+
+		temp.l=1 + (1 ASL 6)
+		temp=temp + (1 ASL 8) +(1 ASL 9)
+		temp=temp +(1 ASL 11)
+		temp=temp + (1 ASL 23)+ ( 1 ASL 24)
+		Poke.l bld+$38,temp
+
+
+	End Statement
+
+
+CEND
+
+
+.IOStuff
+
+	Statement GetJoy{x.l,y.l,butt.l,port.w}
+	 CNIF #c=#j
+
+			MOVE.l d0,a0
+			MOVE.l d1,a1
+			MOVE.l d2,a2
+			MOVEQ #0,d3
+			MOVEQ #0,d4
+			MOVEQ #0,d5
+
+			MOVE #$800e,$f14000:MOVE $f14000,d0
+			BTST	#8,d0:BNE notup:ADDQ #1,d4:notup
+			BTST	#9,d0:BNE notdo:SUBQ #1,d4:notdo
+
+			BTST #10,d0:BNE notle:ADDQ #1,d3:notle
+			BTST #11,d0:BNE notri:SUBQ #1,d3:notri
+
+			MOVE #$800e,$f14000:MOVE $f14002,d0
+			BTST #1,d0:BNE notbc:ADDQ #2,d5:notbc
+			MOVE #$800b,$f14000:MOVE $f14002,d0
+			BTST #1,d0:BNE notba:ADDQ #1,d5:notba
+
+
+			MOVE.w d3,(a0)
+			MOVE.w d4,(a1)
+			MOVE.w d5,(a2)
+			AsmExit
+		CEND
+		CNIF #c=#a
+			Poke.l x,Joyx(1-port)
+			Poke.l y,Joyy(1-port)
+			Poke.l butt,Joyb(1-port)
+		CEND
+		CNIF #c=#s
+			temp=##[$C484](port)
+			Poke.l x,(temp&4=4)-(temp&8=8)
+			Poke.l y,(temp&16=16);JLimit((temp&1=1)-(temp&2=2)+(temp&16=16),-1,1)
+			Poke.l butt,0
+;		If a AND 1 Then ya=-1
+;		If a AND 2 Then ya=1
+;		If a AND 4 Then xa=-1:fr=JLimit(fr+1,0,799)		;xa=-1
+;		If a AND 8 Then xa=1:fr=JLimit(fr-1,0,799)
+
+
+		CEND
+	End Statement
+
+	Function.w trx{pl.w}
+		Shared segjoy.w
+
+		If segjoy=-2 Then pl+4
+		If segjoy=-4
+			If pl<2
+				pl+4
+			Else
+				If pl>3 Then pl+2
+			EndIf
+		EndIf
+
+		Function Return pl
+	End Function
+
+
+Macro MyVWait
+		CNIF #c=#s
+			MOVE #0,$ff0000
+			myvbwaitlp`@:TST $ff0000:BPL myvbwaitlp`@:MOVE#0,$ff0000
+		CEND
+		CNIF #c=#a
+			VWait
+		CEND
+End Macro
+
+Macro MyQWait
+		CNIF #c=#s
+;			MOVE #0,$ff0000
+			mywaitlp`@:TST $ff0000:BPL mywaitlp`@:MOVE#0,$ff0000
+		CEND
+		CNIF #c=#a
+			VWait
+		CEND
+End Macro
+
+
+
+	##[$80CA] *p
+CNIF #race
+Statement UpDateNuPlayer{lup.l} ;	 ;,diff.w ,slidmod.w,speedmod.w,accelmod.w
+	Shared cvh(),Pl(),newp();*p0,*p7
+	Shared champ.w,racenum.w,super.w,champtyp.w,attract.w
+
+	If champtyp<2
+		If super Then lup+8
+
+		t=racenum
+		t=##[$C386](t/5,0,1)
+		s=1-t
+	Else
+
+		s=1:t=0
+	EndIf
+
+
+	base.l=lup
+
+	For pl=0 To #uscar
+		*p.car=Pl(pl)
+
+		If attract Then t=(##[$8481](rsd,8.5439)+1) ASR 1:s=1-t:rsd-9.528
+
+		If champtyp>1
+			lup=base+64+*p\carnum*72
+			For cnt=1 To 8
+				If Peek.b(lup)<>cnt Then Safe{}
+				lup+1
+			Next
+
+
+			lup=base+*p\carnum*72+champ*8
+			If super Then lup+32
+		EndIf
+
+
+
+		If *p\control=#contcomp Then nlup.l=lup+3:Else nlup=lup
+		blah.q=Peek.b(nlup)*s+Peek.b(nlup+8)*t
+		fric=(blah ASR 7)*0.98+0.01
+
+		blah.q=Peek.b(nlup+1)*s+Peek.b(nlup+1+8)*t
+		topspeed=(blah) ASR 4
+
+		acc=topspeed*(1/fric-1)
+
+		blah.q=Peek.b(nlup+2)*s+Peek.b(nlup+2+8)*t
+		initacc=(blah) ASR 8
+		reta=initacc/acc/fric
+
+		\engfric =fric; ASL 6
+		\retard	=reta ASR 3;ASL 6
+
+		blah.q=Peek.b(lup+6)*s+Peek.b(lup+6+8)*t
+		\steering=blah ASR 5
+		\bounce	=0.5
+		\gravity =0.5
+		\accel	 =acc	ASR 3;ASL 6
+		If newp(pl)\nam1=$53415641 Then \accel*1.2
+
+
+		CNIF #nts
+			\steering ASL 1
+		CEND
+
+
+	Next
+
+End Statement
+CEND
+
+
+
+;------------------------------------------------------
+
+
+
+
+CNIF #title
+
+Statement colormini{src.l,dst.l,col.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVEQ#119,d7
+	MOVE.l #$88888888,d0:MOVE.l #$77777777,d1
+	TST d2:BEQ col0:SUBQ#1,d2:BEQ col1:SUBQ#1,d2:BEQ col2:BRA col3
+col0:
+	MOVE.l (a0)+,(a1)+:DBRA d7,col0:AsmExit
+col1:
+	MOVE.l (a0)+,d2:MOVE.l d2,d3:AND.l d0,d2:LSR.l#1,d2:OR.l d2,d3
+	MOVE.l d3,(a1)+:DBRA d7,col1:AsmExit
+col2:
+	MOVE.l (a0)+,d2:MOVE.l d2,d3:AND.l d0,d2:AND.l d1,d3:LSR.l#3,d2:ADD.l d2,d3
+	MOVE.l d3,(a1)+:DBRA d7,col2:AsmExit
+
+col3:
+	MOVE.l (a0)+,d2:MOVE.l d2,d3:AND.l d0,d2:AND.l d1,d3:LSR.l#1,d2:OR.l d2,d3
+	MOVE.l d3,(a1)+:DBRA d7,col3:AsmExit
+End Statement
+
+
+
+Statement addmini{id.w,x.q,y.q,t.w,c.w}
+	Shared chara(),charb(),minioff.w,nxlink.w,rsd
+	rev=t&8:t&7
+;	sn.w=minioff+$8000+(c AND 6)ASL 12+(t+t+(c AND 1))*5*3
+	sn.w=minioff+$8000+(c AND 6)ASL 12+t*5*3
+	If rev Then sn+2048
+	x=(x ASL 3) +128:y=y +124
+
+	hit.w=-1:i.w=0
+	##[$80BB]
+
+		If charb(i)\id=id Then hit=i
+		If i=nxlink
+			hit=nxlink:nxlink+2
+			charb(hit	)\id=id
+			charb(hit+1)\id=id
+		EndIf
+		i+1
+	##[$80BC] hit>-1
+
+	ld.w=hit+1+$e00
+	chara(hit)\y=y,ld,sn,x
+	charb(hit)\fx=x,y
+	hit+1:sn+12;6
+	If t<6 Then ld.w=hit+1+$200 Else ld.w=hit+1+$f00
+	chara(hit)\y=y,ld,sn,x+32
+	charb(hit)\fx=x+32,y
+
+;	If hit+1=insert
+;		If Random1(324,rsd)<0
+;			charb(hit)\cx=(Random1(rsd,324)*20+20)*8+128
+;			charb(hit)\cy=376
+;			If Random1(7328,rsd)<0 Then charb(hit)\cy=112
+;		Else
+;			charb(hit)\cy=(Random1(rsd,12)*15+15)*8+128
+;			charb(hit)\cx=456
+;			If Random1(7328,rsd)<0 Then charb(hit)\cx=112
+;		EndIf
+;		rsd+23.235
+;	EndIf
+
+	charb(hit-1)\cx=charb(hit)\cx-32
+	charb(hit-1)\cy=charb(hit)\cy
+
+
+
+End Statement
+
+
+Statement dofence{x.w,y.w,w.w,c.w,p1.w,p2.w}
+	Shared map(),numchars.w
+	DEFTYPE.w choff,hi,ch,cc,i
+	;
+	c+1
+	If (c&7)=0 Then c-8
+	ch=c AND 7:c=c ASR 3:hi=2+c+c
+	;
+	choff=$8180+numchars
+	While ch>2:choff+$2000:ch-2:Wend
+	;
+	If c=1 Then choff+30
+	If c=2 Then choff+90
+	;
+	map(x	+4,y+hi)=choff+90
+	map(x+w-5,y+hi)=choff+90
+
+	For i=0 To w-1
+		Select i
+			Case 0:		 co=ch*5+0
+			Case 1:		 co=ch*5+1
+			Case w-1:	 co=ch*5+4
+			Case p1-1:	If c<2 Then co=ch*5+3
+			Case p1:		co=2
+			Case p1+1:	co=1
+			Case p2-1:	If c<2 Then co=3
+			Case p2:		co=ch*5+2
+			Case p2+1:	co=ch*5+1
+
+		End Select
+		cc=choff+co*hi:For j=0 To hi-1:map(x,y+j)=cc+j:Next:x+1
+	Next
+
+
+
+End Statement
+
+
+home:nxlink.w=0:Return
+
+Function.w translate{ch.w}
+	blah.w=-1
+	If ch=64 Then blah=28;
+	If ch=91 Then blah=91 ;AHHAHA
+	If ch>64 AND ch<91 Then blah=ch-65
+	If ch>91 AND ch<102 Then blah=ch-63;59
+	If ch>47 AND ch<58 Then blah=ch-19
+	If ch=46 Then blah=26 ;.
+	If ch=33 Then blah=27 ;!
+
+
+	Function Return blah
+End Function
+
+;	If ch=63 Then blah=28 ;?
+;	If ch=58 Then blah=29 ;:
+;	If ch=40 Then blah=31 ;(
+;	If ch=41 Then blah=32 ;)
+
+
+
+
+
+Statement movechars{}
+Shared chara(),charb(),nxlink.w,stt,stt2
+	*ca.chara=&chara(0)
+	*cb.charb=&charb(0)
+	For cnt.w=0 To nxlink-1
+
+;		cx=(*cb\fx+0.5-*cb\cx) ASR 3 +*cb\cx
+;		*ca\x=cx-stt:*cb\cx=cx
+;		cy=(*cb\fy+0.5-*cb\cy) ASR 3 +*cb\cy
+;		*ca\y=cy:*cb\cy=cy
+
+		If *cb\id>128
+			cx=(*cb\fx-stt2)&1023
+
+			If cx>96 AND cx<448
+				*ca\x=cx
+				*ca\y=*cb\fy
+			Else
+				*ca\x=20
+				*ca\y=20
+			EndIf
+
+		Else
+			cx=(*cb\fx-stt)&511
+
+			If cx>96 AND cx<448
+				*ca\x=cx
+				*ca\y=*cb\fy
+			Else
+				*ca\x=20
+				*ca\y=20
+			EndIf
+		EndIf
+
+		*ca+SizeOf.chara
+		*cb+SizeOf.charb
+	Next
+End Statement
+
+
+Statement displaychars{vmem.l}
+	Shared chara(),charb(),nxlink,fps.w
+	temp.l=0
+
+
+
+;	!MyVWait
+;	For cnt.w=0 To nxlink-1
+;		If charb(cnt)\fps AND fps
+;			chara(cnt)\l+8*39
+;			SegaTransfer &chara(cnt),vmem,4:vmem+8
+;			chara(cnt)\l-8*39
+;		Else
+;			SegaTransfer &chara(cnt),vmem,4:vmem+8
+;		EndIf
+;	Next
+	If nxlink>0
+		##[$C482] &chara(0),#wvram+vmem,(nxlink) ASL 2
+		vmem+(nxlink ASL 3)
+	EndIf
+	##[$C489] &temp,vmem,2:##[$C489] &temp,vmem+4,2
+
+
+End Statement
+
+
+
+##[$80CA] chara(i)
+Statement colourstring{id,col,hil,y.q}
+	Shared chara(),charb(),fsize.l,nxlink.w,fps,fontptr.w
+
+	If fps&4
+		osn.w=((col AND 6) ASL 12) + $8002+fontptr+4*39
+		If col AND 1 Then osn+8*39 ;was 5
+	Else
+		osn=$a002+fontptr+4*39
+	EndIf
+
+	If hil>-1
+		sn.w=$a002+fontptr+4*39
+	Else
+		sn.w=((col AND 6) ASL 12) + $8002+fontptr
+		If col AND 8 Then big.w=1 Else big=0:sn+4*39;:y-2
+		If col AND 1 Then sn+8*39 ;was 5
+	EndIf
+
+
+	mybase.w=-1
+	If y>-1 Then y=y ASL 3 +124
+
+	For i.w=0 To nxlink-1
+
+		If charb(i)\id=id
+			If mybase=-1 Then mybase=i:hil+i
+
+			this.w=charb(i)\l
+			If this>-1
+				If (hil=i)
+					chara(i)\l=this+osn
+					If y>-1 Then charb(i)\fy=y -7
+				Else
+					chara(i)\l=this+sn
+					If y>-1 Then charb(i)\fy=y-2
+				EndIf
+			EndIf
+		EndIf
+	Next
+End Statement
+
+Statement remapstring{id1.w,l.w,id2.w}
+	Shared charb(),nxlink
+
+	done.w=0:insert=-1
+	##[$80BB]
+		insert+1
+		If charb(insert)\id=id1 Then done=1
+		If insert=nxlink Then done=2
+	##[$80BC] done<>0
+
+	If done=1
+		For i=0 To l-1
+			charb(insert+i)\id=id2
+		Next
+	EndIf
+
+End Statement
+
+Statement positionstring{id.w,x.q,y.q}
+	Shared chara(),charb(),fsize.l,nxlink.w
+	If x<0 Then invert=1:x=-x
+	x=(x LSL 3)+128:y=(y LSL 3)+124
+
+	For i.w=0 To nxlink-1
+		If charb(i)\id=id
+			If invert=1 Then x=x-charb(i)\dx:invert=0
+
+			charb(i)\fx=charb(i)\dx+x
+			charb(i)\fy=charb(i)\dy+y
+		EndIf
+	Next
+End Statement
+
+Statement addstring{id.w,charbase.l,l.w,col.w}
+	Shared chara(),charb(),fsize.l,nxlink.w,rsd.q,fontptr
+
+	done.w=0:insert=-1
+	##[$80BB]
+		insert+1
+		If charb(insert)\id=id Then done=1
+		If insert=nxlink Then done=2
+	##[$80BC] done<>0
+
+	x.q=0:y.q=0
+	sn.w=((col AND 6) ASL 12) + $8002+fontptr
+
+	If col AND 8 Then big.w=1 Else big=0:sn+4*39:y-2
+	If col AND 1 Then sn+8*39 ;was 5
+
+	osn=$c002+fontptr:;If fps&4 Then osn+8*39
+
+	ld.w=insert+1+$500:xx=x:ll=insert	;was big*$500
+	For look.l=charbase To charbase+l
+		blah.w=translate{Peek.b(look)}
+		If blah<0
+			x+6*(1+big)
+		Else
+			If insert<79
+				oldx=x
+				If blah=91 ;hard space
+					x+6*(1+big):blah=$180
+				Else
+					x+Peek.w(fsize+blah+blah+(1-big)*78)+2
+					blah ASL 2 +sn
+				EndIf
+				chara(insert)\y=y,ld,blah,oldx
+				charb(insert)\id=id
+				charb(insert)\l=blah-sn
+
+
+				If blah=$180 Then chara(insert)\t=ld&$ff:charb(insert)\l=-1 ;hard space
+
+				ld+1:insert+1
+			EndIf
+		EndIf
+	Next
+	ww.w=(xx-x) ASR 1
+	For i=ll To insert-1
+		charb(i)\dx=chara(i)\x+ww
+		charb(i)\dy=chara(i)\y
+
+		If done=2
+			If i&1
+				charb(i)\cx=(##[$8481](rsd,324)*20+20)*8+128
+				charb(i)\cy=376
+				If i&2 Then charb(i)\cy=112
+			Else
+				charb(i)\cy=(##[$8481](rsd,12)*15+15)*8+128
+				charb(i)\cx=456
+				If i&2 Then charb(i)\cx=112
+			EndIf
+			rsd+23.235
+		EndIf
+
+	Next
+
+	If done=2 Then nxlink=insert
+
+End Statement
+
+
+
+CEND
+
+
+
+CNIF #bilbo
+
+	Statement squigd{dest.l,count.w,start.q,adder.q}
+
+		MOVE.l d0,a0:SUBQ#1,d1:MOVE.l d3,d6:MOVE.l d2,d5
+
+		nxlin6:MOVE.l d5,d7:SWAP d7:ADD.l d6,d5:MOVE d7,(a0):ADDQ #4,a0
+		DBRA d1,nxlin6
+		AsmExit
+
+	End Statement
+
+	;	 base.l=?selmap +item*17*12*2
+	;					roll=12+(item&1) ASL 5
+	;					For y=10 To 10+11
+	;						For x=roll To roll+16
+	;
+	;							map(x,y)=Peek.w(base)+$8000+selptr:base+2
+	;						Next
+	;					Next
+
+
+	Statement redoitem{map.l,item.w,base.l,selptr.w}
+		;
+
+		MOVE.l d0,a0
+		AND #1,d1:ASL#6,d1:ADD d1,a0
+
+		MOVE.l d2,a1:MOVEQ#11,d4
+	nxyr:
+		MOVEQ#16,d5:MOVE.l a0,a2:ADD #64*2,a0
+	nxxr:
+		MOVE (a1)+,d0:ADD d3,d0:MOVE d0,(a2)+:DBRA d5,nxxr:
+		DBRA d4,nxyr:AsmExit
+	End Statement
+
+
+	Macro myr
+	;	redoitem{&map(8,10),`1,?selmap +`1*17*12*2,selptr+$8000}
+	End Macro
+
+
+
+	NEWTYPE .rect
+		map.l:ww.w:wh.w:x:y:w:h
+	End NEWTYPE
+
+	Macro s SizeOf .rect\`1(a0):End Macro
+	Macro d SizeOf .rect\`1(a1):End Macro
+
+	Statement sblat{src_rect.l,dest_rect.l}
+		MOVEM.l a4-a6,-(a7):MOVE.l d0,a0:MOVE.l d1,a1
+		MOVE.l !s{map},a2:MOVE !s{y},d0:ASL#2,d0:ADD d0,a2
+		MOVE.l !d{map},a3:MOVE !d{y},d0:ASL#2,d0:ADD d0,a3
+		MOVE !s{x},d0:MOVE !d{x},d1:MOVE !s{w},d6:LSR #1,d6:SUBQ #1,d6
+	nxrow:
+		MOVE d0,d2:LSR#3,d2:MULU !s{wh},d2:ASL#5,d2:LEA 0(a2,d2),a4
+		MOVE d1,d2:LSR#3,d2:MULU !d{wh},d2:ASL#5,d2:LEA 0(a3,d2),a5
+		MOVE d0,d2:AND#7,d2:LSR#1,d2:ADD d2,a4
+		MOVE d1,d2:AND#7,d2:LSR#1,d2:ADD d2,a5
+		MOVE !s{h},d7:SUBQ#1,d7
+	nxbb:
+		MOVE.b (a4),(a5):ADDQ#4,a5:ADDQ#4,a4:DBRA d7,nxbb
+		ADDQ#2,d0:ADDQ#2,d1:DBRA d6,nxrow
+		MOVEM.l (a7)+,a4-a6:AsmExit
+	End Statement
+
+
+
+	Statement sblot{src_rect.l,dest_rect.l}
+		MOVEM.l a4-a6,-(a7):MOVE.l d0,a0:MOVE.l d1,a1
+		MOVE.l !s{map},a2:MOVE !s{y},d0:ASL#2,d0:ADD d0,a2
+		MOVE.l !d{map},a3:MOVE !d{y},d0:ASL#2,d0:ADD d0,a3
+		MOVE !s{x},d0:MOVE !d{x},d1:MOVE !s{w},d6:SUBQ #1,d6
+	nxrow2:
+		MOVE d0,d2:LSR#3,d2:MULU !s{wh},d2:ASL#5,d2:LEA 0(a2,d2),a4
+		MOVE d1,d2:LSR#3,d2:MULU !d{wh},d2:ASL#5,d2:LEA 0(a3,d2),a5
+		MOVE #$f0,d3:MOVE d0,d2:AND#7,d2:LSR#1,d2:BCC ko:MOVEQ#15,d3:ko:ADD d2,a4
+		MOVE d1,d2:AND#7,d2:LSR#1,d2:ADD d2,a5
+		MOVE !s{h},d7:SUBQ#1,d7
+	nxbb2:
+		MOVE.b (a4),d4:AND d3,d4:BEQ nopix:MOVE.b (a5),d5
+		NOT d3:AND d3,d5:NOT d3:OR d4,d5:MOVE.b d5,(a5):nopix
+		ADDQ#4,a5:ADDQ#4,a4:DBRA d7,nxbb2
+		ADDQ#1,d0:ADDQ#1,d1:DBRA d6,nxrow2
+		MOVEM.l (a7)+,a4-a6:AsmExit
+	End Statement
+
+
+
+Statement segaprintsmall{charbase.l,l,x,y,col}
+	Shared map(),origptr.w
+	sn.w=((col AND 6) ASL 12) + $800d+origptr
+
+	For look.l=charbase To charbase+l
+		blah.w=translate{Peek.b(look)}
+		If blah<0
+			x+1
+		Else
+			If blah<>91 ;hard space
+				map(x,y)=blah +sn
+			EndIf
+			x+1
+
+		EndIf
+	Next
+
+End Statement
+
+Statement segaprintbig{charbase.l,l,x,y,col}
+	Shared map(),fontptr.w
+	sn.w=((col AND 6) ASL 12) + $8002+fontptr
+
+	If col&1 Then sn=sn+8*39
+
+	For look.l=charbase To charbase+l
+		blah.w=translate{Peek.b(look)}
+		If blah<0
+			x+1
+		Else
+			If blah<>91 ;hard space
+				blah ASL 2
+				map(x,y)		=blah +sn:blah+1
+				map(x,y+1)	=blah +sn:blah+1
+				map(x+1,y)	=blah +sn:blah+1
+				map(x+1,y+1)=blah +sn:blah+1
+			EndIf
+			x+2
+			If blah=36 Then x-1
+
+		EndIf
+	Next
+
+End Statement
+
+
+	Statement segaprintprint{src.l,l.l,x,y}
+	Shared map(),myfontdat.l,fsize
+
+		big =1
+
+		sn.l=8
+		If big Then sn+(8*39) ASL 1;2
+		win.rect\map=&map(0,0),32,16,x,y
+		big=0
+
+		mysrc.rect\map=myfontdat,1024,2,ch ASL 4+8,0,16,16
+		For cnt.l=0 To l-1
+			x=(x+1)&$fffe
+			blah=translate{Peek.b(src) }
+
+			If blah<0 OR blah=91
+				x+6*(1+big)
+			Else
+				mysrc\x=blah ASL 4 +sn
+				win\x=x
+
+				sblot{&mysrc,&win}
+;				sblat{&mysrc,&win}
+				x=x+Peek.w(fsize+blah+blah+(1-big)*78)+2
+			EndIf
+
+			src+1
+		Next
+
+
+	;	mysrc.rect\map=?seldat,16,44,0,88*item,128,88
+	;	SegaDMA &map(0,0),#wvram+billptr*32,8192
+
+
+	;	mysrc.rect\map=?seldat,16,44,0,0,128,88
+	;			sblat{&mysrc,&win}
+	;			SegaDMA &map(0,0),#wvram+billptr*32,8192
+
+
+	End Statement
+
+
+CEND
+
+
+
+
+
+CNIF #bilbo
+
+
+	Statement docount{bill.l,count.w,open.w,closed.w}		 ;bill=64x64
+		MOVE.l d0,a0:MULU #11*16,d1:LEA countdown(pc,d1),a1
+		MOVE.w d2,d0:SWAP d2:MOVE d0,d2
+		MOVE.w d3,d0:SWAP d3:MOVE d0,d3
+		MOVEQ#15,d7:nxydc:MOVEQ#10,d6:nxxdc
+		MOVE.b(a1)+,d0:BEQ clos:MOVE.l d2,(a0)+:BRA nclo:clos:MOVE.l d3,(a0)+:nclo
+		DBRA d6,nxxdc:ADD #128-11*4,a0:DBRA d7,nxydc
+		AsmExit
+
+	countdown:									 ;11x16
+
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+		Dc.b 0,0,0,0,0,0,0,0,0,0,0
+
+		Dc.b 0,0,0,1,1,1,1,0,0,0,0
+		Dc.b 0,1,1,1,1,1,1,1,1,0,0
+		Dc.b 0,1,1,1,1,1,1,1,1,0,0
+		Dc.b 1,1,1,1,0,0,1,1,1,1,0
+		Dc.b 1,1,1,1,0,0,1,1,1,1,0
+		Dc.b 0,0,0,0,0,0,1,1,1,1,0
+		Dc.b 0,0,0,1,0,1,1,1,1,0,0
+		Dc.b 0,0,0,1,1,1,1,1,0,0,0
+		Dc.b 0,0,0,1,1,1,1,1,1,0,0
+		Dc.b 0,0,0,0,0,0,1,1,1,1,0
+		Dc.b 0,0,0,0,0,0,1,1,1,1,0
+		Dc.b 1,1,1,1,0,0,1,1,1,1,0
+		Dc.b 1,1,1,1,0,0,1,1,1,1,0
+		Dc.b 0,1,1,1,1,1,1,1,1,0,0
+		Dc.b 0,1,1,1,1,1,1,1,1,0,0
+		Dc.b 0,0,0,1,1,1,1,0,0,0,0
+		Dc.b 0,0,0,1,1,1,1,1,1,0,0
+		Dc.b 0,1,1,1,1,1,1,1,1,1,0
+		Dc.b 0,1,1,1,1,1,1,1,1,1,0
+		Dc.b 1,1,1,1,1,0,1,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 0,0,0,0,0,0,0,1,1,1,1
+		Dc.b 0,0,0,0,0,0,0,1,1,1,1
+		Dc.b 0,0,0,0,0,0,1,1,1,1,1
+		Dc.b 0,0,0,0,0,0,1,1,1,1,0
+		Dc.b 0,0,0,0,0,1,1,1,1,1,0
+		Dc.b 0,0,0,0,1,1,1,1,1,0,0
+		Dc.b 0,0,0,1,1,1,1,1,0,0,0
+		Dc.b 0,0,0,1,1,1,1,0,0,0,0
+		Dc.b 0,0,1,1,1,1,1,1,1,1,1
+		Dc.b 0,1,1,1,1,1,1,1,1,1,1
+		Dc.b 1,1,1,1,1,1,1,1,1,1,1
+		Dc.b 0,0,1,1,1,1,1,1,0,0,0
+		Dc.b 0,0,1,1,1,1,1,1,0,0,0
+		Dc.b 0,0,1,1,1,1,1,1,0,0,0
+		Dc.b 0,0,1,1,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,0,1,1,1,1,0,0,0
+		Dc.b 0,0,0,1,1,1,1,1,0,0,0
+		Dc.b 0,0,1,1,1,1,1,1,1,0,0
+		Dc.b 0,1,1,1,1,1,1,1,1,1,0
+		Dc.b 0,1,1,1,1,0,1,1,1,1,0
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 1,1,1,1,0,0,0,1,1,1,1
+		Dc.b 0,1,1,1,1,0,1,1,1,1,0
+		Dc.b 0,1,1,1,1,1,1,1,1,1,0
+		Dc.b 0,0,1,1,1,1,1,1,1,0,0
+		Dc.b 0,0,0,1,1,1,1,1,0,0,0
+
+	End Statement
+
+
+
+
+
+	Statement squiggle{frame.w}
+		MOVE d0,d2
+		MOVEQ#0,d0
+		MOVE.l #cp,a1:MOVE.l#vd,a2
+
+
+		MOVEQ #0,d3
+
+		MOVE d2,d3:LSL.l #8,d3:LSL.l #1,d3
+		MOVE #240,d4:SUB d2,d4:MULU d2,d4:LSL.l #8,d4
+		MOVEQ #0,d6
+
+	nxlin
+		wl1:MOVE.w $c00008,d1:LSR#8,d1:CMP d1,d0:BPL wl1
+
+
+		BSR DoUpper
+		ADDQ #1,d0
+		wl2:MOVE.w $c00008,d1:LSR#8,d1:CMP d1,d0:BPL wl2
+		BSR DoLower
+
+		;
+	;	MOVE d2,d1:ADD d0,d1:AND#1023,d1:ASL#2,d1:MOVE 0(a0,d1),d1
+	;	ASR#8,d1:ASR#1,d1
+
+		;
+	;	MOVE d0,d1:AND#15,d1:OR.w#$8700,d1:MOVE d1,$c00004
+		ADDQ#1,d0:CMP #240,d0:BNE nxlin
+
+
+	:AsmExit
+
+	.DoLower
+		CMP d2,d0
+			BLE half
+			SUB.l d3,d6
+			MOVE.l d6,d1:SWAP d1
+			MOVE.l d2,d5:ADD d5,d5:SUB d0,d5
+
+			CMP #0,d5
+			BLE whole
+			SUB d0,d5
+			BRA twice
+
+
+	.DoUpper
+		MOVE #240,d7:SUB d2,d7
+
+		CMP d7,d0
+		BGE half
+	;		MOVEQ #4,d1
+
+
+			SUB.l d3,d4
+			MOVE.l d4,d1:SWAP d1
+			MOVE #480,d5
+			SUB d2,d5:SUB d2,d5
+			SUB d0,d5
+
+
+			CMP #31*8,d5
+			BGE whole
+			SUB d0,d5
+
+
+	twice:MOVEQ #0,d7
+				MOVE.l #wvram+$38000003,(a1):MOVE d1,(a2)
+				MOVE.l #wvram+$38020003,(a1):MOVE d7,(a2)
+				MOVE.l #wsram+$00000000,(a1):MOVE d5,(a2)
+				MOVE.l #wsram+$00020000,(a1):MOVE #0,(a2)
+				RTS
+
+	whole:MOVEQ #0,d7
+				MOVE.l #wvram+$38000003,(a1):MOVE d7,(a2)
+				MOVE.l #wvram+$38020003,(a1):MOVE d7,(a2)
+				MOVE.l #wsram+$00000000,(a1):MOVE d7,(a2)
+				MOVE.l #wsram+$00020000,(a1):MOVE d7,(a2)
+				RTS
+
+		half
+			MOVEQ #0,d1:MOVE #32*8,d7
+
+			MOVE.l #wvram+$38000003,(a1):MOVE d1,(a2)
+			MOVE.l #wvram+$38020003,(a1):MOVE d1,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d7,(a2)
+			MOVE.l #wsram+$00020000,(a1):MOVE d7,(a2)
+			RTS
+
+	End Statement
+
+
+	.
+	.SetUpCloud
+
+
+		!MyVWait
+		!setreg{2,0}		 ;map location=0*8192
+		!setreg{4,0}		 ;map location=0*8192
+		!setreg{5,$7e}	 ;sprites location=$fc00
+		!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+;		!setreg{12,$89}	;32 cell mode shadows no interlace
+		!setreg{12,$81}	;32 cell mode no shadows no interlace
+
+		!setreg{13,$3e}	;hs=$f800
+
+		!setreg{16,1+48} ;64x64 sized map
+		!setreg{3,$38}	 ;windowpos= $e000
+		!setreg{17,$0};$8a}
+		!setreg{18,$0};$ff}
+		!setreg{7,0}
+
+
+;		!setreg{11,3}		;h-scroll line by line
+
+		MOVE.l #cp,a1:MOVE.l#vd,a2
+		MOVEQ #0,d3
+		MOVE.l #wvram+$3c000003,(a1):MOVE d3,(a2) ;sprites
+		MOVE.l #wvram+$3c020003,(a1):MOVE d3,(a2)
+		MOVE.l #wvram+$3c040003,(a1):MOVE d3,(a2)
+		MOVE.l #wvram+$3c060003,(a1):MOVE d3,(a2)
+		MOVE.l #wvram+$38000003,(a1):MOVE d3,(a2) ;scroll reg
+		MOVE.l #wvram+$38020003,(a1):MOVE d3,(a2)
+		MOVE.l #wsram+$00000000,(a1):MOVE d3,(a2)
+		MOVE.l #wsram+$00020000,(a1):MOVE d3,(a2)
+
+;		!setreg{5,$7c}	 ;sprites location=$fa00
+;		!pokemem{#wvram+$20000000,0}					 ;horizontal
+;		!pokemem{#wsram+$00000000,0}					 ;vertical
+;		!pokemem{#wvram+$20020000,0}					 ;horizontal
+;		!pokemem{#wsram+$00020000,0}			 ;vertical
+
+	Return
+
+
+;Macro yrs
+;	i*3+8
+;End Macro
+Macro yrs
+	((i*32+44) ASR 3)
+End Macro
+
+
+	.docodies
+		For cnt.w=0 To 128 Step 2
+			Poke.w buffa1+cnt,#mybluecol;0
+		Next
+		##[$C482] buffa1,#wcram,64
+		MOVE #$8710,$c00004
+
+		!pokemem{#wvram+$10000000,0}
+		!pokemem{#wvram+$10020000,0}
+
+		!pokemem{#wsram+$00000000,0}			 ;vertical
+		!pokemem{#wsram+$00020000,0}			 ;vertical
+
+		!setreg{13,$4}	 ;hs=$1000;$fc00
+
+
+
+		*batman.batman=?cmdat
+;		SegaDMA &*batman\pal	 ,#wcram+32,16
+		MyCopy{ &*batman\pal	 ,buffb1+32,16}
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 39
+			map(i,j)=Peek.w(base)+$a754:base+2
+		Next:Next
+		##[$C489] &*batman\bloks,#vram+$ea80,*batman\numblocks*16
+		##[$C482] &map(0,0),#wvram,2048
+		For fadeincol.w=0 To 30
+			!MyVWait
+			For cnt.w=0 To 100:Next
+			##[$C482] buffa1,#wcram,64
+			MyCloset{buffb1,buffa1}
+		Next
+		For cnt.w=0 To 100
+			!MyVWait
+		Next
+
+
+	Return
+
+
+	.doresults
+		For cnt.w=0 To 128 Step 2
+			Poke.w buffb1+cnt,#mybluecol
+			Poke.w buffa1+cnt,#mybluecol
+		Next
+
+
+		*batman.batman=?resultsdat
+
+		MyCopy{&*batman\pal ,buffa1,16}
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 39
+			map(i,j)=Peek.w(base)+$a500:base+2
+		Next:Next
+		##[$C489] &*batman\bloks,#vram+$a000,*batman\numblocks*16
+		##[$C482] &map(0,0),#wvram,2048
+
+		numchars.w=(?fontf-?font) ASR 5
+		fontptr.w=$100
+		##[$C489] ?font,#vram+fontptr*32,(?fontf-?font) ASR 1
+
+		minioff.w=fontptr+numchars
+;		SegaTransfer ?miniat,#vram+minioff*32,(?miniatf-?miniat) ASR 1
+
+
+		!pokemem{#wsram+$00000000,-32*8+4}			 ;vertical
+		!pokemem{#wsram+$00020000,0}			 ;vertical
+
+
+		For j=0 To 30:For i=0 To 39
+			map(i,j)=fontptr
+		Next:Next
+
+
+		base.l=buffa1+32
+			MyCopy{ ?carpalette,base,8												 }
+			MyCopy{ ?carpalette,base+32,8											}
+
+			MyCopy{ ?carpalette+16+newp(0)\col ASL 3,base+16,4 }
+			MyCopy{ ?carpalette+16+newp(1)\col ASL 3,base+24,4 }
+
+			MyCopy{ ?carpalette+16+newp(2)\col ASL 3,base+48,4 }
+			MyCopy{ ?carpalette+16+newp(3)\col ASL 3,base+56,4 }
+
+
+		base.l=buffa1
+		MyCopy {?segpalette+16,base+16,8}
+		Poke.w base,#mybluecol
+
+
+		pitch.w=31000
+		For i=0 To 5
+			*p=Pl(i)
+			roll.w=*p\warptime
+			If *p\control<>#contcomp
+				If roll<pitch Then pitch=roll
+			EndIf
+		Next
+
+		For i=0 To 5
+			pl.w=startline(i)\car
+			*p=Pl(pl)
+
+			*p\pos=i
+
+			If *p\control=#contcomp
+				roll=pitch
+			Else
+				roll=*p\warptime
+			EndIf
+
+			If *p\tottime>0
+				startline(i)\h=-(*p\tottime-startrace.w+roll)
+			Else
+
+				If lapdir.w=1
+					myleng.w=*p\lap ASL 7 +*p\curdt
+				Else
+					myleng.w=*p\lap ASL 7 -*p\curdt
+				EndIf
+				myleng=$8000-myleng
+
+				startline(i)\h=myleng.w
+			EndIf
+		Next
+
+		##[$851E] &startline(0),#uscar,*p0
+
+
+
+
+		nxlink.w=0
+		For i=0 To 5
+			pl.w=startline(i)\car
+			*p.car=Pl(pl)
+			roll.w=i*10
+			pitch.w=-(*p\control<>#contcomp)
+
+			cnt.w=##[$C386](*p\newwarps,0,9)+48
+			addstring{roll,&cnt+1,0,pitch};4}
+			positionstring{roll,25.5,!yrs}
+
+;			Select i
+;				Case 0:pitch.w=9
+;				Case 1:pitch=6
+;				Case 2:pitch=3
+;				Case 3:pitch=1
+;				Default:pitch=0
+;			End Select
+			*p\newscore=##[$C386](9-i-i-i,1,9)+(i>3)
+
+			base.l=*p\newscore		;points
+			If base>9
+				cnt=(##[$C381](base /10)+48) ASL 8 +base ##[$80B9] 10 + 48
+				addstring{roll+1,&cnt	,1,pitch}
+			Else
+				cnt=base+48
+				addstring{roll+1,&cnt+1,0,pitch}
+			EndIf
+			positionstring{roll+1,37,!yrs}
+
+
+;			base.l=(*p\tottime+*p\newwarps*3-startrace.w)/5
+			base.l=-startline(i)\h/5
+			Poke.b &*p\i+5,base ##[$80B9] 10 +48:base /10
+			Poke.b &*p\i+4,46
+			Poke.b &*p\i+3,base ##[$80B9] 10 +48:base /10
+			Poke.b &*p\i+2,base ##[$80B9] 6	+48:base /6
+			Poke.b &*p\i+1,46
+			Poke.b &*p\i+0,base ##[$80B9] 10 +48:base /10
+			addstring{roll+4,&*p\i,5,pitch}
+			positionstring{roll+4,31,!yrs}
+
+			addmini{roll+2,4.5,(!yrs) ASL 3,i,(*p\newp&3)+2}
+			colormini{?miniat+*p\carnum*15*32,buffb2,*p\newp&1+((*p\newp)&4) ASR 1}
+			##[$C482] buffb2,#wvram+(minioff+i*15)*32,15*16
+
+
+
+
+			cnt.w=i+49
+			segaprintbig{&cnt+1						 ,0,2 ,i*4+6,pitch}
+			segaprintbig{&newp(*p\newp)\nam1,5,11,i*4+6,pitch}
+
+
+		Next
+
+		##[$C482] &map(0,0),#wvram+$1000,2048
+
+		addstring{-16,?rac0,11,8};#selcol+8}
+		positionstring{-16,20,1.5}
+
+
+
+
+		fadeincol.w=-30:done.w=Off
+		##[$80BB]
+
+			movechars{}
+			!MyVWait
+			If fadeincol<0 Then ##[$C482] buffb1,#wcram,64
+			displaychars{$fc00}
+
+			If fadeincol<0
+				fadeincol+1
+				MyCloset{buffa1,buffb1}
+			Else
+				temp.l=##[$C484](trx{0})
+				If temp&$f0<>0 Then done=On
+			EndIf
+
+
+		##[$80BC] done
+		!dotune{53}
+
+
+		nxlink=0
+		!MyVWait
+		displaychars{$fc00}
+		!pokemem{#wsram+$00000000,0}			 ;vertical
+		!pokemem{#wsram+$00020000,0}			 ;vertical
+
+		*batman.batman=?clouddat
+
+
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 63
+			map(i,j)=Peek.w(base)+$8100:base+2
+		Next:Next
+		##[$C489] &*batman\bloks+2*24*30,#vram+$2000,*batman\numblocks*16
+		##[$C482] &map(0,0),#wvram+$1000,2048
+
+		Poke.w buffa1,0
+		##[$C482] &*batman\pal+2,#wcram+2,15
+
+;about to break codemasters logo
+		count.w=0
+		##[$80BB]
+			!MyQWait
+
+			##[$C482] buffb1,#wcram,1;64
+
+			MOVE.l #cp,a1:MOVE.l#vd,a2
+			MOVEQ #0,d3
+			MOVE.l #wvram+$38000003,(a1):MOVE d3,(a2)
+			MOVE.l #wvram+$38020003,(a1):MOVE d3,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d3,(a2)
+			MOVE.l #wsram+$00020000,(a1):MOVE d3,(a2)
+
+			cc3:MOVE $c00004,d0:BTST #3,d0:BNE cc3
+
+			If count>0 Then squiggle{##[$C386](count,0,300)}
+			count+13;#animtime
+
+;			SegaDMA buffb1,#wcram,64
+			MyCloset{buffa1,buffb1}
+
+
+		##[$80BC] count>300
+		count=0
+;broken..
+		!pokemem{#wsram+$00000000,-32*8}			 ;vertical
+		!pokemem{#wsram+$00020000,-32*8}			 ;vertical
+
+;			Repeat
+;			Until SegaJoy(trx{0})<>0
+;
+;			Repeat
+;			Until SegaJoy(trx{0})=0
+
+
+
+
+	Return
+
+
+	.DoCloudScratch
+
+		For cnt.w=0 To 128 Step 2
+			Poke.w buffa1+cnt,#mybluecol;0
+		Next
+		##[$C482] buffa1,#wcram,64
+
+
+
+
+		*batman.batman=?clouddat
+
+;		SegaDMA &*batman\pal ,#wcram,16
+		MyCopy{&*batman\pal ,buffb1,16}
+
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 63
+			map(i,j)=Peek.w(base)+$8100:base+2
+		Next:Next
+		##[$C489] &*batman\bloks+2*24*30,#vram+$2000,*batman\numblocks*16
+		##[$C482] &map(0,0),#wvram+$1000,2048
+
+
+		*batman.batman=?cmdat
+;		SegaDMA &*batman\pal	 ,#wcram+32,16
+		MyCopy{ &*batman\pal	 ,buffb1+32,16}
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 39
+			map(i,j)=Peek.w(base)+$a500:base+2
+		Next:Next
+		##[$C489] &*batman\bloks,#vram+$a000,*batman\numblocks*16
+		##[$C482] &map(0,0),#wvram,2048
+
+
+
+
+
+;about to break codemasters logo
+		count.w=-50*#loadtime
+		##[$80BB]
+			!MyQWait
+
+
+			MOVE.l #cp,a1:MOVE.l#vd,a2
+			MOVEQ #0,d3
+			MOVE.l #wvram+$38000003,(a1):MOVE d3,(a2)
+			MOVE.l #wvram+$38020003,(a1):MOVE d3,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d3,(a2)
+			MOVE.l #wsram+$00020000,(a1):MOVE d3,(a2)
+
+			cc9:MOVE $c00004,d0:BTST #3,d0:BNE cc9
+
+			If count>0 Then squiggle{##[$C386](count,0,300)}
+
+
+			If count=-50*#loadtime
+				For fadeincol.w=0 To 30
+					!MyVWait
+					For cnt.w=0 To 100:Next
+					##[$C482] buffa1,#wcram,64
+					MyCloset{buffb1,buffa1}
+				Next
+			EndIf
+
+			count+#animtime
+
+		##[$80BC] count>260
+		count=0
+;broken..
+
+
+
+
+;		For cnt.w=0 To 5
+;			newp(cnt)\humcol=newp(cnt)\col
+;			If newp(cnt)\sel
+;				If newp(cnt)\nam2&1=0
+;					newp(cnt)\humnam1=newp(cnt)\nam1
+;					newp(cnt)\humnam2=newp(cnt)\nam2
+;				EndIf
+;			EndIf
+;		Next
+
+		For cnt.w=0 To 5
+			newp(cnt)\sel=Off
+			newp(cnt)\ed=-32
+			newp(cnt)\col=newp(cnt)\humcol
+
+;			NewName{&newp(cnt)\nam1,1}
+		Next:reduce.w=0
+
+		done.w=#debounce-1
+		item.w=0:nxchamp.w=0:myselchamp.w=0:moved.w=0:nxlink.w=0
+
+
+
+.DoCloudLogo
+
+;copy playfield a to playfield b.. (cloud image)
+		*batman.batman=?clouddat
+
+		!MyVWait
+		##[$C489] &*batman\bloks+2*24*30,#vram+$2000,*batman\numblocks*16
+		##[$C482] &*batman\pal ,#wcram	 ,16
+		##[$C482] ?segpalette ,#wcram+32,16
+
+		base.l=&*batman\mmap
+		For j=0 To 29:For i=0 To 63
+			map(i,j)=Peek.w(base)+$8100:base+2
+		Next:Next
+		!MyVWait
+		##[$C482] &map(0,0),#wvram,2048
+
+
+		numchars.w=(?fontf-?font) ASR 5
+		fontptr.w=$100+*batman\numblocks
+		##[$C489] ?font,#vram+fontptr*32,(?fontf-?font) ASR 1
+
+
+
+		minioff.w=fontptr+numchars
+;		SegaTransfer ?miniat,#vram+minioff*32,(?miniatf-?miniat) ASR 1
+
+		origptr.w=minioff+15*6;(?miniatf-?miniat) ASR 5
+		##[$C489] ?billdat,#vram+origptr*32,(?billdatf-?billdat) ASR 1
+		billptr.w=origptr+(?billdatf-?billdat) ASR 5
+
+
+;draw billboard.
+
+		If done=#nextrace
+
+			redlev.w=-64
+			##[$80BB]
+				Gosub RedCrap
+			##[$80BC] redlev=0
+
+			!MyVWait
+			##[$C482] &map(0,0),#wvram+billptr*32,8192
+
+
+;			SegaDMA &map(0,0),#wvram+billptr*32	,8192;2048
+			##[$C482] ?carpalette,#wcram+ 64,16
+			##[$C482] ?carpalette,#wcram+ 96,16
+
+
+			stt=0:stt2=0:velx=0
+			roll.w=1:Gosub SetUpBill
+			!MyVWait
+			##[$C482] &map(0,0),#wvram+$1000			,2048
+
+			##[$C482] ?carpalette			,#wcram+ 64,8 ;kill me..
+			##[$C482] ?carpalette			,#wcram+ 96,8
+			##[$C482] ?carpalette+16	 ,#wcram+ 80,4
+			##[$C482] ?carpalette+16+ 8,#wcram+ 88,4
+			##[$C482] ?carpalette+16+16,#wcram+112,4
+			##[$C482] ?carpalette+16+24,#wcram+120,4
+
+			!pokemem{#wsram+$00000000,0}			 ;vertical
+			!pokemem{#wsram+$00020000,0}			 ;vertical
+
+			done=#debounce-1
+;the billboard is now on the screen..
+;			Repeat
+;			Until
+
+
+
+		Else
+			roll=2
+			!MyVWait
+			##[$C482] ?titledat,#wvram+32*billptr,16*32*16
+			##[$C482] ?segpalette+64,#wcram+32,16
+
+			##[$C482] ?carpalette			,#wcram+ 64,8
+			##[$C482] ?carpalette			,#wcram+ 96,8
+			##[$C482] ?carpalette+16	 ,#wcram+ 80,4
+			##[$C482] ?carpalette+16+ 8,#wcram+ 88,4
+			##[$C482] ?carpalette+16+16,#wcram+112,4
+			##[$C482] ?carpalette+16+24,#wcram+120,4
+
+
+			Gosub SetUpBill
+			!MyVWait
+			##[$C482] &map(0,0),#wvram+$1000			,2048
+
+			!pokemem{#wsram+$00000000,0}			 ;vertical
+			!pokemem{#wsram+$00020000,0}			 ;vertical
+
+		EndIf
+
+
+
+
+
+		Goto dodocloud
+
+
+	writegotext
+
+		nxlink=0
+		For i=0 To #uscar							;new done value
+			Gosub newcar2
+			pl.w=#uscar-startline(i)\car
+			newp(pl)\cx=$80-32-16-i*24
+			newp(pl)\vel=6
+		Next
+
+		xoff.w=0
+		win.rect\x=0,0
+		;nxlink.w=0
+		addstring{-16,?scordat,5,11};#selcol+8}
+		positionstring{-16,29,4}
+
+
+		roll=2
+		If champtyp>1 Then roll+8
+		Poke.l blockmap,Peek.l(?racedat)
+		Poke.w blockmap+4,racenum.w+49
+		addstring{-11,blockmap,5,roll}
+		If champtyp>1
+
+			positionstring{-11,20,31/2}
+		Else
+
+			positionstring{-11,20,58 /4}
+
+
+			Poke.l blockmap,Peek.l(?atmtdat) ;atte
+			Poke.l blockmap+4,Peek.l(?atmtdat+4) ;mpt?
+			Poke.b blockmap+7,32
+			Poke.b blockmap+8,0+49
+
+			addstring{-9,blockmap,8,2}
+
+			positionstring{-9,20 ,65/4}
+
+
+
+		EndIf
+
+
+		base.l=((nxchamp.w&3)*6+racenum.w)*13+?trknamdat
+		addstring{-4,base,12,2};#selcol}
+		positionstring{-4,20,18}
+
+
+		temp=0
+
+	Return
+
+
+Macro myironlung
+	base.l=?blubdat+(nxchamp&3) ASL 2
+	addstring{130+nxchamp&1,Peek.l(base),Peek.l(base+4)-Peek.l(base)-1,10};#deselcol}
+	positionstring{130+nxchamp&1,20+(1-nxchamp&1) ASL 6,3.5}
+End Macro
+
+
+#cardeep=3
+#carmu=#cardeep*2
+
+
+
+.newcar2
+	col.w=#uscar-startline(i)\car
+	If champtyp.w<2
+		roll.w=cartyp.w
+		newp(col)\car=cartyp.w
+	Else
+		roll=newp(col)\car
+	EndIf
+
+	For pitch.w=1 To #cardeep
+		addmini{64+i*#carmu+pitch,-20,212-(i&1)*28-pitch,i+8,(col&3)+4}
+	Next
+
+	colormini{?miniat+(roll&7)*15*32,buffb2,col&1+(col&4) ASR 1}
+	##[$C482] buffb2,#wvram+minioff*32+i*15*32,15*16
+	If col<4
+		##[$C482] ?carpalette+16+newp(col)\col ASL 3,#wcram+64+16+(col&1)ASL 3+(col&2) ASL 4,4
+	EndIf
+Return
+
+
+.movecar2
+
+		For i=0 To #uscar
+			pl.w=#uscar-startline(i)\car
+			If champtyp>1
+
+				If pl<=numseg.w
+					temp.l=##[$C484](trx{pl})
+					If newp(pl)\moved=0
+						If temp&16<>0
+							newp(pl)\car=##[$C384](newp(pl)\car+1,0,6)
+							Gosub newcar2
+							newp(pl)\moved=50
+						EndIf
+					Else
+						If temp&16=0 Then newp(pl)\moved=0
+					EndIf
+				EndIf
+			EndIf
+
+
+			cx=newp(pl)\cx+newp(pl)\vel
+			roll=Off
+
+			If cx>$80+256-i*32
+				cx=$80+256-i*32
+				newp(pl)\vel=0
+			EndIf
+
+
+			newp(pl)\cx=cx
+			blah.q=($80+160-cx) ASR 7
+
+			roll.w=i*#carmu:mysx.q=cx
+			If newp(pl)\vel<0
+				For pitch.w=1 To #cardeep
+					charb(roll	)\fx=mysx
+					charb(roll+1)\fx=mysx+32:mysx+blah:roll+2
+				Next
+			Else
+				For pitch.w=1 To #cardeep
+					charb(roll	)\fx=mysx
+					charb(roll+1)\fx=mysx-8:mysx+blah:roll+2
+				Next
+			EndIf
+
+		Next
+
+Return
+
+
+
+.newcar
+;	If mydestmem.l<>0 Then Return
+
+	roll.w=(##[$8481](rsd,6.83)+1)*3
+
+
+	blah.q=##[$8481](rsd,7.727):rsd+6.27
+	newp(i)\vel=7+##[$8481](rsd,627.865)*2
+
+	If blah<0
+		cx=$60-blah ASL 4
+		roll+8
+	Else
+		cx=$a0+320+ blah ASL 4
+		newp(i)\vel=-newp(i)\vel
+	EndIf
+
+	For pitch.w=1 To #cardeep
+		addmini{-64+i*#carmu+pitch,-20,216-i*16-pitch,i+roll&8,i+4}
+	Next
+	colormini{?miniat+(roll&7)*15*32,buffb2,i&1}
+	##[$C482] buffb2,#wvram+minioff*32+i*15*32,15*16
+
+;	mydestmem.l=#wvram+minioff*32+i*15*32
+;			If mydestmem.l<>0
+;				mydestmem=0
+;			EndIf
+
+
+	If done>=#trsel
+		newp(i)\vel=0
+		roll.w=i*#carmu
+		For pitch.w=1 To #cardeep
+			charb(roll	)\fy=20
+			charb(roll+1)\fy=20:roll+2
+		Next
+	EndIf
+
+
+Return
+
+
+movecar
+		For i=0 To 3
+
+			cx=newp(i)\cx+newp(i)\vel
+			roll=Off
+
+			If newp(i)\vel<0
+				If cx<$58 Then Gosub newcar
+			Else
+				If cx>$a0+320 Then Gosub newcar
+			EndIf
+
+			newp(i)\cx=cx
+			blah.q=($80+160-cx) ASR 7
+
+			roll.w=i*#carmu:mysx.q=cx
+			If newp(i)\vel<0
+				For pitch.w=1 To #cardeep
+					charb(roll	)\fx=mysx
+					charb(roll+1)\fx=mysx+32:mysx+blah:roll+2
+				Next
+			Else
+				For pitch.w=1 To #cardeep
+					charb(roll	)\fx=mysx
+					charb(roll+1)\fx=mysx-8:mysx+blah:roll+2
+				Next
+			EndIf
+
+		Next
+
+Return
+
+
+.dodocloud
+		mycount.w=0
+		stt2.q=0;512
+		mydestmem.l=0
+
+		win.rect\map=&map(0,0),32,16,0,0;,24
+		redlev.w=0:tobd.w=16384:xoff.w=0
+
+
+		##[$80BB]
+			movechars{}
+			!MyVWait
+			If done>=#scrollpast
+				If done>=#scrollpast+2;#startscr
+					##[$C482] buffa1,#wvram+$f800,240*2*2/2
+				Else
+					##[$C482] buffa1+2,#wvram+$f800,240*2*2/2
+				EndIf
+			EndIf
+
+
+			displaychars{$fc00}
+
+
+
+			If mydestmem.l<>0
+				##[$C482] buffb2,mydestmem,15*16
+				mydestmem=0
+			EndIf
+
+			Gosub RedCrap
+
+
+			temp.l=##[$C484](trx{0})
+			If ##[$C385](stt)>1 Then temp=0
+
+			Select done
+				Case #debounce-1
+					done=done+1
+				Case #debounce
+					If temp&$d0=0
+						done=#scrollpast	;initial debounce
+						!setreg{11,3}		;h-scroll line by line
+						nxlink=0
+					EndIf
+					temp=0
+				Case #scrollpast
+					If stt>450 Then stt-512:done+1
+					temp=0
+				Case #scrollpast+1
+					If ##[$C385](velx)<0.2
+						velx=0:stt=0
+						!MyVWait
+						##[$C482] buffa1,#wvram+$f800,240*2*2/2
+
+						For mycount=16 To 256+144 Step 12
+
+							If mycount<=256
+								If mycount=256
+									fadeincol=5+(##[$8481](rsd,8.282)+1) ASL 1
+									!dotune{fadeincol}
+								EndIf
+								fadeincol=mycount
+
+							Else
+								fadeincol=(mycount-256 )*(mycount-256-144)
+								fadeincol=256+##[$C381](fadeincol ASR 8)
+							EndIf
+
+
+							!pokemem{#wsram+$00000000,-fadeincol}			 ;vertical
+							cc6:MOVE $c00004,d0:BTST #3,d0:BNE cc6
+							##[$80BB]
+							##[$80BC] ((Peek.w($c00008)LSR 8)&255)<2
+
+							##[$80BB]
+							##[$80BC] ((Peek.w($c00008)LSR 8)&255)>(fadeincol-25-16)
+
+							##[$80BB]
+								roll.w=(Peek.w($c00008)LSR 8)&255
+								!pokemem{#wsram+$00000000,-roll-32*8}			 ;vertical
+							CNIF #nts
+								##[$80BC] roll>216
+							CELSE
+								##[$80BC] roll>232
+							CEND
+
+							!MyVWait
+						Next
+						mycount=0
+
+
+						!pokemem{#wsram+$00000000,-32*8}			 ;vertical
+
+						If firstrace
+							done=#startscr
+							For i=0 To 3
+								Gosub newcar
+								newp(i)\cx=cx
+							Next
+
+						Else
+							done=#nextrace
+							nxlink=0
+							Gosub writegotext
+						EndIf
+					EndIf
+
+					temp=0
+
+
+				Case #startscr
+					Gosub movecar
+					mycount.w+1
+					If mycount.w<8192 Then mycount=8192
+
+					If temp&$d0		;title page
+						menu.w=1
+						!dotune{53}
+
+						done=10000
+						##[$80BB]
+							movechars{}
+							!MyVWait
+							displaychars{$fc00}
+
+							Gosub movecar
+
+							cnt=4
+							For i=0 To 3
+								If newp(i)\vel=0 Then cnt-1
+							Next
+
+
+						##[$80BC] cnt=0
+						done=#startscr
+
+
+						Gosub HandleOptions
+						menu.w=0:Gosub HandleOptions
+
+						win\x=32,20:xoff=60
+
+						done=#trsel
+						nxlink=0
+						base.l=?chadat+champtyp.w ASL 2
+						addstring{-5,Peek.l(base),Peek.l(base+4)-Peek.l(base)-1,11};#deselcol}
+						positionstring{-5,20,17.5}
+						!myironlung
+
+						Gosub FlushRed
+
+					EndIf
+					temp=0
+				Case #trsel:	;champ selection
+					If temp&$d0
+						!dotune{53}
+						done=#startscr:roll.w=0:Gosub SetUpBill
+						!MyVWait
+						##[$C482] &map(0,0),#wvram+$1000			,2048
+						nxlink.w=0:displaychars{$fc00}	;blank
+
+
+
+						GetReg a0,&map(0,0):MOVE.l #$55555555,d1
+						MOVE.l d1,d2:MOVE.l d2,d3:MOVE.l d3,d4:MOVEQ #16,d5
+						MOVE.l #511,d0;#(64*128)/8-1
+						myclse:MOVEM.l d1-d4,(a0):ADD d5,a0
+									 MOVEM.l d1-d4,(a0):ADD d5,a0:DBRA d0,myclse
+						##[$C482] &map(0,0),#wvram+billptr*32,8192 ;blank for a diff reason
+
+						done=#nextrace
+						roll.w=1:Gosub SetUpBill
+
+						nxlink.w=0:Gosub writegotext
+						movechars{}
+						!MyVWait
+						##[$C482] &map(0,0),#wvram+$1000 ,2048
+						displaychars{$fc00}
+
+
+						xoff.w=0
+						Gosub FlushRed
+
+					EndIf
+
+
+				Case #nextrace:
+					If temp&$80 Then done=#leave:!dotune{53}
+
+					Gosub movecar2
+					temp=0
+
+
+
+			End Select
+
+
+			delx=0
+			If (temp&4=4) Then delx-1
+			If (temp&8=8) Then delx+1
+
+
+			If moved=0
+
+;				If temp&$20
+;					menu.w=0
+;					Gosub HandleOptions
+;					nxchamp-1
+;					moved=50
+;				EndIf
+
+				If (delx<>0)
+					!dotune{52}
+					myselchamp.w=myselchamp+delx
+					moved=50
+				EndIf
+
+			Else
+				If (delx=0) AND (temp&$20=0) Then moved=0
+
+			EndIf
+
+
+			If tobd.w=16384
+				nu.w=myselchamp-nxchamp
+				If nu>0
+					signside.w=On:stt-512
+					nxchamp+1:tobd=0:redlev=-64
+				EndIf
+				If nu<0
+					signside.w=Off:stt+512
+					nxchamp-1:tobd=0:redlev=-64
+				EndIf
+			EndIf
+
+;			velx/0.2
+
+			velx=velx *.8
+			Select done
+				Case #scrollpast	:velx=velx	+ 4
+				Default: velx=velx	- ##[$C386](stt+velx*5,-50,50) ASR 4
+			End Select
+
+			stt+velx
+			stt2+velx
+
+			squigd{buffa1+2,176,-stt2 ASR 3,0}		 ;sky
+			squigd{buffa1+2+176*4,4,-stt2,0}			 ;red/white stipes
+			squigd{buffa1+2+180*4,60,-stt2,-stt2 ASR 8} ;ground
+
+;			squigd{buffa1+8*4,180,-stt2,0}	;billboard
+			squigd{buffa1,200,-stt2,0}	;billboard
+
+
+
+			If mycount>8192+#titletime Then done=#doattr
+		##[$80BC] done>=#leave
+		stt=0
+		champ.w=(myselchamp.w&3)
+		super.w=Off
+;		menu.w=1
+;		Gosub HandleOptions
+
+;		SegaDMA &*batman\pal ,#wcram	 ,16
+;		SegaDMA ?segpalette ,#wcram+32,16
+
+		MyCopy{&*batman\pal ,buffa1	 ,16}
+		MyCopy{?segpalette ,buffa1+32,16}
+
+
+		If done=#doattr;startscr
+
+			base.l=buffa1
+			MyCopy{&*batman\pal		 ,base	 ,16 }
+			MyCopy{?segpalette+64	 ,base+32,16 }
+
+			MyCopy{?carpalette			,base+ 64,8 }
+			MyCopy{?carpalette			,base+ 96,8 }
+			MyCopy{?carpalette+16	 ,base+ 80,4 }
+			MyCopy{?carpalette+16+ 8,base+ 88,4 }
+			MyCopy{?carpalette+16+16,base+112,4 }
+			MyCopy{?carpalette+16+24,base+120,4 }
+
+
+
+
+		Else
+			base.l=buffa1
+			MyCopy {?segpalette+16,base+16,8}
+
+			For i=0 To #uscar
+				col.w=#uscar-startline(i)\car
+				If col<4
+					MyCopy{?carpalette+16+newp(col)\col ASL 3,buffa1+64+16+(col&1)ASL 3+(col&2) ASL 4,4}
+				EndIf
+			Next
+			MyCopy{?carpalette,buffa1+64,8}
+			MyCopy{?carpalette,buffa1+96,8}
+		EndIf
+
+;		For i=0 To 3
+;			MyCopy{?carpalette+16+newp(i)\col ASL 3,buffa1+64+16+(i&1)ASL 3+(i&2) ASL 4,4}
+;		Next
+
+
+		For cnt.w=0 To 128 Step 2
+			Poke.w buffb1+cnt,0
+		Next
+
+		For fadeincol.w=0 To 30
+			!MyVWait
+			##[$C482] buffa1,#wcram,64
+			If done=#doattr;startscr
+				displaychars{$fc00}
+				Gosub movecar
+				movechars{}
+			EndIf
+			MyCloset{buffb1,buffa1}
+
+
+		Next
+
+
+
+	Return
+;--------------------------------
+
+	.SetUpBill
+
+		If roll=2
+			base.l=billptr+$a000:roll=1
+		Else
+			base.l=billptr+$8000
+		EndIf
+
+		GetReg a0,&map(0,0):MOVE.l #$07ff07ff,d1
+		MOVE.l d1,d2:MOVE.l d2,d3:MOVE.l d3,d4:MOVEQ #16,d5
+		MOVE.l #255,d0;#(64*64)/8-1
+		myclst:MOVEM.l d1-d4,(a0):ADD d5,a0
+					 MOVEM.l d1-d4,(a0):ADD d5,a0:DBRA d0,myclst
+;		For x=0 To 63:For y=0 To 63:map(x,y)=2047:Next:Next
+
+
+
+		For cnt.w= 4+4 To 4+32-4 Step 8
+			map(cnt,1)=origptr+$8000
+			map(cnt,2)=oirgptr+$8001
+		Next
+
+		map(4	 +4,2+17+1)=origptr+$800b
+		map(4+32-4,2+17+1)=origptr+$800b
+		map(4	 +4,2+17+2)=origptr+$800b
+		map(4+32-4,2+17+2)=origptr+$800b
+
+
+
+		For x=4 To 4+32
+			For y=2 To 2+17
+				temp.l=&map(x,y)
+				happy=0
+				If y=2		Then Poke.w temp,origptr+$8003:happy=1
+				If y=2+17
+					Poke.w temp,origptr+$8006:happy=2
+					If firstrace AND (champtyp&2<0)
+						If x<32-9
+							pitch.w=x-(32-9)
+							If pitch<8 Then Poke.w temp,origptr+$8000+70+pitch
+						EndIf
+					Else
+						If x>32-5
+							pitch.w=x-(32-5)
+							If pitch<9 Then Poke.w temp,origptr+$8000+60+pitch
+						EndIf
+					EndIf
+
+				EndIf
+				If x>21 AND x<36 AND done>=#trsel	;??????????????
+					If y=6							Then Poke.w temp,origptr+$8001+52:happy=4
+					If y=13						 Then Poke.w temp,origptr+$8007+52:happy=5
+					If (y>6) AND (y<13) Then Poke.w temp,origptr+$8004+52:happy=6
+				EndIf
+
+				If x=22
+					Select happy
+						Case 4:Poke.w temp,origptr+$8000+52
+						Case 5:Poke.w temp,origptr+$8006+52
+						Case 6:Poke.w temp,origptr+$8003+52
+					End Select
+				EndIf
+				If x=35
+					Select happy
+						Case 4:Poke.w temp,origptr+$8002+52
+						Case 5:Poke.w temp,origptr+$8008+52
+						Case 6:Poke.w temp,origptr+$8005+52
+					End Select
+				EndIf
+
+				If x=4
+					Select happy
+						Case 0:Poke.w temp,origptr+$8008
+						Case 1:Poke.w temp,origptr+$8002
+						Case 2:Poke.w temp,origptr+$8005
+					End Select:happy=3
+				EndIf
+				If x=4+32
+					Select happy
+						Case 0:Poke.w temp,origptr+$8009
+						Case 1:Poke.w temp,origptr+$8004
+						Case 2:Poke.w temp,origptr+$8007
+					End Select:happy=3
+				EndIf
+
+				If happy=0 Then Poke.w temp, base:base+roll
+			Next
+		Next
+
+		If done=#nextrace
+;			segaprint{?leadtxt,10,24,4,0}
+
+
+			If firstrace
+				For pl=0 To #uscar
+					*p=Pl(pl)
+					*p\score=0
+					*p\newscore=0
+					newp(pl)\pl=pl
+					*p\newp=pl
+					startline(pl)\car=pl
+					startline(pl)\h=0
+				Next
+			EndIf
+
+
+			For i=0 To #uscar
+				*p=Pl(startline(i)\car)
+				*p\score=*p\score+*p\newscore
+				*p\newscore=0
+				startline(i)\h=*p\score
+				*p\pos=i
+			Next
+
+			##[$851E] &startline(0),#uscar,*p0
+
+			For i=0 To 5
+				y=7+i
+				*p=Pl(startline(i)\car)
+
+				segaprintsmall{&newp(*p\newp)\nam1,5,23,y,0}
+
+				base.l=*p\score
+				If base>9
+					If base>99
+
+						temp.l=##[$C381](base/100):base-(temp*100)
+						temp=(temp+48)
+						segaprintsmall{&temp+3,0,24+8,y,0}
+					EndIf
+					temp.l=##[$C381](base/10):base-(temp*10)
+					temp=(temp+48)
+					segaprintsmall{&temp+3,0,24+9,y,0}
+				EndIf
+				base=(base ##[$80B9] 10 + 48)
+				segaprintsmall{&base+3,0,24+10,y,0}
+
+			Next
+		EndIf
+
+	Return
+
+;-----------------
+
+
+
+
+	.RedCrap
+
+		If redlev=0
+			If signside.w
+
+;				If myiron.w
+;					If stt ASR 3 + 40>16
+;						!myironlung
+;						myiron.w=Off
+;					EndIf
+;				EndIf
+
+				While ((stt ASR 3+40)>(tobd ASR 9)) AND (tobd<16384)
+					##[$C482] &map(0,0)+tobd,#wvram+billptr*32+tobd,256
+					tobd+512
+				Wend
+			Else
+
+;				If myiron
+;					If stt ASR 3 - 28<16
+;						!myironlung
+;						myiron.w=Off
+;					EndIf
+;				EndIf
+
+				While ((stt ASR 3-28)<((16384-tobd) ASR 9)) AND (tobd<16384)
+					tobd+512
+					##[$C482] &map(0,0)+16384-tobd,#wvram+billptr*32+16384-tobd,256
+				Wend
+			EndIf
+		EndIf
+
+
+
+		If redlev=-64 Then redlev=-11
+		Select redlev
+			Case -11:
+				GetReg a0,&map(0,0):MOVE.l #$55555555,d1
+				MOVE.l d1,d2:MOVE.l d2,d3:MOVE.l d3,d4:MOVEQ #16,d5
+				MOVE.l #511,d0;#(64*128)/8-1
+				mycls5:MOVEM.l d1-d4,(a0):ADD d5,a0
+							 MOVEM.l d1-d4,(a0):ADD d5,a0:DBRA d0,mycls5
+
+			Case -10
+				win\x=xoff
+				mysrc.rect\map=?seldat,16,44,0 ,88*(nxchamp&3),32,88
+				sblat{&mysrc,&win}
+			Case -9
+				win\x=32+xoff
+				mysrc.rect\map=?seldat,16,44,32,88*(nxchamp&3),32,88
+				sblat{&mysrc,&win}
+			Case -8
+				win\x=64+xoff
+				mysrc.rect\map=?seldat,16,44,64,88*(nxchamp&3),32,88
+				sblat{&mysrc,&win}
+
+			Case -7
+				win\x=96+xoff
+				mysrc.rect\map=?seldat,16,44,96,88*(nxchamp&3),32,88
+				sblat{&mysrc,&win}
+			Case -6:
+
+				If done=#trsel
+					!myironlung
+				EndIf
+
+;					If nxchamp<4
+;						segaprintprint{?champdat,12,0,0}
+;					Else
+;						If nxchamp<8
+;							segaprintprint{?turbodat,12,0,0}
+;						Else
+;							segaprintprint{?matchdat,10,0,0}
+;						EndIf
+;					EndIf
+					redlev=0
+					tobd=0
+
+		End Select
+		If redlev<0 Then redlev+1
+
+	Return
+
+	.FlushRed
+		redlev=-64
+		##[$80BB]
+			Gosub RedCrap
+		##[$80BC] redlev=0
+		!MyVWait
+		##[$C482] &map(0,0),#wvram+billptr*32,8192
+		tobd=16384
+	Return
+
+
+;-----------------------------------
+
+
+
+Statement NewDraw{item.w,col.w}
+	Shared champtyp.w,laptyp.w,disptyp.w,reduce.w,cartyp.w,password.ij
+
+
+	If item=9 Then Goto moredone
+
+	y.w=(item&$e)*10+54
+	x=4.75+(item&1)*13.5
+
+	If item&1=1
+;		col=col+8
+		Select item
+			Case 1:base.l=?matdat+champtyp.w ASL 2
+			Case 3:base.l=?lapdat+laptyp.w ASL 2
+			Case 5
+
+				Select reduce.w
+					Case 0:roll.w=1
+					Case 1:roll=1
+					Case 2:roll=3
+					Case 3:roll=2
+					Case 4:roll=2
+					Case 5:roll=2
+					Case 6:roll=2
+				End Select
+				disptyp=##[$C384](disptyp,0,roll)
+
+
+				roll.w=disptyp
+				If reduce>2 AND roll>0 Then roll=3
+				base.l=?dispdat+roll.w ASL 2
+			Case 7:base.l=&password\k
+			Case 11:base.l=?cardat+cartyp ASL 2
+		End Select
+	Else
+		base.l=?txtdat+item ASL 1
+	EndIf
+
+
+	addstring{item,Peek.l(base),Peek.l(base+4)-Peek.l(base)-1,col}
+	positionstring{item,-x,	y ASR 3}
+
+
+	Goto moredone
+
+
+
+
+
+	matdat:Dc.l r01,r02,r03,r04,r05
+		r01:Dc.b "CHAMPIONSHIP"
+		r02:Dc.b "TURBO LEAGUE["
+		r03:Dc.b "MATCH RACE[[["
+		r04:Dc.b "TURBO MATCH[["
+		r05:Event
+
+	txtdat:Dc.l r11,r12,r13,r14,r15,r16,r17
+		r11:Dc.b"MODE"
+		r12:Dc.b"LAPS"
+		r13:Dc.b"DISPLAY"
+		r14:Dc.b"PASSWORD"
+		r15:Dc.b"RACE!"
+		r16:Dc.b"CAR"
+		r17:Event
+
+
+	lapdat:Dc.l r21,r22,r23,r24
+		r21:Dc.b"4["
+		r22:Dc.b"8["
+		r23:Dc.b"12"
+		r24:Event
+
+	dispdat:Dc.l r41,r42,r43,r44,r45
+		r41:Dc.b "SINGLE[[[["
+		r42:Dc.b "VERTICAL[["
+		r43:Dc.b "HORIZONTAL"
+		r44:Dc.b "SPLIT[[[[["
+		r45:Event
+
+
+	cardat:Dc.l r51,r52,r53,r54,r55,r56,r57
+		r51:Dc.b "MINI[[["
+		r52:Dc.b "VW[[[[["
+		r53:Dc.b "TRUCK[["
+		r54:Dc.b "PORSCHE"
+		r55:Dc.b "F1[[[[["
+		r56:Dc.b "COW[[[["
+		r57:Event
+
+
+	moredone
+End Statement
+
+
+	chadat:Dc.l p01,p02,p03,p04,p05
+		p01:Dc.b "CHAMPIONSHIP"
+		p02:Dc.b "TURBO LEAGUE"
+		p03:Dc.b "MATCH RACE"
+		p04:Dc.b "TURBO MATCH"
+		p05:Event
+
+
+	blubdat:Dc.l p11,p12,p13,p14,p15
+		p11:Dc.b "RALLY RACING["
+		p12:Dc.b "SURF SHOWDOWN"
+		p13:Dc.b "WINTER SERIES"
+		p14:Dc.b "COWBOY FEVER["
+		p15:Event
+
+
+
+
+Macro yta
+	(((i+ytaoff.w)*20+44) ASR 3)
+End Macro
+
+	.doone
+
+		If newp(i)\sel
+;			Select newp(i)\sel
+;				Case -3:dofence{2,!yca,36,i+8,2,10}
+;				Case -2:dofence{2,!yca,36,i+8,10,26}
+;				Case -1:dofence{2,!yca,36,i+8,26,34}
+;			End Select
+
+			addstring{i*3,&newp(i)\nam1,5,3};i+8}
+			positionstring{i*3,20,!yta}
+
+;			positionstring{i*3+1,-5,!yta}
+;			positionstring{i*3+2,45,!yta}
+			positionstring{i*3+1,-5,-5}
+			positionstring{i*3+2,45,-5}
+
+;			addmini{i*3+1,5,!yca,newp(i)\car,i}
+;			addmini{i*3+2,28.75,!yca+0.5,6,6}
+
+
+		Else
+;			dofence{2,!yca,36,15,-4,-11}
+;			addstring{i*3,?press,10,13}
+;			positionstring{i*3,20,!yca+1}
+			addstring{ i*3,?press,10,3};#deselcol}
+			positionstring{i*3,20,!yta}
+		EndIf
+
+	Return
+
+	.dopass
+		NewDraw{7,#selcol}
+	Return
+
+
+Macro shownum
+	If menu>0
+		docount{&map(8,3),`1,origptr+$800a,billptr+$8000}
+	EndIf
+End Macro
+
+	.HandleOptions
+		ytaoff.w=(6-numseg) ASR 1
+
+
+		roll.w=0:Gosub SetUpBill
+
+		!shownum{0}
+
+		!MyVWait
+		##[$C482] ?segpalette ,#wcram+32,16
+		##[$C482] &map(0,0),#wvram+$1000			,2048
+
+		temp.l=$55555555
+		base.l=#vram+billptr.w*32;fontptr*32-32
+		For roll.w=0 To 7:##[$C489] &temp,base,2:base+4:Next
+
+
+
+		nxlink.w=0
+
+		item=0
+		If menu=0
+			addstring {-10,?opttxt,6,10}
+			positionstring{-10,20,3}
+			For cnt.w=0 To 8 Step 2
+				col=#deselcol
+				If item=cnt Then col=#selcol
+				NewDraw{cnt,col}
+				NewDraw{cnt+1,col}
+			Next
+		Else
+
+			For i=0 To numseg;5
+				Gosub doone
+				If newp(i)\sel=Off
+					charb(nxlink-10)\id=i*3+1
+					charb(nxlink- 9)\id=i*3+1
+					charb(nxlink- 2)\id=i*3+2
+					charb(nxlink- 1)\id=i*3+2
+				End If
+			Next
+			addstring{-5,?reg0,11,11}
+			positionstring{-5,20,3}
+
+		EndIf
+
+
+		done=Off:mycount.w=0:myiron.w=Off:passed.w=-32
+		##[$80BB]
+
+			movechars{}
+
+			!shownum{mycount ASR 5}
+
+			!MyVWait:fps+1
+
+			displaychars{$fc00}
+			##[$C482] &map(0,0),#wvram+$1000			,2048
+
+
+			temp.l=##[$C484](trx{0})
+			delx=(temp&4=4)-(temp&8=8)
+			dely=(temp&1=1)-(temp&2=2)
+			fire=(temp&$10)<>0
+			If menu=0
+				If passed>-1
+					Gosub procpass
+				Else
+					Gosub procopt
+				EndIf
+			EndIf
+
+			If menu=1
+				Gosub procreg
+				myiron=0
+				For i=0 To #uscar
+					If newp(i)\sel Then myiron+1
+					If newp(i)\ed>-1 Then colourstring{i*3,3,newp(i)\ed,!yta}:myiron=-20
+				Next
+
+				If myiron>0
+					mycount=mycount+1
+;					If mycount<32 Then mycount=32
+				Else
+					mycount=0
+				EndIf
+			Else
+				If passed>-1
+					colourstring{7,3,passed,114/8}
+				EndIf
+			EndIf
+
+		##[$80BC] done
+
+
+		If menu=1
+			For i=0 To 5
+				If newp(i)\sel=0 Then NewName{&newp(i)\nam1,0}
+
+			Next
+		EndIf
+
+		!MyVWait
+		nxlink.w=0
+		displaychars{$fc00}
+
+
+		GetReg a0,&map(0,0):MOVE.l #$55555555,d1
+		MOVE.l d1,d2:MOVE.l d2,d3:MOVE.l d3,d4:MOVEQ #16,d5
+		MOVE.l #1023,d0;#(64*128)/8-1
+		mycls1:MOVEM.l d1-d4,(a0):ADD d5,a0:DBRA d0,mycls1
+
+		!MyVWait
+		##[$C482] &map(0,0),#wvram+billptr*32	,8192;2048
+
+		roll.w=1:Gosub SetUpBill
+
+		!MyVWait
+		##[$C482] &map(0,0),#wvram+$1000			,2048
+
+
+
+
+	Return
+
+
+	procopt
+
+			If moved=0
+
+				If dely<>0
+					nu=##[$C384](item+dely+dely,0,12)
+					NewDraw{item	,#deselcol}
+					NewDraw{item+1,#deselcol}
+					item=nu
+					NewDraw{item	,#selcol}
+					NewDraw{item+1,#selcol}
+					moved=50
+					!dotune{51}
+				EndIf
+
+				fire=fire-delx
+				If fire<>0
+					roll.w=53
+
+					Select item
+						Case 0:champtyp.w=##[$C384](champtyp+fire,0,4)
+						Case 2:laptyp.w=##[$C384](laptyp.w-fire,0,3)
+						Case 4:
+							If reduce<2 Then roll=20:Else disptyp=disptyp-fire
+
+						Case 6:fire=fire+delx:If fire Then passed+32:Else roll=-1
+
+						Case 8:fire=fire+delx:If fire Then done.w=On:Else roll=-1
+						Case 10:cartyp.w=##[$C384](cartyp.w+fire,0,6)
+					End Select
+					If roll>-1 Then !dotune{roll}
+					NewDraw{item+1,#selcol}
+					moved=50
+				EndIf
+			Else
+				If delx=0 AND dely=0 AND fire=0 Then moved=0
+			EndIf
+	Return
+
+	procpass
+
+		If moved=0
+			delx=delx-(temp&$70<>0)
+			base.l=passed+delx
+			If base>5
+				passed=-32;:Gosub dopass
+				moved=50
+				!dotune{53}
+			Else
+				If base<0 Then base+6
+				passed=base
+				base.l+&password\i
+				If dely<>0
+					moved=50:Poke.b base,##[$C384](Peek.b(base)-dely,64,102)
+					!dotune{51}
+				EndIf
+
+
+				If delx<>0
+					!dotune{52}
+					moved=50
+				EndIf
+
+			EndIf
+			Gosub dopass
+		Else
+			If delx=0 AND dely=0 AND fire=0 Then moved=0
+		EndIf
+	Return
+
+
+	procreg
+		For i=0 To numseg.w
+			temp.l= ##[$C484](trx{i})&255
+			If newp(i)\moved<0
+				If temp<>0 Then newp(i)\moved=newp(i)\del:newp(i)\del=#delay2
+			Else
+				newp(i)\moved-1
+				If temp=0 Then newp(i)\moved=-1:newp(i)\del=#delay1
+				temp=0
+			EndIf
+
+			If temp&128
+				newp(i)\moved=30
+				If i=0 Then mycount=(mycount+32)&$FFE0;done.w=On
+			EndIf
+
+
+			delx=(temp&4=4)-(temp&8=8)
+			dely=(temp&1=1)-(temp&2=2)
+
+			Select newp(i)\sel
+				Case	0
+					If temp&$ff
+
+						If temp&$80
+							newp(i)\sel=-2
+							newp(i)\ed=0
+							newp(i)\nam1=$40404040
+							newp(i)\nam2=$40404040
+						Else
+							newp(i)\sel=-3
+							NewName{&newp(i)\nam1,0}
+							newp(i)\ed=-32
+						EndIf
+						!dotune{54}:mycount.w=0
+						myiron.w=Off:reduce.w+1:Gosub doone:delx=0
+					EndIf
+
+
+;				Case -1
+;					dely-(temp&16=16)
+;					If dely<>0 Then newp(i)\col=JWrap(newp(i)\col+dely,0,8):Gosub DoPal
+				Case -3
+					If temp&$ff
+						If temp&$80
+							newp(i)\sel=-2
+							newp(i)\ed=0
+							newp(i)\nam1=$40404040
+							newp(i)\nam2=$40404040
+							!dotune{54}
+						Else
+							NewName{&newp(i)\nam1,0}
+							!dotune{53}
+						EndIf
+						mycount.w=0
+						Gosub doone
+					EndIf
+
+;					dely-(temp&16=16)
+;					If dely<>0 Then newp(i)\car=JWrap(newp(i)\car+dely,0,6):Gosub doone
+				Case -2:
+					If newp(i)\ed>-1
+
+						delx=delx-(temp&$70<>0)
+						base.l=newp(i)\ed+delx
+
+						If base>5
+							newp(i)\ed=-32
+							If (newp(i)\nam1=$40404040 AND (newp(i)\nam2 ASR 16)=$4040)
+								NewName{&newp(i)\nam1,0}
+								newp(i)\sel=-3
+							EndIf
+							Gosub doone
+							!dotune{53}
+						Else
+							If base<0 Then base+6
+							newp(i)\ed=base
+							base.l+&newp(i)\nam1
+							If dely<>0
+								Poke.b base,##[$C384](Peek.b(base)-dely,64,92):Gosub doone:delx=0
+								!dotune{51}
+							EndIf
+							If delx<>0
+								!dotune{52}
+								Gosub doone
+							EndIf
+						EndIf
+						delx=0
+					Else
+						If temp&16
+							newp(i)\ed+32
+							If newp(i)\nam2&1
+								newp(i)\nam1=newp(i)\humnam1
+								newp(i)\nam2=newp(i)\humnam2
+							EndIf
+							Gosub doone
+
+						EndIf
+					EndIf
+
+				Default
+			End Select
+
+
+		Next
+
+		If mycount>$77 Then done=On
+
+
+	Return
+
+
+
+CEND
+
+
+
+
+
+
+;------------------------------------------
+
+
+
+
+CNIF (#c=#s)
+
+
+Event
+	sup0		 :Dc.b "SUPER SKIDMARKS"
+	reg0		 :Dc.b "REGISTRATION"
+	rac0		 :Dc.b "RACE RESULTS"
+	press		:Dc.b "PRESS START"
+	opttxt	 :Dc.b "OPTIONS"
+
+
+
+	rallyr	 :Dc.b "RALLY"
+	beachr	 :Dc.b "BEACH"
+	snowr		:Dc.b "SNOW"
+	ranchr	 :Dc.b "RANCH"
+	racedat	:Dc.b "RACE"
+	atmtdat	:Dc.b "ATTEMPT"
+	scordat	:Dc.b "SCORES"
+	leadtxt	:Dc.b "LEADERBOARD"
+	tub			:Dc.b "TURBO"
+	nrm			:Dc.b "NORML"
+
+
+
+
+	champdat:Dc.b "CHAMPIONSHIP"
+	turbodat:Dc.b "TURBO LEAGUE"
+	randodat:Dc.b "RANDOM PLAY"
+	matchdat:Dc.b "MATCH RACE"
+
+		m10:Dc.b "RALLY"
+		m11:Dc.b "BEACH"
+		m12:Dc.b "SNOW"
+		m13:Dc.b "RANCH"
+		m14:Event
+
+
+
+
+;	lptxt		:Dc.b "LAPS"
+;	ptstxt	 :Dc.b "PTS"
+;	racingtxt:Dc.b "NEXT RACE"
+
+
+	Event
+	racename :Dc.l rallyr,beachr,snowr,ranchr
+	Event
+
+
+trknamdat
+Dc.b "DEATH VALLEY "
+Dc.b "OLD JOES FARM"
+Dc.b "THE HOMESTEAD"
+Dc.b "MOONSHINE RUN"
+Dc.b "DEVILS CANYON"
+Dc.b "COWBOY COUNTY"
+Dc.b "GREASE TOWN	"
+Dc.b "INDY 5			 "
+Dc.b "BOVINE CITY	"
+Dc.b "GRANDPAS LAWN"
+Dc.b "MISERY COUNTY"
+Dc.b "SNOWYS TRAIL "
+Dc.b "GASVILLE		 "
+Dc.b "BUTCHERS RUN "
+Dc.b "ROADKILL WAY "
+Dc.b "BIKINI MILE	"
+Dc.b "TEASER BAY	 "
+Dc.b "TRASHCAN LAND"
+Dc.b "ANGEL ISLAND "
+Dc.b "FROZEN FARM	"
+Dc.b "CREAM COUNTY "
+Dc.b "BADMANS GULLY"
+Dc.b "PETROL CITY	"
+Dc.b "TYRE MOUNTAIN"
+
+
+CEND
+
+
+
+
+
+
+
+
+
+
+
+	.DoAttract
+		CNIF #race
+;			SegaDisplay Off
+			attract.w=On
+			laps.w=2
+			mytrk.w=(##[$8481](rsd,23.435)+1)*12:rsd+435.76
+			champtyp.w=0
+			For cnt.w=0 To #uscar
+				newp(cnt)\sel=0
+				newp(cnt)\car=(##[$8481](325.654,rsd)+1)*2
+			Next
+			screenmode.w=(screenmode+1)&3:rsd-435.765
+			laps.w=1:lapdir.w=1
+			racenum.w=0:firstrace.w=On
+			Gosub SetFirst
+			For pl=0 To #uscar
+				startline(pl)\car=pl
+				Pl(pl)\pos=pl
+			Next
+
+
+			Gosub GetNewTrack
+			Gosub DoSignStart
+			Gosub SetUpWorld
+			Gosub SkidMain
+
+			inrace.w=Off
+			attract.w=Off
+		CEND
+
+	Return
+
+
+
+
+.NextRace
+	Select laptyp
+		Case 0:laps.w=4
+		Case 1:laps.w=8
+		Case 2:laps.w=12
+	End Select
+
+
+	If champtyp<2
+		For i=0 To 5
+			newp(i)\car=cartyp.w
+		Next
+	EndIf
+
+	If NOT firstrace
+		For pl=0 To #uscar
+			Pl(pl)\score+Pl(pl)\newscore
+		Next
+	EndIf
+
+	!MyVWait
+	##[$C48A] Off
+	Select champtyp.w&2
+
+		Case 0:mytrk.w=champ*6+racenum
+		Case 2:mytrk.w=champ*6 +(##[$8481](rsd,68.83)+1)*3
+
+	End Select
+	rsd-7.2894
+	super.w=((champtyp&1)<>0)
+
+
+
+
+	Gosub GetNewTrack
+
+	Gosub SetUpWorld
+;	Safe{}
+
+	Gosub SkidMain
+
+
+
+Return
+
+
+	.SetFirst
+;		menu.w=#rego
+		For cnt.w=0 To 5
+			newp(cnt)\sel=Off
+			newp(cnt)\ed=-32
+			newp(cnt)\col=newp(cnt)\humcol
+			NewName{&newp(cnt)\nam1,1}
+		Next
+	Return
+
+
+
+.assignplayers
+	reduce.w=0
+	For pl.w=0 To #uscar
+		*p=Pl(pl):Gosub SetStartCar
+		If newp(pl)\sel Then reduce+1
+	Next
+
+	If firstrace.w
+
+
+		Select disptyp
+			Case 0:screenmode=0
+			Case 1:screenmode=1
+			Case 2:screenmode=2
+		End Select
+		If disptyp>0
+			If reduce>2 Then screenmode=3
+		EndIf
+
+
+		cnt.w=0	;gethumans/comp
+		pitch.w=reduce;#uscar
+		For pl=0 To #uscar
+			If newp(pl)\sel
+				Pl(cnt)\newp=pl
+				Pl(cnt)\control=trx{pl}
+				newp(pl)\pl=cnt :cnt+1
+			Else
+				Pl(pitch)\newp=pl
+				Pl(pitch)\control=#contcomp
+				newp(pl)\pl=pitch:pitch+1
+			EndIf
+		Next
+
+		If screenmode=1	;HAHAHAHHA
+			##[$80C9] Pl(1)\newp,Pl(2)\newp
+			##[$80C9] Pl(1)\control,Pl(2)\control
+			newp(Pl(1)\newp)\pl=1
+			newp(Pl(2)\newp)\pl=2
+		EndIf
+
+		For pl=0 To #uscar
+			If newp(pl)\sel=0
+				##[$80BB]
+					pitch.w=(##[$8481](rsd,435.661)+1)*4:rsd-5.8275
+					For roll.w=0 To #uscar
+						If pitch.w=newp(roll)\col Then pitch.w=-1
+					Next
+				##[$80BC] pitch.w>-1
+				newp(pl)\col=pitch.w
+;				newp(pl)\car=(Random1(rsd,435.661)+1)*2:rsd-7.1245
+			EndIf
+		Next
+		firstrace.w=Off
+	EndIf
+Return
+
+
+
+
+
+
+.
+.
+.
+;	light,big gamma, overscore,little l,post
+
+.worldregs
+	CNIF #c=#s
+			!setreg{2,0}		 ;map location=0*8192
+			!setreg{4,0}		 ;map location=0*8192
+			!setreg{5,$7e}	 ;sprites location=$fc00
+			!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+			!setreg{12,$89}	;32 cell mode shadows no interlace
+			!setreg{13,$4}	 ;hs=$1000;$fc00
+			!setreg{16,1}		;64x32 sized map
+			!setreg{3,$38}	 ;windowpos= $e000
+			!setreg{17,$0};$8a}
+			!setreg{18,$0};$ff}
+	CEND
+
+Return
+
+
+.SetUpWorld
+
+	CNIF #race
+		sqvol.w=40
+
+		CNIF #c=#s
+;			SegaStopTune 46
+			##[$C495] 2
+
+			Poke.l $ff0020,0
+			For roll.w=0 To 127 Step 2
+				Poke.w &chara(0)+roll,0;((Random1(rsd,4.7387)+1)*1911)&$eee:rsd-7.282
+			Next
+			!MyVWait
+
+
+			If attract=Off
+				##[$C482] &chara(0),#wvram+$fc00,64
+				##[$C482] &chara(0) ,#wcram,64
+				##[$C48A] Off
+			EndIf
+		CEND
+
+
+		cmpacc=-1
+		cmpacc7=-0.7
+		inrace.w=On
+
+
+		CNIF #maketri
+			myang=64
+
+			qs=0.2:qc=0.2
+			delta.l=0
+
+			deadx=2
+			deady=0
+
+			Gosub InitTris
+		CEND
+
+		CNIF #c=#a
+			For dtp=2 To pts3 Step 0.1
+				FindLo dtp,skbm
+				Point bez\i ASL #sc,bez\j ASL #sc,1
+				Point bez\k ASL #sc,bez\l ASL #sc,1
+			Next
+		CEND
+
+
+
+
+		CNIF #c=#s
+
+
+		Function.l mygod{sp.l,info.l,flip.w,dest.l}
+;			dest.l=#vram+$66c*32
+			info+2:If flip<>0 Then flip=2
+			While Peek.w(info)>=0
+				ssp.l=sp+Peek.w(info)*6
+				src.l=sp+Peek.w(ssp+flip)
+				siz.w=Peek.w(ssp+4)*16
+				##[$C489] src,dest,siz
+				info+2:dest+siz+siz
+			Wend
+			Function Return dest.l-64-#vram+#wvram
+		End Function
+
+
+
+			;
+;			For cnt.w=0 To 31
+;				SegaTransfer ?blank,#vram+cnt*64*2,64				;2048 bytes
+;			Next
+
+			temp.l=#vram+$1000
+			For cnt.w=0 To 3
+				If *ath.theader\blocks[cnt]<>0
+					If Peek.l(*ath\blocks[cnt]+tkbin)<>$43724d21 Then Safe{}
+
+
+					##[$C387] *ath\blocks[cnt]+tkbin,blockmap.l
+					base.l=Peek.l(*ath\blocks[cnt]+tkbin+6)
+					If cnt=0
+						##[$C489] blockmap+4,#vram+$1004+cnt*16384,(base-4) ASR 1
+					Else
+						##[$C489] blockmap,#vram+$1000+cnt*16384,base ASR 1
+					EndIf
+					temp=temp+base
+				EndIf
+			Next
+
+			flagman.l=mygod{?sprbin,myinfo.l,super.w,temp};#vram+*ath\blocks[4]
+
+
+
+
+			##[$C387]	*ath\blockmap+tkbin,blockmap.l
+			skidm.l=blockmap+64
+			If super
+				##[$C48F] skidm
+				For cnt=0 To #uscar
+					spr(cnt)\spdata=spr(cnt)\spdata OR $800
+					spr(cnt+#uscar+1)\spdata=spr(cnt+#uscar+1)\spdata OR $800
+				Next
+				lapdir.w=-1
+			Else
+				For cnt=0 To #uscar
+					spr(cnt	)\spdata=spr(cnt)\spdata AND $f7ff
+					spr(cnt+#uscar+1)\spdata=spr(cnt+#uscar+1)\spdata AND $f7ff
+				Next
+				lapdir.w=1
+			EndIf
+
+
+			If attract=Off Then Gosub worldregs
+		CEND
+
+
+
+
+		lapdir2=lapdir ASL 1:lapdir4=lapdir ASL 2
+
+		For dum.w=0 To #spoon:spoon(dum)=0:Next
+
+		Gosub assignplayers
+
+		Gosub PlaceNorm ;AHAHAHAHHAHAH
+
+
+		##[$80CA] *p
+		For ipl.w=0 To #maxcar
+			*p=Pl(ipl)
+			\carnum=newp(\newp)\car
+		Next
+
+
+		CNIF #c=#s
+			Select champtyp
+				Case 0: UpDateNuPlayer{Peek.l(Peek.l($ff0004)+8 )}
+				Case 1: UpDateNuPlayer{Peek.l(Peek.l($ff0004)+8 )}
+				Default:UpDateNuPlayer{Peek.l(Peek.l($ff0004)+12)}
+			End Select
+
+;			If champ>-1
+;;				UpDateNuPlayer{Peek.l(Peek.l($ff0004)+8)+24*champ.w}
+;				If champtyp
+;					UpDateNuPlayer{Peek.l(Peek.l($ff0004)+8)}
+;				Else
+;					UpDateNuPlayer{Peek.l(Peek.l($ff0004)+12)}
+;				EndIf
+;			Else
+;				UpDateNuPlayer{Peek.l(Peek.l($ff0004)+4)+8*skill.w}
+;			EndIf
+		CELSE
+			UpDateNuPlayer{?cardiff+8*2}
+		CEND
+
+
+
+
+		Gosub DoSignStart
+
+
+
+
+		##[$80CA] *p
+		reduce.w=-1
+		For pl=0 To #uscar
+			*p=Pl(pl)
+;			*p\pos=pl	;huh?!
+			tdist(*p\pos)\car=pl
+			*p\newscore=pl
+
+			If \control=#contcomp
+				*p\k=QHite(*p\i,*p\j,skbm)	 :\drop=On
+			Else
+				*p\k=QHite(*p\i,*p\j,skbm)+16:reduce+1
+			EndIf
+			##[$C48D] &newp(*p\newp)\nam1,?tagbin,*p\q,super
+
+			*p\disc=32000
+;			*p\oldpos=-2
+;			*p\pos=*p\oldpos
+
+
+
+			i.w=1
+			If (*p\control<#contcomp) AND (pl<4)
+				If i=0
+					Select *p\carnum
+						Case 0:*p\tune=0
+						Case 1:*p\tune=1
+						Case 2:*p\tune=2
+						Case 3:*p\tune=4
+						Case 4:*p\tune=3
+						Case 5:*p\tune=1	;cow.???!
+					End Select
+					*p\shv	 =Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6+ 6)
+					*p\engmin=Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6+ 8)
+					*p\peak	=Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6+10)
+					i=1
+				Else
+					*p\tune=41-newp(*p\newp)\car*5+pl
+					*p\shv	 =Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6)
+					*p\engmin=Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6+2)
+					*p\peak	=Peek.w(Peek.l(Peek.l($ff0004)+4)+*p\carnum*2*6+4)
+				EndIf
+			Else
+				*p\tune=-1
+			EndIf
+		Next
+;		*p0\tune=1
+
+
+
+
+
+		For pl=0 To #uscar
+			Pl(pl)\oldpos=Pl(pl)\pos ;<shrugs>
+			tdist(Pl(pl)\pos)\h=-10000
+		Next
+		##[$851E] tdist,iscar,*p0
+
+
+
+
+		If attract
+			For cnt.w=0 To 128 Step 2
+				Poke.w buffb1+cnt,0
+			Next
+
+			For fadeincol.w=0 To 30
+				!MyVWait
+				##[$C482] buffa1,#wcram,64
+				MyCloset{buffb1,buffa1}
+			Next
+			Gosub worldregs
+		EndIf
+
+		For cnt.w=0 To 256 Step 2
+			Poke.w buffa1+cnt,0
+			Poke.w buffa2+cnt,0
+			Poke.w buffb1+cnt,0
+			Poke.w buffb2+cnt,0
+		Next
+
+
+
+;		 If retch Then Safe{}
+		Gosub NewScrMode
+
+			!MyVWait
+			!MyVWait
+			!MyVWait
+
+
+		MOVE #$8700,$c00004
+;			If retch Then Safe{}
+
+
+
+
+
+
+		##[$C489] ?strip,#vram+$fe80,128 ;dinky sprites
+		Gosub DoPal
+
+
+		CNIF #c=#s
+
+			!MyVWait
+			##[$C48A] On
+
+		CEND
+
+		done.w=Off
+	CEND
+
+Return
+
+
+;testtrack
+;IncBin "rat:track.1"
+
+
+
+.PlaceCar	;i,j,fr,mycar.w
+	CNIF #c=#a
+		Circle ii ASL #sc,jj ASL #sc,3,mycar.w+2
+	CEND
+;	CNIF #c=#s
+;		spr(mycar.w+8)\hp=JLimit(116+IOP(*p\myview\sx)-scrx,$40,$1e9)
+;		spr(mycar.w+8)\vp=134+IOP(*p\myview\sy)-scry
+;
+;		spr(mycar)\vp=spr(mycar+8)\vp+*p\shady
+;		spr(mycar)\hp=spr(mycar+8)\hp
+;
+;
+;	CEND
+
+Return
+
+
+
+Statement SetupMiddle{x.w,l1.l,l2.l,eo.l}
+
+	MOVE.l d1,a0:MOVE.l d2,a1
+	EXT.l d0:MOVE.l d0,d5
+	MOVE.l #$00800701,d4:ADD.l #$a7f40080,d5
+	MOVE.l #$00200001,d6:MOVEQ #3,d7
+
+	nxset
+	MOVE.l d4,(a0)+:MOVE.l d5,(a0)+:ADD.l d3,d5:ADD.l #$780000,d4
+	MOVE.l d4,(a1)+:MOVE.l d5,(a1)+:SUB.l d3,d5:SUB.l #$780000,d4
+	ADD.l d6,d4
+
+	DBRA d7,nxset
+	AsmExit
+End Statement
+
+
+Macro stopz80:MOVE.b#1,z80:wz`@:BTST.b#0,z80:BNE wz`@:End Macro
+Macro startz80:MOVE #0,z80:End Macro
+
+
+.NewScrMode
+CNIF #c=#s
+
+	!stopz80
+	!setreg{0,$04} ;disable vert int
+
+	!MyVWait
+	!MyVWait
+	!MyVWait
+	!MyVWait
+	!MyVWait
+	##[$C48A] On
+
+
+	For cnt.w=0 To 31
+		##[$C489] ?blank,#wvram+cnt*64*2,64				;2048 bytes
+	Next
+
+
+
+
+
+	CNIF #nts
+		Select screenmode
+			Case 0:scrw=320 :scrh=240	:blkh.w=29
+			Case 1:scrw=160 :scrh=240	:blkh.w=29
+			Case 2:scrw=320 :scrh=120	:blkh.w=15
+			Case 3:scrw=160 :scrh=120	:blkh.w=15
+		End Select
+	CELSE
+		Select screenmode
+			Case 0:scrw=320 :scrh=240	:blkh.w=31
+			Case 1:scrw=160 :scrh=240	:blkh.w=31
+			Case 2:scrw=320 :scrh=120	:blkh.w=16
+			Case 3:scrw=160 :scrh=120	:blkh.w=16
+		End Select
+	CEND
+
+	vp(0)\wid=scrw,128		,128
+	vp(2)\wid= -24,128+160,128
+	vp(1)\wid= -24,128		,128+120
+	vp(3)\wid= -24,128+160,128+120
+
+
+	Select screenmode
+		Case 0	;noint..
+			SetupMiddle{312,buffa1,buffb1,$00000000}
+			SetupMiddle{312,buffa2,buffb2,$00000000}
+			Poke.w $ff0014,-1;$9303
+		Case 1
+			SetupMiddle{152,buffa1,buffb1,$00000000}
+			SetupMiddle{152,buffa2,buffb2,$00000000}
+			Poke.w $ff0014,-1;$9340
+		Case 2
+			SetupMiddle{312,buffa1,buffb1,$20000000}
+			SetupMiddle{312,buffa2,buffb2,$20000000}
+			Poke.w $ff0014,0;$9303
+		Case 3
+			SetupMiddle{152,buffa1,buffb1,$20000000}
+			SetupMiddle{152,buffa2,buffb2,$20000000}
+			Poke.w $ff0014,0;,$9340
+	End Select
+
+
+	If screenmode>1
+		vp(1)\wid=scrw
+	Else
+		If screenmode=1 Then vp(2)\wid=scrw
+	EndIf
+
+
+	If screenmode=3 Then vp(2)\wid=scrw:vp(3)\wid=scrw
+
+
+
+	scrwh=scrw ASR 1:scrhh=scrh ASR 1
+	scr.scr\scrw=scrw,scrwh,scrh,scrhh
+
+	warpmode.w=(screenmode=0)
+	##[$C48A] Off
+
+	!MyVWait
+
+CNIF #nts;1=0;
+		!setreg{10,119}
+		!setreg{0,$14}	;split vertical
+CELSE
+;	If screenmode>0
+		!setreg{10,119}
+		!setreg{0,$14}	;split vertical
+
+;	Else
+;		!setreg{0,$04}
+;
+;	EndIf
+CEND
+
+
+	!startz80
+CEND
+
+Return
+
+
+	CNIF #c=#s
+
+		#row=192
+		Statement animate{map.l,info.l,user.l}
+
+			MOVEM.l a4-a5,-(a7)
+			MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d1,a2:MOVE.l d2,a3
+		getfat:
+			MOVE (a2)+,d0:BMI dunlist:MOVE (a2)+,d1:MOVEM 0(a1,d1),d4-d7
+			MOVE d6,d3:MULU d7,d3:SUBQ#1,d6:SUBQ#1,d7
+		wrapuser:
+			MOVE (a3),d1:BPL titus:mpos:ADD d5,d1:BMI mpos
+			titus:SUB d5,d1:BPL titus:ADD d5,d1:MOVE d1,(a3)+
+			MULU d1,d3:ADD d3,d4:LEA 0(a0,d0.w),a4
+		nxx:
+			MOVE d7,d0:MOVE.l a4,a5:ADDQ#2,a4	;:MOVE d4,(a4)
+		nxy:
+			MOVE d4,(a5):ADD #row,a5:ADDQ#1,d4:DBRA d0,nxy:DBRA d6,nxx
+			BRA getfat
+		dunlist:
+			MOVEM.l (a7)+,a4-a5
+			AsmExit
+		End Statement
+
+	CEND
+
+
+
+Macro doflag
+
+	flanim.q=##[$C384](flanim+.4,0,8)
+	If ##[$C381](flanim)=##[$C381](flanim-0.4) Then ##[$C482] ?flags+flanim ASL 8,#wvram+flags.l	,8*16
+
+	fianim.q=##[$C384](fianim+.4,0,9)
+	If ficont.w>0
+		ficont=ficont-1
+		##[$C482] ?flagdat+64*9+fianim ASL 6,flagman.l			 ,2*16
+	EndIf
+	If ficont.w<0
+		ficont=ficont+1
+		##[$C482] ?flagdat+fianim ASL 6,flagman.l			 ,2*16
+	EndIf
+
+End Macro
+
+
+
+.
+.SkidMain
+CNIF #race
+
+	startrace.w=-1
+	starthoppy.w=128*3+30	;three beeps
+	hoppy.w=500						;credits
+	If reduce.w=-1 Then hoppy=starthoppy ;demo race..
+
+	lead.w=#uscar+1:*newleader.car=*p0:*oldleader.car=*p1
+	For pl=0 To #uscar
+		*p=Pl(startline(pl)\car)
+		If (*p\control<>#contcomp)
+			*oldleader.car=*newleader.car:*newleader=*p
+		EndIf
+		*p\pos=#uscar-pl
+		tdist(#uscar-pl)\car=startline(pl)\car
+;		tdist(pl)\h=-10000
+
+		If lapdir=1
+			myleng.w=*p\lap ASL 7 +*p\curdt
+		Else
+			myleng.w=*p\lap ASL 7 -*p\curdt
+		EndIf
+		tdist(*p\pos)\h=myleng
+
+	Next
+	lead.w=0
+
+;	ficont=0
+;	SegaDMA ?flagdat+64*9+fianim ASL 6,flagman.l			 ,2*16
+
+	fps.w=0:endrace.w=30000-50:nureduce.w=#uscar ;HAHAH
+	fadeincol.w=-40
+	CNIF #c=#s
+		!MyVWait
+		Gosub DoSegaGfx1
+		!MyVWait
+		Gosub DoSegaGfx2
+		!MyVWait
+	CEND
+
+;	If screenmode>1 Then Poke.w $ff0014,0 ; enable hint
+
+	##[$80BB]
+
+		CNIF #c=#s
+			Gosub DoSegaGfx1
+		CEND
+
+
+		fps.w+1
+		If fps>endrace Then done=On
+
+;		If hoppy=500 Then Gosub Credits
+
+		If (hoppy>-50) AND (hoppy<499)
+			hoppy-1
+			If (hoppy AND 127)=18
+				dum.w=hoppy ASR 7
+;				Select dum
+;					Case 0:top$=" GO "
+;					Case 1:top$="lmno"
+;					Case 2:top$="hijk"
+;					Case 3:top$="defg"
+;				End Select
+
+;				QPrint top$,Addr BitMap (4),Addr BitMap(2)
+;				Use BitMap #signbmap
+;				Scroll 32,0,32,16,0,0,4
+;				If dum=3 Then Poke.w (Addr Sound(4) +4) , sndper ASL 1
+				If dum=0
+;					Poke.w (Addr Sound(4) +4) , sndper
+					*ap.car=*p0
+					For opl.w=0 To #uscar
+;						If *ap\predef>-1 Then *ap\idle=On:*ap\disc=30:*ap\warp=0
+						*ap\idle=On:*ap\disc=1:*ap\warp=0
+						If *ap\control<#contcomp
+							!dosnd{*ap\tune}
+						EndIf
+						*ap+SizeOf.car
+					Next
+					!dosnd{10}
+					ficont.w=50*2
+				Else
+					!dosnd{9}
+				EndIf
+;				If snd Then Sound 4,6,30,30
+
+			EndIf
+
+			If (hoppy AND 127)=0
+				dum.w=(hoppy ASR 7)
+				If dum<>0
+;					If snd Then Volume 6,8,8
+					hoppy=((hoppy) AND $380)-128 +30
+				Else
+;					If squeal Then LoopSound 5,8,0	;screech!
+				EndIf
+			EndIf
+			If hoppy=-48
+;				If snd
+;					If squeal
+;						LoopSound 0,7,0,0,0 ;funkee!
+;					Else
+;						LoopSound 0,15,0,0,0,0 ;funkee!
+;					EndIf
+;				EndIf
+			EndIf
+		EndIf
+
+
+		CNIF #c=#s
+			If fadeincol.w<0
+
+				!showred
+				!MyQWait
+				!showwht
+
+				##[$C482] &chara(0) ,#wcram,64
+			Else
+
+				!showred
+				!MyQWait
+
+		;		MyVWait{}
+		;		MyVWait{}
+		;		MyVWait{}
+		;		!showblk
+			EndIf
+
+			Gosub DoSegaGfx2
+
+
+
+
+			If fadeincol<0
+				fadeincol+1
+				If fadeincol>-30 Then MyCloset{&charb(0),&chara(0)}
+			EndIf
+
+
+
+		CEND
+
+
+
+
+
+		CNIF #c=#s
+			If *p0\control=#contcomp
+				If ##[$C484](trx{0})&128>0 Then done=On
+			EndIf
+		CEND
+
+
+
+		myfrcnt.w=(myfrcnt.w+1)&3
+
+
+
+		CNIF #collisions
+			myfredcar.w=myfredcar+1
+			If myfredcar>#uscar Then myfredcar=0
+			*p=Pl(myfredcar):Gosub HandleHeader
+;			pla=myfredcar:*ap=*p
+
+			If ##[$852A](*p,*p0,*maxp)
+				If *p\control<#contcomp
+					!dosnd{5+Peek.w($c00008)&3}
+				EndIf
+			EndIf
+
+		CEND
+
+		CNIF #nts
+			Gosub ProcNts
+		CELSE
+			Gosub ProcPal
+		CEND
+
+
+
+
+		CNIF #c=#a
+			If Joyb(0)<>0 Then done=On
+		CEND
+
+
+
+
+
+		Gosub CheckWallLatent
+
+		CNIF #c=#s
+			If super
+				MoveAll -*p0,#uscar
+			Else
+				MoveAll *p0,#uscar
+			EndIf
+		CELSE
+
+			MoveAll *p0,shcar,#uscar
+		CEND
+
+;		myshadcar=JWrap(myshadcar+1,0,#uscar+1):*p=&Pl(myshadcar):Gosub DrawShadow
+;		*p+(SizeOf.car*2):Gosub DrawShadow
+;		*p+(SizeOf.car*2):Gosub DrawShadow
+
+
+
+		##[$851E] tdist,#uscar,*p0
+
+
+
+
+;		animate {skidm,myinfo.l,&fram(0)}
+;		For cnt.w=myfrcnt To 63 Step 4
+;			fram(cnt)+1
+;		Next
+;		EndIf
+
+
+
+
+
+;		For mycar=0 To #uscar
+;			*p=Pl(mycar)
+;			Gosub PlaceCar
+;		Next
+;		*p=Pl(1):mycar=1
+;		Gosub PlaceCar
+
+
+
+		CNIF #c=#a
+			If Joyb(0)<>0 Then done=On:bigdone=On
+		CEND
+
+
+	##[$80BC] done
+
+	For cnt.w=0 To 128 Step 2
+		Poke.w &charb(0)+cnt,#mybluecol
+	Next
+
+	For fadeincol=0 To 26
+		If fadeincol=6
+			!setreg{12,$81}	;32 cell mode NOshadows no interlace
+		EndIf
+
+		Gosub DoSegaGfx1
+		!MyVWait
+		Gosub DoSegaGfx2
+
+		##[$C482] &chara(0) ,#wcram,64
+
+		MyCloset{&charb(0),&chara(0)}
+
+	Next
+
+	CNIF #c=#s
+		!setreg{0,$04} ;disable vert int
+	CEND
+
+
+;	SegaStopTune -1
+	For pl=0 To #uscar
+		*p=Pl(pl)
+		If *p\tune>-1 Then ##[$C491] *p\tune
+	Next
+
+CEND
+
+	retch.w=On
+Return
+
+
+
+;				tempx=IOP(*p\myview\sx)
+;				tempy=IOP(*p\myview\sy)
+;				spr(cnt)\sx=tempx-12
+;				spr(cnt)\sy=tempy+6
+;				spr(cnt)\dpth=*p\dpth
+;
+;				*v.view=hisview(cnt)
+;
+;				*v\mx=((tempx-*v\px)ASR 1 +*v\mx)ASR 2:*v\px+*v\mx
+;				*v\my=((tempy-*v\py)ASR 1 +*v\my)ASR 2:*v\py+*v\my
+;
+;				vp(cnt)\sx=JLimit(tempx+JInt(tempx-*v\px)-scrwh,0,767.5-scrw)
+;				vp(cnt)\sy=JLimit(tempy+JInt(tempy-*v\py)-scrhh,0,383.5-scrh)
+
+
+;	a0=car,a1=spr,a2=view,a3=vp
+
+Statement chunkycar{*car.car,*sp.segasp,*v.view,*u.vp,*scr.scr}
+	MOVEM.l a4-a5,-(a7)
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE.l d3,a3:MOVE.l d4,a4
+
+	MOVEQ #uscar,d7
+	onemorecar
+		LEA SizeOf.segasp*uscar+SizeOf.segasp(a1),a5
+		MOVEM.l SizeOf.car\myview+SizeOf.view\sx(a0),d0-d1
+
+		ASR.l #1,d0:ASR.l #1,d1:MOVE.l d0,d2:MOVE.l d1,d3
+		ASR.l #1,d2:ASR.l #1,d3:ADD.l d2,d0:ADD.l d3,d1
+
+		MOVE.l d0,d2:MOVE.l d1,d3:SWAP d2:SWAP d3
+		SUB #$c,d2:;ADD #6,d3
+		SUB #6,d3
+		MOVE d2,SizeOf.segasp\sx(a1):MOVE d3,SizeOf.segasp\sy(a1)
+		MOVE d2,SizeOf.segasp\sx(a5)
+;		ADD SizeOf.car\shady(a0),d4
+
+
+		MOVEM.l SizeOf.view\px(a2),d4/d5
+		MOVE.l d0,d2:MOVE.l d1,d3:SUB.l d4,d2:SUB.l d5,d3
+		ASR.l #1,d2:ASR.l #1,d3
+		ADD.l SizeOf.view\mx(a2),d2:ADD.l SizeOf.view\my(a2),d3
+		ASR.l #2,d2:ASR.l #2,d3
+		MOVEM.l d2/d3,SizeOf.view\mx(a2)
+		ADD.l d2,d4:ADD.l d3,d5
+		MOVEM.l d4/d5,SizeOf.view\px(a2)
+
+		SUB.l d0,d4:SUB.l d1,d5
+		ASL.L #1,d4:ASL.l #1,d5
+		CLR.w d4:CLR.w d5
+		SUB.l d4,d0:SUB.l d5,d1
+		SUB.l SizeOf.scr\scrwh(a4),d0
+		SUB.l SizeOf.scr\scrhh(a4),d1
+		MOVE.l #$3080000,d2:SUB.l SizeOf.scr\scrw(a4),d2
+		MOVE.l #$1800000,d3:SUB.l SizeOf.scr\scrh(a4),d3
+
+		TST.l d0:BGE godoy1:MOVEQ #0,d0:godoy1
+		CMP.l d2,d0:BLE godoy2:MOVE.l d2,d0:godoy2
+		TST.l d1:BGE godox1:MOVEQ #0,d1:godox1
+		CMP.l d3,d1:BLE godox2:MOVE.l d3,d1:godox2
+
+
+;					spr(cnt+#uscar+1.w)\sx=spr(cnt)\sx
+;					spr(cnt+#uscar+1)\sy=spr(cnt)\sy+*op\shady
+
+
+		SWAP d0:SWAP d1
+		MOVEM.w d0-d1,SizeOf.vp\sx(a3)
+
+
+
+
+		LEA SizeOf.car(a0),a0
+		LEA SizeOf.segasp(a1),a1
+		LEA SizeOf.view(a2),a2
+		LEA SizeOf.vp(a3),a3
+
+
+		DBRA d7,onemorecar
+		MOVEM.l (a7)+,a4/a5
+	AsmExit
+End Statement
+
+
+
+CNIF #c=#s
+	.ProcPal
+		For ipl.w=0 To 3
+			*p=Pl(ipl):mynxcnt.w=(myfrcnt+ipl)&3
+
+
+			If (mynxcnt&2)=0
+				If *p\control<#contcomp
+					If fadeincol=0
+;						temp=SegaJoy(*p\control)
+						temp=##[$C484](*p\control)
+
+						If ipl=0 ;AHA
+							CNIF #upload=Off
+								If temp&32<>0
+									screenmode=(screenmode+1)&3
+									Gosub NewScrMode
+								EndIf
+							CEND
+							If temp&128>0 Then done=On
+						EndIf
+						If temp&$20
+							!dosnd{##[$C386](47+ipl,47,50)}
+						EndIf
+
+
+						If super
+							jox=(temp&8=8)-(temp&4=4)
+						Else
+							jox=(temp&4=4)-(temp&8=8)
+						EndIf
+
+						joy=(temp&16=16)-(temp&64=64)
+					Else
+						jox=0:joy=0
+					EndIf
+				EndIf
+
+				Gosub SpinIt
+			EndIf
+
+			If mynxcnt=0
+
+				;get joy from above
+				If (\drop=Off) AND (joy<>0)
+					\drop=On:reduce-1:
+					If reduce.w<0 Then hoppy=starthoppy
+				EndIf
+				Gosub MoveIndiv
+			EndIf
+		Next
+
+
+		CNIF #uscar>3
+			Select myfrcnt
+				Case 0:*p=*p4:Gosub MoveIndiv
+				Case 1:*p=*p4:Gosub SpinIt:*p=*p5:Gosub SpinIt
+				Case 2:*p=*p5:Gosub MoveIndiv
+				Case 3:*p=*p4:Gosub SpinIt:*p=*p5:Gosub SpinIt
+
+			End Select
+		CEND
+	Return
+
+
+
+.GetMyJoy
+	If *p\control<#contcomp
+		If fadeincol=0
+			temp=##[$C484](*p\control)
+
+			If *p=*p0; ;AHA
+				CNIF #upload=Off
+					If temp&32<>0
+						screenmode=(screenmode+1)&3
+						Gosub NewScrMode
+					EndIf
+				CEND
+				If temp&128>0 Then done=On
+			EndIf
+
+			If temp&$20
+				!dosnd{##[$C386](47+ipl,47,50)}
+			EndIf
+
+
+			If super
+				jox=(temp&8=8)-(temp&4=4)
+			Else
+				jox=(temp&4=4)-(temp&8=8)
+			EndIf
+
+			joy=(temp&16=16)-(temp&64=64)
+		Else
+			jox=0:joy=0
+		EndIf
+		If (\drop=Off) AND (joy<>0)
+			\drop=On:reduce-1:
+			If reduce.w<0 Then hoppy=starthoppy
+		EndIf
+
+	EndIf
+
+Return
+
+.GetMyJox
+	If *p\control<#contcomp
+		If fadeincol=0
+			temp=##[$C484](*p\control)
+
+			If super
+				jox=(temp&8=8)-(temp&4=4)
+			Else
+				jox=(temp&4=4)-(temp&8=8)
+			EndIf
+		Else
+			jox=0:joy=0
+		EndIf
+	EndIf
+
+Return
+
+
+	.ProcNts
+
+		Select myfrcnt
+			Case 0:*p=*p0:Gosub GetMyJoy:Gosub MoveIndiv
+						 *p=*p4:Gosub GetMyJoy:Gosub MoveIndiv
+			Case 1:*p=*p1:Gosub GetMyJoy:Gosub MoveIndiv:Gosub SpinIt
+						:*p=*p0:Gosub GetMyJox								:Gosub SpinIt
+						:*p=*p2:Gosub GetMyJox								:Gosub SpinIt
+
+			Case 2:*p=*p2:Gosub GetMyJoy:Gosub MoveIndiv
+						 *p=*p5:Gosub GetMyJoy:Gosub MoveIndiv
+			Case 3:*p=*p3:Gosub GetMyJoy:Gosub MoveIndiv:Gosub SpinIt
+						:*p=*p4:Gosub GetMyJox								:Gosub SpinIt
+						:*p=*p5:Gosub GetMyJox								:Gosub SpinIt	:complogic.w=NOT complogic
+		End Select
+
+
+	Return
+
+
+CEND
+
+
+
+
+
+
+
+
+CNIF (#c=#s) AND #race
+	.DoSegaGfx1
+
+		If warpmode.w
+
+				mindist.w=*newleader\pos;9
+				*dp.car=*newleader
+				For cnt.w=0 To #uscar
+					*op.car=Pl(cnt)
+					If *op\control<#contcomp
+						If *op\pos<mindist Then mindist=*op\pos:*dp.car=*op
+					EndIf
+
+					spr(cnt)\sx=##[$C487](*op\myview\sx)-12
+					spr(cnt)\sy=##[$C487](*op\myview\sy)-6;+6
+					spr(cnt)\dpth=*op\dpth
+					spr(cnt+#uscar+1)\sx=spr(cnt)\sx
+;					spr(cnt+#uscar+1)\sy=spr(cnt)\sy+*op\shady+8
+;					spr(cnt+#uscar+1)\sy=*p\shady*2-IOP(QHite(*op\i,*op\j,skbm)+ (*op\i+*op\j) ASL 3 -$9c-8)
+;					spr(cnt+#uscar+1)\sy=*op\shady+IOP( (*op\i+*op\j) ASL 3	-$9c)
+
+					spr(cnt+#uscar+1)\sy=*op\shady+##[$C487](MapY(*op\i,*op\j,skbm)-0.75)
+
+
+				Next
+				If *dp.car<>*newleader
+					*oldleader=*newleader
+					*newleader=*dp:lead.w=16
+				EndIf
+
+				lead-1:If lead<0 Then lead=0
+				olead=16-lead
+				*v.view=hisview(0)
+
+				*v\sx=##[$C487]( (*newleader\myview\sx*olead+*oldleader\myview\sx*lead) ASR 4)
+				*v\sy=##[$C487]( (*newleader\myview\sy*olead+*oldleader\myview\sy*lead) ASR 4)
+
+;				*v\sx=spr(cnt)\sx	 ;IOP(MapX(Pl(cnt)\i,Pl(cnt)\j))
+;				*v\sy=spr(cnt)\sy+19;IOP(MapY(Pl(cnt)\i,Pl(cnt)\j,skbm))
+				*v\mx=((*v\sx-*v\px)ASR 1 +*v\mx)ASR 2:*v\px+*v\mx
+				*v\my=((*v\sy-*v\py)ASR 1 +*v\my)ASR 2:*v\py+*v\my
+
+;				vp(0)\sx=JLimit(*v\sx+JInt(*v\sx-*v\px)-scrwh,0,767.5-scrw)
+;				vp(0)\sy=JLimit(*v\sy+JInt(*v\sy-*v\py)-scrhh,0,383.5-scrh)
+				vp(0)\sx=##[$C386](*v\sx-scrwh,0,767.5+8-scrw)
+				vp(0)\sy=##[$C386](*v\sy-scrhh,0,383.5-scrh)
+
+;				If startrace>0 Then
+;				spoon(spptr.w)=tdist(*newleader\pos)\h:spptr=(spptr+1)&#spoon
+				spoon(*newleader\curdt)=fps
+
+		Else
+
+
+			chunkycar{*p0,&spr(0),&hisview(0),&vp(0),&scr.scr}
+
+			*op=*p0
+			For cnt.w=#uscar+1 To #uscar+#uscar+1
+				spr(cnt)\sy=*op\shady+##[$C487](MapY(*op\i,*op\j,skbm))
+				*op+SizeOf.car
+			Next
+
+;			For cnt.w=0 To #uscar
+;				chunkycar{&Pl(cnt),&spr(cnt),&hisview(cnt),&vp(cnt),&scr.scr}
+;				*p=Pl(cnt )
+;
+;				tempx=IOP(*p\myview\sx)
+;				tempy=IOP(*p\myview\sy)
+;				spr(cnt)\sx=tempx-12
+;				spr(cnt)\sy=tempy+6
+;				spr(cnt)\dpth=*p\dpth
+;
+;				*v.view=hisview(cnt)
+;
+;				*v\mx=((tempx-*v\px)ASR 1 +*v\mx)ASR 2:*v\px+*v\mx
+;				*v\my=((tempy-*v\py)ASR 1 +*v\my)ASR 2:*v\py+*v\my
+;
+;				vp(cnt)\sx=JLimit(tempx+JInt(tempx-*v\px)-scrwh,0,767.5-scrw)
+;				vp(cnt)\sy=JLimit(tempy+JInt(tempy-*v\py)-scrhh,0,383.5-scrh)
+;			Next
+
+		EndIf
+
+
+
+
+
+		setupvps{*nv0,&vp(0)}
+
+		pl=0
+		For *p=*p0 To *maxp Step SizeOf.car
+			If (*p\coll>0) AND (*p\idle<0)
+				roll.w=*p\coll+1
+				If roll>60 Then *p\coll=-1:Else *p\coll=roll
+			EndIf
+			If (*p\coll&1)=0 Then spr(pl)\sy=-32
+			pl+1
+		Next
+
+
+		motl.l=mptl.l
+		mptl.l=skidm+##[$C381](vp(0)\sx LSR 3)ASL1+##[$C381](vp(0)\sy LSR 3)*192;96*2
+
+		If (screenmode&1)=1 ;split horizontal..
+			motr.l=mptr.l
+			mptr.l=skidm+##[$C381](vp(2)\sx LSR 3)ASL1+##[$C381](vp(2)\sy LSR 3)*192;96*2
+		EndIf
+
+		If screenmode=2
+			motla.l=mptla.l
+			mptla.l=skidm+##[$C381](vp(1)\sx LSR 3)ASL1+##[$C381](vp(1)\sy LSR 3)*96*2
+		EndIf
+		If screenmode=3
+			motla.l=mptla.l
+			motra.l=mptra.l
+			mptla.l=skidm+##[$C381](vp(1)\sx LSR 3)ASL1+##[$C381](vp(1)\sy LSR 3)*96*2
+			mptra.l=skidm+##[$C381](vp(3)\sx LSR 3)ASL1+##[$C381](vp(3)\sy LSR 3)*96*2
+		EndIf
+
+
+
+
+		doSortSprites{&cptr(0)}
+		##[$80C9] buffa1,buffa2
+		##[$80C9] buffb1,buffb2
+		If (screenmode&1)=0
+			dodoSegaSprites{&cptr(0),*nv0,buffa1+32}
+		Else
+			doSegaSprites{&cptr(0),*nv0,buffa1+32,super}
+		EndIf
+
+
+
+CNIF #nts
+	#skipval=240-46;220
+CELSE
+	#skipval=256-46;220
+CEND
+
+;		If (myfrcnt&1)=0
+
+
+		 !showgrn{}
+		 replup
+			 TST $ff0000:BLT dunrep
+			 MOVE $c00008,d0
+
+			 CMP.w #skipval*256,d0
+			 BCC dunrep
+
+;			While (Peek.w($c00008)LSR 8)&255<#skipval
+;				Poke.w $c00004,$8702+ddcar.w
+				ddcar.w=ddcar+1
+
+				If (ddcar>#uscar) OR (ddcar<0) Then ddcar=0
+				*p=Pl(ddcar)
+
+
+				##[$80CA] *p
+				roll.w=\roll*160+\pitch ASL 5+\head ASR 1
+				If roll<>\fr
+					\fr=roll
+					##[$C48B] 0,roll,*p\q,*p\bnk ,*p\carnum
+					Gosub DrawShadow
+				Else
+					If *p\upd Then Gosub DrawShadow
+				EndIf
+				*p\upd=0
+
+				BRA replup
+			dunrep
+
+
+
+		MOVE #$8700,$c00004
+
+	Return
+
+
+
+	.DoSegaGfx2
+
+
+		If (screenmode&1)=0
+
+			!pokemem{#wvram+$10000000,-(vp(0)\sx AND 7)}					 ;horizontal
+			!pokemem{#wsram+$00000000, (vp(0)\sy AND 7)}					 ;vertical
+			If motl<>mptl Then ##[$C485] mptl,0,41,blkh
+
+			If screenmode=2
+				If motla<>mptla Then ##[$C485] mptla,16*64*2					,41,blkh
+			EndIf
+
+		Else
+
+			!pokemem{#wvram+$10000000,-(vp(0)\sx AND 7)}					 ;horizontal
+			!pokemem{#wsram+$00000000, (vp(0)\sy AND 7)}					 ;vertical
+			!pokemem{#wvram+$10020000,-(vp(2)\sx AND 7)+(64-21)*8} ;horizontal
+			!pokemem{#wsram+$00020000, (vp(2)\sy AND 7)}					 ;vertical
+			If motl<>mptl Then ##[$C485] mptl,0				,20,blkh
+			If motr<>mptr Then ##[$C485] mptr,(64-22)*2,20,blkh
+
+			If screenmode=3
+				If motla<>mptla Then ##[$C485] mptla,16*64*2					,20,blkh
+				If motra<>mptra Then ##[$C485] mptra,16*64*2+(64-22)*2,20,blkh
+			EndIf
+		EndIf
+
+
+		##[$C482] buffa1,#wvram+$fc00,320
+
+
+		If myfrcnt&1=0
+;			SegaCar 0,Pl(0)\fr,$f300,0	 ,Pl(0)\carnum
+		CNIF #uscar<4
+			##[$C482]	 *p0\q ,#wvram+$ec40,768;288
+		CELSE
+			##[$C482]	 *p0\q ,#wvram+$ec40,1008
+		CEND
+;			SegaCar 0,Pl(2)\fr,$f540,1	 ,Pl(2)\carnum
+;			SegaDMA	 Pl(2)\q ,$f540,288
+
+		Else
+;			SegaCar 0,Pl(1)\fr,$f780,0	 ,Pl(1)\carnum
+			CNIF #uscar<4
+				##[$C482]	 *p1\q ,#wvram+$f420,768;288
+			CELSE
+				##[$C482]	 *p1\q ,#wvram+$f420,1008
+			CEND
+;			SegaCar 0,Pl(3)\fr,$f9c0,1	 ,Pl(3)\carnum
+;			SegaDMA	 Pl(3)\q ,$f9c0,288
+
+		EndIf
+
+
+
+		!doflag
+
+
+
+		!showblk
+
+
+		If screenmode=2
+			Poke.w $ff0020, (vp(1)\sy &7)+8;-15*8
+			Poke.w $ff0022, (vp(1)\sy &7)+8;-15*8
+			Poke.w $ff0024,-(vp(1)\sx &7)
+			Poke.w $ff0026,-(vp(1)\sx &7);+(64-21)*8
+			Poke.l $ff0028,3	;sprite link
+		EndIf
+		If screenmode=3
+			Poke.w $ff0020, (vp(1)\sy &7)+8;-15*8
+			Poke.w $ff0022, (vp(3)\sy &7)+8;-15*8
+			Poke.w $ff0024,-(vp(1)\sx &7)
+			Poke.w $ff0026,-(vp(3)\sx &7)+(64-21)*8
+			Poke.l $ff0028,3	;sprite link
+		EndIf
+
+
+		Poke.l $ff0010,buffb1
+
+
+
+
+;		If warpmode
+;			If (*p\control<(#contcomp))	;local player
+;				If (*p<>*newleader)
+;
+;					If (spoon((spptr+1)&#spoon) >myleng) ;losing by 1 second
+;						If ((tdist(*newleader\pos)\h-1)>myleng) ;but not much
+
+
+		If warpmode AND (fadeincol=0)
+			*p=*p0:sx=vp(0)\sx:sy=vp(0)\sy
+
+			For cnt.w=0 To #uscar
+				If *p\control<>#contcomp
+					If (*p\coll<0) AND (*p\inair=0)
+
+						roll=spr(cnt)\sx
+						pitch=spr(cnt)\sy
+						If (roll+24<sx) OR (roll>sx+320) OR (pitch+24<sy) OR (pitch>sy+232)
+
+							If *p\lap<>*dp\lap Then lapinc.w=*dp\lap-*p\lap:Gosub DrawLaps
+
+							roll.w=##[$C386](fps-spoon(*p\curdt),0,4999)
+							*p\lasttime-roll;Peek.l(Peek.l($ff0004)+16)
+							*p\warptime+roll
+							*p\upd=3
+							!dosnd{63}
+							##[$C48C] 10000+roll,?tagbin,*p\q,super
+							*p\disc=15
+
+	;						If (*p\warp=0) Then *p\warp=1
+	;						if snd
+	;							chan(\channel)\reqsam=7:joy=-8
+	;						EndIf
+
+							*dp=*newleader
+
+							*p\newwarps+1
+							*p\qc=*dp\qc:*p\qs=*dp\qs
+							*p\fr=*dp\fr
+							*p\i=*dp\i+*p\qc*1.2
+							*p\j=*dp\j+*p\qs*1.2
+							*p\k=QHite(*p\i,*p\j,skbm)
+							*p\headi=*dp\headi:*p\headj=*dp\headj:*p\headk=*dp\headk
+
+							*p\rev=*dp\rev:*p\vel=*dp\vel
+							*p\dir=*dp\dir:*p\rot=*dp\rot
+							*p\curdt=*dp\curdt
+
+							*p\coll=1
+							*p\warp=0
+							 ;:*p\lasttime-#spoon
+
+						EndIf
+					EndIf
+				EndIf
+				*p+SizeOf.car
+
+			Next
+		EndIf
+
+	Return
+
+
+CEND
+
+
+
+
+CNIF 1=0;#collisions AND #race
+
+
+
+		verydum.w=0
+
+		*rp.car=*p0:cra.w=On
+
+		If *ap\coll<0
+			*sha.ShadPt=Peek.l($ff000c)+\carnum ASL 12+*ap\head*SizeOf.ShadPt
+			For *rp=*p0 To Pl(3) Step SizeOf.car
+				If *rp\coll<0
+					If *rp<>*ap
+						If ##[$8524](*ap\i,*ap\j,*ap\k,*rp\i,*rp\j,*rp\k)
+							cra=Off
+							If FastCollide(*ap,*rp,cra)
+								*ap\upd=3
+								*rp\upd=3
+								verydum.w=-1
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			Next
+
+			If *ap\control<#contcomp
+				If verydum
+					!dosnd{5+Peek.w($c00008)&3}
+				EndIf
+			EndIf
+		EndIf
+
+
+Macro ac
+	SizeOf.car\`1(a0)
+End Macro
+
+Macro bc
+	SizeOf.car\`1(a1)
+End Macro
+
+
+;NEWTYPE .ShadPt
+;	ri0.q:rj0:ri1:rj1:ri2:rj2:ri3:rj3:ri4:rj4:ri5:rj5	 ;12*4
+;	rx0.w:ry0:rx1:ry1:rx2:ry2:rx3:ry3									 ;8*2
+;End NEWTYPE
+
+
+CNIF 1=0
+;check \coll
+Function.w CrashAsm{*ap.car,*fir.car,*las.car}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2
+
+
+	MOVE.w !ac{carnum},d6:ASL.w #6,d6
+	ADD.w !ac{head},d6:EXT.l d6:ASL.l #6,d6
+	ADD.l $ff000c,d6
+
+
+;	*sha.ShadPt=Peek.l($ff000c)+\carnum ASL 12+*ap\head*SizeOf.ShadPt
+
+	MOVEQ #2,d7:SWAP d7
+	MOVEM.l !ac{i},d0-d2
+	ADD.l d7,d0:SWAP d2:ADD.l d7,d1:ADD.w #17,d2
+
+	ADD.l d7,d7;d7=$40000
+	crnxcar
+	CMP.l a1,a0:BEQ failmine
+	MOVE.l d0,d3:SUB.l !bc{i},d3:BMI failmine
+							 CMP.l		 d7,d3:BPL failmine
+	MOVE.l d1,d3:SUB.l !bc{j},d3:BMI failmine
+							 CMP.l		 d7,d3:BPL failmine
+	MOVE.w d2,d3:SUB.w !bc{k},d3:BMI failmine
+							 CMP.w		#34,d3:BPL failmine
+
+
+	MOVEM.l d0-d2/d6-d7/a0-a2,-(a7)
+
+	MOVE.l a0,d0:MOVE.l a1,d1:MOVE.l d6,d2
+	ALibJsr FastCollide
+
+	MOVEM.l (a7)+,d0-d2/d6-d7/a0-a2
+
+
+	failmine:LEA SizeOf.car(a1),a1
+	CMP.l a1,a2:BNE crnxcar
+	AsmExit
+
+
+End Function
+CEND
+
+
+
+
+
+Macro bitme					;!hitme{*ap,*sha,cra,*rp<>*ap}
+	If `4
+;		If (*rp\towed<>`1) AND (`1\towed<>*rp)
+			If ##[$8524](`1\i,`1\j,`1\k,*rp\i,*rp\j,*rp\k)
+				`3=Off
+;				If *rp\coll<0;(`1\coll<0)
+					If FastCollide(`1,*rp,`2)
+						`1\upd=3
+						*rp\upd=3
+						verydum.w=-1
+;						chan(*rp\channel)\reqsam=2
+;						chan(`1\channel)\reqsam=2
+					EndIf
+;				EndIf
+			EndIf
+;		EndIf
+	EndIf
+End Macro
+
+
+	.Crash
+		verydum.w=0
+;		If myfrcnt.w>1 Then Return
+;		!showred
+		crash.w=0
+
+;		pla.w=ipl:*ap.car=*cp0
+;		pla=myfrcnt:*ap.car=Pl(pla)
+		*rp.car=*p0:cra.w=On
+
+		If *ap\coll<0
+;			*sha=Bank(*ap\bnk)+*ap\head*SizeOf.ShadPt
+;			*sha.ShadPt=?shadowdat+*ap\head*SizeOf.ShadPt
+;				Peek.l($ff000c)+\carnum ASL 12
+			*sha.ShadPt=Peek.l($ff000c)+\carnum ASL 12+*ap\head*SizeOf.ShadPt
+;			For *rp=*p0 To Pl(#uscar) Step SizeOf.car
+			For *rp=*p0 To Pl(3) Step SizeOf.car
+				If *rp\coll<0
+					!bitme{*ap,*sha,cra,*rp<>*ap}
+;					!gosam{5,*ap\tune,-1}
+;					!dosnd{5+Peek.w($c00008)&3}
+				EndIf
+
+			Next
+
+			If *ap\control<#contcomp
+				If verydum
+
+					!dosnd{5+Peek.w($c00008)&3}
+				EndIf
+			EndIf
+		EndIf
+;		!fixit{cra,*ap}
+
+	Return
+CEND
+
+
+;			If myfrcnt=0
+;				*ap.car=Pl(0):*rp.car=Pl(1)
+;				Gosub DoMyColl
+;			EndIf
+;			If myfrcnt=1
+;				*ap.car=Pl(1):*rp.car=Pl(0)
+;				Gosub DoMyColl
+;			EndIf
+;
+;.DoMyColl
+;	*sha.ShadPt=?shadowdat+*ap\head*SizeOf.ShadPt
+;	If MyRectsHit(*ap\i,*ap\j,*ap\k,*rp\i,*rp\j,*rp\k)
+;		mydumvar.w=FastCollide(*ap,*rp,*sha)
+;	EndIf
+;Return
+;CEND
+
+
+.DoMainS
+;Safe{}
+
+
+
+
+
+.
+.DoMainJ
+
+CNIF #c=#j
+
+	##[$80BB]
+
+		!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
+
+		##[$80C9] *bmr1.jbmap,*bmr2.jbmap
+		MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
+
+		*bmr=*bmr1
+
+		BlCls{*bmr,0,0};$1010101,$10101010}
+
+		CNIF #bars
+			Poke.w $f0002a,0
+		CEND
+
+		!waitgpu
+		!waitblit
+		!waitdsp
+
+;		Poke.l *bmr\idata+320+8,$ffffffff
+
+		Gosub PlaceCarold
+
+		stt=jint{(mytau-2)*2}
+		For gt=stt To stt+8 ;Step 2
+			t=gt
+
+			If t<2 Then t+pts
+;			If t>pts2 Then t-pts
+			##[$80C9] mapa.l,mapb.l
+			map.l=mapa
+			Gosub RotObj
+
+			!waitdsp
+			!waitgpu
+			!waitblit
+			BlCopyMem{tritemp.l,map.l,trisize.l }
+
+			Gosub Draw
+		Next
+
+		!waitgpu
+		!waitblit
+
+		CNIF #bars
+			Poke.l $f0002a,$ffff
+			Poke.w $f0002a,mysilly.w:mysilly+1
+		CEND
+
+		GetJoy{&jox.l,&joy.l,&butt.l}
+
+	##[$80BC] 1=0
+CEND
+Return
+
+.
+CNIF #c=#a
+	.DoMainA
+
+
+		##[$80BB]
+			VWait
+		##[$80BC] Joyb(0)<>0
+
+
+	Return
+CEND
+
+
+
+Macro calc
+	`1=base(t)+(`2+ ((`3)*((`3)+1)) ASR 1)*SizeOf.vec
+End Macro
+
+Macro mpc
+	`1=map+(`2+ ((`3)*((`3)+1)) ASR 1)*SizeOf.xy
+End Macro
+
+
+
+.trijunk
+
+NEWTYPE .vec
+	x.q:y:z
+End NEWTYPE
+
+NEWTYPE.xy
+	y.w:x.w
+End NEWTYPE
+
+NEWTYPE .tri
+	a.w:b.w:c.w
+End NEWTYPE
+
+
+DEFTYPE.vec *dest,*dest2,*dest3,*dest4
+
+.InitTris
+
+CNIF #c=#j
+		mapa.l=GetMem32{65536}
+		mapb.l=GetMem32{65536}
+
+		colbase.l=GetMem32{32768}
+		map.l=mapa
+
+	Dim vec.vec(10000):vecs.l=-1
+	Dim tri.tri(10000)
+	Dim base.l(100)
+
+
+		sx1=-10:sy1=-30:sz1=30
+		sx2=-10:sy2=30 :sz2=30
+		sx3=20:sy3=0	 :sz3=30
+		Gosub Generate
+		For t=0 To tri.l
+			base(t)=GetMem32{SizeOf.vec*9*10/2}
+			a=tri(t)\a
+			b=tri(t)\b
+			c=tri(t)\c
+			sx1=vec(a)\x; ASL 6
+			sy1=vec(a)\y; ASL 6
+			sz1=vec(a)\z; ASL 6
+			sx2=vec(b)\x; ASL 6
+			sy2=vec(b)\y; ASL 6
+			sz2=vec(b)\z; ASL 6
+			sx3=vec(c)\x; ASL 6
+			sy3=vec(c)\y; ASL 6
+			sz3=vec(c)\z; ASL 6
+			Gosub Make
+		Next
+
+		For h.w=0 To 18*18
+			col.q=(##[$8481](h,0)+1)*127+1:temp.l=col&255
+			temp=temp ASL 8 + temp
+			Poke.l colbase+h ASL 2,temp ASL 16+temp
+		Next
+	CEND
+
+Return
+
+
+
+
+.Make
+CNIF #c=#j
+	!calc{*dst.vec,0,0}:xx=sx1:yy=sy1:zz=sz1:Gosub Split
+	!calc{*dst.vec,0,8}:xx=sx2:yy=sy2:zz=sz2:Gosub Split
+	!calc{*dst.vec,8,8}:xx=sx3:yy=sy3:zz=sz3:Gosub Split
+
+	scal=8:hscal=scal ASR 1
+	For cnt.w=0 To 2
+
+		For y=hscal To 7 Step scal
+			For x=hscal To y Step scal
+
+				!calc{*dest2,x-hscal,y-hscal}
+				!calc{*dest3,x-hscal,y+hscal}
+				!calc{*dest4,x+hscal,y+hscal}
+
+				x2=*dest2\x:y2=*dest2\y:z2=*dest2\z
+				x3=*dest3\x:y3=*dest3\y:z3=*dest3\z
+				x4=*dest4\x:y4=*dest4\y:z4=*dest4\z
+
+				!calc{*dest,x,y}
+				!calc{*dest2,x-hscal,y}
+				!calc{*dest3,x,y+hscal}
+
+				xx=(x2+x4) ASR 1
+				yy=(y2+y4) ASR 1
+				zz=(z2+z4) ASR 1
+				*dst.vec=*dest:Gosub Split
+
+				xx=(x2+x3) ASR 1
+				yy=(y2+y3) ASR 1
+				zz=(z2+z3) ASR 1
+				*dst.vec=*dest2:Gosub Split
+
+				xx=(x3+x4) ASR 1
+				yy=(y3+y4) ASR 1
+				zz=(z3+z4) ASR 1
+				*dst.vec=*dest3:Gosub Split
+
+			Next
+		Next
+		scal ASR 1:hscal ASR 1
+	Next
+CEND
+
+CNIF 1=0
+	For y=0 To 8
+		For x=0 To y
+			!calc{*dst,x,y}
+			xx=*dst\x ASR 6
+			yy=*dst\y ASR 6
+			zz=*dst\z ASR 6
+			dist=(10 ASL 2)/jsqr{xx*xx+yy*yy+zz*zz}
+;			*dst\x=Sin(ang1)*10;xx*dist
+;			*dst\y=Cos(ang1)*10;yy*dist
+;			*dst\z=0;zz*dist
+
+
+
+			ad.l=?sincos+((x ASL 4) ASL 2)
+			qs=Peek.w(ad	)ASR 15
+			qc=Peek.w(ad+2)ASR 15
+
+			ad.l=?sincos+(((8-y) ASL 4) ASL 2)
+			ps=Peek.w(ad	)ASR 15
+			pc=Peek.w(ad+2)ASR 15
+
+			*dst\x=qs*30*pc
+			*dst\y=qc*30*pc
+			*dst\z=-ps*30
+		Next
+	Next
+CEND
+Return
+
+
+.Split
+CNIF #c=#j
+	*dst\x=xx
+	*dst\y=yy
+	*dst\z=zz
+CEND
+
+Return
+
+
+
+
+NEWTYPE .vert
+	t.q:plus.w
+	dx.q:dy.q
+End NEWTYPE
+
+CNIF #c=#a
+		#sc=2
+CEND
+
+
+
+
+.InitLatMem
+
+	Dim latchl(31),latchr(31)
+	latls.w=-1:latrs.w=-1
+	Dim vert.vert(240)
+	vecs.l=-1:tri.l=-1
+Return
+
+CNIF #maketri
+	Function.w FindNext{mmin,mmax,plus.w}
+
+	Shared vert(),verts
+		mptr=-1
+		For cnt.w=0 To verts
+			If vert(cnt)\plus=plus
+				If mmin<vert(cnt)\t
+					If vert(cnt)\t<mmax
+						mmax=vert(cnt)\t
+						mptr=cnt
+					EndIf
+				EndIf
+			EndIf
+		Next
+
+		Function Return mptr
+	End Function
+
+	Function.w FindNextLat{mmin,mmax,plus.w}
+	Shared latchl(),latchr(),latls.w,latrs.w
+		mptr=-1
+		If plus
+			For cnt.w=0 To latls
+				If mmin<latchl(cnt)
+					If latchl(cnt)<mmax
+						mmax=latchl(cnt)
+						mptr=cnt
+					EndIf
+				EndIf
+			Next
+		Else
+			For cnt.w=0 To latrs
+				If mmin<latchr(cnt)
+					If latchr(cnt)<mmax
+						mmax=latchr(cnt)
+						mptr=cnt
+					EndIf
+				EndIf
+			Next
+		EndIf
+		Function Return mptr
+	End Function
+
+
+
+.Generate
+
+	mystp=1 ASR 5
+	For mycnt.w=0 To 7
+		plusa.w=(mycnt&1=1)
+		plusb.w=(mycnt&2=2)
+		If mycnt>3
+			tau1=31
+			tau2=19
+		Else
+			tau1=12
+			tau2=3
+		EndIf
+
+		For k=1 To 5
+
+			FindLo tau1
+			If plusa
+				x1=bez\i:y1=bez\j
+			Else
+				x1=bez\k:y1=bez\l
+			EndIf
+			FindDif tau1+mystp
+			If plusa
+				dx1=bez\i ASL 5:dy1=bez\j ASL 5
+			Else
+				dx1=bez\k ASL 5:dy1=bez\l ASL 5
+			EndIf
+
+			FindLo tau2
+			If plusb
+				x2=bez\i:y2=bez\j
+			Else
+				x2=bez\k:y2=bez\l
+			EndIf
+			FindDif tau2+mystp
+			If plusb
+				dx2=bez\i ASL 5:dy2=bez\j ASL 5
+			Else
+				dx2=bez\k ASL 5:dy2=bez\l ASL 5
+			EndIf
+
+
+			mag1=jsqr{dx1*dx1+dy1*dy1}
+			mag2=jsqr{dx2*dx2+dy2*dy2}
+			dista=((x1-x2)*dy2-(y1-y2)*dx2)/mag2
+			distb=((x2-x1)*dy1-(y2-y1)*dx1)/mag1
+			tau1=##[$C384](tau1+dista/mag1,2,pts3)
+			tau2=##[$C384](tau2-distb/mag2,2,pts3)
+		Next
+		If plusa
+			latls+1:latchl(latls)=tau1
+		Else
+			latrs+1:latchr(latrs)=tau1
+		EndIf
+		If plusb
+			latls+1:latchl(latls)=tau2
+		Else
+			latrs+1:latchr(latrs)=tau2
+		EndIf
+
+		FindLo tau1
+		If plusa
+			Circle bez\i ASL #sc,bez\j ASL #sc,4,3
+		Else
+			Circle bez\k ASL #sc,bez\l ASL #sc,4,3
+		EndIf
+		FindLo tau2
+		If plusb
+			Circle bez\i ASL #sc,bez\j ASL #sc,4,4
+		Else
+			Circle bez\k ASL #sc,bez\l ASL #sc,4,4
+		EndIf
+
+	Next
+
+	basel=latchl(FindNextLat{2,pts4,On})
+	baser=latchr(FindNextLat{2,pts4,Off})
+
+	For hiscnt.w=0 To 6
+
+		verts=-1
+		plus.w=On
+		tau1=basel;
+		tau2=latchl(FindNextLat{tau1 ,pts4,plus})	:	basel=tau2
+		Gosub FryIt
+
+		plus.w=Off
+		tau1=baser;latchr(FindNextLat{baser,pts4,plus})
+		tau2=latchr(FindNextLat{tau1 ,pts4,plus})	:	baser=tau2
+		Gosub FryIt
+
+
+		Gosub MakeGoodTri
+	Next
+
+Return
+CEND
+
+
+
+.MakeGoodTri
+CNIF #c=#a
+	curl=FindNext{1,pts4,On}
+	curr=FindNext{1,pts4,Off}
+		mminl=vert(curl)\t
+		mminr=vert(curr)\t
+
+	FindLo mminl
+	x1=bez\i:y1=bez\j
+	FindLo mminr
+	x2=bez\k:y2=bez\l
+
+	done.w=Off
+	##[$80BB]
+		Line x1 ASL #sc, y1 ASL #sc, x2 ASL #sc, y2 ASL #sc,5
+
+		mminl=vert(curl)\t
+		mminr=vert(curr)\t
+		nxl=FindNext{mminl,pts4,On}
+		nxr=FindNext{mminr,pts4,Off}
+
+		If (nxl>-1) OR (nxr>-1)
+
+			x3=-200:y3=-200
+			x4=-200:y4=-200
+			If nxl>-1
+				FindLo vert(nxl)\t
+				x3=bez\i:y3=bez\j
+			EndIf
+			If nxr>-1
+				FindLo vert(nxr)\t
+				x4=bez\k:y4=bez\l
+			EndIf
+
+
+			dx=(x4-x1) ASR 3
+			dy=(y4-y1) ASR 3
+			distl=dx*dx+dy*dy
+			dx=(x3-x2) ASR 3
+			dy=(y3-y2) ASR 3
+			distr=dx*dx+dy*dy
+
+			If distl>distr
+				Line x1 ASL #sc, y1 ASL #sc, x3 ASL #sc, y3 ASL #sc,6
+				x1=x3:y1=y3:curl=nxl
+			Else
+				Line x4 ASL #sc, y4 ASL #sc, x2 ASL #sc, y2 ASL #sc,7
+				x2=x4:y2=y4:curr=nxr
+			EndIf
+
+		Else
+			done.w=On
+		EndIf
+	##[$80BC] done
+
+CEND
+
+Return
+
+
+.FryIt
+CNIF #c=#a
+;	FindLo tau2
+;	x1=bez\k ASL #sc:y1=bez\l ASL #sc
+;	Line x1,y1,x1+10,y1+10,5
+
+;	verts=0
+	verts+1
+	vert(verts)\t=tau1
+	vert(verts)\plus=plus
+	verts+1
+	vert(verts)\t=tau2
+	vert(verts)\plus=plus
+
+
+
+	For pass.w=0 To 1
+		dtp=tau1
+		dista=0
+
+		While dtp<tau2
+
+			dtp+0.05
+			FindLo dtp
+				If plus
+					newi=bez\i:newj=bez\j
+				Else
+					newi=bez\k:newj=bez\l
+				EndIf
+			FindDif dtp+0.02
+
+			If plus
+				dx=bez\i*(50*0.05)
+				dy=bez\j*(50*0.05)
+			Else
+				dx=bez\k*(50*0.05)
+				dy=bez\l*(50*0.05)
+			EndIf
+
+			dista=dista+jsqr{dx*dx+dy*dy}
+			If pass=1
+				If dista>myidt
+CNIF #c=#a
+					Point newi ASL #sc,newj ASL #sc,1
+CEND
+					dista-myidt
+					verts+1:vert(verts)\t=dtp
+					vert(verts)\plus=plus
+				EndIf
+			EndIf
+
+		Wend
+
+		If pass=0
+			myidt=(dista+0.01)/(##[$C381](dista/7)+1)
+		EndIf
+
+	Next
+CEND
+
+
+Return
+
+
+
+
+
+
+
+.PlaceCarold
+
+CNIF #c=#j
+;	If butt&1 Then rotang+1
+;	If butt&2 Then rotang-1
+
+
+
+	mytau=mytau+joy*0.1
+
+	FindLo mytau
+	quikx=(bez\i+bez\k) ASR 1
+	quiky=(bez\j+bez\l) ASR 1
+	FindDif mytau+1
+
+
+
+	fredang=Angle((bez\i+bez\k) ASL 4,(bez\j+bez\l) ASL 4) ASR 16
+	qs=-jsin{fredang} ASR 2
+	qc=-jcos{fredang} ASR 2
+;	rotang*0.98
+;	fredang=fredang+rotang
+
+
+
+;	ad.l=?sincos+((fredang&1023) ASL 2)
+;	f=jfrac{fredang}:of=1-f
+;	qs=Peek.w(ad	)*of+Peek.w(ad+4)*f
+;	qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+CEND
+
+Return
+
+
+
+.RotObj
+
+
+CNIF 1=0
+	myscal=2;1.3
+	qqs=jext{qs}*2*myscal
+	qqc=jext{qc}*2*myscal
+	*dest=base(0)
+	*mp.xy=map
+
+	For y=0 To 16
+		For x=0 To y
+;			!calc{*dest,x,y}
+;			!mpc{*mp.xy,x,y}
+
+			*mp\x=(*dest\x*qqc-*dest\y*qqs +160)ASL 4
+
+			hgh=*dest\x*qqs+*dest\y*qqc +100
+			If hgh<0 Then hgh=0
+			*mp\y=(hgh&$ffff) ASL 2
+			*dest+SizeOf.vec
+			*mp+SizeOf.xy
+		Next
+	Next
+CEND
+
+
+
+CNIF #c=#j
+
+	!waitdsp
+
+;	BlCopyMem{map.l,tritemp.l,trisize.l }
+	mytemp.l=$f1cf80
+
+	Poke.l mytemp	,tritemp.l	;dest
+	Poke.l mytemp+4,base(t)		;src
+
+	Poke.l mytemp+	8,jfr{qs ASR 1,qc ASR 1}
+;	quikx.q=(5-jfrac{deadx}) ASL 6
+;	quiky.q=(5-jfrac{deady}) ASL 6
+
+	Poke.q mytemp+ $c,quikx
+	Poke.q mytemp+$10,quiky
+
+	!rundsp{0}
+
+;	!waitdsp
+
+;	BlCopyMem{tritemp.l,map.l,trisize.l }
+	Return
+CEND
+
+
+
+Return
+
+
+
+.Draw
+CNIF #c=#j
+
+	BlPoly{*bmr,map,colbase}
+CEND
+
+CNIF #c=#a
+	For y=0 To 15
+		!mpc{*mp.xy,0,y}
+		*mpn.xy=*mp+SizeOf.xy*(y+1)
+		*dt2.xy=*mpn+SizeOf.xy
+
+
+;		fred(0)=*mp\x:fred(1)=*mp\y
+;		fred(2)=*mpn\x:fred(3)=*mpn\y
+;		fred(4)=*dt2\x:fred(5)=*dt2\y
+;		Polyf 3,&fred(0),*mp\c2
+
+
+		For x=0 To y-1
+			*mp+SizeOf.xy
+
+;			fred(2)=*mp\x:fred(3)=*mp\y
+;			Polyf 3,&fred(0),*mp\c1
+			*mpn=*dt2:*dt2+SizeOf.xy
+
+;			fred(0)=*mp\x:fred(1)=*mp\y
+;			fred(2)=*mpn\x:fred(3)=*mpn\y
+;			fred(4)=*dt2\x:fred(5)=*dt2\y
+;			Polyf 3,&fred(0),*mp\c2
+
+;			BlLin{*bmr,*mpn\x ASR 4,*mpn\y ASR 2,*mp\x ASR 4,*mp\y ASR 2,x+1}
+
+		Next
+	Next
+
+CEND
+Return
+
+
+;			BlLin{*bmr,*dt4\x ASR 4,*dt4\y ASR 2,*dt2\x ASR 4,*dt2\y ASR 2,*mp\c}
+;			BlLin{*bmr,*dt2\x ASR 4,*dt2\y ASR 2,*dt3\x ASR 4,*dt3\y ASR 2,*mp\c}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.
+.
+.
+.
+.
+
+
+##[$80CA] *p
+.SpinIt
+
+;	If jox=2 Then chan(\channel)\reqsam=3:jox=0
+
+Macro ac
+	SizeOf.car\`1(a0)
+End Macro
+
+
+	GetReg d0,*p:GetReg d2,jox
+
+	MOVE.l d0,a0
+
+	TST !ac{inair}:BEQ gohigh
+		MOVEQ #1,d1:SWAP d1
+		MOVE.l !ac{rot},d0:BPL dodo:NEG.l d1
+				 CMP.l d1,d0:BLE donegohigh:MOVE.l d1,d0:BRA donegohigh
+		dodo:CMP.l d1,d0:BGE donegohigh:MOVE.l d1,d0:BRA donegohigh
+
+	gohigh
+		TST !ac{idle}:BPL donegohigh
+		MOVE.w !ac{control},d0:CMP #contcomp,d0:BNE dohum
+			MOVE.l !ac{jox},d0:MOVE.l !ac{steering},d1
+			##[$80C2] $ca00:BRA addit
+		dohum
+			MOVEQ #0,d0
+			TST d2:BGT vbig
+			BEQ addit:MOVE.l !ac{steering},d0:NEG.l d0:BRA addit
+			vbig		 :MOVE.l !ac{steering},d0;:BRA addit
+		addit
+		ADD.l !ac{rot},d0:ASR.l #1,d0
+		MOVE.l d0,!ac{rot}
+	donegohigh
+
+;	If \inair
+;		\rot=JLimit(\rot,-1,1)
+;	Else
+;		If \idle<0
+;
+;			If \control=#contcomp
+;				\rot=(\rot+*p\jox*\steering) ASR 1
+;			Else
+;				\rot=(\rot+	 jox*\steering) ASR 1
+;			EndIf
+;		EndIf
+;	EndIf
+
+
+	Statement addmult{*p.car,dest1.l,dest2.l,dest3.l}
+		MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE.l d3,a3
+
+		MOVE.l !ac{gravity},d0:ADD.l d0,d0:MOVE.l !ac{headk},d1
+		SUB.l d0,d1:MOVE.l d1,!ac{headk}
+		ASL.l #2,d1:ADD.l !ac{k},d1:MOVE.l d1,(a3) ;newk
+
+		MOVE.l !ac{movi},d0 :MOVE.l !ac{movj},d2
+		ADD.l d0,d0				 :ADD.l d2,d2								 ;2*i
+		MOVE.l !ac{headi},d1:MOVE.l !ac{headj},d3
+		ADD.l d0,d1				 :ADD.l d2,d3								 ;d1=j+2*i
+		ASL.l #2,d1				 :ASL.l #2,d3
+		ADD.l d1,d0				 :ADD.l d3,d2								 ;d0=4*(j+2*i)+2*i
+		ADD.l !ac{i},d0		 :ADD.l !ac{j},d2
+		MOVE.l d0,(a1)			:MOVE.l d2,(a2)
+		AsmExit
+	End Statement
+
+
+	oldk=\k
+	If \drop
+		CNIF #nts	;4 frames..
+			addmult{*p,&tx,&tz,&newk.q}
+;			\headk-\gravity-\gravity:newk=\k+\headk ASL 2
+;			tx=\i+\headi ASL 2 +\movi *10
+;			tz=\j+\headj ASL 2 +\movj *10
+		CELSE
+			\headk-\gravity:newk=\k+\headk+\headk
+			tx=\i+\headi+\headi:tz=\j+\headj+\headj
+		CEND
+
+		soonk=QHite(tx,tz,skbm)
+		If newk >soonk
+;			Stop
+			\inair=On:\traction=1
+			CNIF #c=#s
+			 Select (Peek.w($c00004) AND 7)	;quick random..
+				 Case 0:\pitch=##[$C386](\pitch+\mpitch,0,4)
+				 Case 1:\roll =##[$C386](\roll +\mroll ,0,4)
+				 Default
+				End Select
+			CEND
+		Else
+			If \control<#contcomp
+				If ##[$C385](\headk)>2
+					!dosnd{19}
+				EndIf
+			EndIf
+
+			CNIF #nts
+				\headk=(soonk-oldk)ASR 2
+			CELSE
+				\headk=(soonk-oldk)ASR 1
+			CEND
+
+			\inair=Off
+
+			pitch.w=##[$C386]((QHite(tx,tz+0.2,skbm)-soonk)+2.5,0,4)
+			\mpitch=##[$C382](pitch-\pitch):\pitch+\mpitch
+
+			roll.w=##[$C386]((QHite(tx-0.2,tz,skbm)-soonk)+2.5,0,4)
+			\mroll=##[$C382](roll-\roll):\roll+\mroll
+
+		EndIf
+	EndIf
+
+	\dir=##[$851A](\dir+\rot)
+	\qc=qcos(\head):\qs=qsin(\head)
+
+
+	\upd=1
+Return
+
+
+
+Macro FindScr
+	*s\v`1x=(*sha\rx`1																					 )
+	*s\v`1y=(*sha\ry`1-##[$C487](QHite(\i+*sha\ri`1,\j+*sha\rj`1,skbm)-oldk))
+;	*s\v`1y=IOP(MapY(\i+*sha\ri`1,\j+*sha\rj`1,skbm))
+
+End Macro
+
+
+##[$80CA] *p
+.DrawShadow
+
+	CNIF #c=#s
+
+		oldk=QHite(\i,\j,skbm);\k
+
+		*s.quad=&quadverts(0);\q
+;		*sha.ShadPt=peek.l($ff000c)+?shadowdat+SizeOf.ShadPt*FixAng(\head+0.5)
+		*sha.ShadPt=Peek.l($ff000c)+\carnum ASL 12 +SizeOf.ShadPt*##[$851A](\head+0.5)
+		!FindScr{0}:!FindScr{1}:!FindScr{2}:!FindScr{3}
+;		temp=0
+
+;		temp=SegaQuad (&quadverts(0),*p\q+384)
+;		*p\shady=temp
+		*p\shady=##[$C483] (&quadverts(0),*p\q+384)
+
+;		If QAbs(*p\headk)>3
+;			*p\segasp\rshady=-1
+;		Else
+;			*p\segasp\rshady=0
+;		EndIf
+
+	CEND
+
+
+Return
+
+
+Statement bounce{result.w,*e.quadratic,*par.parse}
+	Shared sqlu.l
+
+;result obtained from TestNew..
+;fi,fj are the params to be changed...
+;di,dj,i,j are just for fun..
+
+	here.w=Off ; in case we crash more than once?
+
+	result+16
+	##[$80BB]
+		If ( (result & 1)=1)
+			If *e\lstraight
+				here+FixHitLine(*e,*par)
+			Else
+				here+FixHitQuad(*e,*par,sqlu)
+			EndIf
+		EndIf	 ;noimpact
+		result ASR 1
+		*e+#hquad
+		*par\norm+32
+	##[$80BC] (result=1) ; OR (here=On)
+	*par\norm AND 63
+	*par\boom=(here<0)
+End Statement	;end of bounce
+
+
+
+Statement Damage{result.w,*e.quadratic,*par.parse}
+	##[$80BB]
+		If ( (result & 1)=1)
+			If *e\lstraight
+				deli=*par\fi-*e\lc
+				delj=*par\fj-*e\lf
+				fac=*e\lb*deli+*e\le*delj
+				*par\i=*e\lc+*e\lb*fac
+				*par\j=*e\lf+*e\le*fac	;				here+bouncenew{*e,*par}
+			Else
+				deli=*par\fi-*e\lc
+				delj=*par\fj-*e\lf
+				fac=*e\lb*deli+*e\le*delj
+				*par\i=*e\lc+fac*(*e\lb+*e\ma*fac)
+				*par\j=*e\lf+fac*(*e\le+*e\md*fac) ;				here+bouncepod{*e,*par,sqlu}
+			EndIf
+		EndIf	 ;noimpact
+		result ASR 1
+		*e+#hquad
+	##[$80BC] (result=0)
+End Statement	;end of Damage
+
+
+#mung=On
+#clip=On
+
+##[$80CA] *p
+.MoveIndiv
+
+CNIF #race
+
+;	If \towed<>0 Then Return
+
+	If \control=#contcomp Then comp=On:Else:comp=Off	;computer override!
+
+	If \idle<0 ;be strict!
+
+
+		\movi=0:\movj=0
+
+	CNIF #mung
+		*par\fi=\i:*par\fj=\j
+		*par\i =\i:*par\j =\j
+		dt=\curdt
+		*e=edge(dt):result.w=CheckCollQuad(*e,*par):*g.xtra=grot(dt+1)
+		If result.w>0
+			If (result&5)>0
+				If (*g\cai-*par\fi)**g\swivj > (*g\caj-*par\fj)**g\swivi
+					result&14
+				Else
+					result&11
+				EndIf
+			EndIf
+			If (result&10)>0
+				If (*g\cai-*par\fi)**g\swivj > (*g\caj-*par\fj)**g\swivi
+					result&13
+				Else
+					result&7
+				EndIf
+			EndIf
+
+			If result>0
+				Damage{result,*e,*par}
+				\i=*par\i:\j=*par\j:\headi=0:\headj=0
+			EndIf
+
+		EndIf
+		;mung walls (fin)
+	CEND
+
+
+		If \inair
+			\nrev=0
+		Else
+
+			CNIF #nts
+				If comp AND (complogic= (*p<*p3))
+			CELSE
+				If comp
+			CEND
+
+				\jox=0
+				ni=*p\i+*p\headi ASL 2
+				nj=*p\j+*p\headj ASL 2
+
+				mess.w=firstmass(##[$C384](*p\curdt,2,pts3))
+				*first.guide=mass(mess)
+				safe=On
+;				MOVE #$8708,$c00004
+				DEFTYPE.guide *guide
+				cur.w=\curdt
+				cur=##[$C384](mess+##[$8529](massbase.l,&mass(mess),massbig.l,ni,nj,cur,pts1),0,nxmass.w)
+CNIF 1=0
+				While safe
+					mess=##[$C384](mess+1,0,nxmass.w)
+					*guide.guide=mass(mess)
+					dif=(*guide\dtp-\curdt)
+					If dif<0 Then dif+pts1
+					If (dif>-2 AND dif<8)
+						difi=*guide\mi-ni
+						difj=*guide\mj-nj
+						If (*guide\di*difj-*guide\dj*difi)<0
+							cur.w=mess:maxout=dist:safe=Off
+						EndIf
+					EndIf
+				Wend
+CEND
+;				MOVE #$8700,$c00004
+
+				desti=0
+				*guide	 =mass(			cur						)
+				*lg.guide=mass(##[$C384](cur-1,0,nxmass))
+
+				If lapdir=1
+					difi=*guide\li-ni:normi=*guide\li-*lg\li
+					difj=*guide\lj-nj:normj=*guide\lj-*lg\lj
+					If difi*normj<difj*normi
+						*rg.guide=mass(##[$C384](cur+lapdir2,0,nxmass))
+						desti=*rg\ri:destj=*rg\rj:joy=cmpacc7
+					EndIf
+
+					difi=*guide\ri-ni:normi=*guide\ri-*lg\ri
+					difj=*guide\rj-nj:normj=*guide\rj-*lg\rj
+					If difi*normj>difj*normi
+						*rg.guide=mass(##[$C384](cur+lapdir2,0,nxmass))
+						desti=*rg\li:destj=*rg\lj:joy=cmpacc7
+					EndIf
+				Else
+					##[$80C9] *lg,*guide
+
+					difi=*guide\li-ni:normi=*guide\li-*lg\li
+					difj=*guide\lj-nj:normj=*guide\lj-*lg\lj
+					If difi*normj>difj*normi
+						*rg.guide=mass(##[$C384](cur+lapdir2,0,nxmass))
+						desti=*rg\ri:destj=*rg\rj:joy=cmpacc7
+					EndIf
+
+					difi=*guide\ri-ni:normi=*guide\ri-*lg\ri
+					difj=*guide\rj-nj:normj=*guide\rj-*lg\rj
+					If difi*normj<difj*normi
+						*rg.guide=mass(##[$C384](cur+lapdir2,0,nxmass))
+						desti=*rg\li:destj=*rg\lj:joy=cmpacc7
+					EndIf
+
+				EndIf
+
+
+				If desti=0
+					*rg.guide=mass(##[$C384](cur+lapdir4,0,nxmass))
+					desti=*rg\mi:destj=*rg\mj:joy=cmpacc
+				EndIf
+
+;				MOVE #$8707,$c00004
+
+				difi=desti-\i
+				difj=destj-\j
+				\jox=##[$C382](difi*\qs-difj*\qc)
+			EndIf
+
+			\vel=\headi*\qc+\headj*\qs
+
+									;	*****	 HILL	 ******
+			tx=\i-\qc:tz=\j-\qs
+			If \vel<0
+				joy+(\headk ASR 1)	;hmmmm
+			Else
+				joy-(\headk ASR 1)	;hmmmm
+			EndIf
+;			joy+(!qhite{tx,tz}-\k) ASR 3
+
+			##[$8528] *p,joy
+;			\nrev=(\rev+joy*\accel)*(\engfric)
+;
+;			\movi+(\qc*\nrev)-\headi
+;			\movj+(\qs*\nrev)-\headj
+;			\nrev=(\nrev-\rev) ASR 2
+;
+;			\traction=JAbs(\qc*\movj-\qs*\movi)
+;
+;			\movi*\retard
+;			\movj*\retard
+
+		EndIf
+
+		ddi1=\headi ASL 2+(\movi ASL 2+ \movi) ASL 1
+		ddj1=\headj ASL 2+(\movj ASL 2+ \movj) ASL 1
+		proi=\i+ddi1
+		proj=\j+ddj1
+
+		*g=grot(\curdt)
+		ni=proi-*g\midi:nj=proj-*g\midj
+		If *g\dirj*ni < *g\diri*nj	;n.b. qwrap (2,pts3)
+			\curdt-1
+			If (\curdt<		2) Then \curdt+pts1:lapinc.w=-lapdir:Gosub DrawLaps
+;			If leadtime(\curdt)<tim Then leadtime(\curdt)=tim
+
+		Else
+			*g=grot(\curdt+1):ni=proi-*g\midi:nj=proj-*g\midj
+			If *g\dirj*ni > *g\diri*nj
+				\curdt+1
+				If (\curdt>pts2) Then \curdt-pts1:lapinc=lapdir:Gosub DrawLaps
+;				If leadtime(\curdt)<tim Then leadtime(\curdt)=tim
+			EndIf
+		EndIf
+
+
+
+	CNIF #clip
+		test\boom=Off
+		ddi1=-ddi1
+		ddj1=-ddj1
+		test\i =*p\i:test\j =*p\j
+		test\fi=proi:test\fj=proj
+		test\di=ddi1:test\dj=ddj1
+
+		\side=0:\top=0
+		If (##[$C385](ddi1) < 0.02) AND (##[$C385](ddj1) < 0.02) ;goslo
+			\headi=0:\headj=0:\movi=0:\movj=0
+			ddi1=0:ddj1=0
+		Else
+			ro=ddi1 ASL 6:ger=ddj1 ASL 6
+			qfac.q=RDistance(ro,ger) ASL 7
+			test\diri=ddi1*qfac
+			test\dirj=ddj1*qfac
+
+			dt=\curdt:							;*g=grot(dt)
+			*e=edge(dt)
+			result.w=CheckCollQuad(*e,*par)
+			If result<>0
+				*par\boom=Off
+				bounce{result,*e,*par}
+				If test\boom
+					##[$8527] *p,*par,&qcos(0),&qsin(0),ddi1,ddj1
+CNIF 1=0
+					\swai=test\fi
+					\swaj=test\fj
+
+					\headi=-ddi1 ASR 2:\movi=0
+					\headj=-ddj1 ASR 2:\movj=0
+
+
+					\swiv=##[$851A]((\dir-*par\norm)*2)
+
+					\difi=qcos(*par\norm)
+					\difj=qsin(*par\norm)	;Hooway!
+
+;					If *p=*p0
+;						Use BitMap 0
+;						Line MapX(\swai,\swaj),MapY(\swai,\swaj),MapX(\swai+\difi,\swaj+\difj),MapY(\swai+\difi,\swaj+\difj),14
+;					EndIf
+
+					If ddi1<0 Then \side=1 Else \side=2
+					If ddj1<0 Then \top=3 Else \top=4
+CEND
+				EndIf
+			EndIf
+		EndIf
+	CEND
+
+	Else
+		##[$80CA] *p
+		If \idle=1
+
+			\traction=0
+
+			dtp=##[$C384](signmovst+*p\pos*signmov,3,pts4) ;quick you fool!
+;			dtp=JWrap(signmovst+*p\carnum*signmov,3,pts4) ;quick you fool!
+			FindLo dtp,skbm
+			If signside.w
+				difi=bez\i-\i:difj=bez\j-\j
+			Else
+				difi=bez\k-\i:difj=bez\l-\j
+			EndIf
+
+			\headi=difi ASR 4
+			\headj=difj ASR 4
+			\movi=0:\movj=0
+			FindLo dtp-0.05,skbm:FindDif dtp+0.1,skbm
+			roll=##[$C386]((fps-\tottime),0,64)
+			If signside.w
+				ddist=##[$851A](Angle(bez\i ASL 3,-bez\j ASL 3) ASR 10	 -\dir+roll)
+			Else
+				ddist=##[$851A](Angle(bez\k ASL 3,-bez\l ASL 3) ASR 10+32-\dir+roll)
+			EndIf
+
+			\rot=(ddist-32) ASR 4
+
+		EndIf
+
+	EndIf
+
+
+
+	If (\idle=-1) ;AND (\towed=0) ;strict!!!!!!!
+		If lapdir=1
+			myleng.w=*p\lap ASL 7 +*p\curdt
+
+
+;			If *p\lap-laps.w=-1
+;				If *p\curdt=pts+3-3 Then ficont.w=-30000
+;			EndIf
+
+		Else
+			myleng.w=*p\lap ASL 7 -*p\curdt
+
+;			If *p\lap-laps.w=-1
+;				If *p\curdt=5 Then ficont.w=-30000
+;			EndIf
+		EndIf
+
+		tdist(*p\pos)\h=myleng
+
+CNIF 1=0
+
+		If warpmode
+			If (*p\control<(#contcomp))	;local player
+				If (*p<>*newleader)
+
+					If (spoon((spptr+1)&#spoon) >myleng) ;losing by 1 second
+						If ((tdist(*newleader\pos)\h-1)>myleng) ;but not much
+	;						If (*p\warp=0) Then *p\warp=1
+	;						if snd
+	;							chan(\channel)\reqsam=7:joy=-8
+	;						EndIf
+
+							*dp=*newleader
+
+							*p\newwarps+1
+							*p\qc=*dp\qc:*p\qs=*dp\qs
+							*p\i=*dp\i+*p\qc*1.2
+							*p\j=*dp\j+*p\qs*1.2
+							*p\k=QHite(*p\i,*p\j,skbm)
+							*p\headi=*dp\headi:*p\headj=*dp\headj:*p\headk=*dp\headk
+
+							*p\rev=*dp\rev:*p\vel=*dp\vel
+							*p\dir=*dp\dir:*p\rot=*dp\rot
+							*p\curdt=*dp\curdt
+							If *p\lap<>*dp\lap Then lapinc=*dp\lap-*p\lap:Gosub DrawLaps
+							*p\coll=1
+							*p\warp=0
+							 ;:*p\lasttime-#spoon
+							roll.w=startrace-spoon(*p\curdt)
+							*p\lasttime-roll;Peek.l(Peek.l($ff0004)+16)
+							*p\upd=3
+							!dosnd{63}
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+CEND
+
+
+
+
+	EndIf
+
+
+	\vel=\headi*\qc+\headj*\qs
+
+CEND
+Return
+
+
+.DrawLaps
+CNIF #race
+	*p\lap+lapinc
+
+	If *p\control<#contcomp
+		Select *p\lap-laps.w
+			Case -1:!dosnd{60}
+			Case 0:!dosnd{61}:ficont.w=-30000
+
+			Case 1:If *p\tune>-1 Then ##[$C491] *p\tune
+					!dosnd{62}
+		End Select
+	EndIf
+
+
+	If (laps.w<*p\lap)
+		\coll=1:\tottime+fps
+		\idle=1:\rot=0
+		tdist(\pos)\h=32000
+
+;		If *p\control<#contcomp
+			nureduce.w-1
+			If nureduce.w<0 Then endrace.w=fps+200
+;		EndIf
+
+
+	EndIf
+
+	If lapinc=1
+	 If \tottime=-1 Then \tottime=0
+;		If laps=*p\lap Then chan(*p\channel)\reqsam=4
+
+		If startrace<0 Then startrace=fps
+		quik.w=fps-*p\lasttime
+
+		If quik>0
+;			PrintCarCar quik,?tagbin,*p\q
+			If quik<*p\bestlap Then *p\bestlap=quik
+
+			If (*p\control<#contcomp)
+;				dum.w=quik*0.002:thing.l=			 dum	ASL 8:quik-dum*500
+;				dum.w=quik*0.02 :thing.l=(thing+dum) ASL 8:quik-dum*50
+;				thing=(thing+10) ASL 8+Int(quik*0.2)
+;				PutSpriteNums thing,*p\spr1,*p\spr2
+				*p\disc=15:*p\oldpos=-1
+;				PrintCarCar 0,?tagbin,*p\q
+				##[$C48C] quik,?tagbin,*p\q,super
+			EndIf
+		Else
+
+		EndIf
+		*p\lasttime=fps
+
+	Else
+		*p\lasttime=10000
+	EndIf
+
+
+CEND
+Return
+
+CheckWallLatent
+CNIF #race
+	##[$80CA] *p
+;	For *p=Pl(0) To Pl(#uscar) Step SizeOf.car	; if in a collision, \movi=0=\movj
+	For *p=*p0 To *maxp Step SizeOf.car	; if in a collision, \movi=0=\movj
+
+
+		*p\rev+*p\nrev
+
+		If *p\control<#contcomp
+			If *p\inair
+				If *p\idle
+					dtp=(*p\peak+*p\engpit*3) ASR 2
+				Else
+					dtp=0
+				EndIf
+				*p\engpit=dtp
+			Else
+				a.q=##[$C385](*p\headi)
+				b.q=##[$C385](*p\headj)
+				If a>b Then dtp=a+a+a+b Else dtp=a+b+b+b
+				dtp=##[$C386](dtp ASL *p\shv+*p\engmin,*p\engmin,*p\peak)
+				*p\engpit=dtp
+			EndIf
+
+
+			If *p\tune<10
+				##[$C496] 0,dtp
+			Else
+				##[$C497] *p\tune,dtp ;JAbs(*p\rev)	ASL 8;4
+			EndIf
+			If (*p\traction>0.14) AND (*p\traction<1) AND (*p\inair=0) Then sqvol.w+6
+		EndIf
+
+
+		Select \side
+			Case 0:impact.w=Off
+			Case 1:impact.w=(\i+\headi) >= \swai
+			Case 2:impact.w=(\i+\headi) <= \swai
+		End Select
+		If NOT impact
+			Select \top
+				Case 3:impact.w=(\j+\headj) >= \swaj
+				Case 4:impact.w=(\j+\headj) <= \swaj
+			End Select
+		EndIf
+		If impact
+
+			If \control<#contcomp Then !dosnd{20}
+			\i=\swai:\j=\swaj
+			fac=(\headi*\difj-\headj*\difi);ASL 1 ; do the wild vel
+			fac=fac ASL 1;+ fac ASR 1
+			\headi-(fac*\difj)
+			\headj+(fac*\difi)
+
+
+;			If (JAbs(\headi)>0.03) OR (JAbs(\headj)>0.03)	;so bounce ain't excessive..
+;				blah=RDistance(\headi ASL 7,\headj ASL 7) ASL 4	;was 3
+;				If blah<1
+;					\headi*blah:\headj*blah
+;				EndIf
+;			Else
+;				\headi= \difj ASR 5
+;				\headj=-\difi ASR 5
+;			EndIf
+			If (##[$C385](\headi*\difj-\headj*\difi)>0.03)	;so bounce ain't excessive..
+				blah=RDistance(\headi ASL 7,\headj ASL 7) ASL 4	;was 3
+				If blah<1
+					\headi*blah:\headj*blah
+				EndIf
+			Else
+				\headi+\difj ASR 5
+				\headj-\difi ASR 5
+			EndIf
+
+			blah=qsin(\swiv)	;do the wild spin after bounce..
+			\dir=##[$851A](\dir-blah)
+			\rot-blah ;ASL 1
+
+			\side=0:\top=0:\swai=-1	;reset so ain't happen 'gin
+			\swiv=0 ;:\rev ASR penalty
+		EndIf
+
+	Next
+CEND
+
+CNIF #snd
+	If fadeincol=0
+		sqvol.w=##[$C386](sqvol-2,0,40)
+		If movedsq.w=0
+			If sqvol>25
+				##[$C490] 11+Peek.w($c00008)&7,-1
+	;			SegaStartTune 5,-1
+	;			SegaStartTune 6,-1
+	;			SegaStartTune 7,-1
+				movedsq=50
+			EndIf
+		Else
+			If sqvol<25
+
+				 ##[$C491] 11
+				 ##[$C491] 12
+				 ##[$C491] 13
+				 ##[$C491] 14
+				 ##[$C491] 15
+				 ##[$C491] 16
+				 ##[$C491] 17
+				 ##[$C491] 18
+
+				movedsq=0
+			EndIf
+		EndIf
+	Else
+		sqvol=0
+	EndIf
+CEND
+
+
+Return
+
+
+
+
+
+
+.
+.
+.
+.
+.
+
+
+
+
+CNIF #c=#j
+	;********************** JAGOS SUBS ******************************
+
+.jagos ;(thanx mark!)
+	;
+	;OK, well need some zero page locations...
+	;
+	#allocat=$200
+	#stopat=$204
+	#vbint=$208
+	#gpint=$20c
+	#obint=$210
+	#tiint=$214
+	#dsint=$218
+	#_INT1=$21c
+
+	#superstacksize=256
+	#userstacksize=256
+
+
+	copymem		 ;a0=src, a1=srcf, a2=dest
+	;
+	CMP.l a1,a0:BCC 'done:MOVE.l (a0)+,(a2)+:BRA copymem
+	'done:RTS
+
+	initjagos
+	;
+	CLR.l $ff0:CLR.l $ff8:
+	MOVE.l #$200000,allocat:MOVE.l (a7),a0
+	MOVE.l allocat,a7:SUB.l #superstacksize,allocat
+	MOVE #$0,sr
+	MOVE.l allocat,a7:SUB.l #userstacksize,allocat:MOVE.l a0,-(a7)
+	;
+	MOVE #$1f00,_INT1:LEA inthandler(pc),a0:MOVE.l a0,$100
+	;
+	MOVEQ #8,d0:BSR alloc:CLR.l (a0):MOVE.l #4,4(a0):MOVE.l a0,stopat
+	MOVE.l a0,d0:SWAP d0:MOVE.l d0,$f00020:RTS
+
+
+	alloc ;d0=size, return a0=mem
+	MOVE.l 4,a6:MOVEQ #0,d1:JSR -204(a6):MOVE.l d0,a0:RTS
+
+	vbinton:OR #1,_INT1:MOVE _INT1,$f000e0:RTS
+	vbintoff:ANDI #$fffe,_INT1:MOVE _INT1,$f000e0:RTS
+
+	inthandler
+	;
+	MOVEM.l d0-d7/a0-a6,-(a7)
+	;
+	MOVE $f000e0,d2:ANDI #$1f,d2:MOVE d2,d0
+	LSL #8,d0:OR d2,d0:MOVE d0,$f000e0
+	;
+	LSR #1,d2:BCC 'novbint:MOVE.l vbint,a0:JSR (a0):'novbint
+	LSR #1,d2:BCC 'nogpint:MOVE.l gpint,a0:JSR (a0):'nogpint
+	LSR #1,d2:BCC 'noobint:MOVE.l obint,a0:JSR (a0):'noobint
+	LSR #1,d2:BCC 'notiint:MOVE.l tiint,a0:JSR (a0):'notiint
+	LSR #1,d2:BCC 'nodsint:MOVE.l dsint,a0:JSR (a0):'nodsint
+	;
+	MOVE d0,$f000e2
+	;
+	MOVEM.l (a7)+,d0-d7/a0-a6:RTE
+
+
+	initvbint	;d0=scanline, a0=address of code
+	MOVE d0,$f0004e:MOVE.l a0,vbint
+
+	If a=a
+		MOVE.l a5,global
+		MOVE.l a3,local
+	EndIf
+	RTS
+
+
+
+	vbdb	;vertical blank double buffer...
+		MOVEM.l d0/d2,-(a7)
+		MOVE.l global,a5
+		MOVE.l local,a4
+
+		ADDQ #1,framecnt
+
+		RefrBmap{*bmr2.jbmap}
+		HeadBmap{*bmr2}
+
+	;	HeadBmap{Peek.l($204)-32}
+
+		MOVEM.l (a7)+,d0/d2
+	RTS
+
+
+
+global :Dc.l 0
+local	:Dc.l 0
+CEND
+
+
+
+CNIF 1=0
+
+.printd2
+;
+;RTS
+;
+;print d2 at d0,d1
+;
+MOVEM.l d2-d4/a2,-(a7)
+;
+MOVE.l bmap1,a0							;where it goes
+MULU #320,d1:ADD.l d1,a0:LSL #2,d0:AND #$fff0,d0:ADD d0,a0
+MOVE.l d2,d0
+;
+MOVEQ #7,d4
+'loop
+ROL.l #4,d0:MOVE d0,d2:AND #15,d2
+LEA digs(pc),a1:LSL #4,d2:ADD d2,a1						 ;start of digit
+MOVEQ #7,d3:MOVE.l a0,a2
+'loop2
+MOVE.l (a1),(a2):MOVE.l 4(a1),4(a2)
+MOVE.l 8(a1),16(a2):MOVE.l 12(a1),20(a2)
+;
+LEA 576(a1),a1:LEA 1280(a2),a2
+DBF d3,'loop2
+LEA 32(a0),a0:DBF d4,'loop
+;
+MOVEM.l (a7)+,d2-d4/a2:RTS
+
+Event
+CEND
+
+
+
+	Event
+
+CNIF #c=#j
+	gpu_1
+	IncBin "gpu"
+	gpu_1f
+
+	dsp_1
+	IncBin "dsp"
+	dsp_1f
+CEND
+
+
+	sincos:		IncBin "sincos.bin"
+;	shadowdat: IncBin "shadow.dat"
+	sqludat:	 IncBin "sql.inc"
+
+CNIF #c<>#s
+	mytrack:	 IncBin "maps:f5.nmp"
+CEND
+
+
+CNIF #c=#s
+
+	CNIF #race
+		flags:IncBin "flags.bin"
+
+	CEND
+
+
+	blank:Dcb.w 64,$80
+	carpalette: IncBin "car.palette"
+	segpalette: IncBin "sega.palette"
+
+strip:
+	Dcb.l 32,$89aba981
+	Dcb.l 32,$1cdefedc
+
+
+
+
+
+	CNIF #title
+		font:
+			Dc.l 0,0,0,0,0,0,0,0
+			Dc.l 0,0,0,0,0,0,0,0
+			IncBin "font.bin"
+		fontf:
+
+		fence:
+			IncBin "rails.bin"
+		fencef
+
+		miniat:IncBin "cars.bin"
+		miniatf
+;					 IncBin "rainbow.bin"
+
+		seldat:IncBin"select.bin"
+		seldatf
+;		selmap:IncBin"select.map"
+
+
+
+		fsize:IncBin "size.bin"
+
+		checkers:IncBin "checkers.bin"
+
+
+	CEND
+
+
+
+CEND
+
+
+
+
+
+
+
+
+
+
+.InitOs
+	CNIF #c=#j
+;		BSR initjagos
+		MOVE.l #$00a600a6,$f00038:MOVE #$656,$f0003c
+		;MOVE #ypos,$f00046:MOVE #ypos+hite+hite,$f00048
+		MOVE #$2e,$f00046
+		;MOVE #$2e+240+240,$f00048
+		MOVE #$2e+199+199,$f00048
+
+		bld.l=$f02200
+		!waitgpu
+		!waitdsp
+
+		Poke.l $f1a100,(Peek.l($f1a100)&$f) OR (1 ASL 14)
+		BlCopyMem{?gpu_1,$f03000,?gpu_1f-?gpu_1}
+		BlCopyMem{?dsp_1,$f1b000,?dsp_1f-?dsp_1}
+
+	CEND
+	CNIF #c=#s
+
+
+;		!setreg{2,0}		 ;map location=0*8192
+;		!setreg{4,0}		 ;map location=0*8192
+;		!setreg{5,$78}	 ;sprites location=$f000
+;		!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+;		!setreg{12,$81}	;32 cell mode no shadows no interlace
+;
+;		!setreg{13,$3f}	;hs=$fc00
+;		!setreg{16,1+48} ;64x64 sized map
+;		!setreg{3,$38}	 ;windowpos= $e000
+;		!setreg{17,$0};$8a}
+;		!setreg{18,$0};$ff}
+;		!setreg{7,0}
+
+		!setreg{0,4}
+		!setreg{1,$74}
+
+		!setreg{6,0}
+		!setreg{7,0}
+		!setreg{8,0}
+		!setreg{9,0}
+		!setreg{10,0}
+		!setreg{14,0}
+		!setreg{15,2}
+
+
+	CEND
+
+Return
+
+
+
+
+;	nmp.l						;8k+ contours NOT CRUNCHED
+;	blockmap.l			 ;8k crunched
+;	blocks.l[8]			;40k+ crunched
+
+.InitVars
+
+	;warpmode.w=On
+	champtyp.w=0
+	mytrk.w=2
+	skill.w=3
+	myfontdat.l=?font
+
+
+	screenmode=0
+	mytau=6
+
+	scry=4
+	laps.w=4
+	CNIF #c=#s
+		segjoy.w=##[$C48E]
+		If segjoy<0
+			numseg.w=1-segjoy
+		Else
+			numseg=segjoy-1
+		EndIf
+		If numseg>0
+			cnt.w=##[$C484](0)
+			cnt.w=##[$C484](1)
+		EndIf
+	CEND
+
+Return
+
+
+
+;NEWTYPE .segasp					 ;sort points here
+;	dpth.w:car.w						;car=0 for car or numsprites for bridge
+;	binfo.l[0]							;ptr to bridge info in rom
+;	shady.w:rshady						;
+;	sx.q:sy.q:spdata.w			;bridge
+;End NEWTYPE
+
+
+
+
+
+
+
+Macro ssp SizeOf.segasp\`1(a1):End Macro
+
+Statement findsprites{myinfo.l,splist.l,cptr.l,mydata.l}
+	;
+	MOVEM.l a4-a6,-(a7)
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a4:MOVE.l d3,a5
+
+mybeg:TST (a0)+:BPL mybeg
+
+
+donother
+	MOVE (a0)+,d2:BMI dun:MOVE (a0)+,d3		 ;d2-d3=n block
+nxpart:
+	MOVE (a0)+,!ssp{sx}:MOVE (a0)+,!ssp{sy}:MOVE d3,!ssp{spdata}
+	MOVE #3000,!ssp{dpth}
+	;
+	MOVE (a0),d4:AND#$f00,d4:OR#5,d4:MOVE d4,!ssp{l}:ADD 2(a0),d3
+	;
+	MOVE.b(a0),d4:ADDQ#4,a0:MOVE d4,d5:AND #12,d4 ;d4=w d5=h+1
+	LEA 0(a5,d4),a6:MOVE.l a6,!ssp{wptr}
+	AND#3,d5:ADDQ#1,d5:MOVE d5,d4
+	MOVE d4,!ssp{h0}:ADD d5,d4
+	MOVE d4,!ssp{h1}:ADD d5,d4
+	MOVE d4,!ssp{h2}:ADD d5,d4
+	MOVE d4,!ssp{h3}
+	;
+	MOVE.l a1,(a4)+:ADD #SizeOf.segasp,a1:SUBQ#1,d2:BNE nxpart:BRA donother
+	;
+dun:
+	MOVE.l #0,(a4):MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Statement
+
+Statement findsprites2{myinfo.l,splist.l,cptr.l,mydata.l}
+	;
+	MOVEM.l a4-a6,-(a7)
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a4:MOVE.l d3,a5
+
+mybeg2:TST (a0)+:BPL mybeg2
+
+donother2:
+	MOVE (a0)+,d2:BMI dun2:MOVE (a0)+,d3:BCHG#11,d3		 ;d2-d3=n block
+nxpart2:
+	;
+	MOVE #768,d4:SUB (a0)+,d4:MOVE d4,!ssp{sx}
+	MOVE (a0)+,!ssp{sy}:MOVE d3,!ssp{spdata}:MOVE #3000,!ssp{dpth}
+	;
+	MOVE (a0),d4:AND#$f00,d4:OR#5,d4:MOVE d4,!ssp{l}:ADD 2(a0),d3
+	;
+	AND#$c00,d4:ADD#$400,d4:LSR#7,d4:SUB d4,!ssp{sx}
+	;
+	MOVE.b(a0),d4:ADDQ#4,a0:MOVE d4,d5:AND #12,d4 ;d4=w d5=h+1
+	LEA 0(a5,d4),a6:MOVE.l a6,!ssp{wptr}
+	AND#3,d5:ADDQ#1,d5:MOVE d5,d4
+	MOVE d4,!ssp{h0}:ADD d5,d4
+	MOVE d4,!ssp{h1}:ADD d5,d4
+	MOVE d4,!ssp{h2}:ADD d5,d4
+	MOVE d4,!ssp{h3}
+	;
+	MOVE.l a1,(a4)+:ADD #SizeOf.segasp,a1:SUBQ#1,d2:BNE nxpart2:BRA donother2
+	;
+dun2:
+	MOVE.l #0,(a4):MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Statement
+
+
+
+
+
+.GetNewTrack
+	CNIF #c=#s
+		*ath.theader=tkptr + SizeOf.theader*mytrk.w
+		maptr.l=*ath\nmp+tkbin
+		myinfo.l=*ath\info+tkbin
+
+		For cnt.w=0 To #uscar
+			cptr(cnt)=&spr(cnt)
+			cptr(#uscar+1+cnt)=&spr(#uscar+1+cnt)
+		Next
+		cnt.w=#uscar+#uscar+1+1
+
+		flags.l=Peek.w(myinfo) ASL 5
+
+
+
+
+
+
+		If super
+			findsprites2{myinfo+2,&spr(cnt),&cptr(cnt),?mytable}
+		Else
+			findsprites{myinfo+2,&spr(cnt),&cptr(cnt),?mytable}
+		EndIf
+
+	CELSE
+
+		maptr.l=?mytrack
+	CEND
+
+	condt.l=maptr+64*64*2 + 2
+	pts.w=Peek.w(maptr+64*64*2):pts1.w=pts+1:pts2.w=pts+2:pts3=pts+3:pts4=pts+4
+
+	SetMaptr maptr.l+2,skbm
+	SetConDt condt.l,skbm
+	SetIO &bez.ij,skbm
+	Gosub PreProcess
+
+Return
+
+
+
+
+.DoPal
+	CNIF #c=#j
+			palbase.l=$f00400
+			For tr.w=0 To 255
+				mycol=tr ASL 1
+
+				blah.q=(##[$8481](15*tr+2.3,tr)+1)*127:mr=blah
+				blah.q=(##[$8481](tr,tr*7+3242)+1)*127:mg=blah
+				blah.q=(##[$8481](tr*31+32.6,tr*9+324)+1)*127:mb=blah
+
+				temp.l=(jint{mr ASR 3} ASL 5 + jint{mb ASR 3}) ASL 6+ jint{mg ASR 2}
+		;		temp.l=$ffff;3333
+				Poke.w palbase+mycol,temp
+			Next
+	CEND
+
+	CNIF #c=#s
+		If inrace
+			base.l=&charb(0)+32;#wcram+32
+;			MyCopy{ blockmap	 ,#wcram+96,16	}
+;			MyCopy{ blockmap+32,#wcram	 ,16 }
+			MyCopy{ blockmap	 ,&charb(0)+96,16	}
+			MyCopy{ blockmap+32,&charb(0)	 ,16 }
+
+			MyCopy{ ?carpalette,base,8																	 }
+			MyCopy{ ?carpalette,base+32,8																}
+
+			MyCopy{ ?carpalette+16+newp(Pl(0)\newp)\col ASL 3,base+16,4 }
+			MyCopy{ ?carpalette+16+newp(Pl(2)\newp)\col ASL 3,base+24,4 }
+
+			MyCopy{ ?carpalette+16+newp(Pl(1)\newp)\col ASL 3,base+48,4 }
+			MyCopy{ ?carpalette+16+newp(Pl(3)\newp)\col ASL 3,base+56,4 }
+
+		Else
+			base.l=#wcram
+			##[$C482] ?segpalette,base+96,16
+			##[$C482] ?carpalette,base+64,8 ;cheap...
+			##[$C482] ?carpalette+4,base+80,4
+			##[$C482] ?carpalette+8,base+88,4
+
+
+			##[$C482] ?carpalette,base,8
+			##[$C482] ?carpalette,base+32	,8
+
+			##[$C482] ?carpalette+16+newp(0)\col ASL 3,base+16,4
+			##[$C482] ?carpalette+16+newp(1)\col ASL 3,base+24,4
+
+			##[$C482] ?carpalette+16+newp(2)\col ASL 3,base+48,4
+			##[$C482] ?carpalette+16+newp(3)\col ASL 3,base+56,4
+
+
+		EndIf
+
+
+
+	CEND
+Return
+
+
+##[$80CA] *p
+.HandleHeader
+		If \idle=1
+			\disc-1
+			If \disc=0
+				quik=\bestlap
+				If quik>0 Then ##[$C48C] quik,?tagbin,\q,super:\disc=32000:\oldpos=-1
+			EndIf
+		EndIf
+
+		If \idle=-1 ;racing
+			\disc-1
+			If \disc=0
+				If *p\oldpos=-2
+;					tt$="			 "
+;					PutSpriteMess tt$,*p\spr1,*p\spr2
+					##[$C48C] 0,?tagbin,*p\q,super
+					*p\oldpos=9
+				EndIf
+				If *p\oldpos=-1
+					*p\oldpos=9
+
+					##[$C48C] -1-*p\pos,?tagbin,*p\q,super
+					*p\disc=3
+
+				Else
+;					PutSpriteNums 0,*p\spr1,*p\spr2
+					##[$C48C] 0,?tagbin,*p\q,super
+				EndIf
+			EndIf
+		EndIf
+
+
+;		If (*p\oldpos>-1)
+;			If (*p\pos<> *p\oldpos) OR (*p\disc<-1000)
+;				*p\oldpos=*p\pos
+;				*p\disc=2
+;;				PutSpriteNums *p\pos+1,*p\spr1,*p\spr2
+;				PrintCarCar -1-*p\pos,?tagbin,*p\q
+;			EndIf
+;		EndIf
+
+Return
+
+
+
+
+
+
+##[$80CA] *p
+.SetStartCar
+	\idle=0:\drop=Off:\inair=On
+	\coll=-1:\warp=0:\lap=0:\jox=0
+	\pitch=2:\roll=2:\mpitch=0:\mroll=0:\rot=0:\movi=0:\movj=0
+	\headi=0:\headj=0:\headk=0:\rev=0:\nrev=0:\vel=0:\traction=0
+
+	\swaheadi=0:\swaheadj=0:\swamovi=0:\swamovj=0
+	\side=0:\top=0:\swai=0:\swaj=0:\difi=1:\difj=0:\swiv=0
+	\bestlap=32000:\lasttime=10000:\tottime=-1:\warptime=0
+	\newwarps=0:\newscore=0
+	\upd=3
+Return
+
+
+.PlaceNorm
+CNIF #race
+	If lapdir=-1 Then dtp.q=2.5 :Else dtp.q=pts3+0.5
+	signmovst=dtp
+
+	FindLo dtp,skbm:dti =(bez\i+bez\k)ASR 1:dtj =(bez\j+bez\l)ASR 1:dtp-(0.1*lapdir)
+	FindLo dtp,skbm:dpri=(bez\i+bez\k)ASR 1:dprj=(bez\j+bez\l)ASR 1
+
+	dj=(dtj-dprj) :di=(dti-dpri)
+	qnorm.q=0.1/jsqr{di*di+dj*dj}
+
+	signmov=2.2
+
+	di*10*qnorm*1.25:dj*10*qnorm*1.25
+	tdir=##[$851A](Angle(dj ASL 6,di ASL 6) ASR 10+32)
+
+;	For i.w=0 To #uscar/2
+;		j.w=#uscar-i
+;		Exchange startline(i)\car,startline(j)\car
+;		Exchange startline(i)\h,startline(j)\h
+;		Exchange Pl(startline(i)\car)\pos,Pl(startline(j)\car)\pos
+;	Next
+	##[$851E] &startline(0),#uscar,*p0
+	qnorm*lapdir
+
+
+	*newleader.car=0
+	For dum=#uscar To 0 Step -1
+		pl=-1
+		For cnt.w=0 To #uscar
+			If Pl(cnt)\pos=dum Then pl=cnt
+		Next
+
+		If pl>-1
+			*p=Pl(pl)
+
+			If *newleader<>0
+				*op=*newleader:dtp-(qnorm*signmov)
+				For cnt.w=0 To 3
+
+					FindLo dtp-0.05,skbm
+					If dum&1
+						ni=(bez\i+bez\k)ASR 1
+						nj=(bez\j+bez\l)ASR 1
+					Else
+						ni=(bez\i+bez\k)ASR 1
+						nj=(bez\j+bez\l)ASR 1
+					EndIf
+					difi=*op\i-ni:difj=*op\j-nj
+					dist1=jsqr{difi*difi+difj*difj}-signmov
+
+					FindLo dtp+0.05,skbm
+					If dum&1
+						ni=(bez\i+bez\k)ASR 1
+						nj=(bez\j+bez\l)ASR 1
+					Else
+						ni=(bez\i+bez\k)ASR 1
+						nj=(bez\j+bez\l)ASR 1
+					EndIf
+					difi=*op\i-ni:difj=*op\j-nj
+					dist2=jsqr{difi*difi+difj*difj}-signmov
+					dtp=dtp-0.05*(dist1+dist2)/(dist2-dist1)
+				Next
+			Else
+				dtp=signmovst
+			EndIf
+
+			FindLo dtp,skbm
+			If dum&1
+				*p\i=(bez\i+bez\k)ASR 1
+				*p\j=(bez\j+bez\l)ASR 1
+			Else
+				*p\i=(bez\i+bez\k)ASR 1
+				*p\j=(bez\j+bez\l)ASR 1
+			EndIf
+			*newleader=*p
+
+			FindLo dtp-0.05,skbm:FindDif dtp+0.05,skbm:di=(bez\i+bez\k) ASL 3:dj=(bez\j+bez\l) ASL 3
+			If lapdir=-1 Then di=-di:dj=-dj
+
+			dist1=jsqr{di*di+dj*dj}
+			di/dist1:dj/dist1
+			If dum&1
+				*p\i+dj
+				*p\j-di
+			Else
+				*p\i-dj
+				*p\j+di
+			EndIf
+			*p\curdt=dtp
+
+			*p\dir=##[$851A](Angle(dj ASL 6,di ASL 6) ASR 10+32)
+			*p\qc=qcos(*p\dir)
+			*p\qs=qsin(*p\dir)
+
+		EndIf
+	Next
+
+CEND
+Return
+
+
+CNIF 1=0
+	mycnt.w=0
+	For *p=*p0 To *maxp Step SizeOf.car
+
+		mycnt.w=*p\pos
+		*p\i=dti+dj*width*((mycnt&1)-0.5)*2 - di*width*mycnt;dback
+		*p\j=dtj-di*width*((mycnt&1)-0.5)*2 - dj*width*mycnt;dback
+ ;	 *p\k=QHite(*p\i,*p\j,skbm)+10
+
+		*p\dir=tdir:*p\qc=qcos(tdir):*p\qs=qsin(tdir)
+		*p\curdt=dtp
+		mycnt+1
+	Next
+CEND
+
+
+
+
+Statement CopGrot{src.w,dest.w}
+Shared grot(),edge()
+	*gs.xtra		 =grot(src):*gd.xtra		 =grot(dest)
+	*es.quadratic=edge(src):*ed.quadratic=edge(dest)
+
+	For i=0 To SizeOf.quadratic:Poke.b *ed+i,Peek.b (*es+i):Next
+	For i=0 To SizeOf.xtra		 :Poke.b *gd+i,Peek.b (*gs+i):Next
+
+End Statement
+
+
+
+PreProcess
+CNIF #race
+
+	oldi=100:oldj=100
+	For dt=0 To pts3
+
+		*g=grot(dt):*e=edge(dt)
+
+		FindLo dt+0	,skbm:A1=bez\i:A2=bez\j:bA1=bez\k:bA2=bez\l
+		FindLo dt+0.5,skbm:B1=bez\i:B2=bez\j:bB1=bez\k:bB2=bez\l
+		FindLo dt+1	,skbm:C1=bez\i:C2=bez\j:bC1=bez\k:bC2=bez\l
+
+
+		*g\swivi=A1-bA1:*g\swivj=A2-bA2
+
+;		*g\desti=(A1+	 C1+bA1+		bC1)ASR 2
+;		*g\destj=(A2+	 C2+bA2+		bC2)ASR 2
+;		*g\desti=(A1+B1+C1+bA1+bB1+bC1)/6
+;		*g\destj=(A2+B2+C2+bA2+bB2+bC2)/6
+;		*g\desti=(B1+bB1)ASR 1
+;		*g\destj=(B2+bB2)ASR 1
+		*g\desti=(B1+bB1) ASR 1 +(C1-B1+bC1-bB1)+(A1-B1+bA1-bB1)
+		*g\destj=(B2+bB2) ASR 1 +(C2-B2+bC2-bB2)+(A2-B2+bA2-bB2)
+
+		cai=A1:caj=A2
+		cbi=C1:cbj=C2	;keep em in - why not?
+		*g\midi=B1	:*g\midj=B2
+		*g\cai=A1	 :*g\caj=A2
+		*g\dai=A1-C1:*g\daj=A2-C2
+
+		ni	=A1-C1:nj	=A2-C2:pdist=jsqr{ni	*ni	+nj	*nj	}:ni	/pdist:nj	/pdist
+		difi=A1-B1:difj=A2-B2:pdist=jsqr{difi*difi+difj*difj}:difi/pdist:difj/pdist
+		fac=(ni*difj-nj*difi)
+		If ##[$C385](fac)<0.13
+			*e\lstraight=On
+		Else
+			*e\lstraight=Off
+			*e\lodd1=(fac<0)
+			*e\lodd3=(fac>0)
+		EndIf
+
+
+		plussage.w=0:Gosub DoQuadratic
+
+		*e+#hquad
+		A1=bA1:A2=bA2:B1=bB1:B2=bB2:C1=bC1:C2=bC2
+
+		*g\cbi=A1	 :*g\cbj=A2
+		*g\dbi=A1-C1:*g\dbj=A2-C2
+
+		dai =A1-cai:daj =A2-caj
+		dbi =C1-cbi:dbj =C2-cbj		;ya never know.. might come in handy!
+		*g\diri=B1-*g\midi:*g\dirj=B2-*g\midj
+
+		mu=(cbj*dai-caj*dai+cai*daj-cbi*daj)/(dbi*daj-dbj*dai)
+
+		ni	=A1-C1:nj	=A2-C2:pdist=jsqr{ni	*ni	+nj	*nj	}:ni	/pdist:nj	/pdist
+		difi=A1-B1:difj=A2-B2:pdist=jsqr{difi*difi+difj*difj}:difi/pdist:difj/pdist
+		fac=ni*difj-nj*difi
+		If ##[$C385](fac)<0.13
+			*e\lstraight=On
+		Else
+			*e\lstraight=Off
+			*e\lodd1=(fac>0)
+			*e\lodd3=(fac>0)
+		EndIf
+		plussage.w=32:Gosub DoQuadratic
+	Next
+
+
+
+	CopGrot{pts1,0}
+	For src=1 To 7:CopGrot{src,src+pts1}:Next
+
+	nxmass.w=0:stp=0.25:dtp=2:FindLo dtp,skbm:Gosub getnew:oi=ni:oj=nj
+
+	While dtp<(pts+3)
+		dist=0:stpmax=80:stpmin=0
+		While (dist<3.8) OR (dist>4.2)
+			ndt=dtp+stp:FindLo ndt,skbm:Gosub getnew
+			dist=(oi-ni)*(oi-ni)+(oj-nj)*(oj-nj)
+			If dist<4
+				stpmin=stp
+				If stpmax=80 Then stp+0.1: Else stp=(stpmax+stpmin) ASR 1
+			Else
+				stpmax=stp
+				If stpmin=0 Then stp=##[$C386](stp-0.1,0,80):Else stp=(stpmax+stpmin) ASR 1
+			EndIf
+		Wend
+		dtp=ndt:oi=ni:oj=nj
+
+		difi=bez\k-bez\i:difj=bez\l-bez\j:proj.q=1/jsqr{difi*difi+difj*difj}:difi*proj:difj*proj
+
+		li=bez\i+difi:lj=bez\j+difj
+		ri=bez\k-difi:rj=bez\l-difj
+		mass(nxmass)\mi=ni,nj
+		mass(nxmass)\di=difi,difj
+		mass(nxmass)\li=li,lj
+		mass(nxmass)\ri=ri,rj
+		mass(nxmass)\dtp=ndt:nxmass+1
+;		Circle MapX(ni,nj),MapY(ni,nj),3,14
+;		Line MapX(ni+difi,nj+difj),MapY(ni+difi,nj+difj),MapX(ni,nj),MapY(ni,nj),14
+;		Circle MapX(li,lj),MapY(li,lj),3,14
+;		Circle MapX(ri,rj),MapY(ri,rj),3,14
+
+	Wend
+
+
+	mess.w=0
+	For dtp=2 To pts2
+
+		mess=##[$C384](mess-20,0,nxmass)
+		dif=mass(mess)\dtp-dtp
+		If dif>5 Then dif-pts1
+		While dif<0
+			mess=##[$C384](mess+1,0,nxmass)
+			dif=mass(mess)\dtp-dtp
+			If dif>5 Then dif-pts1
+		Wend
+		firstmass(dtp)=##[$C384](mess-1,0,nxmass)
+
+	Next
+	If maxmess<nxmass Then maxmess=nxmass
+
+	massbase.l=&mass(0)
+	massbig.l=&mass(nxmass)
+
+
+CEND
+Return
+
+CNIF #race
+
+.getnew
+	ni=(bez\i+bez\k) ASR 1
+	nj=(bez\j+bez\l) ASR 1
+Return
+
+
+DoQuadratic
+	If *e\lstraight	;one straight.. comin right up!
+		difi=(C1-A1)	:difj=(C2-A2)
+		pdist=jsqr{difi*difi+difj*difj}
+		difi/pdist:difj/pdist:*e\lb=difi:*e\le=difj
+
+		*e\lc=(A1+C1)ASR 1:*e\lf=(A2+C2)ASR 1
+		b1=(A1-*e\lc)*difi+(A2-*e\lf)*difj
+		b2=(C1-*e\lc)*difi+(C2-*e\lf)*difj
+;		If b2<b1 Then Exchange b1,b2
+		mid=(b1+b2) ASR 1:dif=##[$C385](b1-b2)*0.52
+		b1=mid-dif:b2=mid+dif
+		*e\lb1=b1:*e\lb2=b2
+
+		*e\langst=##[$851A](Angle(difj ASL 6,difi ASL 6) ASR 10+32)
+		*e\langadd=0
+;		Circle MapX(*e\lc,*e\lf),MapY(*e\lc,*e\lf),5,8
+
+
+	Else
+		pc=A1:B1-pc:B1*2:C1-pc:pa=(C1-B1)*2:pb=C1-pa
+		pf=A2:B2-pf:B2*2:C2-pf:pd=(C2-B2)*2:pe=C2-pd
+
+		t=-0.5*(pa*pb+pd*pe)/(pa*pa+pd*pd)
+
+		ob=2*t*pa+pb:oc=t*t*pa+t*pb+pc
+		oe=2*t*pd+pe:of=t*t*pd+t*pe+pf
+		pdist=jsqr{ob*ob+oe*oe}
+		ob/pdist:oe/pdist
+		od=-ob	:oa=oe	; to be modified along this line..
+
+		t+1
+		tc=t*t*pa+t*pb+pc-oc
+		tf=t*t*pd+t*pe+pf-of
+
+		dt1=tc*ob+tf*oe	 ;now, dot2*dot2=dot1...
+		dt2=tc*oa+tf*od
+		fac=(dt1*dt1/dt2)
+		ma=oa/fac:md=od/fac
+		oa*fac:od*fac
+
+		*e\la=oa:*e\ld=od
+		*e\ma=ma:*e\md=md
+		*e\lb=ob:*e\le=oe
+		*e\lc=oc:*e\lf=of
+
+		t=0:tc=t*t*pa+t*pb+pc-oc
+				tf=t*t*pd+t*pe+pf-of
+				b1=tc*ob+tf*oe
+		t=1:tc=t*t*pa+t*pb+pc-oc
+				tf=t*t*pd+t*pe+pf-of
+				b2=tc*ob+tf*oe
+		dif=##[$C385](b1-b2)*0.52:mid=(b1+b2) ASR 1
+		b1=mid-dif:b2=mid+dif
+		*e\lb1=b1:*e\lb2=b2
+
+		t=b1
+		difi=2*t*ma+ob		 ;strictly optional..
+		difj=2*t*md+oe		 ;differientiate it
+		fang=(Angle(difj ASL 6,difi ASL 6) ASR 10+32)
+
+		t=b2
+		difi=2*t*ma+ob		 ;strictly optional..
+		difj=2*t*md+oe		 ;differientiate it
+		stang =(Angle(difj ASL 6,difi ASL 6) ASR 10+32)
+
+		dang.q=(stang-fang)
+		If dang<-32 Then dang+64
+		If dang>32 Then dang-64	;take the smaller..
+
+		dang/(b2-b1)
+
+		*e\langst=fang-(b1*dang)
+		*e\langadd=dang ASR 4
+
+
+	EndIf
+Return
+
+
+
+.DoSignStart
+	dtp=pts3+0.5:If lapdir=-1 Then dtp=2.5
+	FindLo dtp,skbm
+;	difi =(MapX(bez\i,bez\j)-signx) ASR 4:difj =(MapY(bez\i,bez\j,skbm)-signy) ASR 4
+;	desti=(MapX(bez\k,bez\l)-signx) ASR 4:destj=(MapY(bez\k,bez\l,skbm)-signy) ASR 4
+;	signside.w=(difi*difi+difj*difj) < (desti*desti+destj*destj)
+
+	signside=(lapdir>0)
+
+	FindDif 2.6,skbm
+	If signside
+		difi=1.4/jsqr{bez\i*bez\i+bez\j*bez\j}
+	Else
+		difi=1.4/jsqr{bez\k*bez\k+bez\l*bez\l}
+	EndIf
+	signmov=-difi*0.1*lapdir
+;	signmov=0.5
+	signmovst.q=pts3+0.5:If lapdir=-1 Then signmovst=2.5
+Return
+
+
+CEND
+
+
+
+##[$80D3]
+	champs
+	mini:Dc.w	-8, 15, 20,-13,-10,-24
+	pors:Dc.w	 7, -5,	4,	3,-18, -9
+	midg:Dc.w -20, 18, -7, -4, 10, 13
+	beet:Dc.w	 2,-14,-21,	1, -6,-17
+	truk:Dc.w	 8, 23, 24, 22,-11,-12
+	musc:Dc.w -16,-22, 19,	5,	9, 11
+	ccow:Dc.w	12, -3, -1, -2,	6,-23
+	f1f1:Dc.w	16, 21, 17, 14,-15,-19
+
+champcars
+	Dc.w	0,1,7,2,4,3,6,5
+
+;	Dc.w -10,-13, 20, 16, 22, -8
+;	Dc.w	 4,	7,-18,	3, -5, -9
+;	Dc.w	-4, -7, 10, 13, 18,-20
+;	Dc.w	 2, -6,-14,	1,-11,-17
+;	Dc.w -12, 23, 15,	8,-21, 24
+;	Dc.w	-3,	5,	9, 11,-16,-22
+;	Dc.w	-2,	6, 12,-23, 19, -1
+;	Dc.w	14, 17,-15, 21,-19,-24
+
+
+tagbin:IncBin "tags.bin"
+sprbin:IncBin "sprites.bin"
+flagdat:IncBin"flagman.bin"
+
+
+
+CNIF #title
+	cmdat		:IncBin "cm.bin"
+;	titleadat:IncBin "titlea.bin"
+;	titlebdat:IncBin "titleb.bin"
+;	squigdat :IncBin "squig.bin"
+	clouddat :IncBin "background.bin"
+	billdat	:IncBin "billboard.bin"
+	billdatf
+	titledat :IncBin "title.bin"
+
+	resultsdat:IncBin "results.bin"
+
+CEND
+
+
+
+	ty01:Dc.b "GO CATCH A BUS"
+	ty02:Dc.b "YER GRANNY DRIVERS BETTER"
+	ty03:Dc.b "BUGGER"
+	tylst:Event
+
+
+	lostxt:Dc.l ty01,ty02,ty03,tylst
+	lostxtf
+
+	rt01:Dc.b "YIPPE"
+	rt02:Dc.b "HOORAY"
+	rtlst:Event
+
+
+	wintxt:Dc.l rt01,rt02,rtlst
+	wintxtf
+
+
+
+.LostCode
+
+CNIF 1=0
+		If (((Peek.w($c00008)LSR 8)&255)>160); OR (Peek.w($ff0000)=-1)
+			!MyVWait
+			##[$C482] &myvram1(0),$fc00,320
+
+			If (screenmode&1)=0
+;				SegaMap mptl,0,41,blkh
+				!pokemem{#wvram+$10000000,-(vp(0)\sx AND 7)}					 ;horizontal
+				!pokemem{#wsram+$00000000, (vp(0)\sy AND 7)}					 ;vertical
+
+;				If screenmode=2
+;					SegaMap mptla,16*64*2					,41,blkh
+;				EndIf
+
+			Else
+;				SegaMap mptl,0				,21,blkh
+;				SegaMap mptr,(64-22)*2,21,blkh
+				!pokemem{#wvram+$10000000,-(vp(0)\sx AND 7)}					 ;horizontal
+				!pokemem{#wsram+$00000000, (vp(0)\sy AND 7)}					 ;vertical
+				!pokemem{#wvram+$10020000,-(vp(2)\sx AND 7)+(64-21)*8} ;horizontal
+				!pokemem{#wsram+$00020000, (vp(2)\sy AND 7)}					 ;vertical
+
+;				If screenmode=3
+;					SegaMap mptla,16*64*2					,21,blkh
+;					SegaMap mptra,16*64*2+(64-22)*2,21,blkh
+;				EndIf
+			EndIf
+
+
+;			Repeat
+;				cnt.w=(Peek.w($c00008)LSR 8)&255
+;			Until cnt>125
+
+
+		EndIf
+CEND
+
+CNIF 1=0
+		MOVE #$8709,$c00004
+		##[$80BB]
+
+			cnt.w=(Peek.w($c00008)LSR 8)&255
+		##[$80BC] cnt>174
+		MOVE #$8703,$c00004
+;		wwb:CMP.w #$7700,$c00008:BCS wwb
+CEND
+
+
+
+
+	CNIF 1=0
+
+
+		jj=0
+		If butt&1 Then jj+1
+		If butt&2 Then jj-1
+		myangvel=(myangvel+jj) *0.98
+		myang=myang+myangvel ASR 4
+		If myang<0 Then myang+1024
+		If myang>=1024 Then myang-1024
+
+
+		ad.l=?sincos+((myang&1023) ASL 2)
+		f=jfrac{myang}:of=1-f
+
+
+
+		qs=Peek.w(ad	)*of+Peek.w(ad+4)*f
+		qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+
+		qqs=jext{qs}
+		qqc=jext{qc}
+
+
+		xvel=(xvel+jox) *0.95
+		yvel=(yvel+joy) *0.95
+
+		xdif=xvel*qqc + yvel*qqs
+		ydif=xvel*-qqs + yvel*qqc
+		deadx=jlimit{deadx+xdif ASR 3 ,1,63-#sqs}
+		deady=jlimit{deady+ydif ASR 3 ,1,63-#sqs}
+
+		delta.l=jint{deadx} +jint{deady}ASL 6
+	CEND
+
+	CNIF #c=#j
+		LEA vbdb(pc),a0:MOVEQ #1,d0:BSR initvbint:BSR vbinton
+	CEND
+
+
+
+
+
+
+	CNIF 1=0
+		Use On
+
+		SUB Init
+		peat
+		VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db:BlockScroll
+		BitMapOutput db
+		 sx3=MouseX:sy3=MouseY
+		Gosub Make
+		Gosub Rot
+		Gosub Draw
+
+	 ##[$80BC] Joyb(0)<>0
+	End
+	CEND
+
+
+	CNIF 1=0
+;		If (jcos{0}<0.9) OR (jcos{0}>1.1)
+			For i.w=0 To 320
+				hgh=i/320
+				BlLin{*bmr,i,128,i,jcos{hgh}*64+128,$ffffffff}
+			Next
+;		EndIf
+	CEND
+
+
+
+
+
+
+
+Return
+
+
+
+CNIF 1=0
+			base.l=Peek.l(?racename+champ ASL 2)
+			If champ=2
+				roll.w=3 ;snow..
+			Else
+				roll.w=4
+			EndIf
+
+
+			segaprint{base,roll,6,7,8};
+			segaprint{?racedat,3,10+roll+roll,7,8};
+
+			cnt.w=racenum+49
+			segaprint{&cnt+1,0,15,10,8};
+
+
+
+			##[$C482] &map(0,0),#wvram,4096;2048
+
+
+			##[$C482] ?carpalette,#wcram+ 64,8
+			##[$C482] ?carpalette,#wcram+ 96,8
+
+			fadeincol.w=0
+			count=0:nxlink.w=0:fps.w=0
+			For pl=0 To 5
+				titcol=pl
+				For cnt.w=0 To 2
+					charb(nxlink	)\id=cnt+pl ASL 4
+					charb(nxlink+1)\id=cnt+pl ASL 4:nxlink+2
+				Next
+				Gosub makeoldcar
+
+				;assume nxlink+6.. yeah, i know	hard space(?)
+			Next
+
+
+
+			titcol=0:fadeincol=0:done.w=2
+			##[$80BB]
+				If fadeincol<10000 Then fadeincol.w+1
+				!MyVWait
+				displaychars{$f000}
+
+;					If titcol>15
+;						titcol-12
+;
+;						If titcol=4 Then SegaDMA ?carpalette+16+newp(titcol)\col ASL 3,#wcram+ 80,4
+;						If titcol=5 Then SegaDMA ?carpalette+16+newp(titcol)\col ASL 3,#wcram+ 88,4
+;						titcol-3
+;					EndIf
+;
+				item=0
+				For pl=0 To 5
+					If fadeincol<30
+						myx=newp(pl)\ed-10
+					Else
+						myx=newp(pl)\ed
+					EndIf
+
+
+					newp(pl)\ed=myx
+					myx=##[$C386](##[$C381](myx),128-48-96,128+320+8)
+					If myx<128-48-8
+						chara(item	 )\y=0
+						chara(item+ 1)\y=0
+						chara(item+ 2)\y=0
+						chara(item+ 3)\y=0
+						chara(item+ 4)\y=0
+						chara(item+ 5)\y=0
+						chara(item+ 6)\y=0
+					EndIf
+
+					If myx=128-48-96
+						If titcol=pl Then titcol+16
+
+						chara(item+ 7)\y=0
+						chara(item+ 8)\y=0
+						chara(item+ 9)\y=0
+						chara(item+10)\y=0
+						chara(item+11)\y=0:item+12
+					Else
+						delx=(myx-288) ASR 7
+
+
+
+;							chara(item+8 )\y=128+80
+;							chara(item+9 )\y=128+80
+;							chara(item+10)\y=128+80
+;							chara(item+11)\y=128+80
+
+						mbx=myx+24
+						chara(item+ 6)\x=mbx+charb(item+ 6)\dx
+						chara(item+ 7)\x=mbx+charb(item+ 7)\dx
+						chara(item+ 8)\x=mbx+charb(item+ 8)\dx
+						chara(item+ 9)\x=mbx+charb(item+ 9)\dx
+						chara(item+10)\x=mbx+charb(item+10)\dx
+						chara(item+11)\x=mbx+charb(item+11)\dx
+
+
+						mbx=myx+32
+						chara(item	)\x=myx:myx-delx
+						chara(item+1)\x=mbx:mbx-delx
+						chara(item+2)\x=myx:myx-delx
+						chara(item+3)\x=mbx:mbx-delx
+						chara(item+4)\x=myx
+						chara(item+5)\x=mbx
+
+						item+12
+					EndIf
+				Next
+
+				If done=2
+					If (##[$C484](trx{0})&$f0)=0 Then done=1
+				Else
+					If (##[$C484](trx{0})&$f0) Then done=0
+				EndIf
+
+			##[$80BC] done=0
+
+
+;		CELSE
+;			menu.w=#raceit:Gosub redr
+;		CEND
+
+CEND
+
+
+;			Wend
+CNIF 1=0
+				If (Peek.w($c00008)LSR 8)&255<#skipval
+					##[$C48B] 0,*p2\fr,*p2\q,1	 ,*p2\carnum
+					*p=*p2:Gosub DrawShadow
+					CNIF #uscar>3
+						If (Peek.w($c00008)LSR 8)&255<#skipval
+							##[$C48B] 0,*p4\fr,*p4\q,2	 ,*p4\carnum
+							*p=*p4:Gosub DrawShadow
+						EndIf
+					CEND
+				EndIf
+			EndIf
+
+		Else
+			##[$C48B] 0,*p1\fr,*p1\q,0	 ,*p1\carnum
+			##[$C48B] 0,*p3\fr,*p3\q,1	 ,*p3\carnum
+			CNIF #uscar>4
+				##[$C48B] 0,*p5\fr,*p5\q,3	 ,*p5\carnum
+			CEND
+
+		EndIf
+CEND
+
+CNIF 1=0
+
+Statement shit{src.l,dest.l,x.w,adder.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE d2,d0:ADD d0,d0:MOVE d0,d1:MOVE d3,d4
+	LEA 0(a1,d1),a2:MOVEQ#29,d7
+	nxb:MOVE#$180,(a2):ADD#128,a2:DBRA d7,nxb:ADDQ#2,d1
+nxtxx:
+	CMP #80,d1:BPL dundun:TST d0:BMI dundun
+	LEA 0(a0,d0),a2:LEA 0(a1,d1),a3:MOVEQ#29,d7
+	more:MOVE (a2),d3:ADD d4,d3:MOVE d3,(a3):ADD #80,a2:ADD#128,a3
+	DBRA d7,more:SUBQ#2,d0:ADDQ#2,d1:BRA nxtxx
+dundun:
+	AsmExit
+End Statement
+
+
+
+		*p=&map(0,0)
+
+		*batman.batman=?titleadat
+		*robin.batman=?titlebdat
+
+		base.l=&*batman\mmap
+		For j=0 To 29
+			For i=0 To 39
+				If (i>10) AND (i<20)
+				Else
+					Poke.w *p,Peek.w(base)+$8300:*p+2
+				EndIf
+				base+2
+			Next
+		Next
+
+		*p=&map(0,30)
+
+
+		For roll.w=0 To 39 ;Step 1 ASR 4
+
+			shit{&*batman\mmap,&map(0,0),roll,$8b00}
+			shit{&*robin\mmap,&map(0,32),roll,$a980}
+;			For y=0 To 29
+;				map(roll,y)=$180
+;			Next
+;			base.l=*p +roll*2
+;			For x=roll+1 To JLimit(roll+roll,0,39)
+;				temp.l=base
+;				For y=0 To 29
+;					map(x,y)=Peek.w(temp)+$800:temp+80
+;				Next
+;				base-2
+;			Next
+
+			!MyVWait
+			##[$C482] &map(0,0),#wvram,4096;2048
+
+		Next
+CEND
+
+
+CNIF 1=0
+	.makeoldcar
+		newp(pl)\ed=128+320-6+pl*80;200
+		newp(pl)\moved=128+8+pl*46
+
+		If titcol&1
+			blah.q=107 ASR 2
+		Else
+			blah.q= 85 ASR 2
+		EndIf
+
+		pitch.w=titcol+2
+
+		For cnt=0 To 2
+			addmini{cnt+pl ASL 4,-10,blah-cnt ASR 3,newp(titcol)\car,pitch}
+		Next
+
+
+
+;		addstring{pl ASL 4 +4,&newp(pl)\nam1,5,7};pitch}
+;		positionstring{pl ASL 4+4,-20,blah-2};14 ASR 3}
+;		For cnt=1 To 6
+;			chara(nxlink-cnt)\x=charb(nxlink-cnt)\fx
+;			chara(nxlink-cnt)\y=charb(nxlink-cnt)\fy
+;		Next
+
+	Return
+
+
+CEND
+
+CNIF 1=0
+
+	Statement squigb{src.l,ycnt.w}
+		MOVE.l d0,a0
+
+		MOVEQ#0,d0:MOVE.l #cp,a1:MOVE.l#vd,a2
+
+	nxlin5
+		wl3:MOVE.w $c00008,d2:LSR#8,d2:CMP d2,d0:BPL wl3
+
+	 MOVE.w (a0)+,d7
+
+	;		MOVE.l #wvram+$38000003,(a1):MOVE #0,(a2)
+	;		MOVE.l #wvram+$38020003,(a1):MOVE #0,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d7,(a2)
+	;		MOVE.l #wsram+$00020000,(a1):MOVE d7,(a2)
+
+
+		ADDQ#1,d0:CMP d1,d0:BNE nxlin5:AsmExit
+
+
+
+
+	End Statement
+
+CEND
+
+CNIF 1=0
+
+
+Statement segaprint{charbase.l,l,x,y,col}
+	Shared fsize,map(),fontptr.w
+;	sn.w=((col AND 6) ASL 12) + $8182
+	sn.w=((col AND 6) ASL 12) + $8002+fontptr
+
+
+	If col AND 8 Then big.w=1 Else big=0:sn+4*43:y-2
+	If col AND 1 Then sn+8*43 ;was 5
+
+	For look.l=charbase To charbase+l
+		blah.w=translate{Peek.b(look)}
+		If blah<0
+			x+6*(1+big)
+		Else
+			oldx=x
+			If blah=91 ;hard space
+				x+2:blah=$180
+			Else
+				x+2;eek.w(fsize+blah+blah+(1-big)*78)+2
+				blah ASL 2 +sn
+			EndIf
+			map(x,y)	=blah	:map(x+1,y	)=blah+2
+			map(x,y+1)=blah+1:map(x+1,y+1)=blah+3
+
+		EndIf
+	Next
+
+End Statement
+
+CEND
+
+
+
+CNIF 1=0
+		For cnt.w=0 To 128 Step 2
+			Poke.w buffa1+cnt,0
+		Next
+
+		For fadeincol=0 To 30
+			!MyVWait
+			##[$C482] buffb1,#wcram,64
+			MyCloset{buffa1,buffb1}
+		Next
+CEND
+
+
+
+
+
+##[$80D3]
+
+CNIF #c<>#s
+	Event
+	cardiff
+	Dc.b	98,26,24,	 98,24,24,	44,0		;classic
+	Dc.b	92,40,30,	 108,33,25 ,60	,0 ;grunty		2
+	Dc.b	102,61,47,	115,59,45,64,0	 ;zippy
+	Dc.b	100,80,60,	110,50,60,72,0	 ;nippy
+	Dc.b	25,127,101, 29,45,122,68,0	;slippery
+	Dc.b	117,23,17,	104,17,10 ,30	,0 ;pathetic	2
+	Event
+CEND
+
+
+
+
+;Blue Top
+;Green sweat shirt
+;302-6308
+
+
+CNIF 1=0
+	51			-			 Cursor Up/Down Sound
+	52			-			 Cursor Left/Right Borders Sound
+	53			-			 Select an option Sound
+	54			-			 New Player On Player Select allocst
+	55			-			 Cow Sample V1
+	56			-			 Cow Sample V2
+	57			-			 Cow Sample V3
+	58			-			 Cow Sample V4
+	59			-			 After Race Tune (Play after each race - loops)
+	60			-			 Car completes lap 1
+	61			-			 Car completes lap 2
+	62			-			 Car completes lap 3
+	63			-			 Car is Warped
+	64			-			 End Of Championship Final Table Tune (Loops)
+CEND

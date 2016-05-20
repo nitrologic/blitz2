@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WindowX.bb
++; ; windowx example ; Screen 0,2Window 0,10,0,300,200,0,"Window",0,1Print WindowX MouseWait End 

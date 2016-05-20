@@ -1,0 +1,197 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/HopalongAD/HopalongAD.BB2
++##[$80C3]:##[$80CC]
+;SetErr:End:End SetErr
+
+FindScreen 0,"Workbench Screen"
+
+DEFTYPE .w a,c,x,y,nx,it,col,rd,gr,bl,cspeed,mnx,mxx,mny,mxy,xstart,ystart
+DEFTYPE .b n,vr,vg,vb,kind
+
+ver$="1.0.1"
+
+MenuGap 2,1
+newlocarr 0,0," Project "
+MenuItem 0,0,0,0,"RND Params			","N"
+MenuItem 0,16,0,1,"----------------"
+MenuItem 0,0,0,2,"About					 ","?"
+MenuItem 0,0,0,3,"Quit						","Q"
+
+newlocarr 0,1," Options "
+MenuItem 0,0,1,0,"Kind			 "+Chr$(187)
+	SubItem 0,4,1,0,0,"	Standard "
+	SubItem 0,2,1,0,1,"	Variant 1"
+	SubItem 0,2,1,0,2,"	Variant 2"
+	SubItem 0,2,1,0,3,"	Variant 3"
+MenuItem 0,0,1,1,"Zoom In	 + "
+MenuItem 0,0,1,2,"Zoom Out	- "
+
+
+localstat 0,220,112,370,130,$100f,"Hopalong AGA V"+ver$+" by Andrea Doimo",1,2
+arrmult 0
+localstat 1,180,150,100,40,$6,"Params",1,2
+Use localstat 0
+
+wid.w=InnerWidth
+hei.w=InnerHeight
+iwid.w=wid+WLeftOff
+ihei.w=hei+WTopOff
+wid=wid ASR 2
+hei=hei ASR 2
+aspect=(WBWidth/WBHeight)*0.8
+x=0
+y=0
+a=Rnd(400)
+b=Rnd
+c=Rnd(400)
+g=0.1
+gx=g*aspect
+col=1
+kind=1
+cspeed=250
+
+Gosub showparams
+InnerCls 1
+
+##[$80BB]
+	col2=col+1
+	For it=0 To cspeed
+		Select kind
+		Case 2
+			nx=y-Sgn(x)*QAbs(b*x-c)
+		Case 1
+			nx=y-Sgn(x)*(QAbs(b*x-c)ASL 1)
+		Case 3
+			nx=y-Sgn(x)*(QAbs(b*x+c*b))
+		Case 4
+			nx=y-Sgn(x)*(QAbs(b*x+c/b))
+		End Select
+		y=a-x
+		x=nx
+		Gosub iplot
+		ev.l=Event
+		If ev<>0
+			Gosub checkevent
+		EndIf
+	Next
+	i$=Inkey$
+	If i$<>""
+		If i$="+"
+			g=g*2
+			gx=g*aspect
+			InnerCls 1
+			x=0
+			y=0
+		EndIf
+		If i$="-"
+			g=g/2
+			gx=g*aspect
+			InnerCls 1
+			x=0
+			y=0
+		EndIf
+	EndIf
+	col=QWrap(col+1,0,255)
+##[$80C7]
+
+.iplot
+xx=wid*2+gx*x
+yy=hei*2+g*y
+If xx>4 AND xx<iwid
+	If yy>11 AND yy<ihei
+		WPlot xx,yy,col
+	EndIf
+EndIf
+Return
+
+.project
+Select ItemHit
+Case 0
+	InnerCls 1
+	x=0
+	y=0
+	a=Rnd(800)
+	b=Rnd
+	c=Rnd(800)
+	Gosub showparams
+Case 2
+	localstat 2,160,70,240,110,0,"",1,2
+	Activate 2
+	WLocate 40,5
+	Print "HOPALONG AGA V"+ver$
+	WLocate 56,20
+	Print "BY ANDREA DOIMO"
+	WLocate 30,35
+	Print "MADE IN BLITZ BASIC 2"
+	WLocate 30,50
+	Print "CONTACT ME ON FIDONET"
+	WLocate 4,65
+	Print "FOR BUG REPORTS, IDEAS, ETC."
+	WLocate 70,80
+	Print "2:333/714.8"
+	WLocate 36,95
+	Print "CLICK MOUSE TO EXIT"
+	MouseWait
+	Activate 0
+	Free localstat 2
+	Use localstat 0
+Case 3
+	Gosub finish
+End Select
+Return
+
+.options
+Select ItemHit
+Case 0
+	kind=SubHit+1
+	InnerCls 1
+	x=0
+	y=0
+Case 1
+	g=g*2
+	gx=g*aspect
+	InnerCls 1
+	x=0
+	y=0
+Case 2
+	g=g/2
+	gx=g*aspect
+	InnerCls 1
+	x=0
+	y=0
+End Select
+Return
+
+.checkevent
+Select ev
+Case $100
+	On MenuHit+1 Gosub project,options
+Case $200
+	Gosub finish
+Case $2
+	wid.w=InnerWidth
+	hei.w=InnerHeight
+	iwid.w=wid+WLeftOff
+	ihei.w=hei+WTopOff
+	wid=wid ASR 2
+	hei=hei ASR 2
+	InnerCls 1
+	x=0
+	y=0
+End Select
+Return
+
+.finish
+	InnerCls 0
+	End
+
+.showparams
+	Use localstat 1
+	WindowOutput 1
+	InnerCls 0
+	WLocate 0,2
+	NPrint "A:",a
+	NPrint "B:",b
+	NPrint "C:",c
+	WindowOutput 0
+	Use localstat 0
+Return

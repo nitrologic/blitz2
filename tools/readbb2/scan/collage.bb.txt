@@ -1,0 +1,95 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/collage.bb
++;
+; make a collage from random cars
+;
+
+Dim f$(10):For i.w=0 To 7:Read a$:f$(i)="cars.imp/"+a$+"/pic.0":NPrint f$(i):Next
+
+##[$A402] 0,2048,1024,1
+
+ff=1
+For y=0 To 31
+	For x=0 To 31
+		##[$A404] 1,f$(cc)+Mid$(Str$(ff+1000),2)
+		a.l=##[$80B8] ##[$A401](1)
+		If Peek.w(##[$80B8] ##[$A401](1)+16)>64
+			##[$A40C] 1,0,3,0,64,32,x*64,y*32
+		Else
+			##[$A40C] 1,0,0,0,64,32,x*64,y*32
+		EndIf
+		Print "."
+		cc=QWrap(cc+1,0,8)
+		ff=QWrap(ff+1,1,801)
+	 Next
+	 cc=QWrap(cc-1,0,8)
+Next
+##[$A405] 0,"ram:test.iff"
+
+End
+
+lmaxlen 0,1280,280,8
+allocst 0,0,0,1280,280,8,$8020,"HELLO",1,2,0
+
+t.q=255/63:tt.q=63/255:l.q=0
+For i=0 To 63
+	AGAGreen 0,000+i ,l,0,0
+	AGAGreen 0,064+i ,0,l,0
+	AGAGreen 0,128+i ,0,0,l
+	l+4
+Next
+
+For i=0 To 63
+	r=(i AND 48) ASL 2
+	g=(i AND 12) ASL 4
+	b=(i AND 3) ASL 6
+	AGAGreen 0,192+i,r,g,b
+Next
+
+FadePalette 0
+
+;LoadChunky 0,"testpic.iff"
+
+a.l=##[$A410](0)
+ww=Peek.w(##[$80B8] ##[$A401](0)+22)
+w=426
+
+Function.w getcol{r.w,b.w,g.w}
+	LSR #6,d0
+	ROXL.b#1,d1:ROXL#1,d0:ROXL.b#1,d1:ROXL#1,d0
+	ROXL.b#1,d2:ROXL#1,d0:ROXL.b#1,d2:ROXL#1,d0
+	AsmExit
+End Function
+
+For y=0 To 279
+	aa.l=a+y*ww*3:xx=0
+	For x=0 To w-1				 ;280
+		r.q=Peek.b(aa)&255
+		g.q=Peek.b(aa+ww)&255
+		b.q=Peek.b(aa+ww+ww)&255
+		i.w=getcol{r,g,b}+192
+		r=r*tt
+		g=g*tt+64
+		b=b*tt+128
+		;If (y AND 1) Then Exchange r,g
+		;If (y AND 2) Then Exchange r,b
+		;If (y AND 4) Then Exchange g,b
+		Point xx,y,r:Point xx+1,y,g:Point xx+2,y,b:
+;		Plot xx+3,y,i
+		xx+3:aa+1
+		If Joyb(0)<>0 Then End
+	Next
+Next
+
+MouseWait
+
+;SaveScreen 0,"ram:test.iff"
+End
+
+Data.s f1.pix
+Data.s truck.pix
+Data.s porsche.pix
+Data.s vw.pix
+Data.s mini.pix
+Data.s midget.pix
+Data.s camaro.pix
+Data.s cow.pix

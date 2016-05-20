@@ -1,0 +1,628 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/bspread/bspread.bb2
++#test=0
+;
+##[$80C3]:##[$80CC]:##[$80CB]
+;
+;Blitz Spread
+;
+;A Simple Spreadsheet program written in Blitz Basic.
+;
+#vrows=20						 ;visible rows
+;
+#shite=#vrows*8+40		;screen hite
+;
+NEWTYPE.cell
+txt$
+flags.w ; -1 = left justify, 0 = centre, 1 = right justify
+rflags.w	;0=nothing, 1=text
+					;2=a value
+result.f
+End NEWTYPE
+
+Dim cells.cell(99,99),xs(99),ys(99)
+
+;
+;This function converts a column number to	'a','b','aa...'
+
+Function$ colname{x}
+If x>25 Then c$=Chr$(64+Int(x/26))
+c$+Chr$(65+(x ##[$80B9] 26))
+Function Return c$
+End Function
+
+Function$ cellst{i$}	;return cell character
+While Left$(i$,1)>="A" AND Left$(i$,1)<="Z"
+	a$+Left$(i$,1):i$=Mid$(i$,2)
+End While
+Function Return a$
+End Function
+
+Function cellval{i$}	;return cell#, 0... from A,AA...
+m=1
+For k=1 To Len(i$)
+	c+(Asc(Right$(i$,k))-64)*m
+	m*26
+Next
+Function Return c
+End Function
+
+Function.f eval{i$} ;evaulate i$
+Shared z$,cells()
+Gosub element:r.f=r2.f ;get an element into r.f
+loop
+Select a$
+Case "+"
+	Gosub element:r+r2:##[$80BE] Select:Goto loop
+Case "-"
+	Gosub element:r-r2:##[$80BE] Select:Goto loop
+Case "*"
+	Gosub element:r*r2:##[$80BE] Select:Goto loop
+Case "/"
+	Gosub element:r/r2:##[$80BE] Select:Goto loop
+Case "^"
+	Gosub element:r^r2:##[$80BE] Select:Goto loop
+End Select
+z$=a$+i$:Function Return r
+;
+element
+a$=Left$(i$,1):If a$="" Then Return
+If a$="+" Then i$=Mid$(i$,2):Goto element
+If a$="-"
+	i$=Mid$(i$,2):Gosub element:r2=-r2:Return
+EndIf
+If a$="("
+	r2=eval{Mid$(i$,2)}
+	If Left$(z$,1)=")"
+		i$=Mid$(z$,2)
+		a$=Left$(i$,1):i$=Mid$(i$,2):Return
+	EndIf
+	Stop
+EndIf
+If a$="@"
+	a$=Mid$(i$,2,4):i$=Mid$(i$,6)
+	Select a$
+	Case "SUM("
+		Gosub getsum
+	Case "AVG("
+		Gosub getsum
+		If c>0 Then r2/c
+	Default
+		Stop
+	End Select
+	Return
+EndIf
+If (a$>="0" AND a$<="9") OR a$="."
+	r2=Val(i$)
+	i$=Mid$(i$,Len(UStr$(r2))+1)
+	a$=Left$(i$,1):i$=Mid$(i$,2)
+	Return
+EndIf
+If (a$>="A" AND a$<="Z") OR a$="\"
+	;cell reference.
+	Gosub getcell
+	r2=cells(x,y)\result
+	Return
+EndIf
+Stop
+
+getsum
+Gosub getrange:r2=0:c=0
+If x=x2 Then x2+.5
+If y=y2 Then y2+.5
+For k=x To x2 Step Sgn(x2-x)
+For j=y To y2 Step Sgn(y2-y)
+If cells(k,j)\rflags=2
+	r2+cells(k,j)\result:c+1
+EndIf
+Next:Next
+Return
+
+getrange
+Gosub getcell2:x2=x:y2=y
+If a$=","
+	Gosub getcell2
+	If a$=")"
+		a$=Left$(i$,1):i$=Mid$(i$,2):Return
+	EndIf
+EndIf
+Stop
+
+getcell2:a$=Left$(i$,1)
+getcell
+;
+If a$="\" Then i$=Mid$(i$,2):a$=Left$(i$,1)
+;
+a$=cellst{i$} ;get cell reference characters
+x=cellval{a$}
+i$=Mid$(i$,Len(a$)+1) ;skip those chars
+y=Val(i$)
+i$=Mid$(i$,Len(UStr$(y))+1)
+a$=Left$(i$,1):i$=Mid$(i$,2)
+x-1:y-1
+Return
+End Function
+
+Function rw{}
+Function Return Cvi(Inkey$(2))
+End Function
+
+MenuChecked 2
+newlocarr 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD			 ","L"
+MenuItem 0,0,0,1,"SAVE","S"
+MenuItem 0,0,0,2,"QUIT","Q"
+;
+newlocarr 0,1,"EDIT"
+MenuItem 0,0,1,0,"INSERT ROW					","I"
+MenuItem 0,0,1,1,"INSERT COLUMN","C"
+MenuItem 0,0,1,2,"DELETE ROW","D"
+MenuItem 0,0,1,3,"DELETE COLUMN","K"
+MenuItem 0,0,1,4,"DUPLICATE RIGHT","R"
+MenuItem 0,0,1,5,"DUPLICATE DOWN","Z"
+;
+newlocarr 0,2,"CALCULATE"
+MenuItem 0,0,2,0,"ALL		 ","A"
+MenuItem 0,0,2,1,"ROW"
+MenuItem 0,0,2,2,"COLUMN"
+
+workstart 0,8,84,0,1," OK "
+workstart 0,240,84,0,2," CANCEL "
+
+allocst 0,0,0,640,#shite,2,$8000,"Blitz Spread",1,2
+Green 0,6,6,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,15,15,0
+localstat 0,0,12,640,#shite-12,$1900,"",0,1
+CatchDosErrs:arrmult 0
+
+ScreensBitMap 0,0
+MaxLen pa$=192:pa$="examples"
+MaxLen fi$=192
+
+Gosub defaults
+
+Gosub showall
+
+Gosub curs
+
+main
+Gosub getevent
+Select a.l	;event
+Case 256	;menupick
+	Select MenuHit
+	Case 0	;project
+		Select ItemHit
+		Case 0	;load
+			f$=FileRequest$("Sheet to Load?",pa$,fi$)
+			If f$
+				If WriteMem(0,f$)
+					FileInput 0
+					If Inkey$(4)="BSHT"
+						maxx=rw{}:maxy=rw{}
+						For k=0 To maxx:For j=0 To maxy
+						cells(k,j)\txt=Edit$(80)
+						cells(k,j)\flags=rw{},rw{}
+						Next:Next
+						x=0:xo=0:y=0:yo=0:Gosub calcall
+					Else
+						##[$FF8C] 0
+					EndIf
+					CloseFile 0:WindowInput 0
+				Else
+					##[$FF8C] 0
+				EndIf
+			EndIf
+		Case 1	;save
+			f$=FileRequest$("Name to save Sheet as?",pa$,fi$)
+			If f$
+				If ReadMem(0,f$)
+					FileOutput 0
+					Print "BSHT"
+					Print Mki$(maxx),Mki$(maxy)
+					For k=0 To maxx:For j=0 To maxy
+					NPrint cells(k,j)\txt
+					Print Mki$(cells(k,j)\flags)
+					Print Mki$(cells(k,j)\rflags)
+					Next:Next:CloseFile 0:WindowOutput 0
+				Else
+					##[$FF8C] 0
+				EndIf
+			EndIf
+		Case 2	;quit
+			End
+		End Select
+	Case 1	;edit
+		Select ItemHit
+		Case 0	;insert row
+			If y+yo<=maxy
+				xa=0:ya=1
+				For j=maxy To y+yo Step -1
+				For k=0 To maxx
+				Gosub movecell
+				Next:Next
+				j=y+yo:For k=0 To maxx
+				cells(k,j)\rflags=0
+				Next
+				ys(y+yo)=0:maxy+1
+				Gosub showall:Gosub newcurs
+			EndIf
+		Case 1	;insert column
+			If x+xo<=maxx
+				xa=1:ya=0
+				For k=maxx To x+xo Step -1
+				For j=0 To maxy
+				Gosub movecell
+				Next:Next
+				k=x+xo:For j=0 To maxy
+				cells(k,j)\rflags=0
+				Next
+				xs(x+xo)=0:maxx+1
+				Gosub showall:Gosub newcurs
+			EndIf
+		Case 2	;delete row
+			If y+yo<=maxy
+				xa=0:ya=-1
+				For j=y+yo+1 To maxy
+				For k=0 To maxx
+				Gosub movecell
+				Next:Next
+				j=maxy:For k=0 To maxx
+				cells(k,j)\rflags=0
+				Next
+				ys(maxy)=0
+				While ys(maxy)=0 AND maxy>0
+					maxy-1
+				End While
+				Gosub showall:Gosub newcurs
+			EndIf
+		Case 3	;delete a column
+			If x+xo<=maxx
+				xa=-1:ya=0
+				For k=x+xo+1 To maxx
+				For j=0 To maxy
+				Gosub movecell
+				Next:Next
+				k=maxx
+				For j=0 To maxy
+				cells(k,j)\rflags=0
+				Next
+				xs(maxx)=0
+				While xs(maxx)=0 AND maxx>0
+					maxx-1
+				End While
+				Gosub showall:Gosub newcurs
+			EndIf
+		Case 4	;duplicate right
+			xa=1:ya=0:Gosub dupcell
+		Case 5	;duplicate down
+			xa=0:ya=1:Gosub dupcell
+		End Select
+	Case 2	;calculate
+		Select ItemHit
+		Case 0	;all
+			Gosub calcall
+		Case 1	;row
+			j=y+yo:For k=0 To maxx:Gosub calcone:Next
+			Gosub showall:Gosub curs
+		Case 2	;column
+			k=x+xo:For j=0 To maxy:Gosub calcone:Next
+			Gosub showall:Gosub curs
+		End Select
+	End Select
+Case 1024 ;keystroke! - enter some text!
+	If i$>=" " AND i$<=Chr$(127)
+		If i$<>Chr$(127)
+			eat=1
+			##[$80BB]
+			WLocate 40,#vrows*8+8
+			EditFrom eat:i$=Edit$(i$,75)
+			eat=Editat
+			##[$80BC] EditExit=13
+			i$=UCase$(i$)
+		Else
+			i$=""
+		EndIf
+		i$=StripLead$(i$,32)
+		If i$>""
+			If NOT cells(x+xo,y+yo)\rflags	;was it previously empty?
+				If x+xo>maxx Then maxx=x+xo
+				If y+yo>maxy Then maxy=y+yo
+				xs(x+xo)+1
+				ys(y+yo)+1
+			EndIf
+			cells(x+xo,y+yo)\txt=i$,mo,1,0
+			a$=Left$(i$,1)
+			If a$="+" OR a$="-" OR (a$>="0" AND a$<="9") OR a$="." OR a$="@" ;numeric
+				cells(x+xo,y+yo)\rflags=2,eval{i$}
+			EndIf
+		Else
+			If cells(x+xo,y+yo)\rflags	;was something there?
+				xs(x+xo)-1	;delete from this column
+				While maxx>0 AND xs(maxx)=0
+					maxx-1
+				End While
+				ys(y+yo)-1	;delete from this row
+				While maxy>0 AND ys(maxy)=0
+					maxy-1
+				End While
+			EndIf
+			cells(x+xo,y+yo)\txt=i$,0,0,0
+		EndIf
+		Gosub curs:Gosub pcell
+		xa=1:ya=0:Gosub movecurs2
+	EndIf
+End Select
+Goto main
+
+;********************* SUBROUTINES **********************
+
+.subs
+
+.calcall
+For k=0 To maxx:For j=0 To maxy
+Gosub calcone
+Next:Next
+Gosub showall:Gosub curs
+Return
+
+.dupcell	;xa=x add, ya=y add
+;
+If cells(x+xo,y+yo)\rflags
+	localstat 1,160,50,320,100,$1000,"",1,2,0
+	WLocate 8,40:Print "How Many Times:"
+	eat=0:z=1
+	eloop:EditFrom eat
+	WLocate 16*8,40:z=Edit(z,4)
+	If EditExit<>13
+		a.l=Event
+		If a<>64 OR EventWindow<>1
+			eat=Editat:Goto eloop
+		EndIf
+		gh=GadgetHit
+	Else gh=1 ;OK
+	EndIf
+	Free localstat 1:Use localstat 0
+	If gh=1 AND z>0
+		k=x+xo:j=y+yo
+		For b=1 To z
+		If k+xa>maxx Then maxx+1
+		If j+ya>maxy Then maxy+1
+		Gosub movecell:xa+Sgn(xa):ya+Sgn(ya)
+		Next
+		Gosub showall:Gosub curs
+	EndIf
+EndIf
+Return
+
+.movecell
+;
+If cells(k+xa,j+ya)\rflags	;going over something?
+	xs(k+xa)-1:ys(j+ya)-1
+EndIf
+;
+cells(k+xa,j+ya)\rflags=cells(k,j)\rflags
+;
+If cells(k,j)\rflags	;something there?
+	xs(k+xa)+1:ys(j+ya)+1
+	cells(k+xa,j+ya)\txt=cells(k,j)\txt
+	cells(k+xa,j+ya)\flags=cells(k,j)\flags
+	cells(k+xa,j+ya)\result=cells(k,j)\result
+	If cells(k,j)\rflags=2
+		i$=cells(k,j)\txt:a=Instr(i$,"\")
+		If a
+			relloop
+			a+1
+			z$=cellst{Mid$(i$,a)} ;get cell ('A','B'...)
+			cx=cellval{z$}	;cell x
+			cy=Val(Mid$(i$,a+Len(z$)))
+			a2=Len(z$)+Len(UStr$(cy))
+			cx+xa:cy+ya
+			i$=Left$(i$,a-2)+"_"+colname{cx-1}+UStr$(cy)+Mid$(i$,a+a2)
+			a=Instr(i$,"\"):If a Then Goto relloop
+			cells(k+xa,j+ya)\txt=Replace$(i$,"_","\")
+		EndIf
+	EndIf
+EndIf
+;
+Return
+
+.calcone
+If cells(k,j)\rflags=2	;an expression?
+	cells(k,j)\result=eval{cells(k,j)\txt}
+EndIf
+Return
+
+.readmouse
+mx=WMouseX:my=WMouseY:mf=-1
+mx=Int((mx-24)/(cw*8)):my=Int((my-8)/8)
+If mx<0 Then xa=-1:ya=0:mf=0
+If mx>=vcols Then xa=1:ya=0:mf=0
+If my<0 Then ya=-1:xa=0:mf=0
+If my>=#vrows Then ya=1:xa=0:mf=0
+Return
+
+.showarea ;inverse an area selected by the mouse
+;
+x1=xo:y1=yo ;origin
+x2=omx:y2=omy
+;
+If x2<x1
+	tx=x1:x1=x2:x2=tx
+EndIf
+If y2<y1
+	ty=y1:y1=y2:y2=ty
+EndIf
+;
+If x1<0 Then x1=0
+If x1>=vcols Then x1=vcols-1
+If y1<0 Then y1=0
+If y1>=#vrows Then y1=#vrows-1
+;
+If x2<0 Then x2=0
+If x2>=vcols Then x2=vcols-1
+If y2<0 Then y2=0
+If y2>=#vrows Then y2=#vrows-1
+;
+x2+1:y2+1
+;
+x1*cw*8+24:y1*8+20
+x2*cw*8+24:y2*8+20
+;
+Boxf x1,y1,x2-1,y2-1,-1
+;
+Return
+
+.getevent
+a.l=WaitEvent
+If MButtons=1 ;left button down
+	Gosub readmouse
+	If mf
+		Gosub curs:xo=mx:yo=my:mb=0
+		ox=x:oy=y:oxo=xo:oyo=yo:saf=0
+		sloop
+		omx=mx:omy=my:Gosub showarea
+		sloop2
+		##[$80BB]
+		Gosub readmouse:mb=MButtons
+		##[$80BC] mx<>omx OR my<>omy OR mf=0 OR mb=5
+		If (NOT mf) AND mb<>5 ;scroll!
+			x+xa:y+ya
+			xo-xa:yo-ya
+			If x<0 OR y<0
+				x-xa:y-ya
+				xo+xa:yo+ya
+				Goto sloop2
+			EndIf
+			Gosub showarea
+			mx=omx:my=omy:saf=-1
+			Gosub showall:Goto sloop
+		EndIf
+		Gosub showarea
+		If mb<>5 Then Goto sloop
+		If saf Then x=ox:y=oy:xo=oxo:yo=oyo:Gosub showall
+		Gosub curs
+	EndIf
+	Goto getevent
+EndIf
+If a=1024 ;key hit!
+	i$=Inkey$:xa=0:ya=0
+	Select i$
+	Case Chr$(28) ;up arrow
+		ya=-1
+	Case Chr$(29) ;down arrow
+		ya=1
+	Case Chr$(30) ;right arrow
+		xa=1
+	Case Chr$(31) ;left arrow
+		xa=-1
+	Default
+		##[$80BE] Select:Return
+	End Select
+	If Qualifier AND 3
+		xa*sha:ya*sha
+	EndIf
+	Gosub movecurs:Goto getevent
+EndIf
+Return
+
+.defaults
+cw=12		 ;column width.
+sha=10		;amount to add if shift + cursor keys.
+mo=1			;right justify
+nd=2			;print number to 2 decimal places
+;do=1			;print dollar sign
+co=1			;print comma's
+si=1			;always print sign
+maxx=0		;size of sheet
+maxy=0		;size of sheet
+;
+vcols=Int(77/cw) ;visible columns
+Gosub calcfs
+WColour 1,2:WLocate 0,#vrows*8+8:Print "CELL:"
+Return
+
+.calcfs	;calculate format string for printing numbers
+fs$=""
+If nd>0 Then fs$="."+String$("0",nd)
+If si
+	fs$+"+"
+Else
+	fs$+"-"
+EndIf
+r$="####":If co Then r$=",###"
+fs$=String$(r$,cw/4)+fs$
+fs$=RSet$(fs$,cw)
+Return
+
+.newcurs:xa=0:ya=0:Goto movecurs2
+;
+.movecurs
+Gosub curs
+.movecurs2:xo+xa:yo+ya
+If xo<0 OR xo>=vcols
+	xo-xa:x+xa
+	If x<0 Then x=0:xo=0
+	Gosub showall
+EndIf
+If yo<0 OR yo>=#vrows
+	yo-ya:y+ya
+	If y<0 Then y=0:yo=0
+	Gosub showall
+EndIf
+WLocate 40,#vrows*8+8
+If cells(x+xo,y+yo)\rflags
+	Print LSet$(cells(x+xo,y+yo)\txt,75)
+Else
+	Print String$(" ",75)
+EndIf
+CNIF #test=1
+Green 0,0,0,0
+If x+xo>maxx OR y+yo>maxy Then Green 0,0,0,8
+CEND
+Goto curs
+
+.showall
+;
+Menus 0:WColour 2,1
+Boxf 24,20,639,19+#vrows*8,0:WLocate 0,0:Print "	 "
+;
+For k=0 To vcols:Print RSet$(colname{x+k},cw):Next
+;
+For j=0 To #vrows-1
+WColour 2,1:WLocate 0,j*8+8
+Format "###":Print y+j+1:WColour 1,0:Format fs$
+For k=0 To vcols
+If cells(x+k,y+j)\rflags
+	Gosub pcell2
+Else
+	WLocate WCursX+cw*8,WCursY
+EndIf
+Next:Next
+;
+Menus 1:Return
+
+.pcell
+k=xo:j=yo
+WLocate xo*cw*8+24,yo*8+8
+;
+.pcell2:;print out contents of cell
+;
+If cells(x+k,y+j)\rflags=2	;is it a value?
+	a$=Str$(cells(x+k,y+j)\result)
+Else
+	a$=cells(x+k,y+j)\txt
+EndIf
+;
+Select cells(x+k,y+j)\flags
+Case -1
+	a$=LSet$(a$,cw)
+Case 0
+	a$=Centre$(a$,cw)
+Default
+	a$=RSet$(a$,cw)
+End Select
+Print a$
+Return
+
+.curs
+Menus 0
+Boxf xo*cw*8+24,yo*8+20,xo*cw*8+23+cw*8,yo*8+27,-1
+Menus 1:Return

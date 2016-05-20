@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/Amigaguidetest.bb2
++##[$80B4]
+	NPrint "somethings gone wrong"
+	MouseWait
+End ##[$80B4]
+
+Include "amigaguide.i"
+
+DEFTYPE .NewAmigaGuide
+
+nag\nag_Name="DF1:TEST.GUIDE"
+nag\nag_Node=0
+nag\nag_Line=0
+
+hand.l=##[$FC05](nag,0)
+
+##[$FC07] hand
+
+

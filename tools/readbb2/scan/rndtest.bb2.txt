@@ -1,0 +1,94 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/rndtest.bb2
++
+DEFTYPE.l
+
+;Screen 0,1
+;ScreensBitMap 0,0:Cls:WaitBlit_
+Dim a(10)
+MOVE #$12ef,d0:JSR seedrnd2:JSR seedrnd
+For k=1 To 100000
+MOVE #10,d0:JSR getrnd:a(n)+1
+Next
+;
+For k=0 To 9:NPrint k," : ",a(k):Next
+;
+;While Joyb(0)=0
+;	MOVE #320,d0
+;	JSR getrnd:x=n
+;	MOVE #200,d0
+;	JSR getrnd:y=n
+;	Plot x,y,1
+;Wend
+MouseWait
+End
+
+seedrnd
+LEA rndtablef(pc),a0
+MOVE #1,-(a0):MOVE #2,-(a0) ;1st 2 fib nums
+MOVEQ #14,d1
+'loop
+MOVE (a0),d0:ADD 2(a0),d0:MOVE d0,-(a0)
+DBF d1,'loop
+MOVE #17*2,i:MOVE #5*2,j
+RTS
+
+getrnd
+MOVE d0,-(a7)
+BSR rndw ;:MOVE d0,-(a7):BSR rndw:ADD (a7)+,d0
+MULU (a7)+,d0:CLR d0:SWAP d0:##[$80BD] d0,n
+RTS
+
+rndw
+LEA rndtable-2(pc),a0
+MOVE j(pc),d1:MOVE 0(a0,d1),d0
+SUBQ #2,d1:BNE 'jok:MOVE #17*2,d1:'jok:MOVE d1,j
+MOVE i(pc),d1:ADD 0(a0,d1),d0:MOVE d0,0(a0,d1)
+SUBQ #2,d1:BNE 'iok:MOVE #17*2,d1:'iok:MOVE d1,i
+RTS
+
+seedrnd2 ;seed number in d0.w
+	;
+	MOVEQ #54,d1
+	LEA rndtable2(pc),a0
+'loop:MOVE	d0,(a0)+
+	MULU	#$1efd,d0
+	ADD #$dff,d0
+	DBF d1,'loop
+	MOVE.l	a0,(a0)
+	MOVE.l	#rndtable2+48,j_index
+	RTS
+
+getrnd2
+MOVE d0,-(a7)
+BSR rndw2
+MULU (a7)+,d0:CLR d0:SWAP d0:##[$80BD] d0,n
+RTS
+
+rndtable2:Ds.w	55
+k_index:Dc.l	0
+j_index:Dc.l	0
+
+rndw2	;return rnd number 0...65535 if d0.w
+	;
+	MOVEM.l a0/a1,-(a7)
+	LEA rndtable2(pc),a1
+	MOVE.l	j_index(pc),a0
+	MOVE	-(a0),d0
+	CMP.l a1,a0
+	BNE 'skip
+	LEA rndtable2+110(pc),a0
+'skip: MOVE.l	a0,j_index
+	MOVE.l	k_index(pc),a0
+	ADD -(a0),d0
+	MOVE	d0,(a0)
+	CMP.l a1,a0
+	BNE 'skip2
+	LEA rndtable2+110(pc),a0
+'skip2:	MOVE.l	a0,k_index
+	MOVEM.l (a7)+,a0/a1
+	RTS
+
+rndtable:Ds 17
+rndtablef
+i:Dc 0
+j:Dc 0

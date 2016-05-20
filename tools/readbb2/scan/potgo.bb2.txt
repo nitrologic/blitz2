@@ -1,0 +1,6 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/potgo.bb2
++;
+; $VER: potgo.bb2 40.0 (01.03.94)
+;
+
+Macro POTGONAME:"potgo.resource":End Macro

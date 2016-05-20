@@ -1,0 +1,15 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/joy.bb
++;
+; test joy3 and joy4 as wired in diagram
+;
+
+Poke.b $bfe301,0 ;255
+
+While Joyb(0)=0
+	dir.b=Peek.b($bfe101)
+	but.b=Peek.b($bfd000)
+	Print Right$(Bin$(dir),8),"	"	 ;direction bits
+	NPrint Right$(Bin$(but),8),"	"	;fire buttons
+Wend
+
+End

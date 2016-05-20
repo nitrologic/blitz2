@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/DefaultIDCMP.bb
++; ; simple idcmp example program; Screen 0,2					 ;simple screenDefaultIDCMP $8				 ;simple 'mouse buttons' IDCMP flagWindow 0,0,0,320,100,0,"Closes on mouseclick",0,1 Window 0,0,0,320,100,0,"Closes on mouseclick",0,1 DefaultIDCMP $400				;simple 'key press' IDCMP flagWindow 1,0,100,320,100,0,"Closes on keypress",0,1 ev.l=WaitEventIf ev=$8 Then Free Window 0 Else Free Window 1 ;close approprate window WaitEvent 

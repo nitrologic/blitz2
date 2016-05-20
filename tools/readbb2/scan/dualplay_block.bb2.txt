@@ -1,0 +1,38 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/dualplay_block.bb2
++BLITZ
+lmaxlen 0,352,256+32,2
+lmaxlen 1,352,256+32,2
+Slice 0,44,320,256,$fffa,4,8,32,352,352
+;
+ShowB 0
+ShowF 1
+;
+Green 1,0,0,15
+Green 9,15,0,0
+;
+Use lmaxlen 0
+For y=0 To 256 Step 16
+For x=0 To 352 Step 16
+		COL=1-COL
+		Boxf x,y,x+16,y+16,COL
+Next
+Next
+;
+Use lmaxlen 1
+For y=0 To 288 Step 16
+For x=0 To 352 Step 16
+		COL=1-COL
+		Boxf x,y,x+16,y+16,COL
+Next
+Next
+;
+;
+While Joyb(0)=0
+	 VWait
+	 L=QWrap(L+1,0,32)
+	 U=QWrap(U+1,0,32)
+	 ShowB 0,L,0,U
+	 ShowF 1,0,U,L
+Wend
+End
+

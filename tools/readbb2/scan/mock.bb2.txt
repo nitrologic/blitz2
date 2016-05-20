@@ -1,0 +1,39 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/mock.bb2
++
+w=320
+h=280
+
+sh=56 ;scanner height
+
+so=96
+
+BLITZ
+
+lmaxlen 0,w,h,3:BitMapOutput 0
+
+Box 0,sh,w-1,h-1,1
+
+Boxf 160-so,0,160+so,sh-1,0
+
+Box 160-so,0,160+so,sh-1,2
+
+Slice 0,27,w,h,$fff8,3,8,32,w,w
+
+Show 0
+
+MouseWait
+
+AMIGA
+
+DefaultOutput
+
+a.l=CopLoc
+
+While b.l<>$fffffffe
+	b=Peek.l(a)
+	NPrint Hex$(b)
+	a+4
+Wend
+
+MouseWait
+

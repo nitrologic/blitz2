@@ -1,0 +1,372 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/ENCOUNTER/enc.bb2
++NPrint "OK..."
+
+;
+;A rather weird 3D system in use here...
+;
+;Objects only ever keep track of 2 coordinates:
+;Their 'display' X position, and their 'real' Z position.
+;Rotation simply involves moving ALL object's X position
+;by the same amount.
+;The Z position is used to calculate which pre-scaled shape
+;to use for drawing objects, and also for checking when out
+;of range.
+;Many 'Z' arrays are used for things such as enlargement,
+;sideways movement and wrap-around sphere.
+;
+
+.consts
+#msh=0			;make shapes file flag
+zm=64			 ;max z
+xl1=-4096	 ;left edge of world
+xh1=4096		;right edge...
+
+zm2=zm-1
+am=zm*3
+
+.newtypes
+NEWTYPE.object
+x.q		 ;actual on-screen x!
+z.w		 ;depth
+f.w		 ;type - 0=tower, 1=bullet, 2=alien
+s.w		 ;shape offset - 0=tower, zm=bullet, am=alien
+;
+xd.w		;x direction for alien : <- -1	0	1 ->
+zd.w		;y direction if no x direction
+rt.w		;rethink timer
+End NEWTYPE
+
+.funx
+Function realx{x,z}
+Function Return x/(z LSR 2+1)
+End Function
+
+.shapes
+CNIF #msh<>0
+	;
+	allocst 0,1:ScreensBitMap 0,0
+	;
+	LoadShape 0,"tower"
+	LoadShape zm,"blob"
+	LoadShape am,"alien",1
+	;
+	hi=ShapeHeight(0)
+	hi2=ShapeHeight(zm)
+	hi3=ShapeHeight(am)
+	;
+	For z=1 To zm2
+	CopyShape 0,z
+	yh=hi/(z LSR 2+1)/hi	;new hite of shape
+	Scale z,yh,yh,1
+	;
+	k=z+zm
+	CopyShape zm,k
+	yh=hi2/(z LSR 2+1)/hi2	;new hite of shape
+	Scale k,yh,yh,1:Gosub makeshadow
+	;
+	k=z+am
+	CopyShape am,k
+	yh=hi3/(z LSR 2+1)/hi3	;new hite of shape
+	Scale k,yh,yh,1:Gosub makeshadow
+	;
+	Next
+	k=zm:Gosub makeshadow
+	k=am:Gosub makeshadow
+	;
+	For k=0 To zm2
+	Handle k,ShapeWidth(k)/2,ShapeHeight(k)-1
+	Next
+	;
+	For k=zm To zm*5-1
+	DecodeShapes k
+	Next
+	;
+	SaveShapes 0,zm*5-1,"shapes"
+	End
+
+CELSE
+
+	casestrcomp 0,"mock",8
+	LoadShapes 0,"shapes"
+
+CEND
+
+.arrays
+Dim tm(zm2)				 ;for magnification of towers
+Dim aa(zm2)				 ;alien x adds
+Dim sy.w(zm2)				 ;shadow y position
+Dim xl(zm2),xh(zm2) ;for wrap around at different z's
+Dim ##[$80B3] o.object(200)
+##[$80CA] o()
+
+;****************** SET UP STUFF ******************
+
+Gosub inittables
+BLITZ
+Gosub initstuff
+
+;****************** A NEW GAME ********************
+
+Gosub gamedisplay
+Gosub inittowers
+
+aat=0		 ;alien add timer
+asa=0		 ;aliens still alive
+ala=20		;aliens left to add
+
+;****************** GAME LOOP *********************
+
+fc=0
+.main
+While Joyb(0)=0
+	;
+	Gosub addalien
+	Gosub dodb
+	Gosub moveplayer
+	Gosub moveobjects
+	;
+Wend
+;
+Stop
+
+;******************* SUBROUTINES ******************
+
+.addalien
+If aat>0 AND asa>0
+	aat-1
+Else
+	If ala
+		aat=256:asa+1:ala-1
+		locfree o()
+		globalloc o()
+		\x=0:\z=zm2:\s=am:\f=2:\rt=0
+	Else
+		aat=-1
+	EndIf
+EndIf
+Return
+
+.dodb				 ;do double buffering
+##[$80BB]
+	VWait
+##[$80BC] fc>=2
+If fc>2 Then Green 0,15,15,0
+fc=0:ShowB db,144,0:db=1-db:UnQueue db:Use lmaxlen db
+Return
+
+.moveplayer	 ;get player movement flags
+th=0
+If Joyy(1)<0
+	If o()\z>0 OR QAbs(o()\x)>64 Then th=-1
+EndIf
+xa=Joyx(1) LSL 3
+;
+If Joyb(1)
+	If lb
+		lb=0
+		If AddLast(o())
+			\x=0:\z=0:\f=1:\s=zm
+		EndIf
+	EndIf
+Else
+	lb=-1
+EndIf
+Return
+
+.relplayer		;move objects relative to player
+\x-xa
+If th
+	\x*tm(z):\z-1
+	If \z<0
+		freelast o():PushItem o()
+		locfree o():globalloc o():\z+zm:PopItem o()
+	Else
+		If \z>=zm
+			freelast o():PushItem o()
+			AddLast o():\z-zm:PopItem o()
+		EndIf
+	EndIf
+EndIf
+;
+If \z>lz	;gone through previous object?
+	;
+	If \f=1 ;bullet?.....
+		bw=ShapeWidth(zm+\z):xd=QAbs(lx-\x)
+		If lf=0 ;through tower?
+			If xd<bw LSR 1
+				freelast o():Return
+			EndIf
+		EndIf
+		If lf=2 ;through alien?
+			If xd<bw LSL 1
+				asa-1:PrevItem o():freelast o():globfree o():Return
+			EndIf
+		EndIf
+	EndIf
+	;
+	If \f=0
+		If lf=3
+			If QAbs(lx-\x)<ShapeWidth(zm+lz) LSR 1
+				PrevItem o():freelast o():globfree o():Return
+			EndIf
+		EndIf
+	EndIf
+	;
+	freelast o()
+	PrevItem o()
+	globalloc o()
+	globfree o()
+EndIf
+;
+Return
+
+.moveobjects	;move all objects
+locfree o():lz=zm
+While globfree(o())
+	;
+	z=\z:\x=QWrap(\x,xl(z),xh(z)):x=320+\x
+	If x>80 AND x<560
+		If \s
+			QBlit db,\s+z+zm,x,sy(z)
+			QBlit db,\s+z,x,80
+		Else
+			QBlit db,\s+z,x,sy(z)
+		EndIf
+	EndIf
+	;
+	Select \f
+	Case 0	;tower
+		Gosub relplayer
+	Case 1	;bullet
+		Gosub dobullet
+	Case 2	;alien
+		Gosub doalien
+	Case 3
+		Gosub doalienbullet
+	End Select
+	;
+	lx=\x:lz=\z:lf=\f
+	;
+Wend
+Return
+
+.firebull
+PushItem o()
+globalloc o():\x=x:\z=z:\s=zm:\f=3
+PopItem o()
+Return
+
+.doalien
+;
+;should I fire a bullet?
+;
+x=\x
+If QAbs(x)<16
+	If Rnd>.9 Then Gosub firebull
+Else
+	If Rnd>.99 Then Gosub firebull
+EndIf
+;
+If \rt	;rethink timer down yet?
+	\rt-1
+	Select \xd
+	Case -1
+		\x-aa(z)
+	Case 1
+		\x+aa(z)
+	Default
+		\z+\zd
+	End Select
+Else
+	\rt=Rnd(16)+16
+	If \xd
+		\xd=0:If \z<32 Then \zd=1 Else \zd=-1
+	Else
+		\zd=0:If \x>0 Then \xd=-1 Else \xd=1
+	EndIf
+EndIf
+Goto relplayer
+
+.dobullet		 ;handle player bullet movement
+\z+2
+If \z>=zm
+	freelast o()
+Else
+	Gosub relplayer
+EndIf
+Return
+
+.doalienbullet		 ;handle player bullet movement
+\z-2
+If \z<1
+	freelast o()
+Else
+	Gosub relplayer
+EndIf
+Return
+
+.gamedisplay
+Slice 0,44,352,200,$fff2,6,8,32,352,640
+Use SetCycle 0
+Green 1,15,15,15
+Green 7,0,0,0
+;
+ColSplit 0,0,8,15,16
+;
+For k=0 To 7
+ColSplit 0,0,7-k,15-k-k,72+k
+Next
+;
+For z=zm-16 To 4 Step -4
+ColSplit 0,0,15-z LSR 2,0,realx{64,z}+80
+Next
+;
+ColSplit 0,0,0,0,144
+ShowF 2
+Return
+
+.initstuff
+lmaxlen 0,640,200,3
+lmaxlen 1,640,200,3
+lmaxlen 2,352,200,3
+;
+Boxf 0,0,351,15,7
+Boxf 0,144,351,199,7
+;
+longmult 0,100
+longmult 1,100
+;
+SetInt 5
+	fc+1
+End SetInt
+;
+Return
+
+.inittowers
+ClearList o():AddFirst o():\z=zm	;dummy entry for swaps
+For z=zm2 To 0 Step -4
+AddLast o()
+\z=z
+\x=realx{Rnd(xh1+xh1)-xh1,\z}
+\f=0:\s=0
+Next
+Return
+
+.inittables
+For z=0 To zm2
+tm(z)=realx{1,QWrap(z-1,0,zm)}/realx{1,z}
+aa(z)=realx{16,z}
+sy(z)=realx{64,z}+80
+xl(z)=realx{xl1,z}
+xh(z)=realx{xh1,z}
+Next
+Return
+
+.makeshadow
+AMIGA
+BlockScroll:xr=ShapeWidth(k)/2:yr=ShapeWidth(k)/8
+If xr<1 Then xr=1
+If yr<1 Then yr=1
+Circlef 160,64,xr,yr,1
+GetaShape k+zm,160-xr,64-yr,xr+xr,yr+yr
+Return

@@ -1,0 +1,12 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/tested.bb
++BLITZ
+lmaxlen 0,320,256,3
+lmaxlen 1,320,256,3
+Slice 0,44,3
+
+While Joyb(0)=0
+	VWait
+	Show db
+	db=1-db:Use lmaxlen db
+	BlockScroll:Boxf 0,0,Rnd(320),Rnd(256),1
+Wend

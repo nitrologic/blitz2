@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Chr$.bb
++Print Chr$(65): ; Will print the letter A 

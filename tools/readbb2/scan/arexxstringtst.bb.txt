@@ -1,0 +1,73 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/arexxstringtst.bb
++Include arexxres.bb
+
+;Sending String files to ARexx.
+;
+;You will notice a strange occurance!	if we send a string
+;file that does not allow a result string to be sent back
+;(i.e. no EXIT) then it sends us the result as a command
+;message before it returns our original message.
+;Try removing the EXIT from the string and you will see
+;what I mean.
+;Further to that you can crash the rexx task the same way
+;it appears to be a bug in arexx and even if this is not
+;the case it certainly is not compatible with the
+;way this library expects arexx to behave.
+;You will also	notice that you loose a small amount of
+;memory each time this occurs so if you are going to use
+;String Files then make sure there is an EXIT in the
+;string somewhere.
+
+
+;!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+;NOTE THIS IS AN EARLY DEVELOPMENT EXAMPLES AND
+;DOES NOT USE CORRECT EVENT LOOPING PROCEDURES.
+;SOME ERRORS IN THIS CODE (and comments) HAVE NOW
+;BEEN REMOVED AND/OR CORRECTED.
+
+
+;DefaultIDCMP $200				 ;window will only report CLOSE GADGET
+FindScreen 0
+localstat 0,0,0,350,250,$143f,"TEST FUNCTION0",0,1
+localstat 1,200,0,350,250,$143f,"TEST FUNCTION1",0,1
+
+Port.l = CreateMsgPort("FuncPort")
+msg.l = CreateRexxMsg(Port,".rexx","FuncPort")
+SendRexxCommand msg,"EXIT ERRORTEXT(10)",#RXCOMM|#RXFF_RESULT|#RXFF_STRING
+
+;Get the first message Packet to arrive
+ LABEL:
+ ##[$80BB]
+	 Wait
+ ##[$80BC] Event = NULL			;WE will GURU If we attempt To GetRexxResult from an intuiMessage (not any more!!)
+ Rmsg.l=RexxEvent(Port)		;there is no error checking from here on!!
+ NPrint Hex$(Rmsg)," ",Hex$(msg)," (MsgPackets Address)"
+ NPrint Hex$(GetRexxResult(Rmsg,1))," (First Result)"
+ NPrint Hex$(GetRexxResult(Rmsg,2))," (Second Result)"
+ NPrint GetResultString(Rmsg)," (Result string)"
+ NPrint GetRexxCommand(Rmsg,1)," (Command String)"
+ ReplyRexxMsg Rmsg,0,0,"Reply"
+ NPrint "--------------"
+
+;Get the second (either from ARexx or because we replied to our original msg above)
+LABEL1:
+Wait
+Rmsg.l=RexxEvent(Port)
+If IsRexxMsg(Rmsg)
+		 NPrint Hex$(Rmsg)," ",Hex$(msg)
+		 NPrint Hex$(GetRexxResult(msg,1))
+		 NPrint Hex$(GetRexxResult(msg,2))
+		 NPrint GetResultString(msg)
+		 NPrint GetRexxCommand(msg,1)
+		 NPrint "--------------"
+		 NPrint "CLICK MOUSE BUTTON"
+EndIf
+DeleteMsgPort(Port)
+DeleteRexxMsg(msg)
+##[$80BB]
+	Wait													;Wait on event from window
+	ev.l	= Event
+	NPrint Hex$(ev)							 ;Just to prove all the normal functions
+	NPrint Hex$(EventWindow)			;still work after Wait so long as you call EVENT
+##[$80BC] EventWindow = 0 AND ev = $200
+

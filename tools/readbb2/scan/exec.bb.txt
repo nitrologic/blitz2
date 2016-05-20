@@ -1,0 +1,43 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/exec.bb
++CNIF 1=0
+
+/* Flags To be passed To LockDosList(), etc */
+#define LDB_DEVICES 2
+#define LDF_DEVICES (1L << LDB_DEVICES)
+#define LDB_VOLUMES 3
+#define LDF_VOLUMES (1L << LDB_VOLUMES)
+#define LDB_ASSIGNS 4
+#define LDF_ASSIGNS (1L << LDB_ASSIGNS)
+#define LDB_ENTRY 5
+#define LDF_ENTRY (1L << LDB_ENTRY)
+#define LDB_DELETE	6
+#define LDF_DELETE	(1L << LDB_DELETE)
+
+/* you MUST specify one of LDF_READ OR LDF_WRITE */
+#define LDB_READ	0
+#define LDF_READ	(1L << LDB_READ)
+#define LDB_WRITE 1
+#define LDF_WRITE (1L << LDB_WRITE)
+
+CEND
+
+*exec.ExecBase=Peek.l(4)
+
+;a.l=AttemptLockDosList_(4+1)
+;If a=0 Then Stop
+
+*mylist.List=*exec\PortList
+*mynode.Node=*mylist\lh_Head
+
+;LockDosList(), UnLockDosList(), Forbid(), NextDosEntry()
+
+While *mynode\ln_Succ
+	a$=Peek$(*mynode\ln_Name)
+	NPrint a$
+	*mynode=*mynode\ln_Succ
+Wend
+
+;UnLockDosList_ 0
+
+MouseWait
+End

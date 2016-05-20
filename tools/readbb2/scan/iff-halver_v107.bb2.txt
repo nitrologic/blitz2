@@ -1,0 +1,446 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/IFFHalver/IFF-Halver_v107.bb2
++;
+;			IFF Halver		v1.07				[ jilt ]
+;			-------------------
+;
+;			(c) 1994	electronic sweatshop
+;
+;____________________________________________________________________
+;
+;			26/2/94		 Started			 for Philip
+;
+;
+; 28/2/94	 v1.05	 Basic layout:	menus, gadgets & stuff.
+;									 Load/View IFF, Halving Process done ?
+;									 Seems to work.	Saving implemented.
+;	2/3/94	 v1.06	 Halved Images had Title Bar blank !!!
+;									 Fixed that.	Because displaying interlace
+;									 screens slows down the computer so much I
+;									 have replaced seeing what's going on with
+;									 a % indicator.	Less pleasing but, well.
+; 11/6/94	 v1.07	 Added "About" menu option for release with
+;									 BUM#7 hopefully.	I hope someone can use or
+;									 learn something useful from this program.
+;
+;
+;--------------------------------------------------------------------
+.system
+
+##[$80C3] : ##[$80CC] : ##[$FFB5]
+##[$80B4] : End : End ##[$80B4]
+MaxLen pa$ = 192
+MaxLen fi$ = 192
+DefaultIDCMP $4|$8|$40|$100|$200|$400
+CaseSense Off
+
+Version$ = "IFF Halver v1.07"
+
+;--------------------------------------------------------------------
+.datatypes
+
+	iffw=0 : iffh=0 : iffd=0 : iffv=0 : iffc=0 : fi$=""
+	Halved = False
+	Dim FX.b(4)
+	Dim FXx.l(4) , FXy.l(4)
+	Dim pix(4)
+	Dim brightness.l(64)
+
+;--------------------------------------------------------------------
+.gadgetlists
+
+; 1 : O.K. message box
+workstart 1,82,32,0,1,"	O.K.	"
+
+; 2 : O.K./Cancel requester
+workstart 2,40,32,0,1,"	O.K.	"
+workstart 2,140,32,0,2," Cancel "
+
+;--------------------------------------------------------------------
+.menus
+
+MenuGap 4,2
+MenuChecked 2
+newlocarr 1,0,		 "File				 "
+	MenuItem 1,0,0,0,"Load IFF		 ","L"
+	MenuItem 1,0,0,1,"Save			 >>"
+		SubItem 1,0,0,1,0,"Top Left "
+		SubItem 1,0,0,1,1,"Top Right"
+		SubItem 1,0,0,1,2,"Btm Left "
+		SubItem 1,0,0,1,3,"Btm Right"
+	MenuItem 1,0,0,2,"About				","?"
+	MenuItem 1,0,0,3,"Quit				 ","Q"
+
+newlocarr 1,1,		 "Options			 "
+	MenuItem 1,1,1,0,"	Upper Left	"
+	MenuItem 1,1,1,1,"	Upper Right "
+	MenuItem 1,1,1,2,"	Lower Left	"
+	MenuItem 1,1,1,3,"	Lower Right "
+	MenuItem 1,3,1,4,"	Brightest	 "
+	MenuItem 1,3,1,5,"	Darkest		 "
+	MenuItem 1,3,1,6,"	Not Colour 0"
+	MenuItem 1,3,1,7,"	Average		 "
+	MenuItem 1,0,1,8,"--------------"
+	MenuItem 1,0,1,9,"^^ Select 4 FX"
+
+newlocarr 1,2,		 "Scan							 "
+	MenuItem 1,0,2,0,"View IFF					 ","I"
+	MenuItem 1,0,2,1,"View Halved				","H"
+	MenuItem 1,0,2,2,"									 "
+	MenuItem 1,0,2,3,"Do Funky Stuff		 ","X"
+
+
+;--------------------------------------------------------------------
+.screen
+
+freest 0 : ScreensBitMap 0,0
+
+WXmain = 0 : WYmain = 12
+localstat 1,WXmain,WYmain,320,80,$1002+$4+$8," "+Version$+"	jilt'94",0,1
+Use localstat 1 :Activate 1
+
+WLocate 16, 8 : Print Version$,"	by	jilt	of TIP"
+WLocate 16,16 : Print "Based on a program by Nick Stacey."
+WLocate 16,32 : Print "No shareware fee for this Philip !"
+WLocate 16,48 : Print "This free version was created with"
+WLocate 16,56 : Print "Blitz Basic 2	from Acid Software."
+
+arrmult 1
+
+;--------------------------------------------------------------------
+.mainloop
+
+##[$80BB]
+	##[$80BB]
+		Gosub _UseScr0Win1
+		FlushEvents
+		ev.l = WaitEvent
+		evw = EventWindow
+		If evw=1 Then k$ = Inkey$ Else ev=0 : k$=""
+		If ev=$40 Then evg=GadgetHit Else evg=0
+		If ev=$100 Then evm=MenuHit:evi=ItemHit:evs=SubHit Else evm=-1:evi=-1:evs=-1
+
+		; LOAD IFF		***
+		If (evm=0) AND (evi=0) Then Gosub _Load_IFF
+
+		; SAVE				***
+		If (evm=0) AND (evi=1)
+			If Halved=False
+				ok$="No IFF Halved" : ok2$="ERROR" : Gosub _OK
+			Else
+				Gosub _Save_Half
+			End If
+		End If
+
+		; ABOUT			 ***
+		If (evm=0) AND (evi=2)
+			Gosub _About
+		End If
+
+		; VIEW IFF		***
+		If (evm=2) AND (evi=0)
+			If fi$=""
+				ok$="No IFF to View!" : ok2$="ERROR" : Gosub _OK
+			Else
+				Gosub _View_IFF
+			End If
+		End If
+
+		; VIEW HALVED ***
+		If (evm=2) AND (evi=1)
+			If Halved=False
+				ok$="No IFF Halved!" : ok2$="ERROR" : Gosub _OK
+			Else
+				Gosub _View_Halved
+			End If
+		End If
+
+		; FUNKY STUFF ***
+		If (evm=2) AND (evi=3)
+			If fi$=""
+				ok$="No IFF to Halve!" : ok2$="ERROR" : Gosub _OK
+			Else
+				Gosub _Funky_Stuff
+			End If
+		End If
+
+
+
+	##[$80BC] (ev=$200) OR ((evm=0) AND (evi=3))
+	ok$="Really QUIT ?" : Gosub _OK_Cancel
+##[$80BC] yorn$="Y"
+
+;--------------------------------------------------------------------
+.close
+
+If Halved=True Then Free lmaxlen 3
+If fi$<>"" Then Free lmaxlen 1
+Free localstat 1
+##[$FFB4]
+
+End
+
+;====================================================================
+._OK
+
+	localstat 3,200,64,240,48,0,ok2$,0,1,1
+	WLocate 120-(Len(ok$)*4),8 : Print ok$
+	##[$80BB]
+		ev3.l = WaitEvent
+	##[$80BC] (ev3=$40) AND (EventWindow=3)
+	Free localstat 3
+	Use localstat 1
+	FlushEvents
+	Return
+
+;--------------------------------------------------------------------
+._OK_Cancel
+
+	localstat 3,200,64,240,48,0,"Confirm",0,1,2
+	WLocate 120-(Len(ok$)*4),8 : Print ok$
+	##[$80BB]
+		ev3.l = WaitEvent
+	##[$80BC] (ev3=$40) AND (EventWindow=3)
+	yorn$=Mid$("YN",GadgetHit,1)
+	Free localstat 3
+	Use localstat 1
+	FlushEvents
+	Return
+
+;--------------------------------------------------------------------
+._Load_IFF
+
+	##[$80B4] :	Goto _Fail_Load_IFF : End ##[$80B4]
+	nfi$=FileRequest$("Select IFF file",pa$,fi$)
+	If nfi$="" Then Goto _Finished_Load_IFF
+
+	ILBMDepth nfi$
+	niffw = ILBMViewMode : If (niffw<0)OR(niffw>1280) Then Goto _Fail_Load_IFF
+	niffh = DecodeILBM : If (niffh<0)OR(niffh>1024) Then Goto _Fail_Load_IFF
+	niffd = ##[$D087] : If (niffd<0)OR(niffd>6) Then Goto _Fail_Load_IFF
+	niffv = ##[$D088]
+
+	fi$=nfi$ : iffw=niffw : iffh=niffh : iffd=niffd : iffv=niffv
+	iffc=2^iffd
+	FXx(1)=0 : FXy(1)=0
+	FXx(2)=Int(iffw/2) : FXy(2)=0
+	FXx(3)=0 : FXy(3)=Int(iffh/2)
+	FXx(4)=FXx(2) : FXy(4)=FXy(3)
+
+	Gosub _Update_Window
+	Use allocst 0 : localstat 3,200,64,240,48,0,"LOAD IFF ...",0,1
+	WLocate 16,8 : Print "Loading, please wait ..."
+
+	lmaxlen 1,iffw,iffh,iffd
+	LoadBitMap 1,fi$,1
+
+	Free localstat 3
+
+._Analyze_Palette
+	allocst 2,iffd : Use SetCycle 1
+	For c=0 To (iffc-1)
+		brightness(c) = Blue(c) + Palette(c) + PalRGB(c)
+	Next
+	Free allocst 2
+
+	Gosub _View_IFF
+	Gosub _UseScr0Win1
+
+	_Finished_Load_IFF
+	##[$80B4] : End : End ##[$80B4]
+	Return
+
+_Fail_Load_IFF
+ok$="Not an IFF file!" : ok2$="ERROR" : Gosub _OK
+Goto _Finished_Load_IFF
+
+;--------------------------------------------------------------------
+._Update_Window
+
+	Use allocst 0 : Use localstat 1
+	InnerCls
+	WLocate 8,8 : Print "FileName : ",fi$
+	Format "####" : WLocate 8,16 : Print "ImageSize: ",iffw," x ",iffh
+	Format "##" : WLocate 8,24 : Print "#colours : ",iffc," (",iffd," bitplanes)"
+	Return
+
+;--------------------------------------------------------------------
+._View_IFF
+
+	lmaxlen 2,iffw,iffh,iffd
+	allocst 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
+	ShapesBitMap 1,2
+
+	FlushEvents : MouseWait
+	Free allocst 2 : Free lmaxlen 2
+	VWait 50
+
+	Return
+
+;--------------------------------------------------------------------
+._View_Halved
+
+	lmaxlen 2,iffw,iffh,iffd
+	allocst 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
+	ShapesBitMap 3,2
+
+	FlushEvents : MouseWait
+	Free allocst 2 : Free lmaxlen 2
+	VWait 50
+
+	Return
+
+;--------------------------------------------------------------------
+._Funky_Stuff
+
+	NumFX=0
+	For fx=0 To 7
+		If MenuList(1,1,fx)=True Then NumFX=NumFX+1
+	Next
+	If NumFX>4 Then Goto _Fail_Funky_Stuff_1
+
+	FX=0
+	For fx=0 To 7
+		If MenuList(1,1,fx)=True Then FX=FX+1 : FX(FX)=fx
+	Next
+
+	Use allocst 0 : localstat 3,200,64,240,48,0,"Funky Stuff ...",0,1
+	WLocate 16,8 : Print "Halving, please wait ..."
+	lmaxlen 3,iffw,iffh,iffd
+
+	Format "###"
+	For y=0 To Int(iffh/2)-1
+		Use allocst 0 : Use localstat 3 : WLocate 80,22 : Print Int(y/(iffh/2-1)*100.0)," % "
+		For x=0 To Int(iffw/2)-1
+			Use lmaxlen 1
+			xx=x*2 : yy=y*2
+			pix(1) = Cls(xx,yy)	 : pix(2) = Cls(xx+1,yy)
+			pix(3) = Cls(xx,yy+1) : pix(4) = Cls(xx+1,yy+1)
+			For fx=1 To NumFX
+				If FX(fx)=0 Then c=pix(1)
+				If FX(fx)=1 Then c=pix(2)
+				If FX(fx)=2 Then c=pix(3)
+				If FX(fx)=3 Then c=pix(4)
+				If FX(fx)=4
+					brightest=1
+					For p=2 To 4
+						If brightness(pix(p))>brightness(pix(brightest)) Then brightest=p
+					Next
+					c=pix(brightest)
+					End If
+				If FX(fx)=5
+					darkest=1
+					For p=2 To 4
+						If brightness(pix(p))<brightness(pix(darkest)) Then darkest=p
+					Next
+					c=pix(darkest)
+					End If
+				If FX(fx)=6
+					c=pix(1)
+					For p=2 To 4
+						If pix(p)>0 Then c=pix(p) : p=4
+					Next
+					End If
+				If FX(fx)=7
+					c=Int((pix(1)+pix(2)+pix(3)+pix(4))/4+.5)
+					End If
+				Use lmaxlen 3
+				Point FXx(fx)+x,FXy(fx)+y,c
+			Next
+		Next
+	Next
+
+	Halved = True
+
+	Free localstat 3
+	Gosub _View_Halved
+	Gosub _UseScr0Win1
+
+	_Finished_Funky_Stuff
+	Return
+
+_Fail_Funky_Stuff_1
+ok$="More than 4 FX set!" : ok2$="ERROR" : Gosub _OK
+Goto _Finished_Funky_Stuff
+
+
+;--------------------------------------------------------------------
+._UseScr0Win1
+
+	Use allocst 0
+	Use localstat 1
+	Activate 1
+	Return
+
+;--------------------------------------------------------------------
+._Save_Half
+
+	Use lmaxlen 3
+	If evs=0 Then GetaShape 1,FXx(1),FXy(1),FXx(4),FXy(4)
+	If evs=1 Then GetaShape 1,FXx(2),FXy(2),FXx(4),FXy(4)
+	If evs=2 Then GetaShape 1,FXx(3),FXy(3),FXx(4),FXy(4)
+	If evs=3 Then GetaShape 1,FXx(4),FXy(4),FXx(4),FXy(4)
+
+	##[$80B4] :	Goto _Fail_Save_Half : End ##[$80B4]
+	sfi$=FileRequest$("Save filename ?",pa$,fi$)
+
+	If sfi$<>""
+		SavePalette 1,sfi$,1
+		End If
+
+	_Finished_Save_Half
+	##[$80B4] : End : End ##[$80B4]
+	Return
+
+_Fail_Save_Half
+ok$="Couldn't Save!" : ok2$="ERROR" : Gosub _OK
+Goto _Finished_Save_Half
+
+;--------------------------------------------------------------------
+._About
+
+	localstat 3,0,0,640,200,$1008,"ABOUT : "+Version$,0,1
+	##[$80C8] AboutDATA
+	Read ls.b
+	For l=1 To ls
+		Read t$
+		WLocate 8,l*8 : Print t$
+	Next
+
+	##[$80BB]
+		ev3.l= WaitEvent
+	##[$80BC] (ev3=$200) AND (EventWindow=3)
+
+	Free localstat 3
+	VWait 50
+	FlushEvents
+Return
+
+AboutDATA
+
+;			 .........1.........2.........3.........4.........5.........6.........7.........8
+Data.b 21
+Data.s "IFF Halver																		(c) 1994	electronic sweatshop"
+Data.s "____________________________________________________________________________"
+Data.s ""
+Data.s "This prog takes an IFF picture file and halves it in both X and Y directions"
+Data.s "producing an image a quarter of the original size.	 When performing this in"
+Data.s "Dpaint or PPaint , the Halving process selects the	top left pixel from each"
+Data.s "cluster of four pixels (or something like that).	This doesn't give you much"
+Data.s "control !	With this program, your picture can be Halved with eight options."
+Data.s ""
+Data.s "TOP LEFT, TOP RIGHT	: These keep one pixel of each cluster of four."
+Data.s "BTM LEFT, BTM RIGHT		This usually gives enough choice of possibilities."
+Data.s ""
+Data.s "BRIGHTEST	: Tries to keep brightest pixel in cluster."
+Data.s "DARKEST		: Tries to keep darkest pixel in cluster."
+Data.s "NOT 0			: Keeps first pixel in cluster that isn't 0 colour (useful!)"
+Data.s "AVERAGE		: Uses average of four pixel colours.	 NOTE: This is the average"
+Data.s "						 of the colour REGISTERS *NOT* the colour VALUES.	That means it"
+Data.s "						 only works when the palette is in brightness order (either way)"
+Data.s ""
+Data.s "This control over reducing image size is particularly useful when working on"
+Data.s "greyscale digitized pictures, especially the AVERAGE option. (smooths image)"
+
+
+
+

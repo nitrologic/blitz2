@@ -1,0 +1,112 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example3.bb2
++##[$80CC]
+##[$80C3]
+
+##[$80BF]	"FUN_Math:"
+Include "FUN_Matrix.bb2"
+
+NEWTYPE.Facet_Type
+	Points.w[4]
+End NEWTYPE
+
+Dim vertex_list.Vector_Type(7)
+Dim facet_list.Facet_Type(5)
+Dim output_list.Vector_Type(7)
+
+DEFTYPE.Matrix_Type Final
+DEFTYPE.Matrix_Type Temp1
+DEFTYPE.Matrix_Type Temp2
+DEFTYPE.Matrix_Type Temp3
+
+DEFTYPE.Vector_Type VTemp1
+DEFTYPE.Vector_Type VTemp2
+DEFTYPE.Vector_Type Normal
+
+freest 0
+##[$FFB5]
+
+##[$80C8] Cube_Data
+For points.b=0 To 7
+	Read	vertex_list(points)\x
+	Read	vertex_list(points)\y
+	Read	vertex_list(points)\z
+	vertex_list(points)\s=1
+Next points
+
+For sides.b=0 To 5
+	For points.b=0 To 3
+		Read	facet_list(sides)\Points[points]
+	Next points
+Next sides
+
+
+lmaxlen 0,200,180,1
+localstat 0,10,10,200,180,$8|$2|$1000,"Matrix Example 3",0,1
+Use lmaxlen 0
+
+xrot.w=0
+yrot.w=67
+zrot.w=194
+sby.q=1
+sdelta.q=0.03
+
+##[$80BB]
+ xrot+1 : If xrot>359 Then xrot=0
+ yrot+1 : If yrot>359 Then yrot=0
+ zrot+1 : If zrot>359 Then zrot=0
+ sby+sdelta
+ If (sdelta>0) AND (sby>=4) Then sdelta=0-sdelta
+ If (sdelta<0) AND (sby<=0.5) Then sdelta=0-sdelta
+
+ build_rotation_matrix{#ABOUT_Y,&Temp2,yrot}
+ build_rotation_matrix{#ABOUT_X,&Temp1,xrot}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+ build_rotation_matrix{#ABOUT_Z,&Temp1,zrot}
+ concatenate_matrix{&Temp1,&Temp3,&Temp2}
+ build_scale_matrix{&Temp1,sby,sby,sby}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+
+ build_translation_matrix{&Temp1,100,90,0}
+ concatenate_matrix{&Temp1,&Temp3,&Final}
+ BlockScroll 0
+ For points=0 To 7
+	apply_matrix{&Final,&vertex_list(points),&output_list(points)}
+ Next points
+ For sides=0 To 5
+	subtract_vectors{&output_list(facet_list(sides)\Points[2]),&output_list(facet_list(sides)\Points[1]),&VTemp1}
+	subtract_vectors{&output_list(facet_list(sides)\Points[3]),&output_list(facet_list(sides)\Points[1]),&VTemp2}
+	cross_product{&VTemp2,&VTemp1,&Normal}
+	If Normal\z>0
+	lpx.w=output_list(facet_list(sides)\Points[0])\x
+	lpy.w=output_list(facet_list(sides)\Points[0])\y
+	For points=1 To 3
+		Line lpx,lpy,output_list(facet_list(sides)\Points[points])\x,output_list(facet_list(sides)\Points[points])\y,1
+		lpx=output_list(facet_list(sides)\Points[points])\x
+		lpy=output_list(facet_list(sides)\Points[points])\y
+	Next points
+	Line lpx,lpy,output_list(facet_list(sides)\Points[0])\x,output_list(facet_list(sides)\Points[0])\y,1
+	EndIf
+ Next sides
+ BitMaptoWindow 0,0,5,14,5,14,190,166
+ ev.l=Event
+##[$80BC] ev=$200
+
+##[$FFB4]
+End
+
+Cube_Data:
+	Data.w	-20,20,20
+	Data.w	20,20,20
+	Data.w	20,-20,20
+	Data.w	-20,-20,20
+	Data.w	-20,20,-20
+	Data.w	20,20,-20
+	Data.w	20,-20,-20
+	Data.w	-20,-20,-20
+Facet_Data:
+	Data.w	0,3,2,1
+	Data.w	0,1,5,4
+	Data.w	4,5,6,7
+	Data.w	7,6,2,3
+	Data.w	1,2,6,5
+	Data.w	4,7,3,0

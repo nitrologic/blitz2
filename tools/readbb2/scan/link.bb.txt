@@ -1,0 +1,34 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/old/link.bb
++Statement dolink{code.l,origin.l}
+	MOVE.l d0,a0
+	MOVE.l d1,d2
+	LEA 28(a0),a0
+	MOVE.l	(a0)+,d0
+	MOVE.l	a0,a1 ;start of code
+	MOVE.l	a0,d1
+	LSL.l #2,d0
+	ADD.l d0,a0
+	CMP.l #$3ec,(a0)+
+	BNE	 done
+	MOVE.l	(a0)+,d0	;how many relocs
+	SUBQ	#1,d0
+	ADDQ	#4,a0 ;skip hunk#
+	MOVE.l d2,d1
+loop:MOVE.l	(a0)+,d2	;offset
+	ADD.l d1,0(a1,d2)
+	DBF d0,loop
+done:
+	AsmExit
+End Statement
+
+LoadBank 0,"sega"
+dolink{Bank(0),$400}			;$420}
+
+If ReadMem(0,"sega.bin")
+	Exists 0,Bank(0)+32,BankSize(0)-32
+	CloseFile 0
+EndIf
+
+;SaveBank 0,"test.bin"
+
+End

@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/contents2.bb
++
+l1$=String$(Chr$($ad),20)	;9 point separator
+
+If ReadMem(1,"ram:usercontents")
+;	FileOutput 1
+	For j=1 To 10
+		If WriteMem(0,"ram:u"+Str$(j))
+			FileInput 0
+			While NOT DosBuffLen(0)
+				a$=Edit$(1024)
+				If Left$(a$,20)=l1$ Then NPrint b$
+				c$=b$
+				b$=a$
+			Wend
+			CloseFile 0
+		EndIf
+	Next
+EndIf

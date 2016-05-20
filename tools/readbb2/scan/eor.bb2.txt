@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/parts.bb2/eor.bb2
++
+Dc.b "pART"
+Dc.b "SN54/74LS86",0
+Event
+;
+Dc 0					;version
+Dc 0					;flags. b0=start separate task
+;
+Dc.l shape_	 ;shape table
+;
+Dc 2					;# inputs
+Dc 1					;# outputs
+;
+Dc 12,23			;turn off delay...typ/max
+Dc 20,30			;turn on delay...type/max
+;
+Dc.l calcout_ ;calc output routine
+
+calcout_
+;
+;calc output - d0.l=input, return d0.b=output
+;
+AND #3,d0:BEQ 'done:EOR #3,d0:BEQ 'done:MOVEQ #1,d0:'done:RTS
+
+shape_
+IncBin "shapes/eor"

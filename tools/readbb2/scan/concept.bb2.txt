@@ -1,0 +1,44 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/concept.bb2
++; Concept Logo Mirrored By Water
+;
+;				 By	SPECTRE
+;
+;		 Using Blitz Basic II
+
+
+LoadShape 0,"str.sh",0
+
+VWait 100
+BLITZ
+
+#bplmod1=$108
+#bplmod2=$10a
+lmaxlen 0,320,512,4
+
+longdiv 0,10,180
+
+Slice 0,34,320,256,$fff8,4,8,32,320,320
+Use SetCycle 0
+Green 0,0,0,15
+
+
+For i=1 To 7
+	ColSplit 0,0,0,8+i,i*5+150
+Next
+
+co$=Mki$(#bplmod1)+Mki$(-122)
+co$+Mki$(#bplmod2)+Mki$(-122)
+CustomCop co$,180+34
+
+
+For i=0 To 120
+	VWait
+	Show 0,0,i
+Next
+MouseWait
+For i=120 To 0 Step -1
+	VWait
+	Show 0,0,i
+Next
+MouseWait
+End

@@ -1,0 +1,793 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/BombsGamePlay.bb2
++;
+;
+; Bombs GamePlay
+;
+;
+; Created by ARV
+;
+; started 01-06-1994
+; BLITZ2 Version : 01-06-1994
+; last modified 17-10-1994
+
+; =======================================
+; =======================================
+
+Statement SetupDisplay{ *bombptr.gameVars}
+Shared gameStartTitle$
+; Initializes a display and includes:-
+;	 i	 screen, window, mouse-button input
+;	 ii	mouse-pointer imagery
+;	 iii titlebar, grid and scroll-arrows
+.SetupDisplay
+##[$80CA] *bombptr
+		allocst 1, 4, "BOMBS!"
+		Use SetCycle 0
+		DefaultIDCMP $8
+		localstat 1, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
+		Handle 30, -8,-8
+		Handle 31, -8,-8
+		WPointer 30
+		DisplayTitleBar{ *bombptr, gameStartTitle$}
+		DrawGrid{ *bombptr}
+		InitScrolls{ *bombptr}
+		DoScrolls{ *bombptr, True}
+End Statement	;SetupDisplay
+
+; =======================================
+
+Statement SquareChecks{ *bombptr.gameVars}
+; Checks are made for :-
+;	 i	 any false bombs -> exit routine
+;	 ii	any bombs to be found -> only if all unmarked squares
+;			 must be bombs -> mark them and end the game
+.SquareChecks
+##[$80CA] *bombptr
+		If (\falseBombs=0) AND (\totalBombs=\totalSquares-\openedSquares)
+				\gameInProgress = 3
+				For i.l=1 To \totalSquares
+						If (\square[i]\hasBomb<0) AND (\square[i]\state=0)
+								\square[i]\state = 4
+								\markedBombs = \markedBombs + 1
+								xpos = \displayXCoord+(((i-1) ##[$80B9] \wide)-\leftWide)*10
+								ypos = \displayYCoord+(i/\wide-\leftHigh)*10
+								If i ##[$80B9] \wide=0 Then ypos = ypos - 10
+								DrawSquare{ *bombptr, 11, xpos, ypos}
+						End If
+				Next i
+				UpdateTitleBar{ *bombptr}
+				UpdateProgressBar{ *bombptr}
+				lastWin.l = ##[$80D1] localstat
+				If \rating>Val(\ratings[10]\value) Then TheScores{ *bombptr}
+				Use localstat lastWin
+		End If
+End Statement	;SquareChecks
+
+; =======================================
+
+Statement FreeupDisplay{ *bombptr.gameVars}
+; Free up all memory in screens, windows etc that was used for the game
+.FreeupDisplay
+##[$80CA] *bombptr
+		Free localstat 1
+		Free allocst 1
+End Statement	;FreeupDisplay
+
+; =======================================
+
+Statement FloodGrid{ *bombptr.gameVars, num.l}
+Shared hold.holdtype()
+; Opens all empty squares and their immediate neighbours
+; Need "*bombptr" for general game settings
+; Need "num" to denote the square to start with
+.FloodGrid
+		If num=0 Then Statement Return
+; Put the mouse to sleep - does not work yet!
+		WPointer 31
+##[$80CA] *bombptr
+		totalHold.l = 1
+		hold(1)\num = num
+		hold(1)\hasBomb = 0
+; CHANGE THE \xpos AND \ypos TO COORDINATES OF THE SQUARE RATHER THAN THE MOUSE-CLICK
+		hold(1)\xpos = \displayXCoord+(((num-1) ##[$80B9] \wide)-\leftWide)*10
+		hold(1)\ypos = \displayYCoord+(num/\wide-\leftHigh)*10
+		If num ##[$80B9] \wide=0 Then hold(1)\ypos = hold(1)\ypos - 10
+		\openedSquares = \openedSquares + 1
+		\square[hold(1)\num]\state = 2
+		DrawSquare{ *bombptr, $EF, hold(1)\xpos, hold(1)\ypos}
+
+		While totalHold>0
+; This always works on "hold(1)\..."
+; Any extra squares to be added are added at the back as "hold(totalHold)\..."
+				i = CheckTopLeft{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num-1-\wide}
+						If \square[hold(1)\num-1-\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num-1-\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos - 10
+								hold(totalHold)\ypos = hold(1)\ypos - 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num-1-\wide]\state = 2
+						bombNum = \square[hold(1)\num-1-\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos-10, hold(1)\ypos-10}
+				End If
+
+				i = CheckTop{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num-\wide}
+						If \square[hold(1)\num-\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num-\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos
+								hold(totalHold)\ypos = hold(1)\ypos - 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num-\wide]\state = 2
+						bombNum = \square[hold(1)\num-\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos, hold(1)\ypos-10}
+				End If
+
+				i = CheckTopRight{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num+1-\wide}
+						If \square[hold(1)\num+1-\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num+1-\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos + 10
+								hold(totalHold)\ypos = hold(1)\ypos - 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num+1-\wide]\state = 2
+						bombNum = \square[hold(1)\num+1-\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos+10, hold(1)\ypos-10}
+				End If
+
+				i = CheckLeft{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num-1}
+						If \square[hold(1)\num-1]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num-1
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos - 10
+								hold(totalHold)\ypos = hold(1)\ypos
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num-1]\state = 2
+						bombNum = \square[hold(1)\num-1]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos-10, hold(1)\ypos}
+				End If
+
+				i = CheckRight{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num+1}
+						If \square[hold(1)\num+1]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num+1
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos + 10
+								hold(totalHold)\ypos = hold(1)\ypos
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num+1]\state = 2
+						bombNum = \square[hold(1)\num+1]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos+10, hold(1)\ypos}
+				End If
+
+				i = CheckBottomLeft{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num-1+\wide}
+						If \square[hold(1)\num-1+\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num-1+\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos - 10
+								hold(totalHold)\ypos = hold(1)\ypos + 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num-1+\wide]\state = 2
+						bombNum = \square[hold(1)\num-1+\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos-10, hold(1)\ypos+10}
+				End If
+
+				i = CheckBottom{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num+\wide}
+						If \square[hold(1)\num+\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num+\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos
+								hold(totalHold)\ypos = hold(1)\ypos + 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num+\wide]\state = 2
+						bombNum = \square[hold(1)\num+\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos, hold(1)\ypos+10}
+				End If
+
+				i = CheckBottomRight{ *bombptr, hold(1)\num, #peekState}
+				If i=0
+						CalcBombNum{ *bombptr, hold(1)\num+1+\wide}
+						If \square[hold(1)\num+1+\wide]\hasBomb=0
+								totalHold = totalHold + 1
+								hold(totalHold)\num = hold(1)\num+1+\wide
+								hold(totalHold)\hasBomb = 0
+								hold(totalHold)\xpos = hold(1)\xpos + 10
+								hold(totalHold)\ypos = hold(1)\ypos + 10
+						End If
+						\openedSquares = \openedSquares + 1
+						\square[hold(1)\num+1+\wide]\state = 2
+						bombNum = \square[hold(1)\num+1+\wide]\hasBomb
+						If bombNum=0 Then bombNum = $EF
+						DrawSquare{ *bombptr, bombNum, hold(1)\xpos+10, hold(1)\ypos+10}
+				End If
+
+; Take the last in the array and move it to the front
+				hold(1)\num = hold(totalHold)\num
+				hold(1)\hasBomb = hold(totalHold)\hasBomb
+				hold(1)\xpos = hold(totalHold)\xpos
+				hold(1)\ypos = hold(totalHold)\ypos
+				totalHold = totalHold - 1
+; One extra call to update the time
+				UpdateTime{ *bombptr}
+		Wend
+		WPointer 30
+End Statement	;FloodGrid
+
+; =======================================
+
+Statement LMBDownSquare{ *bombptr.gameVars}
+; Displays one or more half-opened squares
+; Keeps track of all these squares in "\downSquares[]"
+.LMBDownSquare
+##[$80CA] *bombptr
+		num.l = FindNum{ *bombptr}
+		\downSquare[0]\num = 0
+; first click
+		If \square[num]\state=0
+				\downSquare[1]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+				\downSquare[1]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				\square[num]\state = 1
+				\downSquare[0]\num = 1
+				\downSquare[1]\num = num
+				Gosub LMBDownDraw
+		End If
+; second click
+		If \square[num]\state=2
+				If CheckTopLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1 - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckTop{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckTopRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1 - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				End If
+				If CheckRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				End If
+				If CheckBottomLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1 + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+				If CheckBottom{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+				If CheckBottomRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1 + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+		End If
+		Gosub LMBDownDraw
+		Statement Return
+
+.LMBDownDraw
+		\LMBDownNum = num
+		For i.b=1 To \downSquare[0]\num
+				\square[\downSquare[i]\num]\state = 1
+				DrawSquare{ *bombptr, 9, \downSquare[i]\xpos, \downSquare[i]\ypos}
+		Next i
+Return
+End Statement	;LMBDownSquare
+
+; =======================================
+
+Statement LMBUpSquare{ *bombptr.gameVars, theRegion.b}
+; If the button release was outside the button press square then it
+; restores the pressed down squares, else
+; it opens the square on the first click
+; or the surrounding squares on the second click
+.LMBUpSquare
+##[$80CA] *bombptr
+		num.l = FindNum{ *bombptr}
+		If num<>\LMBDownNum									; same as LMBDown?
+				RestoreRegion{ *bombptr, theRegion}
+		Else
+		If \gameInProgress=0 Then \gameInProgress = 1
+				Select \square[num]\state
+					Case 2
+; open all covered surrounding squares
+						For i.b=1 To \downSquare[0]\num
+								If \square[\downSquare[i]\num]\hasBomb=\bombs\typenr
+										ShowAllBombs{ *bombptr, num}
+								Else
+										CalcBombNum{ *bombptr, \downSquare[i]\num}
+										\openedSquares = \openedSquares + 1
+										\square[\downSquare[i]\num]\state = 2
+										If \square[\downSquare[i]\num]\hasBomb=0
+												bombnum=$EF
+										Else
+												bombnum=\square[\downSquare[i]\num]\hasBomb
+										End If
+										DrawSquare{ *bombptr, bombnum, \downSquare[i]\xpos, \downSquare[i]\ypos}
+								End If
+						Next i
+; Checks to see if we can flood the grid
+						While \downSquare[0]\num>0
+								If \square[\downSquare[\downSquare[0]\num]\num]\hasBomb=0
+										\openedSquares = \openedSquares - 1
+										FloodGrid{ *bombptr, \downSquare[\downSquare[0]\num]\num}
+								End If
+								\downSquare[0]\num = \downSquare[0]\num - 1
+						Wend
+
+					Case 1
+						If \square[num]\hasBomb=\bombs\typenr
+; it has a bomb
+								ShowAllBombs{ *bombptr, num}
+						Else
+								CalcBombNum{ *bombptr, num}
+								If \square[num]\hasBomb=0
+; open all empty squares
+										FloodGrid{ *bombptr, num}
+								Else
+; open the square
+										xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+										ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+										\square[num]\state = 2
+										\openedSquares = \openedSquares + 1
+										DrawSquare{ *bombptr, \square[num]\hasBomb, xpos, ypos}
+								End If
+						End If
+					Default
+				End Select
+		If \gameInProgress<2 Then SquareChecks{ *bombptr}
+		End If
+End Statement	;LMBUpSquare
+
+; =======================================
+
+Statement RMBDownSquare{ *bombptr.gameVars}
+; Displays one or more half-opened squares
+; Keeps track of all these squares in "\downSquares[]"
+.RMBDownSquare
+##[$80CA] *bombptr
+		num.l = FindNum{ *bombptr}
+		\downSquare[0]\num = 0
+		Select \square[num]\state
+			Case 0
+; first click
+				\downSquare[1]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+				\downSquare[1]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				\square[num]\state = 3
+				\downSquare[0]\num = 1
+				\downSquare[1]\num = num
+				Gosub RMBDownDraw
+			Case 2
+; second click
+				If CheckTopLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1 - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckTop{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckTopRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1 - \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 - 10
+				End If
+				If CheckLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				End If
+				If CheckRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				End If
+				If CheckBottomLeft{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num - 1 + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 - 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+				If CheckBottom{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+				If CheckBottomRight{ *bombptr, num, #peekState}=0
+						\downSquare[0]\num = \downSquare[0]\num + 1
+						\downSquare[\downSquare[0]\num]\num = num + 1 + \wide
+						\downSquare[\downSquare[0]\num]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10 + 10
+						\downSquare[\downSquare[0]\num]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10 + 10
+				End If
+				Gosub RMBDownDraw
+			Case 4
+				\downSquare[1]\xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+				\downSquare[1]\ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+				\downSquare[0]\num = 1
+				\downSquare[1]\num = num
+				Gosub RMBDownDraw
+				\square[num]\state = 4
+		End Select
+		Statement Return
+
+.RMBDownDraw
+		\RMBDownNum = num
+		For i.b=1 To \downSquare[0]\num
+				\square[\downSquare[i]\num]\state = 3
+				DrawSquare{ *bombptr, 10, \downSquare[i]\xpos, \downSquare[i]\ypos}
+		Next i
+Return
+End Statement	;RMBDownSquare
+
+; =======================================
+
+Statement RMBUpSquare{ *bombptr.gameVars, theRegion.b}
+; If the square was marked then unmark it
+; If the square was unmarked then mark it
+; If the square was opened then mark all surrounding closed squares
+; If the button release was at a different place from the
+; button press then the squares are restored
+.RMBUpSquare
+##[$80CA] *bombptr
+		num.l = FindNum{ *bombptr}
+		If num<>\RMBDownNum									; same as RMBDown?
+				RestoreRegion{ *bombptr, theRegion}
+		Else
+				\gameInProgress = 1
+				Select \square[num]\state
+					Case 4
+; unmark the square
+						\square[num]\state = 0
+						\markedBombs = \markedBombs - 1
+						CheckMark{ *bombptr, num}
+						xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+						DrawSquare{ *bombptr, 0, xpos, ypos}
+					Case 3
+; mark the square
+						\square[num]\state = 4
+						\markedBombs = \markedBombs + 1
+						CheckMark{ *bombptr, num}
+						xpos = \displayXCoord+((\xcoord-\displayXCoord)/10)*10
+						ypos = \displayYCoord+((\ycoord-\displayYCoord)/10)*10
+						DrawSquare{ *bombptr, 11, xpos, ypos}
+					Case 2
+; mark all surrounding closed squares
+						For i.b=1 To \downSquare[0]\num
+								\square[\downSquare[i]\num]\state = 4
+								\markedBombs = \markedBombs + 1
+								CheckMark{ *bombptr, \downSquare[i]\num}
+								DrawSquare{ *bombptr, 11, \downSquare[i]\xpos, \downSquare[i]\ypos}
+						Next i
+					Default
+				End Select
+; redisplay the number of marked bombs
+				UpdateTitleBar{ *bombptr}
+		End If
+End Statement	;RMBUpSquare
+
+; =======================================
+
+Statement HandleLMBDown{ *bombptr.gameVars, theRegion.b}
+; Make intermediate drawings on the screen - no other changes
+.HandleLMBDown
+##[$80CA] *bombptr
+		Select theRegion
+			Case #closeRegion						 ; CLOSE gadget
+				\closeState = 1
+				WBox 2,2, 18,18, 11
+				WBlit 15-\closeState, 2,2
+			Case #restartRegion					 ; RESTART gadget
+				\restartState = 1
+				WBox 38,2, 54,18, 11
+				WBlit 19-\restartState, 38,2
+			Case #gridRegion							; GRID
+				If \gameInProgress<2
+						LMBDownSquare{ *bombptr}
+				End If
+		End Select
+End Statement	;HandleLMBDown
+
+; =======================================
+
+Function.b HandleLMBUp{ *bombptr.gameVars, theRegion.b}
+Shared gameStartTitle$
+; Any changes made are from the button releases
+; The gadget or square must have been pressed down first
+; or the area will be restored
+; The only exception is the scroll arrows
+; these do not have to be pressed down before, but
+; only need a button release over them
+;
+; The return value indicates whether to keep playing (TRUE)
+; or end the game (FALSE)
+; Only the CLOSE Gadget will return FALSE
+;
+; Restore all regions and take appropriate actions
+.HandleLMBUp
+##[$80CA] *bombptr
+		If theRegion<>\LMBDownRegion
+				RestoreRegion{ *bombptr, \LMBDownRegion}
+		Else
+				Select theRegion
+					Case #closeRegion				 ; CLOSE gadget
+						If (\rating>Val(\ratings[10]\value)) AND (\falseBombs=0) Then TheScores{ *bombptr}
+						ResetVars{ *bombptr}
+						Function Return False
+
+					Case #pauseRegion				 ; PAUSE gadget
+						Select \gameInProgress
+							Case 1
+								\gameInProgress = 2
+								\pauseState = 1-\pauseState
+							Case 2
+								\gameInProgress = 1
+								\pauseState = 1-\pauseState
+						End Select
+						WBox 20,2, 36,18, 11
+						WBlit 17-\pauseState, 20,2
+
+					Case #restartRegion			 ; RESTART gadget
+						If \restartState=1
+								\restartState = 0
+								WBox 38,2, 54,18, 11
+								WBlit 19-\restartState, 38,2
+								WBox \progressBar\xcoord,\progressBar\ycoord, \progressBar\xcoord+10,\progressBar\ycoord+13, 0
+								ResetVars{ *bombptr}
+								PlaceBombs{ *bombptr}
+								DisplayTitleBar{ *bombptr, gameStartTitle$}
+								DrawGrid{ *bombptr}
+								UpdateProgressBar{ *bombptr}
+								InitScrolls{ *bombptr}
+								DoScrolls{ *bombptr, True}
+						End If
+
+					Case #gridRegion					; GRID
+						If \gameInProgress<2
+								LMBUpSquare{ *bombptr, theRegion}
+						End If
+
+					Default
+						DoScrolls{ *bombptr, False}
+				End Select
+		End If
+		Function Return True
+End Function	;HandleLMBUp
+
+; =======================================
+
+Statement HandleRMBDown{ *bombptr.gameVars, theRegion.b}
+; Make intermediate drawings on the screen - no other changes
+.HandleRMBDown
+##[$80CA] *bombptr
+		Select theRegion
+			Case #closeRegion							 ; CLOSE gadget
+				\closeState = 1
+				WBox 2,2, 18,18, 11
+				WBlit 15-\closeState, 2,2
+			Case #restartRegion						 ; RESTART gadget
+				\restartState = 1
+				WBox 38,2, 54,18, 11
+				WBlit 19-\restartState, 38,2
+			Case #progressRegion						; PROGRESS BAR
+			Case #gridRegion								; GRID
+				If \gameInProgress<2
+						RMBDownSquare{ *bombptr}
+				End If
+		End Select
+End Statement	;HandleRMBDown
+
+; =======================================
+
+Function.b HandleRMBUp{ *bombptr.gameVars, theRegion.b}
+; Any changes made are from the button releases
+; The gadget or square must have been pressed down first
+; or the area will be restored
+; The only exception is the scroll arrows
+; these do not have to be pressed down before, but
+; only need a button release over them
+;
+; The return value indicates whether to keep playing (TRUE)
+; or end the game (FALSE)
+; Only the CLOSE Gadget will return FALSE
+;
+.HandleRMBUp
+##[$80CA] *bombptr
+		If (theRegion<>\RMBDownRegion)
+				RestoreRegion{ *bombptr, \RMBDownRegion}
+		Else
+				Select theRegion
+					Case #closeRegion				 ; CLOSE gadget
+						lastWin.l = ##[$80D1] localstat
+						If \rating>Val(\ratings[10]\value) Then TheScores{ *bombptr}
+						Use localstat lastWin
+						ResetVars{ *bombptr}
+						Function Return False
+					Case #pauseRegion				 ; PAUSE gadget
+						Select \gameInProgress
+							Case 1
+								\gameInProgress = 2
+								\pauseState = 1-\pauseState
+							Case 2
+								\gameInProgress = 1
+								\pauseState = 1-\pauseState
+						End Select
+						WBox 20,2, 36,18, 11
+						WBlit 17-\pauseState, 20,2
+					Case #restartRegion			 ; RESTART gadget
+						If \restartState=1
+								\restartState = 0
+								WBox 38,2, 54,18, 11
+								WBlit 19-\restartState, 38,2
+								WBox \progressBar\xcoord,\progressBar\ycoord, \progressBar\xcoord+10,\progressBar\ycoord+13, 0
+								ResetVars{ *bombptr}
+								PlaceBombs{ *bombptr}
+								DisplayTitleBar{ *bombptr, gameStartTitle$}
+								DrawGrid{ *bombptr}
+								UpdateProgressBar{ *bombptr}
+								InitScrolls{ *bombptr}
+								DoScrolls{ *bombptr, True}
+						End If
+					Case #gridRegion					; GRID
+						If \gameInProgress<2
+								RMBUpSquare{ *bombptr, theRegion}
+						End If
+					Default
+						DoScrolls{ *bombptr, False}
+				End Select
+		End If
+		Function Return True
+End Function	;HandleRMBUp
+
+; =======================================
+
+Function.b SelectRegion{ *bombptr.gameVars}
+; Checks all regions and gadgets for mouse-clicks
+; region 1 = CLOSE gadget
+;				2 = PAUSE
+;				3 = RESTART
+;				4 = PROGRESS
+;				5 = GRID
+; All gadgets are hard coded, the grid depends on the display-settings
+.SelectRegion
+##[$80CA] *bombptr
+		theRegion.b = 0
+		If (\ycoord>1) AND (\ycoord<19)							 ; gadgets
+				If (\xcoord>1) AND (\xcoord<19)					 ; close
+						theRegion = #closeRegion
+				End If
+				If (\xcoord>19) AND (\xcoord<37)					; pause
+						theRegion = #pauseRegion
+				End If
+				If (\xcoord>37) AND (\xcoord<55)					; restart
+						theRegion = #restartRegion
+				End If
+		End If
+		If (\ycoord>\displayYCoord-24) AND (\ycoord<\displayYCoord-7)
+				If (\xcoord>\displayXCoord-6) AND (\xcoord<\displayXCoord+10*\displayWide+6)
+						theRegion = #progressRegion
+; NOTE: This is here only as a safe-guard as there are no
+;			 actions taken on clicks in this region
+;			 Feel free to add your own, but add them also to
+;			 "HandleLMB..." and "HandleRMB...",
+;			 then call your routines
+; Leave all the other regions alone or risk stuffing them up
+				End If
+		End If
+		If (\ycoord>\displayYCoord) AND (\ycoord<\displayYCoord+10*\displayHigh)
+				If (\xcoord>\displayXCoord) AND (\xcoord<\displayXCoord+10*\displayWide)
+						theRegion = #gridRegion
+				End If
+		End If
+		Function Return theRegion
+End Function	;SelectRegion
+
+; =======================================
+
+Statement TheGame{ *bombptr.gameVars, *biptr.OSInput}
+; Plays a game of BOMBS!
+; Use the LMB to open a square
+; Use the RMB to mark a square
+.TheGame
+##[$80CA] *bombptr
+; SETS ALL GAME VARIABLES LIKE BOMBS, NEIGHBOURS ETC
+		ResetVars{ *bombptr}
+		PlaceBombs{ *bombptr}			; places bombs in the playing field
+		SetupDisplay{ *bombptr}		; draws the grid
+		Menus Off
+		keep.b=True
+		FlushEvents
+		##[$80BB]
+				GetGameInput{ *biptr}
+				Gosub GameEvents
+		##[$80BC] NOT keep
+		Menus On
+		FreeupDisplay{ *bombptr}
+		Statement Return
+
+.GameEvents
+		\xcoord = *biptr\iMouseX
+		\ycoord = *biptr\iMouseY
+
+		theRegion.b = SelectRegion{ *bombptr}
+		Select *biptr\code
+			Case $68																	; LMB Down
+				\LMBDownRegion = theRegion
+				HandleLMBDown{ *bombptr, theRegion}
+			Case $E8																	; LMB Up
+				keep = HandleLMBUp{ *bombptr, theRegion}
+			Case $69																	; RMB Down
+				\RMBDownRegion = theRegion
+				HandleRMBDown{ *bombptr, theRegion}
+			Case $E9																	; RMB Up
+				keep = HandleRMBUp{ *bombptr, theRegion}
+		End Select
+		UpdateTime{ *bombptr}
+Return
+
+End Statement	;TheGame
+
+; =======================================
+; =======================================

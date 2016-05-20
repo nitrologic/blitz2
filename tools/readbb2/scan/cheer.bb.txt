@@ -1,0 +1,154 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/overlays/cheer.bb
++Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3
+	MULU#40,d3:ADD.l d3,a1
+;	ASL.l#5,d3:ADD.l d3,a1:ADD.l d3,a1:ADD.l d3,a1
+	MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #40,a1:MOVE.l#40*256,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+allocst 0,4
+ScreensBitMap 0,0
+Use lmaxlen 0
+InitBank 0,32768,0
+blok.l=Bank(0)
+bm.l=##[$80B8] lmaxlen(0)
+
+LoadBitMap 0,"cheer.iff",0
+FadePalette 0
+ReMap 2,0
+
+For y=0 To 11:For x=0 To 7:GetaShape sh,x*9,y*17+1,8,16:sh+1:Next:Next
+
+Goto compileppl
+
+BlockScroll
+
+NEWTYPE .ppl:x.w:y.w:rot.b:pad.b:End NEWTYPE
+
+Dim ppl.ppl(100)
+
+For i=0 To 31:ppl(i)\x=Rnd(100),Rnd(100):Next
+
+Function.w orient{array.l,carx.w,cary.w}
+	MOVE.l d0,a0:MOVEQ#0,d0
+	MOVEQ#0,d4:MOVE.b1(a0),d4
+	MOVEQ#0,d5:MOVE.b0(a0),d5
+	SUB d1,d4:BGT bigx:NEG d4:ADDQ #8,d0:bigx
+	SUB d2,d5:BGT bigy:NEG d5:ADDQ #4,d0:bigy
+	CMP.l d5,d4:BGT quad:EXG.l d4,d5:ADDQ #2,d0:quad
+	MOVE mystab(pc,d0),d0:AsmExit
+	mystab:Dc.w 5*64,4*64,6*64,7*64,2*64,3*64,1*64,0*64
+End Statement
+
+While Joyb(0)=0
+;	orient{&ppl(0),SMouseX,SMouseY,32}
+	VWait 5
+	##[$80CA] ppl(i)
+	For i=0 To 31
+		ClipBlit \rot,\x,\y
+	Next
+Wend
+
+End
+
+
+
+
+
+
+.compileppl
+
+BlockScroll:sh=0
+For y=0 To 11:For x=0 To 7:longdiv sh,x*8,y*16:sh+1:Next:Next
+
+For y=0 To 11
+	For x=0 To 7
+		For yy=0 To 1
+			getblock{blok,bm,x*8,(y+y+yy)*8}:blok+32
+		Next
+	Next
+Next
+
+If ReadMem(0,"ram:pil.bin")
+	Exists 0,Bank(0),blok-Bank(0)
+	CloseFile 0
+EndIf
+
+Statement drawblok{src1.l,mask1.l,src2.l,dest.l}
+	MOVEM.l (a0)+,d0-d3
+	MOVEM.l (a1)+,d4-d7:AND.l d4,d0:AND.l d5,d1:AND.l d6,d2:AND.l d7,d3
+	MOVEM.l (a2)+,d4-d7:OR.l d4,d0:OR.l d5,d1:OR.l d6,d2:OR.l d7,d3
+	MOVEM.l d0-d3,(a3):ADD#16,a3
+	MOVEM.l (a0)+,d0-d3
+	MOVEM.l (a1)+,d4-d7:AND.l d4,d0:AND.l d5,d1:AND.l d6,d2:AND.l d7,d3
+	MOVEM.l (a2)+,d4-d7:OR.l d4,d0:OR.l d5,d1:OR.l d6,d2:OR.l d7,d3
+	MOVEM.l d0-d3,(a3):AsmExit
+End Statement
+
+Statement nibble{a.l,b.l}
+	MOVE.l d0,a0:MOVE.l d1,a1
+nxbyte:
+	MOVE.b (a0),d0:MOVE.b d0,d1:AND#240,d1:BEQ notop:OR#240,d1:notop
+	AND#15,d0:BEQ nobot:OR#15,d0:nobot:OR d1,d0:NOT d0:MOVE.b d0,(a0)+
+	CMP.l a0,a1:BNE nxbyte:AsmExit
+End Statement
+
+nibble{Bank(0),blok}
+
+If ReadMem(0,"ram:mask.bin")
+	Exists 0,Bank(0),blok-Bank(0)
+	CloseFile 0
+EndIf
+
+MouseWait
+End
+
+;LoadShapes 0,"cheer.shapes":LoadPalette 0,"cheer.iff"
+
+FadePalette 0
+
+;ReMap 14,5:ReMap 10,4:ReMap 11,5
+;For i=0 To 3:ReMap 6+i,10+i/2:Next
+
+sh=0
+For y=0 To 8:For x=0 To 7:GetaShape sh,x*9,y*17,8,16:sh+1:Next:Next
+BlockScroll 2
+
+Dim j(4)
+j(0)=0
+j(1)=8
+j(2)=16
+j(3)=8
+
+While Joyb(0)=0
+	VWait 9
+	;
+	longdiv i+j(j),20,20
+	i=(i+1)AND7
+	j=(j+1)AND3
+	;
+	longdiv k+24,40,20
+	longdiv k+48,60,20
+	k+1:If k>23 Then k-24
+	;
+Wend
+
+End
+
+;Statement drawblok{src1.l,mask1.l,src2.l,dest.l,style.w,frame.w}
+;	MOVEM.l a4-a5,-(a7)
+;	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE.l d3,a3
+;	MOVE d4,d6:AND #$f0,d6:ASL#5,d6:LEA 32(a1,d6),a4:LEA 32(a2,d6),a5
+;	AND#7,d4:move d4,d6:add d6,d6:add d6,d4
+;	ASL#3,d4:ADD d5,d4:ASL#6,d4:ASL#3,d4:LEA 0(a1,d5),a1:LEA 0(a2,d5),a2

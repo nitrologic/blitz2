@@ -1,0 +1,52 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/serial.bb
++;
+; serial port reader
+;
+
+m.l=OpenSerial("serial.device",0,2400,0)
+lmaxlen 0,320,256,1:InitCopList 0,1
+
+BLITZ
+
+Gosub initserial
+
+CreateDisplay 0
+DisplayBitMap 0,0
+BitMapOutput 0
+
+While Joyb(0)=0
+	If a.w<>0 Then Print Chr$(a):a=0
+Wend
+
+Gosub freeserial
+
+End
+
+;--------------------------------------------------------------------
+
+#serper=$dff032
+#serdatr=$dff018
+#intena=$dff09a
+#intenar=$dff01c
+#intreq=$dff09c
+#intreqr=$dff01e
+
+
+initserial:
+	vbr.l=cr_vbr:MOVE.l a5,global
+	oldvector.l=Peek.l(vbr+$74):Poke.l vbr+$74,?handler:Poke.w #intena,$c800
+	ser.l=3546895/2400+1:Poke.w #serper,ser AND $7fff:Return
+
+freeserial:
+	Poke.l vbr+$74,oldvector:Return
+
+handler:
+	MOVEM.l d0-d7/a0-a6,-(a7):MOVE.l global,a5
+
+	a=Peek.w(#serdatr)
+
+	Poke #intreq,$800:MOVEM.l (a7)+,d0-d7/a0-a6:RTE
+
+global:Dc.l 0
+
+;--------------------------------------------------------------------

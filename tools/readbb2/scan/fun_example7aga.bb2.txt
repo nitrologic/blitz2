@@ -1,0 +1,140 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example7AGA.bb2
++##[$80CC]
+##[$80C3]
+
+##[$80BF]	"FUN_Math:"
+Include "FUN_Matrix.bb2"
+
+NEWTYPE.Facet_Type
+	Points.w[4]
+	fcolour.w
+	cmask.b
+	d1.l
+	d2.l
+End NEWTYPE
+
+NEWTYPE.Point_Type
+	x.w
+	y.w
+End NEWTYPE
+
+Dim vertex_list.Vector_Type(67)
+Dim facet_list.Facet_Type(65)
+Dim output_list.Vector_Type(67)
+Dim polygon.Point_Type(4)
+
+DEFTYPE.Matrix_Type Final
+DEFTYPE.Matrix_Type Temp1
+DEFTYPE.Matrix_Type Temp2
+DEFTYPE.Matrix_Type Temp3
+
+DEFTYPE.Vector_Type VTemp1
+DEFTYPE.Vector_Type VTemp2
+DEFTYPE.Vector_Type Normal
+
+pcount.w=0
+fcount.w=0
+
+Statement Load_Object{fname.s}
+	Shared pcount,fcount
+	Shared vertex_list(),facet_list()
+
+	If WriteMem(0,fname)
+		FileInput 0
+		pcount=Edit(80)
+		fcount=Edit(80)
+		For count.w=0 To pcount
+			vertex_list(count)\x=Edit(80),Edit(80),Edit(80),1
+		Next count
+		For count.w=0 To fcount
+			For count2.w=0 To 3
+				facet_list(count)\Points[count2]=Edit(80)
+			Next count2
+			facet_list(count)\fcolour=Edit(80),Edit(80),Edit(80),Edit(80)
+		Next count
+		CloseFile 0
+	Else
+		End
+	EndIf
+End Statement
+
+Load_Object{"FUN_Math:Example_Shapes/Titus_2.shp"}
+
+lmaxlen 0,320,200,4
+lmaxlen 1,320,200,4
+
+DecodePalette 0,8
+
+physical.b=0
+logical.b=1
+
+BLITZ
+
+InitCopList 0,42,199,$10004,0,16,0	;$12016 <- does not work on 1200's!!!
+CreateDisplay 0
+DisplayBitMap 0,physical
+DisplayPalette 0,0
+Use lmaxlen logical
+
+xrot.w=0
+yrot.w=67 ;67
+zrot.w=194 ;194
+sby.q=1.5
+
+##[$80BB]
+
+ xrot+2 : If xrot>359 Then xrot=360-xrot
+ yrot+2 : If yrot>359 Then yrot=360-yrot
+ zrot+2 : If zrot>359 Then zrot=360-zrot
+
+ build_rotation_matrix{#ABOUT_Y,&Temp2,yrot}
+ build_rotation_matrix{#ABOUT_X,&Temp1,xrot}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+ build_rotation_matrix{#ABOUT_Z,&Temp1,zrot}
+ concatenate_matrix{&Temp1,&Temp3,&Temp2}
+ build_scale_matrix{&Temp1,sby,sby,sby}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+
+ build_translation_matrix{&Temp1,160,100,0}
+ concatenate_matrix{&Temp1,&Temp3,&Final}
+ BlockScroll 0
+ For points=0 To pcount
+	apply_matrix{&Final,&vertex_list(points),&output_list(points)}
+ Next points
+ col_alloc.b=0
+ For sides=0 To fcount
+	subtract_vectors{&output_list(facet_list(sides)\Points[1]),&output_list(facet_list(sides)\Points[0]),&VTemp1}
+	subtract_vectors{&output_list(facet_list(sides)\Points[2]),&output_list(facet_list(sides)\Points[0]),&VTemp2}
+	cross_product{&VTemp2,&VTemp1,&Normal}
+	If Normal\z>0
+		VTemp1\x=1,0.25,1,1
+		e.q=vector_angle{&Normal,&VTemp1}*128+127
+		If e<1 Then e=1
+		If e>255 Then e=255
+		col_alloc+1
+		c.w=col_alloc
+		m.b=facet_list(sides)\cmask
+		AGAGreen 0,c,e*(m AND 1),e*((m AND 2) LSR 1),e*((m AND 4) LSR 2)
+		If facet_list(sides)\Points[3]=-1 Then fps.b=3 Else fps=4
+		For points=0 To fps-1
+			polygon(points)\x=output_list(facet_list(sides)\Points[points])\x,output_list(facet_list(sides)\Points[points])\y
+		Next points
+		Polyf fps,&polygon(0),c
+	EndIf
+ Next sides
+ VWait
+ If physical=1
+		logical=1
+		physical=0
+ Else
+		logical=0
+		physical=1
+ EndIf
+ DisplayBitMap 0,physical
+ DisplayPalette 0,0
+ Use lmaxlen logical
+##[$80BC] Joyb(1)
+
+End
+
+

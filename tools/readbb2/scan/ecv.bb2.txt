@@ -1,0 +1,1119 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/ecv.bb2
++;
+; Electronic CV - Ted Bailey Feb/Mar 1995
+;
+##[$80B4]:End:End ##[$80B4]
+
+Select Processor
+	Case 0
+		numstrs1=38
+		numsmils=10
+		numlins1=10
+		numbars1=5
+		numdots1=24
+	Case 1
+		numstrs1=42
+		numsmils=12
+		numlins1=12
+		numbars1=7
+		numdots1=30
+	Case 2
+		numstrs1=75
+		numsmils=20
+		numlins1=20
+		numbars1=15
+		numdots1=60
+	Case 3
+		numstrs1=90
+		numsmils=30
+		numlins1=30
+		numbars1=25
+		numdots1=78
+	Case 4
+		numstrs1=120
+		numsmils=30
+		numlins1=48
+		numbars1=30
+		numdots1=102
+End Select
+
+#bdshpnum=0
+#tishpnum=1
+#opshpnum=25
+#prshpnum=30
+#exshpnum=31
+#dishpnum=32
+#t0txtnum=40
+#t1txtnum=72
+#prtxtnum=104
+#edtxtnum=108
+#extxtnum=109
+#ditxtnum=110
+#bdsprnum=0
+#opsprnum=1
+#blsprnum=18
+
+AMIGA
+Gosub initloader
+
+SetInt 5
+	ShowBitMap db
+	db=1-db:Use lmaxlen db
+	NextFrame 0
+	PlayMed
+End SetInt
+
+LoadShapes #tishpnum,"gfx/tstarshps.shapes"
+LoadShapes #opshpnum,"gfx/optioshps.shapes"
+LoadShapes #prshpnum,"gfx/optiosmil.shapes"
+LoadShapes #t0txtnum,"gfx/titl0text.shapes"
+LoadShapes #t1txtnum,"gfx/titl1text.shapes"
+LoadShapes #prtxtnum,"gfx/persotext.shapes"
+LoadShapes #edtxtnum,"gfx/educatext.shapes"
+LoadShapes #extxtnum,"gfx/expertext.shapes"
+LoadShapes #ditxtnum,"gfx/dinfotext.shapes"
+For n=#t0txtnum To #t0txtnum+31:DecodeShapes n:Next
+For n=#t1txtnum To #t1txtnum+31:DecodeShapes n:Next
+LoadSprites #opsprnum,"gfx/optiotext.sprtes"
+LoadSprites #blsprnum,"gfx/optioball.sprtes"
+LoadMedModule 1,"sfx/flakey_dove.med"
+
+NEWTYPE.object		 ; this is structure is used
+	x.w:y.w					; for all moving objects
+	sx.w:sy.w				; screen x,y position
+	rt.w:rs.w				; rotation, rotation speed
+	sh.w:fl.w				; shape number, flag for onscreen
+End NEWTYPE
+
+Dim ##[$80B3] strs1.object(numstrs1-1):ld1.l=&strs1(1)
+Dim ##[$80B3] lins1.object(numlins1-1):ld2.l=&lins1(1)
+Dim ##[$80B3] dots1.object(numdots1-1):ld3.l=&dots1(1)
+sprit.object\x=0,0,0,0,0,0,0,0
+
+Dim coslup1.q(720),sinlup1.q(720)
+Dim coslup2.q(720),sinlup2.q(720),sinlup3.q(720)
+Dim scrtch1.q(720),scrtch2.q(720)
+Dim scrtch3.w(720),scrtch4.w(720):sc3.l=&scrtch3(0):sc4.l=&scrtch4(0)
+
+If Processor>0 Then Gosub initsincos
+Gosub inittistar
+Gosub initoplins
+Gosub initopdots
+Gosub freeloader
+If Processor=0 Then Gosub initsincos
+
+lmaxlen 0,480,500,3
+lmaxlen 1,480,500,3
+BitPlanesBitMap 0,2,$01:BitPlanesBitMap 1,3,$01
+BitPlanesBitMap 0,4,$02:BitPlanesBitMap 1,5,$02
+BitPlanesBitMap 0,6,$04:BitPlanesBitMap 1,7,$04
+BitPlanesBitMap 0,8,$03:BitPlanesBitMap 1,9,$03
+lmaxlen 10,256,272,3
+lmaxlen 11,256,272,3
+BitPlanesBitMap 10,12,$01:BitPlanesBitMap 11,13,$01
+BitPlanesBitMap 10,14,$02:BitPlanesBitMap 11,15,$02
+BitPlanesBitMap 10,16,$04:BitPlanesBitMap 11,17,$04
+BitPlanesBitMap 10,18,$03:BitPlanesBitMap 11,19,$03
+
+DecodePalette 0,32:DecodePalette 1,16:p0a.l=Peek.l(##[$80B8] SetCycle(0))
+DecodePalette 2,16:DecodePalette 3,16
+DecodePalette 4,16:DecodePalette 5,16
+DecodePalette 6,16:DecodePalette 7,16
+DecodePalette 8,256:DecodePalette 9,256
+DecodePalette 10,256:DecodePalette 11,256
+DecodePalette 12,256:DecodePalette 13,256
+DecodePalette 14,256:DecodePalette 15,256
+DecodePalette 16,8:DecodePalette 17,8
+DecodePalette 18,8:DecodePalette 19,8
+DecodePalette 20,8:DecodePalette 21,8
+DecodePalette 22,8
+
+InitCopList 0,46,250,$0013,8,32,-7
+InitCopList 1,46,250,$0036,8,32,-5
+DisplayAdjust 0,-8,16,-16,32,-48
+DisplayAdjust 1,-8,16,-16,32,-48:DisplayControls 1,4,0,0
+
+longmult 0,numstrs1+2:longmult 1,numstrs1+2
+Buffer 0,576*numsmils:Buffer 1,576*numsmils
+;////////////////////////////////////////////////////////////////;
+BLITZ:DisplayOff:Gosub initshapes:StartMedModule 1:BlitzKeys On
+;////////////////////////////////////////////////////////////////;
+.STATEMENTS
+;////////////////////////////////////////////////////////////////;
+Statement qcls1{bmptr.l}
+	; nice and quick processor bitmap clear
+	; for option 4 (dots) specifically.
+	MOVE.l d0,a0:ADDA#15512,a0:MOVE#258,d7
+	MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3
+	MOVEQ#0,d4:MOVEQ#0,d5:MOVEQ#0,d6:MOVE d0,a1
+	lop1:MOVEM.l d0-d6/a1,-(a0):SUBA#28,a0:DBRA d7,lop1
+	AsmExit
+End Statement
+
+Statement qcls2{bmptr.l}
+	; nice and quick processor bitmap clear
+	; for option 2 (lines) specifically.
+	MOVE.l d0,a0:ADDA#4032,a0:MOVEQ#125,d7
+	MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3
+	MOVEQ#0,d4:MOVEQ#0,d5:MOVEQ#0,d6:MOVE d0,a1
+	lop2:MOVEM.l d0-d6/a1,-(a0):DBRA d7,lop2
+	AsmExit
+End Statement
+
+Statement updatestrs1{ladd1.l,speed.w}
+	; dodgy inline code for title screen
+	; 3d stars
+	MOVE.l d0,a0:MOVE.l -28(a0),a0:MOVE d1,d3
+	s1_nxt:TST.l (a0):BEQ s1_fin:LEA 8(a0),a1
+			;
+			MOVE d3,d1:MOVE d3,d2
+			MULS (a1),d1:MULS 2(a1),d2:ASR.l #6,d1:ASR.l #6,d2
+			CMPI#8704,d1:BGT s1_xgt
+			CMPI#-8704,d1:BLT s1_xls:BRA s1_doy
+			s1_xgt:ADDI#-8704,d1:BRA s1_doy
+			s1_xls:ADDI#8704,d1:s1_doy:MOVE d1,(a1)
+			CMPI#18176,d2:BGT s1_ygt
+			CMPI#-18176,d2:BLT s1_yls:BRA s1_dos
+			s1_ygt:ADDI#-18176,d2:BRA s1_dos
+			s1_yls:ADDI#18176,d2:s1_dos:MOVE d2,2(a1)		;d1=x,d2=y
+			;
+			ASR#6,d1:ADDI#136,d1:MOVE d1,4(a1)					 ;d1=sx,d2,sy
+			ASR#6,d2:ADDI#142,d2:MOVE d2,6(a1)
+			CMPI#0,d1:BLT s1_clf:CMPI#256,d1:BGT s1_clf
+			CMPI#0,d2:BLT s1_clf:CMPI#272,d2:BGT s1_clf
+			MOVE#-1,14(a1)
+			;
+			SUBI#136,d1:BPL s1_xpos:NEG d1:s1_xpos			 ;distance calc
+			SUBI#142,d2:BPL s1_ypos:NEG d2:s1_ypos			 ;for scaling
+			CMP d1,d2:BEQ s1_kldg												;stars
+			BMI s1_ygtx:EXG d1,d2:s1_ygtx
+			TST d2:BNE s1_yne:BRA s1_szshp:s1_yne
+			SWAP d2:CLR d2:DIVU d1,d2:LSR#7,d2
+			ADD d2,d2:SWAP d1
+			DIVU s1_lval(pc,d2.w),d1:BRA s1_szshp
+			s1_kldg:MULU#27146,d1:SWAP d1:ADD d2,d1:BRA s1_szshp
+			s1_lval:IncBin "len.inc"
+			s1_szshp:CMPI #20,d1:BGT s1_nxsz1:MOVEQ #0,d1:BRA s1_dor
+			s1_nxsz1:CMPI #30,d1:BGT s1_nxsz2:MOVEQ #4,d1:BRA s1_dor
+			s1_nxsz2:CMPI #40,d1:BGT s1_nxsz3:MOVEQ #8,d1:BRA s1_dor
+			s1_nxsz3:CMPI #60,d1:BGT s1_nxsz4:MOVEQ#12,d1:BRA s1_dor
+			s1_nxsz4:CMPI #70,d1:BGT s1_nxsz5:MOVEQ#16,d1:BRA s1_dor
+			s1_nxsz5:MOVEQ#20,d1:s1_dor
+			;
+			MOVE 10(a1),d4:ADD 8(a1),d4:ANDI#15,d4:MOVE d4,8(a1):ASR#2,d4
+			ADD d4,d1:MOVE d1,12(a1):BRA s1_stf					;rotate stars
+			;
+			s1_clf:MOVE#0,14(a1):s1_stf									;onscreen flag
+			;
+			MOVE.l (a0),a0:BRA s1_nxt
+s1_fin:AsmExit
+End Statement
+
+Statement updatelins1{ladd2.l,xoffs.w,yoffs.w,lngap.w,randm.w}
+	; urgghh, this routine is for the 'dancing' lines
+	; in option 2, basically it's a quick? cos lookup
+	MOVE.l d0,a0:MOVE.l -28(a0),a0
+	LEA xyincrms,a2:LEA x1y1x2y2,a3
+	MOVE x1y1x2y2(pc),d0:ADD xyincrms(pc),d0:CMPI#1024,d0
+	BLT l1_stx1:MOVEQ#0,d0:MOVE d4,(a2):ADDQ#1,d4
+	l1_stx1:MOVE d0,(a3)
+	MOVE x1y1x2y2+2(pc),d0:ADD xyincrms+2(pc),d0:CMPI#1024,d0
+	BLT l1_sty1:MOVEQ#0,d0:MOVE d4,2(a2):ADDQ#1,d4
+	l1_sty1:MOVE d0,2(a3)
+	MOVE x1y1x2y2+4(pc),d0:ADD xyincrms+4(pc),d0:CMPI#1024,d0
+	BLT l1_stx2:MOVEQ#0,d0:MOVE d4,4(a2):ADDQ#1,d4
+	l1_stx2:MOVE d0,4(a3)
+	MOVE x1y1x2y2+6(pc),d0:ADD xyincrms+6(pc),d0:CMPI#1024,d0
+	BLT l1_sty2:MOVEQ#0,d0:MOVE d4,6(a2)
+	l1_sty2:MOVE d0,6(a3)
+	MOVE#0,l1_count
+	l1_nxt:TST.l (a0):BEQ l1_fin:LEA 8(a0),a1
+					 MOVE x1y1x2y2(pc),d4							 ;x1
+					 ADD d0,d4:ANDI#1022,d4:MOVE d1,d5
+					 ADD l1_colup(pc,d4),d5:MOVE d5,(a1)
+					 MOVE x1y1x2y2+2(pc),d4						 ;y1
+					 ADD d0,d4:ANDI#1022,d4:MOVE d2,d5
+					 ADD l1_colup(pc,d4),d5:MOVE d5,2(a1)
+					 MOVE x1y1x2y2+4(pc),d4						 ;x2
+					 ADD d0,d4:ADD d3,d4:ANDI#1022,d4:MOVE d1,d5
+					 ADD l1_colup(pc,d4),d5:MOVE d5,4(a1)
+					 MOVE x1y1x2y2+6(pc),d4						 ;y2
+					 ADD d0,d4:ADD d3,d4:ANDI#1022,d4:MOVE d2,d5
+					 ADD l1_colup(pc,d4),d5:MOVE d5,6(a1)
+					 ADDQ#3,l1_count:MOVE l1_count(pc),d0:LSL#3,d0
+				 MOVE.l (a0),a0:BRA l1_nxt
+	l1_fin:AsmExit
+	l1_count:Dc.w 0,0
+	x1y1x2y2:Dc.w 0,0,0,0
+	xyincrms:Dc.w 16,2,7,10
+	l1_colup:IncBin "clup.inc"
+End Statement
+
+Statement updatedots1{ladd3.l,colup.l,silup.l,time1.w,dtgap.w}
+	;some more dodgy assembly code for option 4 (dots)
+	;this moves some dots in a sort of expanding rotating
+	;circle way using another quick? sin/cos lookup
+	MOVE.l a4,-(a7):MOVE.l d0,a0:MOVE.l -28(a0),a0
+	LEA d1_x1x6,a1:MOVE.l d1,a2:MOVE.l d2,a3
+	MOVE d1_x1x6(pc),d0:ADDQ#1,d0:CMPI#400,d0
+	BLT d1_stx1:MOVEQ#0,d0:d1_stx1:MOVE d0,(a1)
+	MOVE d1_x1x6+2(pc),d0:ADDQ#2,d0:CMPI#400,d0
+	BLT d1_stx2:MOVEQ#0,d0:d1_stx2:MOVE d0,2(a1)
+	MOVE d1_x1x6+4(pc),d0:ADDQ#3,d0:CMPI#400,d0
+	BLT d1_stx3:MOVEQ#0,d0:d1_stx3:MOVE d0,4(a1)
+	MOVE d1_x1x6+6(pc),d0:ADDQ#4,d0:CMPI#400,d0
+	BLT d1_stx4:MOVEQ#0,d0:d1_stx4:MOVE d0,6(a1)
+	MOVE d1_x1x6+8(pc),d0:ADDQ#5,d0:CMPI#400,d0
+	BLT d1_stx5:MOVEQ#0,d0:d1_stx5:MOVE d0,8(a1)
+	MOVE d1_x1x6+10(pc),d0:ADDQ#6,d0:CMPI#400,d0
+	BLT d1_stx6:MOVEQ#0,d0:d1_stx6:MOVE d0,10(a1)
+	MOVEQ#0,d0:LEA d1_p1p6,a1:MOVEQ#5,d1
+	clexp:MOVE d0,(a1)+:DBRA d1,clexp:LEA d1_p1p6,a4
+	d1_nxt:TST.l (a0):BEQ d1_fin:LEA 8(a0),a1
+			;
+			MOVE 12(a1),d0
+			TST d0:BNE cas1
+			MOVE d1_x1x6(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6(pc),d2
+			MULS 0(a2,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a3,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,(a4):ADDI#8,(a4):BRA ecas
+			cas1
+			CMPI#1,d0:BNE cas2
+			MOVE d1_x1x6+2(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6+2(pc),d2
+			MULS 0(a3,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a2,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,2(a4):ADDI#8,2(a4):BRA ecas
+			cas2
+			CMPI#2,d0:BNE cas3
+			MOVE d1_x1x6+4(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6+4(pc),d2
+			MULS 0(a2,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a3,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,4(a4):ADDI#8,4(a4):BRA ecas
+			cas3
+			CMPI#3,d0:BNE cas4
+			MOVE d1_x1x6+6(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6+6(pc),d2
+			MULS 0(a3,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a2,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,6(a4):ADDI#8,6(a4):BRA ecas
+			cas4
+			CMPI#4,d0:BNE cas5
+			MOVE d1_x1x6+8(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6+8(pc),d2
+			MULS 0(a2,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a3,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,8(a4):ADDI#8,8(a4):BRA ecas
+			cas5
+			MOVE d1_x1x6+10(pc),d0:MOVE d0,d1
+			MOVE d3,d2:ADD d1_p1p6+10(pc),d2
+			MULS 0(a3,d2.w),d0:LSR.l#8,d0:MOVE d0,(a1)
+			MULS 0(a2,d2.w),d1:LSR.l#8,d1:MOVE d1,2(a1)
+			ADD d4,10(a4):ADDI#8,10(a4)
+			ecas
+			MOVE#-1,14(a1)
+			MOVE (a1),d0:CMPI#120,d0:BGT d1_clf:CMPI#-120,d0:BLT d1_clf
+			MOVE 2(a1),d0:CMPI#125,d0:BGT d1_clf:CMPI#-125,d0:BGT d1_fst
+			d1_clf:MOVE#0,14(a1):d1_fst
+			;
+			MOVE.l (a0),a0:BRA d1_nxt
+	d1_fin:MOVE.l (a7)+,a4:AsmExit
+	d1_x1x6:Dc.w 0,0,0,0,0,0
+	d1_p1p6:Dc.w 0,0,0,0,0,0
+End Statement
+
+Statement updateball1{sprad.l,randm.w}
+	; this is a simple bouncing ball routine
+	; used in options 1-4
+	MOVE.l d0,a0:MOVE (a0),d0:ADD 4(a0),d0
+	CMPI#56,d0:BLT b1_xls:CMPI#246,d0:BGT b1_xgt:BRA b1_stx
+	b1_xls:MOVEQ#56,d0:BRA b1_ngx
+	b1_xgt:MOVE#246,d0:b1_ngx:NEG 4(a0)
+	b1_stx:MOVE d0,(a0)
+	MOVE 2(a0),d0:MOVE 6(a0),d2:ADDQ#1,d2:ADD d2,d0:MOVE d2,6(a0)
+	CMPI#225,d0:BLT b1_sty
+	MOVE#225,d0:ADD#-10,d1:MOVE d1,6(a0)
+	b1_sty:MOVE d0,2(a0)
+	MOVE 12(a0),d0:ADDQ#1,d0:ANDI#15,d0:MOVE d0,12(a0)
+	AsmExit
+End Statement
+
+Statement initbitmps{xofst.w,yofst.w,btmap.w}
+	; draws white border lines
+	For bmp=0 To 1
+		Use lmaxlen btmap+bmp
+		BlitColl #bdshpnum,xofst,yofst
+		BlitColl #bdshpnum,xofst,yofst+248
+	Next
+End Statement
+
+Statement initpalets{palnm.b,redon.b,greon.b,bluon.b}
+	cl1=1:cl2=1:cl3=1:cnt=0
+	For n=0 To 127
+		If redon=0 Then cl1=0
+		If greon=0 Then cl2=0
+		If bluon=0 Then cl3=0
+		StopCycle palnm,n,cl1,cl2,cl3
+		cnt+1
+		If cnt>7
+			cnt=0
+			cl1=QLimit(cl1+1,0,15)
+			cl2=QLimit(cl2+1,0,15)
+			cl3=QLimit(cl3+1,0,15)
+		EndIf
+	Next
+	cl1=0:cl2=0:cl3=0:cnt=0
+	For n=128 To 255
+		If redon=0 Then cl1=15
+		If greon=0 Then cl2=15
+		If bluon=0 Then cl3=15
+		StopCycle palnm,n,15-cl1,15-cl2,15-cl3
+		cnt+1
+		If cnt>7
+			cnt=0
+			cl1=QLimit(cl1+1,0,15)
+			cl2=QLimit(cl2+1,0,15)
+			cl3=QLimit(cl3+1,0,15)
+		EndIf
+	Next
+End Statement
+
+Statement initsprits{clist.w}
+	;initialise bouncing ball and border lines
+	Shared sprit
+	sprit\x=55+Rnd(191),-25,1+Rnd(3),0,0,0,0
+	For n=1 To 7:StopCycle n,1,11,11,12:Next
+	For n=2 To 15:StopCycle 1,n,n,n,n:Next
+	For n=2 To 15:StopCycle 2,n,n,0,0:Next
+	For n=2 To 15:StopCycle 3,n,0,n,0:Next
+	For n=2 To 15:StopCycle 4,n,0,0,n:Next
+	For n=2 To 15:StopCycle 5,n,n,0,n:Next
+	For n=2 To 15:StopCycle 6,n,0,n,n:Next
+	For n=2 To 15:StopCycle 7,n,n,n,0:Next
+	DisplaySprite clist,#bdsprnum,19,0,0
+	DisplaySprite clist,#bdsprnum,269,0,1
+	DisplaySprite clist,#blsprnum,sprit\x,sprit\y,2
+End Statement
+
+Statement updatecols1{pl0ad.l,pl1ad.l}
+	; quick palette copy for changing sprite colours
+	; in sync to music
+	MOVE.l d0,a0:ADDQ#4,a0:ADD#192,a0
+	MOVE.l d1,a1:ADDQ#4,a1:MOVEQ#47,d7
+	cloop1:MOVE.l (a1)+,(a0)+:DBRA d7,cloop1:AsmExit
+End Statement
+
+Statement updatecols2{pl0ad.l,pl1ad.l}
+	; quick palette copy for changing background colours
+	; in sync to music
+	MOVE.l d0,a0:ADDQ#4,a0:ADD#96,a0
+	MOVE.l d1,a1:ADDQ#4,a1:MOVEQ#23,d7
+	cloop2:MOVE.l (a1)+,(a0)+:DBRA d7,cloop2:AsmExit
+End Statement
+;////////////////////////////////////////////////////////////////;
+.MAIN_LOOPS
+;////////////////////////////////////////////////////////////////;
+.cvtitle
+Gosub inittitle:ClrInt 5
+##[$80BB]
+	VWait:cnt.w+1
+	DisplayBitMap 0,db,16,16,db,17,17
+	db=1-db:Use lmaxlen 2+db:UnQueue db
+	updatestrs1{ld1.l,spd.w}
+	##[$80CA] strs1()
+	newmem strs1()
+	While globfree(strs1())
+		If \fl Then QBlit db,#tishpnum+\sh,\sx,\sy
+	Wend
+	Use lmaxlen 4+db
+	QBlit db,#t0txtnum+s.q,135,100
+	QBlit db,#t1txtnum+31-s.q,135,175
+	If cnt.w=400 Then spd.w+1:sv.q=0.6
+	If cnt.w=500 Then spd.w+1:sv.q=0.7
+	If cnt.w=600 Then spd.w+1:sv.q=0.8
+	If cnt.w=700 Then spd.w+1:sv.q=1
+	s.q+sv.q:If s.q>31 Then s.q=0
+	PlayMed
+;	Poke.w $dff180,$0ff
+##[$80BC] cnt.w=815 OR Joyb(1)<>0 OR RawStatus($44)
+SetInt 5:PlayMed:End SetInt
+DisplayOff
+Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
+;////////////////////////////////////////////////////////////////;
+os.b=Rnd(4):sy.w=36
+.options
+Gosub initoptns:ClrInt 5
+##[$80BB]
+	VWait:tim.w=QWrap(tim.w+4,0,359)
+	DisplayBitMap 0,db,fx.q,fy.q,db,bx.q,by.q
+	DisplaySprite 0,#opsprnum+1+s.q,100,sy.w,2
+	DisplaySprite 0,#opsprnum,160,120,3
+
+	fx.q=90+scrtch1(tim)
+	fy.q=110+sinlup1(tim)ASL4
+	bx.q=90+scrtch2(tim)
+	by.q=110+scrtch1(tim)
+	db=1-db:Use lmaxlen 4+db
+	##[$B206] 16,0,288,290,64,95+scrtch3(tim),2+db
+	blx.w=fx.q AND $fff0
+	BlitColl #bdshpnum,blx.w,fy.q
+	BlitColl #bdshpnum,blx.w,fy.q+248
+	s.q+0.5:If s.q>15 Then s.q=0
+	If mv=False
+		jy0.b=Joyy(1)
+		If RawStatus($4c) Then jy0.b=-1
+		If RawStatus($4d) Then jy0.b=1
+		If jy0.b<>0 Then mv=True
+	EndIf
+	If mv=True
+		If jy0.b=1 AND cnt.w<=13
+			sy.w+2:If sy.w>176 Then sy.w=64:cnt.w=14
+		EndIf
+		If jy0.b=-1 AND cnt.w<=13
+			sy.w-2:If sy.w<64 Then sy.w=176:cnt.w=14
+		EndIf
+		cnt.w+1:If cnt.w>20 Then cnt.w=0:mv=False
+	EndIf
+	PlayMed
+;	Poke $dff180,$f0f
+##[$80BC] (Joyb(1)<>0 OR RawStatus($44)) AND mv=False
+SetInt 5:PlayMed:End SetInt
+DisplaySprite 0,#opsprnum,0,-100,2
+DisplaySprite 0,#opsprnum,0,-100,3
+DisplayOff
+Select sy.w
+	Case 64:Goto option1
+	Case 92:VWait20:Goto option2
+	Case 120:VWait 30:Goto option3
+	Case 148:VWait 20:Goto option4
+	Case 176:VWait 30:Goto option5
+End Select
+;////////////////////////////////////////////////////////////////;
+.option1
+Gosub initoptn1:ClrInt 5
+##[$80BB]
+	VWait:tim.w=QWrap(tim.w+ti.b,0,359):If tim.w=180 Then act=True
+	DisplayBitMap 0,db,fx.q,fy.q,db,bx.q,by.q
+	DisplaySprite 0,#blsprnum+sprit\sh,sprit\x,sprit\y,2
+	If swt0.b AND txt=True
+		sc.b+1:If sc.b>7 Then sc.b=1
+		updatecols1{p0a.l,Peek.l(##[$80B8] SetCycle(sc.b))}
+		DisplayPalette 0,0:swt0.b=0
+	EndIf
+	If swt1.b
+		pl.b+1:If pl.b>11 Then pl.b=8
+		rg.b+1:If rg.b>3 Then rg.b=1
+		DisplayRainbow 0,rg.b,pl.b,rg.b-1:swt1.b=0
+	EndIf
+
+	fx.q=120+scrtch3(tim):fy.q=125+scrtch2(tim)
+	bx.q=120+scrtch2(tim):by.q=125+scrtch1(tim)
+	db=1-db:Use lmaxlen 4+db:UnQueue db
+	QBlit db,#bdshpnum,fx.q,fy.q
+	QBlit db,#bdshpnum,fx.q,fy.q+248
+	If txt=False AND act=True
+		xv.b+1:tx1.w+xv.b:tx2.w-xv.b:tx3.w+xv.b:tx4.w-xv.b
+		yv.b+1:yv2.b+2:ty1.w+yv.b:ty2.w+yv.b:ty3.w-yv2.b:ty4.w-yv2.b
+		If tx1>12
+			tx1.w=12:tx2.w=88:tx3.w=12:tx4.w=88
+			ty1.w=17:ty2.w=17:ty3.w=87:ty4.w=87
+			xv.b=-5-bnc.b:yv.b=-5-bnc.b:yv2.b=-10-bnc.b LSL1:bnc.b-2
+		EndIf
+		If bnc.b<-5 Then txt=True
+	EndIf
+	QBlit db,#prtxtnum,fx.q+tx1.w,fy.q+ty1.w
+	QBlit db,#prtxtnum+1,fx.q+tx2.w,fy.q+ty2.w
+	QBlit db,#prtxtnum+2,fx.q+tx3.w,fy.q+ty3.w
+	QBlit db,#prtxtnum+3,fx.q+tx4.w,fy.q+ty4.w
+	Use lmaxlen 2+db:UnBuffer db
+	For n=0 To numsmils-1
+		smlup.w=tim.w+n LSL3
+		smilx.w=fx.q+120+scrtch2(smlup)ASL1
+		smily.w=fy.q+125+coslup2(smlup)ASL7
+		BBlit db,#prshpnum,smilx.w,smily.w
+	Next
+	If txt=True Then updateball1{&sprit,-Int(Rnd(10))}
+
+	PlayMed
+	If GetMedInstr(0)=5 Then swt0=-1
+	If GetMedInstr(1)=3 Then swt1=-1
+;	Poke $dff180,$ff0
+##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+SetInt 5:PlayMed:End SetInt
+DisplaySprite 0,#blsprnum,0,-50,2
+DisplayOff
+Use lmaxlen 0:UnQueue 0:UnBuffer 0
+Use lmaxlen 1:UnQueue 1:UnBuffer 1
+Goto options
+;////////////////////////////////////////////////////////////////;
+.option2
+Gosub initoptn2:ClrInt 5
+##[$80BB]
+	VWait:tim.w=QWrap(tim.w+ti.b,0,359)
+	If tim=180 Then act=True:gap.w=10+Rnd(50)
+	DisplayBitMap 1,0,fx.q,0,10+db,0,0
+	DisplaySprite 1,#blsprnum+sprit\sh,sprit\x,sprit\y,2
+	If swt0.b AND txt=True
+		sc.b+1:If sc.b>7 Then sc.b=1
+		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+		DisplayPalette 1,0:swt0.b=0
+	EndIf
+	If swt1.b
+		pl.b+1:If pl.b>15 Then pl.b=9
+		rg.b+2:If rg.b>12 Then rg.b=10
+		DisplayRainbow 1,rg.b,pl.b,rg.b-9:swt1.b=0
+	EndIf
+
+	If txt=False AND act=True
+		If op2.b>0
+			fv.b+1:fx.q+fv.b
+			If fx.q>240 Then fx.q=240:fv.b=-6-bnc.b:bnc.b-2
+			If bnc.b<-6 Then txt=True
+		Else
+			fv.b+1:fx.q-fv.b
+			If fx.q<0 Then fx.q=0:fv.b=-6-bnc.b:bnc.b-2
+			If bnc.b<-6 Then txt=True
+		EndIf
+	EndIf
+
+	db=1-db:Use lmaxlen 12+db
+	qcls2{Peek.l(##[$80B8] lmaxlen(12+db)+8)}
+	qcls2{Peek.l(##[$80B8] lmaxlen(14+db)+8)}
+	qcls2{Peek.l(##[$80B8] lmaxlen(16+db)+8)}
+
+	xof.w=120+scrtch1(tim):yof.w=68+scrtch2(tim)
+	ran.w=Int(Rnd(10))
+	updatelins1{ld2.l,xof.w,yof.w,gap.w,12+ran.w}
+	##[$80CA] lins1()
+	newmem lins1()
+	While globfree(lins1())
+		Line \x,\y,\sx,\sy,1
+	Wend
+	xx1.w=xof-32 AND $fff0:If xx1.w<24 Then xx1.w=24
+	yy1.w=yof-32
+	Use lmaxlen 14+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w-32,yy1.w,12+db
+	Use lmaxlen 16+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w+32,yy1.w,12+db
+	If txt=True Then updateball1{&sprit,-ran.w}
+
+	PlayMed
+	If GetMedInstr(0)=5 Then swt0.b=-1
+	If GetMedInstr(1)=3 Then swt1.b=-1
+;	Poke.w $dff180,$00f
+##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+SetInt 5:PlayMed:End SetInt
+DisplaySprite 1,#blsprnum,0,-50,2
+DisplayOff
+Goto options
+;////////////////////////////////////////////////////////////////;
+.option3
+Gosub initoptn3:ClrInt 5
+##[$80BB]
+	VWait:tim.w=QWrap(tim.w+ti.b,0,359)
+	If tim.w=180 Then act=True
+	DisplayBitMap 1,10,0,8,db,120,0
+	DisplaySprite 1,#blsprnum+sprit\sh,sprit\x,sprit\y,2
+	If oswt1.b<>swt1.b
+		pl.b+1:If pl.b>6 Then pl.b=0
+		updatecols2{p0a,Peek.l(##[$80B8] SetCycle(16+pl.b))}
+	EndIf
+	If swt0 AND txt=True
+		sc.b+1:If sc.b>7 Then sc.b=1
+		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}:swt0.b=0
+	EndIf
+	DisplayPalette 1,0
+	Select swt1.b
+		Case 0
+			CustomSprites 1,&sinlup3(tim),&scrtch4(0),0
+		Case 1
+			CustomSprites 1,&scrtch2(tim),&scrtch4(0),0
+		Case 2
+			CustomSprites 1,&scrtch1(tim),&scrtch4(0),0
+		Case 3
+			CustomSprites 1,&scrtch2(tim),&scrtch4(0),0
+	End Select
+
+	db=1-db:Use lmaxlen db:UnQueue db
+	For n=0 To numbars1-1
+		QBlit db,#exshpnum,235+scrtch3(tim+n LSL2),0
+	Next
+
+	If txt=False AND act=True
+		Use lmaxlen 16
+		If op3.b>0
+			##[$B206] 16,ylin.w,208,2,16,ylin.w,17
+			ylin.w+2:If ylin.w>258 Then txt=True
+		Else
+			##[$B206] 16,ylin.w,208,2,16,ylin.w,17
+			ylin.w-2:If ylin.w<8 Then txt=True
+		EndIf
+	EndIf
+	If txt=True Then updateball1{&sprit,-Int(Rnd(10))}
+
+	PlayMed:oswt1.b=swt1.b
+	If GetMedInstr(0)=5 Then swt0.b=-1
+	If GetMedInstr(1)=3 Then swt1.b+1:If swt1.b>3 Then swt1.b=0
+;	Poke.w $dff180,$0f0
+##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+SetInt 5:PlayMed:End SetInt
+DisplaySprite 1,#blsprnum,0,-50,2
+DisplayOff
+Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
+Goto options
+;////////////////////////////////////////////////////////////////;
+.option4
+Gosub initoptn4:ClrInt 5
+##[$80BB]
+	VWait:tim.w+4:If tim.w>359 Then tim.w=0
+	If tim.w=180 Then act=True
+	cnt.w+1:If cnt.w>400 Then cnt.w=0:gap.w+gv.b
+	If gap.w>24 OR gap.w<4 Then gv.b=-gv.b:gap.w+gv.b
+	DisplayBitMap 0,db,8,8,db,bx.q,by.q
+	DisplaySprite 0,#blsprnum+sprit\sh,sprit\x,sprit\y,2
+	If swt0.b AND txt=True
+		sc.b+1:If sc.b>7 Then sc.b=1
+		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+		DisplayPalette 0,0:swt0.b=0
+	EndIf
+	If swt1.b AND txt=True
+		pl.b+1:If pl.b>10 Then pl.b=8
+		DisplayRainbow 0,1,pl,0:swt1.b=0
+		sh.b+1:If sh.b>5 Then sh.b=0
+	EndIf
+
+	bx.q=8+scrtch1(tim):by.q=8+scrtch2(tim)
+
+	updatedots1{ld3,sc3,sc4,tim,gap}
+	db=1-db:Use lmaxlen 2+db:qcls1{Peek.l (##[$80B8] lmaxlen(2+db)+8)}
+	##[$80CA] dots1()
+	newmem dots1()
+	While globfree(dots1())
+		If \fl
+			longdiv #dishpnum+sh,128+\x,133+\y
+			longdiv #dishpnum+sh,128-\x,133-\y
+		EndIf
+	Wend
+
+	If txt=False AND act=True
+		blv.b+1:bly.w-blv.b
+		If bly.w<26 Then bly.w=26:blv.b=-6-bnc.b:bnc.b-2
+		If bnc.b<-6 Then txt=True
+		Use lmaxlen 4+db
+		If bly.w>30 Then blo.b=21 Else blo.b=13
+		BlitColl #dishpnum+6,16,bly.w-blo.b
+		BlitColl #ditxtnum,16,bly.w
+		BlitColl #dishpnum+7,16,bly.w+79
+		BlitColl #bdshpnum,0,256
+	EndIf
+	If txt=True Then updateball1{&sprit,-Int(Rnd(10))}
+
+	PlayMed
+	If GetMedInstr(0)=5 Then swt0.b=-1
+	If GetMedInstr(1)=3 Then swt1.b=-1
+;	Poke.w $dff180,$f00
+##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+SetInt 5:PlayMed:End SetInt
+DisplaySprite 0,#blsprnum,0,-50,2
+DisplayOff
+Goto options
+;////////////////////////////////////////////////////////////////;
+.option5
+End
+;////////////////////////////////////////////////////////////////;
+.INITROUTINES
+;////////////////////////////////////////////////////////////////;
+.inittitle
+	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	initbitmps{0,16,4}
+
+	spd.w=67:sv.q=0.5:cnt.w=0
+
+	initpalets{8,0,0,1}:initpalets{9,1,0,1}
+	initpalets{10,1,1,0}
+	For n=0 To 255:StopCycle 11,n,15,15,15:Next
+	For n=0 To 2:StopCycle 11,n,11,11,12:StopCycle 11,248+n,11,11,12:Next
+	For n=5 To 7:StopCycle 0,n,11,11,12:Next:StopCycle 0,17,11,11,12
+
+	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,16,16,0,17,17
+	initsprits{0}
+	DisplayPalette 0,0
+	DisplayRainbow 0,1,8,0
+	DisplayRainbow 0,2,9,1
+	DisplayRainbow 0,3,10,2
+	DisplayRainbow 0,4,11,3
+Return
+;////////////////////////////////////////////////////////////////;
+.initoptns
+	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	Use lmaxlen 2
+	For x.b=0 To 13:For y.b=0 To 13
+		BlitColl #opshpnum+os.b,x.b LSL 5,y.b LSL 5
+	Next:Next
+	os.b+1:If os.b>4 Then os.b=0
+	Use lmaxlen 3:##[$B206] 0,0,480,500,0,0,2
+
+	op0.b=1-op0.b
+	If op0.b>0
+		For n=0 To 720
+			scrtch1(n)=coslup2(n)*16
+			scrtch2(n)=sinlup2(n)*16
+			scrtch3(n)=coslup1(n)*16
+		Next
+	Else
+		For n=0 To 720
+			scrtch1(n)=coslup2(n)*16
+			scrtch2(n)=coslup1(n)*16
+			scrtch3(n)=coslup1(n)*16
+		Next
+	EndIf
+	tim.w=0:fx.q=98:fy.q=118:bx.q=98:by.q=118
+	sy.w=QWrap(sy+28,64,176)
+
+	initpalets{8,1,0,0}:initpalets{9,0,0,1}
+	initpalets{10,1,0,1}:initpalets{11,0,1,0}
+	initpalets{12,1,1,0}:initpalets{13,0,1,1}
+	initpalets{14,1,1,1}
+	For n=8 To 14
+		StopCycle n,0,11,11,12:StopCycle n,1,11,11,12
+		StopCycle n,248,11,11,12:StopCycle n,249,11,11,12
+	Next
+
+	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,fx.q,fy.q,0,bx.q,by.q
+	initsprits{0}
+	For n=0 To 8 Step 4
+		StopCycle 0,21+n,15,15,15:StopCycle 0,22+n,3,3,3:StopCycle 0,23+n,6,6,6
+	Next
+	DisplayPalette 0,0
+	DisplayRainbow 0,1,8,0
+	DisplayRainbow 0,2,9,1
+	DisplayRainbow 0,3,10,2
+	DisplayRainbow 0,4,11,3
+	DisplayRainbow 0,5,12,4
+	DisplayRainbow 0,6,13,5
+	DisplayRainbow 0,7,14,6
+Return
+;////////////////////////////////////////////////////////////////;
+.initoptn1
+	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	Use lmaxlen 2
+	For n=220 To 0 Step -4
+		cl.b=1-cl.b
+		Circlef 240,250,n,cl.b
+	Next
+	Use lmaxlen 3:##[$B206] 0,0,480,500,0,0,2
+
+	op1.b=1-op1.b
+	If op1.b>0
+		ti.b=-2
+		For n=0 To 720
+			scrtch1(n)=coslup1(n)*48
+			scrtch2(n)=sinlup1(n)*48
+			scrtch3(n)=Int(coslup2(n)*48)
+		Next
+		r1.b=12:g1.b=0:b1.b=0:r2.b=0:g2.b=12:b2.b=0
+		r3.b=0:g3.b=0:b3.b=12:r4.b=9:g4.b=0:b4.b=10
+	Else
+		ti.b=2
+		For n=0 To 720
+			scrtch1(n)=coslup2(n)*48
+			scrtch2(n)=sinlup1(n)*48
+			scrtch3(n)=Int(sinlup2(n)*48)
+		Next
+		r1.b=11:g1.b=12:b1.b=0:r2.b=0:g2.b=9:b2.b=9
+		r3.b=10:g3.b=0:b3.b=10:r4.b=12:g4.b=5:b4.b=0
+	EndIf
+	tim.w=0:swt0.b=0:swt1.b=0:act=False:txt=False
+	pl.b=8+Int(Rnd(3)):rg.b=1+Int(Rnd(2))
+	fx.q=120:fy.q=125:bx.q=120:by.q=125
+	xv.b=0:yv.b=0:yv2.b=0:bnc.b=5
+	tx1.w=-70:ty1.w=-65:tx2.w=170:ty2.w=-65
+	tx3.w=-70:ty3.w=251:tx4.w=170:ty4.w=251
+
+	For n=0 To 255:StopCycle 8,n,r1.b,g1.b,b1.b:Next
+	For n=0 To 255:StopCycle 9,n,r2.b,g2.b,b2.b:Next
+	For n=0 To 255:StopCycle 10,n,r3.b,g3.b,b3.b:Next
+	For n=0 To 255:StopCycle 11,n,r4.b,g4.b,b4.b:Next
+	For n=0 To 255:StopCycle 12,n,15,15,15:Next
+	For n=0 To 255:StopCycle 13,n,15,15,15:Next
+	For n=0 To 255:StopCycle 14,n,15,15,15:Next
+	For n=0 To 255:StopCycle 15,n,15,15,15:Next
+	For n=12 To 15
+		StopCycle n,0,11,11,12:StopCycle n,1,11,11,12
+		StopCycle n,248,11,11,12:StopCycle n,249,11,11,12
+	Next
+
+	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,fx.q,fy.q,0,bx.q,by.q
+	initsprits{0}:sc.b=1+Int(Rnd(6))
+	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	DisplayPalette 0,0
+	Select Int(Rnd(6))
+		Case 0
+			pl1.b=8:pl2.b=9:pl3.b=10
+		Case 1
+			pl1.b=11:pl2.b=8:pl3.b=9
+		Case 2
+			pl1.b=10:pl2.b=9:pl3.b=8
+		Case 3
+			pl1.b=9:pl2.b=10:pl3.b=11
+		Case 4
+			pl1.b=11:pl2.b=9:pl3.b=10
+		Case 5
+			pl1.b=8:pl2.b=11:pl3.b=10
+		Case 6
+			pl1.b=9:pl2.b=11:pl3.b=8
+	End Select
+	DisplayRainbow 0,1,pl1.b,0
+	DisplayRainbow 0,2,pl2.b,1
+	DisplayRainbow 0,3,pl3.b,2
+	DisplayRainbow 0,4,12,3
+	DisplayRainbow 0,5,13,4
+	DisplayRainbow 0,6,14,5
+	DisplayRainbow 0,7,15,6
+Return
+;////////////////////////////////////////////////////////////////;
+.initoptn2
+	Use lmaxlen 0:BlockScroll:Boxf 0,0,480,1,1:Boxf 0,248,480,250,1
+	Use lmaxlen 10:BlockScroll:Use lmaxlen 11:BlockScroll
+
+	op2.b=1-op2.b
+	If op2.b>0
+		ti.b=-1
+		For n=0 To 720
+			scrtch1(n)=Int(coslup2(n)*64)
+			scrtch2(n)=Int(sinlup1(n)*32)
+			scrtch3(n)=Int(coslup2(n)*32)
+		Next
+		fx.q=0:Use lmaxlen 6:longdiv #edtxtnum,240,17
+	Else
+		ti.b=1
+		For n=0 To 720
+			scrtch1(n)=Int(coslup1(n)*64)
+			scrtch2(n)=Int(sinlup1(n)*32)
+			scrtch3(n)=Int(sinlup2(n)*32)
+		Next
+		fx.q=240:Use lmaxlen 6:longdiv #edtxtnum,0,17
+	EndIf
+	tim.w=0:swt0=0:swt1=0:act=False:txt=False
+	pl.b=9+Int(Rnd(6)):rg.b=10:gap.w=10+Rnd(50)
+	fv.b=0:bnc.b=6
+
+	StopCycle 0,1,11,11,12
+	For n=2 To 7:StopCycle 0,n,15,15,15:Next
+	For n=1 To 7:StopCycle 0,8+n,15,0,8:Next
+	##[$CE18] 8,0,255,255,0,0,255,0,255
+	##[$CE18] 9,0,255,0,255,0,0,0,255
+	##[$CE18] 10,0,255,0,0,255,0,255,255
+	##[$CE18] 11,0,255,255,255,0,255,0,0
+	##[$CE18] 12,0,255,0,255,0,255,255,0
+	##[$CE18] 13,0,255,0,0,255,255,255,0
+	##[$CE18] 14,0,255,128,0,255,0,255,0
+	##[$CE18] 15,0,255,0,255,255,255,0,0
+
+	DisplayOn:CreateDisplay 1:DisplayBitMap 1,0,fx.q,0,10,0,0
+	initsprits{1}:sc.b=1+Int(Rnd(6))
+	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	DisplayPalette 1,0
+	DisplayRainbow 1,9,8,0
+	DisplayRainbow 1,10,9+Rnd(6),1
+	DisplayRainbow 1,11,8,2
+	DisplayRainbow 1,12,9+Rnd(6),3
+	co$=Mki$($10a)+Mki$(-66)
+	DisplayUser 1,125,co$,4
+Return
+;////////////////////////////////////////////////////////////////;
+.initoptn3
+	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	Use lmaxlen 10:BlockScroll:Use lmaxlen 11:BlockScroll
+	initbitmps{0,8,12}
+
+	op3.b=1-op3.b
+	If op3.b>0
+		ti.b=-2:ylin.w=0
+		For n=0 To 720
+			scrtch1(n)=sinlup2(n)
+			scrtch2(n)=coslup1(n)
+			scrtch3(n)=Int(sinlup2(n)*coslup2(n)*80)
+			scrtch4(n)=-34
+		Next
+	Else
+		ti.b=2:ylin.w=258
+		For n=0 To 720
+			scrtch1(n)=sinlup1(n)
+			scrtch2(n)=coslup2(n)
+			scrtch3(n)=Int(coslup1(n)*sinlup2(n)*80)
+			scrtch4(n)=-34
+		Next
+	EndIf
+	Use lmaxlen 17:longdiv #extxtnum,16,25
+	tim.w=0:cnt.w=0:swt0=0:swt1=0:act=False:txt=False
+
+	StopCycle 0,1,11,11,12
+	For n=2 To 7:StopCycle 0,n,15,15,15:Next
+	For n=0 To 6:StopCycle 16+n,0,0,0,0:Next
+	For n=1 To 7:StopCycle 16,n,4+n,4+n,0:Next
+	For n=1 To 7:StopCycle 17,n,0,4+n,4+n:Next
+	For n=1 To 7:StopCycle 18,n,4+n,0,4+n:Next
+	For n=1 To 7:StopCycle 19,n,4+n,2+n,n:Next
+	For n=1 To 7:StopCycle 20,n,n,4+n,2+n:Next
+	For n=1 To 7:StopCycle 21,n,2+n,n,4+n:Next
+	For n=1 To 7:StopCycle 22,n,2+n,6+n,4+n:Next
+	##[$CE18] 8,0,255,144,0,112,80,0,255
+
+	DisplayOn:CreateDisplay 1:DisplayBitMap 1,10,0,8,0,120,0
+	initsprits{1}:sc.b=1+Int(Rnd(6)):bc.b=16+Int(Rnd(6))
+	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	updatecols2{p0a,Peek.l(##[$80B8] SetCycle(bc.b))}
+	DisplayPalette 1,0
+	DisplayRainbow 1,10,8,3
+	co$=Mki$($180)+Mki$(0)
+	DisplayUser 1,125,co$,4
+Return
+;////////////////////////////////////////////////////////////////;
+.initoptn4
+	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	initbitmps{8,8,4}
+
+	op4.b=1-op4.b
+	If op4.b>0
+		For n=0 To 720
+			scrtch1(n)=coslup2(n)*4
+			scrtch2(n)=sinlup2(n)*4
+			scrtch3(n)=Int(coslup2(n)*128)
+			scrtch4(n)=Int(sinlup2(n)*128)
+		Next
+	Else
+		For n=0 To 720
+			scrtch1(n)=coslup2(n)*4
+			scrtch2(n)=sinlup2(n)*4
+			scrtch3(n)=Int(sinlup2(n)*128)
+			scrtch4(n)=Int(coslup2(n)*128)
+		Next
+	EndIf
+	tim.w=0:cnt.w=0:swt0.b=0:swt1.b=0:act=False:txt=False
+	pl.b=8+Int(Rnd(2)):sh.b=Int(Rnd(5))
+	gap.w=4:gv.b=4
+	bx.q=10:by.q=10:blv.b=0:bly.w=256:bnc.b=6
+
+	##[$CE18] 8,0,255,255,0,128,0,255,0
+	##[$CE18] 9,0,255,0,0,255,255,0,255
+	##[$CE18] 10,0,255,255,255,0,255,0,0
+	##[$CE18] 11,0,255,0,255,255,255,0,0
+	For n=12 To 15:For m=0 To 255:StopCycle n,m,15,15,15:Next:Next
+	For n=12 To 15
+		StopCycle n,0,11,11,12:StopCycle n,1,11,11,12
+		StopCycle n,248,11,11,12:StopCycle n,249,11,11,12
+	Next
+
+	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,8,8,0,bx.q,by.q
+	initsprits{0}:sc.b=1+Int(Rnd(6))
+	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	DisplayPalette 0,0
+	DisplayRainbow 0,1,8+Rnd(2),0
+	DisplayRainbow 0,2,11,1
+	DisplayRainbow 0,3,11,2
+	DisplayRainbow 0,4,12,3
+	DisplayRainbow 0,5,13,4
+	DisplayRainbow 0,6,14,5
+	DisplayRainbow 0,7,15,6
+Return
+;////////////////////////////////////////////////////////////////;
+.OUTSIDE_LOOP
+;////////////////////////////////////////////////////////////////;
+.initshapes
+	Use lmaxlen 8:BlockScroll 1
+	GetaShape #bdsprnum,0,0,16,250
+	GetaSprite 0,0
+	Use lmaxlen 2:BlockScroll 1
+	GetaShape #bdshpnum,0,0,256,2
+	Use lmaxlen 0:BlockScroll
+	Point 0,0,1:Point 1,0,2:Point 2,0,3
+	Point 3,0,4:Point 4,0,5:Point 5,0,6
+	Point 6,0,7:Point 7,0,6:Point 8,0,5
+	Point 9,0,4:Point 10,0,3:Point 11,0,2:Point 12,0,1
+	GetaShape #exshpnum,0,0,12,1:BlockScroll
+	Use lmaxlen 2:BlockScroll 1
+	GetaShape #dishpnum+0,0,0,1,1
+	GetaShape #dishpnum+1,0,0,2,2
+	GetaShape #dishpnum+2,0,0,3,3
+	GetaShape #dishpnum+3,0,0,4,4
+	GetaShape #dishpnum+4,0,0,3,3
+	GetaShape #dishpnum+5,0,0,2,2
+	##[$CD10] #dishpnum+6,224,21,1
+	##[$CD10] #dishpnum+7,224,39,1
+	For n=#dishpnum To #dishpnum+5:DecodeShapes n:Next
+	Use lmaxlen 2:BlockScroll 1
+	Boxf 6,6,28,28,0
+	GetaShape #opshpnum+4,0,0,32,32
+	Use lmaxlen 0:BlockScroll
+Return
+;////////////////////////////////////////////////////////////////;
+AMIGA
+.initloader
+	LoadAnim 0,"gfx/yyloading.animat",0
+	LoadMedModule 0,"sfx/cheesy_organ_tune.med":StartMedModule 0
+	DecodePalette 1,4:##[$CE19] 0,1
+	allocst 0,0,0,320,200,2,$0000,"",0,0:FadePalette 0
+	lmaxlen 0,320,200,2:lmaxlen 1,320,200,2
+	InitAnim 0,0
+	AbsMouse 328,216
+Return
+;////////////////////////////////////////////////////////////////;
+.freeloader
+	For nn=1 To 0 Step -0.01
+		vol.q=nn*64
+		If nn<0.1 Then VWait2 Else VWait1
+		DuplicatePalette 1,0,nn:FadePalette 0
+		SetMedVolume vol.q
+	Next
+	StopMed:ClrInt 5
+	Free MedModule 0:Free Anim 0
+	For n=0 To 1:Free lmaxlen n:Free SetCycle n:Next
+	Free allocst 0
+Return
+;////////////////////////////////////////////////////////////////;
+.initsincos
+	For n=0 To 720
+		ang1.f=n*##[$80BA]/90
+		ang2.f=n*##[$80BA]/180
+		ang3.f=n*##[$80BA]/45
+		coslup1(n)=HCos(ang1)
+		sinlup1(n)=HSin(ang1)
+		coslup2(n)=HCos(ang2)
+		sinlup2(n)=HSin(ang2)
+		sinlup3(n)=HSin(ang3)*2
+	Next
+Return
+;////////////////////////////////////////////////////////////////;
+.inittistar
+	##[$80CA] strs1()
+	While globalloc(strs1())
+		\x=(Rnd(272)-136)*64
+		\y=(Rnd(282)-141)*64
+		\sx=136:\sy=142
+		\rt=Int(Rnd(15))
+		If Rnd(1)<0.5 Then \rs=1+Int(Rnd(3)) Else \rs=-1-Int(Rnd(3))
+		\sh=0:\fl=0
+	Wend
+Return
+;////////////////////////////////////////////////////////////////;
+.initoplins
+	##[$80CA] lins1()
+	While globalloc(lins1())
+		\x=0,0,0,0,0,0,0,0
+	Wend
+Return
+;////////////////////////////////////////////////////////////////;
+.initopdots
+	n=0:tp.w=0
+	##[$80CA] dots1()
+	While globalloc(dots1())
+		If n>=(numdots1/6)*1 Then tp.w=1 Else tp.w=0
+		If n>=(numdots1/6)*2 Then tp.w=2
+		If n>=(numdots1/6)*3 Then tp.w=3
+		If n>=(numdots1/6)*4 Then tp.w=4
+		If n>=(numdots1/6)*5 Then tp.w=5
+		\x=0,0,0,0,0,0,tp.w,0
+		n+1
+	Wend
+Return

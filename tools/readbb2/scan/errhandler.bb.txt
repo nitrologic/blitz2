@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/errhandler.bb
++NEWTYPE .ezrequest
+	size.l:flags.l:title$:mess$:gad$
+End NEWTYPE
+
+DEFTYPE .ezrequest errz
+
+##[$80B4]
+	##[$80BD] d0,err.l
+;	errz\size=20,0,"RUNTIME ERROR",Peek$(err),"QUIT|CONT"
+;	If AutoRequest_
+	err$=Mki$(40)+Chr$(12)+Peek$(err)+Mki$(0)
+	##[$FF8B] 0,&err$,20:End
+End ##[$80B4]
+
+Dim a(10)
+a(11)=12

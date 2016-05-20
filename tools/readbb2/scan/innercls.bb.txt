@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/InnerCls.bb
++; ; innercls example; Screen 0,3Window 0,0,0,320,200,0,"Not a GIMMEZEROZERO window",0,1 InnerCls 2MouseWait 

@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Else.bb
++; ; if...else...endif program example ; NPrint "Type a number from 1 to 10" a=Edit(3) If a<5 NPrint "Your number is less than 5" Else NPrint "Your number is greater than or equal to 5"EndIf MouseWait  

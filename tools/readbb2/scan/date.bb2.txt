@@ -1,0 +1,26 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/utility/date.bb2
++;
+; $VER: date.bb2 40.0 (03.03.94)
+;
+
+;/*****************************************************************************/
+
+
+XInclude"exec/types.bb2"
+
+
+;/*****************************************************************************/
+
+
+NEWTYPE.ClockData
+sec.w
+min.w
+hour.w
+mday.w
+month.w
+year.w
+wday.w
+End NEWTYPE
+
+
+;/*****************************************************************************/

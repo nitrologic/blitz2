@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/battmembitsamix.bb2
++;
+; $VER: battmembitsamix.h 40.0 (01.03.94)
+;
+
+
+;/*
+; * See Amix documentation for these bit definitions
+; *
+; * Bits 32 to 63, inclusive
+; */

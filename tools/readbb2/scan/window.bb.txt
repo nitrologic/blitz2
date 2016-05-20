@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Window.bb
++; ; window on workbench example program ; WbToScreen 0						;use workbench screen WBenchToFront_					 ;bring it to front. Window 0,2,2,600,160,$1|$2|$4|$8,"A Window",0,1 MouseWait WBenchToBack_ 

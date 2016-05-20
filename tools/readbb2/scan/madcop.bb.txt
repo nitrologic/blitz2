@@ -1,0 +1,91 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/madcop.bb
++
+BLITZ
+lmaxlen 0,640,200,2
+
+*mybm.bitmap=##[$80B8] lmaxlen(0)
+lbmptr0.l=*mybm\_data[0]
+lbmptr1.l=*mybm\_data[1]
+
+;Now build the copperlist from hell...
+
+co$=""
+;Intial setup and stuff...
+co$+Mki$($092)+Mki$($0038)								;DDFSTRT
+co$+Mki$($094)+Mki$($00d0)								;DDFSTOP
+co$+Mki$($08e)+Mki$($2c81)								;DIWSTRT
+co$+Mki$($090)+Mki$($f4c1)								;DIWSTOP
+co$+Mki$($180)+Mki$($0000)								;COLOR00
+co$+Mki$($182)+Mki$($00f0)								;COLOR01
+co$+Mki$($184)+Mki$($0f00)								;COLOR02
+co$+Mki$($186)+Mki$($000f)								;COLOR03
+co$+Mki$($108)+Mki$($0000)								;BPL1MOD
+co$+Mki$($102)+Mki$($0000)								;BPLCON1
+;Wait for horizontal flyback (starts at $0f)
+co$+Mki$((43*$100)|($12*2)|1)+Mki$($fffe)
+;Build the upper half of the display (all lores)
+For x.w=0 To 99
+	lbptr0.l=lbmptr0+(x*80)
+	lbptr1.l=lbmptr1+(x*80)
+	co$+Mki$($100)+Mki$($2000)								;BPLCON0 = lores 2 planes
+	bptrh.w=lbptr0/$10000
+	bptrl.w=lbptr0-(bptrh*$10000)
+	co$+Mki$($0e0)+Mki$(bptrh)								;BPL1PTH
+	co$+Mki$($0e2)+Mki$(bptrl)								;BPL1PTL
+	bptrh.w=lbptr1/$10000
+	bptrl.w=lbptr1-(bptrh*$10000)
+	co$+Mki$($0e4)+Mki$(bptrh)								;BPL2PTH
+	co$+Mki$($0e6)+Mki$(bptrl)								;BPL2PTL
+;Wait for horizontal flyback to begin
+	co$+Mki$(((44+x+1)*$100)|($12*2)|1)+Mki$($fffe)
+Next x
+
+;Now build lower half of display, half in lores 4 colours
+For x.w= 100 To 199
+	lbptr0.l=lbmptr0+(x*80)
+	lbptr1.l=lbmptr1+(x*80)
+	co$+Mki$($100)+Mki$($2000)								;BPLCON0 = lores 2 planes
+	bptrh.w=lbptr0/$10000
+	bptrl.w=lbptr0-(bptrh*$10000)
+	co$+Mki$($0e0)+Mki$(bptrh)								;BPL1PTH
+	co$+Mki$($0e2)+Mki$(bptrl)								;BPL1PTL
+	bptrh.w=lbptr1/$10000
+	bptrl.w=lbptr1-(bptrh*$10000)
+	co$+Mki$($0e4)+Mki$(bptrh)								;BPL2PTH
+	co$+Mki$($0e6)+Mki$(bptrl)								;BPL2PTL
+;Now wait for hpos $34 and change into hires 2 planes
+	co$+Mki$(((x+44)*$100)|($34*2)|1)+Mki$($fffe)
+	co$+Mki$($100)+Mki$($a000)								;BPLCON0 =hires 2 planes
+;Wait for horizontal flyback to build the next scanline
+	co$+Mki$(((x+44+1)*$100)|($12*2)|1)+Mki$($fffe)
+Next x
+co$+Mki$((243*$100)|($12*2)|1)+Mki$($fffe)
+co$+Mki$($100)+Mki$($2000)								;BPLCON0 = lores 2 planes
+co$+Mki$($fffffffe)
+CustomCop co$,44
+
+BitMapOutput 0
+BlockScroll
+;First, box in the lores area (note L shape)
+Line 0,1,319,1,2
+Line 319,1,319,99,2
+Line 80,99,319,99,2
+Line 80,99,80,199,2
+Line 0,199,80,199,2
+Line 0,1,0,199,2
+
+;Now box in the hires area
+Box 100,100,526,199,1
+
+Colour 2
+Locate 10,6:Print "Low resolution area"
+Locate 1,15:Print "Low"
+Locate 1,17:Print "Res"
+Locate 1,19:Print "Area"
+
+Colour 3
+Locate 15,16:Print "High resolution area"
+
+MouseWait
+AMIGA
+

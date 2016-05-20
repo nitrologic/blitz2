@@ -1,0 +1,55 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/3D_Box.bb2
++;
+; 3D box - Joop Damen
+;
+
+BLITZ
+lmaxlen 0,320,256,1
+lmaxlen 1,320,256,1
+Slice 0,44,320,256,$fff8,1,8,32,320,320
+Show 0
+Use lmaxlen 0
+Green 1,15,15,15
+
+DIST=300 : ZOM=900
+XF1=-100 : YF1=-100
+XF2=100 : YF2=100
+ZD=100
+
+Mouse On
+While Joyb(0)=0
+			VWait
+			Show db:db=1-db:Use lmaxlen db:BlockScroll 0
+			PHI+.02
+			ZOM=200
+			;
+			CPHI=HCos(PHI)*128
+			SPHI=HSin(PHI)*128
+			;
+			;
+			ZP1=(ZD*CPHI-XF1*SPHI)/128
+			XP1=(ZD*SPHI+XF1*CPHI)/128
+			ZP2=(ZD*CPHI-XF2*SPHI)/128
+			XP2=(ZD*SPHI+XF2*CPHI)/128
+			;
+			X1=160+(XP1*ZOM)/(DIST+ZP1)
+			Y1=128+(YF1*ZOM)/(DIST+ZP1)
+			X2=X1
+			Y2=128+(YF2*ZOM)/(DIST+ZP1)
+			X3=160+(XP2*ZOM)/(DIST+ZP2)
+			Y3=128+(YF2*ZOM)/(DIST+ZP2)
+			X4=X3
+			Y4=128+(YF1*ZOM)/(DIST+ZP2)
+
+			; Draw line
+
+			Line X1,Y1,X2,Y2,1
+			Line X2,Y2,X3,Y3,1
+			Line X3,Y3,X4,Y4,1
+			Line X4,Y4,X1,Y1,1
+Wend
+End
+
+
+
+

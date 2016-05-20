@@ -1,0 +1,615 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/chunky/ed.bb
++;
+; 3D editor
+;
+
+; rb-click switch planes	rb-drag move plane
+; lb-click select verticy lb-drag move verticy
+
+Dim sh.w(512)
+Print "HELLO"
+
+Statement mygetashape{n,x0,y0,x1,y1}
+	If x0>x1 Then ##[$80C9] x0,x1
+	If y0>y1 Then ##[$80C9] y0,y1
+	GetaShape n,x0,y0,x1-x0+1,y1-y0+1
+	Handle n,191-x0,97-y0
+End Statement
+
+Macro p 191+(`1-`3)*10,98+(`1+`3-`2-`2)*3:End Macro
+
+lmaxlen 1,384,180,1
+
+doverticy:
+	Circlef 4,3,4,3,1:GetaShape 5,0,0,13,6:Handle 5,3,2
+
+doyzplane:
+	BlockScroll
+	For i=-8 To 8
+		Line !p{0,i,-8},!p{0,i,8,0},1		 ;yz
+		Line !p{0,-8,i},!p{0,8,i,0},1
+	Next
+	mygetashape{2,!p{0,-8,8},!p{0,8,-8}}
+
+dozxplane:
+	BlockScroll
+	For i=-8 To 8
+		Line !p{i,0,-8},!p{i,0,8},3			;zx
+		Line !p{-8,0,i},!p{8,0,i},3
+	Next
+	GetaShape 3,0,49,384,97:Handle 3,191,48
+
+doxyplane:
+	BlockScroll
+	For i=-8 To 8
+		Line !p{i,-8,0},!p{i,8,0},1			;xy
+		Line !p{-8,i,0},!p{8,i,0},1
+	Next
+	mygetashape{4,!p{-8,8,0},!p{8,-8,0}}
+
+;TestShape ?myshape
+
+##[$CD10] 1,384,198,4
+CludgeBitMap 1,1
+Use lmaxlen 1:BlockScroll 1
+
+; hires overscan display (704x280)
+; 86x86 chunky window
+
+DEFTYPE .w
+
+ps=2:chw=74:chh=110		 ;size of chunky
+chc=chw+chw/32+1+2
+ww=74:wh=74:ox=6			 ;size of 3d window
+
+MOVE #$8400,$dff096
+
+Gosub setuppointer
+Gosub setuppalette
+lmaxlen 0,704,280,7
+Gosub builddisplay
+Gosub setupui
+Goto main
+
+.builddisplay:
+	ccc.l=CustomChunkySize(chw,chh)
+	InitCopList 0,32,280,$13107,8,256,ccc
+	InitCopList 1,32,280,$13107,8,256,ccc
+	DisplayAdjust 0,8,-16,0,-48,8
+	DisplayAdjust 1,8,-16,0,-48,8
+	DisplayPalette 0,0:DisplayBitMap 0,0,47,0
+	DisplayPalette 1,0:DisplayBitMap 1,0,47,0
+	CustomChunky 0,0,ps,chw,chh,ps,wh
+	CustomChunky 1,0,ps,chw,chh,ps,wh
+	Return
+
+.setuppalette
+	DecodePalette 0,256:##[$80C8] cols
+	For i=0 To 6
+		Read r,g,b:StopCycle 0,i,r,g,b:StopCycle 0,128+i,r,g,b
+	Next
+
+	StopCycle 0,17,15,8,0
+
+	Return
+
+cols:
+	Data 0,0,0,12,10,10,5,5,5,15,15,15
+	Data 3,3,3,12,12,12,12,1,2
+
+.setuppointer
+	##[$CD10] 0,32,32,2
+	CludgeBitMap 0,0
+	Handle 0,5,5
+	##[$D089] 0,?iff
+	GetaSprite 0,0
+	Return
+
+.setupui:
+	##[$BA82] 0,0,64
+	##[$BA97] 0,3,2,1,3
+	##[$BA84] 0,0,0,0,706,280,0
+	##[$BA84] 0,1,4,2,ww*ps*2+4,wh*ps+2,12
+	##[$BA84] 0,2,4,154,ww*ps*2+4,124,0
+	##[$BA84] 0,3,22,156,260,66,8
+	For i=0 To 2
+		##[$BA84] 0,4+i,8+i*16,224,14,52,6
+	Next
+	##[$BA84] 0,10,306,2,396,11,0,"SIMONS 3D EDITOR"
+	##[$BA84] 0,11,306,14,396,63,0
+	##[$BA84] 0,12,306,78,396,200,12
+;	AddBox 0,20,310,16,388,11,0,"MESSAGE CENTRE"
+
+	##[$BA84] 0,20,310,16,96,11,2,"ADD/DELETE|SELECT/MOVE"
+	##[$BA84] 0,21,310,28,96,11,12,"DRAG PLANE"
+	##[$BA84] 0,22,310,40,96,11,2,"YZ PLANE|XZ PLANE|XY PLANE"
+	##[$BA84] 0,23,310,52,96,11,0,"TEST"
+	##[$BA84] 0,24,310,64,96,11,0,"TEST"
+
+	##[$BA84] 0,31,410,16,96,11,12,"X ROTATE"
+	##[$BA84] 0,32,410,28,96,11,12,"Y ROTATE"
+	##[$BA84] 0,33,410,40,96,11,12,"Z ROTATE"
+
+	##[$BA84] 0,40,510,16,96,11,12,"GRAB ALL"
+	##[$BA84] 0,41,510,28,96,11,12,"GRAB PLANE"
+;	AddBox 0,42,510,40,96,11,12,"Z ROTATE"
+
+	##[$BA84] 0,50,610,16,86,11,12,"TESTSHAPE"
+
+	Return
+
+iff:IncBin "crosshair.iff"
+
+;----------------------------------------------------------------------
+
+NEWTYPE .vert
+	x.w:y:z
+	sx.w:sy
+	flag.w
+End NEWTYPE
+
+.main:
+	;
+	##[$D312] ?myshape				 ;&sh(0)
+	;
+	Dim ##[$80B3] v.vert(128)
+	Dim fpos(3)
+	fpos(0)=-8:fpos(1)=-8:fpos(2)=-8
+	;
+	BLITZ:Mouse On:MouseArea 0,0,704,280:BlitzKeys On
+	Boxf 0,0,100,100,1
+	SetInt 5
+		If ##[$BA96]
+			DisplaySprite db,0,MouseX-48,MouseY,0
+		Else
+			DisplaySprite db,0,-100,0,0
+		EndIf
+		fr.q+1
+	End SetInt
+	Gosub drawpage
+	Gosub setup3d
+	Gosub drawframe
+	;
+	##[$80BB]
+		CreateDisplay db
+		VWait
+		be=##[$BA92]
+		fr=0:db=1-db:RenderToChunky db:;Use ????? db
+		If be=2 AND ##[$BA8F]=21 Then Gosub indrag		 ;BitMapOutput 0:Locate 0,0:Print "HELLO"
+		If be=2 AND ##[$BA8F]=12 Then Gosub inframe
+		If be=-1 AND ##[$BA8F]=22 Then Gosub changeframe
+		If be=1
+			If ##[$BA8F]=31 Then Gosub rotatex
+			If ##[$BA8F]=32 Then Gosub rotatey
+			If ##[$BA8F]=33 Then Gosub rotatez
+			If ##[$BA8F]=50 Then Gosub formatshape
+		EndIf
+		Gosub draw3d
+	##[$80BC] RawStatus($45)			;Joyb(0)<>0
+	;
+	End
+
+
+rotatex:
+	newmem v():##[$80CA] v()
+	While globfree(v()):##[$80C9] \y,\z:\z=-\z:Wend
+	Gosub drawframe:Return
+
+rotatey:
+	newmem v():##[$80CA] v()
+	While globfree(v()):##[$80C9] \x,\z:\x=-\x:Wend
+	Gosub drawframe:Return
+
+rotatez:
+	newmem v():##[$80CA] v()
+	While globfree(v()):##[$80C9] \x,\y:\y=-\y:Wend
+	Gosub drawframe:Return
+
+;Macro p 191+(`1-`3)*10,98+(`1+`3-`2-`2)*3:End Macro
+
+DEFTYPE .w vx,vy,vz
+
+.inframe:
+	x.q=MouseX-320-191-4:x=x/10
+	y.q=MouseY-79-98-4:y=-y/3
+	Use lmaxlen 1:iframe=frame
+retry:
+	Select iframe
+		Case 0
+			vx=fpos(0):vz=vx-x:vy=(x+y)ASR 1+vz
+		Case 1
+			vy=fpos(1)
+			vz=(vy+vy-x-y) ASR 1
+			vx=x+vz+1
+		Case 2
+			vz=fpos(2)
+			vx=x+vz+1
+			vy=(vz+vz+x+y) ASR 1
+	End Select
+	vx AND $ffff
+	vy AND $ffff
+	vz AND $ffff
+	If vx<-8 OR vx>8 OR vy<-8 OR vy>8 OR vz<-8 OR vz>8
+		iframe+1:If iframe=3 Then iframe=0
+		If iframe<>frame Then Goto retry Else Return
+	EndIf
+	frame=iframe:##[$BA8A] 22,frame:##[$BA86] 22
+	newmem v():##[$80CA] v()
+	While globfree(v())
+		If \x=vx AND \y=vy AND \z=vz
+			freelast v():##[$80BE] While:Gosub drawframe:Return
+		EndIf
+	Wend
+	If globalloc(v())
+		v()\x=vx,vy,vz
+	EndIf
+	Gosub drawframe
+	Return
+
+.changeframe
+	frame=##[$BA8B](22)
+	Goto drawframe
+
+.indrag
+	Select frame
+		Case 0:bx.q=##[$BA98](21)
+		Case 1:bx.q=-##[$BA99](21)
+		Case 2:bx.q=-##[$BA98](21)
+	End Select
+	bx=bx ASL 13
+	fpos(frame)=QLimit(fpos(frame)+bx,-8,8)
+	Goto drawframe
+
+.drawframe:
+	Use lmaxlen 1:BlockScroll 1:BlitMode CookieMode
+	Select frame
+		Case 0
+			longdiv 3,!p{0,fpos(1),0},2
+			longdiv 4,!p{0,0,fpos(2)},2
+			longdiv 2,!p{fpos(0),0,0},1
+			For i=-4 To 4 Step 4
+				Line !p{fpos(0),-8,i},!p{fpos(0),8,i},2
+				Line !p{fpos(0),i,-8},!p{fpos(0),i,8},2
+			Next
+		Case 1
+			longdiv 2,!p{fpos(0),0,0},2
+			longdiv 4,!p{0,0,fpos(2)},2
+			longdiv 3,!p{0,fpos(1),0},1
+			For i=-4 To 4 Step 4
+				Line !p{i,fpos(1),-8},!p{i,fpos(1),8},2
+				Line !p{-8,fpos(1),i},!p{8,fpos(1),i},2
+			Next
+		Case 2
+			longdiv 2,!p{fpos(0),0,0},2
+			longdiv 3,!p{0,fpos(1),0},2
+			longdiv 4,!p{0,0,fpos(2)},1
+			For i=-4 To 4 Step 4
+				Line !p{i,-8,fpos(2),},!p{i,8,fpos(2)},2
+				Line !p{-8,i,fpos(2)},!p{8,i,fpos(2)},2
+			Next
+	End Select
+	newmem v():##[$80CA] v()
+	While globfree(v())
+		n=1
+		If frame=0 AND \x=fpos(0) Then n=4
+		If frame=1 AND \y=fpos(1) Then n=4
+		If frame=2 AND \z=fpos(2) Then n=4
+		longdiv 5,!p{\x,\y,\z},n
+		Line !p{\x,\y,\z},!p{\x,fpos(1),\z},6
+;		Line !p{\x,\y,\z},!p{fpos(0),\y,\z},6
+;		Line !p{\x,\y,\z},!p{\x,\y,fpos(2)},6
+	Wend
+	##[$FF22]
+	Use lmaxlen 0:MOVE#-1,$dff074:BlitMode $7ca:longdiv 1,320,79
+	Return
+
+.drawpage:
+	Use lmaxlen 0:BitMapOutput 0:##[$BA85]
+	For x=0 To ww-1:dx=x*ps*2+ox:Boxf dx,3,dx+ps*2-1,2+wh*ps,255-x:Next
+	For x=0 To 63:dx=x*ps*2+24:Boxf dx,157,dx+3,220,255-x:Next
+	;
+	For y=0 To 15
+		For x=0 To 15
+			c=Rnd(4096)
+			For i=0 To 3:For j=0 To 1
+				Use CopList j:ChunkyVlin x*4+i,77+y*2,78+y*2,c
+			Next j,i
+		Next
+	Next
+	;
+	Return
+
+	NEWTYPE.obj
+		x.w
+		y.w
+		z.w
+		xr.w
+		yr.w
+		zr.w
+		f.w ;flags
+	End NEWTYPE
+
+.setup3d
+	;
+	Dim ##[$80B3] o.obj(256)
+	For zz.l=-1024 To 1024 Step 512
+	For xx.l=-1024 To 1024 Step 512
+	If AddLast(o())
+		no+1
+		o()\x=xx
+		o()\y=0
+		o()\z=zz
+		;
+	EndIf
+	Next xx,zz
+	Dim p.w(100)
+	WindowSize3D ww,wh,6
+	cy=-128
+	Return
+
+.draw3d
+	;
+	Camera3D cx,cy,cz,cxr,cyr,czr
+	Horizon3D 0,0		;4,5
+	;
+	newmem o()
+	While globfree(o())
+		If o()\f
+			freelast o()
+		Else
+			Matrix3D 0,o()\x,o()\y,o()\z,o()\xr,o()\yr,o()\zr
+			fltoqu 0,0
+			o()\xr-40
+			o()\yr+20
+			o()\zr-30
+		EndIf
+	Wend
+	;
+	ocx=cx:ocy=cy:ocz=cz
+	;
+	jx=Joyx(1)+RawStatus($4f)-RawStatus($4e)
+	jy=Joyy(1)+RawStatus($4c)-RawStatus($4d)
+	;
+	cyr+jx LSL 8
+	;
+	Angle3D 0,cxr,cyr,czr
+	;
+	cx+XRot3D(0,-jy LSL 5)
+	cy+YRot3D(0,-jy LSL 5)
+	cz+ZRot3D(0,-jy LSL 5)
+	;
+	Render3D
+	;
+	Return
+
+;-----------------------------------------------------------------
+
+NEWTYPE .face
+	a.w:b:c
+	act.w
+	orient.w
+End NEWTYPE
+
+.formatshape:
+	;
+	Dim vert.vert(64)
+	Dim face.face(64)
+	;
+	newmem v():##[$80CA] v()	 ;index points from editor
+	nv=0
+	While globfree(v())
+		vert(nv)\x=\x,-\y,\z:nv+1
+	Wend
+	;
+	nv-1
+	;
+	If nv<4 Then Return
+	;
+	cent.vert\x=(vert(0)\x+vert(1)\x+vert(2)\x+vert(3)\x)/4
+	cent.vert\y=(vert(0)\y+vert(1)\y+vert(2)\y+vert(3)\y)/4
+	cent.vert\z=(vert(0)\z+vert(1)\z+vert(2)\z+vert(3)\z)/4
+	;
+	face(0)\a=0,1,2:face(0)\act=0
+	face(1)\a=0,1,3:face(1)\act=0
+	face(2)\a=0,2,3:face(2)\act=0
+	face(3)\a=1,2,3:face(3)\act=0
+	;
+	vert=3:face=3
+	;
+	For mytt=4 To nv:vert=mytt:bigpig=mytt:Gosub addpoint:Next
+	;
+	Gosub makeshape
+	;
+	##[$D312] &sh(0)
+	;
+	Return
+
+DEFTYPE .w
+
+Function.q mydot{*a.vert,*b.vert}
+	Function Return (*a\x**b\x+*a\y**b\y+*a\z**b\z)
+End Statement
+
+Statement scalar{*dest.vert,*a.vert,*b.vert}
+##[$80CA] *dest
+	\x=*a\y**b\z-*a\z**b\y
+	\y=*a\z**b\x-*a\x**b\z
+	\z=*a\x**b\y-*a\y**b\x
+End Statement
+
+Statement minus{*dest.vert,*a.vert,*b.vert}
+	##[$80CA] *dest
+	\x=*a\x-*b\x
+	\y=*a\y-*b\y
+	\z=*a\z-*b\z
+End Statement
+
+.addpoint
+
+	oldface=face:nf=0
+	For fa=0 To oldface
+		*f.face=face(fa)
+		If *f\act=0
+			v1=*f\a:v2=*f\b:v3=*f\c
+;			*e1.edge=edge(*f\a)
+;			*e2.edge=edge(*f\b)
+;			*e3.edge=edge(*f\c)
+;			v1.w=*e1\a:v2.w=*e3\a:v3.w=*e3\b
+			minus{&vec1.vert,&vert(v1),&vert(v2)}
+			minus{&vec2.vert,&vert(v1),&vert(v3)}
+			scalar{&vec3.vert,&vec1,&vec2}
+
+			minus{&vec1.vert,&vert(v1),&vert(bigpig)}
+			minus{&vec2.vert,&vert(v1),&cent}
+
+;			Stop
+;			If mydot{&vec1,&vec3}=0 Then Stop
+;			If mydot{&vec2,&vec3}=0 Then Stop
+
+			If Sgn(mydot{&vec1,&vec3})<>Sgn(mydot{&vec2,&vec3})	;haha outside
+				*f\act=-1
+				face+1:face(face)\a=v1,v2,bigpig:face(face)\act=0
+				face+1:face(face)\a=v1,v3,bigpig:face(face)\act=0
+				face+1:face(face)\a=v2,v3,bigpig:face(face)\act=0
+;				edge+1:edge(edge)\a=v1,bigpig ,-1
+;				edge+1:edge(edge)\a=v2,bigpig ,-1
+;				edge+1:edge(edge)\a=v3,bigpig ,-1
+			EndIf
+		EndIf
+	Next
+
+	For fa=0 To face		;cull
+		*f.face=face(fa)
+		If *f\act=0
+			v1=*f\a:v2=*f\b:v3=*f\c
+;			*e1.edge=edge(*f\a)
+;			*e2.edge=edge(*f\b)
+;			*e3.edge=edge(*f\c)
+;			v1.w=*e1\a:v2.w=*e3\a:v3.w=*e3\b
+			minus{&vec1.vert,&vert(v1),&vert(v2)}
+			minus{&vec2.vert,&vert(v1),&vert(v3)}
+			scalar{&vec3.vert,&vec1,&vec2}
+
+			minus{&vec2.vert,&vert(v1),&cent}
+			For bigpig=0 To vert
+				If (v1<>bigpig) AND (v2<>bigpig) AND (v3<>bigpig)
+					minus{&vec1.vert,&vert(v1),&vert(bigpig)}
+					If Sgn(mydot{&vec1,&vec3})<>Sgn(mydot{&vec2,&vec3}) Then *f\act=-1
+				EndIf
+			Next
+			;
+			If *f\act=0 Then nf+1
+			;
+		EndIf
+	Next
+
+Return
+
+
+makeshape:
+	;
+	n=0:sh(n)=nv+1:n+1:mu=10
+	;
+	##[$80CA] vert(i)
+	;
+	For i=0 To nv
+		sh(n)=\x*mu:sh(n+1)=\y*mu:sh(n+2)=\z*mu:sh(n+3)=0:n+4
+	Next
+	;
+	sh(n)=1:sh(n+1)=-1:n+2	;poly group, origin
+	;
+	##[$80CA] face(i)
+	;
+	sh(n)=nf+1:n+1:ccc=1
+	;
+	For i=0 To face
+		If \act=0
+
+			minus{&vec1.vert,&vert(\a),&vert(\b)}
+			minus{&vec2.vert,&vert(\a),&vert(\c)}
+			scalar {&vec3,&vec1,&vec2}
+			minus{&vec1.vert,&vert(\a),&cent}
+			If mydot{&vec3,&vec1}>0
+				##[$80C9] \b,\c
+			EndIf
+
+			sh(n+0)=3
+			sh(n+1)=\a
+			sh(n+2)=\b
+			sh(n+3)=\c
+			sh(n+4)=\a
+			sh(n+5)=-1;Rnd(8)
+			sh(n+6)=ccc			 ;Rnd(5)+3
+			n+7:ccc+1 ;:If ccc=8 Then ccc=3
+		EndIf
+	Next
+	sh(n)=0
+	;
+;	AMIGA
+;	If WriteFile(0,"ram:test")
+;		WriteMem 0,&sh(0),256
+;		CloseFile 0
+;	EndIf
+;	End
+	;
+	Return
+
+;newtype.shape3d
+;
+;00.l : pointer to shape data (or 0)
+;04.w : length of shape data in bytes
+;06.w : visible radius of shape
+;
+;-----8-----;
+
+;newtype.vert
+;
+;00.w : x.w
+;02.w : y.w
+;04.w : z.w
+;06.w : flags.w - <> 0=recursive shape draw : lo byte=angleid, hi=shape#
+;
+;-----8-----;
+
+;newtype.poly
+;
+;00.w : # verts in poly
+;02.w : vertices numbers[n]
+;??.w : vertice 1 repeated
+;??.w : clockwise colour
+;??.w : anticlockwise colour
+
+;newtype.polygroup
+;
+;00.w : origin vert for z sort
+;02.w : # polys in polygroup
+;polys.poly[n]
+
+#l=92
+
+myshape
+;
+Dc 8	;8 verts
+	Dc -l,-l-l,-l,0
+	Dc l,-l-l,-l,0
+	Dc l,0,-l,0
+	Dc -l,0,-l,0
+	Dc -l,-l-l,l,0
+	Dc l,-l-l,l,0
+	Dc l,0,l,0
+	Dc -l,0,l,0
+
+Dc 1	;1 poly group
+	Dc -1		;origin of this polygroup
+
+;	Dc 1
+;		Dc 4 ,0,1,2,3,0, 2,1
+
+	Dc 6		;number of polys in this polygroup
+		Dc 4, 0,1,2,3,0, -1,1 ;#verts, verts, vert1, anticolour, colour
+		Dc 4, 1,5,6,2,1, -1,2
+		Dc 4, 5,4,7,6,5, -1,3
+		Dc 4, 4,0,3,7,4, -1,4
+		Dc 4, 4,5,1,0,4, -1,5
+
+Dc 0	;0 collision spheres

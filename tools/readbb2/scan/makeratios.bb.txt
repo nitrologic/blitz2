@@ -1,0 +1,30 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKERATIOS.BB
++
+##[$80C8] ratios
+Print "dc.l",Chr$(9)
+For l=0 To 6
+		Read rat.q
+		irat.q=1/rat
+		r.l=Peek.l(&rat)
+		i.l=Peek.l(&irat)
+		Print "$",Right$(Hex$(r),6),","
+Next
+NPrint ""
+
+##[$80C8] ratios
+Print "dc.l",Chr$(9)
+For l=0 To 6
+		Read rat.q
+		irat.q=1/rat
+		r.l=Peek.l(&rat)
+		i.l=Peek.l(&irat)
+		Print "$",Right$(Hex$(i),6),","
+Next
+NPrint ""
+
+MouseWait
+
+
+ratios:
+Data.q 0
+Data.q 3,4,5,6,7,8

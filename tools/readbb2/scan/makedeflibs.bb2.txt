@@ -1,0 +1,57 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/makedeflibs.bb2
++DEFTYPE.l
+;
+;program to create a 'blitz2:deflibs' file based on 'blitzlibs:#?/' libs
+;
+If ReadMem(0,"blitz2:deflibs")=0
+	NPrint "Error creating blitz2:deflibs":End
+EndIf
+;
+l.l=##[$FE0A]("blitzlibs:",-2)
+If l=0
+	NPrint "Error 'locking' blitzlibs:":End
+EndIf
+;
+e.l=##[$FE97](260,1)
+e2.l=##[$FE97](260,1)
+;
+##[$FE0D] l,e
+;
+While ##[$FE0E](l,e)
+	If Peek.l(e+4)>=0	;dir ?
+		d$="blitzlibs:"+Peek$(e+8)
+		l2=##[$FE0A](&d$,-2)
+		If l2=0
+			NPrint "Error 'locking' ",d$:##[$FE0B] l:CloseFile 0:KillFile "blitz2:deflibs"
+			Goto freemem
+		EndIf
+		NPrint "":NPrint "Scanning directory : ",d$:NPrint ""
+		##[$FE0D] l2,e2
+		While ##[$FE0E](l2,e2)
+			If Peek.l(e2+4)<0	 ;file?
+				f$=LCase$(Peek$(e2+8))
+				If Right$(f$,5)<>".info"
+					f$=d$+"/"+f$
+					If WriteMem(1,f$)
+						NPrint "Converting library : ",f$
+						FileInput 1:FileOutput 0
+						Print Mkl$(FileSeek(1))
+						Print Inkey$(FileSeek(1))
+						CloseFile 1:DefaultOutput
+					Else
+						NPrint "Error reading file ",f$
+						##[$FE0B] l:##[$FE0B] l2:CloseFile 0:KillFile "blitz2:deflibs"
+						Goto freemem
+					EndIf
+				EndIf
+			EndIf
+		Wend
+		##[$FE0B] l2
+	EndIf
+Wend
+FileOutput 0:Print Mkl$(0):DefaultOutput
+##[$FE0B] l
+
+CloseFile 0
+
+freemem:##[$FE99] e,260:##[$FE99] e2,260

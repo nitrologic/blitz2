@@ -1,0 +1,46 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/vehicles/makeiff.bb
++casestrcomp 0,"sega.palette"
+allocst 0,4
+ScreensBitMap 0,0
+FadePalette 0
+
+px=0:py=0:n=0
+
+Read a$
+
+##[$80BB]
+	LoadBank 0,a$
+	car.l=Bank(0)+(400-16)*288
+	For n=0 To 15
+		For xx=0 To 16 Step 8
+			For y=0 To 23
+				For x=0 To 3
+					bb.b=Peek.b(car):car+1
+
+					c=(bb LSR 4)AND15:If c<>0 Then If c<8 Then c=4+c/2 Else c=11+(c-8)/2
+					Point px+xx+x+x,py+y,c
+					c=bb AND 15:If c<>0 Then If c<8Then c=4+c/2 Else c=11+(c-8)/2
+					Point px+xx+x+x+1,py+y,c
+				Next
+			Next
+		Next
+		px+24:If px=312 Then px=0:py+24:car+288
+	Next
+	Read a$
+##[$80BC] a$="*"
+
+MouseWait
+
+SaveScreen 0,"ram:cars.iff"
+
+End
+
+Data.s vw.sega
+Data.s f1.sega
+Data.s porsche.sega
+Data.s truck.sega
+Data.s midget.sega
+Data.s mini.sega
+Data.s cow.sega
+Data.s camaro.sega
+Data.s *

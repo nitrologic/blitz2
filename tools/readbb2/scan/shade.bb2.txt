@@ -1,0 +1,85 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/shade.bb2
++DEFTYPE.l
+
+;mounts.bin file:
+;
+;starts with table of 256 info's for each 16 wide column
+;
+;00.w y of start of blit.
+;02.w offset of above
+;04.w bltsize of blit.
+;06.w offset to bitmap data
+;
+NEWTYPE.info
+y.w
+o.w
+bltsize.w
+offset.w
+End NEWTYPE
+
+Dim i.info(255)
+
+Dim bp.w(32768)
+
+lmaxlen 0,4096,256,2
+
+LoadBitMap 0,"mounts.iff",0
+
+BLITZ
+
+Slice 0,44,320,256,$fff8,2,8,32,4096,4096
+
+Use SetCycle 0
+
+Green 0,8,0,0
+
+Show 0
+
+For x=4095 To 0 Step -1
+For y=0 To 255
+If Joyb(0) Then End
+If Cls(x,y)
+	p1=Cls(x-1,y)
+	p2=Cls(x+1,y)
+	p3=Cls(x-2,y)
+	p4=Cls(x+2,y)
+	p5=Cls(x-3,y)
+	p6=Cls(x+3,y)
+	If p2<1
+		Point x,y,3
+		If p1>0 AND y&1=1
+			Point x-1,y,3
+		EndIf
+		If p3>0 AND y&3=0
+			Point x-2,y,3
+		EndIf
+		If p5>0 AND y&7=0
+			Point x-3,y,3
+		EndIf
+	EndIf
+	If p1<1
+		Point x,y,1
+		If p2>0 AND y&1=1
+			Point x+1,y,1
+		EndIf
+		If p4>0 AND y&3=0
+			Point x+2,y,1
+		EndIf
+		If p6>0 AND y&7=0
+			Point x+3,y,1
+		EndIf
+	EndIf
+EndIf
+Next y,x
+
+Green 0,0,0,0
+
+While Joyb(0)=0
+	VWait
+	Show 0,bx,0
+	bx=QWrap(bx+Joyx(1)LSL 3,0,4096)
+Wend
+
+AMIGA
+
+SaveBitmap 0,"mounts2.iff",0

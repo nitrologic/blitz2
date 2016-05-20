@@ -1,0 +1,129 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/readgame.bb2
++
+DEFTYPE.l
+
+p=##[$FEC9]("potgo.resource")
+NPrint p
+
+GetReg a6,p:MOVE.l #-1,d0:JSR -6(a6):##[$80BD] d0,b
+NPrint Hex$(b)
+
+While Joyb(0)=0
+	GetReg a6,p
+	BSR Game1Lck
+	##[$80BD] d0,t
+	NPrint Hex$(t)
+Wend
+
+GetReg a6,p:MOVE.l #-1,d0:JSR -12(a6):##[$80BD] d0,b
+
+End
+
+Game1Lck
+			 MOVEA.L #$DFF000,A3
+			 MOVEA.L #$BFE001,A4
+			 MOVE.W	#7,D4
+			 BSET		D4,$200(A4)
+			 BCLR		D4,(A4)
+			 MOVE		#$a000,$dff034
+			 MOVEA.L #$DFF016,A0
+			 MOVE.W	#$4000,D1
+			 MOVEQ	 #0,D3
+			 MOVEQ	 #6,D0
+loop:	TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 TST.B	 (A4)
+			 MOVE.W	(A0),D2
+			 BSET		D4,(A4)
+			 BCLR		D4,(A4)
+			 AND.W	 D1,D2
+			 BNE		 skip
+			 BSET		D0,D3
+skip:	DBF		 D0,loop
+			 ;
+			 MOVE		#$3000,$dff034
+			 BCLR		D4,$200(A4)
+			 LSL.W	 #1,D3
+			 SWAP		D3
+			 MOVE.W	$C(A3),D1
+			 MOVE.W	D1,D0
+			 LSR.W	 #1,D0
+			 EOR.W	 D0,D1
+			 AND.W	 #$101,D1
+			 AND.W	 #$101,D0
+			 ROR.B	 #1,D0
+			 ROR.B	 #1,D1
+			 LSR.W	 #7,D0
+			 LSR.W	 #5,D1
+			 OR.W		D1,D0
+			 OR.L		D3,D0
+			 OR.L		#$10000000,D0
+			 RTS
+
+CELSE
+
+Game1Lck
+	 MOVEM.L D2-D4/A2-A4/A6,-(A7)
+	 LEA		 $A0(A6),A2
+	 BSET		#1,-$33(A2)
+	 BNE.L	 *+$A2			 ; 0104D0A2
+	 MOVEA.L #$DFF000,A3
+	 MOVEA.L #$BFE001,A4
+	 MOVE.W	#7,D4
+	 BSET		#2,-$33(A2)
+	 BSET		D4,$200(A4)
+	 BCLR		D4,(A4)
+	 MOVEA.L $58(A6),A6
+	 MOVE.W	#$2000,D0
+	 MOVE.W	#$3000,D1
+	 JSR		 -$12(A6)
+	 MOVEA.L #$DFF016,A0
+	 MOVE.W	#$4000,D1
+	 MOVEQ	 #0,D3
+	 MOVEQ	 #6,D0
+	 BRA.S	 *+8				 ; 0104D046
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 TST.B	 (A4)
+	 MOVE.W	(A0),D2
+	 BSET		D4,(A4)
+	 BCLR		D4,(A4)
+	 AND.W	 D1,D2
+	 BNE.S	 *+4				 ; 0104D05C
+	 BSET		D0,D3
+	 DBF		 D0,*-$1C		; 0104D040
+	 MOVE.W	#$3000,D0
+	 MOVE.W	D0,D1
+	 JSR		 -$12(A6)
+	 BCLR		D4,$200(A4)
+	 BCLR		#2,-$33(A2)
+	 LSL.W	 #1,D3
+	 SWAP		D3
+	 MOVE.W	$C(A3),D1
+	 MOVE.W	D1,D0
+	 LSR.W	 #1,D0
+	 EOR.W	 D0,D1
+	 AND.W	 #$101,D1
+	 AND.W	 #$101,D0
+	 ROR.B	 #1,D0
+	 ROR.B	 #1,D1
+	 LSR.W	 #7,D0
+	 LSR.W	 #5,D1
+	 OR.W		D1,D0
+	 OR.L		D3,D0
+	 OR.L		#$10000000,D0
+	 BCLR		#1,-$33(A2)
+	 MOVEM.L (A7)+,D2-D4/A2-A4/A6
+	 RTS
+
+CELSE

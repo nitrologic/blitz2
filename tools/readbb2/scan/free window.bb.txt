@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Free Window.bb
++; ; free window example program ; WBenchToFront_				 ;bring workbench screen to front of view. WbToScreen 0						;use workbench as screen 0Window 0,0,0,300,100,$f,"Click to say bye bye",0,1MouseWait Free Window 0 

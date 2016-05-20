@@ -1,0 +1,188 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/x-word/X-word.bb
++;------------------------------------------------------------------
+; WordHacker V 0.91	(first release for B_U_M8!)	Written in Blitz
+;
+; This program is used to help solve Cross Word Puzzels.
+; You Enter the Letters that you know into the string gadget,
+; put spaces in for the letters you do not know,	then press
+; search and all the possible matches will be displayed in the
+; listview gadget.
+;
+; Some people might have problems useing this program because
+; it uses heapsish of memory and some people are inpatient and
+; can stand the wait for the word list to load.	That's life.
+;
+; If you want to contact me then here's my Internet Address,
+; brettc@spaz.manawatu.planet.co.nz	(I think that's the right one)
+;
+;------------------------------------------------------------------
+#about = 0					; about gadget zero
+
+#noc		= 36				; max number of characters in search word
+										; from gadgets 1 to #noc are for search word
+
+#match	= #noc+1		; string gadget for search input
+#doit	 = #noc+2		; begin word searching
+#VL		 = #noc+3
+#STATUS = #noc+4		; text status gadget
+
+#Win0=0
+;------------------------------------------------------------------
+NEWTYPE.wt				; word storage structure
+	wordsiz.w
+	theword$
+End NEWTYPE
+
+Dim ##[$80B3]	swords.wt(30000)		; The words in the search list 28996
+Dim ##[$80B3]	fwords.wt(100)			; The words in the found list
+Dim ##[$80B3]	LO.w(#noc)					; A list of the known characters
+
+##[$80CA] swords()
+
+
+FindScreen 0
+
+GTButton	#Win0,#about,418,40,180,12," About this Program. ",16
+GTButton	#Win0,#doit,024,40,228,12," Start looking for a match. ",16
+
+GTString	#Win0,#match,24,4,#noc*9,16,"Enter the word to search for.",2,#noc,""
+
+GTText		#Win0,#STATUS,24,170,400,12,"STATUS",4,"Setting up Word List, please WAIT!"
+
+gxp.w = 24					; gadget start x pos
+#gw	 = 16					; gadget width
+
+For scl.w = 1 To #noc
+	GTText #Win0,scl,gxp,24,#gw,12,"",4,"@"
+	gxp+#gw
+Next scl
+
+GTListView #Win0,#VL,8,70,350,84,"LIST IT",4,fwords()
+
+localstat				#Win0,10,30,630,200,4126,"Word Hacker",1,2,0
+AttachGTList	#Win0,#Win0
+
+#MOUSEMOVE=$10:#INTUITICKS=$400000:#GADGETUP=$40
+AddIDCMP #MOUSEMOVE+#INTUITICKS
+
+.init_data
+
+Gosub	 SetupWords
+
+;mainloop
+
+.main
+##[$80BB]
+	ev.l=WaitEvent
+
+	If ev = #GADGETUP
+		Select GadgetHit
+			Case	#match	: Gosub WordEntered
+			Case	#doit	 : Gosub WordMatch
+			Case	#about	: BeepScreen 0
+
+		End Select
+	EndIf
+
+##[$80BC] ev=$200			 ; close window
+
+End
+;-----------------------------------------------------------------
+.WordEntered
+
+SearchWord$ =UCase$(GTGetString(#Win0,#match))
+
+wl.w=Len(SearchWord$)
+
+For sl.w = 1 To #noc
+
+	If sl <= wl Then it$ = Mid$(SearchWord$,sl,1) Else it$="@"
+
+	GTSetString #Win0,sl,it$
+
+Next sl
+
+Return
+;-----------------------------------------------------------------
+.WordMatch
+
+If SearchWord$	= "" Then BeepScreen 0:Return
+
+newmem swords()
+newmem fwords()
+newmem LO()
+
+ClearList fwords()
+ClearList LO()
+
+; find first character to for
+
+losc.w=0
+
+For scl.w = 1 To wl
+	If Mid$(SearchWord$,scl,1) <> " "
+		globalloc LO()
+		LO()=scl				; store location of known letters
+		losc+1
+	EndIf
+Next scl
+
+
+While globfree(swords())
+
+	If \wordsiz = wl
+
+		newmem LO()
+		cool.w = True
+
+		For sad = 1 To losc
+
+			If cool
+				globfree LO()
+				If Mid$(\theword,LO(),1) <> Mid$(SearchWord$,LO(),1) Then cool = False
+			EndIf
+
+		Next sad
+
+		If cool Then globalloc fwords() : fwords()\theword=\theword
+
+	EndIf
+
+NOT.w $dff180
+Wend
+
+GTChangeList #Win0,#VL,fwords()
+
+Return
+;-----------------------------------------------------------------
+; In this section I have to READ in the word.list into it's array
+
+; simon was here and crunched the wordlist
+
+.SetupWords
+
+InitBank 0,250000,0
+LoadBank 0,"wordlist.cm"
+CrMDecrunch Bank(0)
+
+;LoadBank 0,"Word.list",1
+
+ba.l = Bank(0) : bend.l = ba+BankSize(0)
+
+While ba<bend
+	globalloc swords()
+
+	\theword	= ##[$B388](ba,$a)
+	\wordsiz	= Len(\theword)
+	ba+(\wordsiz+1)
+
+	NOT.w $dff180
+Wend
+
+FreeBank 0
+
+GTSetString #Win0,#STATUS,"Waiting for you now, to go."
+
+Return
+
+;-----------------------------------------------------------------

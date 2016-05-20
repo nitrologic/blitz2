@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Stop.bb
++; ; stop program example; a=10NPrint "Click mouse button, then type 'NPrint a'" MouseWait Stop

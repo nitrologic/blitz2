@@ -1,0 +1,1803 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/insectoids/insectoids.bb2
++##[$80C3]:##[$80CC]:##[$80CB]
+##[$80B4]:End:End ##[$80B4]
+;
+;INSECTOIDS!
+;
+;
+;Set aside shapes 0-95 for 6 different aliens (16 rotations)
+;
+;shape 96 = player bullet, 97 = alien bullet
+;shape 98 = alien bomb
+;
+;shapes 99-104 are the aliens dying explosions
+;
+;Shape 105 is the little 'ship' icon
+;
+;shape 106 is warp.blok
+;shape 107 is dummy.blok for warp queue
+;
+;shapes 108-11 are '1000' bonus anim...
+;
+;sprites 0-4 are for player 1 ship,
+;sprites 5-9 are for player 2s
+;
+;sprites 10-14 are the beam animation
+;
+;sprites 15-24 are the ship dying animation.
+;
+LoadShapes 96,"data/shapes"
+;
+LoadSprites 0,"data/sprites"
+;
+casestrcomp 0,"data/spritepal1",16
+casestrcomp 1,"data/spritepal2",16
+casestrcomp 2,"data/warp.blok"
+;
+lmaxlen 3,320,8,4:LoadBitMap 3,"data/scorebar",3
+;
+For k=0 To 7:Read n$:LoadSound k,"data/"+n$:Next
+Data$ "fire","boom","boom.alien","swoop"
+Data$ "fire.alien","beam","capture","backsound"
+;
+VWait 40:BLITZ
+
+NEWTYPE.alien
+;
+;movement stuff
+;
+x.q
+y.q
+xs.q
+ys.q
+xa.q
+ya.q
+;
+;weird stuff
+;
+fi.w	;formation ID number
+pn.w	;path number
+ps.w	;path step!
+;
+;apperance
+;
+fo.q	;original frame
+fr.q	;frame
+fs.q	;frame speed
+;
+;intellect
+;
+s.w ;status - 0 = dead
+		;				 1 = yet to appear - counting down
+		;				 2 = zooming around b4 formation
+		;				 3 = in formation
+		;				 4 = diving
+		;				 5 = in beam!
+		;
+f.w ;flags	- 0 = boring
+		;				 1 = flagship
+		;				 2 = peeler
+		;
+t.w ;timer	- general purpose
+		;
+n.w ;			 - flagship number.
+		;
+d.w ;			 - delay before compulsory dive!
+dd.w;			 - peeler dive delay
+		;
+p.w ;			 - point value of alien
+p2.w;			 - special point value for flagship
+		;
+fc.w;			 - flag ship counter for others being shot.
+*fsh.alien	;- If non-zero, points to flagship
+		;
+End NEWTYPE
+
+NEWTYPE.capt	;captured alien!
+x.w
+y.w
+n.w	 ;number of captured alien
+fo.q
+fr.q
+End NEWTYPE
+
+NEWTYPE.bomb
+;
+x.q
+y.q
+xs.q
+ys.q
+;
+End NEWTYPE
+
+NEWTYPE.bullet
+;
+x.q
+y.q
+xs.q
+ys.q
+sh.w	;shape number of collision checking.
+;
+End NEWTYPE
+
+NEWTYPE.fpath
+;
+xa.q
+ya.q
+fs.q
+;
+End NEWTYPE
+
+NEWTYPE.star
+;
+x.w
+y.q
+y2.w
+y3.w
+;
+ys.q
+c.w
+End NEWTYPE
+
+Dim ##[$80B3] stars.star(32)
+Dim ##[$80B3] dudes.alien(50)
+Dim ##[$80B3] bombs.bomb(50)
+Dim ##[$80B3] bulls.bullet(9)
+Dim wowx.q(50,63),wowy.q(50,63)
+Dim paths.fpath(24,8)
+Dim pathf(24)
+Dim ##[$80B3] capt.capt(8)
+Dim capx(4,3),capy(4,3) ;offsets for captured aliens.
+Dim blx(70),bly(70)
+;
+;prepare array for warp in stuff...
+;
+For k=1 To 70
+tag
+x=Int(Rnd(10))*32+32:y=Int(Rnd(7))*32+32
+For j=1 To k-1
+	If x=blx(j) AND y=bly(j) Then ##[$80BE] For:Goto tag
+Next
+blx(k)=x:bly(k)=y
+Next
+
+;This little function will take an x add, a y add, and a steps
+;parameter, and calculate a step from 0 to steps-1
+;corresponding to which way something is pointed.....
+;
+;0 is up, 1 is up and a bit right and so on....
+;
+Function calcrot{xadd,yadd,steps}
+steps2=steps/2
+co.f=##[$80BA]/steps2
+If xadd=0
+	a.f=steps2/2
+Else
+	a.f=Cos(yadd/xadd)/co
+End If
+If xadd<0 Then a=steps2+a
+If yadd<0 Then a=steps+a
+If Frac(a)>.5 Then a+1
+a=(a+(steps2/2)) ##[$80B9] steps
+Function Return Int(a)
+End Function
+
+Function calcacc{s,d,is,t}
+;
+;s=src, d=dest, is=initial speed, t=time
+;
+a.f=(d-s-(is*t))*2/(t*t)
+;
+Function Return a
+;
+End Function
+
+ShapesHit 3,4
+;
+longmult 0,100:longmult 1,100
+For k=1 To 70:longmult k+1,1:Next
+
+For j=1 To 1
+For k=1 To 4
+Read capx(k,j),capy(k,j)
+capy(k,j)+204
+Next k,j
+
+;lineup
+Data -16,0,16,0,-32,0,32,0
+;
+;pyramid
+Data -16,0,16,0,-8,-16,8,-16
+
+lmaxlen 3,320,8,4
+;
+QAMIGA
+casestrcomp 2,"data/warp.blok"
+LoadBitMap 3,"data/scorebar",3
+VWait 40:BLITZ
+Gosub titstuff
+;
+sli=52:If NTSC Then sli=28
+
+.intro
+;
+Gosub dointro
+
+.newgame
+;
+sc.l=0			;score
+lv=0				;level
+atw=1			 ;attack wave!
+sl=3				;ships left
+gst=-1			;game start
+;
+dvc=.001		;dive chance
+fic=.005		;fire chance
+bos=4			 ;bomb speed
+tz=40			 ;time interval
+mps=3			 ;flight path steps
+ass=4			 ;asteroid y speed
+axs=1			 ;asteroid x speed
+iwrox=90		;number of asteroids
+flchk=10000 ;free life check value
+;
+Gosub gamesetup
+
+.newpattern
+;
+Gosub warpcover
+Gosub loadlevel
+Gosub preppaths
+Gosub preplevel
+Gosub warpshow
+
+.newlife
+ClearList capt()
+ncap=0
+shf=2.5
+shx=160
+shy=9
+If ast>99 Then shy=190
+shxs=0	;ship x speed
+shys=0	;y speed
+motx=70+Rnd(140):motxs=0
+beamy=0
+beamc=0
+ctyp=1	;type of capture
+ncap=0	;number of captured aliens.
+nok=0	 ;not ok to continue flag
+scu=-1	;update score flag
+nok=0			 ;not ok to do main
+pcd=100			;pattern complete delay
+cas=0			 ;asteroid current delay
+moy=0			 ;starting pos of mother ship
+sl2=sl
+sc2.l=sc
+InFront 8:If ast=100 Then InFront 0
+;
+If gst Then gst=0:sl-1:Gosub showlives
+;
+gameon=-1	 ;OK to run int routine!
+
+##[$B40C]
+
+.main2
+;
+If ast=100	;mmmmm.... it's time for docking!
+	;
+	.mother
+	;
+	Gosub dothedb:Gosub dostars
+	;
+	##[$B40C]
+	If (##[$B40B](0) OR ##[$B40B](2))
+		If shy>65 AND shf<15 Then shf=15:Sound 1,15
+	Else
+		If shy=65 AND shf<15 Then shf=15:Sound 1,15
+	EndIf
+	;
+	moy+1:motx+motxs:m2=moy:If m2>100 Then m2=100
+	If m2>50 Then shys=.5:If shy<65 Then shxs=0
+	Scroll 0,100-m2,104,m2,motx,32,4
+	;
+	If shf>=25
+		If sl=sl2
+			If sl Then sl-1:Gosub showlives
+		EndIf
+		If sl2 Then Goto patdone
+		Goto gameover
+	EndIf
+	;
+	If moy>240 Then Goto patdone
+	;
+	Goto mother
+	;
+EndIf
+;
+If ast=99 ;asteroid pattern?
+	;
+	.rox
+	;
+	Gosub dothedb:Gosub dostars
+	;
+	##[$80CA] dudes()
+	;
+	##[$B40C]:If (##[$B40B](0) OR ##[$B40B](2)) AND shf<15 Then shf=15:Sound 1,15
+	;
+	If Joyb(0)>0 Then End
+	;
+	If cas
+		cas-1
+	Else
+		cas=2
+		If shf<15 AND wrox
+			If AddLast(dudes())
+				nrox+1:wrox-1
+				\x=Rnd(320):\y=-16
+				\xs=Rnd(axs):\ys=ass+Rnd
+				If Rnd>.5 Then \xs=-\xs
+				\fo=0:\fr=0:\fs=Rnd+1
+				If Rnd>.5 Then \fo=32
+				If Rnd>.5 Then \fs=-\fs
+			EndIf
+		EndIf
+	EndIf
+	newmem dudes()
+	While globfree(dudes())
+		\y+\ys
+		If \y<242 AND \x>-16 AND \x<336
+			\x+\xs:\fr+\fs
+			QBlit db,\fo+\fr&31,\x+32,\y+32
+		Else
+			freelast dudes():nrox-1
+		EndIf
+	Wend
+	;
+	If shf<15 AND wrox Then sc+5:Gosub newscore:Goto rox
+	;
+	If wrox
+		If nrox Then Goto rox Else Goto justdied
+	EndIf
+	newmem dudes():If globfree(dudes()) Then Goto rox
+	;
+	Goto patdone
+	;
+EndIf
+
+.main ;OK, let's doit!
+##[$80BB]
+	;
+	Gosub dothedb
+	;
+	;move all bullets.
+	;
+	mss=0:mds=0:nbs=-1
+	##[$80CA] bulls()
+	newmem bulls()
+	While globfree(bulls())
+		nbs=0
+		\x+\xs:\y-\ys:\ys+.5
+		If \y<0
+			freelast bulls()
+		Else
+			QBlit db,\sh,\x+32,\y+32
+		EndIf
+	Wend
+	;
+	;fire ?
+	;
+	##[$80CA] bulls()
+	If Joyb(1)	;fire button
+		If nbs AND shf<15 AND na>0
+			Sound 0,1
+			If AddLast(bulls())
+				\x=shx,206,0,6,98
+			EndIf
+			newmem capt()
+			While globfree(capt())
+				If AddLast(bulls())
+					\x=capt()\x,capt()\y-4,0,4,97
+				EndIf
+			Wend
+		EndIf
+	EndIf
+	;
+	;OK, now to move captured aliens!
+	;
+	##[$80CA] capt()
+	newmem capt()
+	While globfree(capt())
+		;
+		cx=shx+capx(\n,ctyp)
+		cy=shy+capy(\n,ctyp)
+		;
+		cxa=cx-\x
+		If QAbs(cxa)>5 Then cxa=5:If \x>cx Then cxa=-5
+		;
+		cya=cy-\y
+		If QAbs(cya)>5 Then cya=5:If \y>cy Then cya=-5
+		;
+		\x+cxa:\y+cya:If \fr&15 Then \fr+.5
+		;
+		If \x>-8 AND \x<328
+			QBlit db,\fr & 15+\fo,\x+32,\y+32
+		EndIf
+		;
+	Wend
+	;
+	;Move aliens bombs...
+	;
+	##[$80CA] bombs()
+	aadv=0:newmem bombs()
+	While globfree(bombs())
+		;
+		x=\x:y=\y:x+\xs:y+\ys
+		If x>-8 AND x<328 AND y>-8 AND y<234
+			\x=x:\y=y:aadv=-1
+			QBlit db,96,x+32,y+32
+			If shf<15
+				If RectsHit(98,x,y,shf,shx,shy+201)
+					Gosub killplayer
+					freelast bombs()
+				Else
+					If y>160
+						newmem capt()
+						While globfree(capt())
+							If SpritesHit(98,x,y,capt()\fr&15,capt()\x,capt()\y)
+								;this captured alien has been zapped!
+								If globalloc(dudes())
+									dudes()\x=capt()\x,capt()\y
+									dudes()\s=0:dudes()\fr=99:na+1
+								EndIf
+								n=capt()\n
+								freelast capt():ncap-1
+								newmem capt()
+								While globfree(capt())
+									If capt()\n>n Then capt()\n-1
+								Wend
+								freelast bombs():Goto bombkilled
+								;
+							EndIf
+						Wend
+					EndIf
+				EndIf
+			EndIf
+		Else
+			freelast bombs()
+		EndIf
+		;
+	bombkilled
+	Wend
+	;
+	If fod
+		fod-1
+	Else
+		fod=1
+		foc=(foc+1)&31 ;formation counter
+	EndIf
+	;
+	##[$80CA] dudes()
+	;
+	newmem dudes()
+	;
+	While globfree(dudes())
+		x=\x:y=\y:fr=\fr
+		Select \s ;status
+		Case 3	;in formation
+			fox=wowx(\fi,foc):foy=wowy(\fi,foc)
+			;
+			xa=fox-x
+			If QAbs(xa)>4
+				xa=4:If fox<x Then xa=-4
+			EndIf
+			;
+			ya=foy-y
+			If QAbs(ya)>4
+				ya=4:If foy<y Then ya=-4
+			EndIf
+			;
+			x+xa:y+ya
+			;
+			If fr&15 Then fr+\fs
+			Gosub boring:Gosub chkdie
+			If di
+				Gosub chkbeam
+				;
+				;OK, 'should I dive' bit
+				;
+				If \d
+					If \s=3 AND shf<15 AND QAbs(xa)<4 AND QAbs(ya)<4
+						\d-1
+						If \d=0
+							mss=-1
+							\pn=fpn,1:\xs=0,0,fxa,fya
+							\fr=ffr,ffs:\t=tz:\s=2:nud-1
+						EndIf
+					EndIf
+				Else
+					If Rnd<dvc OR na<7
+						If \s=3 AND shf<15 AND QAbs(xa)<4 AND QAbs(ya)<4
+							Select \f
+							Case 0	;boring?
+								mss=-1
+								pn=Rnd(8)+17
+								\pn=pn,1
+								*pa.fpath=paths(pn,1)
+								\xs=0,0,*pa\xa,*pa\ya
+								\fr=pathf(pn),*pa\fs
+								\t=tz:\s=2
+							Case 1	;flagship?
+								If nud=0
+									*fsh.alien=\fsh:*fsh\fc=0
+									fpn=Rnd(8)+17:*pa.fpath=paths(fpn,1)
+									fxa=*pa\xa:fya=*pa\ya:ffr=pathf(fpn)
+									ffs=*pa\fs
+									;
+									n=\n:PushItem dudes():newmem dudes()
+									While globfree(dudes())
+										If \n=n AND \s=3 Then \d=1:*fsh\fc+1:nud+1
+									Wend
+									If *fsh\fc=1 Then *fsh\fc=0
+									PopItem dudes()
+								EndIf
+							Case 2	;peeler?
+								If nud=0
+									fpn=Rnd(8)+17:*pa.fpath=paths(fpn,1)
+									fxa=*pa\xa:fya=*pa\ya:ffr=pathf(fpn)
+									ffs=*pa\fs
+									;
+									n=\n:dd=\dd:d=1
+									PushItem dudes():newmem dudes()
+									While globfree(dudes())
+										If \n=n AND \s=3 Then \d=d:d+dd:nud+1
+									Wend
+									PopItem dudes()
+								EndIf
+							End Select
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+			;
+		Case 4	;diving
+		Case 1	;yet to appear
+			If \t
+				\t-1
+			Else
+				If \f ;flagship or peeler?
+					\s=3
+				Else
+					\s=2:\t=tz
+				EndIf
+			EndIf
+		Case 2	;zooming
+			aadv=-1:\xs+\xa:\ys+\ya:x+\xs:y+\ys:fr+\fs
+			If \t
+				\t-1
+				If Rnd<fic AND shf<15 ;should I fire?
+				 If \pn>16 OR ast>3
+						If AddLast(bombs())
+							bombs()\x=x,y,Rnd,bos
+							If x>160 Then bombs()\xs=-Rnd
+						EndIf
+					EndIf
+				EndIf
+			Else
+				\ps+1
+				If \ps<=mps
+					*pa.fpath=paths(\pn,\ps)
+					\xa=*pa\xa,*pa\ya
+					\fs=*pa\fs
+					\t=tz
+				Else
+					If \fs<0 Then \fs=-.25 Else \fs=.25
+					\s=3
+				EndIf
+			EndIf
+			Gosub boring:Gosub chkdie:If di Then Gosub chkbeam
+		Case 0	;dying
+			QBlit db,fr,x+32,y+32:fr+1
+			If fr<108
+				If fr<105
+					\fr=fr
+				Else
+					freelast dudes():na-1
+					If na<1 Then nok=-1
+				EndIf
+			Else
+				If \t
+					\t-1:fr+.25:If fr>=112 Then fr-4
+					\fr=fr
+				Else
+					freelast dudes():na-1
+					If na<1 Then nok=-1
+				EndIf
+			EndIf
+		Case 5	;in the beam!
+			If beamy
+				fr=QWrap(fr+1,0,16):x=shx:y=beamy+4
+				QBlit db,\fo+fr,x+32,y+32
+				\x=x:\y=y:\fr=fr:Gosub chkdie
+			Else
+				QBlit db,\fo+fr,x+32,y+32
+				;
+				;add to captured list
+				;
+				If AddLast(capt())
+					ncap+1:na-1:If na<1 Then nok=-1
+					capt()\x=x,y,ncap,\fo,fr
+				EndIf
+				freelast dudes()
+			EndIf
+		End Select
+	Wend
+	;
+	If mss Then Sound 3,2,32 Else: If Rnd <.005 Then Sound 7,2
+	If mds Then Sound 2,1
+	;
+	.showscore
+	If scu Then Gosub newscore ;update score?
+	;
+##[$80BC] nok
+;
+;something happened - all aliens killed or player done over!
+;
+If shf>24	;player has been zapped!
+	If na<1 Then Goto patdone
+	If aadv Then Goto main
+	;
+	justdied
+	If sl Then sl-1:Gosub showlives:Goto newlife
+	;
+	;game over!
+	;
+	gameover
+	BitMapOutput db:Colour 1,0
+	Locate 20,16:Print "GAME OVER"
+	If sc>hisc.l
+		Locate 17,18:Print "NEW HIGH SCORE!"
+		BitMapOutput 3:Locate 19,0:Colour 15,0:Print sc
+	EndIf
+	;
+	If pcd Then pcd-1:Goto main2
+	;
+	If sc>hisc Then hisc=sc
+	;
+	Goto intro
+	;
+EndIf
+;
+.patdone
+;
+BitMapOutput db:Colour 1,0
+If ast<99
+	Locate 13,16
+	Print "ATTACK WAVE ",atw," DEALT TO!"
+Else
+	If ast=99
+		Locate 11,16
+		Print "ASTEROIDS SUCCESSFULY DODGED"
+	Else
+		If shf<15
+			Locate 9,16
+			Print "DOCKING SUCCESSFUL! 2000 BONUS!"
+			If pcd=100 Then sc+2000:Gosub newscore
+		Else
+			Locate 14,16
+			Print "DOCKING UNSUCCESSFUL!"
+		EndIf
+	EndIf
+EndIf
+;
+;makesure nothing's left!
+;
+If pcd Then pcd-1:Goto main2
+;
+For k=1 To 2
+Gosub dothedb:If ast>98 Then BlockScroll
+Next
+If ast<99 Then atw+1
+;
+gameon=0:Volume 15,0,0,0,0
+ShowSprite 0,-16,shy,0:Use Slice 2:ShowSprite 0,-16,shy,0
+Use Slice 0
+;
+Goto newpattern
+
+;********************** SUBROUTINES **********************
+
+MouseWait:End
+.
+.newscore
+BitMapOutput 3:Colour 6,0
+Locate 8,0:Print sc:scu=0
+If sc2<flchk AND sc>=flchk	;free life?
+	sl+1:Gosub showlives
+	flchk+10000
+EndIf
+sc2=sc
+Return
+
+.dispoff
+DisplayOff:ClrInt 5:FreeSlices
+;
+Slice 3,sli,320,8,$fff0,4,8,32,320,320
+Show 3:Use SetCycle 3
+For k=0 To 7
+j=15-k-k
+ColSplit 6,0,8,j,k
+ColSplit 15,15,j,j,k
+Next
+;
+Return
+
+.dispon
+DisplayOn:Return
+
+.showlives
+;
+Use lmaxlen 3
+j=sl:If j>8 Then j=8
+For k=1 To j
+longdiv 105,249+k*8,0
+Next
+If k<9
+	BlitMode EraseMode
+	longdiv 105,249+k*8,0
+	BlitMode CookieMode
+EndIf
+Use lmaxlen db
+Return
+
+.dostars
+##[$80CA] stars()
+newmem stars()
+While globfree(stars())
+	\y3=\y2:\y2=\y:\y=(\y+\ys)&255
+	Point \x,\y+32,\c
+	Point \x,\y3+32,0
+Wend
+Return
+
+.dothedb
+;
+Gosub wvbl
+;
+;double buffering?
+;
+Show db,32,32:db=1-db:UnQueue db,2:Use lmaxlen db
+Return
+
+.chkdie	 ;see if I've been shot!
+;
+##[$80CA] bulls()
+newmem bulls():di=-1
+While globfree(bulls())
+	If SpritesHit(fr,x,y,\sh,\x,\y)
+		If dudes()\d Then nud-1
+		po=dudes()\p:dfr=99
+		*fsh.alien=dudes()\fsh
+		If *fsh
+			If dudes()\s=2
+				*fsh\fc-1
+				If *fsh\fc=0
+					po=dudes()\p2
+					If po=1000 Then dfr=108:dudes()\t=32
+				EndIf
+			EndIf
+		EndIf
+		sc+po:scu=-1:mds=-1
+		dudes()\fr=dfr:dudes()\s=0:di=0
+		freelast bulls()
+	EndIf
+Wend
+Return
+
+.chkbeam	;see if alien has been beam captured!
+;
+##[$80CA] dudes()
+If beamc	;beam capture flag set?
+	If x>shx-8 AND x<shx+8
+		If y>beamy-8 AND y<beamy+16
+			\s=5:beamg=0:beamc=0
+			Sound 6,8
+		EndIf
+	EndIf
+EndIf
+Return
+
+.killplayer
+;
+shf=15:Sound 1,15
+newmem capt()
+While globfree(capt())
+	If globalloc(dudes())
+		dudes()\x=capt()\x,capt()\y
+		dudes()\s=0:dudes()\fr=99:na+1
+	EndIf
+	freelast capt()
+Wend
+;
+Return
+
+.boring
+;
+;draw a boring alien
+;
+If x<-16 Then x+352
+If x>336 Then x-352
+If y<-16 Then y+242
+If y>233 Then y-242
+fr=QWrap(fr,0,16)
+;
+\x=x:\y=y:\fr=fr
+;
+QBlit db,fr+\fo,x+32,y+32
+If shf<15
+	If RectsHit(fr,x,y,shf,shx,shy+201)
+		Gosub killplayer
+	EndIf
+EndIf
+Return
+
+.wvbl
+VWait
+While frc<2
+	VWait
+Wend:frc=0
+;
+If Joyb(0)>0 Then End
+Return
+
+.showbeam
+If beamy>0 AND beamy<216
+	;
+	ShowSprite beamf,shx,beamy,0
+	beamf=QWrap(beamf+1,10,15)
+	;
+Else
+	beamy=0:ShowSprite 0,-16,0,0
+	Volume 8,0
+EndIf
+Return
+
+.blackpal
+For k=0 To 31:Green k,0,0,0:Next:Return
+
+.warppal
+Green 12,0,0,8
+Green 13,0,0,6
+Green 14,0,0,4
+Return
+
+.titstuff
+BitMapOutput 3
+Locate 8,0:Colour 6,0:Print "0		 "
+Locate 19,0:Colour 15,0:Print hisc
+Return
+
+.dointro
+;
+Gosub dispoff
+QAMIGA
+LoadModule 0,"data/mod.insect":PlayModule 0
+VWait 40:BLITZ:PlayModule 0
+For k=0 To 2:Free lmaxlen k:Next
+For k=0 To 95:Free MidHandle k:Next:Free lmaxlen 4
+lmaxlen 0,320,224,5
+;
+Slice 0,sli+10,320,224,$fff0,5,8,32,320,320
+Show 0:Gosub blackpal
+Gosub dispon
+;
+##[$80BB]
+	For k=1 To 3
+	QAMIGA
+	BlockScroll:LoadBitMap 0,"data/title"+Str$(k),4
+	VWait 40:BLITZ
+	FadeIn 4
+	For j=1 To 500
+	VWait
+	If Joyb(1)
+		##[$80BE] For:##[$80BE] For
+		For kk=64 To 0 Step -1
+		VWait:Volume 15,kk,kk,kk,kk
+		Next
+		StopModule:QAMIGA:StopModule:VWait 40:BLITZ
+		Free Module 0:Return
+	EndIf
+	Next
+	FadeOut 4
+	Next
+##[$80C7]
+
+.gamesetup
+;
+;palette 0 is then main display palette
+;
+;palette 1 is the palette for the top area sprites
+;
+Gosub dispoff
+;
+For k=0 To 2:lmaxlen k,384,290,4:Next
+;
+Gosub titstuff:Gosub showlives
+;
+Slice 0,sli+10,320,224,$fff0,4,8,32,384,384
+Gosub blackpal:Use SetCycle 1:Use SetCycle 2
+;
+Slice 1,200+sli+10,320,24,0,0,8,32,384,384
+Use SetCycle 2
+;
+Slice 2,201+sli+10,320,23,0,0,8,0,384,384
+;
+Use Slice 0:db=0:Show db,32,32
+;
+gameon=0:Gosub dispon
+;
+.introutine
+SetInt 5
+;
+frc+1
+;
+If gameon
+	If ast<100
+		Use Slice 2
+		If shf<15
+			;
+			;Move players ship!
+			;
+			Select Joyx(1)
+			Case 0
+				shf=2.5
+			Case -1
+				shx=QLimit(shx-2,8,312)
+				shf=QLimit(shf-.125,0,4)
+			Case 1
+				shx=QLimit(shx+2,8,312)
+				shf=QLimit(shf+.125,0,4)
+			End Select
+			ShowSprite shf,shx,shy,0
+		Else	;ship is dying!
+			If shf<25
+				ShowSprite shf,shx,shy,0
+			Else
+				ShowSprite 0,-16,shy,0
+				nok=-1
+			EndIf
+			shf+.2
+		EndIf
+		Use Slice 0
+	Else
+		shx=QLimit(shx+shxs,8,312)
+		shy-shys:If shy<32 Then shy=32
+		If shf<15
+			ShowSprite shf,shx,shy,0
+			Select Joyx(1)
+			Case 0
+				shf=2.5
+			Case -1
+				shxs-.0025
+				shf=QLimit(shf-.125,0,4)
+			Case 1
+				shxs+.0025
+				shf=QLimit(shf+.125,0,4)
+			End Select
+		Else
+			If shf<25
+				ShowSprite shf,shx,shy,0:shf+.2
+			Else
+				ShowSprite 0,-16,shy,0
+			EndIf
+		EndIf
+	EndIf
+	;
+	;do the beam!
+	;
+	beamc=0
+	If beamy
+		If Joyy(1) AND shf<15 ;still held down
+			beamy-2:beamd=-1
+		Else
+			beamy+6:If beamd AND beamg Then beamc=-1:beamd=0
+		EndIf
+		Gosub showbeam
+	Else
+		If Joyy(1) AND ast<99
+			If ncap<4 AND shf<15
+				beamy=214:beamf=10:beamd=0:beamg=-1
+				LoopSound 5,8,32
+			EndIf
+		EndIf
+	EndIf
+EndIf
+;
+End SetInt
+;
+Return
+
+.preppaths	;calculate 24 flight paths.
+						;1-8	 = warp from left,
+						;9-16	= warp from right.
+						;17-24 = diving
+
+If ast>98
+	If ast=99 ;asteroids?
+		ass+.5:If ass>8 Then ass=8
+		axs+.25:If axs>4 Then axs=4
+		iwrox+10:If iwrox>200 Then iwrox=200
+		wrox=iwrox
+	EndIf
+	Return
+EndIf
+
+tz-1:If tz<20 Then tz=20
+t=tz
+mps+.5:If mps>6 Then mps=6
+dvc+.0005:If dvc>.25 Then dvc=.5
+fic+.001:If fic>.25 Then fic=.5
+bos+.125:If bos>12 Then bos=12
+
+##[$80CA] paths(k,j)
+;
+For k=1 To 8 ;zooming paths.
+;
+x=0:y=0:xs=0:ys=0:j=1
+;
+xa=calcacc{x,Rnd(80),xs,t}
+ya=calcacc{y,96+l2,ys,t}
+z=calcrot{xa,ya,16}:pathf(k)=z
+Gosub addpath
+;
+For j=2 To mps
+xa=calcacc{x,Rnd(80)+80,xs,t}
+ya=calcacc{y,Rnd(64)+l2+96,ys,t}
+Gosub addpath
+Next j,k
+;
+For k=9 To 16
+pathf(k)=(8-pathf(k-8)+8)&15
+For j=1 To mps
+\xa=-paths(k-8,j)\xa
+\ya=paths(k-8,j)\ya
+\fs=-paths(k-8,j)\fs
+Next j,k
+;
+For k=17 To 24 ;diving flight paths
+;
+x=160:y=0:xs=0:ys=0:j=1
+;
+xa=calcacc{x,Rnd(120)+100,xs,t}
+ya=calcacc{y,64+l2,ys,t}
+z=calcrot{xa,ya,16}:pathf(k)=z
+Gosub addpath
+;
+For j=2 To mps
+xa=calcacc{x,Rnd(120)+100,xs,t}
+ya=calcacc{y,y+48+Rnd(32),ys,t}
+Gosub addpath
+Next j,k:tz-1
+;
+Return
+;
+addpath
+\xa=xa:\ya=ya
+For z2=1 To t
+xs+xa:ys+ya:x+xs:y+ys
+Next
+;
+z2=calcrot{xs,ys,16}
+;
+If z=z2 Then \fs=0:Return
+;
+fd=Abs(z-z2)
+;
+If z>z2
+	If z-z2>8
+		\fs=(16-fd)/t
+	Else
+		\fs=-fd/t
+	EndIf
+Else
+	If z2-z>8
+		\fs=-(16-fd)/t
+	Else
+		\fs=fd/t
+	EndIf
+EndIf
+z=z2:Return
+
+.preplevel	;prepare all arrays for start of level!
+;
+ClearList dudes():ClearList stars()
+;
+##[$80CA] stars()
+If ast>98
+	While AddLast(stars())
+		\x=Rnd(320)+32:\y=Rnd(256)
+		\y2=0:\y3=0
+		\ys=Rnd LSL 1+1
+		\c=Rnd(4)+7
+	Wend
+	Return
+EndIf
+;
+##[$80CA] dudes()
+;
+ClearList bombs():ClearList bulls()
+;
+na=0:n=0:scv=50	;default score value
+;
+##[$80BB]
+	Read at
+	If at<3
+		If at>=0 Then Read a,fr:fr*16
+		Select at
+		Case 0				;boring alien
+			Read pn
+			For j=1 To a
+			If AddLast(dudes())
+				Read x,y,fx,fy,t
+				fx*1.5
+				\x=x,y:\t=t:\s=1:\n=0:\f=0:\fo=fr:\d=0:\fs=0
+				\p=scv
+				Gosub calcwow:Gosub pickpath
+			EndIf
+			na+1:Next
+		Case 1	;flagship set
+			Read f2,sscv:f2*16:n+1
+			For j=1 To a
+			If AddLast(dudes())
+				If j=1 Then *fsh.alien=dudes()
+				Read x,y,fx,fy,t
+				fx*1.5
+				\x=x,y:\t=t:\s=1:\f=1:\d=0
+				\fr=0:\fo=fr:If j>1 Then \fo=f2
+				\n=n:\fsh=*fsh:\p=scv:\p2=scv:If j=1 Then \p2=sscv
+				Gosub calcwow
+			EndIf
+			na+1:Next
+		Case 2	;peeler
+			Read f2:n+1
+			For j=1 To a
+			If AddLast(dudes())
+				Read x,y,fx,fy,t
+				fx*1.5
+				\x=x,y:\t=t:\s=1:\f=2:\n=n:\d=0
+				\fr=0:\fo=fr:\dd=f2:\fs=0:\p=scv
+				Gosub calcwow
+			EndIf
+			na+1:Next
+		End Select
+	Else
+		Read scv
+	EndIf
+##[$80BC] at<0
+;
+Return
+;
+pickpath
+pn2=pn:If x>160 Then pn2=pn2+8
+\pn=pn2,1
+\xs=0,0,paths(pn2,1)\xa,paths(pn2,1)\ya
+\fr=pathf(pn2),paths(pn2,1)\fs
+;
+Return
+;
+calcwow
+\fi=na
+For z=0 To 15
+wowx(na,z)=fx+(fx*z/64)+160
+wowy(na,z)=fy+(fy*z/64) +yoff
+Next
+For z=0 To 15
+wowx(na,16+z)=wowx(na,15-z)
+wowy(na,16+z)=wowy(na,15-z)
+Next
+Return
+
+.warpcover
+VWait:Show db,32,32:Use lmaxlen db
+For k=1 To 70
+VWait
+longdiv 106,blx(k),bly(k)
+QBlit k+1,107,blx(k),bly(k)
+Next
+Return
+
+.warpshow
+Use lmaxlen db
+For k=1 To 70:VWait:UnQueue k+1,2:Next
+ShapesBitMap 2,1-db
+Return
+
+.loadlevel	;load lv level stuff from disk
+;
+lv+1:##[$80C8] level1
+For k=1 To lv-1 ;skip data to correct pattern!
+	##[$80BB]:Read j:##[$80BC] j=-1
+	If k<lv-1 Then Read j:If j=-2 Then ##[$80C8] level1
+Next:Read ast,yoff
+;
+For k=0 To 95:Free MidHandle k:Next:Free lmaxlen 4
+;
+QAMIGA
+;
+If ast<99
+	LoadBitMap 2,"data/backdrop."+Str$(ast),0
+	Use lmaxlen 2:Scroll 0,0,320,224,32,32
+	k=0
+	##[$80BB]
+		Read j
+		If j
+			LoadShapes k,"data/insects."+Str$(j):k+16
+		EndIf
+	##[$80BC] j=0
+Else
+	Use lmaxlen 2:BlockScroll
+	If ast=100
+		lmaxlen 4,106,100,4 ;for mum ship
+		LoadBitMap 4,"data/mothership",0
+	Else
+		casestrcomp 0,"data/asteroidpal":StopCycle 0,3,0,0,0
+		LoadShapes 0,"data/asteroids1"
+		LoadShapes 32,"data/asteroids2"
+	EndIf
+EndIf
+;
+VWait 40:BLITZ
+;
+Use Slice 1
+Use SetCycle 0
+For j=0 To 15
+StopCycle 1,j,Blue(j),Palette(j),PalRGB(j)
+Next
+Use Slice 0
+If ast<100 Then Use SetCycle 1 Else Use SetCycle 0
+;
+Return
+
+;********************** GAME LEVELS **********************
+
+.level1
+;
+Data 1,64		 ;backdrop.1
+
+Data 1,2,0		;insects.1,2
+
+Data 0				;boring aliens
+	Data 6,0,1	;6 aliens, shape 0, flight path 1
+	;
+	Data -16,-16,-40,8,0
+	Data -16,-16,-24,8,4
+	Data -16,-16,-8,8,8
+	Data -16,-16,8,8,12
+	Data -16,-16,24,8,16
+	Data -16,-16,40,8,20
+
+Data 3,100
+
+Data 0				;more boring aliens
+	Data 6,1,2
+	;
+	Data 336,-16,-40,-8,24
+	Data 336,-16,-24,-8,28
+	Data 336,-16,-8,-8,32
+	Data 336,-16,8,-8,36
+	Data 336,-16,24,-8,40
+	Data 336,-16,40,-8,44
+
+Data 3,200
+
+Data 2				;peelers
+	Data 4,0,8
+	;
+	Data -16,-16,-24,-24,128
+	Data 106,-16,-8,-24,128
+	Data 212,-16,8,-24,128
+	Data 336,-16,24,-24,128
+
+Data -1			 ;END!
+
+.level2
+;
+Data 2,64
+;
+Data 3,4,5,0
+;
+Data 0
+	Data 6,0,1
+	Data -16,-16,-40,24,0
+	Data -16,-16,-24,24,4
+	Data -16,-16,-8,24,8
+	Data -16,-16,8,24,12
+	Data -16,-16,24,24,16
+	Data -16,-16,40,24,20
+	;
+Data 3,100
+	;
+Data 0
+	Data 6,1,1
+	Data 336,-16,40,8,0
+	Data 336,-16,24,8,4
+	Data 336,-16,8,8,8
+	Data 336,-16,-8,8,12
+	Data 336,-16,-24,8,16
+	Data 336,-16,-40,8,20
+	;
+Data 3,200
+	;
+Data 2
+	Data 4,0,8
+	Data -16,-16,-24,-8,128
+	Data 106,-16,-8,-8,128
+	Data 212,-16,8,-8,128
+	Data 336,-16,24,-8,128
+	;
+Data 3,250
+	;
+Data 1
+	Data 2,2,0
+	Data 1000
+	Data -16,-16,-8,-24,128
+	Data 336,-16,8,-24,128
+	;
+Data -1
+
+Data 99,-1
+
+.level3
+;
+Data 3,64
+;
+Data 6,7,0
+;
+Data 0
+	Data 6,0,1
+	Data -16,-16,-40,24,0
+	Data -16,-16,-24,24,4
+	Data -16,-16,-8,24,8
+	Data -16,-16,8,24,12
+	Data -16,-16,24,24,16
+	Data -16,-16,40,24,20
+	;
+Data 3,100
+	;
+Data 0
+	Data 6,1,1
+	Data 336,-16,40,8,0
+	Data 336,-16,24,8,4
+	Data 336,-16,8,8,8
+	Data 336,-16,-8,8,12
+	Data 336,-16,-24,8,16
+	Data 336,-16,-40,8,20
+	;
+Data 3,200
+	;
+Data 2
+	Data 4,0,8
+	Data -16,-16,-24,-8,48
+	Data 106,-16,-8,-8,48
+	Data 212,-16,8,-8,48
+	Data 336,-16,24,-8,48
+	;
+Data 2
+	Data 4,1,8
+	Data -16,-16,-8,-24,52
+	Data 336,-16,8,-24,56
+	Data -16,-16,-24,-24,60
+	Data 336,-16,24,-24,64
+	;
+Data -1
+
+Data 100,-1
+
+.level4
+
+Data 4,64
+;
+Data 10,11,12,0
+;
+Data 0
+	Data 7,0,1
+	Data -16,-16,-48,8,0
+	Data -16,-16,-32,8,4
+	Data -16,-16,-16,8,8
+	Data -16,-16,0,8,12
+	Data -16,-16,16,8,16
+	Data -16,-16,32,8,20
+	Data -16,-16,48,8,24
+
+Data 0
+	Data 7,0,2
+	Data 336,-16,-48,24,0
+	Data 336,-16,-32,24,4
+	Data 336,-16,-16,24,8
+	Data 336,-16,0,24,12
+	Data 336,-16,16,24,16
+	Data 336,-16,32,24,20
+	Data 336,-16,48,24,24
+
+Data 3,100
+
+Data 0
+	Data 7,1,3
+	Data 336,-16,-48,-8,28
+	Data 336,-16,-32,-8,32
+	Data 336,-16,-16,-8,36
+	Data 336,-16,0,-8,40
+	Data 336,-16,16,-8,44
+	Data 336,-16,32,-8,48
+	Data 336,-16,48,-8,52
+
+Data 3,250
+
+Data 1	;flagship!
+	Data 3,2,0
+	Data 1000
+	Data 160,-16,-32,-24,128
+	Data -16,-16,-48,-24,128
+	Data 336,-16,-16,-24,128
+
+Data 1
+	Data 3,2,1
+	Data 1000
+	Data 160,-16,32,-24,128
+	Data -16,-16,16,-24,128
+	Data 336,-16,48,-24,128
+
+Data -1
+
+.level5
+
+Data 1,64
+;
+Data 1,2,9,0
+;
+Data 0
+	Data 7,0,1
+	Data -16,-16,-48,8,0
+	Data -16,-16,-32,8,4
+	Data -16,-16,-16,8,8
+	Data -16,-16,0,8,12
+	Data -16,-16,16,8,16
+	Data -16,-16,32,8,20
+	Data -16,-16,48,8,24
+
+Data 0
+	Data 7,1,1
+	Data 336,-16,-48,-8,0
+	Data 336,-16,-32,-8,4
+	Data 336,-16,-16,-8,8
+	Data 336,-16,0,-8,12
+	Data 336,-16,16,-8,16
+	Data 336,-16,32,-8,20
+	Data 336,-16,48,-8,24
+
+Data 3,100
+
+Data 0
+	Data 5,1,2
+	Data -16,-16,-32,24,64
+	Data -16,-16,-16,24,68
+	Data -16,-16,0,24,72
+	Data -16,-16,16,24,76
+	Data -16,-16,32,24,80
+
+Data 3,200
+
+Data 2
+	Data 5,0,16
+	;
+	Data -16,-16,-32,-24,160
+	Data 80,-16,-16,-24,160
+	Data 160,-16,0,-24,160
+	Data 240,-16,16,-24,160
+	Data 336,-16,32,-24,160
+
+Data 3,250
+
+Data 1
+	Data 3,2,1
+	Data 1000
+	;
+	Data 160,-16,0,-40,192
+	Data -16,-16,-16,-40,192
+	Data 336,-16,16,-40,192
+
+Data -1
+
+Data 99,-1
+
+.level6
+
+Data 2,64
+;
+Data 3,4,5,0
+;
+Data 0
+	Data 7,0,1
+	Data -16,-16,-48,24,0
+	Data -16,-16,-32,24,4
+	Data -16,-16,-16,24,8
+	Data -16,-16,0,24,12
+	Data -16,-16,16,24,16
+	Data -16,-16,32,24,20
+	Data -16,-16,48,24,24
+
+Data 0
+	Data 7,0,1
+	Data 336,-16,-48,-8,0
+	Data 336,-16,-32,-8,4
+	Data 336,-16,-16,-8,8
+	Data 336,-16,0,-8,12
+	Data 336,-16,16,-8,16
+	Data 336,-16,32,-8,20
+	Data 336,-16,48,-8,24
+
+Data 3,100
+
+Data 0
+	Data 5,1,2
+	Data 336,-16,-32,8,64
+	Data 336,-16,-16,8,68
+	Data 336,-16,0,8,72
+	Data 336,-16,16,8,76
+	Data 336,-16,32,8,80
+
+Data 3,200
+
+Data 2
+	Data 6,0,12
+	Data -16,-16,-80,8,160
+	Data 80,-16,-64,8,160
+	Data 160,-16,-48,8,160
+	Data 160,-16,48,8,160
+	Data 240,-16,64,8,160
+	Data 336,-16,80,8,160
+
+Data 3,250
+
+Data 1
+	Data 3,2,1
+	Data 1000
+	Data 160,-16,0,-24,192
+	Data -16,-16,-16,-24,192
+	Data 336,-16,16,-24,192
+
+Data -1
+
+Data 100,-1
+
+.level7
+
+Data 3,64
+
+Data 6,7,8,0
+
+Data 0
+	Data 5,1,1
+	Data -16,-16,-32,-8,0
+	Data -16,-16,-16,-8,4
+	Data -16,-16,0,-8,8
+	Data -16,-16,16,-8,12
+	Data -16,-16,32,-8,16
+
+Data 0
+	Data 5,1,1
+	Data 336,-16,-32,-8,0
+	Data 336,-16,-16,-8,4
+	Data 336,-16,0,-8,8
+	Data 336,-16,16,-8,12
+	Data 336,-16,32,-8,16
+
+Data 3,100
+
+Data 0
+	Data 7,0,2
+	Data -16,-16,-48,40,64
+	Data -16,-16,-32,40,68
+	Data -16,-16,-16,40,72
+	Data -16,-16,0,40,76
+	Data -16,-16,16,40,80
+	Data -16,-16,32,40,84
+	Data -16,-16,48,40,88
+
+Data 3,200
+
+Data 2
+	Data 5,0,12
+	Data -16,64,-32,8,160
+	Data 80,64,-16,8,160
+	Data 160,64,0,8,160
+	Data 240,64,16,8,160
+	Data 336,64,32,8,160
+
+Data 3,250
+
+Data 1
+	Data 3,2,0
+	Data 1000
+	Data 160,-16,-32,-24,192
+	Data -16,-16,-48,-24,192
+	Data 336,-16,-16,-24,192
+
+Data 1
+	Data 3,2,1
+	Data 1000
+	Data 160,-16,32,-24,192
+	Data -16,-16,16,-24,192
+	Data 336,-16,48,-24,192
+
+Data -1
+
+.level8
+
+Data 4,64
+
+Data 10,11,12,0
+
+Data 0
+	Data 9,0,1
+	Data 336,-16,-64,8,0
+	Data 336,-16,-48,8,4
+	Data 336,-16,-32,8,8
+	Data 336,-16,-16,8,12
+	Data 336,-16,0,8,16
+	Data 336,-16,16,8,20
+	Data 336,-16,32,8,24
+	Data 336,-16,48,8,28
+	Data 336,-16,64,8,32
+
+Data 3,200
+
+Data 2
+	Data 5,0,12
+	Data -16,-16,-32,-8,36
+	Data 80,-16,-16,-8,36
+	Data 160,-16,0,-8,36
+	Data 240,-16,16,-8,36
+	Data 336,-16,32,-8,40
+
+Data 2
+	Data 5,0,12
+	Data -16,-16,-32,24,36
+	Data 80,-16,-16,24,36
+	Data 160,-16,0,24,36
+	Data 240,-16,16,24,36
+	Data 336,-16,32,24,36
+
+Data 3,250
+
+Data 1
+	Data 4,2,1
+	Data 1000
+	Data 160,-16,0,-24,48
+	Data -16,-16,-16,-24,48
+	Data 336,-16,16,-24,48
+	Data 160,-16,0,-40,48
+
+Data 1
+	Data 4,2,1
+	Data 1000
+	Data 160,-16,0,40,48
+	Data -16,-16,-16,40,48
+	Data 336,-16,16,40,48
+	Data 160,-16,0,56,48
+
+Data -1
+
+Data 99,-1
+
+.level9
+
+Data 1,64
+
+Data 1,2,0
+
+Data 0
+	Data 5,0,1
+	Data -16,-16,0,-32,0
+	Data -16,-16,0,-16,4
+	Data -16,-16,0,0,8
+	Data -16,-16,0,16,12
+	Data -16,-16,0,32,16
+
+Data 0
+	Data 6,1,1
+	Data 336,-16,-48,0,0
+	Data 336,-16,-32,0,4
+	Data 336,-16,-16,0,8
+	Data 336,-16,16,0,12
+	Data 336,-16,32,0,16
+	Data 336,-16,48,0,20
+
+Data 3,200
+
+Data 2
+	Data 4,0,12
+	Data -16,-16,-32,-32,64
+	Data 106,-16,-24,-24,64
+	Data 212,-16,-16,-16,64
+	Data 336,-16,-8,-8,64
+
+Data 2
+	Data 4,1,12
+	Data -16,-16,32,-32,64
+	Data 106,-16,24,-24,64
+	Data 212,-16,16,-16,64
+	Data 336,-16,8,-8,64
+
+Data 2
+	Data 4,0,12
+	Data -16,-16,-32,32,64
+	Data 106,-16,-24,24,64
+	Data 212,-16,-16,16,64
+	Data 336,-16,-8,8,64
+
+Data 2
+	Data 4,0,12
+	Data -16,-16,32,32,64
+	Data 106,-16,24,24,64
+	Data 212,-16,16,16,64
+	Data 336,-16,8,8,64
+
+Data -1
+
+Data 100,-1
+
+.level10
+
+Data 2,64
+
+Data 3,4,5,0
+
+Data 0
+	Data 10,0,1
+	Data -16,-16,-8,-24,0
+	Data -16,-16,-8,-8,4
+	Data -16,-16,-8,8,8
+	Data -16,-16,-8,24,12
+	Data -16,-16,-8,40,16
+	Data -16,-16,8,-24,20
+	Data -16,-16,8,-8,24
+	Data -16,-16,8,8,28
+	Data -16,-16,8,24,32
+	Data -16,-16,8,40,36
+
+Data 3,100
+
+Data 0
+	Data 10,1,2
+	Data 336,-16,-24,-32,0
+	Data 336,-16,-24,-16,4
+	Data 336,-16,-24,0,8
+	Data 336,-16,-24,16,12
+	Data 336,-16,-24,32,16
+	Data 336,-16,24,-32,20
+	Data 336,-16,24,-16,24
+	Data 336,-16,24,0,28
+	Data 336,-16,24,16,32
+	Data 336,-16,24,32,36
+
+Data 3,250
+
+Data 1
+	Data 5,2,0
+	Data 1000
+	Data -16,-16,-40,-40,160
+	Data -16,16,-40,-24,160
+	Data -16,48,-40,-8,160
+	Data -16,80,-40,8,160
+	Data -16,112,-40,24,160
+
+Data 1
+	Data 5,2,0
+	Data 1000
+	Data 336,-16,40,-40,160
+	Data 336,16,40,-24,160
+	Data 336,48,40,-8,160
+	Data 336,80,40,8,160
+	Data 336,112,40,24,160
+
+Data -1,-2	;end of all patterns

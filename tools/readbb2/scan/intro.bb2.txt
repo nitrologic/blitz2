@@ -1,0 +1,98 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/Intro.bb2
++##[$80B4]
+	NPrint "Fatal Error !"
+	End
+End ##[$80B4]
+##[$80C3];:NoCli
+freest 0;:WBenchToFront_
+;ScreensBitMap 0,0
+
+If NumPars
+	Dim picture$(NumPars)
+	If Par$(1)="MED" OR Par$(1)="MOD"
+		If NumPars>1
+			moduletype$=Par$(1)
+			modulename$=Par$(2)
+			If NumPars>2
+				For pic=3 To NumPars
+					picture$(pic-2)=Par$(pic)
+				Next
+				numpics=NumPars-2
+			EndIf
+		Else
+			NPrint "No module name spesified"
+			End
+		EndIf
+	Else
+		For pic=1 To NumPars
+			picture$(pic)=Par$(pic)
+		Next
+		numpics=NumPars
+	EndIf
+Else
+	NPrint "SYNTAX : INTRO [MED|MOD Modulename$] [Picture1 [picture2....]"
+	End
+EndIf
+
+If moduletype$="MED"
+	If ##[$BE15](modulename$)
+		LoadMedModule 0,modulename$
+	Else
+		NPrint "Module doesn't exist"
+		End
+	EndIf
+	StartMedModule 0
+EndIf
+
+If moduletype$="MOD"
+	If ##[$BE15](modulename$)
+		LoadModule 0,modulename$
+	Else
+		NPrint "Module doesn't exist"
+		End
+	EndIf
+	PlayModule 0
+EndIf
+
+SetInt 5
+	PlayMed
+End SetInt
+
+If numpics
+	For pic=1 To numpics
+		If ##[$BE15](picture$(pic))
+			ILBMDepth picture$(pic)
+			allocst 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
+;			ShowScreen 0
+			casestrcomp 0,picture$(pic)
+			FadePalette 0
+			LoadScreen 1,picture$(pic)
+;			ShowScreen 1
+			count=1
+			##[$80BB]
+				VWait
+				count+1
+			##[$80BC] count=1500 OR Joyb(0)=1
+		Else
+			NPrint picture$(pic)+": doesn't exist"
+		EndIf
+	Next
+	CloseScreen 1
+Else
+	NPrint "Press both mouse buttons to stop module"
+EndIf
+
+##[$80BB]:VWait:##[$80BC] Joyb(0)=3
+
+;For v=64 To 0 Step -0.1
+;	VWait
+;	Volume 15,v;,v,v,v
+;Next
+
+;Filter On
+ClrInt 5
+End
+
+Dc.b "$VER: INTRO V1.1 By Iain Catterick (21/2/94)",0
+Event
+

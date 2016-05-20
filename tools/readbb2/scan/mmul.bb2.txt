@@ -1,0 +1,33 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/mmul.bb2
++;
+;mmul - matrix multiplication prog...
+;
+;mmul w1 h1 w2 h2
+;
+w1=3:h1=3:w2=3:h2=3
+
+w3=w2:h3=w1
+
+Dim m1$(w1,h1),m2$(w2,h2),m3$(w3,h3)
+
+For y=1 To h1
+For x=1 To w1
+Print "Matrix 1 element ",x,",",y,":"
+m1$(x,y)=Edit$(80)
+Next x,y
+
+For y=1 To h1
+For x=1 To w1
+Print "Matrix 2 element ",x,",",y,":"
+m2$(x,y)=Edit$(80)
+Next x,y
+
+For y=1 To h3
+For x=1 To w3
+
+
+
+
+Next x,y
+
+MouseWait

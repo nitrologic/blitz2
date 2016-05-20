@@ -1,0 +1,92 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/plas.BB2
++xm.w=320:ym.w=256 :im=1
+cl=5:mnc=16:mxc=23
+
+allocst 0,0,0,xm,ym,cl,$00,"",0,1
+localstat 0,0,0,xm,ym,$1800,"",0,0
+ScreensBitMap 0,0
+mc=2^cl
+For t=0 To mc-1
+v=t*256/mc
+AGARed t,0,v,0
+Next
+
+nnx:
+
+Dim c.w(xm,ym)
+For x=0 To xm Step 64
+For y=0 To ym Step 64
+c=Rnd(mxc-mnc)+mnc
+
+c(x,y)=c :If im=1 Then Point x,y,c
+Next
+Next
+
+For p=6 To 1 Step -1
+s=2^p:h=s/2
+
+For y=0 To ym-s Step s
+For x=0 To xm-s Step s
+
+c1=c(x,y)
+c2=c(x,y+s)
+c3=c(x+s,y)
+c4=c(x+s,y+s)
+
+mx=c1:mn=c1
+If c2<mn Then mn=c2
+If c3<mn Then mn=c3
+If c4<mn Then mn=c4
+
+If c2>mx Then mx=c2
+If c3>mx Then mx=c3
+If c4>mx Then mx=c4
+
+mn=mn-h/2
+mx=mx+h/2
+
+If mx>mxc Then mx=mxc
+If mn<mnc Then mn=mnc
+
+
+
+If x=0 Then c=Rnd(mx-mn)+mn :c(x,y+h)=c :If im=1 Then Point x,y+h,c
+If y=0 Then c=Rnd(mx-mn)+mn :c(x+h,y)=c :If im=1 Then Point x+h,y,c
+
+c=Rnd(mx-mn)+mn :c(x+h,y+h)=c :If im=1 Then Point x+h,y+h,c
+c=Rnd(mx-mn)+mn :c(x+h,y+s)=c :If im=1 Then Point x+h,y+s,c
+c=Rnd(mx-mn)+mn :c(x+s,y+h)=c :If im=1 Then Point x+s,y+h,c
+
+Next
+Next
+Next
+
+For y=0 To ym
+For x=0 To xm
+
+Point x,y,c(x,y)
+Next
+Next
+
+
+
+SaveScreen 0,"ram:plsbrt"
+BRA		 nnx
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,31 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/resident.bb2
++;
+; $VER: resident.bb2 40.0 (28.02.94)
+;
+
+XInclude "exec/types.bb2"
+
+NEWTYPE.Resident
+rt_MatchWord.w ;/* word to match on (ILLEGAL) */
+*rt_MatchTag.Resident;/* pointer to the above */
+*rt_EndSkip.b ;/* address to continue scan */
+rt_Flags.b ;/* various tag flags	*/
+rt_Version.b ;/* release version number */
+rt_Type.b ;/* type of module (NT_XXXXXX) */
+rt_Pri.b ;/* initialization priority */
+*rt_Name.b ;/* pointer to node name */
+*rt_IdString.b ;/* pointer to identification string */
+*rt_Init.b ;/* pointer to init code */
+End NEWTYPE
+
+#RTC_MATCHWORD=$4AFC;/* The 68000 "ILLEGAL" instruction */
+
+#RTF_AUTOINIT=(1LSL7);/* rt_Init points to data structure */
+#RTF_AFTERDOS=(1LSL2)
+#RTF_SINGLETASK=(1LSL1)
+#RTF_COLDSTART=(1LSL0)
+
+;/* Compatibility: (obsolete) */
+;/* #RTM_WHEN=3 */
+#RTW_NEVER=0
+#RTW_COLDSTART=1

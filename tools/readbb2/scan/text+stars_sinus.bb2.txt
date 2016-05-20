@@ -1,0 +1,171 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/text+stars_Sinus.bb2
++;------------------------------------------
+;
+;		SINUS_TEXT+STARS - DOOR JOOP DAMEN
+;
+;------------------------------------------
+LoadShapes 0,"shapes/blitzfonts-2c"
+LoadModule 0,"modules/mod.sheam"				; load some mod
+VWait
+;
+BLITZ
+Filter On
+PlayModule 0																	; play module nr
+Volume 15,64,64,64,64
+;
+lmaxlen 0,320+80,256,2
+lmaxlen 1,320+80,256,2
+Slice 0,44,320,256,$fff8,2,8,32,320+80,320+80
+Show 0,32,0
+Show 1,32,0
+Use lmaxlen 0
+GetaShape 0,0,0,1,1
+;
+Dim Y(240),XP(40),I(140)
+Dim SP(60),XS(60),YS(60),CL(60)
+Gosub ppll
+Gosub ICOS
+;
+Green 1,15,15,15
+Green 2,8,8,8
+Green 3,13,13,13
+;
+##[$80C8] copcol
+YCOP=15
+For LOP=0 To 46
+Read a,b,c
+For TAL=0 To 4
+ColSplit 1,a,b,c,YCOP+TAL
+Next
+YCOP+5
+Next
+;
+For LOP=0 To 19
+XP(LOP)=19+LOP*18
+Next
+;
+SCN$="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:"
+TE$="										THE WAVE PRESENTS SOME SINUS TEXT.."
+TE$=TE$+"...CODE BY JOOP DAMEN.............................."
+TL=Len(TE$)
+;
+For lop=0 To TL
+M$=Mid$(TE$,lop,1):I(lop)=Instr(SCN$,M$)
+Next
+;
+DIS=18
+
+; ---- MAIN LOOPO ----
+
+While Joyb(0)=0
+	 VWait
+	 Show db,32,0:db=1-db:Use lmaxlen db:BlockScroll 0
+	 ;
+	 For LOP=0 To 60
+	 Point XS(LOP),YS(LOP),CL(LOP)
+	 XS(LOP)=XS(LOP)+SP(LOP)
+	 If XS(LOP)>352 : XS(LOP)=32 : End If
+	 Next
+	 ;
+	 DIS-3
+	 If DIS=0
+	 DIS=18
+	 POS+1
+	 TEX=QWrap(TEX+1,0,TL)
+	 EndIf
+	 ;
+	 For LOP=0 To 19
+	 longdiv I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
+	 Next
+	 POS=QWrap(POS-1,0,157)
+Wend
+;
+StopModule
+Free Module 0
+End
+;
+;
+;****************	DATA ROUTINES ***************
+;
+;
+ICOS:
+For LOP=0 To 230
+S+.08 : Y(LOP)=120+HCos(S)*101
+Next
+Return
+;
+ppll:
+For lop=0 To 9
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=1:CL(lop)=2
+Next
+For lop=10 To 20
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=2:CL(lop)=2
+Next
+
+For lop=21 To 30
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=3:CL(lop)=2
+Next
+For lop=31 To 40
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=4:CL(lop)=3
+Next
+
+For lop=41 To 50
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=5:CL(lop)=3
+Next
+For lop=51 To 60
+XS(lop)=Rnd(320):YS(lop)=Rnd(255):SP(lop)=6:CL(lop)=3
+Next
+Return
+;
+;
+copcol:
+Data 15,0,0
+Data 15,1,0
+Data 15,2,0
+Data 15,3,0
+Data 15,4,0
+Data 15,5,0
+Data 15,6,0
+Data 15,7,0
+Data 15,8,0
+Data 15,9,0
+;
+Data 15,10,0
+Data 15,11,0
+Data 15,12,0
+Data 15,13,0
+Data 15,14,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+;
+Data 10,15,0
+Data 9,15,0
+Data 8,15,0
+Data 7,15,0
+Data 6,15,0
+Data 5,15,0
+Data 4,15,0
+Data 3,15,0
+Data 2,15,0
+Data 1,15,0
+Data 0,15,0
+Data 0,15,0
+;
+Data 0,15,2
+Data 0,15,3
+Data 0,15,4
+Data 0,15,5
+Data 0,15,6
+Data 0,15,7
+Data 0,15,8
+Data 0,15,9
+Data 0,15,10
+Data 0,15,11
+Data 0,15,12
+Data 0,15,13
+Data 0,15,15
+Data 0,15,15
+Data 0,0,0

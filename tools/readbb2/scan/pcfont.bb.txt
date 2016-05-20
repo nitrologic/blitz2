@@ -1,0 +1,8 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/pcfont.bb
++;
+; pcfont
+;
+
+; shape=w,h,data
+; font=index to shapes
+;

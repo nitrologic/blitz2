@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/devices.bb2
++;
+; $VER: devices.bb2 40.0 (28.02.94)
+;
+
+XInclude "exec/libraries.bb2"
+
+XInclude "exec/ports.bb2"
+
+;/****** Device ******************************************************/
+
+NEWTYPE.Device
+dd_Library.Library
+End NEWTYPE
+
+;/****** Unit ********************************************************/
+
+NEWTYPE.Unit
+unit_MsgPort.MsgPort;/* queue for unprocessed messages */
+;/* instance of msgport is recommended */
+unit_flags.b
+unit_pad.b
+unit_OpenCnt.w ;/* number of active opens */
+End NEWTYPE
+
+#UNITF_ACTIVE=(1LSL0)
+#UNITF_INTASK=(1LSL1)

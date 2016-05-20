@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WColour.bb
++; ; wcolour example ; Screen 0,3									 ;open Intuition screen and window.. Window 0,0,0,320,200,$1000,"Colours",0,1For T=1 To 7						;foreground colour loop  For G=1 To 7					 ;background colour loop 	WColour T,G					 ;set window colour	Print "Wow! "					;print some text...  Next NPrint "" NextMouseWait End 

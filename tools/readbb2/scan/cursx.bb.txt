@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CursX.bb
++; ; cursx program example ; Screen 0,3					 ;open an Intuition screen ScreensBitMap 0,0				;find it's bitmap BitMapOutput 0				 ;send Print statements there... Locate 0,2					 ;position bitmap cursor For k=1 To 16			 ;start a loop... While k>CursX			;some trickery! 	Print "*"  Wend NPrint ""				;print a newlineNextMouseWait 

@@ -1,0 +1,58 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/carlo.bb
++;
+; convert 24bit skidcars to 3 color
+;
+
+##[$A402] 0,1280,320,1
+;ReadChunky 0,"car.24"
+
+##[$A404] 0,"w:cars/mini1.iff":thresh=130
+
+lmaxlen 0,640,32,8
+lmaxlen 1,640,32,3
+
+DecodePalette 0,256:For i=0 To 255:AGAGreen 0,i,i,i,i:Next
+
+DecodePalette 1,4
+AGAGreen 1,0,0,255,0:StopCycle 1,1,3,3,3:StopCycle 1,2,12,12,12:StopCycle 1,3,14,8,5
+
+InitCopList 0,44,32,$13008,8,256,0
+;InitCopList 1,94,32,$13102,8,4,0
+
+InitCopList 1,94,64,$13002,8,4,-2
+;DisplayDblScan 1,1
+
+DisplayBitMap 0,0:DisplayPalette 0,0
+DisplayBitMap 1,1:DisplayPalette 1,1
+
+BLITZ
+
+CreateDisplay 0,1
+
+For xx=0 To 9
+	a=xx*32
+	##[$A402] 1,64,32,1:##[$A40C] 0,1,a*2,0,64,32,0,0
+	m.l=Peek.l(##[$80B8] ##[$A401](1))
+	Use lmaxlen 0
+	For y=0 To 31
+		For x=0 To 31
+			mm.l=m+x+x+y*192+(y AND 1)
+			r.w=Peek.b(mm)&255:g.w=Peek.b(mm+64)&255:b.w=Peek.b(mm+128)&255
+			c.w=(r+g+b)/3
+			Use lmaxlen 0:Point x+xx*32,y,c
+			Use lmaxlen 1
+			If ((x-y)AND1)=1
+				If c<60 Then c=1 Else c=2
+			Else
+				If c<120 Then c=1 Else c=2
+			EndIf
+			If g>r+50 Then c=6
+			If r>g+30 Then c=3:If ((x+y)AND1)=1 Then If r<thresh Then c=1
+			Point x+xx*32,y,c
+		Next
+	Next
+Next
+
+FloodFill 0,0,0
+MouseWait
+End

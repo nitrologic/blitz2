@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ItemHit.bb
++; ; exit on quit menu program example ; Screen 0,3							 ;open a simple screen Window 0,0,0,320,200,0,"Window with menus",0,1MenuColour 2						;change menu drawing penMenuTitle 0,0,"Menus"			;title of menu 0MenuItem 0,0,0,0,"First"		 ;item 0...MenuItem 0,0,0,1,"Second"	;item 1...MenuItem 0,0,0,2,"Third"		;item 2...MenuItem 0,0,0,3,"Quit"		 ;item 3...SetMenu 0						;attach menulist to windowRepeat WaitEvent Until ItemHit=3				 ;quit when 'Quit' selected. 

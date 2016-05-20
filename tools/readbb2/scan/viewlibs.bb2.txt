@@ -1,0 +1,282 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/viewlibs.bb2
++
+DEFTYPE.l
+;
+;'viewlibs' utility
+;
+;allows you to see what libraries are around!
+;
+;viewlibs [BLITZLIBS|DEFLIBS] [COMMANDS] [LIB libnum] [LIBDIR libdir]
+;
+;See if deflibs is around by default...
+
+If WriteMem(0,"blitz2:blitzlibs") Then df=-1:CloseFile 0
+;
+;User options...
+;
+For k=1 To NumPars
+p$=LCase$(Par$(k))
+;
+If p$="?" Then Goto template
+;
+If Left$(p$,1)=">" Then out$=Mid$(p$,2):Goto nxt
+;
+Select p$
+Case "deflibs"
+	df=-1
+Case "blitzlibs"
+	df=0
+Case "commands"
+	co=-1
+Case "lib"
+	If k<NumPars
+		k+1:lv=Val(Par$(k))
+	Else
+		NPrint "LIB ?????":End
+	EndIf
+Case "libdir"
+	If k<NumPars
+		k+1:ld$=Par$(k)
+	Else
+		NPrint "LIBDIR ?????":End
+	EndIf
+Default
+	template
+	NPrint "VIEWLIBS [BLITZLIBS|DEFLIBS] [COMMANDS] [LIB libnum] [LIBDIR dirname]"
+	End
+End Select
+;
+nxt
+;
+Next
+
+If out$
+	If ReadMem(1,out$)=0
+		NPrint "Error opening output channel":End
+	Else
+		FileOutput 1
+	EndIf
+EndIf
+
+i1=##[$FE97](260,1)
+If i1
+	i2=##[$FE97](260,1)
+	If i2
+		i3=##[$FE97](260,1)
+		If i3
+		Else
+			Goto cleanup
+		EndIf
+	Else
+		Goto cleanup
+	EndIf
+Else
+	Goto cleanup
+EndIf
+
+If df
+	NPrint "Viewing 'blitz2:deflibs'"
+Else
+	NPrint "Viewing 'blitzlibs:'"
+	t$="		"
+EndIf
+NPrint ""
+
+;begin processing of libs...
+If df
+	If WriteMem(0,"blitz2:deflibs")=0
+		NPrint "Error reading 'blitz2:deflibs'":Goto cleanup
+	Else
+		FileInput 0
+	EndIf
+Else
+	lo=##[$FE0A]("blitzlibs:",-2)
+	If lo=0
+		NPrint "Error reading 'blitzlibs:'":Goto cleanup
+	EndIf
+	i1=##[$FE97](260,1)
+	##[$FE0D] lo,i1
+EndIf
+
+.nextlib
+;
+If ad Then ##[$FE99] ad,le:ad=0
+;
+If df
+	l=Cvi(Inkey$(4))
+Else
+	If lo2		;in a directory?
+		If ##[$FE0E](lo2,i2)
+			If Peek.l(i2+4)>=0 Then Goto nextlib
+			f2$=f$+"/"+Peek$(i2+8)
+			lo3=##[$FE0A](f2$,-2)
+			If lo3
+				##[$FE0D] lo3,i3
+				le=Peek.l(i3+124)
+				ad=##[$FE97](le,1)
+				If ad
+					##[$FE0B] lo3
+					If WriteMem(0,f2$)
+						##[$BE14] 0,ad,le
+						CloseFile 0
+						ln=Peek.w(ad+32+4)&$ffff
+						If lv Then If ln<>lv Then Goto nextlib
+						Print "	Blitz library '",f2$,"' "
+						ad2=ad+32
+					Else
+						NPrint "Error reading file ",f2$:Goto nextlib
+					EndIf
+				Else
+					NPrint "Error allocating memory"
+					##[$FE0B] lo3:Goto nextlib
+				EndIf
+			Else
+				NPrint "Error locking library '",f2$,"'"
+				Goto nextlib
+			EndIf
+		Else
+			##[$FE0B] lo2:lo2=0:Goto nextlib
+		EndIf
+	Else
+		If ##[$FE0E](lo,i1)
+			If Peek.l(i1+4)<0 Then Goto nextlib ;directory?
+			d$=Peek$(i1+8)
+			If ld$ Then If d$<>ld$ Then Goto nextlib
+			f$="blitzlibs:"+Peek$(i1+8)
+			lo2=##[$FE0A](f$,-2)
+			If lo2=0
+				NPrint "Error locking directory ",f$:Goto nextlib
+			EndIf
+			NPrint "Reading directory...",f$
+			NPrint ""
+			##[$FE0D] lo2,i2
+			Goto nextlib
+		Else
+			Goto alldone
+		EndIf
+	EndIf
+EndIf
+;
+;print out library commands...
+;
+NPrint "(#",ln,")"
+;
+If ln<256
+	If co
+		ad2+48
+		loop2
+		d0=Peek.w(ad2)
+		If d0>=0
+			ad2+6:If d0=8 Then Goto addtoke
+			If d0&15
+				If d0&4
+					ad2+4
+					While Peek.b(ad2)>=0:ad2+1:Wend
+					ad2+1:Gosub aligna1:Goto addtoke
+				Else
+					Goto stloop
+				EndIf
+			EndIf
+			;
+			Gosub skiplibreg:ad2+12:Goto loop2
+			;
+			stloop
+			d0=Peek.w(ad2):ad2+2:If d0<0 Then Goto addtoke
+			ad2+(d0&255):Gosub aligna1:Gosub skiplibreg:ad2+12:Goto stloop
+			;
+			addtoke
+			ad2+6
+			co$=Peek$(ad2):ad2+Len(co$)+1
+			he$=Peek$(ad2):ad2+Len(he$)+1
+			Gosub aligna1
+			;
+			NPrint t$,co$," ",he$
+			;
+			Goto loop2
+		EndIf
+		NPrint ""
+	EndIf
+EndIf
+
+If lv=0 Then Goto nextlib
+
+alldone
+NPrint "":NPrint "Finished"
+cleanup
+If i1 Then ##[$FE99] i1,260
+If i2 Then ##[$FE99] i2,260
+If i3 Then ##[$FE99] i3,260
+If ad Then ##[$FE99] ad,le
+CloseFile 1
+
+MouseWait
+
+End
+
+.aligna1
+If ad2&1 Then ad2+1
+Return
+
+.skiplibreg
+If Peek.w(ad2) Then ad2+4:Goto skiplibreg
+ad2+2:Return
+
+CELSE
+
+.syslib LEA 48(a2),a1
+	LEA temp1,a4
+	;
+.loop2	MOVE	(a1),d0
+	BMI .next
+	MOVE.l	a1,(a4)
+	MOVE.l	a1,a4 ;last link for subs
+	ADDQ	#2,a4
+	ADDQ	#6,a1
+	CMP #8,d0
+	BEQ .addtoke
+	AND #15,d0
+	BNE .something
+	;
+	;skip sys sub
+	;
+	BSR skiplibreg
+	LEA 12(a1),a1
+	ADDQ	#1,d7 ;in case it's a user lib
+	BRA .loop2
+.something	BTST	#2,d0
+	BEQ .notalib
+	ADDQ	#4,a1
+.alibloop TST.b (a1)+
+	BPL .alibloop
+	BSR aligna1
+	BRA .addtoke
+.notalib	;process standard function or statement
+.stloop MOVE	(a1)+,d0
+	BMI .addtoke
+	AND #255,d0
+	ADD d0,a1
+	BSR aligna1
+	BSR skiplibreg
+	LEA 12(a1),a1
+	BRA .stloop
+.addtoke	MOVE.l	a1,(a3)
+	MOVE.l	a1,a3
+	ADDQ	#4,a1
+	;
+	MOVE	d7,(a1)+
+	;
+.tokeloop TST.b (a1)+
+	BNE .tokeloop
+.tokeloop2	TST.b (a1)+
+	BNE .tokeloop2
+	BSR aligna1
+	ADDQ	#1,d7
+	BRA .loop2
+	;
+skiplibreg	TST (a1)+
+	BEQ .done
+	ADDQ	#2,a1
+	BRA skiplibreg
+.done RTS
+
+CELSE

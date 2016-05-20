@@ -1,0 +1,3015 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/HydroZone/HydroZone.BB
++;												HYDROZONE
+
+; CODING, GRAPHICS, FONTS AND MUSIC: by David J. Cruickshank
+
+; SOUND SAMPLES: from the game "BuzzBar" written in Blitz Basic II
+
+
+
+; MORE THAN 1 MEG IS NEEDED TO COMPILE THIS SOURCE CODE. SORRY
+
+##[$80C3]
+##[$80CC]
+
+lmaxlen 0,320,256,3
+lmaxlen 1,320,256,3
+lmaxlen 2,120,200,3
+LoadModule 0,"mod.HydroZone"
+LoadSound 1,"explo1"
+LoadSound 2,"explo2"
+LoadSound 0,"Ting"
+casestrcomp 0,"Hztitle.sh"
+LoadShapes 46,"Duck.sh"
+LoadShapes 0,"Shapes2"
+LoadShape 67,"Skull.sh"
+LoadShape 68,"HZTitle.sh"
+
+
+tiy=0:m=0:pil=7.5
+Dim x(35),y(35),xs(35),ys(35),c(35)
+Dim bd(7,7):Dim bd2(7,7);	 BreakOut Col.
+Dim Boss1X(63),Boss1Y(63);	Boss going round and round
+Dim wi(45),soy(20); Font Info
+For t=1 To 63:Boss1X(t)=HSin(t/10)*100:Boss1Y(t)=HCos(t/10)*80
+Next
+For t=1 To 35
+ Gosub FlyBoxsVars
+Next
+
+##[$80C8] FontData
+For t=0 To 45
+ Read wi(t)
+Next
+VWait 50
+
+BLITZ; Hello Blitzs. How are you?.	I`m a bit blitz off
+
+
+Slice 0,44,3
+Use SetCycle 0
+
+Green 0,15,15,15
+Show 0
+For t=15 To 0 Step -1:VWait 4:Green 0,t,t,t:Next
+Gosub Shareware
+PlayModule 0
+Gosub cop
+
+
+##[$80BB]
+Gosub Title
+
+If go=1 Then Gosub Game
+
+##[$80C7]
+
+
+.Title
+Use SetCycle 0
+Gosub FlyBoxs
+Gosub MainTitle
+If go=1 Then Return
+If go=2 Then Gosub Shareware2
+
+Use lmaxlen db:BlockScroll
+Gosub CircleRnd
+tc=1:tud=50:Td=1
+t$="WRITTEN":Gosub FontPrint
+t$="IN":Gosub FontPrint
+t$="BLITZ BASIC II":Gosub FontPrint
+tud=tud+20
+t$="BY":Gosub FontPrint
+t$="DA-VID CRUICKSHANK":Gosub FontPrint
+
+
+
+Show db
+cou=1:Gosub waait
+BlockScroll
+tt=0
+If Rnd(10)>5
+	For t=15 To 1 Step -.5
+	 Boxf 90/t,40/t,225/t,183/t,7
+	 Boxf 105/t,40/t,210/t,123/t,-2
+	 Boxf 120/t,130/t,195/t,183/t,4
+	 Boxf 135/t,138/t,150/t,175/t,7
+	 Boxf 117/t,181/t,119/t,183/t,0
+	 Boxf 214/t,50/t,221/t,55/t,0
+	 VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	Next t
+	Use lmaxlen 1-db
+	tud=10
+	t$="KILL PIRACY":Gosub FontPrint
+	tud=200
+	t$="NOT YOUR AMIGA":Gosub FontPrint
+	While tt<300 AND Joyb(1)=0
+	VWait
+	longdiv 67,134,44,tt
+	tt=tt+1
+	Wend
+	For t=1 To 20 Step .5
+	 Boxf 90/t,40/t,225/t,183/t,7
+	 Boxf 105/t,40/t,210/t,123/t,-2
+	 Boxf 120/t,130/t,195/t,183/t,4
+	 Boxf 135/t,138/t,150/t,175/t,7
+	 Boxf 117/t,181/t,119/t,183/t,0
+	 Boxf 214/t,50/t,221/t,55/t,0
+	 VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	Next t
+
+
+
+Else
+	Td=0:coLR=1:co=0
+	While tt<120 AND Joyb(1)=0
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	tud=100:tt=tt+1
+	t$="SKULL ARMY":Gosub FontPrint
+	t$="SOFTW-ARE":Gosub FontPrint
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	co=co+coLR:Green 0,co,0,0:If co>14 OR co<1 Then coLR=-coLR
+	VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	Wend
+
+EndIf
+
+Td=0
+Use SetCycle 0
+Return
+
+
+
+
+
+
+.Game
+en=100 ; energy
+
+Gosub AlienTalk
+
+;Gosub TestLevel:If en<0 Then Gosub GameOver:Return
+Gosub Level1:If en<0 Then Gosub GameOver:Return
+Gosub Level2:If en<0 Then Gosub GameOver:Return
+Gosub Level3:If en<0 Then Gosub GameOver:Return
+Gosub Level4:If en<0 Then Gosub GameOver:Return
+Gosub Level5:If en<0 Then Gosub GameOver:Return
+Gosub TheEnd
+
+Return
+
+.AlienTalk
+
+BlockScroll:Show db:db=1-db:Use lmaxlen db:BlockScroll
+Green 1,0,0,0
+Green 2,0,0,0
+Green 3,0,0,0
+Green 7,0,0,0
+For t=0 To 500:Point Rnd(320),Rnd(200),7:Next
+Boxf 80,40,240,200,0:Circlef 80,80,40,10,7:Circlef 240,80,40,10,7
+tc=1:tud=10:Td=1
+t$="YOU ARE MY":Gosub FontPrint
+t$="PRISIONER.":Gosub FontPrint
+t$="THERE IS NO":Gosub FontPrint
+t$="ESCAPE, UNLESS":Gosub FontPrint
+t$="YOU PLA-Y MY GAME.":Gosub FontPrint
+t$="KNOWING AS":Gosub FontPrint
+t$="THE HYDROZONE.":Gosub FontPrint
+tud=tud+10
+t$="DO YOU DARE":Gosub FontPrint
+t$="CHALLENGE ME?":Gosub FontPrint
+
+Show db:db=1-db
+For t=0 To 15:VWait 2:Green 1,t,t,t:Green 2,t,0,t:Next
+For t=0 To 13:VWait 4:Green 7,0,0,t:Next
+
+Use lmaxlen db
+Gosub Station1
+tud=10
+
+tud=5:t$="GET READY":Gosub FontPrint
+t$="FOR THE RIDE":Gosub FontPrint
+t$="OF YOUR LIFE.":Gosub FontPrint
+
+cou=3:Gosub waait
+Use SetCycle 0
+
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+cou=3:Gosub waait
+Return
+
+
+.GameOver
+db=1-db:Use lmaxlen db:Show db
+tc=1:Td=1
+t$="GAME OVER":tud=113:Gosub FontPrint
+VWait 75
+Td=0
+sky=-60:skx=60:skxs=3:skys=3
+sky2=-35:skx2=100:skxs2=4:skys2=5
+Green 0,1,0,4
+While Joyb(1)=0 AND t<400
+t=t+1
+Circlef 160,127,Rnd(100),Rnd(8)
+Circlef 160,127,Rnd(100),-Rnd(8)
+
+
+skx=skx+skxs:sky=sky+skys
+skx2=skx2+skxs2:sky2=sky2+skys2
+If skx>0 Then skxs=skxs-1.1
+If skx<0 Then skxs=skxs+1.1
+If sky>0 Then skys=skys-1.1
+If sky<0 Then skys=skys+1.1
+If skx2>0 Then skxs2=skxs2-1
+If skx2<0 Then skxs2=skxs2+1
+If sky2>0 Then skys2=skys2-1
+If sky2<0 Then skys2=skys2+1
+
+
+longdiv 67,130+skx,80+sky,Rnd(8)
+longdiv 67,130-skx,80-sky,Rnd(8)
+If Int(t)=150 Then t$="TRY HARDER":If Rnd(10)>4 Then t$="TRY AGAIN"
+tud=113-skx:Gosub FontPrint
+longdiv 67,130+skx2,80-sky2,Rnd(8)
+longdiv 67,130-skx2,80+sky2,Rnd(8)
+
+VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Wend
+Return
+
+
+
+.FlyBoxs
+cou=100
+
+While Joyb(1)=0 AND cou>0
+cou=cou-1
+
+For t=1 To 35
+	If x(t)>320 OR x(t)<0 OR y(t)>256 OR y(t)<0 Then Gosub FlyBoxsVars
+	xs(t)=xs(t)*1.1:ys(t)=ys(t)*1.1:x(t)=x(t)+xs(t):y(t)=y(t)+ys(t)
+
+	Boxf x(t),y(t),x(t)+ys(t)*4,y(t)+ys(t)*4,c(t)
+Next
+VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Wend
+
+b=5
+
+While b>0
+
+For t=1 To 35
+	If x(t)>320 OR x(t)<0 OR y(t)>256 OR y(t)<0 Then Gosub FlyBoxsVars
+	xs(t)=xs(t)*1.1:ys(t)=ys(t)*1.1:x(t)=x(t)+xs(t):y(t)=y(t)+ys(t)
+
+	Boxf x(t),y(t),x(t)+ys(t)*4,y(t)+ys(t)*4,c(t)
+Next
+Boxf 160-160/b,127-127/b,160+160/b,127+127/b,1
+b=b-.25
+
+VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Wend
+db=1-db:Use lmaxlen db:BlockScroll
+Return
+
+.FlyBoxsVars
+x(t)=Rnd(320):y(t)=Rnd(256):xs(t)=-2+Rnd(4):ys(t)=-2+Rnd(4):c(t)=Int(Rnd(7)+1)
+Return
+
+
+.MainTitle
+BlockScroll
+go=0
+
+Gosub MTitleDraw
+While cou>0 AND go=0
+cou=cou-1
+If Joyb(0)=1 Then Gosub Pattens
+If Joyb(1)=1
+	If tiy=0 Then go=1
+	If tiy=1 Then go=2
+	If tiy=2 Then m=1-m
+	If tiy=3 Then pil=-pil
+	cou=.01:Gosub waait
+	Gosub MTitleDraw
+EndIf
+
+joy=Joyy(1):tiy=tiy-joy:If tiy<0 OR tiy>3 Then tiy=tiy+joy
+If joy<>0 Then Gosub MTitleDraw
+
+Wend
+Td=0
+Return
+
+.MTitleDraw
+
+longdiv 68,20,10
+
+
+Boxf 0,130,320,256,0
+
+tc=0:tud=140:Td=0
+Td=0:If tiy=3 Then Td=1
+If pil=7.5 Then t$="CONTROLS--	(ARCADE)":Gosub FontPrint
+If pil=-7.5 Then t$="CONTROLS		 (PILOT)":Gosub FontPrint
+Td=0:If tiy=2 Then Td=1
+If m=0 Then t$="SPEED			 (NORMAL)":Gosub FontPrint
+If m=1 Then t$="SPEED				(TURBO)":Gosub FontPrint
+tc=1:Td=0:If tiy=1 Then Td=1
+t$="SHAREW-ARE":Gosub FontPrint
+tud=220:Td=0:If tiy=0 Then Td=1
+t$="ST-ART":Gosub FontPrint
+longdiv 67,271,184,7
+Point 287,208-tiy,2:Point 298,208-tiy,2
+cou=20000
+VWait
+Show db:db=1-db:Use lmaxlen db
+Return
+
+.TestLevel
+
+Return
+
+.Level1
+PC=2:pt=68:Bc=1
+lr=1020:t=1020:ud=-250:tt=-250
+Gosub WireVarSt
+Green 0,4,0,0:Green 1,0,0,0
+##[$80C8] WTData1:fr=40:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData3:fr=28:Gosub WireTun:If en<0 Then Return
+Fa=0:FL=1
+
+Gosub TunVari
+
+##[$80C8] TData:fr=47:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back1:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData41:fr=9:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,4
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData11:fr=74:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData21:fr=14:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData27:fr=25:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=3:c4=2:c5=5:BlockScroll Bc
+##[$80C8] TData11:fr=30:Gosub MainLoop:If en<0 Then Return
+
+##[$80C8] TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
+tow=0:ats=-.12:brb=0:Gosub Boss1:If en<0 Then Return
+Gosub Explode
+
+tc=1:tud=80
+Use lmaxlen 1-db
+t$="WELL DONE":Gosub FontPrint
+t$="YOUVE KILLED IT":Gosub FontPrint
+t$="GET READY":Gosub FontPrint
+cou=3:Gosub waait
+Gosub Doors2
+FL=0
+##[$80C8] TData:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=2:c4=3:c5=2:BlockScroll Bc
+##[$80C8] TData8:fr=11:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData7:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData9:fr=12:Gosub MainLoop:If en<0 Then Return
+Green 1,0,5,0
+##[$80C8] TData1:fr=30:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+
+##[$80C8] TData9:fr=12:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData24:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData:fr=2:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,0
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData6:fr=30:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData13:fr=36:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData9:fr=3:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData30:fr=22:Gosub MainLoop:If en<0 Then Return
+
+##[$80C8] TDataEnd2:fr=9:Gosub MainLoop:If en<0 Then Return
+
+
+Use lmaxlen 1-db
+tc=1:tud=50
+t$="O.K. ITS":Gosub FontPrint
+t$="TIME FOR A":Gosub FontPrint
+t$="LITTLE FUN.":Gosub FontPrint
+t$="SHOOT THE":Gosub FontPrint
+t$="T-ARGETS FOR":Gosub FontPrint
+t$="EXTRA ENERGY":Gosub FontPrint
+cou=3:Gosub waait
+Gosub DuckShot
+Use lmaxlen 1-db
+tc=1:tud=50
+t$="LETS SMASH":Gosub FontPrint
+t$="THROUGH THE":Gosub FontPrint
+t$="W-ALL AND":Gosub FontPrint
+t$="HYDROW-ARP TO":Gosub FontPrint
+t$="LEVEL 2":Gosub FontPrint
+cou=2:Gosub waait
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+
+
+Return
+
+
+
+.Level2
+Green 0,1,0,5:Green 1,0,2,1
+PC=7:pt=121:Bc=1
+lr=800:t=800:ud=500:tt=500
+Gosub WireVarSt
+##[$80C8] WTData4:fr=43:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData4:Read non:fr=50:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData3:fr=28:Gosub WireTun:If en<0 Then Return
+
+Gosub TunVari
+Fa=0:FL=1
+
+##[$80C8] TData10:fr=20:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back4:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData38:fr=8:Gosub MainLoop:If en<0 Then Return
+Green 1,6,2,0
+##[$80C8] TData38:fr=8:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData12:fr=45:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData13:fr=36:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData21:fr=14:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData4:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=3:c4=2:c5=5:BlockScroll Bc
+##[$80C8] TData21:fr=7:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData43:fr=14:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData2:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back1:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData25:fr=18:Gosub MainLoop:If en<0 Then Return
+Green 1,15,11,15
+##[$80C8] TData24:fr=35:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+
+
+##[$80C8] TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
+
+brb=0:Gosub Boss2:If en<0 Then Return
+Gosub Explode
+tud=80
+Use lmaxlen 1-db
+t$="OK. LETS":Gosub FontPrint
+t$="GET GOING":Gosub FontPrint
+cou=1:Gosub waait
+Gosub Doors3
+FL=0
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData5:fr=25:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,2
+##[$80C8] TData3:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData4:fr=13:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData39:fr=12:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back1:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData22:fr=31:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData44:fr=5:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData41:fr=9:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData30:fr=22:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData37:fr=13:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData30:fr=22:Gosub MainLoop:If en<0 Then Return
+Green 1,10,0,0
+##[$80C8] TData21:fr=17:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData15:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=6:c4=3:c5=4:BlockScroll Bc
+##[$80C8] TData2:fr=14:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,0
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData14:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=5:c4=4:c5=7:BlockScroll Bc
+
+##[$80C8] TData12:fr=45:Gosub MainLoop:If en<0 Then Return
+Fa=1:Green 1,10,0,10
+##[$80C8] TData:fr=17:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
+
+Use lmaxlen 1-db
+tc=1:tud=50
+t$="LETS BREAK OUT":Gosub FontPrint
+t$="TO LEVEL 3":Gosub FontPrint
+t$="IN THIS":Gosub FontPrint
+t$="3D BREAKOUT":Gosub FontPrint
+t$="GAME":Gosub FontPrint
+cou=2:Gosub waait
+
+Gosub BreakOut:If en<0 Then Return
+Use lmaxlen 1-db
+tc=1:tud=50
+If tt=0
+ t$="YOU LOST ALL":Gosub FontPrint
+ t$="YOUR BALLS":Gosub FontPrint
+Else
+ t$="WELL DONE":Gosub FontPrint
+EndIf
+tud=tud+10
+t$="LEVEL 3 HERE":Gosub FontPrint
+t$="WE COME.":Gosub FontPrint
+cou=1:Gosub waait
+
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+
+
+Return
+
+.Level3
+PC=3:pt=122:Bc=1
+lr=1440:t=1440:ud=-150:tt=-150
+Gosub WireVarSt
+Green 0,7,0,10:Green 1,0,2,1
+##[$80C8] WTData5:fr=44:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData4:fr=50:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData3:fr=28:Gosub WireTun:If en<0 Then Return
+
+Gosub TunVari
+Fa=0:FL=1
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData31:fr=13:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData42:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+##[$80C8] TData44:fr=13+22:Gosub MainLoop:If en<0 Then Return
+Green 1,3,0,3
+##[$80C8] Back1:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+Fa=1
+##[$80C8] TData45:fr=33:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData30:fr=23:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData4:fr=14:Gosub MainLoop:If en<0 Then Return
+Green 7,0,0,5
+##[$80C8] TData32:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData14:fr=32:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData3:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData12:fr=45:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData9:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd3:fr=4:Gosub MainLoop:If en<0 Then Return
+tow=1:ats=-.1:Gosub Boss5
+FL=0
+##[$80C8] TData11:fr=20:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData28:fr=25:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData22:fr=31:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back7:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=6:c2=5:c3=4:c4=3:c5=2:BlockScroll Bc
+##[$80C8] TData14:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back8:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=4:c3=5:c4=2:c5=3:BlockScroll Bc
+##[$80C8] TData8:fr=11:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData38:fr=8:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData17:fr=19:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData16:fr=22:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData:fr=5:Gosub MainLoop:If en<0 Then Return
+tud=50
+Use lmaxlen 1-db
+t$="BONUS ROUND.":Gosub FontPrint
+t$="CA-TCH THE":Gosub FontPrint
+t$="FLASHING SQUARES":Gosub FontPrint
+t$="FOR EXTRA ENERGY.":Gosub FontPrint
+t$="GOOD LUCK.":Gosub FontPrint
+cou=3:Gosub waait
+Green 1,5,7,0
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+fr=200:wwP=20:Gosub Bonus2:If en<0 Then Return
+##[$80C8] Back4:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData9:fr=10:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,15
+##[$80C8] Out:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=6:BlockScroll Bc
+fr=3:Gosub MainLoop
+
+Return
+
+.Level4
+pt=123:Bc=1:PC=5
+lr=-50:t=-50:ud=200:tt=200
+Gosub WireVarSt
+Use SetCycle 0:Green 0,15,4,0:Green 1,3,0,6
+##[$80C8] WTData6:fr=40:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData4:Read non:fr=55:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData3:fr=28:Gosub WireTun:If en<0 Then Return
+
+Gosub TunVari
+Fa=1:FL=1
+##[$80C8] TData34:fr=25:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData34:fr=25:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,0
+##[$80C8] TData25:fr=18+15:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=3:c4=2:c5=5:BlockScroll Bc
+##[$80C8] TData28:fr=25:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData6:fr=22+18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData14:fr=35:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData2:fr=16:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData44:fr=5:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
+brb=0:Gosub Boss4:If en<0 Then Return
+Green 0,3,0,6
+Gosub Explode
+
+tud=80
+Use lmaxlen 1-db
+t$="WERE IN":Gosub FontPrint
+t$="THE TUNNEL":Gosub FontPrint
+t$="5 BY 5":Gosub FontPrint
+cou=.4:Gosub waait
+Gosub Doors
+FL=0
+##[$80C8] TData10:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back1:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData40:fr=14:Gosub MainLoop:If en<0 Then Return
+Green 1,9,4,0
+##[$80C8] TData24:fr=35:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back5:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=-7:c5=4:BlockScroll Bc
+##[$80C8] TData:fr=3:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=3:c4=2:c5=5:BlockScroll Bc
+##[$80C8] TData25:fr=18:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,0
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+##[$80C8] TData15:fr=40:Gosub MainLoop:If en<0 Then Return
+Green 1,5,0,3
+##[$80C8] TData31:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData16:fr=22:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd2:fr=9:Gosub MainLoop:If en<0 Then Return
+
+Use lmaxlen 1-db
+tud=50
+
+t$="TIME TO TOP":Gosub FontPrint
+t$="UP THA-T ENERGY.":Gosub FontPrint
+tud=tud+15
+t$="SHOOT THE":Gosub FontPrint
+t$="T-ARGETS":Gosub FontPrint
+t$="DEAD":Gosub FontPrint
+cou=3:Gosub waait
+Gosub DuckShot
+Use lmaxlen 1-db
+tud=100
+t$="LETS GO":Gosub FontPrint
+cou=.5:Gosub waait
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+
+Return
+
+.Level5
+pt=117:PC=5
+lr=-720:t=-720:ud=900:tt=900
+Gosub WireVarSt
+Green 0,0,3,2:Green 1,0,0,0
+##[$80C8] WTData8:fr=20:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData6:fr=10:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData8:Read non:fr=19:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData7:fr=40:Gosub WireTun:If en<0 Then Return
+##[$80C8] WTData3:fr=28:Gosub WireTun:If en<0 Then Return
+
+Gosub TunVari
+Fa=1:FL=1:Bc=1
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData39:fr=12:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData22:fr=9:Gosub MainLoop:If en<0 Then Return
+Green 1,0,2,14
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+##[$80C8] TData21:fr=16:Gosub MainLoop:If en<0 Then Return
+Green 1,0,0,0
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+##[$80C8] TData18:fr=19:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData44:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData15:fr=43:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back3:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData36:fr=19:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData19:fr=16:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData22:fr=31:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData25:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData25:fr=11:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
+
+brb=0:Gosub Boss3:If en<0 Then Return
+Gosub Explode
+tud=90
+Use lmaxlen 1-db
+t$="GOOD":Gosub FontPrint
+t$="SHOOTING":Gosub FontPrint
+cou=.4:Gosub waait
+Gosub Doors3
+
+FL=0
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back7:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=6:c2=5:c3=4:c4=3:c5=2:BlockScroll Bc
+##[$80C8] TData14:fr=10:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back8:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=4:c3=5:c4=2:c5=3:BlockScroll Bc
+##[$80C8] TData20:fr=20:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData6:fr=22:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData35:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back2:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
+##[$80C8] TData16:fr=22:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData15:fr=42:Gosub MainLoop:If en<0 Then Return
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+##[$80C8] TData38:fr=8:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData38:fr=8:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData7:fr=18:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData6:fr=5:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData37:fr=13:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData2:fr=14:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TData12:fr=20:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
+
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+tud=80
+Use lmaxlen 1-db
+t$="CA-TCH THE":Gosub FontPrint
+t$="FLASHING SQUARES":Gosub FontPrint
+t$="FOR ENERGY.":Gosub FontPrint
+t$="GOOD LUCK.":Gosub FontPrint
+cou=3:Gosub waait
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+fr=200:wwP=50:Gosub Bonus2:If en<0 Then Return
+##[$80C8] Back6:fr=5:Gosub MainLoop:If en<0 Then Return
+Bc=0:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
+##[$80C8] TData16:fr=2:Gosub MainLoop:If en<0 Then Return
+Bc=1:c2=5:c3=6:c4=6:c5=4:BlockScroll Bc
+
+##[$80C8] TData40:fr=14:Gosub MainLoop:If en<0 Then Return
+##[$80C8] TDataEnd3:fr=4:Gosub MainLoop:If en<0 Then Return
+tow=1:ats=-.13:Gosub Boss5
+##[$80C8] TDataEnd:fr=11:Gosub MainLoop:If en<0 Then Return
+
+Return
+
+.TheEnd
+
+
+BlockScroll:Use SetCycle 0
+t=255
+For tt=0 To 190
+t=t*.98
+Line Rnd(320),Rnd(256),160,128,Rnd(7)+1
+Line Rnd(320),Rnd(256),Rnd(7)+1
+Boxf 160-5.5*t,128-2.5*t,160-2.5*t,128+ -1.5*t,7
+Boxf 160+ -4.5*t,128+ -1.5*t,160+ -3.5*t,128+ 2.5*t,7
+Boxf 160+ -1.5*t,128+ -2.5*t,160+ -.5*t,128+ 2.5*t,7
+Boxf 160+ -.5*t,128+ -.5*t,160+ .5*t,128+ .5*t,7
+Boxf 160+ .5*t,128+ -2.5*t,160+ 1.5*t,128+ 2.5*t,7
+Boxf 160+ 2.5*t,128+ -2.5*t,160+ 3.5*t,128+ 2.5*t,7
+Boxf 160+ 3.5*t,128+ -2.5*t,160+ 5.5*t,128+ -1.5*t,7
+Boxf 160+ 3.5*t,128+ -.5*t,160+ 4.5*t,128+ .5*t,7
+Boxf 160+ 3.5*t,128+ 1.5*t,160+ 5.5*t,128+ 2.5*t,7
+Green 7,0,0,15.9-tt*.084
+VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+
+Next
+BlockScroll
+t=250
+For tt=0 To 190
+t=t*.98
+Line Rnd(320),Rnd(256),160,128,Rnd(7)+1
+Line Rnd(320),Rnd(256),Rnd(7)+1
+Boxf 160-5.5*t,128-2.5*t,160-4.5*t,128+2.5*t,7
+Boxf 160-4.5*t,128-2.5*t,160-2.5*t,128-1.5*t,7
+Boxf 160-4.5*t,128-.5*t,160-3.5*t,128+.5*t,7
+Boxf 160-4.5*t,128+1.5*t,160-2.5*t,128+2.5*t,7
+Boxf 160-1.5*t,128-2.5*t,160-.5*t,128+2.5*t,7
+Boxf 160-.5*t,128-2.5*t,160+.5*t,128-1.5*t,7
+Boxf 160+.5*t,128-2.5*t,160+1.5*t,128+2.5*t,7
+Boxf 160+2.5*t,128-2.5*t,160+3.5*t,128+2.5*t,7
+Boxf 160+3.5*t,128-2.5*t,160+4.5*t,128-1.5*t,7
+Boxf 160+3.5*t,128+1.5*t,160+4.5*t,128+2.5*t,7
+Boxf 160+4.5*t,128-1.5*t,160+5.5*t,128+1.5*t,7
+
+Green 7,0,0,15.9-tt*.084
+VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+
+Next
+
+For t=0 To 222 Step 3
+Line Rnd(320),Rnd(256)+t,160,128+t,Rnd(7)+1
+Line Rnd(320),Rnd(256)+t,Rnd(7)+1
+VWait 2
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+
+Next
+
+Use lmaxlen 1-db:BlockScroll:Use lmaxlen db
+For t=0 To 1000:Point Rnd(320),Rnd(200),7.1:Next
+
+Td=1:tc=0:tud=20
+t$="YOUVE DONE GOOD.":Gosub FontPrint:tud=tud-4
+t$="YOUVE MADE IT":Gosub FontPrint:tud=tud-4
+t$="THROUGH MY 5":Gosub FontPrint:tud=tud-4
+t$="HYDROZONES.":Gosub FontPrint:tud=tud-4
+t$="YOU ARE ONE OF THE":Gosub FontPrint:tud=tud-4
+t$="GREA-TEST.":Gosub FontPrint:tud=tud+5
+t$="BUT I LIED.	 I WILL":Gosub FontPrint:tud=tud-4
+t$="NOT LET YOU GO":Gosub FontPrint:tud=tud-4
+t$="UNTIL YOU":Gosub FontPrint:tud=tud-4
+t$="CONQUER . . .":Gosub FontPrint
+Green 1,0,0,0
+Green 2,0,0,0
+Green 3,0,0,0
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+For t=0 To 15 Step .5:VWait:Green 1,t,t,t:Green 2,t,0,t:Next
+For t=0 To 15 Step .05:VWait:Green 7,0,0,t:Next
+Gosub CircleRnd
+longdiv 68,20,60
+tc=1:tud=160
+t$="SPECIAL EDITION":Gosub FontPrint
+
+cou=2:Gosub waait
+Use SetCycle 0
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Gosub CircleRnd
+tud=90
+t$="FOR MORE INFO.":Gosub FontPrint
+t$="READ THE":Gosub FontPrint
+t$="SHAREW-ARE MENU.":Gosub FontPrint
+
+cou=2:Gosub waait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+cou=1:Gosub waait
+Return
+
+
+.TunVari
+
+co=3:coLR=1
+Use lmaxlen db:BlockScroll 1:Use lmaxlen db
+x1=-160:x2=160:x3=-160:x4=160:x5=-160
+xx1=-150:xx2=150:xx3=-150:xx4=150:xx5=-150
+y1=-127:y2=-127:y3=-127:y4=-127:y5=-127
+yy1=127:yy2=127:yy3=127:yy4=127:yy5=127
+c1=2:c2=3:c3=2:c4=3:c5=2
+jo=0
+ud=0:lr=0
+Return
+
+
+
+.MainLoop
+
+While en>-.1 AND fr>0
+If c2>8 Then If Fa Then Sound 1,11
+If FL=0
+ x1=x2:x2=x3:x3=x4:x4=x5:Read x5
+ xx1=xx2:xx2=xx3:xx3=xx4:xx4=xx5:Read xx5
+Else
+ xx1=xx2:xx2=xx3:xx3=xx4:xx4=xx5:Read xx5:xx5=-xx5
+ x1=x2:x2=x3:x3=x4:x4=x5:Read x5:x5=-x5
+EndIf
+
+y1=y2:y2=y3:y3=y4:y4=y5:Read y5
+yy1=yy2:yy2=yy3:yy3=yy4:yy4=yy5:Read yy5
+c1=c2:c2=c3:c3=c4:c4=c5:Read c5
+
+For t=0 To 1.8 Step .2
+If c2>8 Then If Fa Then y2=y2+15:yy2=yy2+15
+Gosub Lines
+
+If Joyb(1)=1 AND fg=0 Then Sound 2,11,300:fg=1:ft=.2:flr=-lr-20:fud=-ud-20
+If ft>8.95 Then Gosub Fire5
+Boxf 160+(x5+lr)/(10-t),127+(y5+ud)/(10-t),160+(xx5+lr)/(10-t),127+(yy5+ud)/(10-t),c5
+If ft>6.95 AND ft<8.95 AND fg Then Gosub Fire4
+Boxf 160+(x4+lr)/(8-t),127+(y4+ud)/(8-t),160+(xx4+lr)/(8-t),127+(yy4+ud)/(8-t),c4
+If ft>4.95 AND ft<6.95 AND fg Then Gosub Fire3
+Boxf 160+(x3+lr)/(6-t),127+(y3+ud)/(6-t),160+(xx3+lr)/(6-t),127+(yy3+ud)/(6-t),c3
+If ft>2.95 AND ft<4.95 AND fg Then Gosub Fire2
+Boxf 160+(x2+lr)/(4-t),127+(y2+ud)/(4-t),160+(xx2+lr)/(4-t),127+(yy2+ud)/(4-t),c2
+If ft>.1 AND ft<2.95 AND fg Then Gosub Fire1
+Boxf 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c1
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Next
+
+If -lr>x1-20 AND -lr<xx1+20 AND -ud>y1-20 AND -ud<yy1+20 Then Sound 1,15,3:Show db:VWait:BlockScroll 2:VWait 2:en=en-10:VWait 5
+fr=fr-1
+Wend
+en=Int(en+.1)
+Return
+
+
+.Fire5
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+ft=ft+.2
+If ft>10 Then fg=0:ft=0
+If flr+40>x5 AND flr-0<xx5 AND fud+40>y5 AND fud-0<yy5 Then fg=0:ft=0
+Return
+
+.Fire4
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+ft=ft+.2
+If flr+40>x4 AND flr-0<xx4 AND fud+40>y4 AND fud-0<yy4 Then fg=0:ft=0
+Return
+
+.Fire3
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+ft=ft+.2
+If flr+40>x3 AND flr-0<xx3 AND fud+40>y3 AND fud-0<yy3 Then fg=0:ft=0
+Return
+
+.Fire2
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+ft=ft+.2
+If flr+40>x2 AND flr-0<xx2 AND fud+40>y2 AND fud-0<yy2 Then fg=0:ft=0
+Return
+
+.Fire1
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+ft=ft+.2
+If flr+40>x1 AND flr-0<xx1 AND fud+40>y1 AND fud-0<yy1 Then fg=0:ft=0
+Return
+
+
+
+.Boss1
+ft=.2:at=3.6:S=0:BoCo=7:ben=15:ftud=.2
+While en>-.1 AND ben>0
+S=S+1:If S>63 Then S=1
+at=at-ats:If at>4 OR at<.7 Then ats=-ats:Gosub BossColli
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:ftud=.2:flr=-lr-20:fud=-ud-20
+
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+If ft>at AND fg Then Gosub FireBoss
+Boxf 160+(Boss1X(S)-60+lr)/at,127+(Boss1Y(S)-70+ud)/at,160+(Boss1X(S)+60+lr)/at,127+(Boss1Y(S)+70+ud)/at,BoCo
+Boxf 160+(Boss1X(S)-70+lr)/at,127+(Boss1Y(S)-50+ud)/at,160+(Boss1X(S)-30+lr)/at,127+(Boss1Y(S)-10+ud)/at,5
+Boxf 160+(Boss1X(S)+70+lr)/at,127+(Boss1Y(S)-50+ud)/at,160+(Boss1X(S)+30+lr)/at,127+(Boss1Y(S)-10+ud)/at,5
+Boxf 160+(Boss1X(S)-40+lr)/at,127+(Boss1Y(S)+20+ud)/at,160+(Boss1X(S)+40+lr)/at,127+(Boss1Y(S)+30+Rnd(20)+ud)/at,0
+If ft<=at AND fg Then Gosub FireBoss
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+expt=at:exx=Boss1X(S):exy=Boss1Y(S)
+Return
+
+.FireBoss
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+If ft+.3>at AND ft-.3<at
+ If flr+40>Boss1X(S)-60 AND flr<Boss1X(S)+60 AND fud+40>Boss1Y(S)-70 AND fud-0<Boss1Y(S)+70
+ ft=.2:fg=0:ftud=.2:ben=ben-1:Sound 1,11,5
+ BoCo=BoCo+1:If BoCo>4 Then BoCo=2
+ EndIf
+EndIf
+
+If ft>4 OR ft<.2
+
+If brb AND ft>4 Then ftud=-.2
+ If brb=0 AND ft>4 Then fg=0
+ If ft<.2 Then fg=0:ftud=.2:ft=.2:If PColl(-lr,-ud,40,40,flr+20,fud+20,40,40)
+ Sound 1,11,3:Show db:VWait:BlockScroll 2:VWait 2:en=en-10:VWait 3
+
+ EndIf
+EndIf
+ft=ft+ftud
+Return
+
+.BossColli
+If at>4 Then Return
+If -lr>Boss1X(S)-120 AND -lr<Boss1X(S)+120 AND (-ud>Boss1Y(S)-120 AND -ud<Boss1Y(S)+120 OR tow=1)
+Sound 1,15,3:Show db:VWait:BlockScroll 4:VWait 2:en=en-10:VWait 3
+EndIf
+Return
+
+.Boss2
+ft=.2:at=4:S=0:ben=15:ftud=.2:fslr=0:fsud=0:aft=4
+While en>-.1 AND ben>0
+S=S+1:If S>63 Then S=1
+
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,15,13:fg=1:ft=.2:ftud=.2:flr=-lr-20:fud=-ud-20
+aft=aft-.4:aflr=aflr+fslr:afud=afud+fsud
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+
+Boxf 160+(-50+lr)/4,127+(-50+ud)/4,160+(50+lr)/4,127+(30+ud)/4,1
+Boxf 160+(-40+lr)/4,127+(-30+ud)/4,160+(-10+lr)/4,127+(-20+ud)/4,2
+Boxf 160+(10+lr)/4,127+(-30+ud)/4,160+(40+lr)/4,127+(-20+ud)/4,2
+
+Circlef 160+lr/4,127+ud/4,5,0
+If aft>ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,7
+If fg Then Gosub FireBoss2
+If aft<=ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,7
+
+Boxf 0,0,en,10,4
+If aft<.3
+ If PColl(aflr-20,afud-20,40,40,-lr-20,-ud-20,40,40)
+ Sound 1,15,3:Show db:VWait:BlockScroll 4:VWait 3:en=en-10
+ EndIf
+ aft=4:aflr=0:afud=0:fslr=-lr/10:fsud=-ud/10
+EndIf
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+expt=4:exx=0:exy=-10
+Return
+
+.FireBoss2
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(7)
+If ft>4
+ If PColl(-50,-50,100,80,flr,fud,40,40)
+ ft=.2:fg=0:ftud=.2:ben=ben-1:Sound 1,11,5
+
+ EndIf
+EndIf
+
+If ft>4 OR ft<.2
+
+If brb AND ft>4 Then ftud=-.2
+ If brb=0 AND ft>4 Then fg=0
+ If ft<.2 Then fg=0:ftud=.2:ft=.2:If PColl(-lr,-ud,40,40,flr+20,fud+20,40,40)
+ Sound 1,11,3:Show db:VWait:BlockScroll 4:VWait 2:en=en-10:VWait 3
+
+ EndIf
+EndIf
+ft=ft+ftud
+Return
+
+.Boss3
+ax=0:ay=0:sp1=2:sp2=33:at=3:S=0:ben=15:ftud=.2:fsud=0:aft=4:BoCo=1
+While en>-.1 AND ben>0
+sp1=sp1+1:If sp1>63 Then sp1=1
+sp2=sp2+1:If sp2>63 Then sp2=1
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:ftud=.2:flr=-lr-20:fud=-ud-20
+aft=aft-.3:aflr=aflr+fslr:afud=afud+fsud
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+Boxf 160+(-20+lr)/3.2,127+ud/3.2,160+(20+lr)/3.2,127+(128+ud)/3.2,5
+Circlef 160+(ax+lr)/at,127+(ay+ud)/at,40/at,BoCo
+Circlef 160+(ax+Boss1X(sp1)+lr)/at,127+(ay+Boss1Y(sp1)+ud)/at,20/at,1+Rnd(7)
+Circlef 160+(ax+Boss1X(sp2)+lr)/at,127+(ay+Boss1Y(sp2)+ud)/at,20/at,1+Rnd(7)
+
+
+If aft>ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,7
+If fg
+
+ Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,2+Rnd(6)
+ If ft>4 Then ft=.2:fg=0:ftud=.2
+ If ft>2.9 AND ft<3.15
+	If PColl(-50,-50,100,80,flr,fud,40,40)
+	ft=.2:fg=0:ftud=.2:ben=ben-1:Sound 1,11,5
+	BoCo=BoCo+1:If BoCo>4 Then BoCo=1
+	EndIf
+ EndIf
+ft=ft+ftud
+EndIf
+If aft>.1 AND aft<=ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,7
+
+Boxf 1,1,en,10,4
+If aft<.3
+ If PColl(aflr,afud,40,40,-lr,-ud,40,40)
+	Sound 1,15,3:Show db:db=1-db:Use lmaxlen db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
+ EndIf
+ adb=1-adb
+ If adb=1 Then aflr=Boss1X(sp1):afud=Boss1Y(sp1)
+ If adb=0 Then aflr=Boss1X(sp2):afud=Boss1Y(sp2)
+ aft=at:fslr=(-aflr-lr)/10:fsud=(-afud-ud)/10
+ If Rnd(10)>8 Then aft=at:fslr=0:fsud=0:aflr=0:afud=0
+EndIf
+
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+expt=3:exx=0:exy=-10
+Return
+
+.Boss4
+ax=-20:ay=-40:axs=5:ays=-10:ben=15:aft=3:ftud=.2:fsud=0:BoCo=1
+While en>-.1 AND ben>0
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:ftud=.2:flr=-lr-20:fud=-ud-20
+ax=ax+axs:If ax>140 OR ax<-140 Then axs=-axs
+ay=ay+ays:ays=ays+1:If ay>100 Then ay=100:ays=-Rnd(20)
+aft=aft-.2
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+
+Boxf 160+(ax-50+lr)/3,127+(ay-50+ud)/3.05,160+(ax+50+lr)/3,127+(ay+30+ud)/3.05,BoCo
+Boxf 160+(ax-20+lr)/3.1,127+(ay-45+ud)/3.1,160+(ax-10+lr)/3.1,127+(ay-20+ud)/3.1,-3
+Boxf 160+(ax+10+lr)/3.1,127+(ay-45+ud)/3.1,160+(ax+20+lr)/3.1,127+(ay-20+ud)/3.1,-3
+Circlef 160+(ax+lr)/3,127+(ay+ud)/3,10,5+(1.5-aft)*2,1
+
+Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,1+Rnd(7)
+
+
+If fg
+ Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,1+Rnd(7)
+ If ft>3.5 Then ft=.2:fg=0:ftud=.2
+ If ft>2.9 AND ft<3.15
+	If PColl(ax-50,ay-50,100,80,flr,fud,40,40)
+	ft=.2:fg=0:ftud=.2:ben=ben-1:Sound 1,11,5
+	BoCo=BoCo+1:If BoCo>5 Then BoCo=2
+	EndIf
+ EndIf
+ft=ft+ftud
+EndIf
+
+If aft>.1 AND aft<=ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,1+Rnd(7)
+
+Boxf 0,0,en,10,4
+If aft<.3
+ If PColl(aflr,afud,40,40,-lr,-ud,40,40)
+	Sound 1,15,3:Show db:db=1-db:Use lmaxlen db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
+ EndIf
+ aft=3:fslr=-Rnd(20):fsud=-Rnd(20):aflr=ax:afud=ay
+ If ax>-lr Then fslr=Rnd(2)
+ If ay>-ud Then fsud=Rnd(2)
+EndIf
+
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+expt=3:exx=ax:exy=ay
+Return
+
+.Boss5
+x2=170:xx2=170:c2=0:mi=1
+ft=.2:at=2:S=64:BoCo=7:ben=15:ftud=.2
+While en>-.1 AND ben>0
+
+mi=-mi
+x1=x2:x2=x3:x3=x4:x4=x5:x5=mi*150
+xx1=xx2:xx2=xx3:xx3=xx4:xx4=xx5:xx5=mi*160
+;y1=y2:y2=y3:y3=y4:y4=y5
+;yy1=yy2:yy2=yy3:yy3=yy4:yy4=yy5:
+c1=c2:c2=c3:c3=c4:c4=c5:c5=2+Rnd(6)
+
+For t=0 To 1.8 Step .2
+
+S=S-1:If S<1 Then S=63
+at=at-ats:If at>4 OR at<.5 Then ats=-ats:Gosub BossColli
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:ftud=.2:flr=-lr-20:fud=-ud-20
+
+Boxf 160+(x5+lr)/(10-t),127+(y5+ud)/(10-t),160+(xx5+lr)/(10-t),127+(yy5+ud)/(10-t),c5
+Boxf 160+(x4+lr)/(8-t),127+(y4+ud)/(8-t),160+(xx4+lr)/(8-t),127+(yy4+ud)/(8-t),c4
+Boxf 160+(x3+lr)/(6-t),127+(y3+ud)/(6-t),160+(xx3+lr)/(6-t),127+(yy3+ud)/(6-t),c3
+Boxf 160+(x2+lr)/(4-t),127+(y2+ud)/(4-t),160+(xx2+lr)/(4-t),127+(yy2+ud)/(4-t),c2
+Boxf 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c1
+
+If ft>at AND fg Then Gosub FireBoss
+Boxf 160+(Boss1X(S)-50+lr)/at,127+(-128+ud)/at,160+(Boss1X(S)+50+lr)/at,127+(128+ud)/at,BoCo
+Boxf 160+(Boss1X(S)-70+lr)/at,127+(Boss1Y(S)-50+ud)/at,160+(Boss1X(S)-30+lr)/at,127+(Boss1Y(S)-10+ud)/at,5
+Boxf 160+(Boss1X(S)+70+lr)/at,127+(Boss1Y(S)-50+ud)/at,160+(Boss1X(S)+30+lr)/at,127+(Boss1Y(S)-10+ud)/at,5
+Boxf 160+(Boss1X(S)-40+lr)/at,127+(Boss1Y(S)+20+ud)/at,160+(Boss1X(S)+40+lr)/at,127+(Boss1Y(S)+30+Rnd(20)+ud)/at,0
+If ft<=at AND fg Then Gosub FireBoss
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Next
+
+Wend
+
+
+
+
+
+Return
+
+
+.WireTun
+
+While en>-.1 AND fr>0
+
+Read re:x1=x2:x2=x3:x3=x4:x4=x5:x5=x5+re
+xx1=xx2:xx2=xx3:xx3=xx4:xx4=xx5:xx5=xx5+re
+Read re:y1=y2:y2=y3:y3=y4:y4=y5:y5=y5+re
+yy1=yy2:yy2=yy3:yy3=yy4:yy4=yy5:yy5=yy5+re
+c1=c2:c2=c3:c3=c4:c4=c5:c5=2+Rnd(6)
+
+For t=0 To 1.8 Step .2
+If Joyb(0)=1 Then tud=100:Use lmaxlen 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use lmaxlen db:cou=32568:Gosub waait
+lri=Joyx(1)*7.5:lr=lr-lri
+udi=Joyy(1)*pil:ud=ud-udi
+pt=pt-.1
+Boxf 160+(-300+lr)/pt,127+(-600+ud)/pt,160+(300+lr)/pt,127+(400+ud)/pt,PC
+Boxf 160+(-50+lr)/pt,127+(70+ud)/pt,160+(50+lr)/pt,127+(400+ud)/pt,1
+
+If pt>10 Then Box 160+(x5+lr)/(10-t),127+(y5+ud)/(10-t),160+(xx5+lr)/(10-t),127+(yy5+ud)/(10-t),c5
+Box 160+(x4+lr)/(8-t),127+(y4+ud)/(8-t),160+(xx4+lr)/(8-t),127+(yy4+ud)/(8-t),c4
+Box 160+(x3+lr)/(6-t),127+(y3+ud)/(6-t),160+(xx3+lr)/(6-t),127+(yy3+ud)/(6-t),c3
+Box 160+(x2+lr)/(4-t),127+(y2+ud)/(4-t),160+(xx2+lr)/(4-t),127+(yy2+ud)/(4-t),c2
+Box 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c1
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Next
+
+If -lr<x1+20 OR -lr>xx1-20 OR -ud<y1+20 OR -ud>yy1-20 Then Sound 1,11,3:Show db:VWait:BlockScroll 2:VWait 2:en=en-10:VWait 5
+
+fr=fr-1
+Wend
+
+Return
+
+.WireVarSt
+Green 1,0,1,3
+x1=-75-t:x2=-75-t:x3=-75-t:x4=-75-t:x5=-75-t
+xx1=75-t:xx2=75-t:xx3=75-t:xx4=75-t:xx5=75-t
+y1=-75-tt:y2=-75-tt:y3=-75-tt:y4=-75-tt:y5=-75-tt
+yy1=75-tt:yy2=75-tt:yy3=75-tt:yy4=75-tt:yy5=75-tt
+c3=2:c4=1:c5=6
+Return
+
+.DuckShot
+sh=46:time=128:x2=140:xx2=160:y2=-128:yy2=128:c2=4:Gosub DuckVar
+While time>-128
+time=time-.2
+
+Gosub Lines
+If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:flr=-lr-20:fud=-ud-20
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+dlr=dlr+dlrs:dud=dud+duds:dlrs=dlrs+dlra:duds=duds+duda:If dlr>130 OR dlr<-158 OR dud>99 OR dud<-125 Then Gosub DuckVar
+longdiv sh+shp,160+(dlr+lr)/4,127+(dud+ud)/4
+Boxf 160+(140+lr)/2,127+(128+ud)/2,160+(160+lr)/2,127+(time+ud)/2,4
+Boxf 160+(-160+lr)/2.2,127+(-128+ud)/2.2,160+(-140+lr)/2.2,127+(time+ud)/2.2,4
+Line 160+(-140+lr)/2.2,127+(time+ud)/2.2,160+(140+lr)/2,127+(time+ud)/2,4
+shp=shp+db:If shp>3 Then shp=0
+If fg Then Gosub FireDuck
+
+
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+If en>150 Then en=150
+Return
+
+.FireDuck
+Boxf 160+(flr+lr)/ft,127+(fud+ud)/ft,160+(flr+40+lr)/ft,127+(fud+40+ud)/ft,Rnd(6)+2
+If ft>4
+ ft=-.2:fg=0
+ If PColl(flr,fud,40,40,dlr,dud,30,30) Then Sound 0,11,5:Gosub DuckVar:If en<150 Then en=en+7
+EndIf
+ft=ft+.2
+
+
+
+Return
+
+.DuckVar
+sh=sh+4:If sh>60 Then sh=46
+rn=Int(Rnd(4)):dkc=dkc-1:If dkc<3 Then dkc=5
+If rn=1 Then dlr=-155:dud=-100+Rnd(170):dlrs=1+Rnd(2):duds=0:dlra=-.05+Rnd(1)/10:duda=-.05+Rnd(1)/10:Return
+If rn=2 Then dlr=128:dud=-100+Rnd(170):dlrs=-1-Rnd(2):duds=0:dlra=-.05+Rnd(1)/10:duda=-.05+Rnd(1)/10:Return
+If rn=3 Then dlr=-150+Rnd(268):dud=97:duds=-1-Rnd(2):dlrs=0:duda=-.05+Rnd(1)/10:dlra=-.05+Rnd(1)/10:Return
+dlr=-150+Rnd(268):dud=-120:duds=1+Rnd(2):dlrs=0:duda=-.05+Rnd(1)/10:dlra=-.05+Rnd(1)/10
+
+Return
+
+.Bonus2
+While en>-.1 AND fr>0
+
+x1=x2:x2=x3:x3=x4:x4=x5:x5=Int(-160+Rnd(240))
+xx1=xx2:xx2=xx3:xx3=xx4:xx4=xx5:xx5=x5+80
+y1=y2:y2=y3:y3=y4:y4=y5:y5=Int(-128+Rnd(178))
+yy1=yy2:yy2=yy3:yy3=yy4:yy4=yy5:yy5=y5+80
+c1=c2:c2=c3:c3=c4:c4=c5:c5=Int(Rnd(6)+2):If c5=6 Then yy5=yy5-40:xx5=xx5-40
+If Rnd(20)>18 AND c5<>6 Then x5=-160+Rnd(280):xx5=x5+wwP:y5=-128:yy5=128
+
+For t=0 To 1.8 Step .2
+
+Gosub Lines
+Green 6,co,co,4
+If Joyb(1)=1 AND fg=0 Then Sound 2,11,13:fg=1:ft=.2:flr=-lr-20:fud=-ud-20
+If ft>8.95 Then Gosub Fire5
+Boxf 160+(x5+lr)/(10-t),127+(y5+ud)/(10-t),160+(xx5+lr)/(10-t),127+(yy5+ud)/(10-t),c5
+If ft>6.95 AND ft<8.95 AND fg Then Gosub Fire4
+Boxf 160+(x4+lr)/(8-t),127+(y4+ud)/(8-t),160+(xx4+lr)/(8-t),127+(yy4+ud)/(8-t),c4
+If ft>4.95 AND ft<6.95 AND fg Then Gosub Fire3
+Boxf 160+(x3+lr)/(6-t),127+(y3+ud)/(6-t),160+(xx3+lr)/(6-t),127+(yy3+ud)/(6-t),c3
+If ft>2.95 AND ft<4.95 AND fg Then Gosub Fire2
+Boxf 160+(x2+lr)/(4-t),127+(y2+ud)/(4-t),160+(xx2+lr)/(4-t),127+(yy2+ud)/(4-t),c2
+If ft>.1 AND ft<2.95 AND fg Then Gosub Fire1
+Boxf 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c1
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Next
+
+If -lr>x1-20 AND -lr<xx1+20 AND -ud>y1-20 AND -ud<yy1+20
+ If c1<>6 Then Sound 1,11,3:Show db:VWait:BlockScroll 4:VWait 2:en=en-10:VWait 5
+ If c1=6 Then Sound 0,11,13:If en<150 Then en=en+3
+EndIf
+fr=fr-1
+Wend
+
+If c5=6 Then x5=160:xx5=160:y5=132:yy5=132:c5=2
+If c4=6 Then x4=160:xx4=160:y4=132:yy4=132:c4=2
+If c3=6 Then x3=160:xx3=160:y3=132:yy3=132:c3=2
+If c2=6 Then x2=160:xx2=160:y2=132:yy2=132:c2=2
+
+Return
+
+
+.Lines
+
+co=co+coLR:Green 6,co,15-co,8:If co>14 OR co<1 Then coLR=-coLR
+lri=Joyx(1)*7.5:lr=lr-lri:If lr>160 OR lr<-160 Then lr=lr+lri
+udi=Joyy(1)*pil:ud=ud-udi:If ud>126 OR ud<-126 Then ud=ud+udi
+
+Line 160,127,lr,ud,3
+Line 160,127,320+lr,ud,3
+Line 160,127,lr,256+ud,2
+Line 160,127,320+lr,256+ud,2
+If Joyb(0)=1 Then tud=100:Use lmaxlen 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use lmaxlen db:cou=32568:Gosub waait
+Return
+
+.BreakOut
+BrCo=0:ox=0:oxs=0:oy=0:oys=0:ot=.3:otud=0:start=1:Dim bd(7,7),bd2(7,7)
+
+Use lmaxlen 2
+BlockScroll
+For vv2=0 To 250 Step 40
+ For vv1=0 To 315 Step 67
+ Boxf vv1/2.5,vv2/2.5,(vv1+50)/2.5,(vv2+20)/2.5,1+vv2/50
+ Box vv1/2.5,vv2/2.5,(vv1+50)/2.5,(vv2+20)/2.5,7
+ Next
+Next
+vv2=vv2-17:vv1=vv1-15
+GetaShape 65,0,0,vv1/2.5,vv2/2.5
+
+For v2=0 To 250 Step 40
+ For v1=0 To 315 Step 67
+ Boxf v1/3.5,v2/3.5+120,(v1+50)/3.5,(v2+20)/3.5+120,1+v2/50
+ Box v1/3.5,v2/3.5+120,(v1+50)/3.5,(v2+20)/3.5+120,7
+ Next
+Next
+v2=v2-17:v1=v1-15
+GetaShape 66,0,120,v1/3.5,v2/3.5
+
+Use lmaxlen db
+tt=5
+While en>-.1 AND BrCo<70 AND tt>0
+
+
+Gosub Lines
+If start Then ox=-lr:oy=-ud:If Joyb(1) Then otud=.1:start=0:oxs=Rnd(.2)-.1:oys=Rnd(.2)-.1
+ot=ot+otud:If ot>4 OR ot<.2 Then otud=-otud:Gosub BreakCol
+ox=ox+oxs:oy=oy+oys:If (ox<-145 AND oxs<0) OR (ox>145 AND oxs>0) Then oxs=-oxs
+If (oy<-127 AND oys<0) OR (oy>127 AND oys>0) Then oys=-oys
+If (ot>3.45 AND ot<3.55) OR (ot>2.45 AND ot<2.55) Then Gosub BreakBrick
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+
+If ot>3.4 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
+longdiv 66,160+(-160+lr)/3.5,127+(-127+ud)/3.5
+If ot>2.4 AND ot<3.5 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
+longdiv 65,160+(-160+lr)/2.5,127+(-127+ud)/2.5
+
+
+If ot<2.5 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
+
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Wend
+
+Return
+
+
+.BreakCol
+If ot>4 Then Return
+If NOT PColl(ox-10,oy-10,20,20,-lr-20,-ud-20,40,40) Then start=1:otud=0:ot=.3:en=en-10:tt=tt-1:Return
+oxs=(ox+lr)/5
+oys=(oy+ud)/5
+
+Return
+
+.BreakBrick
+
+If ot>2.47 AND ot<2.53 AND bd(Int((ox+165)/67),Int((oy+132)/40))=0
+ot=2.5
+otud=-otud
+bd(Int((ox+165)/67),Int((oy+132)/40))=1
+
+Use lmaxlen 2
+
+Boxf Int((ox+165)/67)*67/2.5,Int((oy+132)/40)*40/2.5,(60+Int((ox+165)/67)*67)/2.5,(20+Int((oy+132)/40)*40)/2.5,0
+GetaShape 65,0,0,vv1/2.5,vv2/2.5
+Use lmaxlen db
+BrCo=BrCo+1:If en<150 Then en=en+1
+Sound 0,11
+EndIf
+
+If ot>3.45 AND ot<3.55 AND bd2(Int((ox+165)/67),Int((oy+132)/40))=0
+ot=3.5
+otud=-otud
+bd2(Int((ox+165)/67),Int((oy+132)/40))=1
+
+Use lmaxlen 2
+
+Boxf Int((ox+165)/67)*67/3.5,120+Int((oy+132)/40)*40/3.5,(60+Int((ox+165)/67)*67)/3.5,120+(20+Int((oy+132)/40)*40)/3.5,0
+GetaShape 66,0,120,v1/3.5,v2/3.5
+Use lmaxlen db
+BrCo=BrCo+1:If en<150 Then en=en+1
+Sound 0,11
+EndIf
+Return
+
+.Explode
+ew=0
+For t=20 To 200 Step 10
+Gosub Lines
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+ew=ew+.025
+Circlef 160+(exx+lr)/(expt-ew),127+(exy+ud)/(expt-ew),t/expt,2+Rnd(6)
+Circlef 160+(exx+lr)/expt,127+(exy+ud)/expt,Rnd(t)/expt,-Rnd(8)
+Circlef 160+(exx+lr)/expt,127+(exy+ud)/expt,Rnd(t)/expt,-Rnd(8)
+For tt=0 To 5:Point 160+(-Rnd(t)+Rnd(t)+exx+lr)/expt,127+(-Rnd(t)+Rnd(t)+exy+ud)/expt,Rnd(7):Next
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Next
+Return
+.Doors
+x3=140:y3=-128:xx3=160:yy3=128:c3=6
+
+
+For t=-160 To 140 Step 4
+Gosub Lines
+
+
+Boxf 160+(x5+lr)/8,127+(y5+ud)/8,160+(xx5+lr)/8,127+(yy5+ud)/8,c5
+Boxf 160+(x4+lr)/6,127+(y4+ud)/6,160+(xx4+lr)/6,127+(yy4+ud)/6,c4
+
+Boxf 160+(t+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+Boxf 0,0,en,10,4
+If m=0 Then VWait 2
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Next
+Return
+
+.Doors2
+x3=160:y3=128:xx3=-160:yy3=-128:c3=-7
+
+
+For t=0 To 160 Step 4
+Gosub Lines
+
+Boxf 160+(x5+lr)/8,127+(y5+ud)/8,160+(xx5+lr)/8,127+(yy5+ud)/8,c5
+Boxf 160+(x4+lr)/6,127+(y4+ud)/6,160+(xx4+lr)/6,127+(yy4+ud)/6,c4
+Boxf 160+(-160+lr)/4.1,127+(-128+ud)/4.1,160+(160+lr)/4.1,127+(128+ud)/4.1,-7
+Boxf 160+(t+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+Boxf 160+(-t+lr)/4,127+(-128+ud)/4,160+(-160+lr)/4,127+(128+ud)/4,6
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Next
+
+Return
+
+.Doors3
+x3=159:y3=127:xx3=160:yy3=128:c3=6
+
+
+For t=0 To 128 Step 2
+Gosub Lines
+
+Boxf 160+(x5+lr)/8,127+(y5+ud)/8,160+(xx5+lr)/8,127+(yy5+ud)/8,c5
+Boxf 160+(x4+lr)/6,127+(y4+ud)/6,160+(xx4+lr)/6,127+(yy4+ud)/6,c4
+Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(-t*1.25+lr)/4,127+(-t+ud)/4,6
+Boxf 160+(-t*1.25+lr)/4,127+(t+ud)/4,160+(-160+lr)/4,127+(128+ud)/4,6
+Boxf 160+(160+lr)/4,127+(-128+ud)/4,160+(t*1.25+lr)/4,127+(-t+ud)/4,6
+Boxf 160+(t*1.25+lr)/4,127+(t+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
+
+Boxf 0,0,en,10,4
+If m=0 Then VWait
+Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+
+Next
+Return
+
+.cop
+
+t=126
+For a=0 To 15
+ColSplit 0,0,0,a,t
+
+t=t+8
+Next a
+ColSplit 0,0,0,0,256
+Return
+
+
+
+
+.Shareware
+
+TD=1:tc=1:tud=10
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+Green 1,0,0,0
+Green 2,0,0,0
+Green 3,0,0,0
+Green 7,0,0,0
+For t=0 To 1000:Point Rnd(320),Rnd(256),7:Next
+For t=0 To 7:Circlef Rnd(320),Rnd(256),Rnd(25),7:Next
+Td=1:t$="SHAREW-ARE NOTE":Gosub FontPrint
+tc=0:tud=tud+15
+t$="THIS GAME IS":Gosub FontPrint
+t$="SHAREW-ARE.":Gosub FontPrint
+tud=tud+15
+t$="FOR EXTRA LEVELS":Gosub FontPrint
+t$="AND THE SOURCE":Gosub FontPrint
+t$="CODE, READ":Gosub FontPrint
+t$="THE SHAREW-ARE":Gosub FontPrint
+t$="MENU.":Gosub FontPrint
+
+Show db:db=1-db:Use lmaxlen db:BlockScroll
+For t=0 To 15:VWait 2:Green 1,t,t,t:Green 2,t,0,t:Next
+For t=0 To 15:VWait 7:Green 7,0,0,t:Next
+
+cou=1.5:Gosub waait
+
+Return
+.Shareware2
+tc=1:tud=0
+Use lmaxlen db:BlockScroll
+Gosub CircleRnd
+Td=1:t$="SHAREW-ARE":Gosub FontPrint
+tc=0:Td=0:tud=tud+5
+t$="YOU MA-Y FREEL-Y":Gosub FontPrint:tud=tud-2
+t$="COPY THIS GAME TO":Gosub FontPrint:tud=tud-2
+t$="YOUR MA-TES AS":Gosub FontPrint:tud=tud-2
+t$="LONG AS ITS NOT":Gosub FontPrint:tud=tud-2
+t$="MODIFIED.":Gosub FontPrint:tud=tud-2
+t$="IF YOU DECIDE TO":Gosub FontPrint:tud=tud-2
+t$="KEEP IT, THEN YOU":Gosub FontPrint:tud=tud-2
+t$="ARE REQUIRED TO":Gosub FontPrint:tud=tud-2
+t$="P-A-Y A !5 POUND":Gosub FontPrint:tud=tud-2
+t$="SHAREW-ARE FEE.":Gosub FontPrint
+Show db
+cou=5:Gosub waait
+tud=15:BlockScroll:Gosub CircleRnd
+t$="IN RETURN YOU WILL":Gosub FontPrint
+t$="RECEIVE A DISK":Gosub FontPrint
+t$="WITH EXTRA LEVELS,":Gosub FontPrint
+t$="EXTRA BOSSES AND":Gosub FontPrint
+t$="EXTRA EVERY THING":Gosub FontPrint
+t$="ELSE.	 YOU WILL":Gosub FontPrint
+t$="ALSO RECEIVE THE":Gosub FontPrint
+t$="SOURCE CODE FOR":Gosub FontPrint
+t$="YOUR BLITZ BASIC II.":Gosub FontPrint
+Show db
+cou=4:Gosub waait
+
+tc=1:tud=10:BlockScroll:Gosub CircleRnd
+t$="PLEASE MAKE":Gosub FontPrint
+t$="CHEQUES P-A-Y-ABLE":Gosub FontPrint
+t$="TO":Gosub FontPrint
+t$="DA-VID CRUICKSHANK":Gosub FontPrint
+t$="AND POST TO":Gosub FontPrint:tud+15
+t$="DA-VID CRUICKSHANK":Gosub FontPrint:tud=tud-5
+t$="58 ALN STREET":Gosub FontPrint:tud=tud-5
+t$="HEBBURN":Gosub FontPrint:tud=tud-5
+t$="TYNE & WEAR":Gosub FontPrint:tud=tud-5
+t$="NE31 1XT":Gosub FontPrint
+cou=4:Gosub waait
+
+tud=5:BlockScroll:Gosub CircleRnd
+t$="THIS OFFER IS FOR":Gosub FontPrint
+t$="PEOPLE LIVING IN":Gosub FontPrint
+t$="GR. BRIT-AIN ONL-Y.":Gosub FontPrint
+t$="SORRY.":Gosub FontPrint
+tud+15
+t$="PLEASE REMEMBER":Gosub FontPrint
+t$="TO INCLUDE YOUR":Gosub FontPrint
+t$="NAME, ADDRESS AND":Gosub FontPrint
+t$="COMPUTER SETUP.":Gosub FontPrint
+tud=tud+10
+t$="THANK YOU":Gosub FontPrint
+cou=3:Gosub waait
+
+
+Return
+
+
+.waait
+While Joyb(1)=1 OR Joyb(0)=1:VWait:Wend
+While cou>0 AND Joyb(1)=0
+cou=cou-.01
+VWait 2:Wend
+While Joyb(1)=1:Wend
+
+Return
+
+.FontPrint
+le=Len(t$):wi=0:lrt=5:wid=0
+
+For T=1 To le
+num=Asc(Mid$(t$,T,1))
+If num>64 AND num<91 Then soy(T)=num-65
+If num>47 AND num<58 Then soy(T)=num-22
+If num=40 Then soy(T)=36
+If num=41 Then soy(T)=37
+If num=46 Then soy(T)=38
+If num=63 Then soy(T)=39
+If num=38 Then soy(T)=40
+If num=33 Then soy(T)=41
+If num=44 Then soy(T)=42
+If num=42 Then soy(T)=43
+If num=32 Then soy(T)=44
+If num=45 Then soy(T)=45
+wid=wid+wi(soy(T))
+Next
+If tc=1 Then lrt=160-wid/2
+
+For T=1 To le
+If soy(T)<>44 AND soy(T)<>45
+ If Td
+	;BlitMode SolidMode
+	longdiv soy(T),lrt-(lrt-160)/50,tud-(tud-127)/50,2:longdiv soy(T),lrt-(lrt-160)/100,tud-(tud-127)/100,2
+	;BlitMode CookieMode
+ EndIf
+ longdiv soy(T),lrt,tud
+EndIf
+lrt=lrt+wi(soy(T))
+Next
+tud=tud+25
+Return
+
+.CircleRnd
+For t=0 To 150:Point Rnd(320),Rnd(200),7:Next
+Return
+
+.Station1
+
+Gosub CircleRnd
+
+
+Circlef 140,110,30,5
+For t=165 To 235 Step 15:Circlef t,75+t/5,t/20,2:Circle t,75+t/5,t/20,0:Next
+For t=200 To 140 Step -15:Circlef t-75,220-t/1.9,24-t/15,2:Circle t-75,220-t/1.9,24-t/15,0:Next
+Circlef 250,130,35,5
+Circlef 150,150,55,7
+For t=210 To 180 Step -10:Circlef t+20,420-t/.8,40-t/8,2:Circle t+20,420-t/.8,40-t/8,0:Next
+Circlef 43,165,40,5
+For t=70 To 205 Step 20:Circlef t,150+t/2,10+t/13,2:Circle t,150+t/2,10+t/13,0:Next
+Circlef 180,225,50,5
+
+Line 148,100,151,70,6:Line 153,100,6
+Line 146,102,151,70,6:Line 151,102,6
+
+Return
+
+.Pattens
+cou=.01:Gosub waait
+tt=0:ttt=0:pat=0
+Show 1-db
+Use lmaxlen 1-db:BlockScroll
+While Joyb(0)=0
+
+ Line 160,127,160,127,0
+ ttt=ttt+.0011:pat=0
+ While pat<150 AND Joyb(0)=0
+	pat=pat+5
+	tt=tt+ttt
+	Line 160+HSin(tt)*pat,127+HCos(tt)*pat,pat
+ Wend
+VWait
+Show db:db=1-db:Use lmaxlen db:If PAT=0 Then BlockScroll
+
+Wend
+
+cou=.01:Gosub waait
+Show 1
+Use lmaxlen 1:BlockScroll
+While Joyb(0)=0
+ Gosub CircleRnd
+ Line 160,127,160,127,0
+ ttt=-100+Rnd(200):pat=0
+ While pat<220 AND Joyb(0)=0
+	pat=pat+.1
+	tt=tt+ttt
+	Line 160+HSin(tt)*pat,127+HCos(tt)*pat,pat
+ Wend
+BlockScroll
+Wend
+PAT=1-PAT
+
+Return
+
+
+
+.FontData
+;Font Widths
+Data 22,19,19,21,18,17,20,20,6,16,20,17,22,20,21,19,21,21,19,20,19,22,27,22,20,19,19,9
+Data 18,18,21,19,19,19,19,19,10,8,7,15,23,19,7,19,10,-4
+
+
+.TData
+;17
+Data 90,160,-127,127,2
+Data -160,160,90,127,3
+Data -160,160,-10,0,4
+Data -160,-90,-127,127,5
+Data 90,160,-127,127,6
+Data -160,160,90,127,7
+Data -160,160,-127,0,2
+Data -160,-90,-127,127,3
+Data 0,160,00,127,4
+Data -160,160,-50,127,5
+Data -160,160,-127,-90,6
+Data -160,0,-127,127,7
+Data 90,160,-127,127,2
+Data -160,160,90,127,3
+Data -160,160,-127,-90,12
+Data -160,-90,-127,127,5
+Data 90,160,-127,127,6
+
+.TData1
+;30
+Data -160,-90,-127,127,4, 90,160,-127,127,2
+Data -160,160,90,127,3, -160,160,90,127,4
+Data -160,-90,-127,127,5, -160,90,-127,127,6
+Data -160,160,90,127,7, -160,160,-127,-90,5
+Data -50,50,-127,127,2, -20,20,-127,127,3
+Data 90,160,-127,127,4, -160,160,90,127,5
+Data -160,160,-127,-90,6, -160,-90,-127,127,7
+Data 90,160,-127,127,2, -160,160,90,127,3
+Data -160,160,-127,-90,14, -160,-90,-127,127,5
+Data 90,160,-127,127,6, -160,160,90,127,7
+Data 0,160,-127,-90,2, -160,-90,-127,127,3
+Data 90,160,-127,127,4, -160,0,90,127,5
+Data -160,160,-127,-90,14 ,-160,0,-127,127,7
+Data 90,160,-127,127,3, -160,160,90,127,2
+Data -160,160,90,127,3, -160,70,-127,127,4
+
+.TData2
+;14 Skiney Posts going from left To right
+Data -160,160,90,127,2
+Data -160,160,-127,85,3
+Data -160,-120,-127,127,4
+Data -120,-80,-127,127,5
+Data -80,-40,-127,127,6
+Data -40,0,-127,127,7
+Data -0,40,-127,127,2
+Data -40,80,-127,127,3
+Data -80,120,-127,127,4
+Data 120,160,-127,127,5
+Data -20,0,-127,127,6
+Data 140,160,-127,127,7
+Data -160,160,30,127,2
+Data 50,80,20,127,3
+.TData3
+;10 Shapes
+Data -160,160,-90,-70,10
+Data -160,10,-127,127,3
+Data -160,160,-10,10,4
+Data -10,160,-127,127,5
+Data -100,10,-127,127,6
+Data -160,160,10,30,7
+Data -10,10,-127,127,2
+Data -160,-20,-127,10,3
+Data 100,160,-127,127,4
+Data 20,160,-90,127,5
+.TData4
+;13 Wirldpools Clockwise
+Data -160,-10,-127,-10,2
+Data 0,160,-127,0,3
+Data 0,160,0,127,4
+Data -160,0,0,127,5
+Data -160,0,-127,0,6
+Data 0,160,-127,0,7
+Data 0,160,0,127,2
+Data -160,0,0,127,3
+Data -160,0,-127,0,4
+Data -20,160,-127,20,5
+Data -30,160,-30,127,6
+Data -160,30,-30,127,3
+Data -160,-30,-127,-30,4
+
+.TData44
+;13 Wirldpool Anti-clockwise
+Data -160,-30,-127,-30,2
+Data -160,30,-30,127,3
+Data -30,160,-30,127,4
+Data -20,160,-127,20,5
+Data -160,0,-127,0,6
+Data -160,0,0,127,7
+Data 0,160,0,127,2
+Data 0,160,-127,0,3
+Data -160,0,-127,0,4
+Data -160,0,0,127,5
+Data 0,160,0,127,6
+Data 0,160,-127,0,7
+Data -160,-10,-127,-10,5
+
+
+
+.TData5
+;22 Shapes
+Data -160,80,-50,60,2
+Data -80,160,30,60,3
+Data -160,80,-128,-30,11
+Data -80,0,70,128,5
+Data 0,30,70,128,6
+Data 140,160,-128,128,7
+Data -120,-10,-128,70,2
+Data -160,100,-128,10,3
+Data -10,160,-10,128,4
+Data -160,160,40,70,5
+Data 10,20,-128,128,6
+Data 30,160,-90,-50,15
+Data -160,160,0,128,2
+Data -70,160,-128,10,3
+Data -160,160,100,128,4
+Data 150,160,-128,128,5
+Data -160,160,-80,128,6
+Data -160,-140,-128,128,7
+Data 150,160,-128,128,2
+Data -160,160,-128,60,3
+Data -160,-150,-128,128,4
+Data -160,-140,-128,128,5
+
+.TData6
+;22
+Data -160,160,-60,90,2
+Data -160,160,90,128,3
+Data -160,160,-128,-22,12
+Data -80,80,-128,128,4
+Data -160,160,-40,40,5
+Data -160,-80,-128,128,6
+Data -160,160,-128,-40,7
+Data -70,110,-128,128,2
+Data -160,160,-40,40,3
+Data -50,130,-128,128,4
+Data -160,160,-90,90,5
+Data -160,160,-50,-20,6
+Data -160,160,-50,-20,7
+Data -160,160,-50,-20,2
+Data -160,160,-50,-20,3
+Data -160,160,-50,-21,4
+Data -160,160,-128,-22,13
+Data -160,160,-50,-22,6
+Data -160,160,-50,0,7
+Data -160,160,-50,-10,2
+Data -160,160,-60,-20,3
+Data -160,160,100,128,4
+
+.TData7
+;18
+Data -160,160,10,128,6
+Data -160,160,-80,100,5
+Data -160,160,-90,-50,4
+Data -160,160,-90,-50,3
+Data -160,160,-90,-50,4
+Data -160,160,-90,-50,3
+Data -160,160,-90,-50,4
+Data -160,10,-128,128,2
+Data -160,160,-90,-50,3
+Data -10,160,-128,128,6
+Data -160,160,-90,-50,4
+Data -160,160,-80,-50,6
+Data -160,160,-128,-110,4
+Data -160,160,-90,-50,2
+Data -160,160,-80,-10,11
+Data -160,160,-60,0,7
+Data -160,160,10,50,6
+Data -160,160,90,128,3
+
+.TData8
+;9
+Data -160,160,-128,-100,4
+Data -80,0,-128,20,2
+Data 60,140,30,128,3
+Data -160,-30,-70,-40,4
+Data -160,-130,-128,128,11
+Data 30,160,-10,40,6
+Data 60,70,-128,128,7
+Data -30,50,-128,-80,3
+Data 40,160,70,110,2
+
+
+
+.TData9
+;12
+
+Data -100,-50,-128,128,7
+Data 50,100,-128,128,7
+Data -100,-50,-128,128,7
+Data 50,100,-128,128,7
+Data -100,-50,-128,128,3
+Data 50,100,-128,128,3
+Data -100,-50,-128,128,3
+Data 50,100,-128,128,3
+Data -100,-50,-128,128,6
+Data 50,100,-128,128,6
+Data -100,-50,-128,128,6
+Data 50,100,-128,128,6
+
+
+.TData10
+;13
+Data -10,10,-128,128,5
+Data -40,40,-128,128,4
+Data -80,80,-128,128,3
+Data -100,100,-128,128,2
+Data -160,160,70,128,4
+Data -160,160,-128,20,7
+Data -160,-20,-128,128,6
+Data -10,160,-128,128,5
+Data -160,160,-99,70,3
+Data -160,160,70,99,2
+Data -160,160,-99,70,5
+Data -160,160,70,99,7
+Data -160,30,-128,10,6
+
+.TData11
+;68
+Data -160,-150,-128,128,4
+Data -160,160,100,128,2
+Data -160,-110,-128,128,3
+Data 140,160,-128,128,4
+Data -160,-70,-128,128,5
+Data -160,160,-128,-100,6
+Data -160,-20,-128,128,7
+Data -160,160,80,128,3
+Data -160,20,-128,128,2
+Data -160,40,-128,128,3
+Data -160,160,-128,-100,4
+Data -160,160,100,128,5
+Data 150,160,-128,128,6
+Data 130,160,-128,128,7
+Data -160,160,-128,-70,5
+Data 90,160,-128,128,2
+Data -160,160,100,128,3
+Data 50,160,-128,128,4
+Data 20,160,-128,128,5
+Data 0,160,-128,128,6
+Data -20,160,-128,128,7
+Data -50,160,-128,128,4
+Data -80,160,-128,128,2
+Data -110,160,-128,128,3
+Data -160,160,-128,-80,4
+Data -10,10,-128,128,5
+Data -10,10,-128,128,6
+Data -160,-90,-128,128,7
+Data -160,-80,-128,128,5
+Data 80,160,-128,128,2
+Data -160,160,-128,-90,13
+Data -160,160,90,128,4
+Data -160,-80,-128,128,5
+Data 80,160,-128,128,6
+Data -160,160,-128,-90,13
+Data -160,160,90,128,4
+Data -160,160,-20,20,2
+Data -120,-80,-128,128,3
+Data -160,160,-100,-70,4
+Data -10,20,-128,128,5
+Data -80,-60,-128,128,6
+Data 130,160,-128,128,7
+Data -160,100,-128,128,6
+Data -120,100,-128,128,2
+Data -120,100,-128,128,3
+Data -120,100,-128,128,4
+Data -120,100,-128,128,5
+Data -160,160,100,128,6
+Data 80,160,-128,128,7
+Data -160,-140,-128,128,7
+Data -30,30,10,128,2
+Data -100,-70,-128,20,3
+Data 70,100,-128,20,4
+Data -160,-150,-128,128,7
+Data -160,160,-128,-90,5
+Data -160,160,100,128,6
+Data -20,20,-128,128,7
+Data -160,160,-128,-30,4
+Data -160,160,-40,-30,2
+Data -160,160,-128,-30,3
+Data -160,160,-40,-30,4
+Data -160,160,-128,-22,15
+Data -20,-10,-128,128,6
+Data -160,160,30,128,7
+Data -160,160,30,40,5
+Data -160,160,30,128,2
+Data -160,160,30,40,3
+Data -160,160,30,128,4
+
+
+.TData12
+;45
+Data -160,160,-50,-20,5
+Data -160,160,30,60,2
+Data -160,160,100,128,3
+Data -160,-120,-128,128,4
+Data -80,-40,-128,128,5
+Data 40,80,-128,128,6
+Data 100,160,-128,128,7
+Data -160,160,-128,-90,4
+Data -160,160,-40,10,2
+Data -160,160,30,60,3
+Data -160,160,90,128,4
+Data -160,-150,-128,128,5
+Data 150,160,-128,128,6
+Data -160,-120,-128,128,7
+Data 110,160,-128,128,5
+Data -160,-100,-128,128,2
+Data 90,160,-128,128,3
+Data -160,-50,-128,128,4
+Data 30,160,-128,128,5
+Data -160,-30,-128,128,6
+Data 30,160,-128,128,7
+Data -160,-30,-128,128,3
+Data 30,160,-128,128,2
+Data -160,-30,-128,128,3
+Data -160,160,-40,40,4
+Data 30,160,-128,128,5
+Data -160,-30,-128,128,6
+Data -160,-30,-10,128,4
+Data -160,10,-10,128,7
+Data -10,160,-128,10,6
+Data -160,10,-10,128,2
+Data -10,160,-128,10,3
+Data -160,10,-10,128,4
+Data -10,160,-128,10,5
+Data -160,10,-10,128,6
+Data -10,160,-128,10,7
+Data -50,-10,-128,128,3
+Data -160,160,-128,-90,2
+Data -160,160,-128,-20,3
+Data -160,160,-128,10,4
+Data -160,160,-100,40,5
+Data -160,160,100,128,6
+Data -160,160,50,128,7
+Data -160,160,10,100,4
+Data -160,160,-30,100,2
+
+.TData13
+;36
+Data -160,160,-128,-100,3
+Data -10,10,-128,128,4
+Data -160,160,-10,10,5
+Data -10,10,-128,128,6
+Data -160,160,-10,10,7
+Data -10,10,-128,128,3
+Data -160,160,-10,10,2
+Data 40,50,-128,128,3
+Data -160,160,40,60,4
+Data 80,100,-128,128,5
+Data -160,160,80,100,6
+Data 110,160,-128,128,7
+Data -160,160,110,128,5
+Data -160,-90,-128,128,2
+Data -160,160,-128,-30,3
+Data -160,160,-90,-50,4
+Data -160,160,50,80,5
+Data -160,160,-80,-30,6
+Data -160,160,30,80,7
+Data -160,160,-80,-30,5
+Data -160,160,30,80,2
+Data -160,160,-80,-30,4
+Data -160,160,30,80,5
+Data -160,160,80,128,6
+Data -160,160,5,128,7
+Data -160,30,-20,20,5
+Data -30,160,-20,20,2
+Data -160,30,-20,20,3
+Data -30,160,-20,20,4
+Data -160,30,-20,20,5
+Data -30,160,-20,20,6
+Data -160,0,-128,0,3
+Data -20,20,-128,30,7
+Data -20,20,-30,128,6
+Data -20,20,-128,30,2
+Data -20,20,-30,128,3
+
+.TData14
+;32
+Data -10,10,-10,128,4
+Data -30,30,-30,128,5
+Data -50,50,-50,128,3
+Data -70,70,-70,128,7
+Data -70,70,-128,128,3
+Data -160,-80,-128,128,2
+Data 70,160,-128,128,3
+Data -160,160,-10,10,4
+Data -10,40,-128,30,5
+Data -60,-50,-128,128,2
+Data -50,-40,-128,128,7
+Data -160,160,-30,-20,4
+Data -160,-150,-128,128,2
+Data -160,160,-10,128,3
+Data -160,160,-90,128,4
+Data -160,-140,-128,128,5
+Data 140,160,-128,128,6
+Data -160,160,110,128,7
+Data -160,160,-128,90,5
+Data -160,-140,-128,128,2
+Data -160,160,100,128,3
+Data 140,160,-128,128,4
+Data -160,160,-90,128,5
+Data -10,10,-128,128,6
+Data -160,10,-10,128,7
+Data -10,160,-10,128,6
+Data -160,10,-128,10,2
+Data -10,160,-128,10,3
+Data -160,10,-10,128,4
+Data -10,160,-10,128,5
+Data -160,10,-128,10,6
+Data -10,160,-128,10,7
+
+.TData15
+;40
+Data -160,-100,-128,128,7
+Data -160,-100,-128,128,2
+Data -160,160,-128,-110,13
+Data -160,160,-128,-110,14
+Data -160,-10,-128,70,5
+Data -160,160,-90,128,6
+Data 20,160,-128,128,7
+Data 20,160,-128,128,4
+Data -160,160,0,128,2
+Data -160,160,0,128,3
+Data -160,80,-128,128,4
+Data -160,160,-128,10,5
+Data -160,160,-128,60,6
+Data -160,160,-128,100,7
+Data -160,160,-128,100,5
+Data -160,160,-128,100,2
+Data -40,160,-128,128,3
+Data -160,160,100,128,4
+Data -160,160,70,128,5
+Data -40,40,-128,128,6
+Data -160,-100,-128,128,7
+Data -10,10,-128,128,5
+Data -160,40,-128,128,2
+Data -160,160,-128,-90,3
+Data -40,160,-128,128,4
+Data -160,160,90,128,5
+Data -160,40,-128,128,6
+Data -160,160,-20,20,7
+Data -40,160,-128,128,3
+Data -160,-50,-128,128,2
+Data -160,-10,-128,128,3
+Data -160,30,-128,128,4
+Data -160,120,-100,128,5
+Data -160,160,-128,-20,6
+Data -160,160,-30,128,7
+Data 50,160,-128,128,3
+Data -30,20,-128,128,2
+Data -160,160,-70,70,4
+Data -70,70,-128,128,5
+Data -160,160,-70,70,6
+
+.TData16
+;22
+Data -30,30,-128,128,7
+Data -100,0,-128,128,2
+Data -10,70,-128,128,3
+Data -70,100,-128,128,4
+Data 90,160,-128,128,5
+Data -160,20,-128,128,6
+Data 130,160,-128,128,7
+Data -160,110,-128,128,4
+Data 130,160,-128,128,2
+Data -160,160,-30,-10,3
+Data -160,160,100,128,4
+Data -160,160,30,50,5
+Data -160,160,-128,-95,6
+Data -160,160,60,80,7
+Data -160,-70,-128,128,6
+Data -30,-20,-128,128,2
+Data 10,50,-128,128,3
+Data -160,160,50,70,4
+Data -160,160,-10,10,5
+Data -160,160,-30,30,6
+Data -160,160,-50,50,7
+Data -160,160,-90,90,4
+
+.TData17
+;19
+Data -160,160,10,128,2
+Data -160,160,-50,128,3
+Data -160,160,-128,-100,4
+Data -160,160,-128,-50,13
+Data -160,160,-128,10,6
+Data -160,160,-128,50,7
+Data -160,160,100,128,2
+Data -160,160,70,128,3
+Data -160,160,-128,10,4
+Data -160,160,-128,10,5
+Data -60,160,-128,128,6
+Data -160,50,-128,-30,7
+Data -160,50,-90,10,2
+Data -160,50,-40,60,3
+Data -160,50,30,128,4
+Data -50,160,-128,-30,5
+Data -50,160,-90,10,6
+Data -50,160,-40,60,7
+Data -50,160,30,128,4
+
+.TData18
+;19
+Data 80,160,-10,128,5
+Data -70,160,-128,128,2
+Data -40,40,-40,40,6
+Data -160,160,-70,128,3
+Data -40,40,-40,40,6
+Data -160,70,-128,128,4
+Data -40,40,-40,40,6
+Data -160,160,-128,70,7
+Data -40,40,-40,40,6
+
+Data 80,160,-10,128,6
+Data -40,40,-40,40,6
+Data -70,160,-128,128,4
+Data -40,40,-40,40,6
+Data -160,160,-70,128,2
+Data -40,40,-40,40,6
+Data -160,70,-128,128,3
+Data -40,40,-40,40,6
+Data -160,160,-128,70,4
+Data -40,40,-40,40,6
+
+
+.TData19
+;16
+Data 0,160,-128,128,6
+Data -10,10,-128,128,2
+Data -160,0,-128,128,3
+Data -10,10,-128,128,4
+Data 0,160,-128,128,5
+Data -10,10,-128,128,6
+Data -160,0,-128,128,7
+Data -10,10,-128,128,4
+
+Data -160,160,-128,0,2
+Data -160,160,-10,10,3
+Data -160,160,0,128,4
+Data -160,160,-10,10,5
+Data -160,160,-128,0,6
+Data -160,160,-10,10,7
+Data -160,160,0,128,3
+Data -160,160,-10,10,4
+
+.TData20
+;20
+Data -160,160,-30,20,3
+Data -160,160,-30,20,4
+Data -160,160,20,70,5
+Data -160,160,10,128,6
+Data -10,160,-128,128,7
+Data -160,160,-128,-10,5
+Data -160,160,-128,40,2
+Data -10,160,-128,128,3
+Data -50,160,-128,128,4
+Data -160,-40,-30,128,5
+
+Data -160,20,-128,128,6
+Data 20,160,-128,128,7
+Data -160,20,-128,128,3
+Data 25,160,-128,128,2
+Data -160,20,-128,128,3
+Data 20,160,-128,128,4
+Data -160,160,-128,50,5
+Data -160,160,100,128,6
+Data -160,160,10,80,7
+Data -160,160,100,128,4
+
+.TData21
+;14
+Data -160,-140,100,128,2
+Data 100,160,90,128,3
+Data -160,-60,50,128,4
+Data 10,160,10,128,5
+Data -160,40,-30,128,6
+Data -100,160,-70,128,7
+Data -160,100,-70,128,4
+Data -160,100,-90,128,2
+Data -160,100,-128,-80,3
+Data -160,100,-90,128,4
+Data -160,100,-70,128,5
+Data -160,160,40,128,6
+Data -90,90,40,128,7
+Data -160,-130,-128,128,5
+
+.TData22
+;31
+Data 30,160,-128,128,6
+Data -160,-80,-128,128,2
+Data -80,0,-128,128,3
+Data 0,80,-128,128,4
+Data 80,160,-128,128,5
+Data 0,80,-128,128,6
+Data -80,0,-128,128,7
+Data -160,-80,-128,128,4
+Data -160,160,90,128,2
+Data -160,160,-20,128,3
+Data -160,160,-30,128,4
+
+Data -160,160,-20,20,5
+Data -100,100,-128,-90,6
+Data -100,100,-128,-10,7
+Data -100,100,-128,50,4
+Data -160,160,-128,80,6
+Data -100,100,90,128,3
+Data -100,100,10,128,2
+Data -100,100,-50,128,3
+Data -160,160,-80,128,4
+Data -160,160,-128,-110,13
+Data -160,160,-100,-60,6
+Data -160,160,-128,-110,7
+Data -30,30,-128,128,5
+Data 40,160,-128,128,2
+Data -30,160,-128,128,3
+Data -110,110,-128,128,4
+Data -110,110,-128,128,5
+Data -110,110,-128,128,6
+Data -110,110,-128,128,7
+Data -110,-100,-128,128,3
+
+.TData23
+;Gas filled tunnel Red
+Data 160,-160,128,-128,-6
+Data -160,160,-128,-90,5
+Data -160,10,-128,-30,7
+Data -160,160,100,128,3
+Data 90,160,-128,128,2
+
+.TData24
+;35
+Data -160,30,-128,30,4
+Data -30,160,-128,30,2
+Data -160,30,-128,30,3
+Data -30,160,-128,30,4
+Data -160,30,-128,-22,13
+Data -30,160,-128,30,6
+Data -160,30,10,128,7
+Data -30,160,-10,128,5
+Data -160,30,-30,128,2
+Data -30,160,-30,128,3
+Data -160,30,-30,128,4
+Data -30,160,-30,128,5
+Data -160,160,-30,-20,6
+Data -100,-80,-128,128,7
+Data -160,-80,-128,128,4
+Data -160,160,-30,40,2
+Data -30,20,-60,60,3
+Data -160,160,-128,-100,4
+Data -160,160,100,128,5
+Data -160,-80,-128,128,6
+Data -80,10,-128,128,7
+Data 80,160,-128,128,3
+Data -160,160,-128,-70,2
+Data -160,-10,100,128,3
+Data -10,160,-128,-90,4
+Data -160,160,-128,-22,13
+Data -160,160,0,30,6
+Data -160,160,40,128,7
+Data 140,160,-128,128,4
+Data 100,160,-128,128,2
+Data -160,-10,-128,128,3
+Data -160,160,-40,-10,4
+Data -160,160,-50,-22,13
+Data -160,-150,-128,128,6
+Data -30,-20,-128,-10,7
+
+.TData25
+;18
+Data -160,160,-128,20,3
+Data -160,160,-40,-22,12
+Data -160,160,-128,20,4
+Data -160,160,-60,-22,10
+Data -160,160,-128,20,5
+Data -160,160,-70,-22,11
+Data -160,160,-128,20,6
+Data -160,160,-80,-22,12
+Data -160,160,-128,20,7
+Data -160,160,-50,-22,13
+Data -160,160,-128,20,3
+Data -160,160,-40,-22,14
+Data -160,160,-128,20,2
+Data -160,160,-40,-22,15
+Data -160,160,-40,-22,12
+Data -160,160,-40,-22,10
+Data -160,160,-40,-22,11
+Data -160,160,-100,-22,12
+
+
+.TData26
+;14
+Data -160,160,100,128,5
+Data -160,160,40,128,2
+Data -160,160,-30,128,3
+Data -160,160,-128,10,14
+Data -160,160,-128,10,10
+Data -160,160,-128,10,11
+Data -160,160,-128,10,12
+Data -160,160,-128,10,13
+Data -160,160,-128,-10,6
+Data -160,160,-128,-10,2
+Data -160,160,100,128,3
+Data -160,-120,-128,128,4
+Data -160,-120,-128,128,5
+Data -160,-120,-30,128,6
+
+.TData27
+;25
+Data -160,-110,-128,128,4
+Data 140,160,-128,128,5
+Data -160,160,-128,-100,15
+Data -160,160,100,128,6
+Data -160,160,-128,-100,10
+Data -160,160,40,80,7
+Data -160,160,-128,-100,13
+Data 140,160,-128,128,3
+Data -160,160,-128,-100,2
+Data -160,160,-128,-100,12
+Data -160,160,30,128,3
+Data -160,160,-50,0,13
+Data -160,160,-100,-50,4
+Data -160,160,80,128,5
+Data -160,-130,-128,128,6
+Data -30,-10,-128,-22,13
+Data 70,90,-22,128,7
+Data 30,50,-128,-22,14
+Data 130,150,-22,128,3
+Data -100,-80,-128,-22,15
+Data -10,10,-22,128,2
+Data -160,160,-128,-80,13
+Data -160,10,-128,-22,10
+Data 10,160,-128,-22,11
+Data -100,100,-128,-22,12
+
+.TData28
+;25
+Data -160,160,-128,-50,6
+Data -160,-150,-128,128,7
+Data 150,160,-128,128,2
+Data -160,160,110,128,3
+Data -160,160,50,128,4
+Data -160,160,-15,128,6
+Data -160,160,-70,128,7
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,12
+Data -160,160,-128,-22,6
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,5
+Data -160,160,-60,-22,4
+Data -160,160,-60,-22,13
+
+.TData29
+;Gas filled tunnel Blue
+Data 160,-160,128,-128,-1
+Data -160,160,-128,-90,5
+Data -160,10,-128,-30,4
+Data -160,160,100,128,3
+Data 90,160,-128,128,2
+
+.TData30
+;22
+Data -160,-10,-128,-100,7
+Data -160,-10,-128,-60,2
+Data -160,-10,-128,-20,3
+Data -160,-10,-128,20,4
+Data -160,-10,-128,60,5
+Data -160,-10,-128,100,6
+Data -160,-10,-128,128,7
+Data -160,160,-128,-22,10
+Data -10,160,-128,-22,2
+Data 10,160,30,128,3
+Data -60,-50,-128,128,4
+Data -160,160,-128,-100,5
+Data -160,160,-40,-22,7
+Data -160,160,-128,-100,13
+Data -160,160,-40,-22,7
+Data -160,160,-128,-100,5
+Data -160,160,-40,-22,15
+Data -160,160,-128,-100,13
+Data -160,160,-40,-22,7
+Data -160,160,-128,-100,13
+Data -160,160,-40,-22,15
+Data -160,160,100,128,6
+
+.TData31
+;18
+Data -10,160,-128,-100,6
+Data -10,160,-128,-60,2
+Data -10,160,-128,-20,3
+Data -10,160,-128,20,4
+Data -10,160,-128,60,5
+Data -10,160,-128,100,6
+Data -10,160,-128,128,7
+Data 140,160,-128,10,13
+Data 100,160,-128,10,10
+Data 60,160,-128,-22,11
+Data 20,160,-128,-22,12
+Data -20,160,-128,-22,13
+Data -60,160,-128,-22,14
+Data -100,160,-128,-22,15
+Data -140,160,-128,-22,11
+Data -160,160,-128,-22,10
+Data -160,160,-128,-90,12
+Data -160,160,-128,-90,4
+
+.TData32
+;18
+Data -160,160,-128,-90,2
+Data -160,160,-128,-90,11
+Data -160,160,-128,-30,6
+Data -160,160,-128,0,4
+Data -160,160,-128,60,5
+Data -160,160,30,60,6
+Data -160,160,-120,-90,10
+Data -160,160,-120,-90,12
+Data -160,160,-120,-90,10
+Data -160,160,-120,-90,12
+Data -160,160,-120,-90,10
+Data -160,160,-120,-90,12
+Data -160,160,-110,-80,10
+Data -160,160,-100,-70,12
+Data -160,160,-90,-60,10
+Data -160,160,-80,-50,12
+Data -160,160,-110,-80,10
+Data -160,160,-50,-22,11
+
+.TData33
+;Gas filled tunnel Green
+Data 160,-160,128,-128,-3
+Data -160,160,-128,-90,5
+Data -160,10,-128,-30,4
+Data -60,-10,-128,128,3
+Data 90,160,-128,128,2
+
+.TData34
+;25
+Data -10,160,-10,128,6
+Data -160,10,-128,128,2
+Data 40,160,-128,128,3
+Data -80,-10,-128,128,4
+Data -100,-90,-128,128,5
+Data 50,60,-128,128,6
+Data -160,160,-100,-50,7
+Data -160,160,50,100,4
+Data -160,160,-50,50,2
+Data -160,-100,-128,128,3
+Data 100,160,-128,128,4
+Data 100,160,-128,128,5
+Data -160,-100,-128,128,6
+Data -60,-50,-128,128,7
+Data 100,110,-128,128,6
+Data -160,-110,-128,128,2
+Data -160,-40,-128,128,3
+Data -160,40,-128,128,4
+Data 150,160,-128,128,5
+Data -160,160,-128,-80,6
+Data -160,160,-128,-10,7
+Data -160,160,100,128,4
+Data -160,10,-128,128,2
+Data -160,160,-128,-90,3
+Data 140,160,-128,10,5
+
+.TData35
+;18
+Data -160,-140,-128,128,4
+Data 140,160,-128,128,2
+Data -160,20,-128,-22,3
+Data -10,160,-128,-22,4
+Data -160,20,-128,-22,13
+Data -10,160,-128,-22,6
+Data -160,20,-128,-22,15
+Data -10,160,-128,10,4
+Data -160,20,-128,-22,2
+Data -10,160,-128,-22,3
+Data -160,20,-128,-22,12
+Data -10,160,-128,-22,13
+Data -160,20,-128,10,6
+Data -10,160,-128,-22,15
+Data -160,20,-128,-22,14
+Data -10,160,-128,-22,2
+Data -160,160,-128,-22,11
+Data -160,160,-128,-22,4
+
+.TData36
+;19
+Data -160,-150,-128,128,3
+Data -160,-10,-128,20,7
+Data -160,80,-128,128,2
+
+Data 40,100,-128,128,3
+Data -160,160,-128,-60,4
+Data 40,100,-128,128,5
+Data -160,160,60,128,6
+Data 40,100,-128,128,7
+Data -160,160,-128,-60,9
+Data 40,100,-128,128,2
+Data -160,160,-80,-20,3
+Data 40,100,-128,128,4
+Data -160,160,-128,-22,12
+Data 40,100,-128,128,6
+Data -160,160,-128,-22,15
+Data 40,100,-128,128,4
+Data -160,160,90,128,2
+Data 40,100,-128,128,3
+Data 120,160,-128,128,4
+
+.TData37
+;13
+Data 130,160,-128,128,7
+Data -160,160,-128,10,2
+Data -160,160,100,128,3
+Data -160,160,100,128,4
+Data -160,160,-50,128,5
+Data -160,160,-50,128,6
+Data -160,160,-50,128,7
+Data -160,160,-50,128,3
+Data -160,160,-50,128,2
+Data -160,160,-128,-100,3
+Data -160,-60,-128,128,7
+Data 60,160,-128,128,7
+Data -160,160,-128,-22,12
+
+.TData38
+;8
+Data -160,-20,-128,128,7
+Data -160,160,-128,-20,2
+Data -20,160,-128,128,3
+Data -160,160,-20,128,4
+Data -160,-20,-128,128,5
+Data -160,160,-128,-20,6
+Data -20,160,-128,128,7
+Data -160,160,-20,128,4
+
+.TData39
+;12
+Data -80,80,-128,128,2
+Data -160,-80,-128,128,3
+Data 60,160,-128,128,4
+Data 60,160,-20,128,5
+Data -160,160,-20,128,6
+Data -160,160,-20,128,7
+Data -160,40,-128,128,4
+Data -160,40,-128,128,-1
+Data -160,40,-128,128,-2
+Data -160,40,-128,128,-3
+Data -160,40,-128,128,-4
+Data -160,40,-128,128,4
+
+.TData40
+;14
+Data -30,160,-30,128,5
+Data -30,160,-30,128,2
+Data -160,160,-30,128,3
+Data -160,160,-128,-30,4
+Data -160,160,-30,128,5
+Data -160,160,-128,-30,6
+Data -160,160,-30,128,7
+Data -160,160,-128,-30,4
+Data -160,160,-30,128,2
+Data -160,80,-30,128,3
+Data -160,0,-30,128,4
+Data -160,-80,-30,128,5
+Data -160,-120,-30,128,6
+Data -160,-140,-128,128,7
+
+.TData41
+;9
+Data -160,160,-128,20,2
+Data -160,160,-128,20,-2
+Data -160,160,-128,20,-3
+Data -160,160,-128,20,-4
+Data -160,160,-128,20,-5
+Data -160,160,-128,20,-6
+Data -160,160,-128,20,2
+Data -160,-10,-128,128,3
+Data -160,50,-128,128,4
+
+.TData42
+;17
+Data -160,-20,-128,20,5
+Data -160,80,-128,20,2
+Data 80,160,-128,128,3
+Data -160,-80,-128,128,4
+Data 0,80,-128,128,5
+Data -80,0,-128,128,6
+Data 80,160,-128,128,7
+Data -160,-80,-128,128,5
+Data -80,0,-128,128,2
+Data -80,0,-128,128,3
+Data 80,160,-128,128,4
+Data -160,-80,-128,128,5
+Data -160,-80,-128,128,6
+Data -160,110,-20,128,7
+Data 20,160,0,128,2
+Data -160,160,30,128,3
+Data -160,160,-20,20,4
+
+.TData43
+;14
+Data -60,40,-70,128,6
+Data -100,40,-128,128,2
+Data -160,70,-128,128,3
+Data 130,160,-128,128,4
+Data 70,160,-128,128,5
+Data -160,-30,-128,128,6
+Data -160,160,-128,-50,7
+Data -160,160,-128,10,4
+Data -160,80,-128,10,2
+Data -160,160,20,128,3
+Data -20,160,-10,128,4
+Data -80,10,-128,128,5
+Data -160,160,-128,-60,10
+Data -160,160,0,60,3
+
+.TData45
+;33
+Data -160,160,-128,-60,7
+Data -160,160,0,60,2
+Data -160,160,60,128,3
+Data -160,160,-60,0,4
+Data -160,160,0,60,5
+Data -160,160,-128,-60,6
+Data -160,160,60,128,7
+Data -160,160,-128,-60,12
+Data -160,160,0,60,2
+Data -20,160,-10,128,3
+Data -160,160,-90,128,4
+Data -160,160,-128,-20,13
+Data -160,160,20,128,6
+Data -160,160,-128,-50,7
+Data -160,20,-128,-20,12
+Data 80,160,-128,128,2
+Data 80,160,-20,128,3
+Data -160,160,20,128,4
+Data -80,80,-128,128,5
+Data -80,80,-128,20,6
+Data -160,-100,-128,40,7
+Data -160,160,40,128,5
+Data 80,160,-128,128,2
+Data -160,160,-128,-50,3
+Data -30,-20,-128,128,4
+Data 100,110,-128,128,5
+Data -160,160,-50,128,6
+Data -160,160,-128,-70,7
+Data -160,-20,70,128,2
+Data -160,-80,60,128,3
+Data -160,80,-20,128,4
+Data -80,160,-128,60,5
+Data -160,-30,-128,128,6
+
+.TData46
+;22
+Data -160,160,-50,70,2
+Data -160,10,-128,-100,3
+Data 70,160,-128,10,4
+Data -160,-10,0,128,5
+Data 140,160,-128,128,6
+Data -10,60,-70,128,7
+Data -160,-30,-128,128,2
+Data -160,100,-128,30,3
+Data -30,160,-80,128,4
+Data -30,60,-128,128,5
+Data -160,160,-128,-20,6
+Data -160,160,-10,128,7
+Data -160,-140,-10,128,2
+Data 50,160,-128,128,3
+Data -40,80,-128,128,4
+Data -160,-30,-128,128,5
+Data -70,20,-128,128,6
+Data -100,120,-128,128,7
+Data -160,-100,-128,90,2
+Data 70,160,-128,128,3
+Data -160,160,-20,70,4
+Data -160,-70,-128,128,5
+
+
+
+.TDataEnd
+;End SolidWall
+Data 150,160,-128,128,3
+Data -160,-150,-128,128,3
+Data 150,160,-127,128,3
+Data -160,-150,-128,127,3
+Data 160,160,132,132,2
+Data 160,160,132,132,2
+Data -160,150,-127,127,6
+Data -160,-150,-127,127,4
+Data -160,160,-127,10,3
+Data -160,30,-127,127,2
+
+.TDataEnd2
+;with Post
+Data 150,160,-128,128,3
+Data -160,-150,-128,128,3
+Data 150,160,-127,128,3
+Data -160,-150,-128,127,3
+Data 160,160,132,132,2
+Data -160,-140,-128,128,4
+Data -160,150,-127,127,6
+Data -160,-130,-127,127,4
+Data -160,160,-127,10,3
+Data -160,-130,-127,127,2
+
+.TDataEnd3
+;4
+Data -50,50,-128,128,7
+Data -160,-150,-128,128,3
+Data 150,160,-128,128,4
+Data -160,-100,-128,128,5
+
+.Out
+Data 160,-160,128,-128,-7
+Data -160,160,-128,-80,2
+Data -160,160,50,128,3
+Data -160,160,-128,128,2
+
+.Back1
+;What a nice tunnel
+Data 160,-160,128,-128,-7
+Data -160,160,-128,-90,2
+Data -160,10,-128,-30,3
+Data -160,160,100,128,4
+Data 90,160,-128,128,5
+
+.Back2
+;another one
+Data 160,-160,128,-128,-7
+Data -160,80,-128,-10,2
+Data -30,40,-128,128,3
+Data -160,40,-50,128,4
+Data 80,160,-80,128,5
+
+.Back3
+;and again
+Data 160,-160,128,-128,-7
+Data -160,-130,-128,128,2
+Data 20,60,-128,50,3
+Data -160,-60,-50,128,4
+Data -160,160,-40,-20,5
+
+.Back4
+;dito
+Data 160,-160,128,-128,-7
+Data -160,-100,-128,128,2
+Data -100,-40,-128,128,3
+Data -40,20,-128,128,4
+Data 20,100,-128,128,5
+
+.Back5
+;small tunnel. 3 blocks big
+Data 160,-160,128,-128,-7
+Data -160,-100,-128,128,2
+Data -100,-40,-128,128,3
+Data 160,-160,128,-128,-7
+Data 20,100,-128,128,5
+
+.Back6
+;small tunnel. 2 blocks big
+Data 160,-160,128,-128,-7
+Data 100,160,-128,30,2
+Data 160,-160,128,-128,-7
+Data -120,10,-128,128,5
+Data -20,10,-128,128,6
+Data 120,160,-30,128,3
+
+.Back7
+;
+Data 160,-160,128,-128,-1
+Data -160,-100,-128,128,2
+Data -100,-40,-128,128,3
+Data -40,20,-128,128,4
+Data 20,100,-128,128,5
+
+.Back8
+;
+Data 160,-160,128,-128,-2
+Data -160,-100,-128,-80,2
+Data -100,-40,-128,128,3
+Data 40,120,-128,128,4
+Data -160,100,-128,28,5
+
+.WTData1
+;L Turn:	 15 Boxs
+Data 0,0,0,0,0,0,0,0,-5,0,-10,0,-20,0,-30,0,-40,0,-40,0,-30,0,-20,0,-10,0,-5,0,0,0,0,0
+
+.WTData2
+;up:	 12 Boxs
+Data 0,-5,0,-10,0,-30,0,-50, 0,-60,0,-60,0,-50,0,-40,0,-25,0,-10,0,-5,0,0
+
+.WTData3
+; 21
+Data 20,0,40,0,70,0,75,0,80,0,75,0,70,0,70,0,60,10,50,20,40,30,30,40,20,50,10,60
+Data 0,60,-10,50,-20,20,-50,0,-70,-10,-25,-10,0,0,0,0,0,0,0,0,-2000,0,0,0,0,0,0,0,0,0
+
+.WTData4
+;43
+Data 50,0,50,50,0,50,0,-50,0,-50,0,-50,0,-50,0,0,0,0,0,-50,0,-50,0,50,0,50,0,50,-50,-50,-50,-50,-50,-50,60,0,0,0,0,50,30,30,0,0
+Data 10,10,25,25,25,25,60,60,0,0,-20,0,60,0,60,0,60,-60,30,-30,-60,10,40,10,40,10,40,0,-70,0,0,-40,0,-40,0,-40,0,40,50,40,50,0
+
+.WTData5
+;44
+Data 30,0,0,0,70,0,0,0,60,0,0,-50,0,0,0,-60,0,0,0,-50,0,0,-60,-50,0,0,-50,-50,0,0,-60,-60,0,0,40,-40,-60,0,-40,-40,0,-60,40,40
+Data 60,0,40,40,0,60,-40,-40,-60,0,-80,0,-50,0,70,0,50,0,50,0,50,0,0,0,0,0,50,0,50,50,50,50,0,50,0,50,-30,-30,70,70,20,20,0,0
+
+.WTData6
+;40
+Data 0,0,-30,0,-70,10,-70,-10,-60,-30,20,0,0,0,-70,0,-70,60,60,-80,-70,0,0,70,0,70,0,70,0,-60,0,0,0,0,-40,-30,-80,-10,-30,-80
+Data 60,-50,60,-50,0,0,-10,0,-10,0,-50,10,0,25,25,0,70,40,70,30,20,10,0,0,-90,0,-70,-70,0,-70,70,0,70,-70,70,-70,0,0,-70,-30
+
+.WTData7
+;34
+Data 10,10,10,10,-100,-50,-70,-20,0,80,-80,80,-80,80,-90,40,-80,10,-80,40,-100,70,40,-50,100,-50,-40,50,-85,90,-40,0,0,0,10,0
+Data -90,0,-40,100,-40,80,-100,40,-50,-50,-80,-100,0,0,-90,-90,-50,-50,-75,100,100,80,0,0,-70,50,-40,100,-90,-50,40,40
+
+.WTData8
+;20
+Data 10,10,-100,-100,100,100,100,0,50,50,0,10,0,30,0,70,0,90,0,20,0,-20,0,-50,0,-70,0,-90,0,-30,-30,0,-30,0,50,50,60,-30,-20,0
+
+
+
+

@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/errhandler3.bb
++;
+; the following 4 lines need to be used when developing programs
+; on a DblPAL machine, we will remedy this soon!
+;
+
+##[$80B4]
+	##[$80BD] d0,err.l:err$=Peek$(err):##[$FF8B] 0,&err$,20:End
+End ##[$80B4]
+
+Dim a(10):a(11)=12	 ;this is an error just to test the above!

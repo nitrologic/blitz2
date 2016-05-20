@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/makemem.bb2
++;
+;make fast mem!
+;
+DEFTYPE.l
+
+e=Peek.l(4)
+
+c=Peek.l(e+322)
+
+While Peek.l(c)
+	c=Peek.l(c)
+	NPrint Hex$(Peek.l(c))
+Wend
+
+MouseWait
+
+
+
+;l=65536 ;64K worth
+
+;m=AllocMem_(l,1)
+

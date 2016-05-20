@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/PRNOPS.BB
++#G7=6
+#G5=5
+#G4=3
+#G3=2
+#G2=1
+#G1=0
+#W1=0
+
+allocst 0,0,0,640,256,2,-32768,"TEST",0,1
+GTButton #W1,#G7,156,53,80,12,"CANCLE",16
+GTButton #W1,#G5,12,53,80,12,"PRINT",16
+GTInteger #W1,#G4,88,37,40,14,"COPIES	:",1,0
+GTCycle #W1,#G3,88,25,152,12,"ASPECT	:",1," LEFT |CENTRE"
+GTCycle #W1,#G2,88,13,152,12,"QUALITY :",1," POOR	|AVERAGE| GOOD	|V. GOOD"
+GTCycle #W1,#G1,88,1,152,12,"SIZE		:",1,"SMALL |MEDIUM|LARGE "
+localstat #W1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList #W1,#W1

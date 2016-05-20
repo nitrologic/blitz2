@@ -1,0 +1,431 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/oldsega.bb
++;
+; sega megadrive routines
+;
+
+#vd=$c00000	;vdp data port
+#cp=$c00004	;vdp control port
+#hv=$c00008	;hv counter
+
+#ram=$ff0000
+
+#wvram=	$40000000
+#wcram=	$c0000000
+#wsram=	$40000010
+
+#vram=$0
+#cram=$80000000
+#vsram=$40000000
+
+#z80=$a11100
+#z80sram=$a00000
+#z80dram=$ff8000
+
+NEWTYPE .sprite
+	vp.w
+	size.b:splink.b
+	spdata.w
+	hp.w
+End NEWTYPE
+
+Macro reg #$8000+`1*256:End Macro
+Macro setreg:MOVE.w #$8000+`1*256+`2,cp:End Macro
+Macro setmem:MOVE.l `1,cp:MOVE.w `2,vd:End Macro
+Macro pokemem:MOVE.l `1,cp:Poke.w #vd,`2:End Macro
+
+Statement dodma{src.l,dest.l,size.w}
+	;
+	MOVE.b#1,z80:wz:BTST.b#0,z80:BNE wz
+	;
+	LEA cp,a0
+	;
+	!setreg{1,$7c}:!setreg{15,2}	;disp+m1 & increment
+	;
+	MOVE !reg{19},d3:MOVE.b d2,d3:MOVE d3,(a0)							 ;size
+	MOVE !reg{20},d3:LSR#8,d2:MOVE.b d2,d3:MOVE d3,(a0)
+	;
+	MOVE !reg{21},d3:LSR.l #1,d0:MOVE.b d0,d3:MOVE d3,(a0)	 ;src
+	MOVE !reg{22},d3:LSR.l #8,d0:MOVE.b d0,d3:MOVE d3,(a0)
+	MOVE !reg{23},d3:LSR.l #8,d0:MOVE.b d0,d3:MOVE d3,(a0)
+	;
+	ROL.l#2,d1:ROR #2,d1:SWAP d1:BSET #30,d1:BEQ nocd2		 ;dest
+	BSET #4,d1:nocd2:BSET#7,d1:MOVE.l d1,-(a7)
+	MOVE (a7)+,(a0):MOVE (a7)+,(a0)
+	;
+	!setreg{1,$6c}:MOVE #0,z80
+	AsmExit
+	;
+End Statement
+;---------------------------------------------------------------------
+
+	Function.q jabs{a.q}
+		TST.l d0:BGE notneg:NEG.l d0:notneg
+		AsmExit
+	End Function
+
+	Function.q jfrac{a.q}
+		SWAP d0:CLR.w d0:SWAP d0
+		AsmExit
+	End Function
+
+	Function.q jlimit{a.q,b.q,c.q}
+				 CMP.l d0,d1:BLE testhi:MOVE.l d1,d0:AsmExit
+	testhi:CMP.l d0,d2:BGE dunit :MOVE.l d2,d0:dunit:AsmExit
+	End Function
+
+	Function.q jext{a.w}
+		EXT.l d0:AsmExit
+	End Function
+
+	Function .q jsin{a.q} ;0..1=2*pi
+
+	Shared sincos.l
+		myang=jfrac{a}ASL 9
+		ad.l=sincos+((myang&1023) ASL 2)
+		f=jfrac{myang}:of=1-f
+
+		qs=Peek.w(ad	)*of+Peek.w(ad+4)*f
+	;	qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+
+		Function Return jext{qs} ASL 1
+	End Function
+
+	Function .q jcos{a.q} ;0..1
+	Shared sincos.l
+		myang=jfrac{a}ASL 9
+		ad.l=sincos+((myang&1023) ASL 2)
+		f=jfrac{myang}:of=1-f
+
+	;	qs=Peek.w(ad	)*of+Peek.w(ad+4)*f
+		qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+
+		Function Return jext{qc} ASL 1
+	End Function
+
+	Function.q jsqr{a.q}	;worlds slowest sqr command
+
+		If a=0 Then Function Return 0
+		ntry.q=1:try=0
+
+		While jabs{try-ntry}>0.01
+			try=ntry
+			fx=try*try-a
+			dfx=2*try
+			ntry=try-fx/dfx
+		Wend
+		Function Return try
+	End Function
+
+;---------------------------------------------------------------------
+
+Statement mycar{cardat.l,vecs.l,chunk.l,vecspace.l}
+	MOVE.l a4,-(a7)
+	MOVE.ld0,a0:MOVE.ld1,a1:MOVE.ld2,a2:MOVE.ld3,a4	 ;:MOVE.l 8(a2),a2
+
+	MOVE #$870f,$c00004			;4 scans from here
+
+calcrot:
+	MOVEM (a1),d0-d5:MOVE.l a0,a3		;0xx 1xy 2yx 3yy 4zx 5zy
+	MOVE d4,d6:MULS d1,d6:MOVE d5,d7:MULS d0,d7:SUB.l d7,d6
+	BMI t1:ADDQ#8,a3:NEG 4(a1):NEG 6(a1):NEG 8(a1):NEG 10(a1):t1
+	MULS d3,d0:MULS d2,d1:MULS d5,d2:MULS d4,d3
+	SUB.l d1,d0:BMI t2:ADDQ#4,a3:NEG d4:NEG d5:MOVEM d4-d5,8(a1):t2
+	SUB.l d3,d2:BMI t3:ADDQ#2,a3:MOVEM (a1),d0-d1:NEG d0:NEG d1
+	MOVEM d4-d5,(a1):MOVEM d0-d1,8(a1):t3:ADD (a3),a0
+
+	MOVE #$8701,$c00004			;4 scans from here
+
+clearchunk:
+	MOVE.l a2,-(a7):MOVE.l a2,a3:ADD #46*128+64,a2	;chunky 128x92
+	MOVE#71,d0:MOVEQ#0,d1:clmem:MOVE.l d1,(a3)+:DBRA d0,clmem
+
+	MOVE #$870e,$c00004			;6 scans from here
+
+	MOVE.l a4,a3:MOVEM.l (a1),d5-d7:NEG.l d7:SUB.l d6,d7:SUB.l d5,d7
+	ASL.l#4,d7:BRA ss
+calcvecs:
+	tt:MOVE.l d6,(a3)+
+	ss:MOVEM.l (a1),d0-d2:MOVE.l (a0)+,d3:BEQ doit:MOVE.l d7,d6
+	xx:LSR.b #1,d3:BCC nox:ADD.l d0,d6:nox:BEQ xt:ADD.ld0,d0:BRA xx
+	xt:LSR#8,d3
+	yy:LSR.b #1,d3:BCC noy:ADD.l d1,d6:noy:BEQ yt:ADD.ld1,d1:BRA yy
+	yt:SWAP d3
+	zz:LSR.b #1,d3:BCC noz:ADD.l d2,d6:noz:BEQ tt:ADD.ld2,d2:BRA zz
+doit:									;d0-d2=x,y,z
+	MOVE.l #0,(a3):MOVE.l a4,a3
+	MOVE.l (a3)+,d3	;:MOVE d3,d5:ROL.l#8,d3:MOVE.b d3,d5:LSR.b#1,d5:SUB d5,a2
+
+Macro fplot
+	MOVE d3,d5:ROL.l#8,d3:MOVE.b d3,d5:ROR.l#8,d3:ROR.b#1,d5:MOVE.b d4,0(a2,d5)
+End Macro
+
+	MOVE #$8705,$c00004			;4 scans from here
+nxv:
+	MOVE.l (a3)+,d3:BEQ dunvv
+
+npx:
+	MOVE.b (a0)+,d4:BMI xn:BEQ px:ADD.l d2,d3:!fplot:BRA npx
+	px:MOVE.l d3,-(a7):BRA npx:xn:NEG.b d4:BMI npz
+	SUB.l d1,d3:!fplot:BRA npx
+
+npz:
+	MOVE.b (a0)+,d4:BMI zn:BEQ pz:ADD.l d0,d3:!fplot:BRA npz
+	pz:MOVE.l (a7)+,d3:BRA npz:zn:NEG.b d4:BMI nxv
+	SUB.l d1,d3:!fplot:BRA npz
+
+dunvv:
+
+	MOVE #$870d,$c00004			;4 scans from here
+
+	MOVE.l (a7)+,a2:MOVE.l a2,a0:MOVEQ#23,d7:ADD#14*256+58,a2
+cline:
+	MOVEM.l (a2),d0-d2:ASL.l#4,d0:ASL.l#4,d1:ASL.l#4,d2
+	MOVEM.l 128(a2),d3-d5:OR.l d0,d3:OR.l d1,d4:OR.l d2,d5
+
+	NOT.l d3:NOT.l d4:NOT.l d5
+
+	MOVE.l d4,96(a0):MOVE.l d5,192(a0):MOVE.l d3,(a0)+
+	ADD#256,a2:DBRA d7,cline
+
+	MOVE.l (a7)+,a4:AsmExit
+
+End Statement
+
+
+NEWTYPE .vec
+	xx.w:xy.w
+	yx.w:yy.w
+	zx.w:zy.w
+End NEWTYPE
+
+
+NEWTYPE .mat
+	xa.q:ya:za
+	xb:yb:zb
+	xc:yc:zc
+End NEWTYPE
+
+
+mystart:
+
+	sincos.l=?sincos
+	Gosub initrot
+
+;	vec.vec\xx=100,25,0,-100,-100,25
+
+;	MOVE.b#1,z80:wz2:BTST.b#0,z80:BNE wz2
+
+	Dim cd.b(255,64)
+	Dim vecs.l(256)
+
+; vram
+;
+;		0 = $0000 = map				(4096)
+; 4096 = $1000 = blocks
+;
+;				$e000 = window		 (2048)?
+;				$f000 = sprites		(640)
+;				$f200 = spdata		 (start at #$760)
+;				$fc00 = scroll
+
+globals:
+	cars.l=Peek.l($ff0004)
+	track.l=Peek.l($ff0008)
+	tracklen.l=Peek.l($ff000c)
+
+	skidmap.l=track
+	blocks.l=track+96*48*2
+	blocklen.l=tracklen-96*48*2
+
+
+test
+	;
+	dodma{?mypalette,#cram+0,16}
+	dodma{?carpalette,#cram+32,16}
+	dodma{blocks,#vram+4096,blocklen/2}		 ;32 chars
+	dodma{?spdata,#vram+$f200,512}
+
+	For y=0 To 29
+		dodma{skidmap+(y)*96*2,#vram+y*64*2,64}			 ;2048 bytes
+	Next
+
+	!setmem{#wvram+$3c000003,#0}
+	!setmem{#wvram+$3c020003,#0};-24*8}
+	!setmem{#wsram+$00000000,#0}
+	!setmem{#wsram+$00020000,#4}
+
+	!setreg{2,0}		 ;map location=0*8192
+	!setreg{4,0}		 ;map location=0*8192
+	!setreg{5,$78}	 ;sprites location=$f000
+	!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+	!setreg{12,$81}	;32 cell mode no shadows no interlace
+	!setreg{13,$3f}	;hs=0
+	!setreg{16,1}		;64x32 sized map
+	!setreg{3,$38}	 ;windowpos= $e000
+	!setreg{17,$0};$8a}
+	!setreg{18,$0};$ff}
+
+
+	vv=1
+
+
+poka
+
+	fr.l=fr+1:If fr>799 Then fr=0
+
+	vbwait:
+	TST $ff0000:BEQ vbwait:MOVE#0,$ff0000
+	MOVE #$8704,$c00004
+	dodma{?spites,#vram+$f000,256}
+	dodma{cars+fr*288,#vram+$f200,288}
+	MOVE #$8705,$c00004
+	MOVE #$8706,$c00004
+	MOVE #$8708,$c00004
+	BRA poka
+
+	MOVE #$8708,$c00004
+
+	vb+vv:If vb>16 OR vb<-16 Then vv=-vv
+
+	!pokemem{#wsram+$00000000,vb}
+	!pokemem{#wsram+$00020000,-vb}
+
+	!pokemem{#wvram+$3c000003,vb}
+	!pokemem{#wvram+$3c020003,-vb-24*8}
+
+	While Peek.w($c00008)<$6f00:Wend
+;	!setreg{1,$24}
+	!pokemem{#wsram+$00000000,-vb}
+	!pokemem{#wsram+$00020000,vb}
+	!pokemem{#wvram+$3c000003,-vb}
+	!pokemem{#wvram+$3c020003,vb-24*8}
+
+	MOVE #$8700,$c00004
+
+;	mycar{?car,&vec,&cd(0,0)}		 ;,46*128+64}
+
+	MOVE #$8704,$c00004
+
+	Goto poka
+
+
+spites:
+	Dc.w $080,$a01,$a790,$f0			;palette 1
+	Dc.w $090,$a02,$a790,$90
+	Dc.w $0a0,$a03,$a790,$f0
+	Dc.w $0b0,$a04,$a790,$90
+	Dc.w $0c0,$a05,$a790,$f0
+	Dc.w $0d0,$a06,$a790,$90
+	Dc.w $0e0,$a07,$a790,$e0
+	Dc.w $0f0,$a08,$a790,$90
+	Dc.w $100,$a09,$a790,$f0
+	Dc.w $110,$a0a,$a790,$90
+	Dc.w $120,$a0b,$a790,$f0
+	Dc.w $130,$a0c,$a790,$90
+	Dc.w $140,$a0d,$a790,$f0
+	Dc.w $150,$a0e,$a790,$90
+	Dc.w $160,$a0f,$a790,$f0
+	Dc.w $080,$a10,$a790,$120			;palette 1
+	Dc.w $090,$a11,$a790,$150
+	Dc.w $0a0,$a12,$a790,$120
+	Dc.w $0b0,$a13,$a790,$150
+	Dc.w $0c0,$a14,$a790,$120
+	Dc.w $0d0,$a15,$a790,$150
+	Dc.w $0e0,$a16,$a790,$120
+	Dc.w $0f0,$a17,$a790,$150			;23
+
+	Dc.w $100,$a18,$a790,$120
+	Dc.w $110,$a19,$a790,$150
+	Dc.w $120,$a1a,$a790,$120
+	Dc.w $130,$a1b,$a790,$150
+
+	Dc.w $140,$a1c,$a790,$120
+	Dc.w $150,$a1d,$a790,$150
+	Dc.w $160,$a1e,$a790,$120
+	Dc.w $170,$a00,$a790,$150
+
+spdata:
+	Dc.l $ffffffff
+	Dc.l $f004400f
+	Dc.l $ffffffff
+	Dc.l $fff00fff
+	Dc.l $33300333
+	Dc.l $20222202
+	Dc.l $20000002
+	Dc.l $22222222
+
+;skidmap:
+;	IncBin "block.map"
+;blocks:
+;	IncBin "blocks.dat"
+;	IncBin "block.chr"
+;	IncBin "f1.win"
+;blocksf
+
+mypalette:
+	IncBin "palette.dat"
+
+carpalette:
+	IncBin "car.palette"
+
+
+
+hscroll:
+	Dc.w 0,-24*8
+	Dc.w 0,0
+
+	sincos
+		IncBin "sincos.bin"
+
+
+myvb:
+	RTE
+	ADD#-1,$ff0010:RTE
+
+	MOVEM.l d0-d7/a0-a6,-(a7)
+;	b+1:bb.w=$8700+(b AND 255):Poke.w #cp,bb
+	ADD.b#1,-1						 ;$ff0001
+	MOVE.b #$87,-2				 ;$ff0000
+	MOVE.w -2,cp
+	MOVEM.l (a7)+,d0-d7/a0-a6
+	RTE
+
+;---------------------------------------------------------------
+
+initrot:
+	px= 1:py=-1:pz=0
+	qx=0.7:qy=0.7:qz=-1
+
+	dist1=1/jsqr{px*px+py*py+pz*pz}
+	dist2=1/jsqr{qx*qx+qy*qy+qz*qz}
+	If dist1>dist2 Then dist=dist1:Else dist=dist2
+;	dist=93/jsqr{dist}
+	dist=120/jsqr{dist}
+
+	px*dist:py*dist:pz*dist
+	qx*dist:qy*dist:qz*dist
+
+	Return
+
+getrot
+		xang=xang+0.005
+		qc=jcos{xang}
+		qs=jsin{xang}
+		myrot.mat\xa=qc,-qs,0
+		myrot.mat\xb=qs,qc,0
+		myrot.mat\xc=0,0,1
+
+
+		DEFTYPE .vec v
+		##[$80CA] myrot
+
+		v\xx=\xa*px+\ya*py+\za*pz
+		v\xy=\xa*qx+\ya*qy+\za*qz
+
+		v\zx=\xb*px+\yb*py+\zb*pz
+		v\zy=\xb*qx+\yb*qy+\zb*qz
+
+		v\yx=\xc*px+\yc*py+\zc*pz
+		v\yy=\xc*qx+\yc*qy+\zc*qz
+
+	Return

@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Abs.bb
++Print Abs(-23) ; Prints 23 too 

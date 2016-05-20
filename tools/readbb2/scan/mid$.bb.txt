@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Mid$.bb
++Print Mid$("Hello there",4,5): ; Will Print the characters "lo th"

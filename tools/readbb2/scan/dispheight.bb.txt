@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/DispHeight.bb
++; ; max display height example program; Print "Maximum display height is ",DispHeight MouseWait 

@@ -1,0 +1,79 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/road.bb
++Dim qsin.w(256),qcos.w(256)			;128 = straight ahead
+
+Dim qdist.q(2048)
+For i=1 To 2048
+	qdist(i)=1/i
+Next
+
+For i=0 To 255
+	qsin(i)=HSin((i-128)*##[$80BA]/128)*32767
+	qcos(i)=HCos((i-128)*##[$80BA]/128)*32767
+Next
+
+NEWTYPE .rseg
+	angx.w
+	angy.w
+	width.w
+End NEWTYPE
+
+Dim r.rseg(2048)
+
+a=0:b=0:d=64
+
+For i=0 To 2047
+	If i=64 Then a=1
+;	a=0
+	r(i)\angx=a,b,32
+	d-1:If d=0 Then a=-a:d=128
+	If i=256 Then b=-1
+	If i=256+32*4 Then b=1
+	If i=256+96*4 Then b=-1
+	If i=256+128*4 Then b=0
+Next
+
+allocst 0,9
+ScreensBitMap 0,0
+BlockScroll
+
+a=0
+
+wx=1024	 ;width
+focal=16		;camera 16 metres depth
+height=256	;camera height
+
+ca=r(20)\angx
+For ii=0 To 2048-512 Step 8
+	VWait:BlockScroll
+	oldy=999
+	a=0			;sum of road angle x
+	b=0			;sum of road angle y
+	h=height ;sum of actual height (= to camera at start)
+	dx=0
+	dist=60
+	For i=0 To 511
+
+		b+r(i+ii)\angy
+
+		dist+qcos(128+(b ASR 1)) ASR 14	 ;further into the screen
+
+		dist+1
+
+		h+8*(qsin(128+(b ASR 1)) ASR 14)
+
+		mult=focal*qdist(dist)	 ;/dist
+
+		y=h*mult
+
+		If y<oldy
+			oldy=y
+			wid=wx*mult
+			a+r(i+ii)\angx
+			dx.q+qsin(128+(a ASR 1)) ASR 14
+;			Line 0,128+y,639,128+y,0
+			Line 320+dx-wid,128+y,320+dx+wid,128+y,1
+		EndIf
+	Next
+Next
+
+MouseWait

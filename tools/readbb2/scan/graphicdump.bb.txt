@@ -1,0 +1,100 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicDump.bb
++; This little program will receive a window address from CanDo and
+; then output that window as a Graphic Dump to the printer.
+##[$80CC]
+; I send the arguments from within CanDo to print the window I specify
+; If an error occurs it is saved as a little file in ram: and then I
+; check the file and determine what the error was and act accordingly
+If NumPars > 0
+	fwindo$$ = Par$(1)
+	fwindo.l = Val(num$)
+	xpos$ = Par$(2)
+	xpos.w = Val(xpos$)
+	ypos$ = Par$(3)
+	ypos.w = Val(ypos$)
+	wid$ = Par$(4)
+	wid.w = Val(wid$)
+	ht$ = Par$(5)
+	ht.w = Val(ht$)
+	Gosub HardCopy
+EndIf
+End
+HardCopy:
+		memopt.l = 2^0+2^16
+		pio.l = ##[$FE97](100,memopt)
+		pport.l = pio + 62
+		If pio = 0
+			If ReadMem(0,"ram:error")
+				FileOutput 0
+				Print "No Memory"
+				CloseFile 0
+				DefaultOutput
+			EndIf
+			End
+		EndIf
+		frastport.l = Peek.l(fwindo + 50)
+		fwidth.w = Peek.w(fwindo + 112)
+		fheight.w = Peek.w(fwindo + 114)
+		fscreen.l = Peek.l(fwindo + 46)
+		fviewport.l = fscreen + 44
+		fcolormap.l = Peek.l(fviewport + 4)
+		fvpmode.w = Peek.w(fviewport + 32)
+		psigBit.w = ##[$FEAD](-1)
+		If psigBit = -1
+			f.l = ##[$FE99](pio,100)
+			If ReadMem(0,"ram:error")
+				FileOutput 0
+				Print "No Signal"
+				CloseFile 0
+				DefaultOutput
+			EndIf
+			End
+		End If
+		psigTask.l = ##[$FEA7](0)
+		Poke pport + 8,4
+		Poke.l pport + 10,pport + 34
+		Poke pport + 15,psigBit
+		Poke.l pport + 16,psigTask
+		Poke.l pport + 20,pport + 24
+		Poke.l pport + 28,pport + 20
+		Poke pport + 34,Asc("P")
+		Poke pport + 35,Asc("R")
+		Poke pport + 36,Asc("T")
+		##[$FEB1](pport)
+		Poke pio + 8,5
+		Poke.l pio + 14,pport
+		Poke.w pio + 28,11
+		Poke.l pio + 32,frastport
+		Poke.l pio + 36,fcolormap
+		Poke.l pio + 40,fvpmode
+		Poke.w pio + 44,xpos
+		Poke.w pio + 46,ypos
+		Poke.w pio + 48,wid
+		Poke.w pio + 50,ht
+		Poke.l pio + 52,wid
+		Poke.l pio + 56,ht * 4
+		Poke.w pio + 60,4
+		status.w = ##[$FEC0]("printer.device" + Chr$(0),0,pio,0)
+		If status <> 0
+			f = ##[$FE99](pio,100)
+			##[$FEAE](psigBit)
+			If ReadMem(0,"ram:error")
+				FileOutput 0
+				Print "No Open"
+				CloseFile 0
+				DefaultOutput
+			EndIf
+			End
+		EndIf
+		ercond.w = ##[$FEC2](pio)
+		##[$FEC1](pio)
+		##[$FEB2](pport)
+		f = ##[$FE99](pio,100)
+		##[$FEAE](psigBit)
+		If ReadMem(0,"ram:error")
+			FileOutput 0
+			Print ercond
+			CloseFile 0
+			DefaultOutput
+		EndIf
+Return

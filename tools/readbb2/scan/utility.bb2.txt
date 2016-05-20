@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/utility/utility.bb2
++;
+; $VER: utility.bb2 40.0 (03.03.94)
+;
+
+;/*****************************************************************************/
+
+
+XInclude"exec/types.bb2"
+
+XInclude"exec/libraries.bb2"
+
+
+;/*****************************************************************************/
+
+
+Macro UTILITYNAME:"utility.library":End Macro
+
+
+NEWTYPE.UtilityBase
+ub_LibNode.Library
+ub_Language.b
+ub_Reserved.b
+End NEWTYPE
+
+
+;/*****************************************************************************/

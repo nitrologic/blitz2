@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Record.bb
++; ; brex recording program example; Type "Hello There!" MouseWait NPrint "Play with the mouse, then hit the right mouse button."AbsMouse 0,0Record 0						;begin recording. While Joyb(0)<>2WendRecord						 ;finish recording AbsMouse 0,0PlayBack 0MouseWait 

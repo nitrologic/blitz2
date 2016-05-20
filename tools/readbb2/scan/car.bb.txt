@@ -1,0 +1,61 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/car.bb
++;
+; convert 24bit skidcars to 3 color
+;
+
+##[$A402] 0,1280,320,1
+;ReadChunky 0,"car.24"
+
+;LoadChunky 0,"w:cars/vw1.iff":t1=140:t2=220
+;LoadChunky 0,"w:cars/mini1.iff":t1=140:t2=220
+;LoadChunky 0,"w:cars/escort1.iff":t1=140:t2=220
+;LoadChunky 0,"w:cars/midget1.iff":t1=140:t2=220
+##[$A404] 0,"w:cars/porsche1.iff":t1=140:t2=220
+
+##[$A402] 1,64,32,1:m.l=Peek.l(##[$80B8] ##[$A401](1))
+
+lmaxlen 0,1280,320,3
+AGAGreen 0,0,120,80,40:StopCycle 0,1,3,3,3:StopCycle 0,2,12,12,12:StopCycle 0,3,14,6,8
+
+InitCopList 0,44,256,$13102,8,4,-2
+
+DisplayBitMap 0,0:DisplayPalette 0,0
+
+BLITZ
+
+CreateDisplay 0
+
+For xx=0 To 9
+	a=xx*64
+	##[$A40C] 0,1,a,0,64,32,0,0
+	Use lmaxlen 0
+	For y=0 To 31
+		For x=0 To 63
+			mm.l=m+x+y*192
+			r.w=Peek.b(mm)&255:g.w=Peek.b(mm+64)&255:b.w=Peek.b(mm+128)&255:c.w=(r+g+b)/3
+
+			If g>250 Then c=0:Goto doit				 ;green
+			If g>r+30 Then c=0:Goto doit				 ;green
+
+			If r>b+10
+				c=3															 ;red
+				If ((x+y)AND1)=1
+					If r<t1 Then c=1
+					If r>t2 Then c=2
+				EndIf
+			Else
+				If ((x-y)AND1)=1									;grey
+					If c<65 Then c=1 Else c=2
+				Else
+					If c<80 Then c=1 Else c=2
+				EndIf
+			EndIf
+
+			doit:Point x+xx*64,y,c
+		Next
+	Next
+Next
+
+;FloodFill 0,0,0
+MouseWait
+End

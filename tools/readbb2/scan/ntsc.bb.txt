@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/NTSC.bb
++; ; NTSC test example program ; If NTSC Then Print "Yo Dude" Else Print "Hello Chaps" MouseWait 

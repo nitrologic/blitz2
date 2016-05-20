@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/GetOffsets.bb
++
+allocst 0,0,0,320,256+128,4,0,"",0,1
+ScreensBitMap 0,0
+
+LoadBitMap 0,"redcar.iff",0
+Use SetCycle 0
+Use lmaxlen 0
+
+x=0:y=0
+For l=0 To 31
+		GetaShape l,x,y,48,48
+		##[$FF22]
+		Boxf x,y,x+47,y+47,5+(l&3)
+		##[$FF22]
+		x+48
+		If x+48>319 Then x=0:y+48
+Next
+
+BlockScroll
+
+Dim offx.w(31),offy.w(31)
+
+ux=160:uy=128
+
+For fr=0 To 31
+		Boxf ux,uy,ux+50,uy+50,0
+		##[$FF22]
+		longdiv fr,ux,uy
+
+
+		VWait 20
+Next
+
+MouseWait

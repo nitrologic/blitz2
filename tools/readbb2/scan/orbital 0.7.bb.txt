@@ -1,0 +1,2512 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Orbital/Source Code/Orbital Source/Orbital 0.7.bb
++; --------------------------------------------------------------------
+
+; Orbital V0.7
+; By Challenge Logic
+; (C) 10th November 1993
+
+; --------------------------------------------------------------------
+
+
+; COMPILER DIRECTIVES
+.DIRECTIVES
+
+
+; --------------------------------------------------------------------
+
+##[$80C3]
+VWait 250
+BLITZ
+
+; --------------------------------------------------------------------
+
+
+; MACROS
+.MACROS
+
+
+; --------------------------------------------------------------------
+
+#Current_Sound = 0
+Macro New_Sound
+	`1 = #Current_Sound
+	#Current_Sound = #Current_Sound + 1
+End Macro
+
+#Current_Shape = 1
+Macro New_Shape
+	`1 = #Current_Shape
+	#Current_Shape = #Current_Shape + 1
+End Macro
+
+#Current_Sprite = 0
+Macro New_Sprite
+	`1 = #Current_Sprite
+	#Current_Sprite = #Current_Sprite + 1
+End Macro
+
+; --------------------------------------------------------------------
+
+
+; TYPES
+
+
+; --------------------------------------------------------------------
+
+DEFTYPE .w
+
+NEWTYPE.High_Scores
+	Score.w
+	Name$
+End NEWTYPE
+
+NEWTYPE.Balls
+	Motion.w
+	Shape_.w
+	Buffer_Shape.w
+End NEWTYPE
+
+; --------------------------------------------------------------------
+
+
+; GLOBAL CONSTANTS
+.CONSTANTS
+
+
+; --------------------------------------------------------------------
+
+; SOUND
+
+!New_Sound{#Zap_Red}
+!New_Sound{#Zap_Green}
+!New_Sound{#Zap_Blue}
+!New_Sound{#Extra_Something}
+!New_Sound{#Ten_Second_Warning}
+!New_Sound{#Game_Over}
+#Sound_Effects_Channel = %1000
+
+; SLICE
+
+#Slice_Width =	320
+#Slice_Height = 256
+#Slice_Depth =	5
+
+; GRID
+
+#Grid_X_Offset = 16
+#Grid_Y_Offset = 16
+
+; FONT
+
+#Letter_Width =	 16
+#Number_Width =	 10
+#Font_Height =		32
+#Font_Spacing =		4
+#Font_Baseline =	28
+#Value_Of_Zero =	48
+#Value_Of_Nine =	57
+#Value_Of_Space = 32
+#Value_Of_A =		 65
+#Value_Of_Z =		 90
+!New_Shape{#Zero}
+!New_Shape{#One}
+!New_Shape{#Two}
+!New_Shape{#Three}
+!New_Shape{#Four}
+!New_Shape{#Five}
+!New_Shape{#Six}
+!New_Shape{#Seven}
+!New_Shape{#Eight}
+!New_Shape{#Nine}
+!New_Shape{#A}
+!New_Shape{#B}
+!New_Shape{#C}
+!New_Shape{#D}
+!New_Shape{#E}
+!New_Shape{#F}
+!New_Shape{#G}
+!New_Shape{#H}
+!New_Shape{#I}
+!New_Shape{#J}
+!New_Shape{#K}
+!New_Shape{#L}
+!New_Shape{#M}
+!New_Shape{#N}
+!New_Shape{#O}
+!New_Shape{#P}
+!New_Shape{#Q}
+!New_Shape{#R}
+!New_Shape{#S}
+!New_Shape{#T}
+!New_Shape{#U}
+!New_Shape{#V}
+!New_Shape{#W}
+!New_Shape{#X}
+!New_Shape{#Y}
+!New_Shape{#Z}
+
+; HIGH SCORE
+
+#Max_High_Scores =				 5
+#High_Score_Name_Width =	 6
+#Alphabet_Gadgets_X =			(#Slice_Width / 2) - (13 * #Letter_Width / 2)
+#Alphabet_Gadgets_Y =			2 * #Font_Height
+#Alphabet_Gadgets_Width =	13
+#Alphabet_Gadgets_Height = 2
+#Space_Gadget_X =					3 * #Letter_Width + #Letter_Width / 2
+#Space_Gadget_Y =					4 * #Font_Height
+#Space_Gadget_Width =			5
+#Space_Gadget_Height =		 1
+#Delete_Gadget_X =				10 * #Letter_Width + #Letter_Width / 2
+#Delete_Gadget_Y =				 4 * #Font_Height
+#Delete_Gadget_Width =		 6
+#Delete_Gadget_Height =		1
+#End_Gadget_X =						7 * #Letter_Width
+#End_Gadget_Y =						5 * #Font_Height
+#End_Gadget_Width =				6
+#End_Gadget_Height =			 1
+#New_Name_X =							7 * #Letter_Width
+#New_Name_Y =							7 * #Font_Height
+#High_Score_Title_X =			1 * #Letter_Width
+#High_Score_Title_Y =			0 * #Font_Height
+#Speed_Game_Rank_X =							0 * #Letter_Width
+#Speed_Game_High_Score_X =				1 * #Letter_Width
+#Speed_Game_Name_X =							4 * #Letter_Width
+#Logic_Game_Rank_X =						 10 * #Letter_Width
+#Logic_Game_High_Score_X =			 11 * #Letter_Width
+#Logic_Game_Name_X =						 14 * #Letter_Width
+#High_Score_Table_Y =			2 * #Font_Height
+
+; MENU
+
+#Menu_Box_Colour =	1
+#Option_1_X =			 0 * #Letter_Width
+#Option_1_Y =			 6 * #Font_Height
+#Option_1_Width =	 5
+#Option_1_Height =	2
+#Option_2_X =			 6 * #Letter_Width
+#Option_2_Y =			 6 * #Font_Height
+#Option_2_Width =	 5
+#Option_2_Height =	2
+#Option_3_X =			13 * #Letter_Width
+#Option_3_Y =			 6 * #Font_Height
+#Option_3_Width =	 7
+#Option_3_Height =	1
+#Option_4_X =			13 * #Letter_Width
+#Option_4_Y =			 7 * #Font_Height
+#Option_4_Width =	 7
+#Option_4_Height =	1
+
+; POINTERS
+
+#Pointer_Width =	32
+#Pointer_Height = 32
+!New_Sprite{#Pointer_}
+!New_Sprite{#Selector_Box_Pointer}
+
+; BALLS
+
+; Sizes
+
+#Ball_Diameter =		 32
+#Ball_Array_Width =	 7
+#Ball_Array_Height =	7
+#Max_Bonuses =				9
+
+; Sounds
+
+!New_Sound{#Spinning_Ball}
+!New_Sound{#Dragged_Ball}
+!New_Sound{#Disappearing_Ball}
+!New_Sound{#Magnetised_Ball}
+
+; Motions
+
+#Just_No_Ball_1 =					 1
+#Just_No_Ball_2 =					 2
+#No_Ball =									3
+#Just_Still_Ball_1 =				4
+#Just_Still_Ball_2 =				5
+#Still_Ball =							 6
+#Just_Falling_Ball_1 =			7
+#Just_Falling_Ball_2 =			8
+#Falling_Ball =						 9
+#Just_Spinning_Ball_1 =		10
+#Just_Spinning_Ball_2 =		11
+#Just_Spinning_Ball_3 =		12
+#Just_Stopped_Spinning_1 = 13
+#Just_Stopped_Spinning_2 = 14
+#Just_Dragged_Left_1 =		 15
+#Just_Dragged_Left_2 =		 16
+#Dragged_Left =						17
+#Just_Dragged_Right_1 =		18
+#Just_Dragged_Right_2 =		19
+#Dragged_Right =					 20
+#Thrust_Left =						 21
+#Dragged_To_Ball =				 22
+#Checked_Ball =						23
+
+; Shapes
+
+!New_Shape{#No_Shape}
+!New_Shape{#Red_Ball}
+!New_Shape{#Green_Ball}
+!New_Shape{#Blue_Ball}
+!New_Shape{#Grey_Ball}
+!New_Shape{#Spin_To_Red_Ball_1}
+!New_Shape{#Spin_To_Red_Ball_2}
+!New_Shape{#Spin_To_Red_Ball_3}
+!New_Shape{#Spin_To_Green_Ball_1}
+!New_Shape{#Spin_To_Green_Ball_2}
+!New_Shape{#Spin_To_Green_Ball_3}
+!New_Shape{#Spin_To_Blue_Ball_1}
+!New_Shape{#Spin_To_Blue_Ball_2}
+!New_Shape{#Spin_To_Blue_Ball_3}
+
+; Buffer Shapes
+
+#First_Buffer_Shape = #Current_Shape
+#Current_Shape = #Current_Shape + #Ball_Array_Width * #Ball_Array_Height
+
+; SELECTORS
+
+; Sizes
+
+#Column_Selector_Width =	38
+#Column_Selector_Height = 10
+#Row_Selector_Width =		 10
+#Row_Selector_Height =		38
+#Selector_Offset =				(#Ball_Diameter / 2) - (#Column_Selector_Width / 2)
+
+; Shapes
+
+!New_Shape{#Top_Column_Selector}
+!New_Shape{#Bottom_Column_Selector}
+!New_Shape{#Left_Row_Selector}
+!New_Shape{#Top_Column_Selector_Buffer}
+!New_Shape{#Bottom_Column_Selector_Buffer}
+!New_Shape{#Left_Row_Selector_Buffer}
+
+; Sprites
+
+!New_Sprite{#Right_Row_Selector}
+
+; MAGNETS
+
+; Sizes
+
+#Magnet_Width =	16
+#Magnet_Height = 28
+#Magnet_Offset = (#Ball_Diameter / 2) - (#Magnet_Height / 2)
+
+; Shapes
+
+!New_Shape{#Left_Magnet}
+!New_Shape{#Left_Magnet_Buffer}
+
+; Sprites
+
+!New_Sprite{#Right_Magnet}
+
+; GAME
+
+#Max_Levels =									 3
+#Max_Zones =										4
+#Speed_Game =									 1
+#Logic_Game =									 2
+#Stats_X =										 259
+#Level_Y =											8
+#Lives_Y =											45
+#Balls_Held_Y =								 82
+#Score_Y =											119
+#Timer_Y =											156
+#Quit_Gadget_X =							264
+#Quit_Gadget_Y =							200
+#Quit_Gadget_Width =					 16
+#Quit_Gadget_Height =					16
+#Forfeit_Life_Gadget_X =			264
+#Forfeit_Life_Gadget_Y =			224
+#Forfeit_Life_Gadget_Width =	 16
+#Forfeit_Life_Gadget_Height =	16
+#Max_Permenant_Time_Meter_Colours = 5
+#Permenant_Time_Meter_Height = 40
+
+; MISC
+
+#MEMF_CHIP = 2
+#MEMF_FAST = 4
+
+; --------------------------------------------------------------------
+
+
+; GLOBAL VARIABLES
+.VARIABLES
+
+
+; --------------------------------------------------------------------
+
+; SOUND
+
+Music = On
+Dim Music_Filename$(#Max_Zones - 1)
+
+; BITMAP
+
+Current_Bitmap = 0
+Dim Background_Filename$(#Max_Zones - 1)
+
+; HIGH SCORE
+
+Dim Speed_Game_High_Score.High_Scores(~#Max_High_Scores - 1~)
+Dim Logic_Game_High_Score.High_Scores(~#Max_High_Scores - 1~)
+
+; BALL
+
+Column_Checking = Off
+Row_Checking =		Off
+Bonus =					 Off
+Balls_Held =			0
+Balls_Left =			0
+Left_Magnet =		 Off
+Right_Magnet =		Off
+Column_Selected = -1
+Row_Selected =		-1
+Max_Time =				0
+Dim Ball.Balls(~#Ball_Array_Width - 1~, ~#Ball_Array_Height - 1~)
+
+; GAME
+
+Seconds_Timer = 0
+VBlank_Time = 0
+Zone =	1
+Score = 0
+Finish_Game =		False
+Game_Type = #Speed_Game
+Extra_Something = False
+Dim Permenant_Time_Meter_Colour(#Max_Permenant_Time_Meter_Colours - 1)
+
+; MISC
+
+Finish_Program = False
+LMB_Pressed =		False
+RMB_Pressed =		False
+Mouse_X =				0
+Mouse_Y =				0
+Mouse_X_Speed =	0
+Dim Map_Filename$(#Max_Zones - 1, #Max_Levels - 1)
+
+; --------------------------------------------------------------------
+
+
+; SOUND PROCEDURES
+.SOUND
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Music_Filenames{}
+	Shared Music_Filename$()
+	Music_Filename$(0) = "MED Modules/mod.Orbital-Space Zone"
+	Music_Filename$(1) = "MED Modules/mod.Orbital-Ocean Zone"
+	Music_Filename$(2) = "MED Modules/mod.Orbital-Forest Zone"
+	Music_Filename$(3) = "MED Modules/mod.Orbital-Techno Zone"
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Fade_In_Music{}
+	SetMedMask %0111
+	For Volume_ = 0 To 63
+		SetMedVolume Volume_
+		VWait 2
+	Next Volume_
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Fade_Out_Music{}
+	For Volume_ = 63 To 0 Step -1
+		SetMedVolume Volume_
+		VWait 2
+	Next Volume_
+	SetMedMask %0000
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; BITMAP PROCEDURES
+.BITMAP
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Background_Filenames{}
+	Shared Background_Filename$()
+	Background_Filename$(0) = "Graphics/Space Zone Background"
+	Background_Filename$(1) = "Graphics/Ocean Zone Background"
+	Background_Filename$(2) = "Graphics/Forest Zone Background"
+	Background_Filename$(3) = "Graphics/Techno Zone Background"
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Screen_Swap{}
+	Shared Current_Bitmap
+	VWait
+	Show Current_Bitmap
+	If Current_Bitmap = 0
+		Current_Bitmap = 1
+	Else
+		Current_Bitmap = 0
+	End If
+	Use lmaxlen Current_Bitmap
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Copy_Current_Bitmap_To_Used_Bitmap{}
+	Shared Current_Bitmap
+	If Current_Bitmap = 0
+		ShapesBitMap 0, 1
+	Else
+		ShapesBitMap 1, 0
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Copy_Used_Bitmap_To_Current_Bitmap{}
+	Shared Current_Bitmap
+	If Current_Bitmap = 0
+		ShapesBitMap 1, 0
+	Else
+		ShapesBitMap 0, 1
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Display{}
+	Shared Current_Bitmap
+	Shared Zone
+	Shared Background_Filename$()
+	Shared Game_Type, Column_Checking, Row_Checking
+	QAMIGA
+	LoadBitMap Current_Bitmap, Background_Filename$(Zone - 1), 0
+	If Game_Type = #Speed_Game
+		LoadShape 0, "Graphics/Held Shape"
+	Else
+		LoadShape 0, "Graphics/Check Shape"
+	End If
+	VWait 150
+	BLITZ
+	longdiv 0, 266, 77
+	Use SetCycle 0
+	Screen_Swap{}
+	Copy_Used_Bitmap_To_Current_Bitmap{}
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; GRID PROCEDURES
+.GRID
+
+
+; --------------------------------------------------------------------
+
+Function Screen_To_Grid_X{Screen_X}
+	Function Return Int(Screen_X / #Ball_Diameter)
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Screen_To_Grid_Y{Screen_Y}
+	Function Return Int((#Ball_Array_Height * #Ball_Diameter - Screen_Y) / #Ball_Diameter)
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Snap_To_Grid_X{Screen_X}
+	Function Return #Grid_X_Offset + Int(Screen_X / #Ball_Diameter) * #Ball_Diameter
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Snap_To_Grid_Y{Screen_Y}
+	Function Return #Grid_Y_Offset + Int(Screen_Y / #Ball_Diameter) * #Ball_Diameter
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Grid_To_Screen_X{Grid_X}
+	Function Return #Grid_X_Offset + Grid_X * #Ball_Diameter
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Grid_To_Screen_Y{Grid_Y}
+	Function Return #Grid_Y_Offset + (#Ball_Array_Height * #Ball_Diameter) - ((Grid_Y + 1) * #Ball_Diameter)
+End Function
+
+; --------------------------------------------------------------------
+
+
+; FONT PROCEDURES
+.FONT
+
+
+; --------------------------------------------------------------------
+
+Statement Orbital_Print{String_$, Initial_X, Initial_Y, Excess_Mask}
+	Shared X, Y, Counter
+	X = Initial_X + ~#Letter_Width / 2~
+	Y = Initial_Y + ~#Font_Height / 2~
+	For Counter = 1 To Len(String_$)
+		Value_Of_Character = Asc(Mid$(String_$, Counter, 1))
+
+	; PRINT NUMBER
+
+		If (#Value_Of_Zero <= Value_Of_Character) AND (Value_Of_Character <= #Value_Of_Nine)
+			longdiv ~#Zero - #Value_Of_Zero~ + Value_Of_Character, X, Y, Excess_Mask
+			X = X + #Number_Width
+		End If
+
+	; PRINT SPACE
+
+		If Value_Of_Character = #Value_Of_Space
+			X = X + #Letter_Width
+		End If
+
+	; PRINT LETTER
+
+		If (#Value_Of_A <= Value_Of_Character) AND (Value_Of_Character <= #Value_Of_Z)
+			longdiv ~#A - #Value_Of_A~ + Value_Of_Character, X, Y, Excess_Mask
+			X = X + #Letter_Width
+		End If
+
+		If X > ~#Slice_Width - #Letter_Width / 2~
+			X = Initial_X
+			If Y < ~#Slice_Height - #Font_Height / 2~
+				Y = Y + #Font_Height
+			End If
+		End If
+	Next Counter
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; HIGH SCORE PROCEDURES
+.HIGH_SCORE
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_High_Scores{}
+	Shared Speed_Game_High_Score()
+	Shared Logic_Game_High_Score()
+	Speed_Game_High_Score(0)\Score = 400
+	Speed_Game_High_Score(0)\Name =	""
+	Speed_Game_High_Score(1)\Score = 300
+	Speed_Game_High_Score(1)\Name =	""
+	Speed_Game_High_Score(2)\Score = 200
+	Speed_Game_High_Score(2)\Name =	""
+	Speed_Game_High_Score(3)\Score = 100
+	Speed_Game_High_Score(3)\Name =	""
+	Speed_Game_High_Score(4)\Score = 0
+	Speed_Game_High_Score(4)\Name =	""
+
+	Logic_Game_High_Score(0)\Score = 400
+	Logic_Game_High_Score(0)\Name =	""
+	Logic_Game_High_Score(1)\Score = 300
+	Logic_Game_High_Score(1)\Name =	""
+	Logic_Game_High_Score(2)\Score = 200
+	Logic_Game_High_Score(2)\Name =	""
+	Logic_Game_High_Score(3)\Score = 100
+	Logic_Game_High_Score(3)\Name =	""
+	Logic_Game_High_Score(4)\Score = 0
+	Logic_Game_High_Score(4)\Name =	""
+End Statement
+
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Add_New_High_Score{}
+	Shared Music, Score, Speed_Game_High_Score(), Current_Bitmap, Game_Type
+	Shared Logic_Game_High_Score()
+	If Music
+		StopMed
+		Free DecodeMedModule 0
+		QAMIGA
+		LoadMedModule 0, "MED Modules/mod.Orbital Hi-Scores"
+		VWait 150
+		BLITZ
+		StartMedModule 0
+	End If
+	QAMIGA
+	LoadBitMap Current_Bitmap, "Graphics/High Score Background", 0
+	VWait 150
+	BLITZ
+	Orbital_Print{"ENTER YOUR NAME", (#Slice_Width / 2) - (15 * #Letter_Width / 2), 0, %0100}
+	Orbital_Print{"ABCDEFGHIJKLM", #Alphabet_Gadgets_X, #Alphabet_Gadgets_Y, %0101}
+	Orbital_Print{"NOPQRSTUVWXYZ", #Alphabet_Gadgets_X, #Alphabet_Gadgets_Y + #Font_Height, %0101}
+	Orbital_Print{"SPACE", #Space_Gadget_X, #Space_Gadget_Y, %0101}
+	Orbital_Print{"DELETE", #Delete_Gadget_X, #Delete_Gadget_Y, %0101}
+	Orbital_Print{"FINISH",		#End_Gadget_X,		#End_Gadget_Y,		%0101}
+	Name$ =	""
+	Screen_Swap{}
+	Use SetCycle 0
+	Copy_Used_Bitmap_To_Current_Bitmap{}
+	GetaShape 0, #New_Name_X, #New_Name_Y, #High_Score_Name_Width * #Letter_Width, #Font_Height
+	Finish = False
+	While Finish = False
+		While Joyb(0) = 0
+		Wend
+		VWait
+		While Joyb(0) <> 0
+			X = MouseX + ~#Pointer_Width /	2~
+			Y = MouseY + ~#Pointer_Height / 2~
+		Wend
+
+	; CHECK SPACE GADGET
+
+		If (#Space_Gadget_X <= X) AND (X <= ~#Space_Gadget_X + (#Space_Gadget_Width * #Letter_Width)~)
+			If (#Space_Gadget_Y <= Y) AND (Y <= ~#Space_Gadget_Y + (#Space_Gadget_Height * #Font_Height)~)
+				If Len(Name$) <= ~#High_Score_Name_Width - 1~
+					Name$ = Name$ + " "
+					longdiv 0, #New_Name_X, #New_Name_Y
+					Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
+					Screen_Swap{}
+				End If
+			End If
+		End If
+
+	; CHECK DELETE GADGET
+
+		If (#Delete_Gadget_X <= X) AND (X <= ~#Delete_Gadget_X + (#Delete_Gadget_Width * #Letter_Width)~)
+			If (#Delete_Gadget_Y <= Y) AND (Y <= ~#Delete_Gadget_Y + (#Delete_Gadget_Height * #Font_Height)~)
+				If Len(Name$) > 0
+					Name$ = Left$(Name$, Len(Name$) - 1)
+				End If
+				longdiv 0, #New_Name_X, #New_Name_Y
+				Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
+				Screen_Swap{}
+			End If
+		End If
+
+	; CHECK END GADGET
+
+		If (#End_Gadget_X <= X) AND (X <= ~#End_Gadget_X + (#End_Gadget_Width * #Letter_Width)~)
+			If (#End_Gadget_Y <= Y) AND (Y <= ~#End_Gadget_Y + (#End_Gadget_Height * #Font_Height)~)
+				Finish = True
+			End If
+		End If
+
+	; CHECK ALPHABET GADGETS
+
+		If (#Alphabet_Gadgets_X <= X) AND (X <= ~#Alphabet_Gadgets_X + (#Alphabet_Gadgets_Width * #Letter_Width)~)
+			If (#Alphabet_Gadgets_Y <= Y) AND (Y <= ~#Alphabet_Gadgets_Y + (#Alphabet_Gadgets_Height * #Font_Height)~)
+				X = X	- #Alphabet_Gadgets_X
+				Y = Y	- #Alphabet_Gadgets_Y
+				Gadget_ID = (Int(Y / #Font_Height) * #Alphabet_Gadgets_Width) + Int(X / #Letter_Width)
+				If Len(Name$) <= ~#High_Score_Name_Width - 1~
+					Name$ = Name$ + Chr$(#Value_Of_A + Gadget_ID)
+					longdiv 0, #New_Name_X, #New_Name_Y
+					Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
+					Screen_Swap{}
+				End If
+			End If
+		End If
+	Wend
+
+; ADD SCORE AND NAME TO HIGH SCORE TABLE
+
+	If Game_Type = #Speed_Game
+		Speed_Game_High_Score(~#Max_High_Scores - 1~)\Score = Score
+		Speed_Game_High_Score(~#Max_High_Scores - 1~)\Name = Name$
+	Else
+		Logic_Game_High_Score(~#Max_High_Scores - 1~)\Score = Score
+		Logic_Game_High_Score(~#Max_High_Scores - 1~)\Name = Name$
+	End If
+
+; SORT HIGH SCORE TABLE
+
+	If Game_Type = #Speed_Game
+		Counter = ~#Max_High_Scores - 1~
+		##[$80BB]
+			If Speed_Game_High_Score(Counter)\Score >= Speed_Game_High_Score(Counter - 1)\Score
+				##[$80C9] Speed_Game_High_Score(Counter)\Score, Speed_Game_High_Score(Counter - 1)\Score
+				##[$80C9] Speed_Game_High_Score(Counter)\Name, Speed_Game_High_Score(Counter - 1)\Name
+				Counter = Counter - 1
+			Else
+				Counter = 0
+			End If
+		##[$80BC] Counter = 0
+	Else
+		Counter = ~#Max_High_Scores - 1~
+		##[$80BB]
+			If Logic_Game_High_Score(Counter)\Score >= Logic_Game_High_Score(Counter - 1)\Score
+				##[$80C9] Logic_Game_High_Score(Counter)\Score, Logic_Game_High_Score(Counter - 1)\Score
+				##[$80C9] Logic_Game_High_Score(Counter)\Name, Logic_Game_High_Score(Counter - 1)\Name
+				Counter = Counter - 1
+			Else
+				Counter = 0
+			End If
+		##[$80BC] Counter = 0
+	End If
+	If Music
+		Fade_Out_Music{}
+		StopMed
+	End If
+	Free MidHandle 0
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Display_High_Scores{}
+	Shared Speed_Game_High_Score()
+	Shared Logic_Game_High_Score()
+
+; DISPLAY TITLES
+
+
+	Orbital_Print{"HIGH SCORES", (#Slice_Width / 2) - (11 * #Letter_Width / 2), 0, %0110}
+	Orbital_Print{"SPEED", (#Slice_Width / 4) - (5 * #Letter_Width / 2), 1 * #Font_Height, %0110}
+	Orbital_Print{"LOGIC", (#Slice_Width / 2) + (#Slice_Width / 4) - (5 * #Letter_Width / 2), 1 * #Font_Height, %0110}
+	For Counter = 0 To ~#Max_High_Scores - 1~
+
+; DISPLAY SPEED GAME RANK
+
+		Format "#"
+		Orbital_Print{Str$(Counter + 1), #Speed_Game_Rank_X, #High_Score_Table_Y + (Counter * 24), %0110}
+
+		Format "0000"
+
+; DISPLAY SPEED GAME SCORE
+
+		Y = #High_Score_Table_Y + (Counter * 24)
+		#X = #Speed_Game_High_Score_X
+		Orbital_Print{Str$(Speed_Game_High_Score(Counter)\Score), #X, Y, %0110}
+
+; DISPLAY SPEED GAME NAME
+
+		#X = #Speed_Game_Name_X
+		Orbital_Print{Speed_Game_High_Score(Counter)\Name, #X, Y, %0110}
+
+; DISPLAY LOGIC GAME RANK
+
+		Format "#"
+		Orbital_Print{Str$(Counter + 1), #Logic_Game_Rank_X, #High_Score_Table_Y + (Counter * 24), %0110}
+
+		Format "0000"
+
+; DISPLAY LOGIC GAME SCORE
+
+		#X = #Logic_Game_High_Score_X
+		Orbital_Print{Str$(Logic_Game_High_Score(Counter)\Score), #X, Y, %0110}
+
+; DISPLAY LOGIC GAME NAME
+
+		#X = #Logic_Game_Name_X
+		Orbital_Print{Logic_Game_High_Score(Counter)\Name, #X, Y, %0110}
+	Next Counter
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; MENU PROCEDURES
+.MENU
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Menus{}
+	Shared Music, Current_Bitmap
+	StopMed
+	Free DecodeMedModule 0
+	QAMIGA
+	LoadMedModule 0, "MED Modules/mod.Cloud_9"
+	VWait 150
+	BLITZ
+	If Music
+		StartMedModule 0
+	End If
+	QAMIGA
+	LoadBitMap Current_Bitmap, "Graphics/Menu Background", 0
+	VWait 150
+	BLITZ
+	Display_High_Scores{}
+	BitMapOutput Current_Bitmap
+	Locate 0, 31
+	Print " (C) 10th November 1993 Challenge Logic "
+	Screen_Swap{}
+	Use SetCycle 0
+	Copy_Used_Bitmap_To_Current_Bitmap{}
+
+; DISPLAY MAIN MENU
+
+	Orbital_Print{"SPEED",	 #Option_1_X,	#Option_1_Y,			%0110}
+	Orbital_Print{"GAME",		#Option_1_X, ~#Option_1_Y + #Font_Height~, %0110}
+	Orbital_Print{"LOGIC",	 #Option_2_X,	#Option_2_Y,			%0110}
+	Orbital_Print{"GAME",		#Option_2_X, ~#Option_2_Y + #Font_Height~, %0110}
+	Orbital_Print{"OPTIONS", #Option_3_X,	#Option_3_Y,			%0110}
+	Orbital_Print{"QUIT",		#Option_4_X,	#Option_4_Y, %1100}
+	Screen_Swap{}
+
+; DISPLAY OPTIONS MENU
+
+	Orbital_Print{"MUSIC",	#Option_1_X,	#Option_1_Y,			%0110}
+	Orbital_Print{"ON",		 #Option_1_X, ~#Option_1_Y + #Font_Height~, %0110}
+	Orbital_Print{"MUSIC",	#Option_2_X,	#Option_2_Y,			%0110}
+	Orbital_Print{"OFF",		#Option_2_X, ~#Option_2_Y + #Font_Height~, %0110}
+	Orbital_Print{"CANCEL", #Option_3_X,	#Option_3_Y,			%0110}
+
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Do_Options_Menu{}
+	Shared Music
+	Option = 0
+	While Option = 0
+		While Joyb(0) = 0
+		VWait
+		Wend
+		While Joyb(0) <> 0
+			Mouse_X = MouseX + ~#Pointer_Width /	2~
+			Mouse_Y = MouseY + ~#Pointer_Height / 2~
+		Wend
+
+	; CHECK MUSIC ON GADGET
+
+		If (#Option_1_X <= Mouse_X) AND (Mouse_X <= ~#Option_1_X + (#Option_1_Width * #Letter_Width)~)
+			If (#Option_1_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_1_Y + (#Option_1_Height * #Font_Height)~)
+				Option = 1
+			End If
+		End If
+
+	; CHECK MUSIC OFF GADGET
+
+		If (#Option_2_X <= Mouse_X) AND (Mouse_X <= ~#Option_2_X + (#Option_2_Width * #Letter_Width)~)
+			If (#Option_2_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_2_Y + (#Option_2_Height * #Font_Height)~)
+				Option = 2
+			End If
+		End If
+
+	; CHECK CANCEL GADGET
+
+		If (#Option_3_X <= Mouse_X) AND (Mouse_X <= ~#Option_3_X + (#Option_3_Width * #Letter_Width)~)
+			If (#Option_3_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_3_Y + (#Option_3_Height * #Font_Height)~)
+				Option = 3
+			End If
+		End If
+	Wend
+	Function Return Option
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Do_Main_Menu{}
+	Shared Finish_Game, Finish_Program
+	Shared Game_Type
+	Option = 0
+	While Option = 0
+		While Joyb(0) = 0
+		Wend
+		VWait
+		While Joyb(0) <> 0
+			Mouse_X = MouseX + ~#Pointer_Width /	2~
+			Mouse_Y = MouseY + ~#Pointer_Height / 2~
+		Wend
+
+	; CHECK SPEED GAME GADGET
+
+		If (#Option_1_X <= Mouse_X) AND (Mouse_X <= ~#Option_1_X + (#Option_1_Width * #Letter_Width)~)
+			If (#Option_1_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_1_Y + (#Option_1_Height * #Font_Height)~)
+				Option = 1
+			End If
+		End If
+
+	; CHECK LOGIC GADGET
+
+		If (#Option_2_X <= Mouse_X) AND (Mouse_X <= ~#Option_2_X + (#Option_2_Width * #Letter_Width)~)
+			If (#Option_2_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_2_Y + (#Option_2_Height * #Font_Height)~)
+				Option = 2
+			End If
+		End If
+
+	; CHECK OPTIONS GADGET
+
+		If (#Option_3_X <= Mouse_X) AND (Mouse_X <= ~#Option_3_X + (#Option_3_Width * #Letter_Width)~)
+			If (Option_3_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_3_Y + (#Option_3_Height * #Font_Height)~)
+				Option = 3
+			End If
+		End If
+
+	; CHECK QUIT GADGET
+
+		If (#Option_4_X <= Mouse_X) AND (Mouse_X <= ~#Option_4_X + (#Option_4_Width * #Letter_Width)~)
+			If (#Option_4_Y <= Mouse_Y) AND (Mouse_Y <= ~#Option_4_Y + (#Option_4_Height * #Font_Height)~)
+				Option = 4
+			End If
+		End If
+	Wend
+	Function Return Option
+End Function
+
+; --------------------------------------------------------------------
+
+
+; BALL PROCEDURES
+.BALL
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Balls{Level$}
+	Shared Ball()
+	Shared Balls_Held, Balls_Left
+	Shared Zone, Max_Time, Level
+	Shared Column_Checking, Row_Checking
+	Shared Game_Type
+	Current_Buffer_Shape = #First_Buffer_Shape
+	If Game_Type = #Speed_Game
+		Balls_Held = (48 * Zone) + (21 * (Level - 1))
+	Else
+		Balls_Held =	0
+	End If
+	Balls_Left = 0
+	Column_Checking = True
+	Row_Checking = True
+	QAMIGA
+	If WriteMem(0, Level$)
+		FileInput 0
+		If Inkey$ = "y"
+			Column_Checking = True
+		Else
+			Column_Checking = False
+		End If
+		If Inkey$ = "y"
+			Row_Checking = True
+		Else
+			Row_Checking = False
+		End If
+		Select Inkey$
+		Case "1"
+			Max_Time =	60
+		Case "2"
+			Max_Time = 120
+		Case "3"
+			Max_Time = 180
+		Case "4"
+			Max_Time = 240
+		Case "5"
+			Max_Time = 300
+		Case "6"
+			Max_Time = 360
+		Case "7"
+			Max_Time = 420
+		Case "8"
+			Max_Time = 480
+		Case "9"
+			Max_Time = 540
+		Case "0"
+			Max_Time = 600
+		End Select
+		Ball_Shape$ = Inkey$
+		For Y = ~#Ball_Array_Height - 1~ To 0 Step -1
+			For X = 0 To ~#Ball_Array_Width - 1~
+				Ball_Shape$ = Inkey$
+				Select Ball_Shape$
+				Case "r"
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+					Ball(X, Y)\Shape_ = #Red_Ball
+					Balls_Left = Balls_Left + 1
+				Case "g"
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+					Ball(X, Y)\Shape_ = #Green_Ball
+					Balls_Left = Balls_Left + 1
+				Case "b"
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+					Ball(X, Y)\Shape_ = #Blue_Ball
+					Balls_Left = Balls_Left + 1
+				Case "a"
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+					Ball(X, Y)\Shape_ = #Grey_Ball
+					Balls_Left = Balls_Left + 1
+				Default
+					Ball(X, Y)\Motion = #No_Ball
+					Ball(X, Y)\Shape_ = #No_Shape
+				End Select
+				Ball(X, Y)\Buffer_Shape = Current_Buffer_Shape
+				Current_Buffer_Shape = Current_Buffer_Shape + 1
+			Next X
+			Ball_Shape$ = Inkey$
+		Next Y
+		CloseFile(0)
+		DefaultInput
+	Else
+		For Y = ~#Ball_Array_Height - 1~ To 0 Step -1
+			For X = 0 To ~#Ball_Array_Width - 1~
+				Ball(X, Y)\Motion = #Just_Still_Ball_1
+				Ball(X, Y)\Shape_ = #Red_Ball + Int(Rnd(#Grey_Ball - #Red_Ball + 1))
+				Ball(X, Y)\Buffer_Shape = Current_Buffer_Shape
+				Current_Buffer_Shape = Current_Buffer_Shape + 1
+			Next X
+		Next Y
+		Balls_Left = ~#Ball_Array_Width * #Ball_Array_Height~
+	End If
+	VWait 150
+	BLITZ
+	Balls_Left = Balls_Left + Balls_Held
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Zap_Column{Column}
+	Shared Ball()
+	Shared Balls_Left
+	Shared Column_Selected
+	Shared Score
+	Column_Selected = Column
+	For Y = 0 To ~#Ball_Array_Height - 1~
+		If (Ball(Column, Y)\Shape_ <> #No_Shape) AND (Ball(Column, Y)\Shape_ <> #Grey_Ball)
+			Ball(Column, Y)\Motion = #Just_No_Ball_1
+			Ball(Column, Y)\Shape_ = #No_Shape
+			Balls_Left = Balls_Left - 1
+			Score = Score + 1
+			Sound #Disappearing_Ball, #Sound_Effects_Channel
+		End If
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Zap_Row{Row}
+	Shared Ball()
+	Shared Balls_Left
+	Shared Row_Selected
+	Shared Score
+	Row_Selected = Row
+	For X = 0 To ~#Ball_Array_Width - 1~
+		If (Ball(X, Row)\Shape_ <> #No_Shape) AND (Ball(X, Row)\Shape_ <> #Grey_Ball)
+			Ball(X, Row)\Motion = #Just_No_Ball_1
+			Ball(X, Row)\Shape_ = #No_Shape
+			Balls_Left = Balls_Left - 1
+			Score = Score + 1
+			Sound #Disappearing_Ball, #Sound_Effects_Channel
+		End If
+	Next X
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Zap_Colour{Colour_}
+	Shared Ball()
+	Shared Balls_Left
+	Shared Score
+	Row_Selected = #Ball_Array_Height
+	If (#Red_Ball <= Colour_) AND (Colour_ <= #Blue_Ball)
+		For X = 0 To ~#Ball_Array_Width - 1~
+			For Y = 0 To ~#Ball_Array_Height - 1~
+				If Ball(X, Y)\Shape_ = Colour_
+					Ball(X, Y)\Motion = #Just_No_Ball_1
+					Ball(X, Y)\Shape_ = #No_Shape
+					Balls_Left = Balls_Left - 1
+					Score = Score + 1
+					Select Colour_
+					Case #Red_Ball
+						Sound #Zap_Red, #Sound_Effects_Channel
+					Case #Green_Ball
+						Sound #Zap_Green, #Sound_Effects_Channel
+					Case #Blue_Ball
+						Sound #Zap_Blue, #Sound_Effects_Channel
+					End Select
+				End If
+			Next Y
+		Next X
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Spin_Column{Column}
+	Shared Ball()
+	Shared Column_Selected
+	Column_Selected = Column
+	For Y = 0 To ~#Ball_Array_Height - 1~
+		If (Ball(Column, Y)\Shape_ <> #No_Shape) AND (Ball(Column, Y)\Shape_ <> #Grey_Ball)
+			Ball(Column, Y)\Motion = #Just_Spinning_Ball_1
+			Sound #Spinning_Ball, #Sound_Effects_Channel
+		End If
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Spin_Row{Row}
+	Shared Ball()
+	Shared Row_Selected
+	Row_Selected = Row
+	For X = 0 To ~#Ball_Array_Width - 1~
+		If (Ball(X, Row)\Shape_ <> #No_Shape) AND (Ball(X, Row)\Shape_ <> #Grey_Ball)
+			Ball(X, Row)\Motion = #Just_Spinning_Ball_1
+			Sound #Spinning_Ball, #Sound_Effects_Channel
+		End If
+	Next X
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Do_Left_Magnet{Row}
+	Shared Ball()
+	Shared Left_Magnet, Magnetised_Row
+	Magnetised_Row = Row
+	Left_Magnet = On
+	For X = 1 To ~#Ball_Array_Width - 1~
+		If Ball(X, Magnetised_Row)\Motion = #Still_Ball
+			If Ball(X - 1, Magnetised_Row + 1)\Motion <> #Falling_Ball
+				If Ball(X - 1, Magnetised_Row + 1)\Motion <> #Just_Falling_Ball_1
+					Select Ball(X - 1, Magnetised_Row)\Motion
+					Case #No_Ball
+						Ball(X, Magnetised_Row)\Motion = #Just_Dragged_Left_1
+						Ball(X - 1, Magnetised_Row)\Motion = #Dragged_To_Ball
+					Case #Just_Dragged_Left_1
+						Ball(X, Magnetised_Row)\Motion = #Just_Dragged_Left_1
+					End Select
+					Sound #Magnetised_Ball, #Sound_Effects_Channel
+				End If
+			End If
+		End If
+	Next X
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Do_Right_Magnet{Row}
+	Shared Ball()
+	Shared Right_Magnet, Magnetised_Row
+	Magnetised_Row = Row
+	Right_Magnet = On
+	For X = ~#Ball_Array_Width - 1 - 1~ To 0 Step -1
+		If Ball(X, Magnetised_Row)\Motion = #Still_Ball
+			If Ball(X + 1, Magnetised_Row + 1)\Motion <> #Falling_Ball
+				If Ball(X + 1, Magnetised_Row + 1)\Motion <> #Just_Falling_Ball_1
+					Select Ball(X + 1, Magnetised_Row)\Motion
+					Case #No_Ball
+						Ball(X, Magnetised_Row)\Motion = #Just_Dragged_Right_1
+						Ball(X + 1, Magnetised_Row)\Motion = #Dragged_To_Ball
+					Case #Just_Dragged_Right_1
+						Ball(X, Magnetised_Row)\Motion = #Just_Dragged_Right_1
+					End Select
+					Sound #Magnetised_Ball, #Sound_Effects_Channel
+				End If
+			End If
+		End If
+	Next X
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Update_Balls{}
+	Shared Ball()
+
+; REMOVE DRAGGED TO BALLS
+
+	For X = 0 To ~#Ball_Array_Width - 1~
+		For Y = 0 To ~#Ball_Array_Height - 1~
+			If Ball(X, Y)\Motion = #Dragged_To_Ball
+				Ball(X, Y)\Motion = #No_Ball
+			End If
+		Next Y
+	Next X
+
+; DRAG BALLS LEFT
+
+	For Y = 0 To ~#Ball_Array_Height - 1~
+		For X = 1 To ~#Ball_Array_Width - 1~
+			If Ball(X, Y)\Motion = #Dragged_Left
+					Ball(X, Y)\Motion = Ball(X - 1, Y)\Motion
+					Ball(X - 1, Y)\Motion = #Just_Still_Ball_1
+					Temp = Ball(X, Y)\Shape_
+					Ball(X, Y)\Shape_ = Ball(X - 1, Y)\Shape_
+					Ball(X - 1, Y)\Shape_ = Temp
+			End If
+		Next X
+	Next Y
+
+; DRAG BALLS RIGHT
+
+	For Y = 0 To ~#Ball_Array_Height - 1~
+		For X = ~#Ball_Array_Width - 1 - 1~ To 0 Step -1
+			If Ball(X, Y)\Motion = #Dragged_Right
+					Ball(X, Y)\Motion = Ball(X + 1, Y)\Motion
+					Ball(X + 1, Y)\Motion = #Just_Still_Ball_1
+					Temp = Ball(X, Y)\Shape_
+					Ball(X, Y)\Shape_ = Ball(X + 1, Y)\Shape_
+					Ball(X + 1, Y)\Shape_ = Temp
+			End If
+		Next X
+	Next Y
+
+; STOP, DROP AND SPIN BALLS
+
+	Y = 0
+	For X = 0 To ~#Ball_Array_Width - 1~
+		If Ball(X, Y)\Motion = #No_Ball
+			Select Ball(X, Y + 1)\Motion
+			Case #Still_Ball
+				Ball(X, Y + 1)\Motion = #Just_Falling_Ball_1
+			Case #Falling_Ball
+				Ball(X, Y)\Motion = #Just_Still_Ball_1
+				Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+				Ball(X, Y + 1)\Motion = #No_Ball
+				Ball(X, Y + 1)\Shape_ = #No_Shape
+			End Select
+		End If
+	Next X
+	For Y = 1 To ~#Ball_Array_Height - 1 - 1~
+		For X = 0 To ~#Ball_Array_Width - 1~
+			Select Ball(X, Y)\Motion
+			Case #No_Ball
+				Select Ball(X, Y + 1)\Motion
+				Case #Still_Ball
+					Ball(X, Y + 1)\Motion = #Just_Falling_Ball_1
+				Case #Falling_Ball
+					Select Ball(X, Y - 1)\Motion
+					Case #No_Ball
+						Ball(X, Y)\Motion = #Falling_Ball
+						Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+					Case #Just_Still_Ball_1
+						Ball(X, Y)\Motion = #Just_Still_Ball_1
+						Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+					Case #Still_Ball
+						Ball(X, Y)\Motion = #Just_Still_Ball_1
+						Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+					Case #Just_Falling_Ball_1
+						Ball(X, Y)\Motion = #Falling_Ball
+						Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+					Case #Falling_Ball
+						Ball(X, Y)\Motion = #Falling_Ball
+						Ball(X, Y)\Shape_ = Ball(X, Y + 1)\Shape_
+					End Select
+					Ball(X, Y + 1)\Motion = #No_Ball
+					Ball(X, Y + 1)\Shape_ = #No_Shape
+				End Select
+			Case #Falling_Ball
+				Select Ball(X, Y - 1)\Motion
+				Case #Still_Ball
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+				Case Just_Still_Ball_1
+					Ball(X, Y)\Motion = #Just_Still_Ball_1
+				End Select
+			End Select
+		Next X
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Check_Columns{}
+	Shared Bonus, Score, Seconds_Timer, Time_Bonus
+	Shared Ball(), Game_Type
+	For X = 0 To ~#Ball_Array_Width - 1~
+		Current_Shape = Ball(X, 0)\Shape_
+		First_Ball = 0
+		Balls_Found = 0
+		For Y = 0 To #Ball_Array_Height - 1
+			If (Ball(X, Y)\Motion = #Still_Ball) AND (Ball(X, Y)\Shape_ = Current_Shape)
+				Balls_Found = Balls_Found + 1
+			Else
+				If Balls_Found >= 3
+					If Current_Shape = #Grey_Ball
+						If Balls_Found >= 5
+							Time_Bonus = On
+						Else
+							Bonus = On
+						End If
+					End If
+					For Row = First_Ball To First_Ball + Balls_Found - 1
+						Ball(X, Row)\Motion = #Checked_Ball
+					Next Row
+					Score = Score + Balls_Found - 2
+				End If
+				If Ball(X, Y)\Motion = #Still_Ball
+					Current_Shape = Ball(X, Y)\Shape_
+				Else
+					Current_Shape = #No_Shape
+				End If
+				First_Ball = Y
+				Balls_Found = 1
+			End If
+		Next Y
+		If Balls_Found >= 3
+			If Current_Shape = #Grey_Ball
+				If Balls_Found >= 5
+					Time_Bonus = On
+				Else
+					Bonus = On
+				End If
+			End If
+			For Row = First_Ball To First_Ball + Balls_Found - 1
+				Ball(X, Row)\Motion = #Checked_Ball
+			Next Row
+			Score = Score + Balls_Found - 2
+		End If
+	Next X
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Check_Rows{}
+	Shared Bonus, Score, Seconds_Timer, Extra_Time
+	Shared Ball()
+	Shared Current_Bitmap, Time_Bonus
+	For Y = 0 To #Ball_Array_Height - 1
+		Current_Shape = Ball(0, Y)\Shape_
+		First_Ball = 0
+		Balls_Found = 0
+		For X = 0 To #Ball_Array_Width - 1
+			If ((Ball(X, Y)\Motion = #Still_Ball) OR (Ball(X, Y)\Motion = #Checked_Ball)) AND (Ball(X, Y)\Shape_ = Current_Shape)
+				Balls_Found = Balls_Found + 1
+			Else
+				If Balls_Found >= 3
+					If Current_Shape = #Grey_Ball
+						If Balls_Found >= 5
+							Time_Bonus = On
+						Else
+							Bonus = On
+						End If
+					End If
+					For Column = First_Ball To First_Ball + Balls_Found - 1
+						Ball(Column, Y)\Motion = #Checked_Ball
+					Next Column
+					Score = Score + Balls_Found - 2
+				End If
+				If (Ball(X, Y)\Motion = #Still_Ball) OR (Ball(X, Y)\Motion = #Checked_Ball)
+					Current_Shape = Ball(X, Y)\Shape_
+				Else
+					Current_Shape = #No_Shape
+				End If
+				First_Ball = X
+				Balls_Found = 1
+			End If
+		Next X
+		If Balls_Found >= 3
+			If Current_Shape = #Grey_Ball
+				If Balls_Found >= 5
+					Time_Bonus = On
+				Else
+					Bonus = On
+				End If
+			End If
+			For Column = First_Ball To First_Ball + Balls_Found - 1
+				 Ball(Column, Y)\Motion = #Checked_Ball
+			Next Column
+			Score = Score + Balls_Found - 2
+		End If
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Remove_Checked_Balls{}
+	Shared Ball()
+	Shared Balls_Left, Extra_Something
+	For X = 0 To #Ball_Array_Width - 1
+		For Y = 0 To #Ball_Array_Height - 1
+			If Ball(X, Y)\Motion = #Checked_Ball
+				Ball(X, Y)\Motion = #Just_No_Ball_1
+				Ball(X, Y)\Shape_ = #No_Shape
+				Balls_Left = Balls_Left - 1
+				Sound #Disappearing_Ball, #Sound_Effects_Channel
+			End If
+		Next Y
+	Next X
+	If Extra_Something
+		Sound #Extra_Something, #Sound_Effects_Channel
+	End If
+	Extra_Something = False
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Drop_Ball{}
+	Shared Ball()
+	Shared Balls_Held
+	If Balls_Held > 0
+		X = Rnd(#Ball_Array_Width)
+		Y = #Ball_Array_Height - 1
+		If Ball(X, Y)\Motion = #No_Ball
+			Ball(X, Y)\Motion = #Just_Still_Ball_1
+			Ball(X, Y)\Shape_ = #Red_Ball + Int(Rnd(#Grey_Ball - #Red_Ball + 1))
+			Balls_Held = Balls_Held - 1
+		End If
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Spin_Ball{}
+	Shared LMB_Pressed, Mouse_X, Mouse_Y
+	Shared Ball()
+	If LMB_Pressed
+		X = Screen_To_Grid_X{Mouse_X}
+		Y = Screen_To_Grid_Y{Mouse_Y}
+		If (0 <= X) AND (X <= ~#Ball_Array_Width - 1~)
+			If (0 <= Y) AND (Y <= ~#Ball_Array_Height - 1~)
+				If Ball(X, Y)\Motion = #Still_Ball
+					If Ball(X, Y)\Shape_ <> #Grey_Ball
+						Ball(X, Y)\Motion = #Just_Spinning_Ball_1
+						Sound #Spinning_Ball, #Sound_Effects_Channel
+					End If
+				End If
+			End If
+		End If
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Drag_Ball{}
+	Shared RMB_Pressed, Mouse_X, Mouse_Y, Mouse_X_Speed
+	Shared Ball()
+	If RMB_Pressed
+		X = Screen_To_Grid_X{Mouse_X}
+		Y = Screen_To_Grid_Y{Mouse_Y}
+		If (0 <= X) AND (X <= ~#Ball_Array_Width - 1~)
+			If (0 <= Y) AND (Y <= ~#Ball_Array_Height - 1~)
+
+			; DRAG BALL LEFT
+
+				If Mouse_X_Speed < 0
+					If X <> 0
+						If Ball(X, Y)\Motion = #Still_Ball
+							If Ball(X - 1, Y)\Motion = #No_Ball
+								If (Ball(X - 1, Y + 1)\Motion <> #Falling_Ball) AND (Ball(X - 1, Y + 1)\Motion <> #Just_Falling_Ball_1)
+									Ball(X, Y)\Motion = #Just_Dragged_Left_1
+									Ball(X - 1, Y)\Motion = #Dragged_To_Ball
+									Sound #Dragged_Ball, #Sound_Effects_Channel
+								End If
+							End If
+						End If
+					End If
+				End If
+
+			; DRAG BALL RIGHT
+
+				If Mouse_X_Speed > 0
+					If X <> ~#Ball_Array_Width - 1~
+						If Ball(X, Y)\Motion = #Still_Ball
+							If Ball(X + 1, Y)\Motion = #No_Ball
+								If (Ball(X + 1, Y + 1)\Motion <> #Falling_Ball) AND (Ball(X + 1, Y + 1)\Motion <> #Just_Falling_Ball_1)
+									Ball(X, Y)\Motion = #Just_Dragged_Right_1
+									Ball(X + 1, Y)\Motion = #Dragged_To_Ball
+									Sound #Dragged_Ball, #Sound_Effects_Channel
+								End If
+							End If
+						End If
+					End If
+				End If
+			End If
+		End If
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Do_Bonus{}
+	Shared Bonus, Seconds_Timer, Extra_Time, Current_Bitmap
+
+	Select Int(Rnd(#Max_Bonuses))
+
+; ZAP COLUMN
+
+	Case 0
+		Column = Rnd(#Ball_Array_Height)
+		Zap_Column{Column}
+
+; ZAP ROW
+
+	Case 1
+		Row = Rnd(#Ball_Array_Height)
+		Zap_Row{Row}
+
+; ZAP RED BALLS
+
+	Case 2
+		Zap_Colour{#Red_Ball}
+
+; ZAP GREEN BALLS
+
+	Case 3
+		Zap_Colour{#Green_Ball}
+
+; ZAP BLUE BALLS
+
+	Case 4
+		Zap_Colour{#Blue_Ball}
+
+; SPIN COLUMN
+
+	Case 5
+		Column = Rnd(#Ball_Array_Width)
+		Spin_Column{Column}
+
+; SPIN ROW
+
+	Case 6
+		Row = Rnd(#Ball_Array_Height)
+		Spin_Row{Row}
+
+; LEFT MAGNET
+
+	Case 7
+		Row = Rnd(#Ball_Array_Height)
+		Do_Left_Magnet{Row}
+
+; RIGHT MAGNET
+
+	Case 8
+		Row = Rnd(#Ball_Array_Height)
+		Do_Right_Magnet{Row}
+	End Select
+	Bonus = Off
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Get_Buffer_Shapes{}
+	Shared Current_Bitmap
+	Shared Ball()
+	For Y = #Ball_Array_Height - 1 To 0 Step -1
+		For X = 0 To #Ball_Array_Height - 1
+			GetaShape Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}, #Ball_Diameter, #Ball_Diameter
+		Next X
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Draw_Buffer_Shapes{}
+	Shared Current_Bitmap
+	Shared Ball()
+	For Y = #Ball_Array_Height - 1 To 0 Step -1
+		For X = 0 To #Ball_Array_Height - 1
+			longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+		Next X
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Free_Buffer_Shapes{}
+	Shared Current_Bitmap
+	Shared Ball()
+	For Y = #Ball_Array_Height - 1 To 0 Step -1
+		For X = 0 To #Ball_Array_Height - 1
+			Free MidHandle Ball(X, Y)\Buffer_Shape
+		Next X
+	Next Y
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Display_Game_Stats{}
+	Shared Game_Type
+	Shared Score, Seconds_Timer
+	Shared Balls_Held, Balls_Left
+	Shared Moves_Left, Current_Bitmap
+	Shared Lives, Counter, Extra_Time
+	Shared Permenant_Time_Meter_Colour()
+	Format "0000"
+
+; DISPLAY LIVES
+
+	#Min_X = 263
+	#Min_Y = 50
+	#Max_X = #Min_X + 39
+	#Max_Y = #Min_Y + 22
+	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+	Orbital_Print{Str$(Lives), #Stats_X, #Lives_Y, %1111}
+
+; DISPLAY BALLS HELD
+
+	If Game_Type = #Speed_Game
+		#Min_X = 263
+		#Min_Y = 87
+		#Max_X = #Min_X + 39
+		#Max_Y = #Min_Y + 22
+		Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+		Orbital_Print{Str$(Balls_Held), #Stats_X, #Balls_Held_Y, %1111}
+	End If
+
+; DISPLAY SCORE
+
+	#Min_X = 263
+	#Min_Y = 124
+	#Max_X = #Min_X + 39
+	#Max_Y = #Min_Y + 22
+	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+	Orbital_Print{Str$(Score), #Stats_X, #Score_Y, %1111}
+
+; DISPLAY TIMER
+
+	#Min_X = 263
+	#Min_Y = 161
+	#Max_X = #Min_X + 39
+	#Max_Y = #Min_Y + 22
+	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+	Orbital_Print{Str$(Seconds_Timer), #Stats_X,	#Timer_Y,	%1111}
+
+; DISPLAY EXTRA TIME
+
+	Boxf 290, 200, 299, 239, 0
+	For Counter = 0 To (Extra_Time / (5 / 4)) ##[$80B9] #Permenant_Time_Meter_Height
+		Colour_ = Int(Counter / ~#Permenant_Time_Meter_Height / #Max_Permenant_Time_Meter_Colours~)
+		Line 290, 239 - Counter, 299, 239 - Counter, Permenant_Time_Meter_Colour(Colour_)
+	Next Counter
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Draw_Balls{}
+	Shared LMB_Pressed, RMB_Pressed, Mouse_X, Mouse_Y, Mouse_X_Speed
+	Shared Current_Bitmap
+	Shared Ball()
+	Shared Left_Magnet, Right_Magnet, Magnetised_Row
+	Shared Column_Selected, Row_Selected
+	Shared Seconds_Timer, VBlank_Timer
+
+; DRAW COLUMN SELECTORS
+
+	If Column_Selected >= 0
+		X = Grid_To_Screen_X{Column_Selected} + #Selector_Offset
+		Y = Grid_To_Screen_Y{-1}
+		GetaShape #Bottom_Column_Selector_Buffer, X, Y, #Column_Selector_Width, #Column_Selector_Height
+		Use lmaxlen 0
+		longdiv #Bottom_Column_Selector, X, Y
+		Use lmaxlen 1
+		longdiv #Bottom_Column_Selector, X, Y
+		Y = Grid_To_Screen_Y{#Ball_Array_Height - 1} - #Column_Selector_Height
+		GetaShape #Top_Column_Selector_Buffer, X, Y, #Column_Selector_Width, #Column_Selector_Height
+		Use lmaxlen 0
+		longdiv #Top_Column_Selector, X, Y
+		Use lmaxlen 1
+		longdiv #Top_Column_Selector, X, Y
+		Use lmaxlen Current_Bitmap
+	End If
+
+; DRAW ROW SELECTORS
+
+	If Row_Selected >= 0
+		X = Grid_To_Screen_X{0} - #Row_Selector_Width
+		Y = Grid_To_Screen_Y{Row_Selected} + #Selector_Offset
+		GetaShape #Left_Row_Selector_Buffer, X, Y, #Row_Selector_Width, #Row_Selector_Height
+		Use lmaxlen 0
+		longdiv #Left_Row_Selector, X, Y
+		Use lmaxlen 1
+		longdiv #Left_Row_Selector, X, Y
+		Use lmaxlen Current_Bitmap
+		X = Grid_To_Screen_X{#Ball_Array_Width}
+		ShowSprite #Right_Row_Selector, X, Y, 0
+	End If
+
+; DRAW LEFT MAGNET
+
+	If Left_Magnet
+		X = Grid_To_Screen_X{0} - #Magnet_Width
+		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
+		GetaShape #Left_Magnet_Buffer, X, Y, #Magnet_Width, #Magnet_Height
+		Use lmaxlen 0
+		longdiv #Left_Magnet, X, Y
+		Use lmaxlen 1
+		longdiv #Left_Magnet, X, Y
+		Use lmaxlen Current_Bitmap
+	End If
+
+; DRAW RIGHT MAGNET
+
+	If Right_Magnet
+		X = Grid_To_Screen_X{#Ball_Array_Width}
+		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
+		ShowSprite #Right_Magnet, X, Y, 0
+	End If
+
+	Display_Game_Stats{}
+
+; DRAW BALLS
+
+	For Y_Offset = 0 To #Ball_Diameter - 1 Step 4
+		If Joyb(0) = 1
+			LMB_Pressed = True
+			Mouse_X = MouseX
+			Mouse_Y = MouseY
+		End If
+		If Joyb(0) = 2
+			RMB_Pressed = True
+			Mouse_X = MouseX
+			Mouse_Y = MouseY
+			New_Mouse_X_Speed = MouseXSpeed
+			If New_Mouse_X_Speed <> 0
+				Mouse_X_Speed = New_Mouse_X_Speed
+			End If
+		End If
+		For X = #Ball_Array_Width - 1 To 0 Step -1
+			For Y = 0 To #Ball_Array_Height - 1
+				Select Ball(X, Y)\Motion
+
+			; REMOVE BALL
+
+				Case #Just_No_Ball_1
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_No_Ball_2
+				Case #Just_No_Ball_2
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #No_Ball
+					Ball(X, Y)\Shape_ = #No_Shape
+
+			; STOP BALL
+
+				Case #Just_Still_Ball_1
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Still_Ball_2
+				Case #Just_Still_Ball_2
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Still_Ball
+
+			; SPIN BALL
+
+				Case #Just_Spinning_Ball_1
+					Select Ball(X, Y)\Shape_
+					Case #Red_Ball
+						Ball(X, Y)\Shape_ = #Spin_To_Green_Ball_1
+					Case #Green_Ball
+						Ball(X, Y)\Shape_ = #Spin_To_Blue_Ball_1
+					Case #Blue_Ball
+						Ball(X, Y)\Shape_ = #Spin_To_Red_Ball_1
+					End Select
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Spinning_Ball_2
+					Ball(X, Y)\Shape_ = Ball(X, Y)\Shape_ + 1
+				Case #Just_Spinning_Ball_2
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Spinning_Ball_3
+					Ball(X, Y)\Shape_ = Ball(X, Y)\Shape_ + 1
+				Case #Just_Spinning_Ball_3
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Stopped_Spinning_1
+					Select Ball(X, Y)\Shape_
+					Case #Spin_To_Red_Ball_3
+						Ball(X, Y)\Shape_ = #Red_Ball
+					Case #Spin_To_Green_Ball_3
+						Ball(X, Y)\Shape_ = #Green_Ball
+					Case #Spin_To_Blue_Ball_3
+						Ball(X, Y)\Shape_ = #Blue_Ball
+					End Select
+
+			; STOP SPINNING BALL
+
+				Case #Just_Stopped_Spinning_1
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Stopped_Spinning_2
+				Case #Just_Stopped_Spinning_2
+					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Still_Ball
+
+			; DRAG BALL LEFT
+
+				Case #Just_Dragged_Left_1
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} - Y_Offset, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Dragged_Left_2
+				Case #Just_Dragged_Left_2
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} - Y_Offset, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Dragged_Left
+				Case #Dragged_Left
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} - Y_Offset, Grid_To_Screen_Y{Y}
+
+			; DRAG BALL RIGHT
+
+				Case #Just_Dragged_Right_1
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} + Y_Offset, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Just_Dragged_Right_2
+				Case #Just_Dragged_Right_2
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} + Y_Offset, Grid_To_Screen_Y{Y}
+					Ball(X, Y)\Motion = #Dragged_Right
+				Case #Dragged_Right
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} + Y_Offset, Grid_To_Screen_Y{Y}
+
+			; DROP BALL - CHECKS DON'T APPLY TO BOTTOM ROW
+
+				Case #Falling_Ball
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
+				Case #Just_Falling_Ball_1
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
+					Ball(X, Y)\Motion = #Just_Falling_Ball_2
+				Case #Just_Falling_Ball_2
+					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
+					Ball(X, Y)\Motion = #Falling_Ball
+				End Select
+			Next Y
+		Next X
+		Screen_Swap{}
+		If Game_Stats_Displayed = False
+			Display_Game_Stats{}
+			Game_Stats_Displayed = True
+		End If
+
+; UPDATE TIMERS
+
+		VBlank_Timer = VBlank_Timer -1
+		If VBlank_Timer = 0
+			VBlank_Timer = 50
+			Seconds_Timer = Seconds_Timer - 1
+		End If
+
+		; Boxf 0, 0, 320, 256, 1						; Add this line to check blitter
+																				; functions
+		UnBuffer Current_Bitmap
+	Next Y_Offset
+
+; REMOVE COLUMN SELECTORS
+
+	If Column_Selected >= 0
+		X = Grid_To_Screen_X{Column_Selected} + #Selector_Offset
+		Y = Grid_To_Screen_Y{-1}
+		Use lmaxlen 0
+		longdiv #Bottom_Column_Selector_Buffer, X, Y
+		Use lmaxlen 1
+		longdiv #Bottom_Column_Selector_Buffer, X, Y
+		Y = Grid_To_Screen_Y{#Ball_Array_Height - 1} - #Column_Selector_Height
+		Use lmaxlen 0
+		longdiv #Top_Column_Selector_Buffer, X, Y
+		Use lmaxlen 1
+		longdiv #Top_Column_Selector_Buffer, X, Y
+		Use lmaxlen Current_Bitmap
+		Column_Selected = -1
+	End If
+
+; REMOVE ROW SELECTORS
+
+	If Row_Selected >= 0
+		X = Grid_To_Screen_X{0} - #Row_Selector_Width
+		Y = Grid_To_Screen_Y{Row_Selected} + #Selector_Offset
+		Use lmaxlen 0
+		longdiv #Left_Row_Selector_Buffer, X, Y
+		Use lmaxlen 1
+		longdiv #Left_Row_Selector_Buffer, X, Y
+		Use lmaxlen Current_Bitmap
+		X = Grid_To_Screen_X{#Ball_Array_Width}
+		ShowSprite #Right_Row_Selector, #Slice_Width, #Slice_Height, 0
+		Row_Selected = -1
+	End If
+
+; REMOVE LEFT MAGNET
+
+	If Left_Magnet
+		X = Grid_To_Screen_X{0} - #Magnet_Width
+		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
+		Use lmaxlen 0
+		longdiv #Left_Magnet_Buffer, X, Y
+		Use lmaxlen 1
+		longdiv #Left_Magnet_Buffer, X, Y
+		Use lmaxlen Current_Bitmap
+		Left_Magnet = Off
+	End If
+
+; REMOVE RIGHT MAGNET
+
+	If Right_Magnet
+		X = Grid_To_Screen_X{#Ball_Array_Width}
+		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
+		ShowSprite #Right_Magnet, #Slice_Width, #Slice_Height, 0
+		Right_Magnet = Off
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; GAME
+.GAME
+
+
+; --------------------------------------------------------------------
+
+Function Quit_Gadget{}
+	Shared Mouse_X, Mouse_Y, LMB_Pressed
+	If LMB_Pressed
+		If #Quit_Gadget_X <= Mouse_X + ~#Pointer_Width / 2~
+			If Mouse_X + ~#Pointer_Width / 2~ <= ~#Quit_Gadget_X + #Quit_Gadget_Width~
+				If #Quit_Gadget_Y <= Mouse_Y + ~#Pointer_Width / 2~
+					If Mouse_Y + ~#Pointer_Width / 2~ <= ~#Quit_Gadget_Y + #Quit_Gadget_Height~
+						Function Return True
+					End If
+				End If
+			End If
+		End If
+	EndIf
+	Function Return False
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Function Forfeit_Life_Gadget{}
+	Shared Mouse_X, Mouse_Y, LMB_Pressed
+	If LMB_Pressed
+		If #Forfeit_Life_Gadget_X <= Mouse_X + ~#Pointer_Width / 2~
+			If Mouse_X + ~#Pointer_Width / 2~ <= ~#Forfeit_Life_Gadget_X + #Forfeit_Life_Gadget_Width~
+				If #Forfeit_Life_Gadget_Y <= Mouse_Y + ~#Pointer_Width / 2~
+					If Mouse_Y + ~#Pointer_Width / 2~ <= ~#Forfeit_Life_Gadget_Y + #Forfeit_Life_Gadget_Height~
+						Function Return True
+					End If
+				End If
+			End If
+		End If
+	EndIf
+	Function Return False
+End Function
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Display_Level_Stats{}
+	Shared Level, Game_Type, Column_Checking, Row_Checking
+	Shared Current_Bitmap
+	Format "0000"
+
+; DISPLAY LEVEL
+
+	#Min_X = 263
+	#Min_Y = 13
+	#Max_X = #Min_X + 39
+	#Max_Y = #Min_Y + 22
+	Use lmaxlen 0
+	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+	Orbital_Print{Str$(Level), #Stats_X, #Level_Y, %1111}
+	Use lmaxlen 1
+	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
+	Orbital_Print{Str$(Level), #Stats_X, #Level_Y, %1111}
+	Use lmaxlen Current_Bitmap
+
+; DISPLAY CHECKING
+
+	If Game_Type = #Logic_Game
+		QAMIGA
+		If (Column_Checking = On) AND (Row_Checking = Off)
+			LoadShape 0, "Graphics/Vertical Checking Shape"
+		End If
+		If (Column_Checking = Off) AND (Row_Checking = On)
+			LoadShape 0, "Graphics/Horizontal Checking Shape"
+		End If
+		If (Column_Checking = On) AND (Row_Checking = On)
+			LoadShape 0, "Graphics/Full Checking Shape"
+		End If
+		VWait 150
+		BLITZ
+		Use lmaxlen 0
+		longdiv 0, 273, 89
+		Use lmaxlen 1
+		longdiv 0, 273, 89
+		Use lmaxlen Current_Bitmap
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Play_Game{}
+	Shared Music, Music_Filename$()
+	Shared Row_Checking, Column_Checking
+	Shared Map_Filename$()
+	Shared Finish_Game, Game_Type
+	Shared Speed_Game_High_Score()
+	Shared Logic_Game_High_Score()
+	Shared Balls_Left, Balls_Held
+	Shared Max_Time, Level, Bonus
+	Shared Seconds_Timer, VBlank_Timer, Lives, Score, Moves_Left
+	Shared Zone, Extra_Time
+	Shared LMB_Pressed, RMB_Pressed, Time_Bonus, Mouse_X_Speed
+	Score = 0
+	Level = 1
+	Zone =	1
+	Lives = 2
+	Extra_Time = 0
+	Finish_Game = False
+	Extra_Life_Score = 500
+	While Finish_Game = False
+
+	; START NEW ZONE
+
+		If Level = 1
+			If Music
+				Fade_Out_Music{}
+				StopMed
+				Free DecodeMedModule 0
+				QAMIGA
+				LoadMedModule 0, Music_Filename$(Zone - 1)
+				VWait 150
+				BLITZ
+			End If
+			Initialise_Display{}
+		End If
+
+	; START NEW LEVEL
+
+		If Level <> 1
+			Draw_Buffer_Shapes{}
+			Screen_Swap{}
+			Draw_Buffer_Shapes{}
+		End If
+		LMB_Pressed = False
+		RMB_Pressed = False
+		Finish_Level = False
+		Ten_Second_Warning_Given = False
+		Time_Bonus = Off
+		FlushBuffer 0
+		FlushBuffer 1
+		Select Game_Type
+		Case #Speed_Game
+
+		; DO SPEED GAME
+
+			Initialise_Balls{"Random Balls"}
+			Seconds_Timer = 60 + Extra_Time
+			VBlank_Timer =	1
+			Display_Level_Stats{}
+			Get_Buffer_Shapes{}
+			If Music
+				If Level = 1
+					StartMedModule 0
+					SetMedMask %0111
+				Else
+					Fade_In_Music{}
+				End If
+			End If
+			##[$80BB]
+				Drop_Ball{}
+				Update_Balls{}
+				Check_Columns{}
+				Check_Rows{}
+				Remove_Checked_Balls{}
+				If Bonus
+					Do_Bonus{}
+				End If
+				If Time_Bonus
+					Seconds_Timer = Seconds_Timer + 5
+					Extra_Time = Extra_Time + 5
+					Time_Bonus = Off
+					Sound #Extra_Something, #Sound_Effects_Channel
+				End If
+				If Score >= Extra_Life_Score
+					Lives = Lives + 1
+					Extra_Life_Score = Extra_Life_Score + 500
+					Sound #Extra_Something, #Sound_Effects_Channel
+				End If
+				X = Screen_To_Grid_X{MouseX}
+				Y = Screen_To_Grid_Y{MouseY}
+				If (0 <= X) AND (X <= ~#Ball_Array_Width - 1~)
+					If (0 <= Y) AND (Y <= ~#Ball_Array_Height - 1~)
+						ShowSprite #Selector_Box_Pointer, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}, 2
+					End If
+				End If
+				Spin_Ball{}
+				Drag_Ball{}
+				If Quit_Gadget{}
+					Finish_Level = True
+					Finish_Game =	True
+				End If
+				If Forfeit_Life_Gadget{}
+					Finish_Level = True
+				End If
+				LMB_Pressed = False
+				RMB_Pressed = False
+				Mouse_X_Speed = 0
+				Draw_Balls{}
+				If (Seconds_Timer <= 10) AND (Ten_Second_Warning_Given = False)
+					Ten_Second_Warning_Given = True
+					SetMedMask %0011
+					Sound #Ten_Second_Warning, %0100
+				End If
+			##[$80BC] (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
+			If Balls_Left = 0
+				Score = Score + Seconds_Timer
+				Copy_Used_Bitmap_To_Current_Bitmap{}
+				Display_Game_Stats{}
+				Screen_Swap{}
+				Copy_Used_Bitmap_To_Current_Bitmap{}
+			End If
+		Case #Logic_Game
+
+		; DO LOGIC GAME
+
+			Initialise_Balls{Map_Filename$(Zone - 1, Level - 1)}
+			Seconds_Timer = Max_Time
+			VBlank_Timer =	 1
+			Display_Level_Stats{}
+			Get_Buffer_Shapes{}
+			If (Music)
+				If Level = 1
+					StartMedModule 0
+					SetMedMask %0111
+				Else
+					Fade_In_Music{}
+				End If
+			End If
+			##[$80BB]
+				Update_Balls{}
+				If Column_Checking
+					Check_Columns{}
+				End If
+				If Row_Checking
+					Check_Rows{}
+				End If
+				Remove_Checked_Balls{}
+				X = Screen_To_Grid_X{MouseX}
+				Y = Screen_To_Grid_Y{MouseY}
+				If (0 <= X) AND (X <= ~#Ball_Array_Width - 1~)
+					If (0 <= Y) AND (Y <= ~#Ball_Array_Height - 1~)
+						ShowSprite #Selector_Box_Pointer, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}, 2
+					End If
+				End If
+				Spin_Ball{}
+				Drag_Ball{}
+				If Quit_Gadget{}
+					Finish_Level = True
+					Finish_Game =	True
+				End If
+				If Forfeit_Life_Gadget{}
+					Finish_Level = True
+				End If
+				LMB_Pressed = False
+				RMB_Pressed = False
+				Mouse_X_Speed = 0
+				Draw_Balls{}
+				If (Seconds_Timer <= 10) AND (Ten_Second_Warning_Given = False)
+					Ten_Second_Warning_Given = True
+					SetMedMask %0011
+					Sound #Ten_Second_Warning, %0100
+				End If
+			##[$80BC] (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
+			If Balls_Left = 0
+				Score = Score + Seconds_Timer
+				Copy_Used_Bitmap_To_Current_Bitmap{}
+				Display_Game_Stats{}
+				Screen_Swap{}
+				Copy_Used_Bitmap_To_Current_Bitmap{}
+			End If
+		End Select
+		Fade_Out_Music{}
+		ShowSprite #Selector_Box_Pointer, #Slice_Width, #Slice_Height, 2
+		If Balls_Left <> 0
+			Lives = Lives - 1
+			If Lives = -1
+				Finish_Game = True
+			End If
+		End If
+		Level = Level + 1
+		If Level = #Max_Levels + 1
+			Level = 1
+			Zone = Zone + 1
+			If Zone = #Max_Zones + 1
+				Finish_Game = True
+			End If
+		End If
+	Wend
+	Sound #Game_Over, #Sound_Effects_Channel
+	VWait 100
+	Free_Buffer_Shapes{}
+	If Game_Type = #Speed_Game
+		If Score > Speed_Game_High_Score(~#Max_High_Scores - 1~)\Score
+			Add_New_High_Score{}
+		End If
+	Else
+		If Score > Logic_Game_High_Score(~#Max_High_Scores - 1~)\Score
+			Add_New_High_Score{}
+		End If
+	End If
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+
+; MISC PROCEDURES
+.MISC
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_Map_Filenames{}
+	Shared Map_Filename$()
+	Map_Filename$(0, 0) = "Zone 1/Level 1.1"
+	Map_Filename$(0, 1) = "Zone 1/Level 1.2"
+	Map_Filename$(0, 2) = "Zone 1/Level 1.3"
+	Map_Filename$(1, 0) = "Zone 2/Level 2.1"
+	Map_Filename$(1, 1) = "Zone 2/Level 2.2"
+	Map_Filename$(1, 2) = "Zone 2/Level 2.3"
+	Map_Filename$(2, 0) = "Zone 3/Level 3.1"
+	Map_Filename$(2, 1) = "Zone 3/Level 3.2"
+	Map_Filename$(2, 2) = "Zone 3/Level 3.3"
+	Map_Filename$(3, 0) = "Zone 4/Level 4.1"
+	Map_Filename$(3, 1) = "Zone 4/Level 4.2"
+	Map_Filename$(3, 2) = "Zone 4/Level 4.3"
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Initialise_All{}
+	Shared Music, Current_Bitmap, Permenant_Time_Meter_Colour()
+	AMIGA
+	If WriteMem(0, "Change Directory")
+		CloseFile(0)
+	End If
+	##[$FF89]
+	If ##[$FE9A](#MEMF_CHIP) < 300 * 1024
+		Music = Off
+	End If
+	Permenant_Time_Meter_Colour(0) = 10
+	Permenant_Time_Meter_Colour(1) = 30
+	Permenant_Time_Meter_Colour(2) = 29
+	Permenant_Time_Meter_Colour(3) =	9
+	Permenant_Time_Meter_Colour(4) = 28
+	Initialise_Music_Filenames{}
+	Initialise_Background_Filenames{}
+	Initialise_Map_Filenames{}
+	Initialise_High_Scores{}
+	LoadShape	0, "Graphics/Pointer Sprite"
+	GetaSprite #Pointer_, 0
+	LoadShape	0, "Graphics/Selector Box Pointer Sprite"
+	GetaSprite #Selector_Box_Pointer, 0
+	LoadShapes #Red_Ball, #Spin_To_Blue_Ball_3, "Graphics/Ball Shapes"
+	LoadShapes #Top_Column_Selector, #Left_Row_Selector, "Graphics/Selector Shapes"
+	LoadShape	0, "Graphics/Right Row Selector Sprite"
+	GetaSprite #Right_Row_Selector, 0
+	LoadShapes #Left_Magnet, #Left_Magnet, "Graphics/Left Magnet Shape"
+	LoadShape	0, "Graphics/Right Magnet Sprite"
+	GetaSprite #Right_Magnet, 0
+	LoadShapes #Zero, #Z, "Graphics/Font Shapes"
+	For Counter = #Zero To #Z
+		DecodeShapes Counter
+	Next Counter
+	LoadSound #Spinning_Ball, "Sound Effects/ball-fx (turn)"
+	LoadSound #Dragged_Ball, "Sound Effects/ball-fx (move)"
+	LoadSound #Disappearing_Ball, "Sound Effects/ball-fx (vanish 3) ?"
+	LoadSound #Magnetised_Ball, "Sound Effects/ball-fx (magnet)"
+	LoadSound #Zap_Red, "Sound Effects/Zap Red (speech)"
+	LoadSound #Zap_Green, "Sound Effects/Zap Green (speech)"
+	LoadSound #Zap_Blue, "Sound Effects/Zap Blue (speech)"
+	LoadSound #Extra_Something, "Sound Effects/ball-fx (extra life)"
+	LoadSound #Ten_Second_Warning, "Sound Effects/Warning"
+	LoadSound #Game_Over, "Sound Effects/Game Over"
+	Buffer 0, ((#Ball_Diameter / 8) * #Ball_Diameter * 5) * #Ball_Array_Width * #Ball_Array_Height
+	Buffer 1, ((#Ball_Diameter / 8) * #Ball_Diameter * 5) * #Ball_Array_Width * #Ball_Array_Height
+	lmaxlen 0, #Slice_Width, #Slice_Height, #Slice_Depth
+	lmaxlen 1, #Slice_Width, #Slice_Height, #Slice_Depth
+	VWait 150
+	BLITZ
+	Slice 0, 44, #Slice_Depth
+	Show 0
+	Current_Bitmap = 1
+	Use lmaxlen Current_Bitmap
+	Initialise_Menus{}
+	Mouse On
+	MouseArea 0, 0, ~#Slice_Width - #Pointer_Width~, ~#Slice_Height - #Pointer_Height~
+	Pointer #Pointer_, 6
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; --------------------------------------------------------------------
+
+Statement Remove_All{}
+	Free_Buffer_Shapes{}
+	Free Slice 0
+	Free lmaxlen 0
+	Free lmaxlen 1
+End Statement
+
+; --------------------------------------------------------------------
+
+
+; MAIN
+.MAIN
+
+
+; --------------------------------------------------------------------
+
+; SET UP MED INTERUPT
+
+SetInt 5
+	PlayMed
+End SetInt
+
+Initialise_All{}
+
+; DO THE GAME
+
+While Finish_Program = False
+	Select Do_Main_Menu{}
+	Case 1
+		Game_Type = #Speed_Game
+		Play_Game{}
+		Initialise_Menus{}
+	Case 2
+		Game_Type = #Logic_Game
+		Play_Game{}
+		Initialise_Menus{}
+	Case 3
+		Screen_Swap{}
+		Select Do_Options_Menu{}
+		Case 1
+			If Music = Off
+				Music = On
+				StartMedModule 0
+			End If
+		Case 2
+			If Music
+				Music = Off
+				Mouse Off
+				Fade_Out_Music{}
+				StopMed
+				Mouse On
+			End If
+		End Select
+		Screen_Swap{}
+	Case 4
+		Finish_Program = True
+	End Select
+Wend
+Remove_All{}
+AMIGA
+##[$FF9F]
+
+; --------------------------------------------------------------------
+

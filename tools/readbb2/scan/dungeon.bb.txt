@@ -1,0 +1,112 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/stuff/dungeon.bb
++;
+; MONSTA's IN THE DUNGEON by Simon Armstrong
+;
+
+DEFTYPE .w							;all variables are integers
+
+xs=31:ys=15						 ;size of map
+nummonsters=5					 ;number of monsters
+
+home$=Chr$($9b)+"H"				 ;strings for clearing a standard console
+mycls$=home$+Chr$($9b)+"J"	;including an ascii terminal
+
+NPrint mycls$
+
+Dim map.b(xs,ys)		;standard 2D array for the map
+
+NEWTYPE .monstype	 ;the monster object
+	x.w:y.w
+End NEWTYPE
+
+Dim ##[$80B3] monster.monstype(nummonsters)	;loads of monsters!
+
+Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
+
+.maingame:
+	Gosub setupmap
+	Gosub setupmonsters
+	Gosub setupgame
+	##[$80BB]										;main loop
+		Gosub drawmap
+		Gosub yourmove
+		Gosub monstermove
+	##[$80BC] gameover=True
+	Print "PLAY AGAIN? (Y/N)"
+	If UCase$(Edit$(1))="Y" Then Goto maingame
+	End
+
+.monstermove:
+	##[$80CA] monster()
+	newmem monster()
+	While globfree(monster())
+		map(\x,\y)=0									;clear current pos on map
+		dx=Sgn(myx-\x):dy=Sgn(myy-\y) ;calc direction to move in
+		oldx=\x:oldy=\y							 ;remember old pos
+		If Rnd(2)<1									 ;home in on either x or y priority
+			If dx<>0 Then \x+dx Else \y+dy
+		Else
+			If dy<>0 Then \y+dy Else \x+dx
+		EndIf
+		Select map(\x,\y)													;whats in new pos?
+			Case 0:map(\x,\y)=3											;empty space cool!
+			Case 1:\x=oldx:\y=oldy:map(\x,\y)=3			;wall back up!
+			Case 2:freelast monster()								;down a hole!
+			Case 4:NPrint "HA GOTCHA!":gameover=True ;he got me!
+		End Select
+	Wend
+	If NOT LastItem(monster()) Then NPrint "SUCCESS!":gameover=True
+	Return
+
+.setupmonsters:
+	ClearList monster()
+	While globalloc(monster())							;fill list array
+		monster()\x=Rnd(xs-2)+1,Rnd(ys-2)+1 ;with monstas in rnd pos
+		map(monster()\x,monster()\y)=3			;and stick 'em on the map
+	Wend
+	Return
+
+.yourmove:
+	turn+1:Print "Turn #",turn," (U,D,L,R or Q) "
+	map(myx,myy)=0															;rub out old position
+	Select UCase$(Edit$(1))										 ;edit$=input
+		Case "U":If map(myx,myy-1)<>1 Then myy-1	 ;up
+		Case "D":If map(myx,myy+1)<>1 Then myy+1	 ;down
+		Case "L":If map(myx-1,myy)<>1 Then myx-1	 ;left
+		Case "R":If map(myx+1,myy)<>1 Then myx+1	 ;right
+		Case "Q":Print "BYE NOW":End							;quit
+	End Select
+	If map(myx,myy)=2
+		NPrint "ARRRRR YOU FELL DOWN A HOLE!":gameover=True
+	Else
+		map(myx,myy)=4															;place in new position
+	EndIf
+	Return
+
+.drawmap:		 ;up to home position then loop through both dimensions
+	Print home$
+	For y=0 To ys:For x=0 To xs:Print c$(map(x,y)):Next:NPrint "":Next
+	Return
+
+.setupmap:			;add border than stick walls in random places
+	For y=0 To ys
+		For x=0 To xs
+			If y=0 OR x=0 OR y=ys OR x=xs	;its a border
+				map(x,y)=1
+			Else
+				map(x,y)=0
+				If Rnd(10)<1 Then map(x,y)=1	 ;wall
+				If Rnd(10)<.25 Then map(x,y)=2 ;hole
+			EndIf
+		Next
+	Next
+	Return
+
+.setupgame
+	turn=0:gameover=False						;reset game variables
+	myx=xs/2:myy=ys/2:map(myx,myy)=4 ;put me in middle of map
+	Return
+
+;FindScreen 0:Window 0,20,20,320,256,$1400,"MONSTER GAME",1,2
+;WindowInput 0:WindowOutput 0
+;WLocate 0,0 replaces print home$

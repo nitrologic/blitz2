@@ -1,0 +1,1250 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/intuition.bb
++;********************************************************
+;*																											*
+;*			 BlitzII Intuition.library Include file				 *
+;*																											*
+;********************************************************
+
+##[$80BF] "include/"
+XInclude exec.bb
+XInclude utility.bb
+XInclude graphics.bb
+XInclude devices.bb
+
+;*******************File:preferences.h
+
+#FILENAME_SIZE= 30
+#POINTERSIZE= 1+16+1*2
+#TOPAZ_EIGHTY= 8
+#TOPAZ_SIXTY= 9
+
+NEWTYPE.Preferences
+FontHeight.b
+PrinterPort.b
+BaudRate.w
+KeyRptSpeed.timeval
+KeyRptDelay.timeval
+_DoubleClick.timeval
+PointerMatrix.w[19]		 ;[#POINTERSIZE]
+XOffset.b
+YOffset.b
+color17.w
+color18.w
+color19.w
+PointerTicks.w
+color0.w
+color1.w
+color2.w
+color3.w
+ViewXOffset.b
+ViewYOffset.b
+ViewInitX.w:ViewInitY
+EnableCLI.w
+PrinterType.w
+PrinterFilename.b[30]		;[#FILENAME_SIZE]
+PrintPitch.w
+PrintQuality.w
+PrintSpacing.w
+PrintLeftMargin.w
+PrintRightMargin.w
+PrintImage.w
+PrintAspect.w
+PrintShade.w
+PrintThreshold.w
+PaperSize.w
+PaperLength.w
+PaperType.w
+SerRWBits.b
+SerStopBuf.b
+SerParShk.b
+LaceWB.b
+WorkName.b[30]			;[#FILENAME_SIZE]
+RowSizeChange.b
+ColumnSizeChange.b
+PrintFlags.w
+PrintMaxWidth.w
+PrintMaxHeight.w
+PrintDensity.b
+PrintXOffset.b
+wb_Width.w
+wb_Height.w
+wb_Depth.b
+ext_size.b
+End NEWTYPE
+
+#LACEWB= {1LSL0}
+#LW_RESERVED= 1
+#SCREEN_DRAG= {1LSL14}
+#MOUSE_ACCEL= {1LSL15}
+#PARALLEL_PRINTER= $00
+#SERIAL_PRINTER= $01
+#BAUD_110= $00
+#BAUD_300= $01
+#BAUD_1200= $02
+#BAUD_2400= $03
+#BAUD_4800= $04
+#BAUD_9600= $05
+#BAUD_19200= $06
+#BAUD_MIDI= $07
+#FANFOLD= $00
+#SINGLE= $80
+#PICA= $000
+#ELITE= $400
+#FINE= $800
+#DRAFT= $000
+#LETTER= $100
+#SIX_LPI= $000
+#EIGHT_LPI= $200
+#IMAGE_POSITIVE= $00
+#IMAGE_NEGATIVE= $01
+#ASPECT_HORIZ= $00
+#ASPECT_VERT= $01
+#SHADE_BW= $00
+#SHADE_GREYSCALE= $01
+#SHADE_COLOR= $02
+#US_LETTER= $00
+#US_LEGAL= $10
+#N_TRACTOR= $20
+#W_TRACTOR= $30
+#CUSTOM= $40
+#CUSTOM_NAME= $00
+#ALPHA_P_101= $01
+#BROTHER_15XL= $02
+#CBM_MPS1000= $03
+#DIAB_630= $04
+#DIAB_ADV_D25= $05
+#DIAB_C_150= $06
+#EPSON= $07
+#EPSON_JX_80= $08
+#OKIMATE_20= $09
+#QUME_LP_20= $0A
+#HP_LASERJET= $0B
+#HP_LASERJET_PLUS= $0C
+#SBUF_512= $00
+#SBUF_1024= $01
+#SBUF_2048= $02
+#SBUF_4096= $03
+#SBUF_8000= $04
+#SBUF_16000= $05
+#SREAD_BITS= $F0
+#SWRITE_BITS= $0F
+#SSTOP_BITS= $F0
+#SBUFSIZE_BITS= $0F
+#SPARITY_BITS= $F0
+#SHSHAKE_BITS= $0F
+#SPARITY_NONE= 0
+#SPARITY_EVEN= 1
+#SPARITY_ODD= 2
+#SHSHAKE_XON= 0
+#SHSHAKE_RTS= 1
+#SHSHAKE_NONE= 2
+#CORRECT_RED= $0001
+#CORRECT_GREEN= $0002
+#CORRECT_BLUE= $0004
+#CENTER_IMAGE= $0008
+#IGNORE_DIMENSIONS= $0000
+#BOUNDED_DIMENSIONS= $0010
+#ABSOLUTE_DIMENSIONS= $0020
+#PIXEL_DIMENSIONS= $0040
+#MULTIPLY_DIMENSIONS= $0080
+#INTEGER_SCALING= $0100
+#ORDERED_DITHERING= $0000
+#HALFTONE_DITHERING= $0200
+#FLOYD_DITHERING= $0400
+#ANTI_ALIAS= $0800
+#GREY_SCALE2= $1000
+#CORRECT_RGB_MASK= (#CORRECT_RED|#CORRECT_GREEN|#CORRECT_BLUE)
+#DIMENSIONS_MASK= (#BOUNDED_DIMENSIONS|#ABSOLUTE_DIMENSIONS|#PIXEL_DIMENSIONS|#MULTIPLY_DIMENSIONS)
+#DITHERING_MASK= (#HALFTONE_DITHERING|#FLOYD_DITHERING)
+
+NEWTYPE.IBox
+Left.w
+Top.w
+Width.w
+Height.w
+End NEWTYPE
+
+;*******************File:cghooks.h
+
+NEWTYPE.GadgetInfo
+*gi_Screen.Screen
+*gi_Window.Window
+*gi_Requester.Requester
+*gi_RastPort.RastPort
+*gi_Layer.Layer
+gi_Domain.IBox
+DetailPen.b
+BlockPen.b
+*gi_DrInfo.DrawInfo
+gi_Reserved.l[6]
+End NEWTYPE
+
+NEWTYPE.PGX
+pgx_Container.IBox
+pgx_NewKnob.IBox
+End NEWTYPE
+
+;#CUSTOM_HOOK(= #gadget)((#struct#Hook*)(#gadget)->#MutualExclude)
+
+;*******************File:gadgetclass.h
+
+#GA_Dummy= {#TAG_USER+$30000}
+#GA_Left= {#GA_Dummy+$0001}
+#GA_RelRight= {#GA_Dummy+$0002}
+#GA_Top= {#GA_Dummy+$0003}
+#GA_RelBottom= {#GA_Dummy+$0004}
+#GA_Width= {#GA_Dummy+$0005}
+#GA_RelWidth= {#GA_Dummy+$0006}
+#GA_Height= {#GA_Dummy+$0007}
+#GA_RelHeight= {#GA_Dummy+$0008}
+#GA_Text= {#GA_Dummy+$0009}
+#GA_Image= {#GA_Dummy+$000A}
+#GA_Border= {#GA_Dummy+$000B}
+#GA_lslRender= {#GA_Dummy+$000C}
+#GA_Highlight= {#GA_Dummy+$000D}
+#GA_Disabled= {#GA_Dummy+$000E}
+#GA_GZZGadget= {#GA_Dummy+$000F}
+#GA_ID= {#GA_Dummy+$0010}
+#GA_UserData= {#GA_Dummy+$0011}
+#GA_SpecialInfo= {#GA_Dummy+$0012}
+#GA_lsled= {#GA_Dummy+$0013}
+#GA_EndGadget= {#GA_Dummy+$0014}
+#GA_Immediate= {#GA_Dummy+$0015}
+#GA_RelVerify= {#GA_Dummy+$0016}
+#GA_FollowMouse= {#GA_Dummy+$0017}
+#GA_RightBorder= {#GA_Dummy+$0018}
+#GA_LeftBorder= {#GA_Dummy+$0019}
+#GA_TopBorder= {#GA_Dummy+$001A}
+#GA_BottomBorder= {#GA_Dummy+$001B}
+#GA_Togglelsl= {#GA_Dummy+$001C}
+#GA_SysGadget= {#GA_Dummy+$001D}
+#GA_SysGType= {#GA_Dummy+$001E}
+#GA_Previous= {#GA_Dummy+$001F}
+#GA_Next= {#GA_Dummy+$0020}
+#GA_DrawInfo= {#GA_Dummy+$0021}
+#GA_IntuiText= {#GA_Dummy+$0022}
+#GA_LabelImage= {#GA_Dummy+$0023}
+#PGA_Dummy= {#TAG_USER+$31000}
+#PGA_Freedom= {#PGA_Dummy+$0001}
+#PGA_Borderless= {#PGA_Dummy+$0002}
+#PGA_HorizPot= {#PGA_Dummy+$0003}
+#PGA_HorizBody= {#PGA_Dummy+$0004}
+#PGA_VertPot= {#PGA_Dummy+$0005}
+#PGA_VertBody= {#PGA_Dummy+$0006}
+#PGA_Total= {#PGA_Dummy+$0007}
+#PGA_Visible= {#PGA_Dummy+$0008}
+#PGA_Top= {#PGA_Dummy+$0009}
+#STRINGA_Dummy= (#TAG_USER+$32000)
+#STRINGA_MaxChars= (#STRINGA_Dummy+$0001)
+#STRINGA_Buffer= (#STRINGA_Dummy+$0002)
+#STRINGA_UndoBuffer= (#STRINGA_Dummy+$0003)
+#STRINGA_WorkBuffer= (#STRINGA_Dummy+$0004)
+#STRINGA_BufferPos= (#STRINGA_Dummy+$0005)
+#STRINGA_DispPos= (#STRINGA_Dummy+$0006)
+#STRINGA_AltKeyMap= (#STRINGA_Dummy+$0007)
+#STRINGA_Font= (#STRINGA_Dummy+$0008)
+#STRINGA_Pens= (#STRINGA_Dummy+$0009)
+#STRINGA_ActivePens= (#STRINGA_Dummy+$000A)
+#STRINGA_EditHook= (#STRINGA_Dummy+$000B)
+#STRINGA_EditModes= (#STRINGA_Dummy+$000C)
+#STRINGA_ReplaceMode= (#STRINGA_Dummy+$000D)
+#STRINGA_FixedFieldMode= (#STRINGA_Dummy+$000E)
+#STRINGA_NoFilterMode= (#STRINGA_Dummy+$000F)
+#STRINGA_Justification= (#STRINGA_Dummy+$0010)
+#STRINGA_LongVal= (#STRINGA_Dummy+$0011)
+#STRINGA_TextVal= (#STRINGA_Dummy+$0012)
+#SG_DEFAULTMAXCHARS= (128)
+#LAYOUTA_Dummy= (#TAG_USER+$38000)
+#LAYOUTA_LayoutObj= (#LAYOUTA_Dummy+$0001)
+#LAYOUTA_Spacing= (#LAYOUTA_Dummy+$0002)
+#LAYOUTA_Orientation= (#LAYOUTA_Dummy+$0003)
+#LORIENT_NONE= 0
+#LORIENT_HORIZ= 1
+#LORIENT_VERT= 2
+#GM_Dummy= (-1)
+#GM_HITTEST= (0)
+#GM_RENDER= (1)
+#GM_GOACTIVE= (2)
+#GM_HANDLEINPUT= (3)
+#GM_GOINACTIVE= (4)
+
+NEWTYPE.gpHitTest
+MethodID.l
+*gpht_GInfo.GadgetInfo
+X.w
+Y.w
+End NEWTYPE
+
+#GMR_GADGETHIT= ($00000004)
+
+NEWTYPE.gpRender
+MethodID.l
+*gpr_GInfo.GadgetInfo
+*gpr_RPort.RastPort
+gpr_Redraw.l
+End NEWTYPE
+
+#GREDRAW_UPDATE= (2)
+#GREDRAW_REDRAW= (1)
+#GREDRAW_TOGGLE= (0)
+
+NEWTYPE.gpInput
+MethodID.l
+*gpi_GInfo.GadgetInfo
+*gpi_IEvent.InputEvent
+*gpi_Termination.l
+X.w
+Y.w
+End NEWTYPE
+
+NEWTYPE.gpGoInactive
+MethodID.l
+*gpgi_GInfo.GadgetInfo
+End NEWTYPE
+
+#GMR_MEACTIVE= (0)
+#GMR_NOREUSE= (1LSL1)
+#GMR_REUSE= (1LSL2)
+#GMR_VERIFY= (1LSL3)
+
+;*******************File:screens.h
+
+#RI_VERSION= (1)
+#DRI_VERSION= (1)
+
+NEWTYPE.DrawInfo
+dri_Version.w
+dri_NumPens.w
+*dri_Pens.w
+*dri_Font.TextFont
+dri_Depth.w
+X.w
+Y.w
+dri_Flags.l
+dri_Reserved.l[7]
+End NEWTYPE
+
+#DRIF_NEWLOOK= $00000001
+#DETAILPEN= ($0000)
+#BLOCKPEN= ($0001)
+#TEXTPEN= ($0002)
+#SHINEPEN= ($0003)
+#SHADOWPEN= ($0004)
+#FILLPEN= ($0005)
+#FILLTEXTPEN= ($0006)
+#BACKGROUNDPEN= ($0007)
+#HIGHLIGHTTEXTPEN= ($0008)
+#NUMDRIPENS= ($0009)
+
+NEWTYPE.Screen
+*NextScreen.Screen
+*FirstWindow.Window
+LeftEdge.w:TopEdge
+Width.w:Height
+MouseY.w:MouseX
+Flags.w
+*Title.b
+*DefaultTitle.b
+BarHeight.b:BarVBorder:BarHBorder:MenuVBorder:MenuHBorder
+WBorTop.b:WBorLeft:WBorRight:WBorBottom
+*Font.TextAttr
+ViewPort.ViewPort
+RastPort.RastPort
+BitMap.BitMap
+LayerInfo.Layer_Info
+*FirstGadget.Gadget
+DetailPen.b:BlockPen
+SaveColor0.w
+*BarLayer.Layer
+*ExtData.b
+*UserData.b
+End NEWTYPE
+
+#SCREENTYPE= $000F
+#WBENCHSCREEN= $0001
+#PUBLICSCREEN= $0002
+#CUSTOMSCREEN= $000F
+#_ShowTitle= $0010
+#BEEPING= $0020
+#CUSTOMBITMAP= $0040
+#SCREENBEHIND= $0080
+#SCREENQUIET= $0100
+#SCREENHIRES= $0200
+#NS_EXTENDED= $1000
+#AUTOSCROLL= $4000
+#STDSCREENHEIGHT= -1
+#STDSCREENWIDTH= -1
+#SA_Dummy= (#TAG_USER+32)
+#SA_Left= (#SA_Dummy+$0001)
+#SA_Top= (#SA_Dummy+$0002)
+#SA_Width= (#SA_Dummy+$0003)
+#SA_Height= (#SA_Dummy+$0004)
+#SA_Depth= (#SA_Dummy+$0005)
+#SA_DetailPen= (#SA_Dummy+$0006)
+#SA_BlockPen= (#SA_Dummy+$0007)
+#SA_Title= (#SA_Dummy+$0008)
+#SA_Colors= (#SA_Dummy+$0009)
+#SA_ErrorCode= (#SA_Dummy+$000A)
+#SA_SysFont= (#SA_Dummy+$000C)
+#SA_Type= (#SA_Dummy+$000D)
+#SA_BitMap= (#SA_Dummy+$000E)
+#SA_PubName= (#SA_Dummy+$000F)
+#SA_PubSig= (#SA_Dummy+$0010)
+#SA_PubTask= (#SA_Dummy+$0011)
+#SA_DisplayID= (#SA_Dummy+$0012)
+#SA_DClip= (#SA_Dummy+$0013)
+#SA_Overscan= (#SA_Dummy+$0014)
+#SA_Obsolete1= (#SA_Dummy+$0015)
+#SA_ShowTitle= (#SA_Dummy+$0016)
+#SA_Behind= (#SA_Dummy+$0017)
+#SA_Quiet= (#SA_Dummy+$0018)
+#SA_AutoScroll= (#SA_Dummy+$0019)
+#SA_Pens= (#SA_Dummy+$001A)
+#SA_FullPalette= (#SA_Dummy+$001B)
+#NSTAG_EXT_VPMODE= (#TAG_USER|1)
+#OSERR_NOMONITOR= (1)
+#OSERR_NOCHIPS= (2)
+#OSERR_NOMEM= (3)
+#OSERR_NOCHIPMEM= (4)
+#OSERR_PUBNOTUNIQUE= (5)
+#OSERR_UNKNOWNMODE= (6)
+
+NEWTYPE.NewScreen
+LeftEdge.w:TopEdge:Width:Height:Depth
+DetailPen.b:BlockPen
+ViewModes.w
+Type.w
+*Font.TextAttr
+*DefaultTitle.b
+*Gadgets.Gadget
+*CustomBitMap.BitMap
+End NEWTYPE
+
+NEWTYPE.ExtNewScreen
+LeftEdge.w:TopEdge:Width:Height:Depth
+DetailPen.b:BlockPen
+ViewModes.w
+Type.w
+*Font.TextAttr
+*DefaultTitle.b
+*Gadgets.Gadget
+*CustomBitMap.BitMap
+*Extension.TagItem
+End NEWTYPE
+
+#OSCAN_TEXT= (1)
+#OSCAN_STANDARD= (2)
+#OSCAN_MAX= (3)
+#OSCAN_VIDEO= (4)
+
+NEWTYPE.PubScreenNode
+psn_Node.Node
+*psn_Screen.Screen
+psn_Flags.w
+psn_Size.w
+psn_VisitorCount.w
+*psn_SigTask.Task
+psn_SigBit.b
+End NEWTYPE
+
+#PSNF_PRIVATE= ($0001)
+#MAXPUBSCREENNAME= (139)
+#SHANGHAI= $0001
+#POPPUBSCREEN= $0002
+
+;*******************File:Intuition.h
+
+NEWTYPE.Menu
+*NextMenu.Menu
+LeftEdge.w:TopEdge
+Width.w:Height
+Flags.w
+*MenuName.b
+*FirstItem.MenuItem
+JazzX.w:JazzY:BeatX:BeatY
+End NEWTYPE
+
+#MENUENABLED=$0001
+#MIDRAWN= $0100
+
+NEWTYPE.MenuItem
+*NextItem.MenuItem
+LeftEdge.w:TopEdge
+Width.w:Height
+Flags.w
+MutualExclude.l
+*ItemFill.b
+*lslFill.b
+Command.b
+*SubItem.MenuItem
+Nextlsl.w
+End NEWTYPE
+
+#CHECKIT= $0001
+#ITEMTEXT= $0002
+#COMMSEQ= $0004
+#MENUTOGGLE= $0008
+#ITEMENABLED= $0010
+#HIGHFLAGS= $00C0
+#HIGHIMAGE= $0000
+#HIGHCOMP= $0040
+#HIGHBOX= $0080
+#HIGHNONE= $00C0
+#CHECKED= $0100
+#ISDRAWN= $1000
+#HIGHITEM= $2000
+#MENUTOGGLED= $4000
+
+NEWTYPE.Requester
+*OlderRequest.Requester
+LeftEdge.w:TopEdge
+Width.w:Height
+RelLeft.w:RelTop
+*ReqGadget.Gadget
+*ReqBorder.Border
+*ReqText.IntuiText
+Flags.w
+BackFill.b
+*ReqLayer.Layer
+ReqPad1.b[32]
+*ImageBMap.BitMap
+*RWindow.Window
+*ReqImage.Image
+ReqPad2.b[32]
+End NEWTYPE
+
+#POINTREL= $0001
+#PREDRAWN= $0002
+#NOISYREQ= $0004
+#SIMPLEREQ= $0010
+#USEREQIMAGE= $0020
+#NOREQBACKFILL= $0040
+#REQOFFWINDOW= $1000
+#REQACTIVE= $2000
+#SYSREQUEST= $4000
+#DEFERREFRESH= $8000
+
+NEWTYPE.Gadget
+*NextGadget.Gadget
+LeftEdge.w:TopEdge
+Width.w:Height
+Flags.w
+Activation.w
+GadgetType.w
+*GadgetRender.b
+*lslRender.b
+*GadgetText.IntuiText
+MutualExclude.l
+*SpecialInfo.b
+GadgetID.w
+*UserData.b
+End NEWTYPE
+
+#GFLG_GADGHIGHBITS= $0003
+#GFLG_GADGHCOMP= $0000
+#GFLG_GADGHBOX= $0001
+#GFLG_GADGHIMAGE= $0002
+#GFLG_GADGHNONE= $0003
+#GFLG_GADGIMAGE= $0004
+#GFLG_RELBOTTOM= $0008
+#GFLG_RELRIGHT= $0010
+#GFLG_RELWIDTH= $0020
+#GFLG_RELHEIGHT= $0040
+#GFLG_lslED= $0080
+#GFLG_DISABLED= $0100
+#GFLG_LABELMASK= $3000
+#GFLG_LABELITEXT= $0000
+#GFLG_LABELSTRING= $1000
+#GFLG_LABELIMAGE= $2000
+#GACT_RELVERIFY= $0001
+#GACT_IMMEDIATE= $0002
+#GACT_ENDGADGET= $0004
+#GACT_FOLLOWMOUSE= $0008
+#GACT_RIGHTBORDER= $0010
+#GACT_LEFTBORDER= $0020
+#GACT_TOPBORDER= $0040
+#GACT_BOTTOMBORDER= $0080
+#GACT_BORDERSNIFF= $8000
+#GACT_TOGGLElsl= $0100
+#GACT_BOOLEXTEND= $2000
+#GACT_STRINGLEFT= $0000
+#GACT_STRINGCENTER= $0200
+#GACT_STRINGRIGHT= $0400
+#GACT_LONGINT= $0800
+#GACT_ALTKEYMAP= $1000
+#GACT_STRINGEXTEND= $2000
+#GACT_ACTIVEGADGET= $4000
+#GTYP_GADGETTYPE= $FC00
+#GTYP_SYSGADGET= $8000
+#GTYP_SCRGADGET= $4000
+#GTYP_GZZGADGET= $2000
+#GTYP_REQGADGET= $1000
+#GTYP_SIZING= $0010
+#GTYP_WDRAGGING= $0020
+#GTYP_SDRAGGING= $0030
+#GTYP_WUPFRONT= $0040
+#GTYP_SUPFRONT= $0050
+#GTYP_WDOWNBACK= $0060
+#GTYP_SDOWNBACK= $0070
+#GTYP_CLOSE= $0080
+#GTYP_BOOLGADGET= $0001
+#GTYP_GADGET0002= $0002
+#GTYP_PROPGADGET= $0003
+#GTYP_STRGADGET= $0004
+#GTYP_CUSTOMGADGET= $0005
+#GTYP_GTYPEMASK= $0007
+
+NEWTYPE.BoolInfo
+Flags.w
+*Mask.w
+Reserved.l
+End NEWTYPE
+
+#BOOLMASK= $0001
+
+NEWTYPE.PropInfo
+Flags.w
+HorizPot.w
+VertPot.w
+HorizBody.w
+VertBody.w
+CWidth.w
+CHeight.w
+HPotRes.w:VPotRes
+LeftBorder.w
+TopBorder.w
+End NEWTYPE
+
+#AUTOKNOB= $0001
+#FREEHORIZ= $0002
+#FREEVERT= $0004
+#PROPBORDERLESS= $0008
+#KNOBHIT= $0100
+#PROPNEWLOOK= $0010
+#KNOBHMIN= 6
+#KNOBVMIN= 4
+#MAXBODY= $FFFF
+#MAXPOT= $FFFF
+
+NEWTYPE.StringInfo
+*Buffer.b
+*UndoBuffer.b
+BufferPos.w
+MaxChars.w
+DispPos.w
+UndoPos.w
+NumChars.w
+DispCount.w
+CLeft.w:CTop
+LongInt.l
+*AltKeyMap.KeyMap
+End NEWTYPE
+
+NEWTYPE.IntuiText
+FrontPen.b:BackPen
+DrawMode.b					;hmm word aligned now
+Pad.b
+LeftEdge.w
+TopEdge.w
+*ITextFont.TextAttr
+*IText.b
+*NextText.IntuiText
+End NEWTYPE
+
+NEWTYPE.Border
+LeftEdge.w:TopEdge
+FrontPen.b:BackPen
+DrawMode.b
+Count.b
+*XY.w
+*NextBorder.Border
+End NEWTYPE
+
+NEWTYPE.Image
+LeftEdge.w
+TopEdge.w
+Width.w
+Height.w
+Depth.w
+*ImageData.w
+PlanePick.b:PlaneOnOff
+*NextImage.Image
+End NEWTYPE
+
+NEWTYPE.IntuiMessage
+ExecMessage.Message
+Class.l
+Code.w
+Qualifier.w
+*IAddress.b
+MouseX.w:MouseY
+Seconds.l:Micros
+*IDCMPWindow.Window
+*SpecialLink.IntuiMessage
+End NEWTYPE
+
+#IDCMP_SIZEVERIFY= $00000001
+#IDCMP_NEWSIZE= $00000002
+#IDCMP_REFRESHWINDOW= $00000004
+#IDCMP_MOUSEBUTTONS= $00000008
+#IDCMP_MOUSEMOVE= $00000010
+#IDCMP_GADGETDOWN= $00000020
+#IDCMP_GADGETUP= $00000040
+#IDCMP_REQSET= $00000080
+#IDCMP_MENUPICK= $00000100
+#IDCMP_CLOSEWINDOW= $00000200
+#IDCMP_RAWKEY= $00000400
+#IDCMP_REQVERIFY= $00000800
+#IDCMP_REQCLEAR= $00001000
+#IDCMP_MENUVERIFY= $00002000
+#IDCMP_NEWPREFS= $00004000
+#IDCMP_DISKINSERTED= $00008000
+#IDCMP_DISKREMOVED= $00010000
+#IDCMP_WBENCHMESSAGE= $00020000
+#IDCMP_ACTIVEWINDOW= $00040000
+#IDCMP_INACTIVEWINDOW= $00080000
+#IDCMP_DELTAMOVE= $00100000
+#IDCMP_VANILLAKEY= $00200000
+#IDCMP_INTUITICKS= $00400000
+#IDCMP_IDCMPUPDATE= $00800000
+#IDCMP_MENUHELP= $01000000
+#IDCMP_CHANGEWINDOW= $02000000
+#IDCMP_LONELYMESSAGE= $80000000
+#MENUHOT= $0001
+#MENUCANCEL= $0002
+#MENUWAITING= $0003
+#OKOK= #MENUHOT
+#OKABORT= $0004
+#OKCANCEL= #MENUCANCEL
+#WBENCHOPEN= $0001
+#WBENCHCLOSE= $0002
+
+NEWTYPE.Window
+*NextWindow.Window
+LeftEdge.w:TopEdge
+Width.w:Height
+MouseY.w:MouseX
+MinWidth.w:MinHeight
+MaxWidth.w:MaxHeight
+Flags.l
+*MenuStrip.Menu
+*Title.b
+*FirstRequest.Requester
+*DMRequest.Requester
+ReqCount.w
+*WScreen.Screen
+*RPort.RastPort
+BorderLeft.b:BorderTop:BorderRight:BorderBottom
+*BorderRPort.RastPort
+*FirstGadget.Gadget
+*Parent.Window
+*Descendant.Window
+*Pointer.w
+PtrHeight.b
+PtrWidth.b
+XOffset.b:YOffset
+IDCMPFlags.l
+*UserPort.MsgPort
+*WindowPort.MsgPort
+*MessageKey.IntuiMessage
+DetailPen.b:BlockPen
+*CheckMark.Image
+*ScreenTitle.b
+GZZMouseX.w
+GZZMouseY.w
+GZZWidth.w
+GZZHeight.w
+*ExtData.b
+*UserData.b
+*WLayer.Layer
+*IFont.TextFont
+MoreFlags.l
+End NEWTYPE
+
+#WFLG_SIZEGADGET= $00000001
+#WFLG_DRAGBAR= $00000002
+#WFLG_DEPTHGADGET= $00000004
+#WFLG_CLOSEGADGET= $00000008
+#WFLG_SIZEBRIGHT= $00000010
+#WFLG_SIZEBBOTTOM= $00000020
+#WFLG_REFRESHBITS= $000000C0
+#WFLG_SMART_REFRESH= $00000000
+#WFLG_SIMPLE_REFRESH= $00000040
+#WFLG_SUPER_BITMAP= $00000080
+#WFLG_OTHER_REFRESH= $000000C0
+#WFLG_BACKDROP= $00000100
+#WFLG_REPORTMOUSE= $00000200
+#WFLG_GIMMEZEROZERO= $00000400
+#WFLG_BORDERLESS= $00000800
+#WFLG_ACTIVATE= $00001000
+#WFLG_WINDOWACTIVE= $00002000
+#WFLG_INREQUEST= $00004000
+#WFLG_MENUSTATE= $00008000
+#WFLG_RMBTRAP= $00010000
+#WFLG_NOCAREREFRESH= $00020000
+#WFLG_WINDOWREFRESH= $01000000
+#WFLG_WBENCHWINDOW= $02000000
+#WFLG_WINDOWTICKED= $04000000
+#WFLG_NW_EXTENDED= $00040000
+#WFLG_VISITOR= $08000000
+#WFLG_ZOOMED= $10000000
+#WFLG_HASZOOM= $20000000
+#DEFAULTMOUSEQUEUE= (5)
+
+NEWTYPE.NewWindow
+LeftEdge.w:TopEdge
+Width.w:Height
+DetailPen.b:BlockPen
+IDCMPFlags.l
+Flags.l
+*FirstGadget.Gadget
+*CheckMark.Image
+*Title.b
+*Screen.Screen
+*BitMap.BitMap
+MinWidth.w:MinHeight
+MaxWidth.w:MaxHeight
+Type.w
+End NEWTYPE
+
+NEWTYPE.ExtNewWindow
+LeftEdge.w:TopEdge
+Width.w:Height
+DetailPen.b:BlockPen
+IDCMPFlags.l
+Flags.l
+*FirstGadget.Gadget
+*CheckMark.Image
+*Title.b
+*Screen.Screen
+*BitMap.BitMap
+MinWidth.w:MinHeight
+MaxWidth.w:MaxHeight
+Type.w
+*Extension.TagItem
+End NEWTYPE
+
+#WA_Dummy= (#TAG_USER+99)
+#WA_Left= (#WA_Dummy+$01)
+#WA_Top= (#WA_Dummy+$02)
+#WA_Width= (#WA_Dummy+$03)
+#WA_Height= (#WA_Dummy+$04)
+#WA_DetailPen= (#WA_Dummy+$05)
+#WA_BlockPen= (#WA_Dummy+$06)
+#WA_IDCMP= (#WA_Dummy+$07)
+#WA_Flags= (#WA_Dummy+$08)
+#WA_Gadgets= (#WA_Dummy+$09)
+#WA_Checkmark= (#WA_Dummy+$0A)
+#WA_Title= (#WA_Dummy+$0B)
+#WA_ScreenTitle= (#WA_Dummy+$0C)
+#WA_CustomScreen= (#WA_Dummy+$0D)
+#WA_SuperBitMap= (#WA_Dummy+$0E)
+#WA_MinWidth= (#WA_Dummy+$0F)
+#WA_MinHeight= (#WA_Dummy+$10)
+#WA_MaxWidth= (#WA_Dummy+$11)
+#WA_MaxHeight= (#WA_Dummy+$12)
+#WA_InnerWidth= (#WA_Dummy+$13)
+#WA_InnerHeight= (#WA_Dummy+$14)
+#WA_PubScreenName= (#WA_Dummy+$15)
+#WA_PubScreen= (#WA_Dummy+$16)
+#WA_PubScreenFallBack= (#WA_Dummy+$17)
+#WA_WindowName= (#WA_Dummy+$18)
+#WA_Colors= (#WA_Dummy+$19)
+#WA_Zoom= (#WA_Dummy+$1A)
+#WA_MouseQueue= (#WA_Dummy+$1B)
+#WA_BackFill= (#WA_Dummy+$1C)
+#WA_RptQueue= (#WA_Dummy+$1D)
+#WA_SizeGadget= (#WA_Dummy+$1E)
+#WA_DragBar= (#WA_Dummy+$1F)
+#WA_DepthGadget= (#WA_Dummy+$20)
+#WA_CloseGadget= (#WA_Dummy+$21)
+#WA_Backdrop= (#WA_Dummy+$22)
+#WA_ReportMouse= (#WA_Dummy+$23)
+#WA_NoCareRefresh= (#WA_Dummy+$24)
+#WA_Borderless= (#WA_Dummy+$25)
+#WA_Activate= (#WA_Dummy+$26)
+#WA_RMBTrap= (#WA_Dummy+$27)
+#WA_WBenchWindow= (#WA_Dummy+$28)
+#WA_SimpleRefresh= (#WA_Dummy+$29)
+#WA_SmartRefresh= (#WA_Dummy+$2A)
+#WA_SizeBRight= (#WA_Dummy+$2B)
+#WA_SizeBBottom= (#WA_Dummy+$2C)
+#WA_AutoAdjust= (#WA_Dummy+$2D)
+#WA_GimmeZeroZero= (#WA_Dummy+$2E)
+
+NEWTYPE.Remember
+*NextRemember.Remember
+RememberSize.l
+*Memory.b
+End NEWTYPE
+
+NEWTYPE.ColorSpec
+ColorIndex.w
+Red.w
+Green.w
+Blue.w
+End NEWTYPE
+
+NEWTYPE.EasyStruct
+es_StructSize.l
+es_Flags.l
+*es_Title.b
+*es_TextFormat.b
+*es_GadgetFormat.b
+End NEWTYPE
+
+Macro MENUNUM=(`1&$1F):End Macro
+Macro ITEMNUM=((`1Default5)&$003F):End Macro
+Macro SUBNUM= ((`1Default11)&$001F):End Macro
+Macro SHIFTMENU= (`1&$1F):End Macro
+Macro SHIFTITEM= ((`1&$3F)LSL5):End Macro
+Macro SHIFTSUB= ((`1&$1F)LSL11):End Macro
+;Macro FULLMENUNUM(= #menu,#item,#SUB)\:End Macro
+Macro SRBNUM= ($08-(`1Default4)):End Macro
+;Macro SWBNUM= ($08-(`1&$0F))/*#SerRWBits->#Write#bits#per#chr*/:End Macro
+Macro SSBNUM= ($01+(`1Default4)):End Macro
+Macro SPARNUM= (`1Default4):End Macro
+Macro SHAKNUM= (`1&$0F):End Macro
+
+#NOMENU= $001F
+#NOITEM= $003F
+#NOSUB= $001F
+#MENUNULL= $FFFF
+;#FOREVER= #For(
+
+Macro SIGN= (((`1)>0)-((`1)<0)):End Macro
+
+;#NOT= #
+#CHECKWIDTH= 19
+#COMMWIDTH= 27
+#LOWCHECKWIDTH= 13
+#LOWCOMMWIDTH= 16
+#ALERT_TYPE= $80000000
+#RECOVERY_ALERT= $00000000
+#DEADEND_ALERT= $80000000
+#AUTOFRONTPEN= 0
+#AUTOBACKPEN= 1
+#AUTODRAWMODE= #JAM2
+#AUTOLEFTEDGE= 6
+#AUTOTOPEDGE= 3
+#AUTOITEXTFONT= #NULL
+#AUTONEXTTEXT= #NULL
+#lslUP= (#IECODE_LBUTTON|#IECODE_UP_PREFIX)
+#lslDOWN= (#IECODE_LBUTTON)
+#MENUUP= (#IECODE_RBUTTON|#IECODE_UP_PREFIX)
+#MENUDOWN= (#IECODE_RBUTTON)
+#MIDDLEDOWN= (#IECODE_MBUTTON)
+#MIDDLEUP= (#IECODE_MBUTTON|#IECODE_UP_PREFIX)
+#ALTLEFT= (#IEQUALIFIER_LALT)
+#ALTRIGHT= (#IEQUALIFIER_RALT)
+#AMIGALEFT= (#IEQUALIFIER_LCOMMAND)
+#AMIGARIGHT= (#IEQUALIFIER_RCOMMAND)
+#AMIGAKEYS= (#AMIGALEFT|#AMIGARIGHT)
+#CURSORUP= $4C
+#CURSORLEFT= $4F
+#CURSORRIGHT= $4E
+#CURSORDOWN= $4D
+#KEYCODE_Q= $10
+#KEYCODE_Z= $31
+#KEYCODE_X= $32
+#KEYCODE_V= $34
+#KEYCODE_B= $35
+#KEYCODE_N= $36
+#KEYCODE_M= $37
+#KEYCODE_LESS= $38
+#KEYCODE_GREATER= $39
+
+;*******************File:intuitionbase.h
+
+#DMODECOUNT= $0002
+#HIRESPICK= $0000
+#LOWRESPICK= $0001
+#EVENTMAX= 10
+#RESCOUNT= 2
+#HIRESGADGET= 0
+#LOWRESGADGET= 1
+#GADGETCOUNT= 8
+#UPFRONTGADGET= 0
+#DOWNBACKGADGET= 1
+#SIZEGADGET= 2
+#CLOSEGADGET= 3
+#DRAGGADGET= 4
+#SUPFRONTGADGET= 5
+#SDOWNBACKGADGET= 6
+#SDRAGGADGET= 7
+
+NEWTYPE.IntuitionBase
+LibNode.Library
+ViewLord.View
+*ActiveWindow.Window
+*ActiveScreen.Screen
+*FirstScreen.Screen
+Flags.l
+MouseY.w:MouseX
+Seconds.l
+Micros.l
+End NEWTYPE
+
+;*******************File:iobsolete.h
+
+#GADGHIGHBITS= #GFLG_GADGHIGHBITS
+#GADGHCOMP= #GFLG_GADGHCOMP
+#GADGHBOX= #GFLG_GADGHBOX
+#GADGHIMAGE= #GFLG_GADGHIMAGE
+#GADGHNONE= #GFLG_GADGHNONE
+#GADGIMAGE= #GFLG_GADGIMAGE
+#GRELBOTTOM= #GFLG_RELBOTTOM
+#GRELRIGHT= #GFLG_RELRIGHT
+#GRELWIDTH= #GFLG_RELWIDTH
+#GRELHEIGHT= #GFLG_RELHEIGHT
+#lslED= #GFLG_lslED
+#GADGDISABLED= #GFLG_DISABLED
+#LABELMASK= #GFLG_LABELMASK
+#LABELITEXT= #GFLG_LABELITEXT
+#LABELSTRING= #GFLG_LABELSTRING
+#LABELIMAGE= #GFLG_LABELIMAGE
+#RELVERIFY= #GACT_RELVERIFY
+#GADGIMMEDIATE= #GACT_IMMEDIATE
+#ENDGADGET= #GACT_ENDGADGET
+#FOLLOWMOUSE= #GACT_FOLLOWMOUSE
+#RIGHTBORDER= #GACT_RIGHTBORDER
+#LEFTBORDER= #GACT_LEFTBORDER
+#TOPBORDER= #GACT_TOPBORDER
+#BOTTOMBORDER= #GACT_BOTTOMBORDER
+#BORDERSNIFF= #GACT_BORDERSNIFF
+#TOGGLElsl= #GACT_TOGGLElsl
+#BOOLEXTEND= #GACT_BOOLEXTEND
+#STRINGLEFT= #GACT_STRINGLEFT
+#STRINGCENTER= #GACT_STRINGCENTER
+#STRINGRIGHT= #GACT_STRINGRIGHT
+#LONGINT= #GACT_LONGINT
+#ALTKEYMAP= #GACT_ALTKEYMAP
+#STRINGEXTEND= #GACT_STRINGEXTEND
+#ACTIVEGADGET= #GACT_ACTIVEGADGET
+#GADGETTYPE= #GTYP_GADGETTYPE
+#SYSGADGET= #GTYP_SYSGADGET
+#SCRGADGET= #GTYP_SCRGADGET
+#GZZGADGET= #GTYP_GZZGADGET
+#REQGADGET= #GTYP_REQGADGET
+#SIZING= #GTYP_SIZING
+#WDRAGGING= #GTYP_WDRAGGING
+#SDRAGGING= #GTYP_SDRAGGING
+#WUPFRONT= #GTYP_WUPFRONT
+#SUPFRONT= #GTYP_SUPFRONT
+#WDOWNBACK= #GTYP_WDOWNBACK
+#SDOWNBACK= #GTYP_SDOWNBACK
+#_Close= #GTYP_CLOSE
+#BOOLGADGET= #GTYP_BOOLGADGET
+#GADGET0002= #GTYP_GADGET0002
+#PROPGADGET= #GTYP_PROPGADGET
+#STRGADGET= #GTYP_STRGADGET
+#CUSTOMGADGET= #GTYP_CUSTOMGADGET
+#GTYPEMASK= #GTYP_GTYPEMASK
+#SIZEVERIFY= #IDCMP_SIZEVERIFY
+#NEWSIZE= #IDCMP_NEWSIZE
+#REFRESHWINDOW= #IDCMP_REFRESHWINDOW
+#MOUSEBUTTONS= #IDCMP_MOUSEBUTTONS
+#MOUSEMOVE= #IDCMP_MOUSEMOVE
+#GADGETDOWN= #IDCMP_GADGETDOWN
+#GADGETUP= #IDCMP_GADGETUP
+#REQSET= #IDCMP_REQSET
+#MENUPICK= #IDCMP_MENUPICK
+#_CLOSEWINDOW= #IDCMP_CLOSEWINDOW
+#RAWKEY= #IDCMP_RAWKEY
+#REQVERIFY= #IDCMP_REQVERIFY
+#REQCLEAR= #IDCMP_REQCLEAR
+#MENUVERIFY= #IDCMP_MENUVERIFY
+#NEWPREFS= #IDCMP_NEWPREFS
+#DISKINSERTED= #IDCMP_DISKINSERTED
+#DISKREMOVED= #IDCMP_DISKREMOVED
+#WBENCHMESSAGE= #IDCMP_WBENCHMESSAGE
+#ACTIVEWINDOW= #IDCMP_ACTIVEWINDOW
+#INACTIVEWINDOW= #IDCMP_INACTIVEWINDOW
+#DELTAMOVE= #IDCMP_DELTAMOVE
+#VANILLAKEY= #IDCMP_VANILLAKEY
+#INTUITICKS= #IDCMP_INTUITICKS
+#IDCMPUPDATE= #IDCMP_IDCMPUPDATE
+#MENUHELP= #IDCMP_MENUHELP
+#CHANGEWINDOW= #IDCMP_CHANGEWINDOW
+#LONELYMESSAGE= #IDCMP_LONELYMESSAGE
+#WINDOWSIZING= #WFLG_SIZEGADGET
+#WINDOWDRAG= #WFLG_DRAGBAR
+#WINDOWDEPTH= #WFLG_DEPTHGADGET
+#WINDOWCLOSE= #WFLG_CLOSEGADGET
+#SIZEBRIGHT= #WFLG_SIZEBRIGHT
+#SIZEBBOTTOM= #WFLG_SIZEBBOTTOM
+#REFRESHBITS= #WFLG_REFRESHBITS
+#SMART_REFRESH= #WFLG_SMART_REFRESH
+#SIMPLE_REFRESH= #WFLG_SIMPLE_REFRESH
+#SUPER_BITMAP= #WFLG_SUPER_BITMAP
+#OTHER_REFRESH= #WFLG_OTHER_REFRESH
+#BACKDROP= #WFLG_BACKDROP
+#_ReportMouse= #WFLG_REPORTMOUSE
+#GIMMEZEROZERO= #WFLG_GIMMEZEROZERO
+#BORDERLESS= #WFLG_BORDERLESS
+#ACTIVATE= #WFLG_ACTIVATE
+#WINDOWACTIVE= #WFLG_WINDOWACTIVE
+#INREQUEST= #WFLG_INREQUEST
+#MENUSTATE= #WFLG_MENUSTATE
+#RMBTRAP= #WFLG_RMBTRAP
+#NOCAREREFRESH= #WFLG_NOCAREREFRESH
+#WINDOWREFRESH= #WFLG_WINDOWREFRESH
+#WBENCHWINDOW= #WFLG_WBENCHWINDOW
+#WINDOWTICKED= #WFLG_WINDOWTICKED
+#NW_EXTENDED= #WFLG_NW_EXTENDED
+#VISITOR= #WFLG_VISITOR
+#ZOOMED= #WFLG_ZOOMED
+#HASZOOM= #WFLG_HASZOOM
+#GA_LEFT= #GA_Left
+#GA_RELRIGHT= #GA_RelRight
+#GA_TOP= #GA_Top
+#GA_RELBOTTOM= #GA_RelBottom
+#GA_WIDTH= #GA_Width
+#GA_RELWIDTH= #GA_RelWidth
+#GA_HEIGHT= #GA_Height
+#GA_RELHEIGHT= #GA_RelHeight
+#GA_TEXT= #GA_Text
+#GA_IMAGE= #GA_Image
+#GA_BORDER= #GA_Border
+#GA_lslRENDER= #GA_lslRender
+#GA_HIGHLIGHT= #GA_Highlight
+#GA_DISABLED= #GA_Disabled
+#GA_GZZGADGET= #GA_GZZGadget
+#GA_USERDATA= #GA_UserData
+#GA_SPECIALINFO= #GA_SpecialInfo
+#GA_lslED= #GA_lsled
+#GA_ENDGADGET= #GA_EndGadget
+#GA_IMMEDIATE= #GA_Immediate
+#GA_RELVERIFY= #GA_RelVerify
+#GA_FOLLOWMOUSE= #GA_FollowMouse
+#GA_RIGHTBORDER= #GA_RightBorder
+#GA_LEFTBORDER= #GA_LeftBorder
+#GA_TOPBORDER= #GA_TopBorder
+#GA_BOTTOMBORDER= #GA_BottomBorder
+#GA_TOGGLElsl= #GA_Togglelsl
+#GA_SYSGADGET= #GA_SysGadget
+#GA_SYSGTYPE= #GA_SysGType
+#GA_PREVIOUS= #GA_Previous
+#GA_NEXT= #GA_Next
+#GA_DRAWINFO= #GA_DrawInfo
+#GA_INTUITEXT= #GA_IntuiText
+#GA_LABELIMAGE= #GA_LabelImage
+#PGA_FREEDOM= #PGA_Freedom
+#PGA_BORDERLESS= #PGA_Borderless
+#PGA_HORIZPOT= #PGA_HorizPot
+#PGA_HORIZBODY= #PGA_HorizBody
+#PGA_VERTPOT= #PGA_VertPot
+#PGA_VERTBODY= #PGA_VertBody
+#PGA_TOTAL= #PGA_Total
+#PGA_VISIBLE= #PGA_Visible
+#PGA_TOP= #PGA_Top
+#LAYOUTA_LAYOUTOBJ= #LAYOUTA_LayoutObj
+#LAYOUTA_SPACING= #LAYOUTA_Spacing
+#LAYOUTA_ORIENTATION= #LAYOUTA_Orientation
+
+;#IMAGE_ATTRIBUTES= (#IA_Dummy)
+;#IA_LEFT= #IA_Left
+;#IA_TOP= #IA_Top
+;#IA_WIDTH= #IA_Width
+;#IA_HEIGHT= #IA_Height
+;#IA_FGPEN= #IA_FGPen
+;#IA_BGPEN= #IA_BGPen
+;#IA_DATA= #IA_Data
+;#IA_LINEWIDTH= #IA_LineWidth
+;#IA_PENS= #IA_Pens
+;#IA_RESOLUTION= #IA_Resolution
+;#IA_APATTERN= #IA_APattern
+;#IA_APATSIZE= #IA_APatSize
+;#IA_MODE= #IA_Mode
+;#IA_FONT= #IA_Font
+;#IA_OUTLINE= #IA_Outline
+;#IA_RECESSED= #IA_Recessed
+;#IA_DOUBLEEMBOSS= #IA_DoubleEmboss
+;#IA_EDGESONLY= #IA_EdgesOnly
+;#IA_SHADOWPEN= #IA_ShadowPen
+;#IA_HIGHLIGHTPEN= #IA_HighlightPen
+
+#detailPen= #DETAILPEN
+#blockPen= #BLOCKPEN
+#textPen= #TEXTPEN
+#shinePen= #SHINEPEN
+#shadowPen= #SHADOWPEN
+#hifillPen= #FILLPEN
+#hifilltextPen= #FILLTEXTPEN
+#backgroundPen= #BACKGROUNDPEN
+#hilighttextPen= #HIGHLIGHTTEXTPEN
+#numDrIPens= #NUMDRIPENS
+
+#W_Dummy= #WA_Dummy
+#W_LEFT= #WA_Left
+#W_TOP= #WA_Top
+#W_WIDTH= #WA_Width
+#W_HEIGHT= #WA_Height
+#W_DETAILPEN= #WA_DetailPen
+#W_BLOCKPEN= #WA_BlockPen
+#W_IDCMP= #WA_IDCMP
+#W_FLAGS= #WA_Flags
+#W_GADGETS= #WA_Gadgets
+#W_CHECKMARK= #WA_Checkmark
+#W_TITLE= #WA_Title
+#W_SCREENTITLE= #WA_ScreenTitle
+#W_CUSTOMSCREEN= #WA_CustomScreen
+#W_SUPERBITMAP= #WA_SuperBitMap
+#W_MINWIDTH= #WA_MinWidth
+#W_MINHEIGHT= #WA_MinHeight
+#W_MAXWIDTH= #WA_MaxWidth
+#W_MAXHEIGHT= #WA_MaxHeight
+#W_INNERWIDTH= #WA_InnerWidth
+#W_INNERHEIGHT= #WA_InnerHeight
+#W_PUBSCNAME= #WA_PubScreenName
+#W_PUBSC= #WA_PubScreen
+#W_PUBSCFALLBACK= #WA_PubScreenFallBack
+#W_WINDOWNAME= #WA_WindowName
+#W_COLORS= #WA_Colors
+#W_ZOOM= #WA_Zoom
+#W_MOUSEQUEUE= #WA_MouseQueue
+#W_BACKFILL= #WA_BackFill
+#W_RPTQUEUE= #WA_RptQueue
+#W_SIZEGADGET= #WA_SizeGadget
+#W_DRAGBAR= #WA_DragBar
+#W_DEPTHGADGET= #WA_DepthGadget
+#W_CLOSEGADGET= #WA_CloseGadget
+#W_BACKDROP= #WA_Backdrop
+#W_REPORTMOUSE= #WA_ReportMouse
+#W_NOCAREREFRESH= #WA_NoCareRefresh
+#W_BORDERLESS= #WA_Borderless
+#W_ACTIVATE= #WA_Activate
+#W_RMBTRAP= #WA_RMBTrap
+#W_WBENCHWINDOW= #WA_WBenchWindow
+#W_SIMPLE_REFRESH= #WA_SimpleRefresh
+#W_SMART_REFRESH= #WA_SmartRefresh
+#W_SIZEBRIGHT= #WA_SizeBRight
+#W_SIZEBBOTTOM= #WA_SizeBBottom
+#W_AUTOADJUST= #WA_AutoAdjust
+#W_GIMMEZEROZERO= #WA_GimmeZeroZero
+#S_DUMMY= #SA_Dummy
+#S_LEFT= #SA_Left
+#S_TOP= #SA_Top
+#S_WIDTH= #SA_Width
+#S_HEIGHT= #SA_Height
+#S_DEPTH= #SA_Depth
+#S_DETAILPEN= #SA_DetailPen
+#S_BLOCKPEN= #SA_BlockPen
+#S_TITLE= #SA_Title
+#S_COLORS= #SA_Colors
+#S_ERRORCODE= #SA_ErrorCode
+;#S_FONT= #SA_Font
+#S_SYSFONT= #SA_SysFont
+#S_TYPE= #SA_Type
+#S_BITMAP= #SA_BitMap
+#S_PUBNAME= #SA_PubName
+#S_PUBSIG= #SA_PubSig
+#S_PUBTASK= #SA_PubTask
+#S_DISPLAYID= #SA_DisplayID
+#S_DCLIP= #SA_DClip
+#S_STDDCLIP= #SA_Overscan
+#S_MONITORNAME= #SA_Obsolete1
+#S_SHOWTITLE= #SA_ShowTitle
+#S_BEHIND= #SA_Behind
+#S_QUIET= #SA_Quiet
+#S_AUTOSCROLL= #SA_AutoScroll

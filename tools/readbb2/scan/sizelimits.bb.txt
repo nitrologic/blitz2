@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SizeLimits.bb
++; ; sizelimits program example; Screen 0,2									 ;A simple screenSizeLimits 20,20,150,150				;set limits for windows Window 0,0,0,100,100,15,"SizeLimits",0,1Print "Click RMB" Print "to quit" While Joyb(0)<>2Wend

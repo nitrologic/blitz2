@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WEllipse.bb
++; ; wellipse example program; Screen 0,3Window 0,0,0,320,200,0,"Ellipses",0,1 For t=1 To 1000  WEllipse Rnd(320),Rnd(200),Rnd(300),Rnd(300),Rnd(8) NextMouseWait 

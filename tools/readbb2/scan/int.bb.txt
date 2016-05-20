@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Int.bb
++Print Int(23.456)	 ; Will simply print 23

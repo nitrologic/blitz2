@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/sfx2.bb
++SLOAD "sfx/pointscount",0SLOAD "sfx/pointscountch2",1SAVE "ram:sounds2.blk",SOUNDopts10,100,5,5,100,10,4096,80,1,1,1,1,1,

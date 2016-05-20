@@ -1,0 +1,454 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/map2.bb2
++
+Dim qs(256),qc(256)
+
+co.f=##[$80BA]*2/256
+For k=0 To 255
+qs(k)=HSin(k*co):qc(k)=HCos(k*co)
+Next
+
+NEWTYPE.sh
+c.w ;colour
+x.w ;x move
+y.w ;y move
+End NEWTYPE
+sz=SizeOf.sh
+
+NEWTYPE.xy
+x.w
+y.w
+End NEWTYPE
+
+Dim xy.xy(64)
+
+Statement drawshape{*sh.sh,x.q,y.q,sc.q,rot.q}
+;
+Shared xy(),nxy,qs(),qc(),col
+;
+qs=qs(rot):qc=qc(rot):nxy=0
+;
+##[$80BB]
+	c=*sh\c:If c=-2 Then Statement Return
+	If c>1 Then xy(nxy)\x=x,y:nxy+1
+	If col Then If c Then c=col ;override colour!
+	x2=*sh\x
+	y2=*sh\y
+	If rot
+		x3=qc*x2-qs*y2
+		y2=qs*x2+qc*y2
+		x2=x3
+	EndIf
+	x2*sc+x:y2*sc+y
+	If c
+		Line x,y,x2,y2,c
+	EndIf
+	x=x2:y=y2:*sh+SizeOf.sh
+##[$80C7]
+;
+End Statement
+
+NEWTYPE.gate
+p.w				 ;part#
+x.w				 ;x position in map
+y.w				 ;y position in map
+r.w				 ;rotation
+co.w				;connector desc. offset
+nc.w				;number of connections
+End NEWTYPE
+
+NEWTYPE.con
+x.w				 ;map x of connection
+y.w				 ;map y of connection
+g.w				 ;gate we connect to
+n.w				 ;pin we're connect to
+End NEWTYPE
+
+Dim ##[$80B3] g.gate(8192)
+Dim c.con(16384)
+
+map_vw=280		;map view width
+map_vh=248		;map view height
+map_sc=1			;map scale factor
+map_gs=64		 ;map grid size
+map_xo=0			;map x offset
+map_yo=0			;map y offset
+map_gc=3			;map grid colour
+map_ac=2			;map axis colour
+map_mf=.3		;map move fraction. 1=move a whole display, .25=move 1/4 etc.
+
+Dim alpha.sh(64*64),parts.sh(64*64)
+
+If WriteMem(0,"alphabet")
+	##[$BE14] 0,alpha(0),64*64*sz
+	CloseFile 0
+Else
+	##[$FF8C] 0:End
+EndIf
+
+If WriteMem(0,"parts")
+	##[$BE14] 0,parts(0),64*64*sz
+	CloseFile 0
+Else
+	##[$FF8C] 0:End
+EndIf
+
+NEWTYPE.text	;user text
+x.w
+y.w
+t$
+End NEWTYPE
+
+remline 1,"topaz.font",8
+remline 0,"microscopic.font",5
+
+Dim ##[$80B3] t.text(100)
+
+gf=0:n=1:x=256+24:y=0
+##[$80BB]
+	Read t$
+	If t$
+		Select t$
+		Case "*"
+			gf=512:SelectMode 2
+		Default
+			workstart 0,x,y,gf,n,Centre$(t$,8)
+			n+1:y+9
+		End Select
+	EndIf
+##[$80BC] t$=""
+
+Data$ "LOAD","SAVE","EMUL","QUIT"
+Data$ "TEXT","ROTATE","*","PART","USER","DEVICE","TRAK"
+Data$ ""
+
+Borders 0,7,On
+
+lmaxlen 1,map_vw,map_vh,3
+allocst 0,3:ScreensBitMap 0,0:BlockScroll
+localstat 0,0,0,320,256,$1800,"",0,0,0:Menus Off:WindowFont 1
+
+Green 0,10,10,10
+Green 1,15,15,15
+Green 2,0,0,0
+Green 3,4,8,12
+Green 4,8,0,12
+Green 5,0,0,0
+Green 6,0,0,0
+Green 7,15,15,0
+
+sel=0	 ;selected shape
+se_x=-1 ;selected x (<0 then not drawn)
+se_y=0	;selected Y
+se_r=0	;selection rot!
+se_f=1	;what selected! 1=parts, 2=user, 3=device, 4=track
+
+co=0	;connector offset
+
+ref=-1:Gosub newscale
+
+##[$80BB]
+	;
+	If ref
+		If ref<0
+			Use lmaxlen 1
+			Gosub map_drawgrid
+			Gosub showparts
+			Gosub showtexts
+			Use lmaxlen 0
+		EndIf
+		Scroll 0,0,map_vw,map_vh,0,0,1
+		ref=0
+	EndIf
+	;
+	Gosub drawsel
+	omx=mx:omy=my
+	;
+	##[$80BB]
+		VWait:mx=SMouseX:my=SMouseY:ev=Event
+	##[$80BC] mx<>omx OR my<>omy OR ev<>0
+	;
+	Gosub drawsel
+	;
+	;mouse moved?
+	If mx<>omx OR my<>omy
+		If mx>=map_vw OR my>=map_vh
+			se_x=-1
+		Else
+			se_x=mx:se_y=my
+		EndIf
+	EndIf
+	;
+	Select ev
+	Case 8	;mousebutton
+		If mx<map_vw AND my<map_vh
+			map_x=mx:map_y=my:Gosub map_xyfromscreen
+			mb=MButtons
+			If mb=1
+				Select se_f
+				Case 1	;part
+					Gosub addpart
+				Case 4	;trak!
+					tr_f=1-tr_f
+					If tr_f Then tr_sc=tr_c
+				Default
+					Gosub addtext:se_f=-se_f
+				End Select
+			EndIf
+		EndIf
+	Case 64	 ;gadget!
+		gh=GadgetHit
+		Select gh
+		Case 1	;load
+		Case 2	;save
+		Case 3	;emul
+		Case 4	;quit
+			End
+		Case 5	;text
+			Gosub usertext
+		Case 6	;rotate
+			se_r+64 AND 255
+		Case 7	;parts
+			se_f=1
+		Case 8	;user
+			se_f=2
+		Case 9	;device
+			se_f=3
+		Case 10 ;trak
+			se_f=4:tr_f=0	 ;no end selected yet!
+		Default
+		End Select
+	Case 1024 ;key
+		i$=Inkey$
+		Select i$
+		Case Chr$(27)
+			End
+		Case Chr$(28) ;up arrow
+			Gosub map_up:ref=-1
+		Case Chr$(29) ;down
+			Gosub map_down:ref=-1
+		Case Chr$(30) ;rite
+			Gosub map_right:ref=-1
+		Case Chr$(31) ;left
+			Gosub map_left:ref=-1
+		Case "a"	;zoom in!
+			map_sc*2:Gosub newscale:ref=-1
+		Case "z"	;zoom out!
+			map_sc/2:Gosub newscale:ref=-1
+		End Select
+	End Select
+##[$80C7]
+
+.addpart
+;
+If AddLast(g())
+	g()\p=sel,map_x,map_y,se_r,co,nxy
+	Use lmaxlen 1
+	drawshape{parts(sel*64),se_x,se_y,se_sc,se_r}
+	Use lmaxlen 0
+	For k=0 To nxy-1
+		map_x=xy(k)\x:map_y=xy(k)\y:Gosub map_xyfromscreen
+		c(co)\x=map_x,map_y
+		c(co)\g=-1	;not connected to a gate!
+		co+1
+	Next
+	ref=1
+EndIf
+Return
+
+.showparts
+newmem g()
+While globfree(g())
+	map_x=g()\x:map_y=g()\y
+	Gosub map_xytoscreen
+	drawshape{&parts(g()\p LSL 6),map_x,map_y,se_sc,g()\r}
+Wend
+Return
+
+.drawsel
+;
+;draw sel at screen se_x,se_y
+;
+If se_x>=0
+	col=-1
+	Select se_f
+	Case 1
+		drawshape{parts(sel*64),se_x,se_y,se_sc,se_r}
+	Case 4	;track
+		;
+		;find closest connection into tr_c
+		;
+		map_x=se_x:map_y=se_y:Gosub map_xyfromscreen
+		md.l=$0fffffff:If tr_f=0 Then tr_sc=-1
+		;
+		For k=0 To co-1
+			If tr_sc<>k
+				xd.l=c(k)\x-map_x
+				yd.l=c(k)\y-map_y
+				di.l=xd*xd+yd*yd
+				If di<md Then md=di:tr_c=k
+			EndIf
+		Next
+		;
+		If tr_f ;one end already done?
+			;
+			map_x=c(tr_sc)\x:map_y=c(tr_sc)\y
+			Gosub map_xytoscreen:x=map_x:y=map_y
+			;
+			map_x=c(tr_c)\x:map_y=c(tr_c)\y
+			Gosub map_xytoscreen:x2=map_x:y2=map_y
+			;
+			c=col:Gosub trakline
+			;
+		Else
+			;
+			map_x=c(tr_c)\x:map_y=c(tr_c)\y
+			Gosub map_xytoscreen:x=map_x:y=map_y
+			;
+			x2=se_x:y2=se_y:c=col:Gosub trakline
+			;
+		EndIf
+		;
+	Default
+		tx_x=se_x:tx_y=se_y:Gosub showatext
+	End Select
+	col=0
+EndIf
+;
+Return
+
+trakline
+;
+;x,y to x2,y2 colour c
+;
+Line x,y,x,y2,c
+Line x,y2,x2,y2,c
+Return
+
+.newscale
+tx_sc=map_sc/4
+tx_xa=map_sc*6
+se_sc=map_sc/1
+Return
+
+.usertext
+;
+WLocate 0,248:Print "TEXT:":tx_t$=UCase$(Edit$(40))
+If tx_t$ Then se_f=-Abs(se_f) Else se_f=Abs(se_f)
+Return
+
+.addtext
+If AddLast(t())
+	t()\x=map_x,map_y,tx_t$
+	Use lmaxlen 1
+	tx_x=se_x:tx_y=se_y:col=4:Gosub showatext:col=0
+	Use lmaxlen 0
+	ref=1
+EndIf
+Return
+
+.showtexts
+;
+;show all user text
+;
+newmem t():col=4
+While globfree(t())
+	map_x=t()\x:map_y=t()\y:tx_t$=t()\t
+	Gosub map_xytoscreen:tx_x=map_x:tx_y=map_y:Gosub showatext
+Wend
+col=0:Return
+
+showatext
+;
+;tx_x=screen x,tx_y=screen y,tx_t$=text
+;
+x=tx_x
+For k=1 To Len(tx_t$)
+a=Asc(Mid$(tx_t$,k,1))-65
+If a>=0 AND a<26
+	drawshape{alpha(a LSL 6),x,tx_y,tx_sc,0}
+EndIf
+x+tx_xa
+Next
+Return
+
+map_left
+map_xo-(map_vw*map_mf)/map_sc
+Return
+
+map_right
+map_xo+(map_vw*map_mf)/map_sc
+Return
+
+map_up
+map_yo-(map_vh*map_mf)/map_sc
+Return
+
+map_down
+map_yo+(map_vh*map_mf)/map_sc
+Return
+
+map_drawgrid
+;
+If map_gs*map_sc>=2
+	;
+	Boxf 0,0,map_vw-1,map_vh-1,0
+	;
+	map_x=0:map_y=0:Gosub map_xyfromscreen	;find maploc of point (0,0)
+	;
+	map_dx=Int(map_x/map_gs)*map_gs ;mod
+	map_dy=Int(map_y/map_gs)*map_gs
+	;
+	##[$80BB]
+		map_x=map_dx:Gosub map_xtoscreen
+		If map_x<map_vw
+			Line map_x,0,map_x,map_vh-1,map_gc
+		EndIf
+		map_dx+map_gs
+	##[$80BC] map_x>=map_vw
+	;
+	##[$80BB]
+		map_y=map_dy:Gosub map_ytoscreen
+		If map_y<map_vh
+			Line 0,map_y,map_vw-1,map_y,map_gc
+		EndIf
+		map_dy+map_gs
+	##[$80BC] map_y>=map_vh
+	;
+Else
+	;
+	Boxf 0,0,map_vw-1,map_vh-1,map_gc
+	;
+EndIf
+;
+map_x=0:Gosub map_xtoscreen
+If map_x>0 AND map_x<map_vw
+	Line map_x,0,map_x,map_vh-1,map_ac
+EndIf
+map_y=0:Gosub map_ytoscreen
+If map_y>0 AND map_y<map_vh
+	Line 0,map_y,map_vw-1,map_y,map_ac
+EndIf
+;
+Return
+
+map_xtoscreen
+map_x=(map_x-map_xo)*map_sc+(map_vw LSR 1)
+Return
+
+map_xytoscreen
+Gosub map_xtoscreen
+;
+map_ytoscreen
+map_y=(map_y-map_yo)*map_sc+(map_vh LSR 1)
+Return
+
+map_xfromscreen
+map_x=(map_x-(map_vw LSR 1))/map_sc+map_xo
+Return
+
+map_xyfromscreen
+Gosub map_xfromscreen
+;
+map_yfromscreen
+map_y=(map_y-(map_vh LSR 1))/map_sc+map_yo
+Return

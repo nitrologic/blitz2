@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RelMouse.bb
++; ; brex relmouse program example ; AbsMouse 0,0						;move pointer to upper left For k=1 To 100 RelMouse 1,1					 ;across and down 100 timesNextMouseWait 

@@ -1,0 +1,48 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/semaphores.bb2
++;
+; $VER: semaphores.bb2 40.0 (28.02.94)
+;
+
+XInclude "exec/nodes.bb2"
+
+XInclude "exec/lists.bb2"
+
+XInclude "exec/ports.bb2"
+
+XInclude "exec/tasks.bb2"
+
+;/****** SignalSemaphore *********************************************/
+
+;/* Private structure used by ObtainSemaphore() */
+NEWTYPE.SemaphoreRequest
+sr_Link.MinNode
+*sr_Waiter.Task
+End NEWTYPE
+
+;/* Signal Semaphore data structure */
+NEWTYPE.SignalSemaphore
+ss_Link.Node
+ss_NestCount.w
+ss_WaitQueue.MinList
+ss_MultipleLink.SemaphoreRequest
+*ss_Owner.Task
+ss_QueueCount.w
+End NEWTYPE
+
+;/****** Semaphore procure message (for use in V39 Procure/Vacate ****/
+NEWTYPE.SemaphoreMessage
+ssm_Message.Message
+*ssm_Semaphore.SignalSemaphore
+End NEWTYPE
+
+#SM_SHARED=(1)
+#SM_EXCLUSIVE=(0)
+
+;/****** Semaphore (Old Procure/Vacate type, not reliable) ***********/
+
+NEWTYPE.Semaphore;/* Do not use these semaphores! */
+sm_MsgPort.MsgPort
+sm_Bids.w
+End NEWTYPE
+
+;#sm_LockMsg=#mp_SigTask

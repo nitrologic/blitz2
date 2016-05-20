@@ -1,0 +1,112 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/3D/3dshapelib.bb
++#lib3d=86
+#object3dlib=84
+
+!libheader {#object3dlib,0,0,0,0}
+
+!dumtoke{"Object3D","",_toke}
+
+!astatement
+!args {$20}
+!libs {#lib3d,#la0}				;get rot look up table fom lib3d
+!subs {_moveshapes3d,0,0}
+!name {"MoveShapes3d","ShapeList()"}
+
+!libfin
+
+Macro p
+ {SizeOf.part3d\`1}(a5)
+End Macro
+
+NEWTYPE .xyz:x.q:y:z:End NEWTYPE
+
+NEWTYPE .matrix:m.w[9]:End NEWTYPE
+
+NEWTYPE .part3d
+	*sister.part3d
+	*child.part3d
+	*parent.part3d
+	*frame.w
+	rota.xyz:rotv:rot
+	posa.xyz:posv:pos
+	id.matrix
+	veepos.w[3]
+	view.matrix
+	animvals.w[16]
+End NEWTYPE
+
+._moveshapes3d:
+ MOVE.l a0,rvals:MOVEM.l a4-a6,-(a7):MOVE.l d0,a6:MOVE.l-28(a6),a6
+
+ mloop:
+	TST.l(a6):BEQ dunmove:LEA 8(a6),a5:MOVE.l(a6),a6:CLR.l-(a7)
+
+ moveit:
+	TST !p{animvals}:BMI shifts:BNE quicks:LEA !p{view+18},a4:BRA noid
+
+ quicks:
+	MOVE!p{animvals+2},d0:BEQ nothrust1:MOVEM!p{id+12},d3-d5
+	MULS d0,d3:ASR.l #8,d3:ADD.l d3,!p{posv+0}
+	MULS d0,d4:ASR.l #8,d4:ADD.l d4,!p{posv+4}
+	MULS d0,d5:ASR.l #8,d5:ADD.l d5,!p{posv+8}:nothrust1
+	MOVE!p{animvals+4},d0:BEQ nodrag1:MOVEM.l!p{posv-2},d3-d5
+	MULS d0,d3:SWAP d3:ADD d3,d3:SUB d3,!p{posv+0}
+	MULS d0,d4:SWAP d4:ADD d4,d4:SUB d4,!p{posv+4}
+	MULS d0,d5:SWAP d5:ADD d5,d5:SUB d5,!p{posv+8}:nodrag1
+	MOVE!p{animvals+6},d0:BEQ nordrag1:MOVEM.l!p{rotv-2},d3-d5
+	MULS d0,d3:SWAP d3:ADD d3,d3:SUB d3,!p{rotv+0}
+	MULS d0,d4:SWAP d4:ADD d4,d4:SUB d4,!p{rotv+4}
+	MULS d0,d5:SWAP d5:ADD d5,d5:SUB d5,!p{rotv+8}:nordrag1
+	BRA domove
+
+ shifts:
+	MOVE!p{animvals+2},d0:BEQ nothrust2:MOVEM!p{id+12},d3-d5
+	ASL.l d0,d3:ADD.l d3,!p{posv+0}
+	ASL.l d0,d4:ADD.l d4,!p{posv+4}
+	ASL.l d0,d5:ADD.l d5,!p{posv+8}:nothrust2
+	MOVE!p{animvals+4},d0:BEQ nodrag2:MOVEM.l!p{posv},d3-d5
+	ASR.l d0,d3:SUB.l d3,!p{posv+0}
+	ASR.l d0,d4:SUB.l d4,!p{posv+4}
+	ASR.l d0,d5:SUB.l d5,!p{posv+8}:nodrag2
+	MOVE!p{animvals+6},d0:BEQ nordrag2:MOVEM.l!p{rotv},d3-d5
+	ASR.l d0,d3:SUB.l d3,!p{rotv+0}
+	ASR.l d0,d4:SUB.l d4,!p{rotv+4}
+	ASR.l d0,d5:SUB.l d5,!p{rotv+8}:nordrag2
+	BRA domove
+
+ domove:
+	LEA!p{rota},a4:MOVEM.l(a4)+,d0-d2:ADD.ld0,(a4)+:ADD.ld1,(a4)+
+	ADD.ld2,(a4)+:MOVEM.l-12(a4),d0-d2:ADD.ld0,(a4)+:ADD.ld1,(a4)+
+	ADD.ld2,(a4)+:MOVEM.l(a4)+,d0-d2:ADD.ld0,(a4)+:ADD.ld1,(a4)+
+	ADD.ld2,(a4)+:MOVEM.l-12(a4),d0-d2:ADD.ld0,(a4)+:ADD.ld1,(a4)+
+	ADD.ld2,(a4)+
+
+ calcidrot:
+	MOVEM.l!p{rot-2},d0-d2:MOVE.w#4092,d3:AND d3,d0:AND d3,d1
+	AND d3,d2:LEA !p{id},a4:MOVE.l rvals(pc),a3
+	MOVEM 0(a3,d2.w),d4-d5
+	MOVEM 0(a3,d1.w),d2-d3
+	MOVEM 0(a3,d0.w),d0-d1
+	MOVE d5,d6:MULS d3,d6:MOVE.l d6,a0:MOVE d4,d7:MULS d0,d7
+	SWAP d7:ADD d7,d7:MOVE d7,a1:MULS d2,d7:ADD.l d6,d7:SWAP d7
+	ADD d7,d7:MOVE d7,(a4)+
+	MOVE d4,d7:MULS d1,d7:SWAP d7:ADD d7,d7:MOVE d7,(a4)+
+	MOVE d5,d6:MULS d2,d6:MOVE.l d6,a2:MOVE a1,d7:MULS d3,d7
+	SUB.l d6,d7:SWAP d7:ADD d7,d7:MOVE d7,(a4)+
+	MOVE d4,d6:MULS d3,d6:MOVE.l a2,d7:SWAP d7:ADD d7,d7
+	MULS d0,d7:SUB.l d6,d7:SWAP d7:ADD d7,d7:MOVE d7,(a4)+
+	MOVE d5,d7:MULS d1,d7:SWAP d7:ADD d7,d7:MOVE d7,(a4)+
+	MOVE d2,d6:MULS d4,d6:MOVE.l a0,d7:SWAP d7:ADD d7,d7
+	MULS d0,d7:ADD.l d6,d7:SWAP d7:ADD d7,d7:MOVE d7,(a4)+
+	MULS d1,d2:SWAP d2:ADD d2,d2:MOVE d2,(a4)+
+	NEG d0:MOVE d0,(a4)+:MULS d1,d3:SWAP d3:ADD d3,d3:MOVE d3,(a4)+
+
+noid:TST.l 4(a5):BEQ nokids2:MOVE.l a5,-(a7):nokids2
+	MOVE.l (a5),d0:BEQ nobros2:MOVE.l d0,a5:BRA moveit:nobros2
+	MOVE.l (a7)+,d0:BEQ mloop:MOVE.l d0,a5
+
+kids:MOVE.l 4(a5),a5:BRA moveit
+
+dunmove:MOVEM.l (a7)+,a4-a6:RTS
+
+rvals:Dc.l 0

@@ -1,0 +1,405 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/vr/fly/makedata.bb
++;
+; create the object file
+;
+
+If ReadMem(0,"objectfile")
+	Exists 0,?obdata,?enddata-?obdata
+	Dim a.b(?endcoords-?coords)			;create rotcoords (at the bottom)
+	Exists 0,&a(0),?endcoords-?coords
+	CloseFile 0
+EndIf
+
+End
+
+
+obdata
+obdatlen	:Dc.l enddata-mobs
+noofmobs	:Dc.w 3
+noofbobs	:Dc.w 7-1
+
+mobbase	 :Dc.l mobs-mobs
+bobpbase	:Dc.l bobjectpointers-mobs
+bobbase	 :Dc.l bobs-mobs
+obpbase	 :Dc.l objectpointers-mobs
+obbase		:Dc.l objects-mobs
+coordsbase	:Dc.l coords-mobs
+rotcoordsbase :Dc.l rotcoords-mobs
+endobdatap
+
+#RUNX=30000
+#RUNZ=-40000
+
+#STARTX=#RUNX+120
+#STARTY=-250 ;ONGROUND
+#STARTZ=#RUNZ-38000
+
+#TX=200000
+#TZ=172000
+
+mobs
+	:Dc.w myplane-bobs ;pointer to graphic
+mattrib :Dc.w %1000000000000000	;15=comp/AI,14&13=control/AI type
+mjoysteps
+mheadx	:Dc.w 0			;note uses long but only used on AI
+mdpitch :Dc.w 0			;used for non computerobs
+mrudsteps
+mheady	:Dc.w 0
+mdroll	:Dc.w 0
+mdesthrust
+mheadz	:Dc.w 0
+mdyaw :Dc.w 0
+
+mposx :Dc.l STARTX+1000
+mposy :Dc.l STARTY
+mposz :Dc.l STARTZ
+
+mviewoffset :Dc.w 200
+mhighttorot :Dc.w -250
+msmallstall :Dc.w 3000
+mbigstall :Dc.w 1500-3000	;sub small stall to save computer doing it
+mlift :Dc.b 5
+mrotspeed :Dc.b 8		;shift for dpitch in roll, (-2 for dyaw)
+mthrustdamp :Dc.b 4
+mmodeldamp :Dc.b 3
+
+vstart
+mfspeed :Dc.w 0
+mvspeed :Dc.w 0
+mthrust :Dc.w 0
+mbrake	:Dc.b 0
+unused	:Dc.b 0
+				:Dc.w 0
+vend
+
+#vsize=10
+
+mdamage :Dc.w 60
+mrotnoy :Dc.w $4000,0,0,0,$4000,0,0,0,$4000	;rotnoy
+
+mob2	:Dc.w mlight-bobs	;pointer to graphic
+	:Dc.w %1100000000000000
+	:Dc.l 0,0,0	;heading
+	:Dc.l STARTX-1000,STARTY,STARTZ+3000
+	:Dc.w -100
+	:Dc.w -700
+	:Dc.w 1000
+	:Dc.w 500-1000
+	:Dc.b 5			;lift
+	:Dc.b 7			;droll and dpitch in turn
+	:Dc.b 3
+	:Dc.b 4			;thrustdamp
+	:Ds.b #vsize
+	:Dc.w 60
+	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000	;rotnoy
+
+mob3	:Dc.w plane2-bobs	;pointer to graphic
+	:Dc.w %0000000000000000
+	:Dc.l 10000,-300,-45000
+	:Dc.l 0,0,0	;heading
+	:Dc.w 200
+	:Dc.w -250
+	:Dc.b 5			;lift
+	:Dc.b 8			;droll and dpitch in turn
+	:Dc.b 4
+	:Dc.b 3			;thrustdamp
+	:Dc.w 3000
+	:Dc.w 1500-3000
+	:Ds.b #vsize
+	:Dc.w 60
+	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+
+endmob	:Dc.w -1 ;end marker
+
+;noofbobs :dc.w 7-1
+bobjectpointers		 ;these will be reordered by depth sorting
+bobp1 :Dc.w 0,myplane-bobs ;no of surfs(-1),p to surfs
+;bobp2	:dc.w 0,plane1-bobs
+bobp3 :Dc.w 0,plane2-bobs
+bobp4 :Dc.w 0,mybox1-bobs
+bobp5 :Dc.w 0,mybox2-bobs
+bobp6 :Dc.w 0,mybox3-bobs
+bobp7 :Dc.w 0,mybox4-bobs
+	:Dc.w 0,mlight-bobs
+	:Dc.w -1
+
+#PLANESURFS=47
+
+bobs
+myplane :Dc.w PLANESURFS,10,bob1coords-coords,11,shadcoords-coords
+	;no of points to rotate, no. of normals at end (position and rdsys not done)
+battrib :Dc.w %0		 ;bit0 for no shadow, bit 1 for fixed id rotation
+brot	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+bposx :Dc.l 0 ;STARTX
+bposy :Dc.l 0 ;STARTY
+bposz :Dc.l 100
+bcsys :Dc.w 3			;coordsys 30
+	:Dc.w 9,obp1-objectpointers,2,obp10-objectpointers
+brotcx	:Dc.w 0			;rotated and shifted centrefor depth sort
+brotcy	:Dc.w 0
+brotcz	:Dc.w 0
+
+plane1	:Dc.w PLANESURFS,10,bob1coords-coords,11,shadcoords-coords
+	:Dc.w %01
+	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+bob2pos :Dc.l 10000,-300,200 ;-45000
+	:Dc.w 3
+	:Dc.w 9,obp1-objectpointers,2,obp10-objectpointers
+	:Dc.w 0,0,0
+
+plane2	:Dc.w PLANESURFS,10,bob1coords-coords,11,shadcoords-coords
+	:Dc.w %0
+	:Dc.w $4000,0,0,0,$3CB7,$EBD2,$0,$142F,$3CB9
+bob3pos :Dc.l 10000,-300,-45000
+	:Dc.w 3
+	:Dc.w 9,obp1-objectpointers,2,obp10-objectpointers
+	:Dc.w 0,0,0
+
+mybox1	:Dc.w 7+3,3,myboxcoords-coords,0,-1
+mybox1bit :Dc.w %0
+mybox1rot :Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+mybox1pos :Dc.l RUNX+12000,0,RUNZ+0
+	:Dc.w 3
+	:Dc.w 0,obp13-objectpointers,0,0
+	:Dc.w 0,0,0
+
+mybox2	:Dc.w 7+3,3,myboxcoords-coords,0,-1
+	:Dc.w %1
+	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+	:Dc.l TX,0,TZ-10000
+	:Dc.w 2
+	:Dc.w 0,obp13-objectpointers,0,0
+	:Dc.w 0,0,0
+
+mybox3	:Dc.w 7+3,3,myboxcoords-coords,0,-1
+	:Dc.w %0
+	:Dc.w 0,0,$c000,0,$4000,0,$4000,0,0
+	:Dc.l TX+2000,0,TZ+10000
+	:Dc.w 2
+	:Dc.w 0,obp13-objectpointers,0,0
+	:Dc.w 0,0,0
+
+mybox4	:Dc.w 7+3,3,myboxcoords-coords,0,-1
+	:Dc.w %0
+	:Dc.w $3442,0,$Db16,0,$3FFB,0,$24ea,0,$3441
+	:Dc.l TX+17000,0,TZ-10000
+	:Dc.w 2
+	:Dc.w 0,obp13-objectpointers,0,0
+	:Dc.w 0,0,0
+
+mlight	:Dc.w 15+5,5,mlightcoords-coords,0,-1
+	:Dc.w %0
+	:Dc.w $4000,0,0,0,$4000,0,0,0,$4000
+	:Dc.l RUNX,-500,RUNZ
+	:Dc.w 3
+	:Dc.w 2,obp14-objectpointers,0,0
+	:Dc.w 0,0,0
+
+	:Dc.w -2			 ;end marker
+
+objectpointers			;these will be reordered by depth sorting
+obp1	:Dc.w 0,ob1-objects	;no of surfs(-1),p to surfs
+obp2	:Dc.w 0,ob2-objects
+obp3	:Dc.w 0,ob3-objects
+obp4	:Dc.w 0,ob4-objects
+obp5	:Dc.w 0,ob5-objects
+obp55 :Dc.w 0,ob55-objects
+obp6	:Dc.w 0,ob6-objects
+obp7	:Dc.w 0,ob7-objects
+obp8	:Dc.w 0,ob8-objects
+obp9	:Dc.w 0,ob9-objects
+
+obp10 :Dc.w 0,ob10-objects ;shadow
+obp11 :Dc.w 0,ob11-objects
+obp12 :Dc.w 0,ob12-objects
+
+obp13 :Dc.w 0,ob13-objects ;mybox
+
+obp14 :Dc.w 0,ob14-objects ;mlight
+obp15 :Dc.w 0,ob15-objects
+obp16 :Dc.w 0,ob16-objects
+
+objects ;attribs: do hidden but not shade, shown with neg normal, negate normal, ignore normal.
+ob1 :Dc.w 8,3,%0,39*6,1*6,9*6,10*6,2*6,41	;no of edges, no of points, normal, coords, colour
+	:Dc.w 3,%0,42*6,2*6,10*6,11*6,3*6,41 ;*6 so skips the other 2 x/y/z values
+	:Dc.w 3,%10,38*6,3*6,11*6,12*6,4*6,41
+	:Dc.w 3,%10,41*6,4*6,12*6,13*6,5*6,41
+	:Dc.w 3,%10,39*6,5*6,13*6,14*6,6*6,41
+	:Dc.w 3,%10,42*6,6*6,14*6,15*6,7*6,41
+	:Dc.w 3,%0,38*6,7*6,15*6,16*6,8*6,41
+	:Dc.w 3,%0,41*6,8*6,16*6,9*6,1*6,41
+	:Dc.w 7,%10,40*6,1*6,2*6,3*6,4*6,5*6,6*6,7*6,8*6,41
+
+ob2 :Dc.w 0,3,%100,39*6,7*6,17*6,18*6,15*6,49
+ob3 :Dc.w 0,3,%100,39*6,4*6,19*6,20*6,12*6,49
+ob4 :Dc.w 0,3,%100,39*6,23*6,21*6,22*6,24*6,49
+ob5 :Dc.w 0,3,%100,39*6,23*6,25*6,26*6,24*6,49
+ob55	:Dc.w 0,1,%10001,0,24*6,32*6,33
+
+ob6 :Dc.w 8,3,%0,39*6,9*6,27*6,28*6,10*6,57
+	:Dc.w 2,%0,42*6,10*6,11*6,28*6,57
+	:Dc.w 2,%0,43*6,11*6,12*6,28*6,57
+	:Dc.w 3,%0,45*6,12*6,13*6,29*6,28*6,57
+t :Dc.w 2,%0,47*6,13*6,14*6,29*6,57
+	:Dc.w 3,%0,46*6,15*6,14*6,29*6,27*6,57
+	:Dc.w 2,%0,44*6,16*6,15*6,27*6,57
+	:Dc.w 2,%0,41*6,16*6,9*6,27*6,57
+	:Dc.w 2,%0,40*6,27*6,28*6,29*6,57
+
+
+ob7 :Dc.w 0,3,%100,38*6,30*6,31*6,33*6,32*6,49
+ob8 :Dc.w 0,3,%100,39*6,30*6,34*6,35*6,31*6,49
+ob9 :Dc.w 0,3,%100,39*6,30*6,36*6,37*6,31*6,49
+
+ob10	:Dc.w 0,3,%0001,0,48*6,49*6,51*6,50*6,33
+ob11	:Dc.w 0,3,%0001,0,52*6,53*6,55*6,54*6,33
+ob12	:Dc.w 0,3,%0001,0,56*6,57*6,59*6,58*6,33
+
+
+ob13	:Dc.w 4,3,%1010,70*6,60*6,61*6,65*6,64*6,33
+	:Dc.w 3,%1000,68*6,61*6,65*6,66*6,62*6,34
+	:Dc.w 3,%1000,70*6,62*6,66*6,67*6,63*6,35
+	:Dc.w 3,%1010,68*6,63*6,67*6,64*6,60*6,36
+	:Dc.w 3,%1000,69*6,64*6,65*6,66*6,67*6,37
+
+
+ob14	:Dc.w 6,4,%10,87*6,71*6,72*6,73*6,74*6,75*6,57
+	:Dc.w 4,%0,87*6,76*6,77*6,78*6,79*6,80*6,57
+	:Dc.w 3,%10,89*6,71*6,76*6,77*6,72*6,57
+	:Dc.w 3,%0,90*6,72*6,73*6,78*6,77*6,57
+	:Dc.w 3,%0,88*6,73*6,74*6,79*6,78*6,57
+	:Dc.w 3,%0,91*6,74*6,75*6,80*6,79*6,57
+	:Dc.w 3,%10,88*6,75*6,71*6,76*6,80*6,57
+
+ob15	:Dc.w 0,3,%100,88*6,81*6,82*6,84*6,83*6,49
+ob16	:Dc.w 0,3,%100,88*6,83*6,84*6,86*6,85*6,49
+
+
+coords:
+bob1coords
+	:Dc.w 0,0,0
+#M=2
+	:Dc.w -200/M,-500/M,1000/M ;1
+	:Dc.w 200/M,-500/M,1000/M
+	:Dc.w 500/M,-200/M,1000/M
+	:Dc.w 500/M,200/M,1000/M
+
+	:Dc.w 200/M,500/M,1000/M	 ;5
+	:Dc.w -200/M,500/M,1000/M
+	:Dc.w -500/M,200/M,1000/M
+	:Dc.w -500/M,-200/M,1000/M
+
+	:Dc.w -200/M,-500/M,0		;9
+	:Dc.w 200/M,-500/M,0
+	:Dc.w 500/M,-200/M,0
+	:Dc.w 500/M,200/M,0
+
+	:Dc.w 200/M,500/M,0		;13
+	:Dc.w -200/M,500/M,0
+	:Dc.w -500/M,200/M,0
+	:Dc.w -500/M,-200/M,0
+
+	:Dc.w -2500/M,200/M,1000/M ;17
+	:Dc.w -2500/M,200/M,0
+	:Dc.w 2500/M,200/M,1000/M
+	:Dc.w 2500/M,200/M,0
+
+	:Dc.w -3000/M,-1000/M,1000/M ;21
+	:Dc.w -3000/M,-1000/M,0
+	:Dc.w 0,-1000/M,1000/M
+	:Dc.w 0,-1000/M,0
+	:Dc.w 3000/M,-1000/M,1000/M
+	:Dc.w 3000/M,-1000/M,0
+
+	:Dc.w -200/M,-500/M,-2500/M	;27
+	:Dc.w 200/M,-500/M,-2500/M
+	:Dc.w 0,-300/M,-2500/M
+
+	:Dc.w 0,-500/M,-2500/M	 ;30
+	:Dc.w 0,-500/M,-3000/M
+	:Dc.w 0,-1500/M,-2500/M
+	:Dc.w 0,-1500/M,-3000/M
+
+	:Dc.w -1000/M,-500/M,-2500/M ;34
+	:Dc.w -1000/M,-500/M,-3000/M
+	:Dc.w 1000/M,-500/M,-2500/M
+	:Dc.w 1000/M,-500/M,-3000/M
+
+	:Dc.w $4000,0,0		;normals	38
+	:Dc.w 0,$4000,0
+	:Dc.w 0,0,$4000
+	:Dc.w $2d41,$2d41,0
+	:Dc.w -$2d41,$2d41,0
+	:Dc.w -$3f97,0,$7a1
+	:Dc.w $3f97,0,$7a1
+	:Dc.w $D46F,$D46F,$1160
+	:Dc.w -$D46F,$D46F,$1160
+	:Dc.w 0,$C307,$1383
+
+shadcoords:
+	:Dc.w -2600/M,0/M,900/M		;48
+	:Dc.w -2600/M,300/M,0
+	:Dc.w 2600/M,0/M,900/M
+	:Dc.w 2600/M,300/M,0
+
+	:Dc.w -200/M,0/M,-2540/M	 ;52
+	:Dc.w -500/M,300/M,40
+	:Dc.w 200/M,0/M,-2540/M
+	:Dc.w 500/M,300/M,40
+
+	:Dc.w -800/M,0/M,-2500/M	 ;56
+	:Dc.w -800/M,0/M,-2900/M
+	:Dc.w 800/M,0/M,-2500/M
+	:Dc.w 800/M,0/M,-2900/M
+
+
+myboxcoords
+	:Dc.w 1000,0,2500		;60
+	:Dc.w -1000,0,2500
+	:Dc.w -1000,0,-2500
+	:Dc.w 1000,0,-2500
+
+	:Dc.w 1000,-5500,2500		;64
+	:Dc.w -1000,-5500,2500
+	:Dc.w -1000,-5500,-2500
+	:Dc.w 1000,-5500,-2500
+
+	:Dc.w $4000,0,0		;normals 68
+	:Dc.w 0,$4000,0
+	:Dc.w 0,0,$4000
+
+mlightcoords
+	:Dc.w 200,700,1000 ;71
+	:Dc.w 200,500,1000
+	:Dc.w 200,400,800
+	:Dc.w 200,400,-600
+	:Dc.w 200,700,400
+
+	:Dc.w -200,700,1000	;76
+	:Dc.w -200,500,1000
+	:Dc.w -200,400,800
+	:Dc.w -200,400,-600
+	:Dc.w -200,700,400
+
+	:Dc.w -2000,-200,-400	;81
+	:Dc.w -2000,-200,-1000
+	:Dc.w 0,-0,1200
+	:Dc.w 0,-0,-400
+	:Dc.w 2000,-200,-400
+	:Dc.w 2000,-200,-1000
+
+	:Dc.w $4000,0,0		;normals 87
+	:Dc.w 0,$4000,0
+	:Dc.w 0,0,$4000
+
+	:Dc.w 0,$4000,-$4000
+	:Dc.w 0,-$4000,$4000
+
+endcoords
+
+;#cosize=endcoords-coords
+;
+rotcoords
+;	Ds.b	#cosize ; will be the largest out of normal or field coords(*1.5)
+
+enddata

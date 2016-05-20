@@ -1,0 +1,49 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/cash.bb2
++
+Macro n
+
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP
+NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP:NOP ;:NOP:NOP:NOP
+
+End Macro
+
+
+MOVE #$4000,$dff09a ;vb ints off!
+While Joyb(0)=0
+	MOVE #$20,$dff09c
+	loop:BTST #5,$dff01f:BEQ loop
+	;
+	MOVE #255,d0
+	loop2
+	!n
+	DBF d0,loop2
+	;
+	MOVE #0,$dff180
+Wend
+MOVE #$c000,$dff09a
+;
+End
+
+DEFTYPE.l
+
+##[$FE8F]
+MOVE.l d0,-(a7)
+Dc $4e7a,$0002
+MOVE.l d0,cr
+MOVE.l (a7)+,d0
+##[$80BD] d0,temp
+##[$FE90] temp
+
+NPrint Hex$(Peek.l(?cr))
+
+MouseWait
+End
+
+cr:Dc.l 0

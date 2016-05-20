@@ -1,0 +1,91 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/menu.1.bb2
++##[$80B4]
+	NPrint "Fatal Error !"
+	End
+End ##[$80B4]
+##[$80C3];:NoCli
+freest 0;:WBenchToFront_
+
+NPrint Centre$("Terry Jewell's Disk No. 2",58)
+NPrint Centre$("By",58)
+NPrint Centre$("Iain 'The Master' Catterick",58)
+NPrint ""
+NPrint Centre$("Loading Please Wait ...",58)
+
+picture$="miscdata/menu.iff"
+modname$="miscdata/mod.smartman"
+fontname$="fonts:meuro.font"
+fontsize=23
+
+If ##[$BE15](modname$)
+		LoadModule 0,modname$
+	Else
+		NPrint "Module doesn't exist"
+		End
+	EndIf
+PlayModule 0
+
+If ##[$BE15](picture$)
+	ILBMDepth picture$
+	allocst 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
+	localstat 0,0,DecodeILBM-fontsize-1,ILBMViewMode,fontsize+1,$1900,"",2,1:Menus Off
+	casestrcomp 0,picture$
+	FadePalette 0
+	LoadScreen 1,picture$
+Else
+	NPrint picture$+": doesn't exist"
+	End
+EndIf
+
+If ##[$BE15](fontname$)
+	remline 0,fontname$,fontsize
+	WindowFont 0
+Else
+	End
+EndIf
+
+pos=1
+
+text$=String$(" ",28)
+text$+"Welcome to Terry Jewell's Disk No. 2 ...... "
+text$+"On this disk you will find 4 games which I hope you will enjoy ...... "
+text$+"Also I have included another nice tune for you it's called 'SmartMan' ......"
+text$+"To load a program just press the apropreate F key and the rest will "
+text$+"take care of it's self ...... Bye for now ...... Signed THE MASTER '94"
+text$+String$(" ",28)
+
+##[$80BB]
+
+	WLocate 0,1:WColour 0,30: Print Mid$(text$,pos,28)
+	VWait 5
+	If pos>=Len(text$)-28 Then pos=1 Else pos+1
+
+	ev.l=Event
+	If ev=$400
+		i$=Inkey$
+		If RawKey=$45 Then End
+		If RawKey=$50 Then progname$="BrainBall"
+		If RawKey=$51 Then progname$="ACD.exe"
+		If RawKey=$52 Then progname$="DragonTiles"
+		If RawKey=$53 Then progname$="Atoms"
+	Else
+		progname$=""
+	EndIf
+
+##[$80BC] progname$<>""
+
+CloseWindow 0
+CloseScreen 1
+
+DefaultOutput
+
+NPrint Chr$($9b)+"H"+Chr$(9b)+"J"+"Loading program: "+progname$
+
+StopModule
+
+Free Module 0
+Free IntuiFont 0
+
+##[$FE1F] &progname$,0,0
+
+End

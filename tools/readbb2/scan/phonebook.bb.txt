@@ -1,0 +1,207 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PhoneBook/phonebook.bb
++Include "arexxres.bb"
+
+;****************************** functions and statements *******************************************
+Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
+	workstart 1,200,48,0,1,"THANKS!"
+	localstat 1,80,182,480,64,$1002,ti$,1,2,1
+	WLocate 8,6
+	Print Centre$(tex$,57)
+	WLocate 8,16
+	Print Centre$(tex2$,57)
+	WLocate 8,26
+	Print Centre$(tex3$,57)
+
+
+	If ti$="ARexx Error"
+		WLocate 266,26:Print tex4
+	EndIf
+
+	##[$80BB]
+		##[$80BB]
+			wev.l=WaitEvent
+		##[$80BC] EventWindow=1
+
+		If wev=64
+			If GadgetHit=1 Then Goto endfunc
+		EndIf
+
+		If ev=$400
+			i$=Inkey$
+			If i$=Chr$(13) Then Goto endfunc
+		EndIf
+
+	##[$80C7]
+
+endfunc
+	Free localstat 1:Use localstat 0
+End Statement
+;----------------------------------------------------------------------------
+
+
+FindScreen 0
+
+StringText$ On:SetString 1,2:StringText$ 4,2
+StringGadget 0,72,12,0,1,40,239
+StringGadget 0,72,27,0,2,40,239
+StringGadget 0,72,43,0,3,40,239
+StringGadget 0,72,59,0,4,40,239
+
+ButtonGroup 0 :SelectMode1,0
+
+workstart 0,8,75,0,10,"NEW ENTRY"
+workstart 0,97,75,0,11,"I<"
+workstart 0,129,75,0,12,"<<"
+workstart 0,161,75,0,13,">>"
+workstart 0,193,75,0,14,">I"
+workstart 0,226,75,0,15,"DIAL"
+
+SizeLimits 32,32,-1,-1
+localstat 0,0,24,331,91,$100e,"MY PHONE BOOK",1,2,0
+
+WLocate 2,19:WJam 0:WColour 1,0
+Print "Address"
+WLocate 19,50
+Print "Phone"
+WLocate	27,3
+Print "Name"
+
+setuprexx
+
+If ##[$FEA7]("terminus1")		; make sure Terminus is running
+	port.l = CreateMsgPort("PHONEBOOK")
+	If port.l
+		msg.l = CreateRexxMsg(port,"","TERMINUS1")
+
+		If msg.l
+			 NOP
+		Else
+			reqsingle{"Sorry...","Cannot create RexxMsg, no ARexx available","","",0}
+			##[$C620] 0,15:Redraw 0,15
+			DeleteRexxMsg msg.l
+		EndIf
+
+	Else
+		reqsingle{"Sorry...","Cannot create a MsgPort, no ARexx available","","",0}
+		##[$C620]0,15:Redraw 0,15
+	EndIf
+Else
+	reqsingle{"Oh Dear....","Terminus is NOT loaded!!, no ARexx available","","",0}
+	##[$C620] 0,15:Redraw 0,15
+EndIf
+#num = 4
+
+NEWTYPE.person
+ info$[#num]
+End NEWTYPE
+
+Dim ##[$80B3] people.person(200)
+##[$80CA] people()
+
+If WriteMem (0,"phonebook.data")
+	FileInput 0
+	While NOT DosBuffLen(0)
+		If globalloc (people())
+			For i = 0 To #num-1:\info[i]=Edit$(128):Next
+		EndIf
+	Wend
+EndIf
+
+newmem people()
+If NOT globfree (people()) Then globalloc people()
+
+refresh:
+
+	ref = 0
+	For i = 0 To #num -1
+		ButtonId 0,i+1,\info[i]:Redraw 0,i+1
+	Next
+
+	ClearString 0,1:VWait 5
+	##[$80BB]
+		Wait
+		rmsg.l = RexxEvent(port):ev.l=Event
+		If IsRexxMsg(rmsg) Then Gosub handlerexx
+
+		If ev=$200
+			Gosub update
+			If ReadMem (0,"phonebook.data")
+				FileOutput 0
+				newmem people()
+				While globfree (people())
+					For i = 0 To #num-1: NPrint \info[i]:Next
+				Wend
+				CloseFile 0
+			EndIf
+			End
+		EndIf
+
+		If ev = 64
+			If GadgetHit=#num Then ClearString 0,1
+			If GadgetHit<#num Then ClearString 0,GadgetHit+1
+
+			Select GadgetHit
+				Case 10
+					Gosub update: If globalloc(people()) Then ref =1
+				Case 11
+					Gosub update:If locfree(people()) Then ref = 1
+				Case 12
+					Gosub update:If PrevItem(people()) Then ref = 1
+				Case 13
+					Gosub update:If globfree(people()) Then ref = 1
+				Case 14
+					Gosub update:If LastItem(people()) Then ref = 1
+				Case 15
+				 Gosub update
+				 comdata$="":secdat$="":##[$80C8] mydata
+				 Gosub dorexx
+			End Select
+		EndIf
+	##[$80BC] ref = 1
+
+Gosub refresh
+
+update:
+
+For i = 0 To #num-1:\info[i]=GadgetPens(0,i+1):Next:Return
+
+
+;#****************** Terminus BBS dialer arexx handling code ***********
+
+dorexx:
+For i = 1 To 3
+ Read secdat$
+ comdata$=comdata$+secdat$
+Next i
+
+num$=\info[3]
+comdata$=comdata$+" 'SEND "+Chr$(34)+"ATDT"+num$+"^M"+Chr$(34)+"'"
+SendRexxCommand msg,comdata$,#RXCOMM|#RXFF_STRING|#RXFF_RESULT
+
+Activate 0
+Return
+
+handlerexx
+	If GetRexxResult(rmsg,1)
+		tex2$="Error: "+RexxError(GetRexxResult(rmsg,2))
+		tex3$="SEVERITY: "
+		tex4=GetRexxResult(rmsg,1)
+		reqsingle {"ARexx Error","Your Script has terminated with",tex2$,tex3$,tex4}
+		;Return
+		EndIf
+
+		If GetRexxResult(rmsg,2) > 256
+			tex2$=GetResultString(rmsg)
+			reqsingle{"Script Result","Your Script result is",tex2$,"",tex4}
+		EndIf
+
+			ReplyRexxMsg rmsg,0,0,"ALL OK!"
+
+Return
+
+mydata
+
+Data.s "ADDRESS 'TERMINUS1'"
+Data.s " 'CLS'"
+Data.s " 'BEEP'"
+

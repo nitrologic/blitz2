@@ -1,0 +1,37 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Anim/makeanim.bb
++
+allocst 0,0,0,320,512,5,4,"",0,1
+ScreensBitMap 0,0
+
+lmaxlen 1,320,256,5
+
+LoadAnim 0,"endanim1.anim",0
+Use SetCycle 0
+
+fe=0
+p.w=0
+InitAnim 0,1
+
+loop:
+For l=0 To 255
+		Use lmaxlen 0
+		Scroll 0,l,320,1,0,l*2+fe,1
+Next
+Use lmaxlen 1
+fe=1:NextFrame 0
+For l=0 To 255
+		Use lmaxlen 0
+		Scroll 0,l,320,1,0,l*2+fe,1
+Next
+f$="0000"+Str$(p+1)
+f$=Right$(f$,4)
+f$="ram:pic."+f$
+SaveBitmap 0,f$,0
+p+1
+Use lmaxlen 1
+fe=0:NextFrame 0
+
+Goto loop
+
+##[$B38C]
+End

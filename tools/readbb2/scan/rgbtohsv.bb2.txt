@@ -1,0 +1,39 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/rgbtohsv.bb2
++;
+; hmmm, what's this doing here?
+;
+
+;rgbtohsv
+
+max=0:min=255
+If r>max Then max=r
+If g>max Then max=g
+If b>max Then max=b
+
+If r<min Then min=r
+If g<min Then min=g
+If b<min Then min=b
+
+v=max
+
+If max<>0 Then s=(max-min)/max Else s=0
+
+If s=0
+	h=-1 ;undefined
+Else
+	d=max-min
+	If r=max
+		h=(g-b)/d
+	Else
+		If g=max
+			h=2+(b-r)/d
+		Else
+			If b=max
+				h=4+(r-g)/d
+			EndIf
+		EndIf
+	EndIf
+	h=h*60 ;convert hue to degrees
+	If h<0 Then h+360
+EndIf
+

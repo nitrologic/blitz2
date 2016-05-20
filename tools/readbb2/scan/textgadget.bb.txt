@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/TextGadget.bb
++; ; textgadget example; TextGadget 0,8,180,0,1," EXIT "				 ;add to gadgetlist 0TextGadget 0,216,180,0,2," STAY HERE " ;add this too Screen 0,3													 ;open screenWindow 0,0,0,320,200,$100f,"GADGETS!",1,2,0 Repeat														 ;wait for 'EXIT'Until WaitEvent=64 AND GadgetHit=1

@@ -1,0 +1,4348 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/sound_the_space_cadet/SOURCE_CODE.BB2
++;
+;							Sound The Space Cadet
+;				 (C) Copyright 1994 Scott Hayne
+;		 Please DO NOT give out this source code!
+;
+;
+##[$80C3]
+VWait 150
+For lop=1 To 10
+	 ##[$FF89]
+Next
+BLITZ
+DisplayOff
+MOVE.w $0,$dff180
+score.l=0
+Dim score.l(5),score$(5)
+DEFTYPE .q
+#skad=54
+#ANY=0
+#CHIP=2
+#FAST=4
+#CLEAR=$10000
+Dim map(46,23)
+Dim map2(46,23)
+Dim platx(16),platy(16),platyt(16),platyb(16),platdy(16)
+Dim fish(2),fx(5),fy(5),fxa(5),fya(5),ft(5),fa(5),fat(5)
+Dim btype(32),bx(32),by(32),ba(32),bt2(32),bt(16),bm(16),bc(16),bs(16)
+Dim bd(16),bxa(16),bya(16),ba2(16),bd2(16)
+Dim cxs(32),cys(32),cxe(32),cye(32)
+Dim dx(8),dy(8),dp(8),da(8),dat(8),dt1(8)
+Dim colr(31),colg(31),colb(31)
+score(1)=30000
+score$(1)="VTX"
+score(2)=20000
+score$(2)="D.S"
+score(3)=15000
+score$(3)="RDW"
+score(4)=10000
+score$(4)="N.M"
+score(5)=5000
+score$(5)="SKF"
+QAMIGA
+LoadShapes 0,"SOUND.shapes"
+For lop=0 To 63
+	 GetaSprite lop,lop
+	 Free MidHandle lop
+Next
+Free Sprite 49
+Free Sprite 50
+Free Sprite 51
+Free Sprite 52
+Free MidHandle 0
+LoadShapes 0,"OPTIONS.Shapes"
+GetaSprite 65,0
+Free MidHandle 0
+LoadShapes 0,"CURS.Shape"
+GetaSprite 67,0
+Free MidHandle 0
+LoadShapes 0,"BLOCKS.SHAPES"
+LoadShapes 250,"SKATE.SHAPES"
+LoadShapes 249,"EXTRA.SHAPE"
+casestrcomp 0,"BLOCKS.IFF"
+casestrcomp 0,"SOUND.pal",16
+casestrcomp 3,"Options.pal"
+casestrcomp 3,"Options.pal",16
+LoadShapes 256,"FONT.SHAPES"
+LoadSound 0,"GEM.SMP"
+LoadSound 1,"FRUIT.SMP"
+LoadSound 2,"CHUCKFISH.SMP"
+LoadSound 6,"JUMP.SMP"
+LoadSound 7,"EXPLOSION.SMP"
+LoadSound 8,"DIE.SMP"
+LoadSound 9,"NOFISH.SMP"
+LoadSound 10,"BURP.SMP"
+LoadSound 12,"EEE.SMP"
+LoadSound 15,"TERMINATE.SMP"
+;Govener Priorities
+;govoff=0 : ;Turn Governing OFF
+;updwn=1 : ; LADDER Priority
+;leftright=2 : ; LEFT and RIGHT Priority
+pri=0
+Dim stx(150),sty(150),sts(150)
+For lop=0 To 150
+	 stx(lop)=Int(Rnd(320))
+	 sty(lop)=Int(Rnd(182))
+	 sts(lop)=Int(Rnd(3))+1
+Next
+font$="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.!,-: "
+;
+;Title Code Here
+;
+VWait 150
+BLITZ
+.title
+lmaxlen 2,320,256,4
+QAMIGA
+LoadBitMap 2,"TITLE.IFF",2
+casestrcomp 2,"GMD.PAL",16
+VWait 150
+ShapesBitMap 2,1
+BLITZ
+Slice 0,56,320,256,$fff8,4,8,32,320,320
+Use lmaxlen 2
+Use SetCycle 2
+Show 2
+Green 1,15,15,15
+Green 2,13,13,13
+Green 3,11,11,11
+DisplayOn
+bm=1
+fadt=0
+fad=0
+tim=0
+inttim=0
+intgo=0
+;Clear Keyboard Buffer
+Poke.b $BFEC01,0
+key=0
+oldkey=0
+##[$80BB]
+	 inttim+1
+	 VWait
+	 Show bm+1
+	 bm=1-bm
+	 Use lmaxlen bm+1
+	 For lop=0 To 30
+			If Cls(stx(lop)+sts(lop),sty(lop))<=3
+				 Point stx(lop)+sts(lop),sty(lop),0
+			EndIf
+			stx(lop)-sts(lop)
+			If stx(lop)<-5
+				 stx(lop)=320
+			EndIf
+			If Cls(stx(lop),sty(lop))=0
+				 If sts(lop)=1
+						Point stx(lop),sty(lop),3
+				 EndIf
+				 If sts(lop)=2
+						Point stx(lop),sty(lop),2
+				 EndIf
+				 If sts(lop)=3
+						Point stx(lop),sty(lop),1
+				 EndIf
+			EndIf
+	 Next
+	 If Joyb(1) OR inttim>350
+			tim=1000
+			If inttim>350
+				 intgo=1
+			EndIf
+	 EndIf
+	 kt+1
+	 If kt>5
+			key=Peek.b($BFEC01)
+			If key=oldkey-1
+				 key=0
+			End If
+			oldkey=key
+			kt=0
+	 EndIf
+	 If key<>0
+			If key=127
+				 Gosub options
+			EndIf
+	 EndIf
+##[$80BC] tim>100
+tim=0
+##[$80BB]
+VWait
+	 For lop=0 To 15
+			r=Blue(lop)/1.1
+			g=Palette(lop)/1.1
+			b=PalRGB(lop)/1.1
+			If r<0 Then r=0
+			If g<0 Then g=0
+			If b<0 Then b=0
+			Green lop,r,g,b
+	 Next
+	 tim+1
+##[$80BC] tim>30
+BlockScroll
+If intgo=1
+	 Gosub intro
+EndIf
+QAMIGA
+xstart=48
+ystart=256
+;
+;Begin Game Code Here
+;
+level=0
+xx=0
+score=0
+extra=0
+lte=0
+ltx=0
+ltt=0
+ltr=0
+lta=0
+bombs=4-1
+score=0
+lives=3
+platon=0
+jump=0
+bounce=0
+skate=0
+bounceblit=0
+scrto=0
+jew=0
+fruit=0
+hit=0
+col=0
+Statement loadmap{mapname$}
+	 mapname$="LEVELS/"+mapname$+".MAP"
+	 If WriteMem(0,mapname$)
+				Shared map(),map2()
+				FileInput 0
+				For y=0 To 23
+					For x=0 To 46
+							a$=Inkey$
+							map(x,y)=Asc(a$)
+							If map(x,y)=200 Then map(x,y)=0
+					 Next
+				Next
+					 CloseFile 0
+					 DefaultInput
+				Else
+					 ;Error...
+	 End If
+End Statement
+Statement loadbad{badname$}
+	 badname$="LEVELS/"+badname$+".BAD"
+	 Shared btype(),bx(),by(),badies,adr.l,xstart,ystart
+	 size.l=2048
+	 memtype.l=0
+	 adr.l=0
+	 adr.l=##[$FE97](size.l,memtype.l)
+	 If WriteMem(0,badname$)=0
+			;Cant Find File!!
+			End
+	 EndIf
+	 CloseFile 0
+	 If OpenFile(0,badname$) AND adr>=1
+			##[$BE14] 0,adr.l,size.l
+			VWait 10
+			CloseFile 0
+			xstart=Peek.w(adr)
+			ystart=Peek.w(adr+2)
+			lop=4
+			 ##[$80BB]
+				 btype(b)=Peek.w(adr+lop)
+				 bx(b)=Peek.w(adr+lop+2)
+				 by(b)=Peek.w(adr+lop+4)
+				 lop+6
+				 b+1
+			 ##[$80BC] bx(b-1)=0 OR b>=16
+			badies=b-2
+			err=##[$FE99](adr.l,size.l)
+	 Else
+			;Error...
+			End
+	 EndIf
+End Statement
+Statement loadplat{platname$}
+	 platname$="LEVELS/"+platname$+".PLT"
+	 Shared platx(),platy(),platyb(),platyt(),platdy(),noplatforms,adr.l
+	 size.l=1024
+	 memtype.l=0
+	 adr.l=0
+	 adr.l=##[$FE97](size.l,memtype.l)
+	 If WriteMem(0,platname$)=0
+			;Cant Find File!!
+			End
+	 EndIf
+	 CloseFile 0
+	 If OpenFile(0,platname$) AND adr>=1
+			##[$BE14] 0,adr.l,size.l
+			VWait 10
+			CloseFile 0
+			lop=0
+			 ##[$80BB]
+				 platx(b)=Peek.w(adr+lop)
+				 platy(b)=Peek.w(adr+lop+2)
+				 platyt(b)=platy(b)
+				 platyb(b)=Peek.w(adr+lop+4)
+				 platdy(b)=1
+				 lop+6
+				 b+1
+			 ##[$80BC] platx(b-1)=0 OR b>=16
+			 noplatforms=b-2
+			err=##[$FE99](adr.l,size.l)
+	 Else
+			;Error...
+			End
+	 EndIf
+End Statement
+.new
+platon=0
+jump=0
+bounce=0
+skate=0
+bounceblit=0
+scrto=0
+jew=0
+fruit=0
+hit=0
+col=0
+gems=0
+gemt=0
+okkil=0
+omdp=0
+platwason=0
+xa=0
+For f=0 To 2
+	 fish(f)=0
+Next
+f=0
+For p=0 To 8
+	 dx(p)=0
+	 dy(p)=0
+	 da(p)=0
+	 dat(p)=0
+	 dt1(p)=0
+	 dp(p)=0
+Next
+p=0
+;
+;Load Level
+;
+QAMIGA
+level+1
+If level=16
+	 Goto endseq
+EndIf
+loadmap{Str$(level)}
+loadbad{Str$(level)}
+loadplat{Str$(level)}
+casestrcomp 0,"BLOCKS.IFF"
+casestrcomp 0,"SOUND.pal",16
+;
+VWait 150
+BLITZ
+font$="0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.!,-: "
+Statement qprint{tex$,x,y}
+	 Shared font$
+	 For lop=1 To Len(tex$)
+			ch$=Mid$(tex$,lop,1)
+			ch=Instr(font$,ch$)-1
+			longdiv ch+256,x,y+2
+			x+11
+	 Next
+End Statement
+DisplayOff
+MOVE.w $0,$dff180
+FreeSlices
+Free lmaxlen 2
+Free SetCycle 2
+;Score Slice
+Gosub setbadie
+lmaxlen 2,288,16,2
+Slice 1,38,288,16,$fff8,2,8,4,288,288
+Show 2
+Use lmaxlen 2
+Green 0,0,0,0
+Green 1,12,12,12
+Green 2,0,0,0
+Green 3,0,0,0
+Gosub setscorecopper
+BlockScroll 0
+qprint{"1UP:",4,4}
+qprint{Str$(lives),56,4}
+sc1$=Str$(score)
+noo=8-Len(sc1$)
+sc2$=String$("0",noo)
+qprint{sc2$+sc1$,200,4}
+If lte=1
+	 Use lmaxlen 2
+	 longdiv 298,100,6
+EndIf
+If ltx=1
+	 Use lmaxlen 2
+	 longdiv 299,116,6
+EndIf
+If ltt=1
+	 Use lmaxlen 2
+	 longdiv 300,132,6
+EndIf
+If ltr=1
+	 Use lmaxlen 2
+	 longdiv 301,148,6
+EndIf
+If lta=1
+	 Use lmaxlen 2
+	 longdiv 302,164,6
+EndIf
+;Play Area Slice
+lmaxlen 0,736,368,4
+Slice 0,56,288,192,$fff8,4,8,32,736,736
+Show 0
+BlockScroll 1
+For y=0 To 22
+	 For x=0 To 45
+			map2(x,y)=0
+			If map(x,y)>=1
+				 longdiv map(x,y)+89+72,x*16,y*16
+				 If map(x,y)<=10 Then map(x,y)=1
+				 If map(x,y)=29
+						map(x,y)=1
+						map2(x,y)=1
+				 EndIf
+				 If map(x,y)=30
+						map(x,y)=1
+						map2(x,y)=3
+				 EndIf
+				 If map(x,y)>=31 AND map(x,y)<=33
+						;Ice
+						map(x,y)=1
+						map2(x,y)=4
+				 EndIf
+				 If map(x,y)=34
+						;Sticky
+						map(x,y)=1
+						map2(x,y)=5
+				 EndIf
+				 If map(x,y)>=35 AND map(x,y)<=37
+						;Fruit
+						map(x,y)=0
+						map2(x,y)=6
+				 EndIf
+				 If map(x,y)=38
+						;Jewls
+						map(x,y)=0
+						map2(x,y)=7
+						gems+1
+				 EndIf
+				 If map(x,y)=27
+						map(x,y)=1
+						map2(x,y)=2
+				 EndIf
+				 If map(x,y)>=16 Then map(x,y)=0
+				 If map(x,y)=11 Then map(x,y)=3
+				 If map(x,y)=12 Then map(x,y)=1
+				 If map(x,y)=13 Then map(x,y)=1
+				 If map(x,y)=14 Then map(x,y)=1
+				 ;11=3
+				 ;12+=0
+				 ;10-=1
+			EndIf
+	 Next
+Next
+ShapesBitMap 0,1
+AutoCookie On
+Use SetCycle 0
+a1=0
+d1=1
+x1=xstart+16
+y1=ystart
+scx=x1-162
+If scx<0
+	 scx=0
+EndIf
+If scx>432
+	 scx=432
+EndIf
+scy=y1-75
+If scy>176
+	 scy=176
+EndIf
+If scy<0
+	 scy=0
+EndIf
+ska=48
+skate=0
+shld=1
+anit1=0
+expa=48
+xs=0
+;
+Use lmaxlen 1
+BlitMode CookieMode
+BBlitMode CookieMode
+Buffer 1,8384
+Use lmaxlen 0
+Buffer 0,8384
+Gosub setcopper1
+Volume 15,63,63,63,63
+DisplayOn
+.lop
+	 col=0
+	 clop+1
+	 If clop>=4
+			clop=1
+	 EndIf
+	 For lop=0 To badies
+			; Badie 1	-	Walking Badie
+			If btype(lop)=1
+				 Gosub walker
+			EndIf
+			; Badie 2	-	Bee
+			If btype(lop)=2
+				 Gosub bee
+			EndIf
+			;BADIE 3	-	Shooter
+			If btype(lop)=3
+				 Gosub shooter
+			EndIf
+			;BADIE 4	-	Dozzy Bat
+			If btype(lop)=4
+				 Gosub bat
+			EndIf
+			;BADIE 5	-	Roller
+			If btype(lop)=5
+				 Gosub roller
+			EndIf
+			;BADIE 6	-	Runner
+			If btype(lop)=6
+				 Gosub runner
+			EndIf
+			;BADIE 7	-	Lamer
+			If btype(lop)=7
+				 Gosub lamer
+			EndIf
+	 Next
+	 If lte=2
+			extra+1
+			lte=1
+			Use lmaxlen 2
+			longdiv 298,100,6
+			Use lmaxlen bm
+	 EndIf
+	 If ltx=2
+			extra+1
+			ltx=1
+			Use lmaxlen 2
+			longdiv 299,116,6
+			Use lmaxlen bm
+	 EndIf
+	 If ltt=2
+			extra+1
+			ltt=1
+			Use lmaxlen 2
+			longdiv 300,132,6
+			Use lmaxlen bm
+	 EndIf
+	 If ltr=2
+			extra+1
+			ltr=1
+			Use lmaxlen 2
+			longdiv 301,148,6
+			Use lmaxlen bm
+	 EndIf
+	 If lta=2
+			extra+1
+			lta=1
+			Use lmaxlen 2
+			longdiv 302,164,6
+			Use lmaxlen bm
+	 EndIf
+	 If extra>=5 AND extra<10
+			lives+1
+			Use lmaxlen 2
+			qprint{Str$(lives),56,4}
+			Use lmaxlen bm
+			gems=0
+			lte=0
+			ltx=0
+			ltt=0
+			ltr=0
+			lta=0
+			extra=10
+	 EndIf
+	 If scorechg=1
+			scorechg=0
+			Use lmaxlen 2
+			sc1$=Str$(score)
+			noo=8-Len(sc1$)
+			sc2$=String$("0",noo)
+;			qprint{sc2$+sc1$,200,4}
+			Use lmaxlen bm
+	 EndIf
+	 VWait
+	 Show bm,scx,scy
+	 sk=0
+	 If scrto=0
+			ShowSprite a1,x1-scx,(y1-scy)-sk,0
+	 EndIf
+	 If shld=1
+			shldt+1
+			If shldt2>50
+				 shldt=0
+				 shldt2=0
+				 shld=0
+			EndIf
+			If shldt=2
+				 shldt=0
+				 shldt2+1
+				 If scrto=0
+						ShowSprite 48,x1-scx,(y1-scy)-sk,0
+				 EndIf
+			Else
+				 If scrto=0
+						ShowSprite a1,x1-scx,(y1-scy)-sk,0
+				 EndIf
+			EndIf
+	 Else
+			If scrto=0
+				 ShowSprite a1,x1-scx,(y1-scy)-sk,0
+			EndIf
+	 EndIf
+	 If skud=1
+			a1-33
+	 EndIf
+	 If expa<>48
+			ShowSprite expa,expx-scx,expy-scy,4
+	 Else
+			ShowSprite 48,200,100,4
+	 EndIf
+	 bm=1-bm
+	 Use lmaxlen bm
+	 UnBuffer bm
+	 ;Bonus - 116-121
+	 ;Fruit
+	 If fruit=1
+			longdiv 113,frx,fry
+			fruit=0
+	 EndIf
+	 If hit=0
+			m=map2(x1 ASR 4,(y1+31) ASR 4)
+			If m=6
+				 Sound 1,1
+				 map2(x1 ASR 4,(y1+31) ASR 4)=0
+				 frx=Int((Int(x1 ASR 4)) ASL 4)
+				 fry=Int(((Int(y1+31) ASR 4) ASL 4))
+				 fruit=1
+				 score+50
+				 scorechg=1
+			Else
+				 m=map2(x1 ASR 4,(y1+15) ASR 4)
+				 If m=6
+						Sound 1,1
+						map2(x1 ASR 4,(y1+15) ASR 4)=0
+						frx=Int((Int(x1 ASR 4)) ASL 4)
+						fry=Int(((Int(y1+15) ASR 4) ASL 4))
+						fruit=1
+						score+50
+						scorechg=1
+				 EndIf
+			EndIf
+	 EndIf
+	 If fruit=1
+			longdiv 113,frx,fry
+	 EndIf
+	 ;Jewls
+	 If jew=1
+			longdiv 113,jrx,jry
+			jew=0
+	 EndIf
+	 If hit=0
+			m=map2(x1 ASR 4,(y1+31) ASR 4)
+			If m=7
+				 Sound 0,1
+				 map2(x1 ASR 4,(y1+31) ASR 4)=0
+				 jrx=Int((Int(x1 ASR 4)) ASL 4)
+				 jry=Int(((Int(y1+31) ASR 4) ASL 4))
+				 jew=1
+				 gems-1
+				 score+75
+				 scorechg=1
+			Else
+				 m=map2(x1 ASR 4,(y1+15) ASR 4)
+				 If m=7
+						Sound 0,1
+						map2(x1 ASR 4,(y1+15) ASR 4)=0
+						jrx=Int((Int(x1 ASR 4)) ASL 4)
+						jry=Int(((Int(y1+15) ASR 4) ASL 4))
+						jew=1
+						gems-1
+						score+75
+						scorechg=1
+				 EndIf
+			EndIf
+	 EndIf
+	 If jew=1
+			longdiv 113,jrx,jry
+	 EndIf
+	 If hit=0
+			m=map2(x1 ASR 4,(y1+32) ASR 4)
+			If m=1
+				 If gemt=0
+						col=1
+						hit=0
+						shld=0
+				 Else
+						Sound 12,1
+						bbx=(Int(x1 ASR 4)) ASL 4
+						bby=((Int(y1+34) ASR 4) ASL 4)-3
+						bounce=1
+						bbt=0
+						jdis=0
+						ys=-4
+				 EndIf
+			EndIf
+	 EndIf
+	 For lop=0 To 1
+			If dp(lop)=1
+				 longdiv da(lop),dx(lop),dy(lop)
+				 da(lop)+1
+				 If da(lop)>114
+						dp(lop)=0
+				 EndIf
+			EndIf
+	 Next
+	 If bounceblit=1
+			bbt+1
+			bbt2+1
+			If bbt>3
+				 bbt=0
+				 bba+1
+				 If bba>3
+						bba=0
+				 EndIf
+			EndIf
+			If bbt2>40
+				 bounceblit=0
+				 bbt=0
+				 bbt2=0
+				 bba=0
+			EndIf
+			BBlit bm,bba,bbx,bby
+	 EndIf
+	 For lop=0 To badies
+			If ba(lop)>0
+				 If ba2(lop)>0
+						BBlit bm,ba2(lop),bxa(lop),bya(lop)
+				 EndIf
+				 If bx(lop)>scx-16 AND bx(lop)<scx+304
+						If by(lop)>scy-16 AND by(lop)<scy+192
+							 If bx(lop)>0 AND bx(lop)<730
+									If by(lop)>0 AND by(lop)<350
+										 BBlit bm,ba(lop),bx(lop),by(lop)
+									EndIf
+							 EndIf
+						EndIf
+				 EndIf
+			EndIf
+	 Next
+	 If col=1 AND hit=0 AND shld=0 AND gemt=0
+			hit=1
+			anit1=0
+			platon=0
+			ct=0
+			xa=0
+			ys=-4
+			xd=0
+			yd=0
+			jump=0
+			If d1=1
+				 a1=44
+			EndIf
+			If d1=0
+				 a1=46
+			EndIf
+			jump=0
+			bounce=0
+			skate=0
+			Sound 8,1
+	 EndIf
+	 If hit=1
+			If d1=1
+				 x1-4
+				 y1+ys
+				 If ys<0
+						yd-ys
+				 Else
+						yd+ys
+				 EndIf
+				 If yd=20
+						ys=-3
+				 EndIf
+				 If yd=26
+						ys=-2.5
+				 EndIf
+				 If yd=31
+						ys=-2
+				 EndIf
+				 If yd=37
+						ys=-1.5
+				 EndIf
+				 If yd=40
+						ys=-1
+				 EndIf
+				 If yd=42
+						ys=-.5
+				 EndIf
+				 If yd=43
+						ys=1
+				 EndIf
+				 If yd=45
+						ys=2
+				 EndIf
+				 If yd=51
+						ys=3
+				 EndIf
+				 xd+4
+				 If x1-scx<-50
+						scrto=1
+						If lives<=1
+							 Goto died
+						EndIf
+						xthere=0
+						ythere=0
+						there=0
+				 EndIf
+			EndIf
+			If d1=0
+				 x1+4
+				 y1+ys
+				 If ys<0
+						yd-ys
+				 Else
+						yd+ys
+				 EndIf
+				 If yd=20
+						ys=-3
+				 EndIf
+				 If yd=26
+						ys=-2.5
+				 EndIf
+				 If yd=31
+						ys=-2
+				 EndIf
+				 If yd=37
+						ys=-1.5
+				 EndIf
+				 If yd=40
+						ys=-1
+				 EndIf
+				 If yd=42
+						ys=-.5
+				 EndIf
+				 If yd=43
+						ys=1
+				 EndIf
+				 If yd=45
+						ys=2
+				 EndIf
+				 If yd=51
+						ys=3
+				 EndIf
+				 xd+4
+				 If x1-scx>400
+						scrto=1
+						If lives<=1
+							 Goto died
+						EndIf
+						xthere=0
+						ythere=0
+						there=0
+				 EndIf
+			EndIf
+	 EndIf
+	 If scrto=1
+			If scx>=xstart-170 AND scx<=xstart-154
+				 xthere=1
+			EndIf
+			If xthere=0
+				 If scx>xstart-162
+						scx-6
+				 EndIf
+				 If scx<xstart-162
+						scx+6
+				 EndIf
+			EndIf
+			If scy>=ystart-83 AND scy<=ystart-67
+				 ythere=1
+			EndIf
+			If ythere=0
+				 If scy>ystart-75
+						scy-6
+				 EndIf
+				 If scy<ystart-75
+						scy+6
+				 EndIf
+			EndIf
+			If scx<0
+				 scx=0
+				 xthere=1
+			EndIf
+			If scx>432
+				 scx=432
+				 xthere=1
+			EndIf
+			If scy>176
+				 scy=176
+				 ythere=1
+			EndIf
+			If scy<0
+				 scy=0
+				 ythere=1
+			EndIf
+			If xthere=1 AND ythere=1
+				 there=1
+			EndIf
+			If there=1
+				 scrto=0
+				 shld=1
+				 hit=0
+				 a1=0
+				 d1=1
+				 lives-1
+				 Use lmaxlen 2
+				 qprint{Str$(lives),56,4}
+				 Use lmaxlen bm
+				 x1=xstart
+				 y1=ystart
+				 scx=x1-162
+				 If scx<0
+						scx=0
+				 EndIf
+				 If scx>432
+						scx=432
+				 EndIf
+				 scy=y1-75
+				 If scy>176
+						scy=176
+				 EndIf
+				 If scy<0
+						scy=0
+				 EndIf
+				 anit1=0
+				 expa=48
+				 xs=0
+			EndIf
+	 EndIf
+	 ;Player 1
+	 anit1+1
+	 If hit=0
+	 If pri=2
+			lrok=1
+			ladok=1
+	 EndIf
+	 If pri=0
+			lrok=1
+	 EndIf
+	 lr=0
+	 If lrok=1
+			If Joyx(1)=1
+				 d1=1
+				 m=map((x1+8) ASR 4,(y1+31) ASR 4)
+				 m2=map((x1+8) ASR 4,(y1+4) ASR 4)
+				 m3=map((x1+8) ASR 4,(y1+14) ASR 4)
+				 If m=0 OR m=3 AND (m2=0 OR m2=3) AND (m3=0 OR m3=3)
+						If xa<3
+							 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+							 If m2<>4
+									xa+.2
+							 Else
+									xa+.1
+							 EndIf
+						Else
+							 xa=3
+						End If
+						ladok=0
+						lr=1
+						If anit1>=2
+							 a1-1
+							 If a1<10 Then a1=15
+							 If a1>=16 Then a1=15
+							 anit1=0
+						EndIf
+				 EndIf
+			EndIf
+			If Joyx(1)=-1
+				 d1=0
+				 m=map((x1-10) ASR 4,(y1+31) ASR 4)
+				 m2=map((x1-10) ASR 4,(y1+4) ASR 4)
+				 m3=map((x1-10) ASR 4,(y1+14) ASR 4)
+				 If m=0 OR m=3 AND (m2=0 OR m2=3) AND (m3=0 OR m3=3)
+						If xa>-3
+							 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+							 If m2<>4
+									xa-.2
+							 Else
+									xa-.1
+							 EndIf
+						Else
+							 xa=-3
+						End If
+						ladok=0
+						lr=1
+						If anit1>=2
+							 a1+1
+							 If a1>=8 Then a1=2
+							 If a1<2 Then a1=2
+							 anit1=0
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+	 If x1-scx<151 AND scx>0 AND xa<0
+			scx+xa
+	 EndIf
+	 If x1-scx>=172 AND scx<432 AND xa>0
+			scx+xa
+	 EndIf
+	 If y1-scy>80 AND scy<176
+			scy+2
+	 EndIf
+	 If Int(y1)-scy<70 AND scy>0
+			scy-1
+	 EndIf
+	 If Int(y1)-scy<70 AND scy>0
+			scy-1
+	 EndIf
+	 If scy>176
+			scy=176
+	 EndIf
+	 If scy<0
+			scy=0
+	 EndIf
+	 If scx>432
+			scx=432
+	 EndIf
+	 If scx<0
+			scx=0
+	 EndIf
+	 x1+xa
+	 If xa<0 AND xa>-.2 AND Joyx(1)<>-1
+			xa=0
+	 EndIf
+	 If xa>0 AND xa<.2 AND Joyx(1)<>1
+			xa=0
+	 EndIf
+	 If xa<0
+			If Joyx(1)<>-1
+				 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+				 If m2<>4 AND skate=0
+						xa+.2
+				 Else
+						xa+.05
+				 EndIf
+				 If anit1>2
+						anit1=0
+						a1+1
+						If a1>33 OR a1<30
+							 a1=30
+						EndIf
+				 EndIf
+			EndIf
+			m=map((x1-10) ASR 4,(y1+31) ASR 4)
+			m2=map((x1-10) ASR 4,(y1+4) ASR 4)
+			m3=map((x1-10) ASR 4,(y1+14) ASR 4)
+			If m<>0 AND m<>3 OR (m2<>0 AND m2<>3) OR (m3<>0 AND m3<>3)
+				 xa=0
+			EndIf
+	 EndIf
+	 If xa>0
+			If Joyx(1)<>1
+				 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+				 If m2<>4 AND skate=0
+						xa-.2
+				 Else
+						xa-.05
+				 EndIf
+				 If anit1>2
+						anit1=0
+						a1+1
+						If a1>29 OR a1<26
+							 a1=26
+						EndIf
+				 EndIf
+			EndIf
+			m=map((x1+8) ASR 4,(y1+31) ASR 4)
+			m2=map((x1+8) ASR 4,(y1+4) ASR 4)
+			m3=map((x1+8) ASR 4,(y1+14) ASR 4)
+			If m<>0 AND m<>3 OR (m2<>0 AND m2<>3) OR (m3<>0 AND m3<>3)
+				 xa=0
+			EndIf
+	 EndIf
+	 lrok=1
+	 If	pri=1
+			ladok=1
+	 EndIf
+	 If	pri=0
+			ladok=1
+	 EndIf
+	 ;Jelly!
+	 If bounce=1
+			If d1=0
+				 a1=5
+			EndIf
+			If d1=1
+				 a1=12
+			EndIf
+			If jdis=-100
+				 ys=-3
+			EndIf
+			If jdis=-112
+				 ys=-2.5
+			EndIf
+			If jdis=-117
+				 ys=-2
+			EndIf
+			If jdis=-123
+				 ys=-1
+			EndIf
+			If jdis=-126
+				 ys=-.5
+			EndIf
+			m=map(x1 ASR 4,(y1-2) ASR 4)
+			If jdis=-128 OR m=1
+				 ys=.5
+				 jdis=0
+				 bounce=2
+			EndIf
+			y1+ys
+			jdis+ys
+	 EndIf
+	 If bounce=2
+			If d1=0
+				 a1=2
+			EndIf
+			If d1=1
+				 a1=15
+			EndIf
+			If jdis=2
+				 ys=1
+			EndIf
+			If jdis=5
+				 ys=1.5
+			EndIf
+			y1+ys
+			jdis+ys
+			m=map(x1 ASR 4,(y1+32) ASR 4)
+			If m<>0 OR jdis=12.5
+				 ys=0
+				 bounce=0
+				 y1=(Int(y1/2))*2
+			EndIf
+	 EndIf
+	 If Joyy(1)<>-1
+			okjump=1
+	 EndIf
+	 If Joyy(1)=-1 AND jump=0 AND okjump=1
+			m=map((x1) ASR 4,(y1+32) ASR 4)
+			m2=map((x1) ASR 4,(y1+30) ASR 4)
+			If platon=1
+				 m=1
+				 m2=0
+			EndIf
+			If pri=2 AND m3=0 AND m=1
+				 m2=0
+			EndIf
+			m3=map2(x1 ASR 4,(y1+32) ASR 4)
+			If m3<>5
+				 If (m=1 AND m2=0) OR (m=3 AND m2=0)
+						jump=1
+						jdis=0
+						ys=-2
+						okjump=0
+				 EndIf
+			EndIf
+	 EndIf
+	 If jump=1
+			If d1=0
+				 a1=5
+			EndIf
+			If d1=1
+				 a1=12
+			EndIf
+			If jdis=-2
+				 Sound 6,1
+				 okchuk=0
+			EndIf
+			If jdis=-6
+				 ys=-3
+			EndIf
+			If jdis=-39
+				 ys=-2.5
+			EndIf
+			If jdis=-44
+				 ys=-1.5
+			EndIf
+			If jdis=-50
+				 ys=-1
+			EndIf
+			m=map(x1 ASR 4,(y1-2) ASR 4)
+			If jdis=-54 OR m=1
+				 ys=.5
+				 jdis=0
+				 jump=2
+			EndIf
+			y1+ys
+			jdis+ys
+	 EndIf
+	 If jump=2
+			If d1=0
+				 a1=2
+			EndIf
+			If d1=1
+				 a1=15
+			EndIf
+			If jdis=2
+				 ys=1
+			EndIf
+			If jdis=5
+				 ys=1.5
+			EndIf
+			If jdis=8
+				 ys=2.5
+			EndIf
+			y1+ys
+			jdis+ys
+			m=map(x1 ASR 4,(y1+32) ASR 4)
+			If m<>0 OR jdis=15.5
+				 ys=0
+				 jump=0
+				 y1=(Int(y1/2))*2
+			EndIf
+	 EndIf
+	 If jump=0 AND bounce=0
+	 If ladok=1 AND platon=0
+			If Joyy(1)=-1
+				 m=map((x1) ASR 4,(y1+31) ASR 4)
+				 m2=map((x1) ASR 4,(y1+30) ASR 4)
+				 If m=3 AND m2=3
+						If lr=0 OR	pri=1
+							 x1=((Int(x1 ASR 4)) ASL 4)+8
+							 xa=0
+						EndIf
+						y1-2
+						If pri<>2
+							 okjump=0
+						EndIf
+						If anit1>=4
+							 a1+1
+							 If a1>=20 Then a1=16
+							 If a1<16 Then a1=16
+							 anit1=0
+						EndIf
+						If	pri=1
+							 lrok=0
+						EndIf
+				 Else
+						If m=3 AND m2=0
+						If lr=0 OR	pri=1
+									x1=((Int(x1 ASR 4)) ASL 4)+8
+							 xa=0
+							 EndIf
+							 y1-1
+							 If pri<>2
+									okjump=0
+							 EndIf
+							 If anit1>=4
+									a1+1
+									If a1>=20 Then a1=16
+									If a1<16 Then a1=16
+									anit1=0
+							 EndIf
+							 If pri=1
+									lrok=0
+							 EndIf
+						EndIf
+				 EndIf
+			EndIf
+			If Joyy(1)=1
+				 m=map((x1) ASR 4,(y1+31) ASR 4)
+				 m2=map((x1) ASR 4,(y1+32) ASR 4)
+				 If m=3 AND m2=3
+						If lr=0 OR	pri=1
+							 x1=((Int(x1 ASR 4)) ASL 4)+8
+							 xa=0
+						EndIf
+						y1+2
+						If pri<>2
+							 okjump=0
+						EndIf
+						If anit1>=4
+							 a1+1
+							 If a1>=20 Then a1=16
+							 If a1<16 Then a1=16
+							 anit1=0
+						EndIf
+						If	pri=1
+							 lrok=0
+						EndIf
+				 EndIf
+				 If m=0 AND m2=3
+						If lr=0 OR	pri=1
+							 x1=((Int(x1 ASR 4)) ASL 4)+8
+							 xa=0
+						EndIf
+						 y1+2
+						If pri<>2
+							 okjump=0
+						EndIf
+						If anit1>=4
+							 a1+1
+							 If a1>=20 Then a1=16
+							 If a1<16 Then a1=16
+							 anit1=0
+						EndIf
+						If	pri=1
+							 lrok=0
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+	 If anit1>=4
+			If d1=0
+				 If anit<10
+						a1=0
+				 EndIf
+				 If anit1>=180
+						a1=34
+				 EndIf
+				 If anit1>=182
+						a1=35
+				 EndIf
+				 If anit1>=184
+						a1=36
+				 EndIf
+				 If anit1>=186
+						a1=37
+				 EndIf
+				 If anit1>=188
+						a1=36
+				 EndIf
+				 If anit1>=190
+						a1=35
+				 EndIf
+				 If anit1>=192
+						a1=34
+						anit1=0
+				 EndIf
+			Else
+				 If anit<10
+						a1=8
+				 EndIf
+				 If anit1>=180
+						a1=38
+				 EndIf
+				 If anit1>=182
+						a1=39
+				 EndIf
+				 If anit1>=184
+						a1=40
+				 EndIf
+				 If anit1>=186
+						a1=41
+				 EndIf
+				 If anit1>=188
+						a1=40
+				 EndIf
+				 If anit1>=190
+						a1=39
+				 EndIf
+				 If anit1>=192
+						a1=38
+						anit1=0
+				 EndIf
+			EndIf
+	 EndIf
+	 If platon=0
+			m=map((x1) ASR 4,(y1+32) ASR 4)
+			If m=0
+				 y1+2
+				 m=map((x1) ASR 4,(y1+34) ASR 4)
+				 If m=0
+						y1+1
+				 EndIf
+				 If d1=0 Then a1=2 Else a1=15
+				 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+				 If m2=2
+						Sound 6,4
+						bbx=(Int(x1 ASR 4)) ASL 4
+						bby=((Int(y1+34) ASR 4) ASL 4)-3
+						bounce=1
+						bounceblit=1
+						bbt=0
+						jdis=0
+						ys=-4
+				 EndIf
+			EndIf
+			m=0
+			If m=3
+				 If d1=1
+						m=map((x1+4) ASR 4,(y1+32) ASR 4)
+						If m=0
+							 y1+2
+							 m=map((x1+4) ASR 4,(y1+34) ASR 4)
+							 If m=0
+									y1+1
+							 EndIf
+							 If d1=0 Then a1=2 Else a1=15
+							 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+							 If m2=2
+									bbx=(Int(x1 ASR 4)) ASL 4
+									bby=((Int(y1+34) ASR 4) ASL 4)-3
+									bounce=1
+									bounceblit=1
+									bbt=0
+									jdis=0
+									ys=-4
+							 EndIf
+						EndIf
+				 Else
+						m=map((x1-4) ASR 4,(y1+32) ASR 4)
+						If m=0
+							 y1+2
+							 m=map((x1-4) ASR 4,(y1+34) ASR 4)
+							 If m=0
+									y1+1
+							 EndIf
+							 If d1=0 Then a1=2 Else a1=15
+							 m2=map2((x1) ASR 4,(y1+32) ASR 4)
+							 If m2=2
+									bbx=(Int(x1 ASR 4)) ASL 4
+									bby=((Int(y1+34) ASR 4) ASL 4)-3
+									bounce=1
+									bounceblit=1
+									bbt=0
+									jdis=0
+									ys=-4
+							 EndIf
+						EndIf
+				 EndIf
+			EndIf
+				 m=map((x1) ASR 4,(y1+31) ASR 4)
+				 m2=map((x1) ASR 4,(y1+30) ASR 4)
+				 If m<>0 AND m<>3 OR (m=3 AND m2=0)
+							y1-1
+				 EndIf
+				 m=map((x1) ASR 4,(y1+31) ASR 4)
+				 If m=1
+						##[$80BB]
+							y1-1
+							m=map((x1) ASR 4,(y1+31) ASR 4)
+						##[$80BC] m<>1
+				 EndIf
+			EndIf
+			EndIf
+	 EndIf
+	 ;Dissolving Platforms
+	 If hit=0
+	 m=map2(x1 ASR 4,(y1+32) ASR 4)
+	 If m=3
+			If dp(p)=0
+				 ondp=1
+				 dx(p)=Int((Int(x1 ASR 4)) ASL 4)
+				 dy(p)=Int(((Int(y1+32) ASR 4) ASL 4))
+				 da(p)=107 ; 113
+				 dat(p)+1
+				 dt1(p)=0
+				 dp(p)=2
+				 px=Int(x1 ASR 4)
+				 okkil=0
+			EndIf
+	 Else
+			If ondp=1
+				 okkil=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If Int(x1 ASR 4)<>px
+			okkil=1
+	 EndIf
+	 If dp(p)=2 AND ondp=1 AND okkil=1
+			dp(p)=1
+			dat(p)=0
+			dx=dx(p) ASR 4
+			dy=dy(p) ASR 4
+			p+1
+			map(dx,dy)=0
+			map2(dx,dy)=0
+			If p>1
+				 p=0
+			EndIf
+	 EndIf
+	 ;Moveing Platforms
+	 platon=0
+	 platwason=platon
+	 For plat=0 To noplatforms
+			;Y
+			If platdy(plat)<>0
+				 platy(plat)+platdy(plat)
+				 If platy(plat)=platyt(plat)
+						platdy(plat)=1
+				 EndIf
+				 If platy(plat)=platyb(plat)
+						platdy(plat)=-1
+				 EndIf
+			EndIf
+			;Check Col
+			If jump<>1 AND hit=0 AND bounce=0
+				 If y1+32>platy(plat)-2 AND y1+32<platy(plat)+8
+						If x1>(platx(plat)-2) AND x1<platx(plat)+22
+							 y1=platy(plat)-32
+							 platon=1
+						EndIf
+				 EndIf
+			EndIf
+			If platx(plat)>scx-16 AND platx(plat)<scx+304
+				 If platy(plat)>scy-16 AND platy(plat)<scy+192
+						BBlit bm,4,platx(plat),platy(plat)
+				 EndIf
+			EndIf
+	 Next
+	 If Joyb(1)<>1
+			okf=1
+	 EndIf
+	 ft+1
+	 If ft>=100
+			ft=18
+	 EndIf
+	 okchuk+1
+	 If Joyb(1)=1 AND ft>10 AND hit=0 AND okf=1
+			okf=0
+			ft=0
+			fs+1
+			If okchuk>10
+				 Sound 2,2
+			EndIf
+			If fs>=3 Then fs=0
+			fish(fs)=1
+			ft(fs)=0
+			If d1=0
+				 fx(fs)=x1-14
+				 fxa(fs)=-4
+			Else
+				 fx(fs)=x1
+				 fxa(fs)=4
+			EndIf
+			fy(fs)=y1+8
+			fya(fs)=3
+			fa(fs)=6
+	 EndIf
+	 For f=0 To 2
+			If fish(f)=1
+				 BBlit bm,fa(f),fx(f),fy(f)
+				 fat(f)+1
+				 If fat(f)>2
+						fat(f)=0
+						If fxa(f)<0
+							 fa(f)-1
+							 If fa(f)=5
+									fa(f)=13
+							 EndIf
+						Else
+							 fa(f)+1
+							 If fa(f)=14
+									fa(f)=6
+							 EndIf
+						EndIf
+				 EndIf
+				 If fxa(f)<0
+						m=map(fx(f) ASR 4,(fy(f)+8) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 Goto nxt1
+						EndIf
+				 Else
+						m=map((fx(f)+15) ASR 4,(fy(f)+8) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 Goto nxt1
+						EndIf
+				 EndIf
+				 If fya(f)>0
+						m=map((fx(f)+8) ASR 4,(fy(f)+16) ASR 4)
+						If m<>0 AND m<>3
+							 fya(f)*-1
+							 Goto nxt1
+						EndIf
+				 Else
+						m=map((fx(f)+8) ASR 4,(fy(f)) ASR 4)
+						If m<>0 AND m<>3
+							 fya(f)*-1
+							 Goto nxt1
+						EndIf
+				 EndIf
+				 .nxt1
+				 If fxa(f)<0 AND fya(f)<0
+						m=map(fx(f) ASR 4,(fy(f)) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 fya(f)*-1
+							 Goto nxt
+						EndIf
+				 EndIf
+				 If fxa(f)>0 AND fya(f)<0
+						m=map((fx(f)+15) ASR 4,(fy(f)) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 fya(f)*-1
+							 Goto nxt
+						EndIf
+				 EndIf
+				 If fxa(f)>0 AND fya(f)>0
+						m=map((fx(f)+15) ASR 4,(fy(f)+16) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 fya(f)*-1
+							 Goto nxt
+						EndIf
+				 EndIf
+				 If fxa(f)<0 AND fya(f)>0
+						m=map((fx(f)) ASR 4,(fy(f)+16) ASR 4)
+						If m<>0 AND m<>3
+							 fxa(f)*-1
+							 fya(f)*-1
+							 Goto nxt
+						EndIf
+				 EndIf
+				 .nxt
+				 fx(f)+fxa(f)
+				 fy(f)+fya(f)
+				 ft(f)+1
+				 If ft(f)>30
+						Sound 7,8
+						fish(f)=0
+						fa(f)=14
+						ft(f)=0
+						expon=1
+						expa=20
+						expx=fx(f)+8
+						expy=fy(f)-8
+				 EndIf
+			EndIf
+	 Next
+	 If expon=1
+			expt+1
+			If expt>2
+				 expa+1
+				 expt=0
+				 If expa>25
+						expon=0
+						expa=48
+						expt=0
+				 EndIf
+			EndIf
+	 Else
+			expa=48
+	 EndIf
+	 If platon=1
+			If y1-scy>80 AND scy<176
+				 scy+1
+			EndIf
+			If y1-scy<70 AND scy>0
+				 scy-1
+			EndIf
+	 EndIf
+	 If Joyb(1)=2
+			AMIGA
+			NPrint "Ok..."
+			NPrint "BADIES:",badies
+			NPrint "ADR:";adr
+;			m=map((x1) ASR 4,(y1+32) ASR 4)
+;			NPrint "BLOCK:",m
+			NPrint "Mouse Button..."
+			MouseWait
+			End
+			BLITZ
+	 EndIf
+	 If gems<=0 AND gemt=0
+			gemt=1
+	 EndIf
+	 If gemt>0
+			gemt+1
+			If gemt>80
+				 x=0
+				 y=0
+				 ha=61
+				 hx=350
+				 hy=-70
+				 VWait
+				 For lop=0 To 10
+						ShowSprite 48,200,100,4
+				 Next
+				 If d1=0
+						ShowSprite 0,x1-scx,y1-scy,0
+				 Else
+						ShowSprite 8,x1-scx,y1-scy,0
+				 EndIf
+				 Use lmaxlen 0
+				 Show 0,scx,scy
+				 ##[$80BB]
+						VWait
+						Box scx+x,scy+y,scx+288-x,scy+192-y,0
+						Box scx+x+1,scy+y+1,scx+288-x-1,scy+192-y-1,0
+						x+2
+						y+2
+				 ##[$80BC] y>100
+				 VWait 10
+				 If extra=10
+						longdiv 249,scx+65,scy+70
+						extra=0
+				 EndIf
+				 ShowSprite ha,hx,hy,4
+				 dnex=0
+				 dney=0
+				 ##[$80BB]
+						VWait
+						ShowSprite ha,hx,hy,4
+						If x1-scx<hx-5
+							 hx-2
+						Else
+							 dnex=1
+						EndIf
+						If y1-scy>hy+25
+							 hy+2
+						Else
+							 dney=1
+						EndIf
+						anit+1
+						If anit>1
+							 anit=0
+							 ha+1
+							 If ha>63
+									ha=61
+							 EndIf
+						EndIf
+				 ##[$80BC] dney=1 AND dnex=1
+				 tim=0
+				 tim2=0
+				 If d1=0
+						d=1
+						a1=57
+						##[$80BB]
+							 VWait
+							 tim+1
+							 tim2+1
+							 If tim2>3
+									ShowSprite a1,x1-scx,y1-scy,0
+									If d=1
+										 a1+1
+										 If a1>60
+												d=2
+										 EndIf
+									EndIf
+									If d=2
+										 a1-1
+										 If a1<57
+												d=3
+												a1=0
+												ShowSprite 0,x1-scx,y1-scy,0
+										 EndIf
+									EndIf
+									tim2=0
+							 EndIf
+							 anit+1
+							 If anit>1
+									anit=0
+									ha+1
+									If ha>63
+										 ha=61
+									EndIf
+							 EndIf
+							 ShowSprite ha,hx,hy,4
+						##[$80BC] tim>40
+				 Else
+						d=1
+						a1=53
+						##[$80BB]
+							 VWait
+							 tim+1
+							 tim2+1
+							 If tim2>3
+									ShowSprite a1,x1-scx,y1-scy,0
+									If d=1
+										 a1+1
+										 If a1>56
+												d=2
+										 EndIf
+									EndIf
+									If d=2
+										 a1-1
+										 If a1<53
+												d=3
+												a1=8
+												ShowSprite 8,x1-scx,y1-scy,0
+										 EndIf
+									EndIf
+									tim2=0
+							 EndIf
+							 anit+1
+							 If anit>1
+									anit=0
+									ha+1
+									If ha>63
+										 ha=61
+									EndIf
+							 EndIf
+							 ShowSprite ha,hx,hy,4
+						##[$80BC] tim>40
+				 EndIf
+				 For lop=0 To 20
+						VWait
+						anit+1
+						If anit>1
+							 anit=0
+							 ha+1
+							 If ha>63
+									ha=61
+							 EndIf
+						EndIf
+						ShowSprite ha,hx,hy,4
+				 Next
+				 dnex=0
+				 dney=0
+				 ##[$80BB]
+						VWait
+						ShowSprite ha,hx,hy,4
+						ShowSprite a1,x1-scx,y1-scy,0
+						If hx>-40
+							 hx-2
+							 x1-2
+						Else
+							 dnex=1
+						EndIf
+						If hy>-30
+							 hy-1
+							 y1-1
+						Else
+							 dney=1
+						EndIf
+						anit+1
+						If anit>1
+							 anit=0
+							 ha+1
+							 If ha>63
+									ha=61
+							 EndIf
+						EndIf
+				 ##[$80BC] dney=1 AND dnex=1
+				 fadt=0
+				 tim=0
+				 v=63
+				 ##[$80BB]
+						VWait
+						Volume 15,v,v,v,v
+						v-1
+				 ##[$80BC] v<=0
+				 Sound 15,15
+				 DisplayOff
+				 Goto new
+			EndIf
+	 EndIf
+;Re-Loop
+Goto lop
+;
+.died
+DisplayOff
+MOVE.w $0,$dff180
+FreeSlices
+Free lmaxlen 0
+Free lmaxlen 1
+lmaxlen 2,320,256,4
+QAMIGA
+LoadBitMap 2,"GAMEOVER.IFF",2
+VWait 150
+BLITZ
+Slice 0,56,320,256,$fff8,4,8,16,320,320
+Use lmaxlen 2
+Use SetCycle 2
+Show 2
+DisplayOn
+VWait 150
+tim=0
+##[$80BB]
+	 VWait
+	 For lop=0 To 15
+			r=Blue(lop)/1.1
+			g=Palette(lop)/1.1
+			b=PalRGB(lop)/1.1
+			If r<0 Then r=0
+			If g<0 Then g=0
+			If b<0 Then b=0
+			Green lop,r,g,b
+	 Next
+	 tim+1
+##[$80BC] tim>30
+Gosub chkscore
+DisplayOff
+MOVE.w $0,$dff180
+FreeSlices
+Free lmaxlen 2
+Goto title
+End
+.setcopper1
+	 r=0
+	 g=7
+	 b=15
+	 pos=2
+	 For y=0 To 180
+			ColSplit 1,r,g,b,y
+			t+1
+			If t=8 AND pos=4
+				 t=0
+				 g+1
+				 If g=15
+						pos=5
+				 EndIf
+			EndIf
+			If t=4 AND pos=3
+				 t=0
+				 b-1
+				 If b=0
+						pos=4
+				 EndIf
+			EndIf
+			If t=4 AND pos=2
+				 t=0
+				 r+1
+				 If r=15
+						pos=3
+				 EndIf
+			EndIf
+	 Next
+Return
+.setcopper2
+	 r=15
+	 g=15
+	 b=0
+	 pos=0
+	 t=0
+	 For y=0 To 190
+			ColSplit 1,r,g,b,y
+			t+1
+			If t=1 AND pos=5
+				 t=0
+				 r+2
+				 If r>=14
+						r+1
+						pos=0
+				 EndIf
+			EndIf
+			If t=1 AND pos=4
+				 t=0
+				 b-1
+				 If b<=0
+						pos=5
+				 EndIf
+			EndIf
+			If t=1 AND pos=3
+				 t=0
+				 g+1
+				 If g>=15
+						pos=4
+				 EndIf
+			EndIf
+			If t=1 AND pos=2
+				 t=0
+				 r-1
+				 If r<=0
+						pos=3
+				 EndIf
+			EndIf
+			If t=1 AND pos=1
+				 t=0
+				 b+1
+				 If b>=15
+						pos=2
+				 EndIf
+			EndIf
+			If t=1 AND pos=0
+				 t=0
+				 g-1
+				 If g<=0
+						pos=1
+				 EndIf
+			EndIf
+	 Next
+Return
+.setcopper3
+	 r=0
+	 g=0
+	 b=9
+	 pos=0
+	 t=0
+	 For y=0 To 190
+			ColSplit 1,r,g,b,y
+			t+1
+			If t=14 AND pos=0
+				 t=0
+				 b-1
+				 If b<=0
+						pos=1
+				 EndIf
+			EndIf
+			If t=8 AND pos=1
+				 t=0
+				 g+1
+				 If g>=15
+						pos=2
+				 EndIf
+			EndIf
+	 Next
+Return
+.scorecopper
+	 r=15
+	 g=15
+	 b=0
+	 pos=0
+	 For y=0 To 32
+			ColSplit 1,r,g,b,y
+			t+1
+			If t=1 AND pos=5
+				 t=0
+				 r+2
+				 If r>=14
+						r+1
+						pos=0
+				 EndIf
+			EndIf
+			If t=1 AND pos=4
+				 t=0
+				 b-1
+				 If b<=0
+						pos=5
+				 EndIf
+			EndIf
+			If t=1 AND pos=3
+				 t=0
+				 g+1
+				 If g>=15
+						pos=4
+				 EndIf
+			EndIf
+			If t=1 AND pos=2
+				 t=0
+				 r-1
+				 If r<=0
+						pos=3
+				 EndIf
+			EndIf
+			If t=1 AND pos=1
+				 t=0
+				 b+1
+				 If b>=15
+						pos=2
+				 EndIf
+			EndIf
+			If t=1 AND pos=0
+				 t=0
+				 g-1
+				 If g<=0
+						pos=1
+				 EndIf
+			EndIf
+	 Next
+Return
+.setscorecopper
+	 r=15
+	 g=15
+	 b=0
+	 pos=0
+	 For y=0 To 16
+			ColSplit 1,r,g,b,y
+			t+1
+			If t=1 AND pos=5
+				 t=0
+				 r+2
+				 If r>=14
+						r+1
+						pos=0
+				 EndIf
+			EndIf
+			If t=1 AND pos=4
+				 t=0
+				 b-1
+				 If b<=0
+						pos=5
+				 EndIf
+			EndIf
+			If t=1 AND pos=3
+				 t=0
+				 g+1
+				 If g>=15
+						pos=4
+				 EndIf
+			EndIf
+			If t=1 AND pos=2
+				 t=0
+				 r-1
+				 If r<=0
+						pos=3
+				 EndIf
+			EndIf
+			If t=1 AND pos=1
+				 t=0
+				 b+1
+				 If b>=15
+						pos=2
+				 EndIf
+			EndIf
+			If t=1 AND pos=0
+				 t=0
+				 g-1
+				 If g<=0
+						pos=1
+				 EndIf
+			EndIf
+	 Next
+	 r=0
+	 g=15
+	 b=0
+	 pos=0
+	 For y=0 To 32
+			ColSplit 3,r,g,b,y
+			t+1
+			If t=2 AND pos=0
+				 t=0
+				 b+1
+				 g-1
+				 If g=0
+						pos=1
+				 EndIf
+			EndIf
+	 Next
+Return
+.walker
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=1
+	 If PColl(x1-10,y1+3,18,29,bx(lop)+1,by(lop)+1,12,11)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,28,bx(lop)+1,by(lop)+1,12,11)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+						If x1>bx(lop)-64 AND x1<bx(lop)+64
+							 If y1>by(lop)-64 AND y1<by(lop)+64
+									bm(lop)=2
+									bs(lop)=2
+									bc(lop)=16
+									If x1>bx(lop)
+										 bd(lop)=1
+									Else
+										 bd(lop)=2
+									EndIf
+									Goto endmove1
+							 EndIf
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+						bc(lop)=0
+						If x1>bx(lop)-64 AND x1<bx(lop)+64
+							 If y1>by(lop)-64 AND y1<by(lop)+64
+									bm(lop)=2
+									bs(lop)=2
+									bc(lop)=16
+									If x1>bx(lop)
+										 bd(lop)=1
+									Else
+										 bd(lop)=2
+									EndIf
+									Goto endmove1
+							 EndIf
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 Return
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+	 ; NUTTER BADIE 1
+	 .endmove1
+	 If bm(lop)=2
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+					 If y1+17>by(lop)
+							ypri=1
+					 Else
+							ypri=2
+					 EndIf
+					 If y1+16=by(lop)
+							ypri=0
+					 EndIf
+					 If x1<bx(lop)-64 OR x1>bx(lop)+64
+							 bc(lop)=16
+							 bm(lop)=1
+							 bs(lop)=1
+							 Return
+						EndIf
+						If y1<by(lop)-64 OR y1>by(lop)+64
+								bc(lop)=16
+								bm(lop)=1
+								bs(lop)=1
+								Return
+						EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+						If m=3 AND ypri=1
+							 bd(lop)=3
+							 Return
+						EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m=3 AND ypri=2
+							 bd(lop)=4
+							 Return
+						EndIf
+				 EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 Return
+						EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If y1+17>by(lop)
+							ypri=1
+					 Else
+							ypri=2
+					 EndIf
+					 If y1+16=by(lop)
+							ypri=0
+					 EndIf
+					 If x1<bx(lop)-64 OR x1>bx(lop)+64
+							 bc(lop)=16
+							 bm(lop)=1
+							 bs(lop)=1
+							 Return
+						EndIf
+						If y1<by(lop)-64 OR y1>by(lop)+64
+							 bc(lop)=16
+							 bm(lop)=1
+							 bs(lop)=1
+							 Return
+						EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+						If m=3 AND ypri=1
+							 bd(lop)=3
+							 Return
+						EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m=3 AND ypri=2
+							 bd(lop)=4
+							 Return
+						EndIf
+				 EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 Return
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 Return
+						EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=3
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If x1<bx(lop)
+							xpri=1
+						Else
+							xpri=2
+					 EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+						If m<>3
+							 If xpri=1
+									m=map((bx(lop)-1) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=2
+										 Return
+									Else
+										 bd(lop)=1
+										 Return
+									EndIf
+							 EndIf
+							 If xpri=2
+									m=map((bx(lop)+16) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=1
+										 Return
+									Else
+										 bd(lop)=2
+										 Return
+									EndIf
+							 EndIf
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=1
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=2
+							 bd(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 by(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=4
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If x1<bx(lop)
+							xpri=1
+						Else
+							xpri=2
+					 EndIf
+					 m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3
+							 If xpri=1
+									m=map((bx(lop)-1) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=2
+										 Return
+									Else
+										 bd(lop)=1
+										 Return
+									EndIf
+							 EndIf
+							 If xpri=2
+									m=map((bx(lop)+16) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=1
+										 Return
+									Else
+										 bd(lop)=2
+										 Return
+									EndIf
+							 EndIf
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=1
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=2
+							 bd(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 by(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>38
+							 ba(lop)=37
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+Return
+.bee
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=1
+	 If PColl(x1-10,y1+3,18,29,bx(lop),by(lop)+4,15,11)
+			If bm(lop)<>5
+				col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,24,bx(lop),by(lop)+4,15,11)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+	 xpri=0
+	 ypri=0
+	 If x1>bx(lop)-64 AND x1<bx(lop)+64
+			If y1+16>by(lop)-48 AND y1+16<by(lop)+48
+			bt(lop)=30
+			If x1>bx(lop)-4
+				 xpri=1
+			EndIf
+			If x1<bx(lop)+4
+				 xpri=2
+			EndIf
+			bc(lop)=30
+			If y1>by(lop)
+				 ypri=1
+			Else
+				 ypri=2
+			EndIf
+			EndIf
+	 EndIf
+	 bc(lop)+bs(lop)
+	 bx(lop)+bxa(lop)
+	 by(lop)+bya(lop)
+	 If bxa(lop)>0
+			ba(lop)+1
+			If ba(lop)>32
+				 ba(lop)=29
+			EndIf
+	 Else
+			ba(lop)-1
+			If ba(lop)<33
+				 ba(lop)=36
+			EndIf
+	 EndIf
+	 If by(lop)<16
+			bya(lop)=Rnd(1)
+			by(lop)=16
+	 EndIf
+	 If bx(lop)<16
+			bxa(lop)=Rnd(1)
+			bx(lop)=16
+	 EndIf
+	 If by(lop)>342
+			bya(lop)=Rnd(1)*-1
+			by(lop)=342
+	 EndIf
+	 If bx(lop)>720
+			bxa(lop)=Rnd(1)*-1
+			bx(lop)=720
+	 EndIf
+	 bt(lop)+1
+	 If bt(lop)>20
+			bt(lop)=0
+			a=Sgn(bxa(lop))*-1
+			If xpri=1
+				 a=2
+			EndIf
+			If xpri=2
+				 a=-2
+			EndIf
+			bxa(lop)=Rnd(1)*a
+	 EndIf
+	 If bc(lop)>20
+			bc(lop)=0
+			a=Sgn(bya(lop))*-1
+			If ypri=1
+				 a=2
+			EndIf
+			If ypri=2
+				 a=-2
+			EndIf
+			bya(lop)=Rnd(1)*a
+	 EndIf
+	 EndIf
+Return
+.shooter
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=2
+	 If PColl(x1-10,y1+3,18,29,bx(lop),by(lop)+2,15,13)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,26,bx(lop),by(lop),15,14)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 ba2(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+						If bd2(lop)=0
+						If x1>bx(lop) AND x1<bx(lop)+128
+							 If y1>by(lop)-48 AND y1<by(lop)+16
+									bxa(lop)=bx(lop)+6
+									bya(lop)=by(lop)+4
+									ba2(lop)=20
+									bd2(lop)=1
+									bd(lop)=0
+									bm(lop)=2
+									ba(lop)=81
+									bt(lop)=0
+									Return
+							 EndIf
+						EndIf
+						EndIf
+						bd2(lop)=0
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 ba(lop)=82
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 ba(lop)=82
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>6
+						bt(lop)=0
+						 ba(lop)+1
+						 If ba(lop)>80
+								ba(lop)=73
+						 EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+						bc(lop)=0
+						If bd2(lop)=0
+						If x1>bx(lop)-128 AND x1<bx(lop)
+							 If y1>by(lop)-48 AND y1<by(lop)+16
+									bxa(lop)=bx(lop)-6
+									bya(lop)=by(lop)+4
+									ba2(lop)=20
+									bd2(lop)=2
+									bd(lop)=0
+									bm(lop)=2
+									ba(lop)=90
+									bt(lop)=0
+									Return
+							 EndIf
+						EndIf
+						EndIf
+						bd2(lop)=0
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 ba(lop)=73
+							 Return
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 ba(lop)=73
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>6
+						 bt(lop)=0
+						 ba(lop)-1
+						 If ba(lop)<82
+								ba(lop)=89
+						 EndIf
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=2
+			of=0
+			If PColl(x1-10,y1+3,18,29,bxa(lop)+3,bya(lop)+3,6,6)
+				 col=1
+				 of=1
+			EndIf
+			If bd2(lop)=1
+				 m=map((bxa(lop)+8) ASR 4,(bya(lop)+4) ASR 4)
+				 If m<>0 AND m<>3 OR of=1
+						ba2(lop)=0
+						bd2(lop)=1
+						bm(lop)=1
+						bd(lop)=1
+						bc(lop)=16
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 ba(lop)=89
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 ba(lop)=89
+						EndIf
+						Return
+				 EndIf
+				 bxa(lop)+4
+				 bt(lop)+1
+				 If bt(lop)>6 AND ba2(lop)<22
+						bt(lop)=0
+						ba2(lop)+1
+						If ba(lop)=90
+							 ba(lop)=89
+						EndIf
+						If ba(lop)=81
+							 ba(lop)=73
+						EndIf
+				 EndIf
+			EndIf
+			If bd2(lop)=2
+				 m=map((bxa(lop)+4) ASR 4,(bya(lop)+4) ASR 4)
+				 If m<>0 AND m<>3 OR of=1
+						ba2(lop)=0
+						bd2(lop)=1
+						bm(lop)=1
+						bd(lop)=2
+						bc(lop)=16
+						m=map((bx(lop)+4) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 ba(lop)=73
+						EndIf
+						m=map((bx(lop)+4) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 ba(lop)=73
+						EndIf
+						Return
+				 EndIf
+				 bxa(lop)-4
+				 bt(lop)+1
+				 If bt(lop)>6 AND ba2(lop)<22
+						bt(lop)=0
+						ba2(lop)+1
+						If ba(lop)=90
+							 ba(lop)=89
+						EndIf
+						If ba(lop)=81
+							 ba(lop)=73
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+Return
+.bat
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=2
+	 If PColl(x1-10,y1+3,18,29,bx(lop)+3,by(lop)+4,9,9)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,24,bx(lop)+3,by(lop)+4,9,9)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			bt(lop)+1
+			If bt(lop)>5
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>41
+						ba(lop)=39
+				 EndIf
+			EndIf
+			bt2(lop)+1
+			If bt2(lop)>30
+				 If x1>bx(lop)-64 AND x1<bx(lop)+64
+						If y1>by(lop) AND y1<by(lop)+48
+							 bm(lop)=2
+							 Return
+						EndIf
+				 EndIf
+				 bt2(lop)=40
+			EndIf
+	 EndIf
+	 If bm(lop)=2
+			ba(lop)=42
+			If x1<bx(lop)-66 OR x1>bx(lop)+66
+				 bm(lop)=1
+				 Return
+			EndIf
+			If y1<by(lop)+2 OR y1>by(lop)+50
+				 bm(lop)=1
+				 Return
+			EndIf
+			If x1>bx(lop)-48 AND x1<bx(lop)+48
+				 If y1>by(lop) AND y1<by(lop)+32
+						bm(lop)=3
+						ba(lop)=43
+						bd(lop)=1
+						Return
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=3
+			bt2(lop)+1
+			If bd(lop)=1
+				 If bx(lop)+8<x1
+						bx(lop)+1
+				 EndIf
+				 If bx(lop)+8>x1
+						bx(lop)-1
+				 EndIf
+				 If by(lop)+8<y1+16
+						by(lop)+1
+				 EndIf
+				 If by(lop)+8>y1+16
+						by(lop)-1
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>44
+							 ba(lop)=43
+						EndIf
+				 EndIf
+				 If bt2(lop)>128 OR hit=1 OR col=1
+						bd(lop)=3
+						bt2(lop)=0
+				 EndIf
+			EndIf
+			If bd(lop)=3
+				 clear=0
+				 If bx(lop)<bxa(lop)
+						bx(lop)+1
+						clear=1
+				 EndIf
+				 If bx(lop)>bxa(lop)
+						bx(lop)-1
+						clear=1
+				 EndIf
+				 If by(lop)<bya(lop)
+						by(lop)+1
+						clear=1
+				 EndIf
+				 If by(lop)>bya(lop)
+						by(lop)-1
+						clear=1
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>44
+							 ba(lop)=43
+						EndIf
+				 EndIf
+				 If clear=0
+						bd(lop)=0
+						bm(lop)=1
+						ba(lop)=39
+						bt2(lop)=0
+				 EndIf
+			EndIf
+	 EndIf
+Return
+.roller
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=3
+	 If PColl(x1-10,y1+3,18,30,bx(lop)+1,by(lop),14,11)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,26,bx(lop)+1,by(lop)+1,14,11)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)+16) ASR 4,by(lop) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If (m<>0 AND m<>3) OR m2=0
+							 bd(lop)=2
+							 ba(lop)=45
+							 Return
+						EndIf
+						If y1>by(lop)-24 AND y1<by(lop)+16
+							 If x1<bx(lop)+256 AND x1>bx(lop)
+									bm(lop)=2
+									bs(lop)=4
+									ba(lop)=65
+									Return
+							EndIf
+						EndIf
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>58
+								ba(lop)=52
+						 EndIf
+				 EndIf
+				 bx(lop)+bs(lop)
+				 bc(lop)+bs(lop)
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)-1) ASR 4,by(lop) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If (m<>0 AND m<>3) OR m2=0
+							 bd(lop)=1
+							 ba(lop)=52
+							 Return
+						EndIf
+						If y1>by(lop)-24 AND y1<by(lop)+16
+							 If x1>bx(lop)-240 AND x1<bx(lop)
+									bm(lop)=2
+									bs(lop)=4
+									ba(lop)=59
+									Return
+							EndIf
+						EndIf
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>51
+								ba(lop)=45
+						EndIf
+				 EndIf
+				 bx(lop)-bs(lop)
+				 bc(lop)+bs(lop)
+			EndIf
+	 EndIf
+	 If bm(lop)=2
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)+16) ASR 4,by(lop) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If (m<>0 AND m<>3) OR m2=0
+							 bm(lop)=1
+							 bd(lop)=2
+							 ba(lop)=45
+							 bs(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)-1
+						If ba(lop)<65
+								ba(lop)=70
+						 EndIf
+				 EndIf
+				 bx(lop)+bs(lop)
+				 bc(lop)+bs(lop)
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)-1) ASR 4,by(lop) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If (m<>0 AND m<>3) OR m2=0
+							 bm(lop)=1
+							 bd(lop)=1
+							 ba(lop)=52
+							 bs(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>64
+								ba(lop)=59
+						 EndIf
+				 EndIf
+				 bx(lop)-bs(lop)
+				 bc(lop)+bs(lop)
+			EndIf
+	 EndIf
+Return
+.runner
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=3
+	 If PColl(x1-10,y1+3,18,29,bx(lop)+1,by(lop)+1,12,11)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,28,bx(lop)+1,by(lop)+1,12,11)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+					 If y1+17>by(lop)
+							ypri=1
+					 Else
+							ypri=2
+					 EndIf
+					 If y1+16=by(lop)
+							ypri=0
+					 EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+						If m=3 AND ypri=1
+							 bd(lop)=3
+							 Return
+						EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m=3 AND ypri=2
+							 bd(lop)=4
+							 Return
+						EndIf
+				 EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 Return
+						EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>25
+							 ba(lop)=23
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If y1+17>by(lop)
+							ypri=1
+					 Else
+							ypri=2
+					 EndIf
+					 If y1+16=by(lop)
+							ypri=0
+					 EndIf
+					 m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+					 If m=3 AND ypri=1
+							bd(lop)=3
+							Return
+					 EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m=3 AND ypri=2
+							 bd(lop)=4
+							 Return
+						EndIf
+				 EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 Return
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 Return
+						EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>25
+							 ba(lop)=23
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=3
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If x1<bx(lop)
+							xpri=1
+						Else
+							xpri=2
+					 EndIf
+						m=map((bx(lop)) ASR 4,(by(lop)+16) ASR 4)
+						If m<>3
+							 If xpri=1
+									m=map((bx(lop)-1) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=2
+										 Return
+									Else
+										 bd(lop)=1
+										 Return
+									EndIf
+							 EndIf
+							 If xpri=2
+									m=map((bx(lop)+16) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=1
+										 Return
+									Else
+										 bd(lop)=2
+										 Return
+									EndIf
+							 EndIf
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=1
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=2
+							 bd(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 by(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>25
+							 ba(lop)=24
+						EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=4
+				 If bc(lop)>=16
+					 bc(lop)=0
+					 If x1<bx(lop)
+							xpri=1
+						Else
+							xpri=2
+					 EndIf
+					 m=map((bx(lop)) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3
+							 If xpri=1
+									m=map((bx(lop)-1) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=2
+										 Return
+									Else
+										 bd(lop)=1
+										 Return
+									EndIf
+							 EndIf
+							 If xpri=2
+									m=map((bx(lop)+16) ASR 4,(by(lop)) ASR 4)
+									If m=0 OR m=3
+										 bd(lop)=1
+										 Return
+									Else
+										 bd(lop)=2
+										 Return
+									EndIf
+							 EndIf
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=1
+							 bd(lop)=2
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						m2=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>3 AND m<>0 AND (m2=0 OR m2=3) AND xpri=2
+							 bd(lop)=1
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 by(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>1
+						bt(lop)=0
+						ba(lop)+1
+						If ba(lop)>25
+							 ba(lop)=23
+						EndIf
+				 EndIf
+			EndIf
+	 EndIf
+Return
+.lamer
+	 If bm(lop)=0
+			If bd(lop)=1 AND hit=0
+				 If PColl(x1-10,y1+3,18,29,bx(lop)+2,by(lop),12,15)
+						bonus=ba(lop)-116
+						ba(lop)=0
+						bd(lop)=0
+						If bonus=0
+							 Sound 9,1
+							 If lte=0
+									lte=2
+							 EndIf
+						EndIf
+						If bonus=1
+							 Sound 9,1
+							 If ltx=0
+									ltx=2
+							 EndIf
+						EndIf
+						If bonus=2
+							 Sound 9,1
+							 If ltt=0
+									ltt=2
+							 EndIf
+						EndIf
+						If bonus=3
+							 Sound 9,1
+							 If ltr=0
+									ltr=2
+							 EndIf
+						EndIf
+						If bonus=4
+							 Sound 9,1
+							 If lta=0
+									lta=2
+							 EndIf
+						EndIf
+						If bonus=5
+							 Sound 10,1
+							 score+500
+							 scorechg=1
+						EndIf
+						If bonus=6
+							 Sound 10,1
+							 shld=1
+							 shldt=0
+							 shldt2=0
+							 hit=0
+						EndIf
+				 EndIf
+			EndIf
+			Return
+	 EndIf
+	 If clop=3
+	 If PColl(x1-10,y1+3,18,29,bx(lop),by(lop)+2,15,13)
+			If bm(lop)<>5
+				 col=1
+			EndIf
+	 EndIf
+	 If expon=1 AND bm(lop)<>5
+			If PColl(expx-14,expy+2,24,26,bx(lop),by(lop)+2,15,14)
+				 bm(lop)=5
+				 ba(lop)=14
+				 bt(lop)=0
+				 score+250
+				 scorechg=1
+			EndIf
+	 EndIf
+	 EndIf
+	 If bm(lop)=5
+			bt(lop)+1
+			If bt(lop)>2
+				 bt(lop)=0
+				 ba(lop)+1
+				 If ba(lop)>19
+						bm(lop)=0
+						bd(lop)=1
+						bc(lop)=0
+						ba(lop)=116+Int(Rnd(7))
+						bt(lop)=0
+						by(lop)=Int((Int(by(lop)) ASL 4) ASR 4)
+				 EndIf
+			EndIf
+	 EndIf
+	 If bm(lop)=1
+			If bd(lop)=1
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)+16) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=2
+							 ba(lop)=98
+							 Return
+						EndIf
+						m=map((bx(lop)+16) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=2
+							 ba(lop)=98
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)+bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>3
+						bt(lop)=0
+						 ba(lop)+1
+						 If ba(lop)>97
+								ba(lop)=91
+						 EndIf
+				 EndIf
+			EndIf
+			If bd(lop)=2
+				 If bc(lop)>=16
+						bc(lop)=0
+						m=map((bx(lop)-1) ASR 4,(by(lop)+16) ASR 4)
+						If m=0
+							 bd(lop)=1
+							 ba(lop)=91
+							 Return
+						EndIf
+						m=map((bx(lop)-1) ASR 4,(by(lop)+15) ASR 4)
+						If m<>0 AND m<>3
+							 bd(lop)=1
+							 ba(lop)=91
+							 Return
+						EndIf
+				 EndIf
+				 bc(lop)+bs(lop)
+				 bx(lop)-bs(lop)
+				 bt(lop)+1
+				 If bt(lop)>3
+						 bt(lop)=0
+						 ba(lop)-1
+						 If ba(lop)<99
+								ba(lop)=105
+						 EndIf
+				 EndIf
+			EndIf
+	 EndIf
+Return
+.setbadie
+	 For lop=0 To badies
+			If btype(lop)=1
+				 ba(lop)=37
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=1
+				 bd(lop)=1
+				 count=Int(((Int(bx(lop)) ASR 4) ASL 4))
+				 count=bx(lop)-count
+				 If count<0
+						count=count*-1
+				 EndIf
+				 bc(lop)=count
+			EndIf
+			If btype(lop)=2
+				 bxa(lop)=Rnd(2)
+				 bya(lop)=Rnd(2)
+				 ba(lop)=32
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=1
+				 bd(lop)=1
+				 bc(lop)=0
+			EndIf
+			If btype(lop)=3
+				 bxa(lop)=bx(lop)
+				 bya(lop)=by(lop)
+				 ba(lop)=80
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=.5
+				 bd(lop)=1
+				 bd2(lop)=1
+				 count=Int(((Int(bx(lop)) ASR 4) ASL 4))
+				 count=bx(lop)-count
+				 If count<0
+						count=count*-1
+				 EndIf
+				 bc(lop)=count
+				 ba2(lop)=0
+			EndIf
+			If btype(lop)=4
+				 bxa(lop)=bx(lop)
+				 bya(lop)=by(lop)
+				 ba(lop)=39
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=1
+				 bd(lop)=0
+				 bc(lop)=0
+			EndIf
+			If btype(lop)=5
+				 bxa(lop)=0
+				 bya(lop)=0
+				 ba(lop)=52
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=1
+				 bd(lop)=1
+				 count=Int(((Int(bx(lop)) ASR 4) ASL 4))
+				 count=bx(lop)-count
+				 If count<0
+						count=count*-1
+				 EndIf
+				 bc(lop)=count
+			EndIf
+			If btype(lop)=6
+				 bx(lop)=Int(bx(lop)/2)*2
+				 ba(lop)=23
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=2
+				 bd(lop)=1
+				 count=Int(((Int(bx(lop)) ASR 4) ASL 4))
+				 count=bx(lop)-count
+				 If count<0
+						count=count*-1
+				 EndIf
+				 bc(lop)=count
+			EndIf
+			If btype(lop)=7
+				 bx(lop)=Int(bx(lop)/2)*2
+				 bxa(lop)=bx(lop)
+				 bya(lop)=by(lop)
+				 ba(lop)=91
+				 bt(lop)=0
+				 bm(lop)=1
+				 bs(lop)=2
+				 bd(lop)=1
+				 bd2(lop)=1
+				 ba2(lop)=0
+				 count=Int(((Int(bx(lop)) ASR 4) ASL 4))
+				 count=bx(lop)-count
+				 If count<0
+						count=count*-1
+				 EndIf
+				 bc(lop)=count
+			EndIf
+	 Next
+Return
+.intro
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 2
+	 Free SetCycle 2
+	 Free SetCycle 0
+	 QAMIGA
+	 lmaxlen 0,320,256,4
+	 LoadBitMap 0,"Planet.PAL",0
+	 VWait 150
+	 BLITZ
+	 Slice 0,44,320,256,$fff8,4,8,16,320,320
+	 Use SetCycle 0
+	 For lop=0 To 15
+			colr(lop)=Blue(lop)
+			colg(lop)=Palette(lop)
+			colb(lop)=PalRGB(lop)
+			Green lop,0,0,0
+	 Next
+	 Show 0
+	 DisplayOn
+	 f=15
+	 ##[$80BB]
+			For lop=0 To 15
+				 r=colr(lop)/f
+				 g=colg(lop)/f
+				 b=colb(lop)/f
+				 Green lop,r,g,b
+			Next
+			f-.2
+	 ##[$80BC] f<=1
+	 Use SetCycle 0
+	 For lop=0 To 350
+			VWait
+			If Joyb(1)
+				 Goto endint
+			EndIf
+	 Next
+	 tim=0
+	 ##[$80BB]
+	 VWait
+			For lop=0 To 15
+				 r=Blue(lop)/1.1
+				 g=Palette(lop)/1.1
+				 b=PalRGB(lop)/1.1
+				 If r<0 Then r=0
+				 If g<0 Then g=0
+				 If b<0 Then b=0
+				 Green lop,r,g,b
+			Next
+			tim+1
+	 ##[$80BC] tim>30
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 0
+	 Free SetCycle 0
+	 QAMIGA
+	 lmaxlen 0,320,256,4
+	 LoadBitMap 0,"Planet2.PAL",0
+	 VWait 150
+	 BLITZ
+	 Slice 0,44,320,256,$fff8,4,8,32,320,320
+	 Use SetCycle 0
+	 For lop=0 To 15
+			colr(lop)=Blue(lop)
+			colg(lop)=Palette(lop)
+			colb(lop)=PalRGB(lop)
+			Green lop,0,0,0
+	 Next
+	 Show 0
+	 DisplayOn
+	 f=15
+	 ##[$80BB]
+			For lop=0 To 15
+				 r=colr(lop)/f
+				 g=colg(lop)/f
+				 b=colb(lop)/f
+				 Green lop,r,g,b
+			Next
+			f-.2
+	 ##[$80BC] f<=1
+	 Use SetCycle 0
+	 DisplayOn
+	 For lop=0 To 350
+			VWait
+			If Joyb(1)
+				 Goto endint
+			EndIf
+	 Next
+	 tim=0
+	 ##[$80BB]
+	 VWait
+			For lop=0 To 15
+				 r=Blue(lop)/1.1
+				 g=Palette(lop)/1.1
+				 b=PalRGB(lop)/1.1
+				 If r<0 Then r=0
+				 If g<0 Then g=0
+				 If b<0 Then b=0
+				 Green lop,r,g,b
+			Next
+			tim+1
+	 ##[$80BC] tim>30
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 0
+	 Free SetCycle 0
+	 QAMIGA
+	 lmaxlen 0,320,256,5
+	 LoadBitMap 0,"Mission.PAL",0
+	 VWait 150
+	 BLITZ
+	 Slice 0,44,320,256,$fff8,5,8,32,320,320
+	 Use SetCycle 0
+	 For lop=0 To 31
+			colr(lop)=Blue(lop)
+			colg(lop)=Palette(lop)
+			colb(lop)=PalRGB(lop)
+			Green lop,0,0,0
+	 Next
+	 Show 0
+	 DisplayOn
+	 f=15
+	 ##[$80BB]
+			For lop=0 To 31
+				 r=colr(lop)/f
+				 g=colg(lop)/f
+				 b=colb(lop)/f
+				 Green lop,r,g,b
+			Next
+			f-.2
+	 ##[$80BC] f<=1
+	 Use SetCycle 0
+	 DisplayOn
+	 For lop=0 To 1000
+			VWait
+			If Joyb(1)
+				 Goto skip
+			EndIf
+	 Next
+.skip
+	 tim=0
+	 ##[$80BB]
+	 VWait
+			For lop=0 To 31
+				 r=Blue(lop)/1.1
+				 g=Palette(lop)/1.1
+				 b=PalRGB(lop)/1.1
+				 If r<0 Then r=0
+				 If g<0 Then g=0
+				 If b<0 Then b=0
+				 Green lop,r,g,b
+			Next
+			tim+1
+	 ##[$80BC] tim>30
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 0
+	 Free SetCycle 0
+	 Goto title
+	 .endint
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 0
+	 Free SetCycle 0
+	 Goto title
+Return
+.options
+	 ShowSprite 48,220,20,0
+	 ShowSprite 48,220,20,2
+	 ShowSprite 48,220,20,4
+	 InFront 8
+	 Use lmaxlen 1
+	 Show 1
+	 ##[$80BB]
+			VWait
+			For lop=0 To 15
+				 r=Blue(lop)/1.1
+				 g=Palette(lop)/1.1
+				 b=PalRGB(lop)/1.1
+				 If r<0 Then r=0
+				 If g<0 Then g=0
+				 If b<0 Then b=0
+				 Green lop,r,g,b
+			Next
+			tim+1
+	 ##[$80BC] tim>30
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 BlockScroll 0
+	 Use SetCycle 3
+	 Green 2,0,0,0
+	 qprint{"OPTIONS SCREEN",90,10}
+	 If pri=0
+			qprint{"		GOVERNER OFF		",60,50}
+	 EndIf
+	 If pri=1
+			qprint{"	GOVERNER UP-DOWN	",60,50}
+	 EndIf
+	 If pri=2
+			qprint{" GOVERNER LEFT-RIGHT ",55,50}
+	 EndIf
+	 qprint{"	 GOVERNER HELP!!			",50,80}
+	 qprint{"VIEW HIGH SCORE TABLE",50,110}
+	 qprint{"				- OK -			 ",50,140}
+	 pos=1
+	 xa=30
+	 ya=40
+	 ShowSprite 65,xa,ya,0
+	 done=0
+	 VWait
+	 Gosub setcopper2
+	 VWait
+	 DisplayOn
+	 ##[$80BB]
+			VWait
+			ShowSprite 65,xa,ya,0
+			If Joyy(1)=-1 AND pos>1
+				 VWait 5
+				 pos-1
+				 If pos=1
+						xa=30
+						ya=40
+				 EndIf
+				 If pos=2
+						xa=35
+						ya=70
+				 EndIf
+				 If pos=3
+						xa=10
+						ya=100
+				 EndIf
+				 If pos=4
+						xa=80
+						ya=130
+				 EndIf
+			EndIf
+			If Joyy(1)=1 AND pos<4
+				 VWait 5
+				 pos+1
+				 If pos=1
+						xa=30
+						ya=40
+				 EndIf
+				 If pos=2
+						xa=35
+						ya=70
+				 EndIf
+				 If pos=3
+						xa=10
+						ya=100
+				 EndIf
+				 If pos=4
+						xa=80
+						ya=130
+				 EndIf
+			EndIf
+			If Joyb(1)
+				 If pos=1
+						VWait 5
+						Boxf 0,45,320,65,0
+						pri+1
+						If pri>=3
+							 pri=0
+						EndIf
+						If pri=0
+							 qprint{"		GOVERNER OFF		",60,50}
+						EndIf
+						If pri=1
+							 qprint{"	GOVERNER UP-DOWN	",60,50}
+						EndIf
+						If pri=2
+							 qprint{" GOVERNER LEFT-RIGHT ",55,50}
+						EndIf
+				 EndIf
+				 If pos=2
+						BlockScroll 0
+						ShowSprite 48,50,50,0
+						done=0
+						Poke.b $BFEC01,0
+						key=0
+						oldkey=0
+						qprint{" GOVERNER HELP ",85,10}
+						qprint{"THE GOVERNER IS A LITTLE AID",10,50}
+						qprint{"TO	HELP	YOU	CONTROL SOUND",10,62}
+						qprint{"THE SPACE CADET...",10,74}
+						qprint{"...JUST	EXPERIMENT	AND SEE",10,98}
+						qprint{"WHICH YOU LIKE MOST!!",10,112}
+						qprint{"PRESS - FIRE",115,200}
+						##[$80BB]
+						##[$80BC] Joyb(1)=0
+						##[$80BB]
+							 VWait
+							 kt+1
+							 If kt>5
+									key=Peek.b($BFEC01)
+									If key=oldkey-1
+										 key=0
+									End If
+									oldkey=key
+									kt=0
+							 EndIf
+							 If key<>0
+									If key=127
+										 done=1
+									EndIf
+							 EndIf
+						##[$80BC] done=1 OR Joyb(1)
+						done=0
+						xa=0
+						ya=0
+						Goto options
+				 EndIf
+				 If pos=3
+						Goto showscore
+				 EndIf
+				 If pos=4
+						done=1
+				 EndIf
+			EndIf
+	 ##[$80BC] done=1
+	 ##[$80BB]
+			VWait
+			For lop=0 To 15
+				 r=Blue(lop)/1.1
+				 g=Palette(lop)/1.1
+				 b=PalRGB(lop)/1.1
+				 If r<0 Then r=0
+				 If g<0 Then g=0
+				 If b<0 Then b=0
+				 Green lop,r,g,b
+			Next
+			tim+1
+	 ##[$80BC] tim>30
+	 BlockScroll 0
+	 ShowSprite 48,50,50,0
+	 xa=0
+	 ya=0
+	 DisplayOff
+	 MOVE.w $0,$dff180
+	 FreeSlices
+	 Free lmaxlen 0
+	 Free SetCycle 0
+	 Goto title
+Return
+.chkscore
+	 ins=0
+	 done=0
+	 For lop=1 To 5
+			If score>=score(lop) AND done=0
+				 ins=lop
+				 For lop2=4 To lop Step -1
+						score(lop2+1)=score(lop2)
+						score$(lop2+1)=score$(lop2)
+				 Next
+				 done=1
+			EndIf
+	 Next
+	 If ins>0
+			DisplayOff
+			MOVE.w $0,$dff180
+			Gosub setcopper2
+			DisplayOn
+			Use SetCycle 0
+			BlockScroll
+			Green 2,0,0,0
+			Green 1,13,13,13
+			qprint{"YOU HAVE A HIGH SCORE",40,10}
+			qprint{"ENTER YOUR NAME",75,200}
+			qprint{"...",140,170}
+			l=Len(font$)
+			x=60
+			y=40
+			For lop2=1 To l-1
+				 a$=Mid$(font$,lop2,1)
+				 qprint{a$,x,y}
+				 x+30
+				 If x>240
+						x=60
+						y+20
+				 EndIf
+			Next
+			x=56
+			y=39
+			xm=1
+			ym=1
+			;6 Down
+			s$=""
+			sc$=""
+			ln=0
+			done=0
+			ShowSprite 67,x,y,0
+			##[$80BB]
+				 ShowSprite 67,x,y,0
+				 VWait 5
+				 If Joyx(1)=1
+						x+30
+						xm+1
+						If x>236
+							 x=56
+							 xm=1
+						EndIf
+				 EndIf
+				 If Joyx(1)=-1
+						x-30
+						xm-1
+						If x<56
+							 x=236
+							 xm=7
+					 EndIf
+				 EndIf
+				 If Joyy(1)=1
+						y+20
+						ym+1
+						If y>139
+							 y=39
+							 ym=1
+						EndIf
+				 EndIf
+				 If Joyy(1)=-1
+						y-20
+						ym-1
+						If y<39
+							 y=139
+							 ym=6
+						EndIf
+				 EndIf
+				 If Joyb(1)=1
+						c=(7*(ym-1))+xm
+						sa$=Mid$(font$,c,1)
+						sc$+sa$
+						qprint{sc$,140,170}
+						ln+1
+						##[$80BB]
+						##[$80BC] Joyb(1)=0
+						If ln>=3
+							 done=1
+						EndIf
+				 EndIf
+			##[$80BC] done=1
+			score$(ins)=sc$
+			score(ins)=score
+			x=0
+			y=0
+			##[$80BB]
+				 VWait
+				 For lop=0 To 15
+						r=Blue(lop)/1.1
+						g=Palette(lop)/1.1
+						b=PalRGB(lop)/1.1
+						If r<0 Then r=0
+						If g<0 Then g=0
+						If b<0 Then b=0
+						Green lop,r,g,b
+				 Next
+				 tim+1
+			##[$80BC] tim>30
+			BlockScroll 0
+	 EndIf
+Return
+.showscore
+			BlockScroll 0
+			ShowSprite 48,50,50,0
+			qprint{"TODAYS BEST SCORES",65,10}
+			xa=70
+			ya=40
+			For lop=1 To 5
+				 qprint{score$(lop),xa,ya}
+				 qprint{Str$(score(lop)),xa+140,ya}
+				 ya+24
+			Next
+			qprint{"PRESS - FIRE",115,200}
+			done=0
+			Poke.b $BFEC01,0
+			key=0
+			oldkey=0
+			kt=0
+			##[$80BB]
+			##[$80BC] Joyb(1)=0
+			##[$80BB]
+				 kt+1
+				 If kt>5
+						key=Peek.b($BFEC01)
+						If key=oldkey-1
+							 key=0
+						End If
+						oldkey=key
+						kt=0
+				 EndIf
+				 If key<>0
+						If key=127
+							 done=1
+						EndIf
+				 EndIf
+			##[$80BC] done=1 OR Joyb(1)
+			done=0
+			xa=0
+			ya=0
+			Goto options
+Return
+.endseq
+	 BLITZ
+	 FreeSlices
+	 Free lmaxlen 2
+	 Free SetCycle 2
+	 lmaxlen 0,320,256,2
+	 Slice 0,50,320,256,$fff8,2,8,32,320,320
+	 Green 1,15,15,15
+	 Green 2,0,0,0
+	 Use lmaxlen 0
+	 qprint{"CONGRATULATIONS!!!",70,10}
+	 qprint{"YOU HAVE COMPLETED",70,40}
+	 qprint{"YOUR MISSION, AND",70,60}
+	 qprint{" YOUR PLANET HAS ",70,80}
+	 qprint{"	BEEN SAVED.... ",70,100}
+	 qprint{"	 WELL DONE!!	 ",70,140}
+	 Show 0
+	 ##[$80BB]
+	 ##[$80C7]
+End

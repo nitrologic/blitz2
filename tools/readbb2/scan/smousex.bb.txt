@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SMouseX.bb
++;; smousex&y program example program ; Screen 0,2									 ;open a simple screen ScreensBitMap 0,0						;grab it's bitmap BitMapOutput 0							;send Print to bitmap Print "Click LMB to quit" While Joyb(0)=0						 ;while no Mouse buttons pressed... Locate 0,1								 ;position bitmap cursor  Print SMouseX," ",SMouseY		;print X&Y of mouse Wend

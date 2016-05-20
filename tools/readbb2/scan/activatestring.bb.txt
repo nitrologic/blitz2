@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ActivateString.bb
++; ; string gadget input example ; StringGadget 0,128,16,0,1,40,160		 ;make a string gadgetTextGadget 0,8,180,0,2," EXIT "		 ;and an exit gadgetScreen 0,3								;open screen and windowWindow 0,0,0,320,200,$100f,"String Gadget Activated...",1,2,0 WLocate 4,8							 ;prompt... Print "Type your name:" ActivateString 0,1					 ;turn on string gadgetRepeat								 ;wait for 'EXIT'Until WaitEvent=64 AND GadgetHit=2

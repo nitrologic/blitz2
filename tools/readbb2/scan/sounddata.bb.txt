@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SoundData.bb
++; ; make a square wave program example; InitSound 0,32		 ;Get a sound object ready.For k=0 To 31			;Here, we will make a 'Square' waveform. If k<16 	SoundData 0,k,127  Else	SoundData 0,k,-128 EndIf NextLoopSound 0,15		 ;Play the sound.MouseWait 

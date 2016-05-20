@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LSet$.bb
++Print LSet$("Guy Fawkes",6): ; Will print "Guy Fa"Print LSet$("Guy",6):			 ; Will print "Guy	" 

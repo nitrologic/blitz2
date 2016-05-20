@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WMouseX.bb
++; ; wmousex and wmousey example ; Screen 0,2Window 0,0,0,320,200,0,"Window",0,1 While Joyb(0)=0  WLocate 0,0  Print WMouseX," ",WMouseY Wend

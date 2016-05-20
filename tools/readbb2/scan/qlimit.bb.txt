@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/QLimit.bb
++Print QLimit(150,0,140) ; Prints 140Print QLimit(75,90,200) ; Prints 90 

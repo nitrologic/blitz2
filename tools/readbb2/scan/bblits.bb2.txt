@@ -1,0 +1,93 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/bblits.bb2
++;
+;A little demo of moving things using the BBlit command...
+
+;create a 'ball' type variable
+;
+NEWTYPE.ball
+x.q
+y
+xs
+ys
+End NEWTYPE
+
+;dimension a 'list' of 'balls'
+;
+;try increasing the '1' here to '7'. Notice how things
+;start to flicker? To overcome this, you'll need to use
+;double buffering! See the 'doublebuffer' demo!
+;
+Dim ##[$80B3] balls.ball(1)
+
+;load in a shape and it's palette
+;
+LoadShape 0,"data/ball",0
+
+;keep adding items to list until list full
+;
+While AddLast(balls())
+	balls()\x=Rnd(280)+10,Rnd(160)+10,(Rnd-.5)*8,(Rnd-.5)*8
+Wend
+
+;now, we go into blitz mode
+;
+BLITZ
+
+;initialize a 'buffer' for the BBlit command to make use of:
+;
+Buffer 0,16384
+
+;initialize a lor-res, 8 colour bitmap...
+;
+lmaxlen 0,320,200,3
+
+;draw some stuff to it...
+;
+For k=1 To 100
+Line Rnd(320),Rnd(200),Rnd(320),Rnd(200),Rnd(7)+1
+Next
+
+;initialize a slice, and set it's colour palette
+;
+Slice 0,44,320,200,$fff0,3,8,32,320,320
+Use SetCycle 0
+Show 0
+
+;now, process all ballss...
+;
+;while mouse button not hit..
+;
+While Joyb(0)=0
+
+	;start at first item in list
+	;
+	newmem balls()
+
+	;wait for vertical blank
+	;
+	VWait
+
+	;unbuffer all previously drawn shapes
+	;
+	UnBuffer 0
+
+	;while more items to come...
+	;
+	While globfree(balls())
+
+		;update balls' position
+		;
+		balls()\x+balls()\xs
+		balls()\y+balls()\ys
+
+		;reverse direction if ball gets to edge of bitmap
+		;
+		If balls()\x<10 OR balls()\x>290 Then balls()\xs=-balls()\xs
+		If balls()\y<10 OR balls()\y>170 Then balls()\ys=-balls()\ys
+
+		;draw balls in new position
+		;
+		BBlit 0,0,balls()\x,balls()\y
+
+	Wend
+Wend

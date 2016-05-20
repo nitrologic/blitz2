@@ -1,0 +1,48 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/encrypt.bb
++
+
+Dim name$(100)
+Dim le.l(100)
+nnn.l=0
+
+##[$B681]("ram:")
+;lock.l=PathLock
+While ##[$B683]
+		n$=##[$B684]
+		l.l=##[$B687]
+		t.l=##[$B685]
+		If t=0
+				name$(nnn)=n$
+				le(nnn)=l
+				nnn+1
+				NPrint "Adding ",n$
+		EndIf
+Wend
+
+For ll=0 To nnn-1
+		n$=name$(ll)
+		l=le(ll)
+		NPrint "Scanning: ",n$
+		mem.l=##[$B781](l,0)
+		f.l=WriteMem(0,n$)
+		##[$BE14] 0,mem,l
+		CloseFile 0
+
+		If Peek.l(mem)=$43724d21				;Crm!
+				Poke.l mem,$56695331				;ViS1
+		EndIf
+
+		If Peek.l(mem)=$43724d32				;Crm2
+				Poke.l mem,$5669534c				;ViSL
+		EndIf
+
+		f.l=ReadMem(0,n$)
+		Exists 0,mem,l
+		CloseFile 0
+
+		##[$B782] mem,l
+Next
+
+NPrint ""
+NPrint "Done.."
+MouseWait

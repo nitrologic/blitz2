@@ -1,0 +1,129 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot7.bb
++;To explore mathematical pictures it is handy to write
+;a tiny utility with zooms and saves and anything else you fancy.
+
+;HOLD DOWN RIGHT MOUSE BUTTON TO INTERRUPT PLOTTING
+
+allocst 0,0,0,320,256,5,0,"",19,20
+
+Green 0,0,0,0:Green 1,11,0,0:Green 2,15,15,15
+For i=16 To 31:Green i,31-i,31-i,31-i:Next
+MaxLen pa$=160:MaxLen fi$=64
+SizeLimits 320,256,-1,-1
+localstat 0,0,0,320,256,$1800,"",16,30
+newlocarr 0,0,"Project"
+MenuItem 0,0,0,0,"Save picture"
+MenuItem 0,0,0,1,"Quit"
+newlocarr 0,1,"Draw"
+MenuItem 0,0,1,0,"Zoom"
+MenuItem 0,0,1,1,"Default bounds"
+MenuItem 0,0,1,2,"Set plot area"
+MenuItem 0,0,1,3,"Full screen plot"
+MenuItem 0,0,1,4,"Clear screen"
+MenuItem 0,0,1,5,"Plot"
+MenuItem 0,3,1,6,"	Leave boxes"
+
+arrmult 0
+ScreensBitMap 0,0
+Use lmaxlen 0
+BlockScroll 0
+
+lxdef.f=-3:uxdef.f=3:lydef.f=-3:uydef.f=3
+ldxdef=0:udxdef=320:ldydef=0:udydef=256
+lx=lxdef:ux=uxdef:ly=lydef:uy=uydef
+ldx=ldxdef:udx=udxdef:ldy=ldydef:udy=udydef
+xdiff.f=ux-lx:ydiff.f=uy-ly
+dxdiff=udx-ldx:dydiff=udy-ldy
+dxstep=Sgn(dxdiff):dystep=Sgn(dydiff)
+
+l3:FlushEvents:Green 0,0,0,0:Green 1,11,0,0:Green 2,15,15,15
+##[$80BB]:##[$80BC] WaitEvent=$100
+mh.l=MenuHit:mi.l=ItemHit
+If mh=0
+	If mi=0
+		a$=FileRequest$("Save picture as",pa$,fi$)
+		If a$<>"":SaveBitmap 0,a$:EndIf
+		Goto l3
+	EndIf
+	If mi=1:Goto l2:EndIf
+EndIf
+If mh=1
+	If mi=0:Gosub zoom:Goto l3:EndIf
+	If mi=1
+		lx=lxdef:ux=uxdef:ly=lydef:uy=uydef
+		xdiff.f=ux-lx:ydiff.f=uy-ly
+		Goto l3
+	EndIf
+	If mi=2:Gosub area:Goto l3:EndIf
+	If mi=3
+			ldx=ldxdef:udx=udxdef:ldy=ldydef:udy=udydef
+			dxdiff=udx-ldx:dydiff=udy-ldy
+			dxstep=Sgn(dxdiff):dystep=Sgn(dydiff)
+		Goto l3
+	EndIf
+	If mi=4:BlockScroll 0:Goto l3:EndIf
+	If mi=5:Goto l1:EndIf
+EndIf
+If mh=2
+
+EndIf
+Goto l3
+
+l1:Green 0,0,0,0:For i=16 To 31:Green i,31-i,31-i,31-i:Next
+Use lmaxlen 0
+For i=ldx To udx Step dxstep:x.f=lx+(xdiff*(i-ldx))/dxdiff
+	If Joyb(1)<>0 Then ##[$80BE] For:Goto l3
+	For j=ldy To udy Step dystep:y.f=uy-(ydiff*(j-ldy))/dydiff
+;-------------------------------------------------------
+;Insert any sort of weird function or algorithm here.
+		z.f=HCos(5*HSin(x*x)+6*HCos(y*x))
+;		z.f=1
+;		If d<>0:z=z/d:Else:z=0:EndIf
+;-------------------------------------------------------
+		zz.f=Frac(z)
+		If zz<0:zz+1:EndIf
+		zz*2:If zz>1:zz=2-zz:EndIf
+		c.w=Int(zz*16+16)
+		If c=32:c=31:EndIf
+		Point i,j,c
+Next:Next
+Goto l3
+l2:VWait 50
+End
+
+zoom:
+	FlushEvents
+	MouseWait
+	mx=WMouseX:my=WMouseY
+	##[$80BB]
+		mx2=WMouseX:my2=WMouseY
+		Box mx,my,mx2,my2,-1
+		Box mx,my,mx2,my2,-1
+	##[$80BC] Joyb(0)=0
+	If MenuList(0,1,6):Box mx,my,mx2,my2,1:EndIf
+	If mx=mx2 OR my=my2 Then Return
+	newlx.f=lx+xdiff*(mx-ldx)/dxdiff
+	newux.f=lx+xdiff*(mx2-ldx)/dxdiff
+	newuy.f=uy-ydiff*(my-ldy)/dydiff
+	newly.f=uy-ydiff*(my2-ldy)/dydiff
+	lx=newlx:ux=newux:ly=newly:uy=newuy
+	xdiff=ux-lx:ydiff=uy-ly
+	FlushEvents
+Return
+
+area:
+	FlushEvents
+	MouseWait
+	mx=WMouseX:my=WMouseY
+	##[$80BB]
+		mx2=WMouseX:my2=WMouseY
+		Box mx,my,mx2,my2,-1
+		Box mx,my,mx2,my2,-1
+	##[$80BC] Joyb(0)=0
+	If MenuList(0,1,6):Box mx,my,mx2,my2,1:EndIf
+	If mx=mx2 OR my=my2 Then Return
+	ldx=mx:udx=mx2:ldy=my:udy=my2
+	dxdiff=udx-ldx:dydiff=udy-ldy
+	dxstep=Sgn(dxdiff):dystep=Sgn(dydiff)
+	FlushEvents
+Return

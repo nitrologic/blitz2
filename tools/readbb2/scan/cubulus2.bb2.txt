@@ -1,0 +1,505 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/cubulus2.bb2
++.top:
+
+#debug=0
+
+DEFTYPE.l
+##[$80CC]
+
+Dim hn$(40,6)
+
+.ShowMap:
+Statement ShowMap{s,d}
+u=##[$80D1] lmaxlen
+Use lmaxlen d
+For t=0 To 127
+VWait
+Scroll 0,127-t,320,1,0,127-t,s
+Scroll 0,128+t,320,1,0,128+t,s
+Next
+Use lmaxlen u
+End Statement
+
+
+;LoadModule 1,"st-00:modules/mod.cubulus"
+;PlayModule 1
+f$="Cubulus-all.Shps"
+
+dir$="":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Data/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Cubulus/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Data/Cubulus/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Cubulus/Data/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Cubulus:":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Cubulus:Data/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Data:":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Data:Cubulus/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Blitz2:Data/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Blitz2:Cubulus/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Blitz2:Data/Cubulus/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+dir$="Blitz2:Cubulus/Data/":If ##[$BE15](dir$+f$) <>0 Then Goto gotdir
+
+gotdir:
+LoadShape	 1,dir$+"Cubulus.Pal",1
+LoadShapes	1,dir$+"Cubulus-all.Shps"
+;LoadShapes 75,dir$+"Cubulus.Shps2"
+For l=2 To 4
+For t=0 To 39
+hn$(t,l)="										99:99:99	 9999"
+Next
+Next
+
+t=WriteMem(1,dir$+"Cubulus.HiScores")
+If t=0 Then Goto nohs
+FileInput 1
+For l=2 To 4
+For t=0 To 39
+hn$(t,l)=Edit$(80)
+Next
+Next
+CloseFile 1
+nohs:
+ms=2
+Dim x1(6),x2(6),ss(6),xo(6),tw(6)
+SetString 2,29
+SelectMode 5,0
+For m=2 To 4
+Read x1,x2,ss,xo,tw
+
+x1(m)=x1:x2(m)=x2:ss(m)=ss:xo(m)=xo:tw(m)=tw
+
+Data 16,68,66,28,204
+Data 11,50,50,29,200
+Data 08,40,25,30,200
+
+g=4-m:g*8
+
+For b=0 To m:For c=0 To 3
+ShapeGadget m,b*x2+c*x1+xo,10,0,c+b*4+1,1+g,2+g
+ShapeGadget m,b*x2+c*x1+xo,tw+26,0,c+b*4+41,5+g,6+g
+ShapeGadget m,tw+26,b*x2+c*x1+xo,0,c+b*4+21,3+g,4+g
+ShapeGadget m,10,b*x2+c*x1+xo,0,c+b*4+61,7+g,8+g
+Next
+Next
+workstart m,250,80,0,99,"Random"
+workstart m,250,93,0,98," QUIT "
+Next
+workstart 2,250,106,0,97," Easy "
+workstart 3,250,106,0,97,"Medium"
+workstart 4,250,106,0,97," Hard "
+workstart 2,250,196,0,96," ABOUT "
+workstart 3,250,196,0,96," ABOUT "
+workstart 4,250,196,0,96," ABOUT "
+;TextGadget 2,250,196,0,96," trap "
+
+
+lmaxlen 1,320,256,5
+CludgeBitMap 75,2
+allocst 0,0,0,320,256,5,0,"",0,1
+allocst 3,0,0,320,256,5,0,"",0,1
+localstat 3,0,0,320,256,$1800,"",0,1
+Use SetCycle 1
+ScreensBitMap 3,3
+Use allocst 0
+Use SetCycle 1
+ScreensBitMap 0,0
+Poke.l ?bm,Peek.l (##[$80B8] lmaxlen(0)+8)
+.interupt:
+SetInt 5
+CMP.w	 #0,cnt
+BNE		 nobm
+
+LEA		 clk,a2
+ADD.b	 #1,8(a2)
+CMP.b	 #50,8(a2)
+BNE		 tmok
+MOVE.b	 #0,8(a2)
+ADD.b	 #1,clk+7
+CMP.b	 #10,clk+7
+BNE		 tmok
+MOVE.b	 #0,clk+7
+ADD.b	 #1,clk+6
+CMP.b	 #6,clk+6
+BNE		 tmok
+MOVE.b	 #0,clk+6
+ADD.b	 #1,clk+4
+CMP.b	 #10,clk+4
+BNE		 tmok
+MOVE.b	 #0,clk+4
+ADD.b	 #1,clk+3
+CMP.b	 #6,clk+3
+BNE		 tmok
+MOVE.b	 #0,clk+3
+ADD.b	 #1,clk+1
+CMP.b	 #10,clk+1
+BNE		 tmok
+MOVE.b	 #0,clk+1
+ADD.b	 #1,clk
+CMP.b	 #10,clk
+BNE		 tmok
+MOVE.b	 #0,clk
+.tmok:
+LEA		 nums,a0
+MOVE.l	bm,a1
+CMP.l	 #0,a1
+BEQ		 nobm
+LEA		 5231(a1),a1
+MOVEQ	 #0,d0
+drnm:
+MOVEQ.l #0,d1
+MOVE.b	(a2)+,d1
+ASL.w	 #3,d1
+LEA		 0(a0,d1),a3
+BSR		 num
+ADDQ.l	#1,d0
+CMP.w	 #8,d0
+BNE		 drnm
+BRA		 nobm
+num:		MOVE.b (a3)+,(a1)
+				MOVE.b (a3)+,40(a1)
+				MOVE.b (a3)+,80(a1)
+				MOVE.b (a3)+,120(a1)
+				MOVE.b (a3)+,160(a1)
+				MOVE.b (a3)+,200(a1)
+				MOVE.b (a3)+,240(a1)
+				MOVE.b (a3)+,280(a1)
+				LEA		 1(a1),a1
+				RTS
+nobm:
+End SetInt
+.ngm:
+localstat 0,0,0,320,256,$1800,"",0,1,ms
+x1=x1(ms):x2=x2(ms):ss=ss(ms):xo=xo(ms):tw=tw(ms)
+For t=0 To ms :For r=0 To ms
+longdiv t+r*(ms+1)+ss,t*x1+250,r*x1+xo
+Next:Next
+Gosub random
+ShowMap{0,3}
+t=##[$FFA6](Peek.l(##[$80B8] allocst(0)))
+.lp:
+Poke.l	?cnt,0
+GetReg	d0,ms
+GetReg	d1,&t.l
+MOVE.l	d1,a2
+SUB.w	 #2,d0
+MULU		#400,d0
+LEA		 blks,a0
+LEA		 bas1,a1
+ADD.l	 d0,a1
+MOVE.l	#399,d0
+MOVEQ.l #-1,d1
+chek:
+MOVE.b	(a1)+,d2
+MOVE.b	(a0)+,d3
+CMP.b	 d3,d2
+BNE		 ot
+DBF		 d0,chek
+MOVEQ.l	#0,d1
+ot:
+MOVE.l	d1,(a2)
+
+If t=0 Then Goto done
+
+t=WaitEvent
+If t<>$40 Then Goto lp
+.Gadgets:
+g=GadgetHit-1
+If g=98 Then Gosub random :Goto lp
+If g=97 Then Poke.l ?bm,0:End
+If g=95 Then Goto about
+If g=96 Then Goto nwlvl
+If g=95 Then Goto trp
+
+o=Int(g/20):r=g-o*20
+k=Int(r/4):c=r AND 3
+mov+1
+WLocate 250,150
+Print mov,"	 "
+On o+1 Goto up,rt,dn,lf
+Goto lp
+.about:
+MOVE.w	#-1,cnt
+Use lmaxlen 3
+Scroll 0,0,320,256,0,0,0
+t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+Use lmaxlen 1
+BlockScroll 0
+longdiv 80,0,0
+ShowMap{1,3}
+MouseWait
+ShowMap{0,3}
+t=##[$FFA6](Peek.l(##[$80B8] allocst(0)))
+Goto	lp
+nwlvl:
+Poke.w	?cnt,-1
+Use lmaxlen 3
+Scroll 0,0,320,256,0,0,0
+t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+Use lmaxlen 0
+ms=ms+1:If ms=5 Then ms=2
+CloseWindow 0
+Goto ngm
+.up:
+x=xo+k*x2+c*x1
+For t=1 To x2
+Use lmaxlen 1
+Scroll x,27,x1,tw-1,0,0,0
+Scroll x,26,x1,1,0,tw-1,0
+Use lmaxlen 0
+VWait
+Scroll 0,0,x1,tw,x,26,1
+Next
+Gosub rup
+Goto lp
+.dn:
+x=xo+k*x2+c*x1
+For t=1 To x2
+Use lmaxlen 1
+Scroll x,26,x1,tw-1,0,1,0
+Scroll x,tw+25,x1,1,0,0,0
+Use lmaxlen 0
+VWait
+Scroll 0,0,x1,tw,x,26,1
+Next
+Gosub rdn
+Goto lp
+.rt:
+y=xo+k*x2+c*x1
+For t=1 To x2
+Use lmaxlen 1
+Scroll 26,y,tw-1,x1,1,0,0
+Scroll tw+25,y,1,x1,0,0,0
+Use lmaxlen 0
+VWait
+Scroll 0,0,tw,x1,26,y,1
+Next
+Gosub rrt
+Goto lp
+.lf:
+y=xo+k*x2+c*x1
+For t=1 To x2
+Use lmaxlen 1
+Scroll 27,y,tw-1,x1,0,0,0
+Scroll 26,y,1,x1,tw-1,0,0
+Use lmaxlen 0
+VWait
+Scroll 0,0,tw,x1,26,y,1
+Next
+Gosub rlf
+Goto lp
+.done:
+Poke.w	?cnt,-1
+
+Use lmaxlen 3
+Scroll 0,0,320,256,0,0,0
+t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+
+Use lmaxlen 1
+BlockScroll 0
+longdiv 75,60,28
+ShowMap{1,3}
+MouseWait
+
+BitMapOutput 1
+Gosub addname
+k=0
+Use lmaxlen 1
+BitMapOutput 1
+
+.Hiscores:
+BlockScroll 0
+longdiv 76,60,0
+longdiv 78-k,123,37
+Line 0,35,319,35,1
+
+BitMapOutput 1
+Colour 6-k
+For t=0 To 19
+Locate 1,t+10
+Print t+1
+Locate 4,t+10
+Print hn$(t+k*20,ms)
+Next
+
+
+
+ShowMap{1,3}
+k=1-k
+c.l=0
+h:
+VWait
+c+1
+If c=200 Then Goto Hiscores
+BTST #6,$bfe001
+BNE	h
+Use lmaxlen 0
+Goto ngm
+.random:
+bk.l=?blks
+Poke.l 0,bk
+MOVE.l	#399,d0
+MOVEQ.l #0,d1
+LEA		 blks,a0
+fl:
+MOVE.b	d1,(a0)+
+DBF d0,fl
+
+For t=0 To ms :For r=0 To ms
+For x=0 To 3	:For y=0 To 3
+Poke.b bk+x+t*4+y*20+r*80,t+r*(ms+1)
+Next:Next:Next:Next
+
+For t=0 To 100-100 * #debug
+r=Rnd(4*(ms+1))
+op:
+d=Rnd(4)
+If r>19 Then Print "Error ",r:MouseWait:End
+On d+1 Gosub rup,rdn,rlf,rrt
+Goto rnx
+.rup:
+For b=0 To 3
+a.l=bk+r+b*20
+For c=0 To ms-1
+d=Peek.b (a+c*80)
+Poke.b a+c*80,Peek.b (a+c*80+80)
+Poke.b a+c*80+80,d
+Next
+Next
+Return
+.rdn:
+For b=0 To 3
+a.l=bk+r+b*20
+For c=ms-1 To 0 Step -1
+d=Peek.b (a+c*80)
+Poke.b a+c*80,Peek.b (a+c*80+80)
+Poke.b a+c*80+80,d
+Next
+Next
+Return
+.rlf:
+For b=0 To 3
+a.l=bk+r*20+b
+For c=0 To ms-1
+d=Peek.b (a+c*4)
+Poke.b a+c*4,Peek.b (a+c*4+4)
+Poke.b a+c*4+4,d
+Next
+Next
+Return
+.rrt:
+For b=0 To 3
+a.l=bk+r*20+b
+For c=ms-1 To 0 Step-1
+d=Peek.b (a+c*4)
+Poke.b a+c*4,Peek.b (a+c*4+4)
+Poke.b a+c*4+4,d
+Next
+Next
+Return
+rnx:
+Next
+For t=0 To ms :For r=0 To ms
+For x=0 To 3 :For y=0 To 3
+longdiv	Peek.b(x+t*4+y*20+r*80+bk)+ss,x*x1+t*x2+xo,y*x1+r*x2+xo
+Next:Next:Next:Next
+
+MOVE.l	#$09090a05,clk
+MOVE.l	#$090a0509,clk+4
+MOVE.w	#$3100,clk+8
+mov=0
+
+Return
+
+trp:
+For x=0 To 19
+For y=0 To 19
+WLocate x*8,y*8
+Print Chr$(65+Peek.b(?blks+x+y*20))
+WLocate x*8+160,y*8
+Print Chr$(65+Peek.b(?bas1+x+y*20))
+Next
+Next
+Stop
+Goto lp
+.addname:
+
+time$=""
+For t=0 To 7
+time$=time$+Chr$(Peek.b(?clk+t)+48)
+mve$=Right$("0000"+Str$(mov),4)
+
+Next
+hm=-1:ht=-1
+For t=0 To 19
+t$=Mid$(hn$(t,ms),21,8)
+m$= Mid$(hn$(t+20,ms),32,4)
+;Stop
+If ht=-1 AND time$ < t$	Then ht=t
+If hm=-1 AND mve$ < m$	Then hm=t
+Next
+
+
+If ht=-1 AND hm=-1 Then Goto nmo
+Gosub getname
+
+If ht=-1 Then Goto ntm
+For t=19 To ht+1 Step-1
+hn$(t,ms)=hn$(t-1,ms)
+Next
+hn$(ht,ms)=nam$
+ntm:
+If hm=-1 Then Goto nmov
+For t=19 To hm+1 Step-1
+hn$(t+20,ms)=hn$(t+19,ms)
+Next
+hn$(hm+20,ms)=nam$
+nmov:
+Gosub whs
+nmo:
+Return
+
+.getname:
+BlockScroll 0
+longdiv 79,60,80
+;onam$="King Fuzzy"
+
+ShowMap{1,3}
+Use lmaxlen 3
+WindowInput 3
+Use localstat 3
+
+WLocate 128,100
+
+nam$=Edit$(onam$,16)
+onam$=nam$
+nam$=Left$(nam$+"										 ",20)+time$+"	 "+mve$
+
+Return
+whs:
+t=ReadMem(1,dir$+"Cubulus.HiScores")
+If t=0 Then Goto wnohs
+FileOutput 1
+For l=2 To 4
+For t=0 To 39
+NPrint hn$(t,l)
+Next
+Next
+CloseFile 1
+wnohs:
+Return
+
+
+.cnt:		Dc.l		0
+.bm:		 Dc.l		0
+clk:		Dc.b		9,9,10,5,9,10,5,9,49,0
+
+.blks:	Dcb.b	 400,0
+nums:	 IncBin "Data/nums"
+
+.bas1:	IncBin "Data/cubbas2"
+.bas2:	IncBin "Data/cubbas3"
+.bas3:	IncBin "Data/cubbas4"
+End
+
+
+

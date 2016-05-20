@@ -1,0 +1,36 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/compare.bb2
++
+DEFTYPE.l
+
+##[$80B4]
+	err
+	NPrint "Usage: COMPARE file1 file2"
+	End
+End ##[$80B4]
+
+If NumPars<>2 Then Goto err
+
+If WriteMem(0,Par$(1))
+	If WriteMem(1,Par$(2))
+		If FileSeek(0)<>FileSeek(1) Then NPrint "Files are of different length!":End
+		l=FileSeek(0)
+		If l
+			m1=##[$FE97](l,$10001):m2=##[$FE97](l,$10001)
+			##[$BE14] 0,m1,l:##[$BE14] 1,m2,l
+			;
+			GetReg a0,m1:GetReg a1,m2:GetReg d0,l
+			;
+			ADDQ.l #3,d0:LSR.l #2,d0
+			loop
+			CMPM.l (a0)+,(a1)+:BNE fail:SUBQ.l #1,d0:BNE loop
+			;
+		EndIf
+		NPrint "Files are the same!":Goto done
+		fail
+		NPrint "Files are different!"
+		done:##[$FE99] m1,l:##[$FE99] m2,l
+		End
+	EndIf
+EndIf
+
+Goto err

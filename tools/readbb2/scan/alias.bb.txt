@@ -1,0 +1,119 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/map/alias.bb
++lmaxlen 0,1024,516,4
+lmaxlen 1,1024,516,2
+lmaxlen 2,1024,516,4
+
+LoadBitMap 0,"maps:f1.iff",0				;src
+LoadBitMap 1,"maps:f1.iff2"				 ;src
+
+DEFTYPE.w col1,col2,col3
+
+ShapesBitMap 0,2
+For y=1 To 510
+	Use lmaxlen 1
+	col2=Cls(0,y):col3=Cls(1,y)
+
+	For x=1 To 1022
+		Use lmaxlen 1
+		col1=col2:col2=col3:col3=Cls(x+1,y)
+
+		dcol=0
+		If col2<>0
+			If col2=1 Then dcol=8
+			If col2=2 Then dcol=13
+		Else
+			If (Cls(x,y+1)=1) OR (Cls(x,y-1)=1) Then dcol=15
+			If (dcol=15) AND (col1=1) AND (col3=1)
+				dcol=1
+			Else
+				If (col1=1) OR (col3=1) Then dcol=15
+			EndIf
+
+
+			sum.w=0
+			tcol=col1:If tcol=2 Then sum+1
+			tcol=col3:If tcol=2 Then sum+1
+			tcol=Cls(x,y+1):If tcol=2 Then sum+1
+			tcol=Cls(x,y-1):If tcol=2 Then sum+1
+			If sum>1 Then dcol=5
+
+		EndIf
+
+		If dcol<>0 Then Use lmaxlen 2:Point x,y,dcol
+
+	Next
+
+	If (y AND 15)=0 Then Print y,";"
+Next
+NPrint ""
+NPrint "Finished First Scan!"
+
+
+For y=1 To 510
+	Use lmaxlen 2
+	col2=Cls(0,y):col3=Cls(1,y)
+
+	For x=1 To 1022
+		Use lmaxlen 2
+		col1=col2:col2=col3:col3=Cls(x+1,y)
+
+		dcol=0
+		If col2=15
+			sum.w=0
+
+			tcol=col1
+			If (tcol=8) OR (tcol=15) OR (tcol=14) Then sum+1
+			tcol=col3
+			If (tcol=8) OR (tcol=15) OR (tcol=14) Then sum+1
+
+			Use lmaxlen 0
+			tcol=Cls(x,y+1)
+			If (tcol=8) OR (tcol=15) OR (tcol=14) Then sum+1
+			tcol=Cls(x,y-1)
+			If (tcol=8) OR (tcol=15) OR (tcol=14) Then sum+1
+
+
+			If sum>1 Then dcol=14
+;			If (col1=8) OR (col3=8) Then dcol=14
+;			If (Point(x,y+1)=1) OR (Point(x,y-1)=1) Then dcol=14
+
+		EndIf
+
+		If dcol<>0 Then Use lmaxlen 2:Point x,y,dcol
+
+	Next
+	If (y AND 7)=0 Then Print y,";"
+Next
+
+
+NPrint ""
+NPrint "SECOND PASS THRU"
+
+
+For y=1 To 510
+	For x=1 To 1022
+		Use lmaxlen 2:col2=Cls(x,y)
+
+		dcol=0:Use lmaxlen 0
+		If col2=15
+			Use lmaxlen 0:tcol=Cls(x,y)
+			If tcol=QLimit(tcol,9,12) Then dcol=9
+			If tcol=QLimit(tcol,1,4) Then dcol=1
+		EndIf
+
+		If col2=5
+			Use lmaxlen 0:tcol=Cls(x,y)
+			If tcol=QLimit(tcol,9,12) Then dcol=QLimit(tcol+1,9,12)
+			If tcol=QLimit(tcol,1,4) Then dcol=QLimit(tcol+1,1,4)
+		EndIf
+
+		If dcol<>0 Then Use lmaxlen 2:Point x,y,dcol
+
+	Next
+	If (y AND 15)=0 Then Print y,";"
+Next
+
+SaveBitmap 2,"ram:Dead.iff",0
+NPrint "done"
+MouseWait
+End

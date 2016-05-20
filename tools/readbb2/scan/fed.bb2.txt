@@ -1,0 +1,232 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/fed.bb2
++;
+;font editor
+;
+;p() data:
+
+newlocarr 0,0,"FONT"
+MenuItem 0,0,0,0,"LOAD			 ","L"
+MenuItem 0,0,0,1,"SAVE			 ","S"
+MenuItem 0,0,0,2,"CREATE		 ","C"
+MenuItem 0,0,0,3,"UNDO			 ","U"
+MenuItem 0,0,0,4,"QUIT			 ","Q"
+
+MaxLen ppa$=160
+MaxLen pfi$=160
+MaxLen cpa$=160
+MaxLen cfi$=160
+
+NEWTYPE.point
+x.w
+y.w
+End NEWTYPE
+
+Dim nc(255) ;number of chars
+Dim np(255) ;number of points
+Dim p.point(255,63)
+Dim v.point(63)
+Dim v$(31)
+
+Dim po.point(255)
+
+allocst 0,3:ScreensBitMap 0,0
+AddIDCMP 16:localstat 0,0,0,320,256,$1800,"",1,2:arrmult 0
+
+xsc=2:ysc=2
+t$=Chr$(9)
+
+c=65
+;
+new
+Gosub drawall
+lx=0:fx=0
+more
+ev.l=WaitEvent:mx=EMouseX&$fffc:my=EMouseY&$fffc
+Select ev
+Case 256
+	Select MenuHit
+	Case 0
+		Select ItemHit
+		Case 0	;load
+			f$=FileRequest$("File to load",ppa$,pfi$)
+			If f$
+				If WriteMem(0,f$)
+					FileInput 0:np(c)=p
+					For k=32 To 127
+					np(k)=Cvi(Inkey$(2))
+					For j=1 To np(k)
+					##[$BE14] 0,p(k,j),SizeOf.point
+					Next j,k
+					CloseFile 0:Use localstat 0
+					##[$80BE] Select:##[$80BE] Select:Goto new
+				Else
+					##[$FF8C] 0
+				EndIf
+			EndIf
+		Case 1	;save
+			If fx=0
+				f$=FileRequest$("File to save",ppa$,pfi$)
+				If f$
+					If ReadMem(0,f$)
+						FileOutput 0:np(c)=p
+						For k=32 To 127
+						Print Mki$(np(k))
+						For j=1 To np(k)
+						Exists 0,p(k,j),SizeOf.point
+						Next j,k
+						CloseFile 0:Use localstat 0
+					Else
+						##[$FF8C] 0
+					EndIf
+				EndIf
+			Else
+				##[$FF8C] 0
+			EndIf
+		Case 2	;create
+			Gosub docreate
+		Case 3	;undo
+			p2=p
+			While p2
+				p2-1:If p(c,p2)\x=0 Then p=p2:p2=0
+			Wend
+			np(c)=p:##[$80BE] Select:##[$80BE] Select:Goto new
+		Case 4	;quit
+			End
+		End Select
+	End Select
+Case 1024
+	i$=Inkey$
+	If i$=Chr$(27)
+		np(c)=0:##[$80BE] Select:Goto new
+	EndIf
+	If Asc(i$)>31 AND Asc(i$)<128
+		If fx=0
+			np(c)=p:c=Asc(i$):##[$80BE] Select:Goto new
+		Else
+			##[$FF8C] 0
+		EndIf
+	EndIf
+Case 8
+	mb=MButtons
+	If mb=1 AND Cls(mx,my)<>0
+		If lx Then Line lx,ly,mx,my,2
+		If mx=fx AND my=fy
+			p+1:p(c,p)\x=0:np(c)=p
+			##[$80BE] Select:Goto new
+		EndIf
+		If lx=0 Then fx=mx:fy=my
+		p+1:p(c,p)\x=mx,my:lx=mx:ly=my:Boxf lx,ly,lx+3,ly+3,2
+	EndIf
+End Select
+
+Goto more
+
+.docreate
+f$=FileRequest$("File to create",cpa$,cfi$)
+	If ReadMem(0,f$)
+		FileOutput 0:np(c)=p:va=0:cc=0
+		;
+		For k=32 To 127
+		p(k,0)\x=160,128	;origin point!
+		If cc Then cc-1:Print "," Else cc=3:NPrint "":Print t$+"dc.l"+t$
+		If np(k) Then Print ".object_"+Str$(k) Else Print "0"
+		Next
+		NPrint "":NPrint ""
+		;
+		For k=32 To 127
+		If np(k)=0 Then Goto missall
+		nv=0:np=0
+		;
+		For j=0 To np(k)
+		If p(k,j)\x
+			xx=(p(k,j)\x-160)*xsc
+			yy=(p(k,j)\y-128)*ysc
+			For l=1 To nv
+			If xx=v(l)\x AND yy=v(l)\y
+				##[$80BE] For:Goto outofit
+			EndIf
+			Next
+			nv+1:v(nv)\x=xx,yy
+		Else
+			np+1	;another poly!
+		EndIf
+		outofit
+		Next
+		;
+		NPrint ".object_"+Str$(k)+t$+"dc"+t$+Str$(nv-1)
+		;
+		For j=1 To nv
+		NPrint t$+"dc"+t$+Str$(v(j)\x)+","+Str$(v(j)\y)+",0,0"
+		Next
+		;
+		NPrint t$+"dc"+t$+"0,0"
+		NPrint t$+"dc.l"+t$+".polylist_"+Str$(k)+",0"
+		;
+		NPrint ".polylist_"+Str$(k)+t$+"dc"+t$+Str$(np-1)
+		pa=1:va2=0:ova=va
+		;
+		For j=1 To np
+		v$="":np2=0
+		;
+		While p(k,pa)\x
+			xx=(p(k,pa)\x-160)*xsc
+			yy=(p(k,pa)\y-128)*ysc
+			For vn=1 To nv
+			If xx=v(vn)\x AND yy=v(vn)\y
+				If v$ Then v$+","
+				v$+Str$(vn-1)
+				##[$80BE] For:Goto outofit2
+			EndIf
+			Next
+			outofit2
+			pa+1:np2+1
+		Wend
+		;
+		pa+1:va2+1:v$(va2)=v$
+		NPrint t$+"dc"+t$+Str$(np2-1)+",$0401"
+		va+1:NPrint t$+"dc.l"+t$+".verts_"+Str$(va)
+		;
+		Next
+		;
+		va2=0
+		For j=ova+1 To va
+		va2+1:NPrint t$+"dc"+t$+v$(va2)
+		NPrint ".verts_"+Str$(j)+t$+"dc"+t$+v$(va2)+","+v$(va2)
+		Next
+		;
+		NPrint ""
+		;
+		missall
+		Next
+		;
+		CloseFile 0:Use localstat 0
+	Else
+		##[$FF8C] 0
+	EndIf
+If f$
+EndIf
+Return
+
+.drawall
+BlockScroll:WLocate 0,12:Print LSet$(Str$(c),3),Chr$(c)
+For x=-64 To 64 Step 16
+For y=-64 To 64 Step 16
+Boxf 160+x,128+y,163+x,131+y,1
+Next y,x
+p=np(c):fx=0
+For k=1 To p
+x=p(c,k)\x:y=p(c,k)\y:If fx=0 Then fx=x:fy=y:np=1:po(np)\x=fx,fy
+x2=p(c,k+1)\x:y2=p(c,k+1)\y
+If x2
+	Line x,y,x2,y2,2:np+1:po(np)\x=x2,y2
+Else
+	For j=1 To np
+		po(j)\x-160:po(j)\x ASR 3+32
+		po(j)\y-128:po(j)\y ASR 3+32
+	Next
+	Polyf np,po(1),2
+	Line x,y,fx,fy,2:fx=0:k+1
+EndIf
+Next
+;
+Return

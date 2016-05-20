@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/QFrac.bb
++Print QFrac(23.4) ; Prints .4 

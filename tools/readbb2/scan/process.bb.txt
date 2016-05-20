@@ -1,0 +1,21 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/process.bb
++lmaxlen 0,768,384,4
+lmaxlen 1,768,384,4
+
+;LoadPalette 0,"beach.palette"
+;LoadBitMap 0,"tracks/iff/track.fix20"
+;SaveBitmap 0,"tracks/iff/track.fix20",0
+
+;End
+
+
+casestrcomp 0,"ranch.palette"
+
+LoadBitMap 0,"tracks/iff/track.fix24"
+LoadBitMap 1,"shit/maps/oldtrack21.ami"
+
+Use lmaxlen 0:ReMap 3,8:Use lmaxlen 1:ReMap 3,3,0
+
+SaveBitmap 0,"tracks/iff/track.fix24",0
+
+End

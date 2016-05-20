@@ -1,0 +1,2120 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/editmap.bb
++
+k.f=##[$80BA]/180
+
+##[$80C3]
+
+PropGadget 9,15,21,128,1,9,79
+SetVProp 9,1,0,.0667
+PropGadget 9,30,21,128,2,9,79
+SetVProp 9,2,0,.0667
+PropGadget 9,45,21,128,3,9,79
+SetVProp 9,3,0,.0667
+workstart 9,60,80,0,4,"OK"
+
+
+MaxLen gpa$=192		 ;gfx
+MaxLen gna$=192
+gpa$=""
+MaxLen mpa$=192		 ;map
+MaxLen mna$=192
+mpa$=""
+MaxLen spa$=192		 ;scroll
+MaxLen sna$=192
+spa$=""
+MaxLen cpa$=192		 ;contour
+MaxLen cna$=192
+cpa$=""
+MaxLen sp$=192			;screen shot..
+MaxLen sn$=192
+sp$=""
+
+MaxLen pat$=192
+pat$="#?"
+
+allocst 0,0,0,320,256,5,0,"",0,1
+ScreensBitMap 0,0
+localstat 0,0,0,320,256,$11900,"",0,1
+WindowInput 0
+WColour 17,23
+BitMapOutput 0
+Use lmaxlen 0
+
+LoadShape 1002,"s:edarrows.iff"
+
+BlockScroll
+GetaShape 1018,0,0,16,16
+GetaShape 1001,0,0,16,16
+Handle 1001,-8,-8					 ;blank pointer...
+Line 8,2,8,14,1
+Line 2,8,14,8,1
+GetaShape 1000,0,0,16,16
+Handle 1000,-8,-8:WPointer 1000 ;normal pointer
+
+Green 16,14,14,14		 ;white
+Green 17,0,0,14
+Green 18,0,0,0				;black
+Green 19,11,11,11
+Green 20,8,8,8
+Green 21,5,5,5
+Green 22,14,14,0			;yellow
+Green 23,13,9,9
+For l=24 To 31
+		Green l,15,15,15
+Next
+
+BlockScroll
+;;;hi=1:lo=15:mid=7
+
+hi=19:lo=21:mid=20:back=23	;16
+
+
+NEWTYPE .gad
+		yes.w
+		x.w
+		y.w
+		w.w
+		h.w
+		t.s
+End NEWTYPE
+
+Dim gadgets.gad(20)
+
+;-----------------------------------------------------------
+
+Statement makegadget{n,x,y,t$}		;chr x!!!
+Shared gadgets(),hi,lo,mid,back
+
+		x=(x*8)-1
+		y=(y*8)-2
+
+		h=n
+
+		gadgets(h)\yes=1
+		gadgets(h)\x=x
+		gadgets(h)\y=y
+		gadgets(h)\t=t$
+		gadgets(h)\h=12
+		gadgets(h)\w=(Len(t$)*8)+2:ww=gadgets(h)\w+1
+
+		Box x-1,y-1,x+ww+1,y+13,0
+		Line x,y,x+ww,y,hi
+		Line x,y,x,y+12,hi
+		Line x+ww,y,x+ww,y+12,lo
+		Line x+1,y+12,x+ww,y+12,lo
+		Boxf x+1,y+1,x+ww-1,y+11,mid
+
+		Colour 16,mid
+		Locate Int((x+1)/8),Int((y+2)/8)
+		Print t$
+		Colour 18,back
+
+End Statement
+
+;-----------------------------------------------------------
+
+Statement clrgadgets{}
+Shared gadgets()
+		For l=0 To 20
+				gadgets(l)\yes=0
+		Next
+End Statement
+
+;-----------------------------------------------------------
+
+Function getgadget{}
+Shared gadgets(),lo,mid,hi,back
+
+ggaa:
+		WaitEvent
+		If Joyb(0)<>1 Then Goto ggaa
+;		MouseWait
+		mx=SMouseX
+		my=SMouseY
+
+		For l=0 To 20
+				If gadgets(l)\yes=1
+						If mx>gadgets(l)\x AND mx<gadgets(l)\x+gadgets(l)\w
+								If my>gadgets(l)\y AND my<gadgets(l)\y+gadgets(l)\h
+										zz=l:##[$80BE] For:Goto eff
+								EndIf
+						EndIf
+				EndIf
+		Next
+
+Goto ggaa
+
+eff:
+		x=gadgets(zz)\x
+		y=gadgets(zz)\y
+		Colour lo,mid
+		Locate Int((x+1)/8),Int((y+2)/8)
+		Print gadgets(zz)\t
+		Colour 18,back
+
+		##[$80BB]:VWait:##[$80BC] Joyb(0)=0
+
+		Colour 16,mid
+		Locate Int((x+1)/8),Int((y+2)/8)
+		Print gadgets(zz)\t
+		Colour 18,back
+
+
+
+Function Return zz
+
+End Function
+
+;-----------------------------------------------------------
+
+Function checkgadget{}
+Shared gadgets(),mid,lo,hi,back
+
+		zz=-1
+
+		If Joyb(0)=1
+				mx=SMouseX
+				my=SMouseY
+
+				For l=0 To 20
+						If gadgets(l)\yes=1
+								If mx>gadgets(l)\x AND mx<gadgets(l)\x+gadgets(l)\w
+										If my>gadgets(l)\y AND my<gadgets(l)\y+gadgets(l)\h
+												zz=l:##[$80BE] For:Goto effg
+										EndIf
+								EndIf
+						EndIf
+				Next
+		EndIf
+effg:
+
+		If zz=-1 Then Goto pppp
+
+		x=gadgets(zz)\x
+		y=gadgets(zz)\y
+		Colour 18,mid
+		Locate Int((x+1)/8),Int((y+2)/8)
+		Print gadgets(zz)\t
+		Colour 18,back
+
+		##[$80BB]:VWait:##[$80BC] Joyb(0)=0
+
+		Colour 16,mid
+		Locate Int((x+1)/8),Int((y+2)/8)
+		Print gadgets(zz)\t
+		Colour 18,back
+
+pppp:
+		Function Return zz
+
+End Function
+
+;-----------------------------------------------------------
+
+Function.w MessageBox{title$,text$}
+Shared hi,lo,mid,back
+
+hit.w=-1
+
+GetaShape 999,78,78,168,80
+
+Boxf 78,78,240,150,16		 ;160 wide
+Box 78,78,240,150,0				 ;black outline
+Boxf 79,79,239,91,17				;blue titlebar
+Line 79,91,239,91,0
+Colour 16,17
+tl=Len(title$):tl=11+((20-tl)/2)
+Locate tl,10
+Print title$
+
+Colour 18,16
+tl=Len(text$):tl=11+((18-tl)/2)
+Locate tl,13
+Print text$
+
+;add ok/cancelgadgets...
+x=104:y=134:ww=50
+Box x-1,y-1,x+ww+1,y+13,0
+Line x,y,x+ww,y,hi
+Line x,y,x,y+12,hi
+Line x+ww,y,x+ww,y+12,lo
+Line x+1,y+12,x+ww,y+12,lo
+Boxf x+1,y+1,x+ww-1,y+11,mid
+Colour 16,mid
+Locate Int((x+1)/8),Int((y+2)/8)
+Print "	OK	"
+Colour 18,back
+
+x=167:y=134:ww=50
+Box x-1,y-1,x+ww+1,y+13,0
+Line x,y,x+ww,y,hi
+Line x,y,x,y+12,hi
+Line x+ww,y,x+ww,y+12,lo
+Line x+1,y+12,x+ww,y+12,lo
+Boxf x+1,y+1,x+ww-1,y+11,mid
+Colour 16,mid
+Locate Int((x+1)/8),Int((y+2)/8)
+Print "CANCEL"
+Colour 18,back
+
+ggad:
+MouseWait
+sx=SMouseX
+sy=SMouseY
+If sx>104 AND sx<154 AND sy>134 AND sy<146
+		hit=1
+		Goto ex
+EndIf
+If sx>167 AND sx<214 AND sy>134 AND sy<146
+		hit=0
+		Goto ex
+EndIf
+Goto ggad
+ex:
+Boxf 78,78,78+160,78+79,0
+longdiv 999,78,78
+
+Function Return hit
+End Function
+
+;-----------------------------------------------------------
+
+topblock=0			;0,500-
+topplat=0			 ;1000-
+
+MAPWIDTH=160*2
+MAPHEIGHT=100*2
+
+Dim map.w(MAPWIDTH,MAPHEIGHT)
+Dim col.w(1000)
+Dim collision.w(1000)
+Dim maps.b(MAPWIDTH,MAPHEIGHT) ;scroll....
+
+mapx=0:mapy=0
+cblock=0
+eblock=0
+
+Dim rect.w(320,200)
+rectw=0
+recth=0
+
+Green 0,0,0,0
+Green 1,15,15,15
+Green 6,12,6,12
+Green 5,8,4,8
+Green 4,6,3,6
+
+Buffer 0,40*200*5
+
+cyc.w=0
+cyc1.w=8		;first col
+cyc2.w=10	 ;last col
+
+cycp=8
+
+cycs=0			;speed
+cycss=15
+
+SetInt 5
+
+If cyc=1								;10=9,9=8,8=10
+		cycs+1
+		If cycs=>cycss
+				cycs=0
+
+;				r1=Red(cyc1):g1=Green(cyc1):b1=Blue(cyc1)
+;				r2=Red(cyc1+1):g2=Green(cyc1+1):b2=Blue(cyc1+1)
+;				r3=Red(cyc2):g3=Green(cyc2):b3=Blue(cyc2)
+;				RGB cyc1,r3,g3,b3
+;				RGB cyc1+1,r1,g1,b1
+;				RGB cyc2,r2,g2,b2
+
+				zr2=Blue(cyc2):zg2=Palette(cyc2):zb2=PalRGB(cyc2)
+
+				For fuck=cyc2 To cyc1+1 Step -1
+						zr1=Blue(fuck-1):zg1=Palette(fuck-1):zb1=PalRGB(fuck-1)
+						Green fuck,zr1,zg1,zb1
+				Next
+
+				Green cyc1,zr2,zg2,zb2
+
+
+		EndIf
+EndIf
+
+End SetInt
+;------------------------------------------------------
+.MAIN
+BlockScroll back
+Colour 18,back
+
+clrgadgets{}
+
+BlockScroll back
+Locate 15,1
+Print "Main Menu."
+
+makegadget{1,14,5,"Load	Blocks"}
+
+makegadget{2,14,7," Edit Coll	"}
+
+makegadget{3,14,9,"	Edit Map	"}
+
+makegadget{4,14,11,"Edit	Scroll"}
+
+makegadget{9,14,15,"Edit	Blocks"}
+makegadget{0,14,20,"		Quit		"}
+
+makegadget{10,7,30," 4 Way Scrolly Map Editor "}
+
+Line 0,18,319,18,18
+Line 0,236,319,236,18
+
+keyw:
+
+gg=getgadget{}
+
+If gg=1 Then Goto GetBlocks
+If gg=2 Then Goto EditContour
+If gg=3 Then Goto EditMap
+If gg=4 Then Goto EditScroll
+
+;;;;;;If gg=9 Then Goto EditBlocks
+If gg=0
+		qp.w=MessageBox{"Hello There","Are You Sure ?"}
+		If qp=1 Then End
+EndIf
+
+Goto keyw
+
+;------------------------------------------------------
+.GetBlocks
+
+BlockScroll back
+
+f$=ASLFileRequest$("Load Blocks..",gpa$,gna$,pat$,0,8,320,242)
+
+Use lmaxlen 0
+BitMapOutput 0
+BlockScroll back
+VWait 5
+
+If f$="" Then Goto MAIN
+
+BlockScroll 0
+LoadBitMap 0,f$,0
+Use SetCycle 0
+Green 16,14,14,14
+Green 17,0,0,14
+Green 18,0,0,0
+Green 19,11,11,11
+Green 20,8,8,8
+Green 21,5,5,5
+Green 22,14,14,0
+Green 23,13,9,9
+
+StopCycle 0,16,14,14,14
+StopCycle 0,17,0,0,14
+StopCycle 0,18,0,0,0
+StopCycle 0,19,11,11,11
+StopCycle 0,20,8,8,8
+StopCycle 0,21,5,5,5
+StopCycle 0,22,14,14,0
+StopCycle 0,23,13,9,9
+
+MouseWait
+mx=SMouseX
+my=SMouseY
+
+mx=Int(mx/16)
+my=Int(my/16)
+my=my*20+mx
+
+ssx=0:ssy=0
+
+##[$80D3]
+For s=0 To my
+		col(topblock)=Cls(ssx+8,ssy+8)
+		If col(topblock)=0 Then col(topblock)=Cls(ssx+10,ssy+9)
+		If col(topblock)=0 Then col(topblock)=Cls(ssx+4,ssy+4)
+		VWait
+		GetaShape topblock,ssx,ssy,16,16
+		##[$FF22]
+		Boxf ssx,ssy,ssx+15,ssy+15,1
+		ssx+16:If ssx>319 Then ssx=0:ssy+16
+		topblock+1
+		If topblock=1000 Then ##[$80BE] For:Goto qqqz
+Next
+qqqz:
+##[$80D2]
+
+BlockScroll back
+Goto MAIN
+;------------------------------------------------------
+.EditMap
+startb=0
+
+redrawem:
+VWait
+BlockScroll back
+##[$80D3]
+For y=0 To 11
+		For x=0 To 19
+				Boxf x*16,y*16,x*16+15,y*16+15,0
+				BlitColl map(mapx+x,mapy+y),x*16,y*16
+		Next
+Next
+##[$80D2]
+Line 0,192,319,192,18
+
+makegadget{0,1,25,"Current Block:"}
+Boxf 128,198,128+15,198+15,0
+BlitColl cblock,128,198
+Locate 35,25:Print cblock,"	"
+
+bmx=0:bmy=0
+Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+
+xx=0:yy=218
+endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
+Boxf 0,217,319,251,0
+Line 0,217,319,217,18
+Line 0,251,319,251,18
+For l=startb To endb
+		BlitColl l,xx,yy
+		If l=cblock Then Box xx,yy,xx+15,yy+15,-1
+		xx+16:If xx>319 Then xx=0:yy+16
+Next
+
+Locate 20,25:Print "Status: O.K. "
+
+;If recth<>0
+;		Blit 1005,319-ShapeWidth(1005),198
+;EndIf
+
+edloop:
+VWait
+If bmy<12
+		Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+EndIf
+
+bmx=SMouseX
+bmy=SMouseY
+bmx=Int(bmx/16)
+bmy=Int(bmy/16)
+If bmy<12
+		Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+EndIf
+
+
+mx=SMouseX
+my=SMouseY
+If my<192
+		mx=(Int(mx/16)+mapx)
+		my=(Int(my/16)+mapy)
+		Locate 20,26:Print "X:",mx,"	 "
+		Locate 28,26:Print "Y:",my,"	 "
+EndIf
+
+a$=Inkey$
+aa=Asc(a$)			;139=help
+
+If a$=Chr$(9)
+		cyc=1-cyc
+EndIf
+
+If a$="-" AND cycss>0 Then cycss-1
+If a$="=" AND cycss<20 Then cycss+1
+
+If a$="p"
+		f$=ASLFileRequest$("Save IFF...",gpa$,gna$)
+		If f$="" Then Goto MAIN
+		Use lmaxlen 0
+		BitMapOutput 0
+		BlockScroll 0
+		For y=0 To 11
+				For x=0 To 19
+						Boxf x*16,y*16,x*16+15,y*16+15,0
+						BlitColl map(mapx+x,mapy+y),x*16,y*16
+				Next
+		Next
+		SaveBitmap 0,f$,0
+EndIf
+
+
+If a$="|"
+		VWait
+		f$=ASLFileRequest$("Save Screen Shot...",sp$,sn$,0,8,320,240)
+		If f$="" Then Goto redrawem
+		VWait 10
+		For y=0 To 15
+				For x=0 To 19
+						Boxf x*16,y*16,x*16+15,y*16+15,0
+						BlitColl map(mapx+x,mapy+y),x*16,y*16
+				Next
+		Next
+		##[$FF22]
+		##[$FF22]
+		SaveBitmap 0,f$,0
+		VWait
+		Goto redrawem
+EndIf
+
+If aa=139
+		Gosub EdHelp
+		Goto EditMap
+EndIf
+
+If a$="m"
+		Gosub doscanner
+		Goto EditMap
+EndIf
+
+
+If a$="C"
+		For ay.q=0 To MAPHEIGHT-1
+				For ax.q=0 To MAPWIDTH-1 Step 2
+						If ay/2=Int(ay/2)
+								map(ax,ay)=cblock	 ;$81
+								map(ax+1,ay)=cblock ;$82
+						Else
+								map(ax,ay)=cblock	 ;$83
+								map(ax+1,ay)=cblock ;$84
+						EndIf
+				Next
+		Next
+		Goto EditMap
+EndIf
+
+If a$=Chr$(27) Then Goto MAIN
+
+;;;;;;;;;If a$="z" Then Gosub ZoomIn:Goto EditMap
+
+If a$="v" Then Gosub ViewMap:Goto EditMap
+
+If a$="s" Then Gosub SaveMap:Goto EditMap
+
+If a$="l" Then Gosub LoadMap:Goto EditMap
+
+If a$="g"
+		Locate 20,26:Print "X:			"
+		Locate 22,26:WLocate 22*8,26*8
+		mx=Edit(mx,3)
+		Locate 28,26:Print "Y:			"
+		Locate 30,26:WLocate 30*8,26*8
+		my=Edit(my,3)
+
+		mapx=mx-10:If mapx<0 Then mapx=0
+		mapy=my-6:If mapy<0 Then mapy=0
+		Goto EditMap
+
+EndIf
+
+If a$=" " AND recth<>0
+		mx=SMouseX
+		my=SMouseY
+		If my<192
+				mx=Int(mx/16)
+				my=Int(my/16)
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+				For y=1 To recth
+						For x=1 To rectw
+								If mapx+mx-1+x<MAPWIDTH AND mapx+mx-1+x=>0 AND mapy+my-1+y<MAPHEIGHT AND mapy+my-1+y=>0
+										If (mx-1+x)*16+15<320 AND (my-1+y)*16+15<192
+												Boxf (mx-1+x)*16,(my-1+y)*16,(mx-1+x)*16+15,(my-1+y)*16+15,0
+												BlitColl rect(x,y),(mx-1+x)*16,(my-1+y)*16
+										EndIf
+										map(mapx+mx-1+x,mapy+my-1+y)=rect(x,y)
+								EndIf
+						Next
+				Next
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+		EndIf
+EndIf
+
+##[$80D3]
+If aa=31
+		If mapx>0
+				mapx-1
+				Scroll 0,0,320-16,192,16,0	;->
+				yy=0:xx=0
+				For y=mapy To mapy+11
+						Boxf xx,yy,xx+15,yy+15,0
+						BlitColl map(mapx,y),xx,yy
+						yy+16
+				Next
+		EndIf
+EndIf
+If aa=30
+		If mapx<MAPWIDTH-19
+				mapx+1
+				Scroll 16,0,320-16,192,0,0 ;<-
+				yy=0:xx=320-16
+				For y=mapy To mapy+11
+						Boxf xx,yy,xx+15,yy+15,0
+						BlitColl map(mapx+19,y),xx,yy
+						yy+16
+				Next
+		EndIf
+EndIf
+If aa=28
+		If mapy>0
+				mapy-1
+				Scroll 0,0,320,192-16,0,16	 ;\/
+				yy=0:xx=0
+				For x=mapx To mapx+19
+						Boxf xx,yy,xx+15,yy+15,0
+						BlitColl map(x,mapy),xx,yy
+						xx+16
+				Next
+		EndIf
+EndIf
+If aa=29
+		If mapy<MAPHEIGHT-13
+				mapy+1
+				Scroll 0,16,320,192-16,0,0	 ;/\
+				yy=192-16:xx=0
+				For x=mapx To mapx+19
+						Boxf xx,yy,xx+15,yy+15,0
+						BlitColl map(x,mapy+11),xx,yy
+						xx+16
+				Next
+		EndIf
+EndIf
+##[$80D2]
+
+
+If Joyb(0)=1
+		mx=SMouseX
+		my=SMouseY
+		If my<192
+				mx=Int(mx/16)
+				my=Int(my/16)
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+				Boxf mx*16,my*16,mx*16+15,my*16+15,0
+				BlitColl cblock,mx*16,my*16
+				map(mapx+mx,mapy+my)=cblock
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+		EndIf
+
+		If my>217
+				xx=0:yy=218
+				For l=startb To endb
+						If l=cblock Then Box xx,yy,xx+15,yy+15,-1
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+
+				mx=Int(mx/16)
+				my=my-218:my=Int(my/16)
+				my=my*20+mx
+				cblock=my+startb
+				If cblock>topblock-1 Then cblock=topblock-1
+				Boxf 128,198,128+15,198+15,0
+				BlitColl cblock,128,198
+				Locate 35,25:Print cblock,"	"
+				xx=0:yy=218
+				For l=startb To endb
+						If l=cblock Then Box xx,yy,xx+15,yy+15,-1
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+
+		EndIf
+EndIf
+
+##[$80D3]
+If Joyb(0)=2
+		my=SMouseY:mx=SMouseX
+		If my>217
+				If my>234			 ;go down
+						startb+20:If startb>topblock-21 Then startb=topblock-21
+				Else						;go up
+						startb-20
+						If startb<0 Then startb=0
+				EndIf
+				xx=0:yy=218
+				endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
+				Boxf 0,217,319,251,0
+				Line 0,217,319,217,18
+				Line 0,251,319,251,18
+				For l=startb To endb
+						BlitColl l,xx,yy
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+				VWait 10
+		EndIf
+
+		If my<192
+				VWait
+				For y=0 To 15
+						For x=0 To 19
+								Boxf x*16,y*16,x*16+15,y*16+15,0
+								BlitColl map(mapx+x,mapy+y),x*16,y*16
+						Next
+				Next
+
+				bsx=Int(mx/16):bsy=Int(my/16)
+				bex=bsx:bey=bsy
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+				Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+				##[$80BB]
+						VWait
+						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+						mx=SMouseX
+						my=SMouseY
+						bex=Int(mx/16):bey=Int(my/16)
+						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+				##[$80BC] Joyb(0)<>2
+				bex=SMouseX:bey=SMouseY
+				bex=Int(bex/16):bey=Int(bey/16)
+
+				bbsx=bsx*16:bbsy=bsy*16
+				bbex=bex*16:bbey=bey*16
+
+				bsx+mapx:bsy+mapy
+				bex+mapx:bey+mapy
+
+				rectw=(bex-bsx)+1
+				recth=(bey-bsy)+1
+
+				BlockScroll 0:##[$FF22]
+				For y=0 To recth-1
+						For x=0 To rectw-1
+								Point x,y,col(map(bsx+x,bsy+y))
+						Next
+				Next
+				##[$FF22]
+				GetaShape 1005,0,0,rectw+1,recth+1
+				##[$FF22]
+
+				For y=1 To recth
+						For x=1 To rectw
+								rect(x,y)=map(bsx-1+x,bsy-1+y)
+						Next
+				Next
+
+				Box (bsx-mapx)*16,(bsy-mapy)*16,(bex-mapx)*16+15,(bey-mapy)*16+15,-1
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+
+				Goto redrawem
+		EndIf
+EndIf
+##[$80D2]
+
+Goto edloop
+;------------------------------------------------------
+.EdHelp
+
+Boxf 20,20,300,236,16			 ;280 wide
+Box 20,20,300,236,0				 ;black outline
+Boxf 21,21,299,33,17				;blue titlebar
+Line 21,33,299,33,0
+Colour 16,17
+title$="Editor Help"
+tl=Len(title$):tl=3+((35-tl)/2)
+Locate tl,3
+Print title$
+
+Colour 0,16
+Locate 5,5
+Print "Shift-C : Clear Map To Block"
+Locate 5,6
+Print "Escape	: Return To Main Menu"
+Locate 5,7
+Print "Z			 : Zoom In (X8)"
+Locate 5,8
+Print "V			 : View Entire Map (X16)"
+Locate 5,9
+Print "S			 : Save Map"
+Locate 5,10
+Print "L			 : Load Map"
+Locate 5,11
+Print "G			 : Goto New X And Y"
+Locate 5,12
+Print "Space	 : Paste Area"
+Locate 5,14
+Print "Right Mouse : Hold To Grab"
+Locate 5,15
+Print "Left Mouse	: Place Block"
+Locate 5,16
+Print "|			 : Save Ed-Pic"
+
+
+;add ok gadget...
+x=238:y=214:ww=50
+Box x-1,y-1,x+ww+1,y+13,0
+Line x,y,x+ww,y,hi
+Line x,y,x,y+12,hi
+Line x+ww,y,x+ww,y+12,lo
+Line x+1,y+12,x+ww,y+12,lo
+Boxf x+1,y+1,x+ww-1,y+11,mid
+Colour 16,mid
+Locate Int((x+1)/8)+1,Int((y+2)/8)
+Print "	OK	"
+Colour 18,back
+
+
+ehggad:
+VWait
+MouseWait
+sx=SMouseX
+sy=SMouseY
+If sx>238 AND sx<288 AND sy>214 AND sy<227
+		Goto exeh
+EndIf
+Goto ehggad
+exeh:
+
+Return
+;------------------------------------------------------
+.ZoomIn
+BlockScroll back
+
+clrgadgets{}
+makegadget{0,16,28,"Zoom X 2"}
+
+
+zx=mapx
+zy=mapy
+
+If zy+24>99 Then zy=99-24
+If zx+39>159 Then zx=159-39
+
+xx=0:yy=0
+For y=zy To zy+24
+		For x=zx To zx+39
+				Boxf xx,yy,xx+7,yy+7,0
+				longdiv map(x,y)+500,xx,yy
+				xx+8:If xx>319 Then xx=0:yy+8
+		Next
+Next
+
+Line 0,201,320,201,18
+
+vx=zx-mapx:my=zy-mapy
+Box vx*8,vy*8,(vx+20)*8,(vy+12)*8,-1
+
+ziloop:
+VWait
+Box vx*8,vy*8,(vx+20)*8,(vy+12)*8,-1
+
+a$=Inkey$
+If a$="z" OR Joyb(0)=1
+		mapx=vx+zx
+		mapy=vy+zy
+		Return
+EndIf
+
+If Joyb(0)=2
+		If SMouseX<64
+				If zx>0
+						zx-1
+						Scroll 0,0,320-8,200,8,0	;->
+						yy=0:xx=0
+						For y=zy To zy+24
+								Boxf xx,yy,xx+7,yy+7,0
+								longdiv map(zx,y)+500,xx,yy
+								yy+8
+						Next
+				EndIf
+		EndIf
+		If SMouseX>256
+				If zx<MAPWIDTH-39
+						zx+1
+						Scroll 8,0,320-8,200,0,0 ;<-
+						yy=0:xx=320-8
+						For y=zy To zy+24
+								Boxf xx,yy,xx+7,yy+7,0
+								longdiv map(zx+39,y)+500,xx,yy
+								yy+8
+						Next
+				EndIf
+		EndIf
+		If SMouseY<64
+				If zy>0
+						zy-1
+						Scroll 0,0,320,200-8,0,8	 ;\/
+						yy=0:xx=0
+						For x=zx To zx+39
+								Boxf xx,yy,xx+7,yy+7,0
+								longdiv map(x,zy)+500,xx,yy
+								xx+8
+						Next
+				EndIf
+		EndIf
+		If SMouseY>136
+				If zy<MAPHEIGHT-24
+						zy+1
+						Scroll 0,8,320,200-8,0,0	 ;/\
+						yy=200-8:xx=0
+						For x=zx To zx+39
+								Boxf xx,yy,xx+7,yy+7,0
+								longdiv map(x,zy+24)+500,xx,yy
+								xx+8
+						Next
+				EndIf
+		EndIf
+EndIf
+
+mx=SMouseX
+my=SMouseY
+If my<200
+		vx=Int(mx/8)
+		vy=Int(my/8)
+EndIf
+
+Box vx*8,vy*8,(vx+20)*8,(vy+12)*8,-1
+
+Goto ziloop
+
+;------------------------------------------------------
+.ViewMap
+
+BlockScroll back
+Activate 0
+VWait 12
+
+WPointer 1001
+
+clrgadgets{}
+makegadget{0,16,28,"Zoom X 16"}
+
+dooby:
+##[$80D3]
+For y=0 To MAPHEIGHT-1
+		For x=0 To MAPWIDTH-1
+				Point x,y,col(map(x,y))
+		Next
+Next
+##[$80D2]
+
+Line 0,MAPHEIGHT,320,MAPHEIGHT,18
+
+zx=mapx
+zy=mapy
+Point zx,zy,-1					 ;plot dot...
+
+vmlp:
+VWait:VWait
+Point zx,zy,-1					 ;unplot dot...
+UnBuffer 0
+
+
+a$=Inkey$
+If a$=" " AND recth<>0
+		UnBuffer 0
+		For y=1 To recth
+				For x=1 To rectw
+						map(zx+x-1,zy+y-1)=rect(x,y)
+						Point zx+x-1,zy+y-1,col(map(zx+x-1,zy+y-1))
+				Next
+		Next
+		While Joyb(0)<>0:VWait:Wend
+		BBlit 0,1018,zx,zy
+EndIf
+
+If Joyb(0)=2
+		bsx=zx:bsy=zy
+		bex=bsx:bey=bsy
+		Box bsx,bsy,bex,bey,-1
+		##[$80BB]
+				VWait
+				Box bsx,bsy,bex,bey,-1
+				mx=SMouseX
+				my=SMouseY:If my>199 Then my=199
+				bex=mx:bey=my
+				Box bsx,bsy,bex,bey,-1
+		##[$80BC] Joyb(0)<>2
+		Box bsx,bsy,bex,bey,-1
+		bex=SMouseX:bey=SMouseY:If bey>199 Then bey=199
+
+		If bex<bsx Then ##[$80C9] bex,bsx
+		If bey<bsy Then ##[$80C9] bey,bsy
+
+		rectw=(bex-bsx)+1
+		recth=(bey-bsy)+1
+		GetaShape 1018,bsx,bsy,rectw+1,recth+1
+		##[$FF22]
+		For y=1 To recth
+				For x=1 To rectw
+						rect(x,y)=map(bsx-1+x,bsy-1+y)
+				Next
+		Next
+		Goto dooby
+EndIf
+
+If Joyb(0)=1
+		mapx=zx:mapy=zy
+		WPointer 1000
+		While Joyb(0)<>0:VWait:Wend
+		Return
+EndIf
+
+mx=SMouseX
+my=SMouseY
+If my<MAPHEIGHT-12 AND mx<MAPWIDTH-20
+		zx=mx
+		zy=my
+EndIf
+If recth>0
+		If zy+ShapeHeight(1018)>199 Then zy=199-ShapeHeight(1018)
+		If zx+ShapeWidth(1018)>319 Then zx=319-ShapeWidth(1018)
+EndIf
+
+
+If recth<>0
+		BBlit 0,1018,zx,zy			;draw block...
+EndIf
+Point zx,zy,-1					 ;plot dot...
+
+Goto vmlp
+
+;------------------------------------------------------
+.SaveMap
+
+Locate 20,25:Print "Status: Saving "
+
+f$=ASLFileRequest$("Save Map..",mpa$,mna$,"#?",0,8,320,242)
+If f$="" Then Goto EditMap
+
+
+mem.l=##[$FE97](130000,65537)
+m.l=mem
+w.w=0
+ss.w=0
+##[$80D3]
+For y=0 To MAPHEIGHT-1
+		For x=0 To MAPWIDTH-1
+				w=map(x,y):w=w&$fff
+				ss=maps(x,y)
+				ss=(ss LSL 12)&$f000
+				w=w OR ss
+				Poke.w m,w
+				m+2
+		Next
+Next
+##[$80D2]
+
+h.l=##[$FE01](f$,1006)
+If h.l<>0
+		c.l=##[$FE04](h,mem,MAPWIDTH*MAPHEIGHT*2)		 ;64000=160*100.w
+		##[$FE02](h)
+EndIf
+
+Locate 20,25:Print "Status: O.K.		"
+
+fr.l=##[$FE99](mem,130000)
+
+Return
+Goto EditMap
+;------------------------------------------------------
+.LoadMap
+
+Locate 20,25:Print "Status: Loading "
+
+f$=ASLFileRequest$("Load Map..",mpa$,mna$,"#?",0,8,320,242)
+If f$="" Then Goto EditMap
+
+mem.l=##[$FE97](130000,65537)
+
+h.l=##[$FE01](f$,1004)
+If h.l<>0
+		##[$80D3]
+		c.l=##[$FE03](h,mem,130000)
+		m.l=mem
+		w.w=0
+		ss.w=0
+		For y=0 To MAPHEIGHT-1
+				For x=0 To MAPWIDTH-1
+						w=Peek.w(m)
+						ss=w
+						w=w&$fff
+						ss=ss LSR 12
+						ss=ss&$f
+						If w>topblock-1 Then w=0
+						map(x,y)=w
+						maps(x,y)=ss
+						m+2
+				Next
+		Next
+		##[$80D2]
+		##[$FE02](h)
+EndIf
+
+Locate 20,25:Print "Status: O.K.		"
+
+fr.l=##[$FE99](mem,130000)
+
+Return
+Goto EditMap
+;------------------------------------------------------
+.MergeMap
+
+Locate 20,25:Print "Status: Loading "
+
+f$=ASLFileRequest$("Merge Map..",mpa$,mna$,"#?",0,8,320,242)
+If f$="" Then Goto EditMap
+
+mem.l=##[$FE97](130000,65537)
+
+h.l=##[$FE01](f$,1004)
+If h.l<>0
+		##[$80D3]
+		c.l=##[$FE03](h,mem,130000)
+		m.l=mem
+		w.w=0
+		ss.w=0
+		For y=0 To MAPHEIGHT-1
+				For x=0 To MAPWIDTH-1
+						w=Peek.w(m)
+						ss=w
+						w=w&$fff
+						If w>topblock-1 Then w=0
+						map(x,y)=w
+						m+2
+				Next
+		Next
+		##[$80D2]
+		##[$FE02](h)
+EndIf
+
+Locate 20,25:Print "Status: O.K.		"
+
+fr.l=##[$FE99](mem,130000)
+
+Return
+Goto EditMap
+
+;------------------------------------------------------
+.EditContour
+
+clrgadgets{}
+
+BlockScroll back
+
+ccc=22
+
+Locate 13,0
+Print "Edit Collision."
+
+makegadget{0,35,24,"QUIT"}
+makegadget{1,35,20,"Load"}
+makegadget{2,35,22,"Save"}
+
+Locate 0,6
+Print "Current Block:"
+
+Locate 16,20
+Print "Hold On!"
+
+Locate 16,21
+Print " "
+
+CopyShape eblock,999
+Scale 999,4,4,0
+Boxf 130,40,130+64,40+64,0
+longdiv 999,130,40
+Box 129,39,129+66,39+66,16
+Boxf 200,64,215,80,0
+longdiv eblock,200,64
+xx=130:yy=40+64
+If collision(eblock)<>0
+		Circle xx+32,yy-32,20,20,ccc
+EndIf
+
+
+xx=0:yy=218
+endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
+Boxf 0,217,319,251,0
+Line 0,217,319,217,ccc
+Line 0,251,319,251,ccc
+##[$FF22]
+For l=startb To endb
+		longdiv l,xx,yy
+		If l=eblock Then Box xx,yy,xx+15,yy+15,-1
+		If collision(l)<>0
+				Circle xx+8,yy+8,4,4,ccc
+		EndIf
+		xx+16:If xx>319 Then xx=0:yy+16
+Next
+
+Locate 16,20
+Print "				"
+
+
+ebloop:
+VWait
+
+cg=checkgadget{}
+
+If cg=0 Then Goto MAIN
+
+a$=Inkey$
+If a$=Chr$(27) Then Goto MAIN
+
+If a$="s" OR cg=2
+		f$=ASLFileRequest$("Save Collisions..",cpa$,cna$,"#?",0,8,320,240)
+		If f$<>""
+				h.l=##[$FE01](f$,1006)
+				For b=0 To 1000
+						w.w=collision(b)
+						c.l=##[$FE04](h,&w,2)
+				Next
+				##[$FE02](h)
+		EndIf
+		Goto EditContour
+EndIf
+
+If a$="l" OR cg=1
+		f$=ASLFileRequest$("Load Collisions..",cpa$,cna$,"#?",0,8,320,240)
+		If f$<>""
+				h.l=##[$FE01](f$,1004)
+				For b=0 To 1000
+						w.w=0
+						c.l=##[$FE03](h,&w,2)
+						collision(b)=w
+				Next
+				##[$FE02](h)
+		EndIf
+		Goto EditContour
+EndIf
+
+
+If a$="c"
+		Boxf 130,40,130+64,40+64,0
+		longdiv 999,130,40
+		Box 129,39,129+66,39+66,16
+		collision(eblock)=0
+EndIf
+If a$="x"
+		Boxf 130,40,130+64,40+64,0
+		longdiv 999,130,40
+		Box 129,39,129+66,39+66,16
+		w.w=collision(eblock)
+		w=w&$fff0
+		w+1
+		collision(eblock)=w
+		Circle 130+32,40+32,20,20,ccc
+		zzw.w=w:zzw=zzw&$00f0
+		zw=w:zw=w&$f000
+		If zzw.w<>0
+				w=w&$0f00
+				w=w LSR 8
+				longdiv 1002+w,130+24,40+24
+		EndIf
+		Locate 17,6
+		If zw=0
+				Print "1"
+		Else
+				Print "2"
+		EndIf
+EndIf
+
+If a$="8"	 ;up
+		w.w=collision(eblock)
+		w=w&$f00f
+		w=w OR $0010
+		collision(eblock)=w
+EndIf
+If a$="2"	 ;dwn
+		w.w=collision(eblock)
+		w=w&$f00f
+		w=w OR $0810
+		collision(eblock)=w
+EndIf
+If a$="4"	 ;left
+		w.w=collision(eblock)
+		w=w&$f00f
+		w=w OR $0c10
+		collision(eblock)=w
+EndIf
+If a$="6"	 ;right
+		w.w=collision(eblock)
+		w=w&$f00f
+		w=w OR $0410
+		collision(eblock)=w
+EndIf
+If a$="5"	 ;none
+		w.w=collision(eblock)
+		w=w&$f00f
+		w=w OR $0000
+		collision(eblock)=w
+EndIf
+
+If a$="0"
+		w.w=collision(eblock)
+		zzw.w=w&$f000
+		w=w&$0fff
+		If zzw=0
+				zzw=$1000
+		Else
+				zzw=0
+		EndIf
+		w=w OR zzw
+		collision(eblock)=w
+EndIf
+
+If a$="2" OR a$="4" OR a$="6" OR a$="8" OR a$="0" OR a$="5"
+		Boxf 130,40,130+64,40+64,0
+		longdiv 999,130,40
+		Box 129,39,129+66,39+66,16
+		w.w=collision(eblock)
+		w=w&$fff0
+		w+1
+		collision(eblock)=w
+		Circle 130+32,40+32,20,20,ccc
+		zzw.w=w:zzw=zzw&$00f0
+		zw=w:zw=w&$f000
+		If zzw<>0
+				w=w&$0f00
+				w=w LSR 8
+				longdiv 1002+w,130+24,40+24
+		EndIf
+		Locate 17,6
+		If zw=0
+				Print "1"
+		Else
+				Print "2"
+		EndIf
+EndIf
+
+If a$=" "
+		If ccc=18
+				ccc=16
+		Else
+				If ccc=16
+						ccc=22
+				Else
+						ccc=18
+				EndIf
+		EndIf
+EndIf
+
+
+If Joyb(0)=1
+		mx=SMouseX
+		my=SMouseY
+
+		If my>217
+				xx=0:yy=218
+				For l=startb To endb
+						If l=eblock Then Box xx,yy,xx+15,yy+15,-1
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+				Locate 16,20
+				Print "Hold On!"
+				mx=Int(mx/16)
+				my=my-218:my=Int(my/16)
+				my=my*20+mx
+				eblock=my+startb
+dododo:
+				If eblock>topblock-1 Then eblock=topblock-1
+				CopyShape eblock,999
+				Scale 999,4,4,0
+
+				Boxf 130,40,130+64,40+64,0
+				longdiv 999,130,40
+				Box 129,39,129+66,39+66,16
+				w.w=collision(eblock)
+				If w<>0
+						Circle 130+32,40+32,20,20,ccc
+						zzw.w=w:zzw=zzw&$00f0
+						zw=w:zw=w&$f000
+						If zzw<>0
+								w=w&$0f00
+								w=w LSR 8
+								longdiv 1002+w,130+24,40+24
+						EndIf
+						Locate 17,6
+						If zw=0
+								Print "1"
+						Else
+								Print "2"
+						EndIf
+				EndIf
+				Locate 16,20
+				Print "				"
+				xx=0:yy=218
+				For l=startb To endb
+						If l=eblock Then Box xx,yy,xx+15,yy+15,-1
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+		EndIf
+
+EndIf
+
+aa=Asc(a$)
+If aa=30
+		If eblock<topblock-1 Then eblock+1
+		a$="FUCK":Goto ddddoooo
+EndIf
+If aa=31
+		If eblock>0 Then eblock-1
+		a$="FUCK":Goto ddddoooo
+EndIf
+
+If aa=28
+		eblock-20
+		If eblock<0 Then eblock=0
+		a$="fuck":Goto ddddoooo
+EndIf
+If aa=29
+		eblock+20
+		If eblock>topblock-1 Then eblock=topblock-1
+		a$="fuck":Goto ddddoooo
+EndIf
+
+If Joyb(0)=2
+		my=SMouseY
+		If my>217
+				If my>234			 ;go down
+						startb+20:If startb>topblock-21 Then startb=topblock-21
+				Else						;go up
+						startb-20
+						If startb<0 Then startb=0
+				EndIf
+
+				xx=0:yy=218
+				endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
+				Boxf 0,217,319,251,0
+				Line 0,217,319,217,18
+				Line 0,251,319,251,18
+				##[$FF22]
+				For l=startb To endb
+						longdiv l,xx,yy
+						If l=eblock Then Box xx,yy,xx+15,yy+15,-1
+						If collision(l)<>0
+								Circle xx+8,yy+8,4,4,ccc
+						EndIf
+						xx+16:If xx>319 Then xx=0:yy+16
+				Next
+
+				VWait 10
+
+		EndIf
+EndIf
+
+Goto ebloop
+
+;------------------------------------------------------
+.EditScroll
+
+;dir: 0-15...
+
+VWait
+BlockScroll back
+For y=0 To 11+2
+		For x=0 To 19
+				Boxf x*16,y*16,x*16+15,y*16+15,0
+				longdiv map(mapx+x,mapy+y),x*16,y*16
+				longdiv maps(mapx+x,mapy+y)+1002,x*16,y*16
+		Next
+Next
+Line 0,224,319,224,18
+dir.w=dir&15
+
+bmx=0:bmy=0
+Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+
+edsloop:
+VWait
+If bmy<12+2
+		Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+EndIf
+
+bmx=SMouseX
+bmy=SMouseY
+bmx=Int(bmx/16)
+bmy=Int(bmy/16)
+If bmy<12+2
+		Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+EndIf
+
+
+
+Boxf 8,29*8,8+16,29*8+16,back
+longdiv 1002+dir,8,29*8
+
+mx=SMouseX
+my=SMouseY
+If my<192+32
+		mx=(Int(mx/16)+mapx)
+		my=(Int(my/16)+mapy)
+		Locate 20,29:Print "X:",mx,"	"
+		Locate 28,29:Print "Y:",my,"	"
+EndIf
+
+a$=Inkey$
+aa=Asc(a$)
+
+If a$="C"
+		For ay.q=0 To MAPHEIGHT-1
+				For ax.q=0 To MAPWIDTH-1
+						maps(ax,ay)=0
+				Next
+		Next
+		Goto EditMap
+EndIf
+
+If a$=Chr$(27) Then Goto MAIN
+
+If a$="v" Then Gosub ViewMap:Goto EditScroll
+
+If a$="s" Then Gosub SaveMap:Goto EditScroll
+
+If a$="l" Then Gosub LoadMap:Goto EditScroll
+
+If a$="." Then dir+1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:longdiv 1002+dir,8,29*8
+If a$="," Then dir-1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:longdiv 1002+dir,8,29*8
+
+If a$="m" Then Gosub MergeMap:Goto EditScroll
+
+If aa=31
+		If mapx>0
+				mapx-1
+				Scroll 0,0,320-16,192+32,16,0	;->
+				yy=0:xx=0
+				For y=mapy To mapy+11+2
+						Boxf xx,yy,xx+15,yy+15,0
+						longdiv map(mapx,y),xx,yy
+						longdiv maps(mapx,y)+1002,xx,yy
+						yy+16
+				Next
+		EndIf
+EndIf
+If aa=30
+		If mapx<MAPWIDTH-19
+				mapx+1
+				Scroll 16,0,320-16,192+32,0,0 ;<-
+				yy=0:xx=320-16
+				For y=mapy To mapy+11+2
+						Boxf xx,yy,xx+15,yy+15,0
+						longdiv map(mapx+19,y),xx,yy
+						longdiv maps(mapx+19,y)+1002,xx,yy
+						yy+16
+				Next
+		EndIf
+EndIf
+If aa=28
+		If mapy>0
+				mapy-1
+				Scroll 0,0,320,192-16+32,0,16	 ;\/
+				yy=0:xx=0
+				For x=mapx To mapx+19
+						Boxf xx,yy,xx+15,yy+15,0
+						longdiv map(x,mapy),xx,yy
+						longdiv maps(x,mapy)+1002,xx,yy
+						xx+16
+				Next
+		EndIf
+EndIf
+If aa=29
+		If mapy<MAPHEIGHT-13
+				mapy+1
+				Scroll 0,16,320,192-16+32,0,0	 ;/\
+				yy=192-16+32:xx=0
+				For x=mapx To mapx+19
+						Boxf xx,yy,xx+15,yy+15,0
+						longdiv map(x,mapy+11+2),xx,yy
+						longdiv maps(x,mapy+11+2)+1002,xx,yy
+						xx+16
+				Next
+		EndIf
+EndIf
+
+
+If Joyb(0)=1
+
+		mx=SMouseX
+		my=SMouseY
+		If my<192+32
+				mx=Int(mx/16)
+				my=Int(my/16)
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+				Boxf mx*16,my*16,mx*16+15,my*16+15,0
+				longdiv map(mapx+mx,mapy+my),mx*16,my*16
+				longdiv 1002+dir,mx*16,my*16
+				maps(mapx+mx,mapy+my)=dir
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+		EndIf
+
+EndIf
+
+If Joyb(0)=2
+		my=SMouseY:mx=SMouseX
+		If my<192
+				bsx=Int(mx/16):bsy=Int(my/16)
+				bex=bsx:bey=bsy
+				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
+				Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+				##[$80BB]
+						VWait
+						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+						mx=SMouseX
+						my=SMouseY
+						bex=Int(mx/16):bey=Int(my/16)
+						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
+				##[$80BC] Joyb(0)<>2
+				bex=SMouseX:bey=SMouseY
+				bex=Int(bex/16):bey=Int(bey/16)
+
+				bsx+mapx:bsy+mapy
+				bex+mapx:bey+mapy
+
+				rectw=(bex-bsx)+1
+				recth=(bey-bsy)+1
+
+				For y=1 To recth
+						For x=1 To rectw
+								maps(bsx-1+x,bsy-1+y)=dir
+						Next
+				Next
+
+				Goto EditScroll
+
+		EndIf
+EndIf
+
+Goto edsloop
+
+;------------------------------------------------------
+.SaveMapScroll
+
+Locate 20,25:Print "Status: Saving "
+
+
+f$=ASLFileRequest$("Save Scroll..",spa$,sna$,"#?")
+If f$="" Then Goto EditMap
+
+
+mem.l=##[$FE97](65536,65537)
+m.l=mem
+zz.b=0
+For y=0 To MAPHEIGHT-1
+		For x=0 To MAPWIDTH-1
+				zz.b=maps(x,y)
+				Poke.b m,zz
+				m+1
+		Next
+Next
+
+h.l=##[$FE01](f$,1006)
+If h.l<>0
+		c.l=##[$FE04](h,mem,16000)
+		##[$FE02](h)
+EndIf
+
+Locate 20,25:Print "Status: O.K.		"
+
+fr.l=##[$FE99](mem,65536)
+
+
+Goto EditScroll
+;------------------------------------------------------
+.LoadMapScroll
+
+Locate 20,25:Print "Status: Loading "
+
+
+f$=ASLFileRequest$("Load Scroll..",spa$,sna$,"#?")
+If f$="" Then Goto EditMap
+
+mem.l=##[$FE97](65536,65537)
+
+h.l=##[$FE01](f$,1004)
+If h.l<>0
+
+		c.l=##[$FE03](h,mem,65536)
+
+		m.l=mem
+		zz.b=0
+		For y=0 To MAPHEIGHT-1
+				For x=0 To MAPWIDTH-1
+						zz=Peek.b(m)
+						maps(x,y)=zz
+						m+1
+				Next
+		Next
+
+		##[$FE02](h)
+EndIf
+
+Locate 20,25:Print "Status: O.K.		"
+
+fr.l=##[$FE99](mem,65536)
+
+Goto EditScroll
+;------------------------------------------------------
+.EditBlocks
+clrgadgets{}
+
+BlockScroll 0
+
+ssx=0:ssy=0
+For l=0 To topblock-1
+		longdiv l,ssx,ssy
+		ssx+16
+		If ssx>319 Then ssx=0:ssy+16
+Next
+
+
+mx=SMouseX
+my=SMouseY
+bx=Int(mx/16)
+by=Int(my/16)
+mx=bx*16
+my=by*16
+Box mx,my,mx+15,my+15,-1
+
+edblloop:
+VWait
+Box mx,my,mx+15,my+15,-1
+
+mx=SMouseX
+my=SMouseY
+bx=Int(mx/16)
+by=Int(my/16)
+mx=bx*16
+my=by*16
+
+Box mx,my,mx+15,my+15,-1
+
+If Joyb(0)=0 Then Goto edblloop
+
+blk=by*20+bx
+If blk=>topblock
+		BlockScroll 0
+		blk=topblock
+		col(topblock)=0
+		GetaShape topblock,0,0,16,16
+		CopyShape topblock,topblock+500
+		Scale topblock+500,.5,.5,0
+		topblock+1
+EndIf
+
+comehere:
+BlockScroll back
+
+Locate 13,0
+Print "Edit	Blocks."
+
+makegadget{0,35,26,"QUIT"}
+makegadget{1,35,18,"SAVE"}
+makegadget{2,35,21,"PICK"}
+makegadget{3,35,23,"COPY"}
+makegadget{4,35,30,"CYCL"}
+
+Boxf 95,39,224,168,0
+Box 95,39,224,168,16
+Boxf 240,40,255,55,0
+longdiv blk,240,40
+
+srcx=240:srcy=40
+desx=96:desy=40
+For yy=0 To 15
+		For xx=0 To 15
+				c=Cls(srcx,srcy)
+				Boxf desx,desy,desx+7,desy+7,c
+				srcx+1
+				desx+8
+		Next
+		srcx=240:srcy+1
+		desx=96:desy+8
+Next
+
+
+For c=0 To 15
+		Boxf c*16,180,c*16+15,196,c
+		If c=>cyc1 AND c<=cyc2
+				Line c*16,178,c*16+15,178,1
+		EndIf
+Next
+
+ccol=0
+
+
+
+
+magloop:
+VWait
+Box ccol*16,180,ccol*16+15,196,16
+
+a$=Inkey$
+If a$="-" AND cycss>0 Then cycss-1
+If a$="=" AND cycss<20 Then cycss+1
+
+If a$=Chr$(9) Then cyc=1-cyc
+
+
+cg=checkgadget{}
+If cg=0 Then Goto MAIN
+If cg=1 Then Goto SaveIFF
+If cg=2 Then Goto EditBlocks
+If cg=3 Then Goto CopyBlock
+
+If cg=4
+
+		occ=cyc
+		cyc=0
+
+		While Joyb(0)<>0 VWait:Wend
+		Locate 2,25:Print "Pick First Cycle Colour"
+		MouseWait
+		my=SMouseY:mx=SMouseX
+		If my>179 AND my<197
+				mx=Int(mx/16)
+				If mx<16
+						cyc1=mx
+						cpcp=mx
+				EndIf
+		EndIf
+
+		Locate 2,25:Print "												 "
+
+		VWait 10
+
+		Locate 2,25:Print "Pick second Cycle Colour"
+		MouseWait
+		my=SMouseY:mx=SMouseX
+		If my>179 AND my<197
+				mx=Int(mx/16)
+				If mx<16
+						cyc2=mx
+				EndIf
+		EndIf
+
+		Locate 2,25:Print "												 "
+
+		Line 0,178,256,178,back
+		For c=0 To 15
+				Boxf c*16,180,c*16+15,196,c
+				If c=>cyc1 AND c<=cyc2
+						Line c*16,178,c*16+15,178,1
+				EndIf
+		Next
+
+		cyc=occ
+
+EndIf
+
+
+If Joyb(0)=1
+		my=SMouseY:mx=SMouseX
+		If my>179 AND my<197
+				mx=Int(mx/16)
+				If mx<16
+						Boxf ccol*16,180,ccol*16+15,196,ccol
+						ccol=mx
+				EndIf
+		EndIf
+
+		If mx>95 AND mx<225 AND my>39 AND my<169
+
+				mx=mx-96:my=my-40
+				mx=Int(mx/8):my=Int(my/8)	 ;pixel offset...
+
+				Boxf mx*8+96,my*8+40,mx*8+96+7,my*8+40+7,ccol
+				Point 240+mx,40+my,ccol
+				GetaShape blk,240,40,16,16
+				col(blk)=Cls(240+8,40+8)
+				If col(blk)=0 Then col(blk)=Cls(240+10,40+9)
+				If col(blk)=0 Then col(blk)=Cls(240+4,40+4)
+		EndIf
+EndIf
+
+If Joyb(0)=2
+		my=SMouseY:mx=SMouseX
+		If my>179 AND my<197
+				mx=Int(mx/16)
+				If mx<16
+
+				SetString 19,21
+				SelectMode 18
+				ButtonGroup 0
+				localstat 9,10,40,114,142,$1000,"Palette",18,16,9
+				WindowInput 9
+				WindowOutput 9
+				WLocate 10,10
+				WColour 18,16
+				SetString 19,21
+				SelectMode 18
+				ButtonGroup 0
+
+				rrr=15-Blue(mx):ggg=15-Palette(mx):bbb=15-PalRGB(mx)
+
+				rrr=rrr/15:ggg=ggg/15:bbb=bbb/15
+
+				SetVProp 9,1,rrr,.0625
+				SetVProp 9,2,ggg,.0625
+				SetVProp 9,3,bbb,.0625
+
+				Redraw 9,1
+				Redraw 9,2
+				Redraw 9,3
+				Redraw 9,4
+
+				##[$80BB]
+
+						rrr=15-Int( (VPropPot(9,1)) *16)
+						ggg=15-Int( (VPropPot(9,2)) *16)
+						bbb=15-Int( (VPropPot(9,3)) *16)
+
+						VWait
+						WLocate 9,103:Print rrr," "
+						WLocate 26,103:Print ggg," "
+						WLocate 43,103:Print bbb," "
+
+						Green mx,rrr,ggg,bbb
+
+				##[$80BC] Event=64 AND GadgetHit=4
+
+				WindowInput 0
+				Use lmaxlen 0
+				BitMapOutput 0
+				Free localstat 9
+
+				EndIf
+		EndIf
+EndIf
+
+Goto magloop
+;------------------------------------------------------
+.SaveIFF
+clrgadgets{}
+
+BlockScroll 0
+
+
+f$=ASLFileRequest$("Save IFF...",gpa$,gna$,"#?",0,8,320,242)
+
+If f$="" Then Goto MAIN
+
+BlockScroll 0
+
+ssx=0:ssy=0
+For l=0 To topblock-1
+		longdiv l,ssx,ssy
+		ssx+16
+		If ssx>319 Then ssx=0:ssy+16
+Next
+
+
+For l=16 To 31:StopCycle 0,l,15,15,0:Next
+
+SaveBitmap 0,f$,0
+
+BlockScroll 0
+
+Green 16,14,14,14
+Green 17,0,0,14
+Green 18,0,0,0
+Green 19,11,11,11
+Green 20,8,8,8
+Green 21,5,5,5
+Green 22,14,14,0
+Green 23,13,9,9
+For l=24 To 31
+		Green l,15,15,15
+Next
+
+
+Goto MAIN
+;------------------------------------------------------
+.CopyBlock
+clrgadgets{}
+
+BlockScroll 0
+
+ssx=0:ssy=0
+For l=0 To topblock-1
+		longdiv l,ssx,ssy
+		ssx+16
+		If ssx>319 Then ssx=0:ssy+16
+Next
+
+
+mx=SMouseX
+my=SMouseY
+bx=Int(mx/16)
+by=Int(my/16)
+mx=bx*16
+my=by*16
+Box mx,my,mx+15,my+15,-1
+
+edblloop2:
+VWait
+Box mx,my,mx+15,my+15,-1
+
+mx=SMouseX
+my=SMouseY
+bx=Int(mx/16)
+by=Int(my/16)
+mx=bx*16
+my=by*16
+
+Box mx,my,mx+15,my+15,-1
+
+If Joyb(0)=0 Then Goto edblloop2
+
+blk2=by*20+bx
+If blk2<topblock
+		CopyShape blk2,blk					;copy to blk
+		CopyShape blk,blk+500
+		Scale blk+500,.5,.5,0
+EndIf
+
+Goto comehere
+;---------------------------------------------------------------
+.ddddoooo
+
+If eblock<startb
+		startb-20
+		If startb<0 Then startb=0
+EndIf
+If eblock>endb
+		startb+20
+		If startb>topblock-40 Then startb=topblock-40
+EndIf
+
+Boxf 0,217,319,251,0
+Line 0,217,319,217,ccc
+Line 0,251,319,251,ccc
+##[$FF22]
+xx=0:yy=218
+endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
+For l=startb To endb
+		longdiv l,xx,yy
+;		If l=eblock Then Box xx,yy,xx+15,yy+15,-1
+		If collision(l)=1
+				Circle xx+8,yy+8,4,4,ccc
+		EndIf
+		xx+16:If xx>319 Then xx=0:yy+16
+Next
+
+Goto dododo
+;---------------------------------------------------------------
+poin:
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+		Dc.l		0,0,0,0
+;---------------------------------------------------------------
+.doscanner
+clrgadgets{}
+BlockScroll 0
+
+For y=0 To 39
+		For x=0 To 63
+				If col(map(x*5,y*5))<>0
+						Point x,y,col(map(x*5,y*5))
+				EndIf
+		Next
+Next
+
+SaveBitmap 0,"ram:scanner.iff",0
+
+MouseWait
+Return

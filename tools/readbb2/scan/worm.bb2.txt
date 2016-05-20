@@ -1,0 +1,793 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/WORMS/worm.bb2
++
+DEFTYPE.w
+
+NEWTYPE.seg
+x.w
+y.w
+d.w
+c.w
+End NEWTYPE
+
+NEWTYPE.worm
+w.w		 ;what doing...0=normal moving, 1=hit rock!, 2=not there
+				;in letter mode, shich step at
+f.w		 ;first
+l.w		 ;length
+c.w		 ;character offset
+m.w		 ;men left ;in letter mode, max steps
+sc.w		;score ;in letter mode, pos in array of start of x,y,s
+x.w[5]	;letters of extra collected
+nx.w		;number of extras collected
+t.w		 ;timer for 'extra' flash
+s.seg[256]
+End NEWTYPE
+
+LoadShapes 0,"worm.shapes"
+casestrcomp 0,"worm.iff"
+;LoadBlitzFont 0,"worm.font"
+
+Dim a(300)
+
+If WriteMem(0,"letters")
+	FileInput 0
+	While NOT DosBuffLen(0)
+		aa+1:a(aa)=Cvi(Inkey$(2))
+	Wend
+	CloseFile 0
+	DefaultInput
+EndIf
+
+BLITZ
+
+BlitzKeys On:BlitzRepeat -1,-1:BitMapInput
+
+Dim m(43,31),px(4),py(4),xa(4),ya(4)
+Dim w.worm(10)
+;
+Dim pu(4),pd(4),pl(4),pr(4)
+Dim q(4,32),qs(4),qe(4)
+;
+Dim hx(20),hy(20)
+;
+Dim us(4)
+;
+Dim hn$(5),hs.l(5)
+
+For k=1 To 5:Read hn$(k),hs(k):Next
+Data$ "MAK"
+Data.l 2000
+Data$ "ROD"
+Data.l 1000
+Data$ "AXE"
+Data.l 500
+Data$ "PAL"
+Data.l 100
+Data$ "CAM"
+Data.l 10
+
+##[$80CA] w(pl)
+
+For k=1 To 4:Read px(k),py(k):Next
+Data 0,0,26,0,0,31,26,31
+
+For k=1 To 4:Read xa(k),ya(k):Next
+Data 1,0,0,1,-1,0,0,-1
+
+pu(1)=28:pd(1)=29:pl(1)=31:pr(1)=30
+pu(2)=119:pd(2)=122:pl(2)=97:pr(2)=115
+pu(3)=-1:pd(3)=1
+pu(4)=-1:pd(4)=0
+
+Statement cblit{s,x,y}
+Shared bxo,byo
+longdiv s,x LSL 3+bxo,y LSL 3+byo
+End Statement
+
+Statement mblit{s,x,y}
+Shared m()
+cblit{s,x,y}
+m(x,y)=s
+End Statement
+
+Statement qadd{q,d}
+Shared q(),qs(),qe()
+q(q,qe(q))=d
+qe(q)+1 AND 31
+End Statement
+
+Function qget{q}
+Shared q(),qs(),qe()
+If qs(q)=qe(q) Then Function Return 0
+d=q(q,qs(q)):qs(q)+1 AND 31
+Function Return d
+End Function
+
+Statement flushq{q}
+Shared qs(),qe()
+qs(q)=0:qe(q)=0
+End Statement
+
+Function nxt{}
+Shared aa,a()
+aa+1:Function Return a(aa)
+End Function
+
+Statement cbox{c,x1,y1,x2,y2}
+;
+For x=x1 To x2
+cblit{c,x,y1}:cblit{c,x,y2}
+Next
+For y=y1 To y2
+cblit{c,x1,y}:cblit{c,x2,y}
+Next
+;
+End Statement
+
+Statement control{pl}
+;
+Shared pu(),pd(),pl(),pr()
+x=pl*8+2:Colour 5,0
+If pu(pl)>=0
+	Locate x,24:Print UCase$(Chr$(pu(pl)))
+	Locate x,28:Print UCase$(Chr$(pd(pl)))
+	Locate x+2,26:Print UCase$(Chr$(pr(pl)))
+	Locate x-2,26:Print UCase$(Chr$(pl(pl)))
+Else
+	Locate x,24:Print Chr$(22+pd(pl))
+	Locate x,28:Print Chr$(22+pd(pl))
+	Locate x+2,26:Print Chr$(22+pd(pl))
+	Locate x-2,26:Print Chr$(22+pd(pl))
+EndIf
+;
+End Statement
+
+Function getk2{}
+For k=1 To 10:VWait
+If Joyb(1)
+	##[$80BB]:VWait:##[$80BC] Joyb(1)=0
+	Function Return 1
+EndIf
+If Joyb(0)
+	##[$80BB]:VWait:##[$80BC] Joyb(0)=0
+	Function Return 2
+EndIf
+i$=Inkey$
+If i$
+	If Asc(i$)>=28 AND Asc(i$)<127 Then Function Return Asc(i$)
+EndIf
+Next:Function Return 0
+End Function
+
+Function getk{x,y,c,a}
+##[$80BB]
+Locate x,y:Colour 0,0:Print Chr$(a)
+k=getk2{}
+If k
+	Locate x,y:Colour c,0:Print Chr$(a)
+	Function Return k
+EndIf
+Locate x,y:Colour c,0:Print Chr$(a)
+k=getk2{}
+If k Then Function Return k
+##[$80C7]
+End Function
+
+lmaxlen 0,352,256,4:BitMapOutput 0
+
+npl=1
+
+SetInt 5
+fc+1	;frame counter
+End SetInt
+
+.restart
+DisplayOff:FreeSlices
+Slice 0,44,352,256,$fff0,4,8,32,352,352
+For k=0 To 31:Green k,0,0,0:Next:Show 0:BlockScroll:StopCycle 0,0,0,0,0
+
+For x=0 To 43
+For y=0 To 13
+mblit{0,x,y}
+Next y,x
+cbox{3,0,0,43,13}
+cbox{2,1,1,42,12}
+
+aa=0
+For pl=1 To 5	;one letter for test purposes
+	\f=0:\l=3
+	For j=2 To 0 Step -1
+	\s[j]\x=nxt{},nxt{},nxt{},0
+	Next
+	\w=nxt{}:\m=nxt{}:\sc=aa+1:\t=0
+	For j=1 To \m:x=nxt{}:x=nxt{}:x=nxt{}:Next
+Next
+;
+w(1)\c=0
+w(2)\c=9
+w(3)\c=18
+w(4)\c=9
+w(5)\c=0
+;
+Colour 1,0
+Locate 9,15
+Print "PROGRAMMED IN BLITZ BASIC 2"
+Locate 4,17
+Print "PRESS 1..4 TO ALTER PLAYER CONTROLS"
+Locate 0,19
+Print "PRESS F1..F4 TO SELECT NUMBER OF PLAYERS (",npl,")"
+Locate 11,21
+Print "PRESS SPACE BAR TO PLAY"
+;
+c=4:ca=1
+For k=120 To 175
+ColSplit 1,15,c,0,k:c+ca:If c=15 OR c=4 Then ca=-ca
+Next
+ColSplit 1,15,15,15,176
+ColSplit 0,8,8,8,183
+ColSplit 0,0,0,0,184
+;
+bl=0:bc=0:DisplayOn:FadeIn 0
+;
+.title
+bxo=0:byo=0:VWait 3:If Joyb(0) OR Joyb(1) Then Goto game
+i$=Inkey$
+If i$>Chr$(128) AND i$<Chr$(133)
+	npl=Asc(i$)-128
+	Locate 42,19:Colour 1,0:Print npl
+EndIf
+If i$>"0" AND i$<"5"
+	;
+	Gosub plop:Gosub plcontrols:pl=Asc(i$)-48:c=16-pl
+	;
+	x=pl*8+2:y=25
+	k=getk{x,y,c,24}:If k<3 Then pu(pl)=-1:pd(pl)=k&1:Goto pdone
+	pu(pl)=k:control{pl}
+	;
+	x+1:y+1
+	k=getk{x,y,c,26}:If k<3 Then pu(pl)=-1:pd(pl)=k&1:Goto pdone
+	pr(pl)=k:control{pl}
+	;
+	x-1:y+1
+	k=getk{x,y,c,25}:If k<3 Then pu(pl)=-1:pd(pl)=k&1:Goto pdone
+	pd(pl)=k:control{pl}
+	;
+	x-1:y-1
+	k=getk{x,y,c,27}:If k<3 Then pu(pl)=-1:pd(pl)=k&1:Goto pdone
+	pl(pl)=k
+	;
+	pdone
+	control{pl}:bl=3:bc=50
+	;
+Else
+	If i$=" " Then Goto game
+EndIf
+If bc
+	bc-1
+Else
+	bc=200:bl+1:If bl>3 Then bl=1
+	Gosub blurb
+EndIf
+bxo=24:byo=24
+For pl=1 To 5
+	If \w>=0
+		f=\f:aa=\w*3-3+\sc
+		If \s[f]\x=a(aa) AND \s[f]\y=a(aa+1)
+			d=a(aa+2):\w+1:If \w>\m Then \w=1
+		Else
+			d=\s[f]\d
+		EndIf
+		Gosub movehead
+		If \t
+			\t-1:Gosub movetail
+		Else
+			;should I grow?
+			f2=f+\l+1 AND 255
+			If \s[f]\x=\s[f2]\x AND \s[f]\x=\s[f2]\x
+				Gosub movetail
+			Else
+				\l+1
+			EndIf
+			\t=pl
+		EndIf
+	EndIf
+Next
+Goto title
+
+game
+Gosub newgame
+
+patdone
+Gosub prep
+Gosub stuff
+Gosub worms
+
+For k=1 To npl:us(k)=-1:Next:DisplayOn:FadeIn 0
+For pl=1 To npl:flushq{pl}:Next
+##[$80BB]
+##[$80BC] Inkey$=""
+fr=0:fr2=0:fc=0
+
+.main
+If Joyb(0)=2 Then End
+;
+Gosub stats
+If nf=0
+	patover
+	BlitMode EraseMode
+	For y=7 To 13
+	For x=13 To 31
+	cblit{0,x,y}
+	Next x,y
+	BlitMode CookieMode
+	cbox{2,12,6,32,14}
+	;
+	Locate 14,8:Colour 1,0
+	Print "GARDEN COMPLETED!"
+	;
+	Locate 18,10.5:Print "COMPUTING"
+	Locate 15,12:Print "TAIL BONUS'S..."
+	##[$80BB]
+		pao=0
+		##[$80BB]
+			VWait
+		##[$80BC] fc>=4
+		fc=0
+		For pl=1 To npl
+		If \m ;any lives left?
+			If \l>1 ;any tail length left
+				pao=-1:Gosub movetail:\l-1:\sc+1:us(pl)=-1
+			EndIf
+		EndIf
+		Next
+		Gosub stats
+	##[$80BC] pao=0
+	VWait 100
+	FadeOut 0:Goto patdone
+EndIf
+##[$80BB]
+	VWait
+##[$80BC] fc>=2
+fc=0:Gosub susskeys
+;
+ff=0:fr+1:If fr>=sp Then ff=-1:fr=0
+;
+ff2=0:fr2+1:If fr2>=sp2 Then ff2=-1:fr2=0
+;
+If ld<>0 AND ff2<>0
+	;
+	ox=lx-xa(ld):oy=ly-ya(ld)
+	m=m(lx+xa(ld),ly+ya(ld))
+	If m
+		ldt=ld+1:If ldt>4 Then ldt-4
+		m2=m(lx+xa(ldt),ly+ya(ldt)):ld2=ldt
+		ldt+2:If ldt>4 Then ldt-4
+		m3=m(lx+xa(ldt),ly+ya(ldt)):ld3=ldt
+		;
+		If Rnd>.5 Then ##[$80C9] m2,m3:##[$80C9] ld2,ld3
+		;
+		If m=53
+			If m2=0 Then ld=ld2:Goto ldok
+			If m3=0 Then ld=ld3:Goto ldok
+			Goto ldok
+		EndIf
+		;
+		If m2=0 OR m2=53 Then ld=ld2:Goto ldok
+		If m3=0 OR m3=53 Then ld=ld3:Goto ldok
+		m=m(ox-xa(ld),oy-ya(ld))
+		If m=0 OR m=53
+			ld+2:If ld>4 Then ld-4
+			##[$80C9] lx,ox:##[$80C9] ly,oy:Goto ldok
+		EndIf
+		Goto lmangone
+	EndIf
+	ldok
+	mblit{53,ox,oy}
+	lx+xa(ld):ly+ya(ld)
+	mblit{44+ld LSL 1,lx,ly}
+	mblit{43+ld LSL 1,lx-xa(ld),ly-ya(ld)}
+EndIf
+;
+lmangone
+;
+For pl=1 To npl
+f=\f
+Select \w
+Case 0	;OK
+	;
+	If \s[f]\c=53
+		If ff2 Then Gosub movenorm
+	Else
+		If ff Then Gosub movenorm
+	EndIf
+	;
+Case 1	;dying
+	If \l>2
+		Gosub spinhead:Gosub movetail:\l-1
+		If \l=2 Then flushq{pl}:\m-1:us(pl)=-1
+	Else
+		If \m>0 AND qp=0	;not a 'quick patterm'
+			d=qget{pl}
+			If d
+				m=m(\s[f]\x+xa(d),\s[f]\y+ya(d))
+				If m=0 OR m=2 OR (m>3 AND m<9) OR m=53
+					\s[f]\d=d:\w=0:\l+1
+				Else
+					If ff Then Gosub spinhead
+				EndIf
+			Else
+				If ff Then Gosub spinhead
+			EndIf
+		Else
+			If \l
+				Gosub spinhead:Gosub movetail:\l-1
+			Else
+				Gosub cleartail
+				If \m=0
+					\w=2:npl2-1
+					If npl2=0 Then Goto gameover
+				Else
+					;must be a quick pattern!
+					\w=2:For k=1 To npl:If w(k)\w=0 Then ##[$80BE] For:Goto outer
+					Next:Goto patover
+					outer
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+End Select
+Next
+;
+Goto main
+
+.gameover
+FadeOut 0:BlockScroll
+cbox{57,16,8,28,12}
+Locate 18,10:Colour 1,0:Print "GAME OVER":FadeIn 0
+For pl=1 To npl
+For k=1 To 5
+If \sc>hs(k)
+	For j=4 To k Step -1
+	hn$(j+1)=hn$(j):hs(j+1)=hs(j)
+	Next:Colour 12,0
+	Locate 15,14:Print "PLAYER ",pl," (		)"
+	cblit{57+pl,25,14}
+	Locate 15,16:Print "NEW HIGH SCORE!"
+	Locate 10,18:Colour 15,0:Print "PLEASE ENTER YOUR INITIALS"
+	Boxf 168,168,168+23,169,14
+	Locate 21,20:Colour 1,0:hn$(k)=Edit$(3):hs(k)=\sc
+	##[$80BE] For:Goto byebye
+EndIf
+Next
+byebye
+Next
+Goto restart
+
+plop
+Boxf 0,184,351,255,0:Boxf 0,184,319,184,0
+Return
+
+.blurb
+;
+Gosub plop:Colour 1,0:Select bl
+Case 1
+Locate 16,24:Print "INSTRUCTIONS"
+Colour 12,0:Locate 0,26
+NPrint "GUIDE YOUR WORM AROUND VARIOUS GARDENS,"
+NPrint "EATING FLOWERS ( ) AND AVOIDING ROCKS ( )."
+NPrint "EACH FLOWER EATEN WILL CAUSE YOUR WORM TO"
+NPrint "GROW BY ONE SEGMENT. COMPLETE GARDENS BY"
+NPrint "EATING ALL FLOWERS. COLLECT BONUS LETTERS"
+NPrint "(		 ) FOR EXTRA LIFE."
+cblit{57,16,27}:cblit{1,39,27}
+For k2=4 To 8
+cblit{k2,k2-3,31}
+Next
+Case 2	;high scores
+Locate 11,24:Print "**** WONDER WORMS! ****"
+For k=1 To 5
+Locate 11,25+k:Colour 12,0
+Print hn$(k):Colour 13,0
+Print RSet$(Str$(hs(k)),20)
+Next
+Case 3
+Gosub plcontrols
+End Select
+Return
+
+.plcontrols
+c=0:For x=10 To 34 Step 8
+c+1:Colour 16-c,0
+Locate x,25:Print Chr$(24)
+Locate x,27:Print Chr$(25)
+Locate x+1,26:Print Chr$(26)
+Locate x-1,26:Print Chr$(27)
+Colour 1,0
+Locate x-2,30:Print c:cblit{57+c,x-1,30}
+Next
+;
+For pl=1 To 4
+control{pl}
+Next
+;
+Return
+
+.movenorm
+;
+d=\s[f]\d
+monique
+d2=qget{pl}
+If d2 Then If QAbs(d2-d)=2 Then Goto monique Else d=d2
+;
+Gosub movehead
+;
+If m=0 OR (m>3 AND m<9) OR m>52
+	If m>3 AND m<9
+		\s[f]\c=0
+		If \x[m-4]=0
+			us(pl)=-1:\x[m-4]=-1:\nx+1
+			If \nx=5
+				For k=0 To 4:\x[k]=0:Next:\nx=0:\t=63:\m+1
+			EndIf
+		EndIf
+	Else
+		If m=56
+			\s[f]\c=2:\sc+5:us(pl)=-1
+		EndIf
+	EndIf
+	Gosub movetail
+Else
+	If m=2 Then nf-1:\s[f]\c=0:\l+1:\sc+10:us(pl)=-1 Else \w=1
+EndIf
+Return
+
+.stats
+For pl=1 To npl
+If us(pl)
+	us(pl)=0
+	Locate px(pl)+4,py(pl):Colour 1,0
+	Print RSet$(Str$(\sc),4),"	":Colour 16-pl:Print RSet$(Str$(\m),2)
+	If \t=0
+		For k=0 To 4
+		If \x[k] Then BlitMode CookieMode Else BlitMode EraseMode
+		longdiv k+4,CursX LSL 3,CursY LSL 3:Locate CursX+1,CursY
+		Next
+	EndIf
+EndIf
+;
+If \t
+	If \t&4 Then BlitMode CookieMode Else BlitMode EraseMode
+	For k=0 To 4
+	longdiv k+4,(px(pl)+13+k) LSL 3,py(pl) LSL 3
+	Next
+	\t-1:If \t=0 Then us(pl)=-1
+EndIf
+;
+Next:BlitMode CookieMode
+Return
+
+.susskeys
+##[$80BB]
+i=Asc(Inkey$)
+For k=1 To npl
+	If pu(k)>=0
+		If i=pu(k) Then qadd{k,4}
+		If i=pd(k) Then qadd{k,2}
+		If i=pl(k) Then qadd{k,3}
+		If i=pr(k) Then qadd{k,1}
+	EndIf
+Next
+##[$80BC] i<0
+Return
+
+.cleartail
+;
+mblit{\s[f]\c,\s[f]\x,\s[f]\y}
+Return
+
+.spinhead
+;
+d=\s[f]\d+1:If d>4 Then d-4
+\s[f]\d=d
+mblit{13+d+\c,\s[f]\x,\s[f]\y}
+Return
+
+.movehead ;in direction d
+;
+\s[f]\d=d:x=\s[f]\x:y=\s[f]\y:ox=x:oy=y
+f=f-1 AND 255:x+xa(d):y+ya(d):m=m(x,y)
+;
+If m=0 OR m=2 OR (m>3 AND m<9) OR m>52
+	If m=54
+		##[$80BB]
+			k=Rnd(nh)+1
+		##[$80BC] m(hx(k),hy(k))=54
+		x=hx(k):y=hy(k)
+	EndIf
+	\f=f:\s[f]\x=x,y,d,m:If m=54 Then m=0
+	mblit{13+\c,ox,oy}
+	mblit{13+d+\c,x,y}
+EndIf
+;
+Return
+
+.movetail
+;
+f=\f+\l AND 255
+If pao	;pattern over routine?
+	If \s[f]\x<12 OR \s[f]\x>32 OR \s[f]\y<6 OR \s[f]\y>14
+		mblit{\s[f]\c,\s[f]\x,\s[f]\y}
+	EndIf
+	f=f-1 AND 255
+	If \s[f]\x<12 OR \s[f]\x>32 OR \s[f]\y<6 OR \s[f]\y>14
+		mblit{8+\s[f]\d+\c,\s[f]\x,\s[f]\y}
+	EndIf
+Else
+	mblit{\s[f]\c,\s[f]\x,\s[f]\y}
+	f=f-1 AND 255
+	mblit{8+\s[f]\d+\c,\s[f]\x,\s[f]\y}
+EndIf
+;
+Return
+
+.prep
+pat+1:If pat=25 Then pat=19
+qp=0:If pat ##[$80B9] 6=0 Then qp=-1
+BlockScroll
+If qp
+	Locate 11,12:Colour 1,0
+	cbox{57,9,10,37,14}
+	Print "GARDEN:":If pat<10 Then Print " "
+	Print pat," - BONUS GARDEN!":DisplayOn:FadeIn 0
+Else
+	Locate 18,12:Colour 1,0
+	cbox{57,16,10,28,14}
+	Print "GARDEN:":If pat<10 Then Print " "
+	Print pat:DisplayOn:FadeIn 0
+EndIf
+;
+For k=1 To 100
+VWait
+Next
+;
+FadeOut 0:BlockScroll
+;
+For x=0 To 43
+mblit{3,x,1}:mblit{3,x,30}
+Next
+For y=1 To 30
+mblit{3,0,y}:mblit{3,43,y}
+Next
+For x=1 To 42
+For y=2 To 29
+mblit{0,x,y}
+Next y,x
+For k=1 To npl
+Colour 16-k:Locate px(k),py(k):Print "P",k,":"
+Next
+Return
+
+.stuff
+;
+##[$80C8] patterns
+For k=1 To pat-1
+##[$80BB]
+	Read k2
+##[$80BC] k2<0
+Next
+;
+Read sp,sp2,nr,nf,nb,ld,nh,ns
+;
+For k=1 To nr ;number of rocks
+x=Rnd(40)+2:y=Rnd(26)+3
+mblit{1,x,y}
+Next
+;
+For k=1 To nb*npl2 ;number of bonus's
+x=Rnd(40)+2:y=Rnd(26)+3
+If m(x,y)=0 Then mblit{Rnd(5)+4,x,y}
+Next
+;
+For k=1 To nh ;number of 'holes'
+##[$80BB]
+x=Rnd(40)+2:y=Rnd(26)+3
+##[$80BC] m(x,y)=0
+mblit{54,x,y}
+hx(k)=x:hy(k)=y
+Next
+;
+ns*npl2
+;
+For k=1 To ns ;number of seeds
+##[$80BB]
+x=Rnd(40)+2:y=Rnd(26)+3
+##[$80BC] m(x,y)=0 AND m(x-1,y)=0 AND m(x+1,y)=0 AND m(x,y-1)=0 AND m(x,y+1)=0
+mblit{56,x,y}
+Next
+;
+nf*npl2:If nf>255 Then nf=255
+;
+For k=1 To nf ;number of flowers
+##[$80BB]
+x=Rnd(40)+2:y=Rnd(26)+3
+##[$80BC] m(x,y)=0 AND m(x-1,y)=0 AND m(x+1,y)=0 AND m(x,y-1)=0 AND m(x,y+1)=0
+mblit{2,x,y}
+Next
+;
+nf+ns
+;
+If ld ;add lawnmowerman?
+	##[$80BB]
+		lx=Rnd(40)+2:ly=Rnd(26)+3
+	##[$80BC] m(lx,ly)=0 AND m(lx-xa(ld),ly-ya(ld))=0
+EndIf
+;
+Return
+
+.worms
+;
+##[$80C8] wormdata
+For pl=1 To npl
+If \m Then \w=0 Else \w=2
+\f=0,3,pl*9-9
+For k=0 To 2
+Read \s[k]\x,\s[k]\y,\s[k]\d
+\s[k]\c=0
+Next k,pl
+Return
+
+.newgame
+;
+FadeOut 0:DisplayOff:FreeSlices
+Slice 0,44,352,256,$fff0,4,8,32,352,352
+For k=0 To 31:Green k,0,0,0:Next:Show 0:StopCycle 0,0,0,4,9
+npl2=npl:pat=0
+;
+For pl=1 To npl
+\m=3:\sc=0
+For k=0 To 4:\x[k]=0:Next:\nx=0
+Next
+Return
+
+wormdata
+;
+Data 3,2,1,2,2,1,1,2,1
+Data 42,4,2,42,3,2,42,2,2
+Data 40,29,3,41,29,3,42,29,3
+Data 1,27,4,1,28,4,1,29,4
+
+.patterns
+;
+;speed, mower speed, rocks, flowers, bonuses, mowers, holes, seeds
+;
+Data 4,3,10,6,0,0,0,0,-1
+Data 3,3,15,12,2,0,0,0,-1
+Data 3,3,20,15,3,1,0,0,-1
+Data 3,3,25,20,3,2,0,0,-1
+Data 3,3,30,25,3,3,2,0,-1
+;
+Data 1,1,0,40,0,0,0,0,-1 ;pat 6
+;
+Data 3,2,15,25,3,4,4,0,-1
+Data 3,2,19,28,3,1,5,0,-1
+Data 3,2,23,31,3,2,6,0,-1
+Data 3,2,27,34,3,3,7,0,-1
+Data 3,2,31,37,5,4,8,0,-1
+;
+Data 1,1,0,1,10,0,0,0,-1	;pat 12
+;
+Data 2,1,5,5,5,1,8,5,-1
+Data 2,1,7,6,5,2,10,8,-1
+Data 2,1,9,7,5,3,12,11,-1
+Data 2,1,11,8,5,4,14,14,-1
+Data 2,1,13,9,5,1,16,17,-1
+;
+Data 1,1,0,50,10,0,0,0,-1 ;pat 18
+;
+Data 1,1,5,10,5,2,20,0,-1
+Data 1,1,5,12,5,3,20,0,-1
+Data 1,1,5,14,5,4,20,0,-1
+Data 1,1,5,16,5,1,20,0,-1
+Data 1,1,5,18,5,2,20,0,-1
+;
+Data 1,1,0,50,20,0,0,0,-1 ;pat 24

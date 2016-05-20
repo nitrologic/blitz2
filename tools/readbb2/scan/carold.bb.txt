@@ -1,0 +1,74 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/carold.bb
++;
+; convert 24bit skidcars to 3 color
+;
+
+##[$A402] 0,1280,320,1
+;ReadChunky 0,"car.24"
+
+;LoadChunky 0,"w:cars/vw1.iff":t1=140:t2=220
+;LoadChunky 0,"w:cars/mini1.iff":t1=140:t2=220
+;LoadChunky 0,"w:cars/escort1.iff":t1=140:t2=220
+##[$A404] 0,"w:cars/midget1.iff":t1=140:t2=220
+
+##[$A402] 1,64,32,1
+
+m.l=Peek.l(##[$80B8] ##[$A401](1))
+
+lmaxlen 0,640,32,8
+lmaxlen 1,640,32,3
+
+DecodePalette 0,256:For i=0 To 255:AGAGreen 0,i,i,i,i:Next
+
+DecodePalette 1,4
+AGAGreen 1,0,120,80,40:StopCycle 1,1,3,3,3:StopCycle 1,2,12,12,12:StopCycle 1,3,14,8,5
+
+InitCopList 0,44,32,$13108,8,256,0
+;InitCopList 1,94,32,$13102,8,4,0
+
+InitCopList 1,94,32,$13102,8,4,-2
+;DisplayDblScan 1,1
+
+DisplayBitMap 0,0:DisplayPalette 0,0
+DisplayBitMap 1,1:DisplayPalette 1,1
+
+BLITZ
+
+CreateDisplay 0,1
+
+For xx=0 To 9
+	a=xx*64
+	##[$A40C] 0,1,a,0,64,32,0,0
+	Use lmaxlen 0
+	For y=0 To 31
+		For x=0 To 63
+			mm.l=m+x+y*192
+			r.w=Peek.b(mm)&255:g.w=Peek.b(mm+64)&255:b.w=Peek.b(mm+128)&255
+			c.w=(r+g+b)/3
+			Use lmaxlen 0:Point x+xx*64,y,c
+			Use lmaxlen 1
+
+			If g=255 Then c=0:Goto doit				 ;green
+
+			If r>b+10
+				c=3															 ;red
+				If ((x+y)AND1)=1
+					If r<t1 Then c=1
+					If r>t2 Then c=2
+				EndIf
+			Else
+				If ((x-y)AND1)=1									;grey
+					If c<65 Then c=1 Else c=2
+				Else
+					If c<80 Then c=1 Else c=2
+				EndIf
+			EndIf
+
+			doit:Point x+xx*64,y,c
+		Next
+	Next
+Next
+
+FloodFill 0,0,0
+MouseWait
+End

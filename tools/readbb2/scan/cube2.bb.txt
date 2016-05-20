@@ -1,0 +1,200 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/Cube2.bb
++##[$80CC]
+DEFTYPE.l
+
+remline 2,"topaz.font",8
+;LoadFont 1,"crypt.font",27
+SetString 6,1
+SelectMode 3,0
+workstart	1,0,00,0,99," Randomize "
+workstart	1,0,33,1,98," Print "
+workstart	1,0,66,0,97," Quit "
+
+
+LoadShapes 6,"data/cube.shp"
+
+allocst 0,0,0,640,512,3,$8004,"",0,1
+Green 0,8,8,8:Green 1,0,0,0:Green 2,15,0,0:Green 3,0,15,0
+Green 4,15,0,15:Green 5,15,15,0:Green 6,15,15,15:Green 7,0,0,15
+DefaultIDCMP $48
+localstat 0,0,0,640,512,$11800,"",0,1,1
+ScreensBitMap 0,0
+WindowFont 2
+Dim c(6,4,4)
+For c=1 To 6:For x=0 To 3:For y=0 To 3:c(c,x,y)=c:Next:Next:Next
+
+.rot:
+Gosub disp
+.ev:
+e=WaitEvent
+If e=$40 Then Goto gads
+If e<>8 Then Goto ev
+x=EMouseX:y=EMouseY:m=MButtons
+If m<>1 AND m<>2 Then Goto ev
+mb=m
+oops:
+Gosub locat
+If f=0 Then Goto ev
+f1=f:x1=x:y1=y:z1=z
+.mh:
+e=WaitEvent
+If e<>8 Then Goto mh
+x=EMouseX:y=EMouseY:m=MButtons
+If m=1 OR m=2 Then Goto oops
+Gosub locat
+kw=0:pr=1+Disable(1,98)
+If mb=2 Then kw=3:pr=1
+If f=0 Then Goto ev
+For tl=0 To kw
+If kw=3 Then x1=tl:y1=tl:z1=tl
+If f1=1 AND f=2 Then n=3:l=x1:Gosub rx:If pr=0 Then Print "+X",l
+If f1=2 AND f=1 Then n=1:l=x1:Gosub rx:If pr=0 Then Print "-X",l
+If f1=1 AND f=3 Then n=3:l=y1:Gosub ry:If pr=0 Then Print "+Y",l
+If f1=3 AND f=1 Then n=1:l=y1:Gosub ry:If pr=0 Then Print "-Y",l
+If f1=3 AND f=2 Then n=1:l=z1:Gosub rz:If pr=0 Then Print "+Z",l
+If f1=2 AND f=3 Then n=3:l=z1:Gosub rz:If pr=0 Then Print "-Z",l
+Next
+Goto rot
+
+If x<>9 Then l=x:n=1:Gosub rx
+If y<>9 Then l=y:n=1:Gosub ry
+If z<>9 Then l=z:n=1:Gosub rz
+
+Print m," ",f," ",x," ",y," ",z
+
+
+
+Goto rot
+
+End
+.locat:
+f=0
+q=(x-60)/52
+If q<2 OR q>7 Then Goto noface
+w=((x*119)/206+y-130)/60
+If w<2 OR w>7 Then Goto noface
+r=(y-(x*119)/206+240)/60
+If r<2 OR r>7 Then Goto noface
+
+;NPrint q,w,r
+
+q=Int(q-1):w=Int(w-1):r=Int(r-1)
+If w=>0 AND w<=3 AND r=>0 AND r<=3 Then f=1:x=w-1:y=3-r:z=9
+If q=>0 AND q<=3 AND r=>4 AND r<=7 Then f=2:x=q-1:z=r-4:y=9
+If q=>4 AND q<=7 AND w=>4 AND w<=7 Then f=3:y=q-4:z=w-4:x=9
+noface:
+Return
+.gads:
+g=GadgetHit
+If g=98 Then WLocate 0,500:Boxf0,500,639,511,0
+If g=97 Then End
+If g=99 Then Goto random
+Goto ev
+
+.random:
+For kk=0 To 200
+r=Int(Rnd(3)+1)
+l=Int(Rnd(3)+1)
+n=1:On r Gosub rx,ry,rz
+Next
+Goto rot
+
+.disp:
+For x=0 To 2
+For y=0 To 2
+longdiv 5+c(1,x,y),164+(x+y)*52,125+(x-y)*30
+longdiv 11+c(2,x,y),164+x*52,155+x*30+y*60
+longdiv 17+c(3,x,y),320+x*52,215-x*30+y*60
+Next
+Next
+Return
+
+
+.rx:						 ; correct
+For tn=1 To n
+For w=0 To 2
+k=c(1,l,2-w)
+c(1,l,2-w)=c(2,l,w)
+c(2,l,w)=c(4,l,w)
+c(4,l,w)=c(5,l,2-w)
+c(5,l,2-w)=k
+Next
+If l>0 Then Goto ntl
+For t=0 To 1
+k=c(6,0,t)
+c(6,0,t)=c(6,t,2)
+c(6,t,2)=c(6,2,2-t)
+c(6,2,2-t)=c(6,2-t,0)
+c(6,2-t,0)=k
+Next
+ntl:
+If l<>2 Then Goto nbl
+For t=0 To 1
+k=c(3,0,t)
+c(3,0,t)=c(3,t,2)
+c(3,t,2)=c(3,2,2-t)
+c(3,2,2-t)=c(3,2-t,0)
+c(3,2-t,0)=k
+Next
+nbl:
+Next
+Return
+.ry:
+For tn=1 To n
+For w=0 To 2
+k=c(1,w,l)
+c(1,w,l)=c(3,l,w)
+c(3,l,w)=c(4,2-w,l)
+c(4,2-w,l)=c(6,l,2-w)
+c(6,l,2-w)=k
+Next
+If l<>0 Then Goto nrl
+For t=0 To 1
+k=c(2,2-t,0)
+c(2,2-t,0)=c(2,2,2-t)
+c(2,2,2-t)=c(2,t,2)
+c(2,t,2)=c(2,0,t)
+c(2,0,t)=k
+Next
+nrl:
+If l<>2 Then Goto nll
+For t=0 To 1
+k=c(5,2-t,0)
+c(5,2-t,0)=c(5,2,2-t)
+c(5,2,2-t)=c(5,t,2)
+c(5,t,2)=c(5,0,t)
+c(5,0,t)=k
+Next
+nll:
+Next
+Return
+.rz:
+For tn=1 To n
+For w=0 To 2
+k=c(2,w,l)
+c(2,w,l)=c(3,w,l)
+c(3,w,l)=c(5,2-w,l)
+c(5,2-w,l)=c(6,2-w,l)
+c(6,2-w,l)=k
+Next
+If l<>0 Then Goto nfl
+For t=0 To 1
+k=c(1,2-t,0)
+c(1,2-t,0)=c(1,2,2-t)
+c(1,2,2-t)=c(1,t,2)
+c(1,t,2)=c(1,0,t)
+c(1,0,t)=k
+Next
+nfl:
+If l<>2 Then Goto npl
+For t=0 To 1
+k=c(4,2-t,0)
+c(4,2-t,0)=c(4,2,2-t)
+c(4,2,2-t)=c(4,t,2)
+c(4,t,2)=c(4,0,t)
+c(4,0,t)=k
+Next
+npl:
+Next
+Return
+

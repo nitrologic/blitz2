@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Str$.bb
++a$=Str$(12345)Print Len(a$)	; Prints 5

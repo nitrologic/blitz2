@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Edit$.bb
++; ; edit$ program example ; Print "Please Type in your name:"		;prompt for a namea$=Edit$(40)									 ;receive inputNPrint "Hello There ",a$," !"			;print message and name MouseWait 

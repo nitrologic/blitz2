@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Point.bb
++; ; point example ; Screen 0,3,"HELLO THERE"			 ;intuition screen... ScreensBitMap 0,0					;and bitmap of screenFor y=0 To 9						 ;one loop...  For x=0 To 47					 ;another 	Plot x,y,7-Point(x,y)			;calc inverse colour for plot Next								;end of x loop Next								 ;end of y loop MouseWait 

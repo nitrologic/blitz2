@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/stest.bb2
++allocst 0,0,0,1280,256,8,$8020,"",1,2
+
+ScreensBitMap 0,0
+
+For y=0 To 255
+AGAGreen 0,y,y,0,y
+Line 0,y,255,y,y
+Next
+
+;MouseWait
+
+Use SetCycle 0
+
+##[$80BB]:VWait:##[$80BC] Joyb(0)=2
+
+Free allocst 0
+
+p.l=##[$80B8] SetCycle(0):p=Peek.l(p)
+For k=0 To 23:NPrint Hex$(Peek.l(p)):p+4:Next
+
+MouseWait

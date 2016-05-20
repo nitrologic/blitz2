@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/kernal/makeauto.bb2
++
+;
+;make auto
+;
+If NumPars<>1
+	err
+	NPrint "Usage: MAKEAUTO inputfile (without .s!)"
+	End
+EndIf
+
+If WriteMem(0,Par$(1)+".s")=0 Then Goto err
+If ReadMem(1,Par$(1)+".dox")=0
+	NPrint "Can't open output file":End
+EndIf
+FileInput 0
+FileOutput 1
+
+a$="---------------------------------------" ;String$("-",40)
+t$=Chr$(9)+";*"
+
+While NOT DosBuffLen(0)
+l$=Edit$(256)
+If l$=t$
+	NPrint a$
+	l$=Edit$(256)
+	While l$<>t$
+		NPrint l$:l$=Edit$(256)
+	Wend
+	NPrint a$
+EndIf
+Wend

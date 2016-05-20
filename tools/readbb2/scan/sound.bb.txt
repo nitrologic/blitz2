@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sound.bb
++; ; a very sound program example; LoadSound 0,"Mysound.iff" Sound 0,15,8,16,32,64 MouseWait End 

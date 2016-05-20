@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Circlef.bb
++; ; circlef example ; Screen 0,3								 ;an intuition screenScreensBitMap 0,0 For k=1 To 10									;start of loop  Circlef Rnd(320),Rnd(200),Rnd(100),Rnd(7)+1	;random circlesNext													;end of loop MouseWait 

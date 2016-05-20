@@ -1,0 +1,131 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/BombsScores.bb2
++;
+;
+; Bombs Scores
+;
+;
+; Created by ARV
+;
+; started 01-06-1994
+; BLITZ2 Version : 01-06-1994
+; last modified 17-10-1994
+
+; =======================================
+; =======================================
+
+Function.s GetPlayerName{}
+Shared *biptr.OSInput
+; Returns a string for the ratings array
+.GetPlayerName
+		WColour 2
+		WBox 0,21, 320,DispHeight, 1
+		WLocate 28,60:Print "ENTER YOUR NAME FOR THE RATINGS"
+		For i.b=1 To 10
+				WLocate i*20+40,100:Print Chr$(i+64)
+		Next i
+		For i.b=11 To 20
+				WLocate i*20-160,120:Print Chr$(i+64)
+		Next i
+		For i.b=21 To 26
+				WLocate i*20-360,140:Print Chr$(i+64)
+		Next i
+		WLocate 180,140:Print "-"
+		WJam 4:WLocate 200,140:Print " ":WJam 0
+		WBox 218,138, 229,149, 0
+		WBox 238,138, 249,149, 0
+		WBlit 22, 219,139
+		WBlit 29, 239,139
+		keepSS.b=True
+		##[$80BB]
+				GetUserInput{ *biptr}
+##[$80CA] *biptr
+				Select \ev
+					Case $8
+						Select \code
+							Case $E8											; LMB Up
+								If (\iMouseY>97) AND (iMouseY<150)
+										If (\iMouseX>57) AND (iMouseX<250)
+												x1.l = (\iMouseX/10-4)
+												y1.l = (\iMouseY/10-10)
+												If x1 ##[$80B9] 2=1 Then x1 = -100 Else x1=x1/2
+												If y1 ##[$80B9] 2=1 Then y1 = -100 Else y1=y1*5
+												num.l = y1 + x1 + 64
+												Select num
+													Case 91
+														build$ = build$ + "-"
+													Case 92
+														build$ = build$ + " "
+													Case 93
+														build$ = UnLeft$(build$,1)
+													Case 94
+														keepSS = False
+													Default	 ; normal letter
+														If num>64 Then build$=build$+Chr$(num)
+												End Select
+												WBox 60,170, 320,180, 1
+												WLocate 60,170:Print build$
+										End If
+								End If
+						End Select
+				End Select
+		##[$80BC] (NOT keepSS) OR (Len(build$)=25)
+		While (Len(build$)<25) AND (build$<>"")
+				build$ = build$ + " "
+		Wend
+		WBox 0,21, 320,DispHeight, 0
+		Function Return build$
+End Function	;GetPlayerName
+
+; =======================================
+
+Statement TheScores{ *bombptr.gameVars}
+Shared *biptr.OSInput
+; Checks the incoming \rating
+; Opens a screen and window for displaying the best times
+; Asks for input via edit$
+; Sets \rewriteTimes to TRUE
+; Closes the screen and winwow
+.TheScores
+##[$80CA] *bombptr
+		allocst 3, 2, "RATINGS"
+		DefaultIDCMP $8
+		localstat 3, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
+		WJam 0
+
+		WBox 0,0, 320, 20, 3
+		WLocate 20,7:Print "PLAYERS"
+		WLocate 256,7:Print "RATINGS"
+		If \rating>Val(\ratings[10]\value)
+				playerName$ = GetPlayerName{}
+				If playerName$<>""
+						\rewriteRatings = True
+						i.b=9
+						While (Val(\ratings[i]\value)<\rating) AND (i>0)
+								\ratings[i+1]\name = \ratings[i]\name
+								\ratings[i+1]\value = \ratings[i]\value
+								i = i - 1
+						Wend
+						rating$ = Str$(\rating)
+						\rating = 0
+						While Len(rating$)<5
+								rating$ = " " + rating$
+						Wend
+						\ratings[i+1]\name = playerName$
+						\ratings[i+1]\value = rating$
+				End If
+		End If
+		For i=1 To 10
+				If (\ratings[i]\name=playerName$) AND (\ratings[i]\value=rating$) Then WColour 2 Else WColour 1
+				WLocate 20,i*15+30:Print \ratings[i]\name
+				WLocate 264,i*15+30:Print \ratings[i]\value
+		Next i
+		WColour 1
+		##[$80BB]
+				GetUserInput{ *biptr}
+		##[$80BC] (*biptr\ev=$8) AND (*biptr\code=$E8)
+		Free localstat 3
+		Free allocst 3
+End Statement	;TheScores
+
+; =======================================
+; =======================================

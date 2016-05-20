@@ -1,0 +1,24 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/repeat.bb
++allocst 0,4
+ScreensBitMap 0,0
+BlockScroll
+
+casestrcomp 0,"repeat.iff"
+FadePalette 0
+LoadShapes 0,"repeat.blocks"
+
+For x=0 To 5
+	For y=0 To 5
+		xx=x+(y AND 1)/2
+		sx=32*xx-16*y
+		sy=16*xx+8*y
+		If y=0 Then sh=1 Else sh=3
+		ClipBlit 9,sx,sy
+	Next
+Next
+
+
+
+
+MouseWait
+End

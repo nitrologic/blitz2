@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/testser.bb
++;a.w=OpenSerial ("serial.device",0,2400,32)
+;NPrint a
+
+;BLITZ
+
+yay=Off
+
+##[$FE91] 11,?sert
+
+;SetInt 11
+;	yay=On
+;End SetInt
+
+
+While Joyb(0)=0
+	VWait
+	If yay Then Print "y":Else Print "b"
+	NPrint yay
+Wend
+End
+
+
+.sert
+	MOVE #$f0f,$dff180
+RTS
+

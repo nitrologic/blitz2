@@ -1,0 +1,10 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/expansion.bb2
++;
+; $VER: expansion.bb2 40.0 (03.03.94)
+;
+
+Macro EXPANSIONNAME:"expansion.library":End Macro
+
+;/* flags for the AddDosNode() call */
+#ADNB_STARTPROC=0
+#ADNF_STARTPROC=(1LSL0)

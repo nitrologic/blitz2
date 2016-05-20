@@ -1,0 +1,602 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/CiaTrackerDemo.bb
++; Demo of most of the CIATrackerLib command set (V1.6)
+
+; hmm, after running from Blitz2 go to workbench screen to use
+; as their is a nocli....
+
+Statement MemSave{a$,s.l,l.l} ;hmmm no support lib sorry, Simon
+	If ReadMem(0,a$) Then Exists 0,s,l:CloseFile 0
+End Statement
+
+##[$80C3]:##[$80CC]
+MaxLen fi$=108
+
+ThisTask.l=##[$FEA7](0)
+OldPri.w=##[$FEA8](ThisTask,19) ;Beef up performance a bit...
+
+;This is new for V1.6.	It causes ciaTrackerLib to build a note
+;table so notes can be looked up in linear time, not looped as
+;in previous versions, all for the cost of 2K of RAM.
+;BuildNoteTable
+
+If ExecVersion <37 Then End
+
+;As stated in the docs, faster machines cause the replay routines to skip
+;notes.	This is also true of ProTracker, NoiseTracker, ...
+;Here is a simple way to compensate for processor speed.
+
+Select Processor
+	Case 0: ##[$9C02] 300	;68000
+	Case 1: ##[$9C02] 300	;68010
+	Case 2: ##[$9C02] 600	;68020 - this value is a guess
+	Case 3: ##[$9C02] 900	;68030
+	Case 4: ##[$9C02] 1200 ;68040 - 900 is too short
+End Select
+
+freest 0
+*vp.ViewPort=ViewPort(0)
+*myview.View=##[$FFAD]
+
+;What I'm doing here is determining how big the window's title bar
+;will be, so my WBox, GTBevelBox etc commands render correctly, and
+;so I can have a window big enough to fit everything.
+
+*WScreen.screen=##[$80B8] allocst(0)
+*WBScreen.Screen=*WScreen\_screen
+AddHeight.w=*WBScreen\WBorTop+*WBScreen\Font\ta_YSize+1
+
+;AddHeight is now the height (in scanlines) of the window-to-open's
+;title bar.
+
+Dim ceq.w(36):Dim vu.w(4)
+Dim pk.w(36)
+
+Dim fg.w(36):Dim vum.w(13):Dim fgd.w(36)
+
+##[$80C8] cTable
+For x.w=0 To 35
+	Read fg(x)
+Next x
+
+##[$80C8] dTable
+For x.w=0 To 35
+	Read fgd(x)
+Next x
+
+##[$80C8] vuTable
+For x.w=0 To 12
+	Read vum(x)
+Next x
+
+For x=1 To 36
+	ceq(x)=32
+Next x
+
+;Precalculate the analyser bars starting and stopping positions
+Dim hbs.w(36):Dim hbf(36)
+For x=1 To 36
+	hbs(x)=(10*x)+23
+	hbf(x)=(10*x)+31
+Next x
+
+VUBars.w=False
+WinFullSize.w=True
+UpdateDisplay.w=True
+CPUFriendly=True
+
+counter.w=0
+
+;This newtype is the taglist for our new window
+
+NEWTYPE.tl
+	a.l:b:c:d:e:f:g:h:i:j:k:l:m:n:o:p:q:r:s:t:u:v:w:x:y:z
+End NEWTYPE
+
+;This newtype determines what happens when the user hits the zoom button
+
+NEWTYPE.sz
+	LeftEdge.w
+	TopEdge.w
+	ZoomWidth.w
+	ZoomHeight.w
+End NEWTYPE
+
+NEWTYPE.ml
+	SamLen.w
+	SamName.s
+	SamLoc.l
+End NEWTYPE
+
+NEWTYPE.AppWindow
+	*aw_Private.l
+End NEWTYPE
+
+DEFTYPE.tl mywindow
+DEFTYPE.sz myzoom
+DEFTYPE.AppWindow *appwin
+DEFTYPE.AppMessage *amsg
+DEFTYPE.UCopList *uc
+
+Dim SamData.ml(31)
+Dim sPeriod.w(36)
+
+wheight.w=104+AddHeight
+wwidth.w=426
+
+WinSize.w=wheight
+
+wleft.w=(WBWidth-wwidth)/2	 ;A simple way to ensure that the window opens
+wtop.w=(WBHeight-wheight)/2	;centered on the WorkBench
+
+myzoom\LeftEdge=wleft,wtop,wwidth,17+AddHeight
+
+;These tags are the most needed ones, see Includes and AutoDocs for the
+;full list
+
+#WA_Dummy=$80000063
+#WA_Activate=#WA_Dummy+$26:#WA_CloseGadget=#WA_Dummy+$21:#WA_DepthGadget=#WA_Dummy+$20
+#WA_DragBar=#WA_Dummy+$1f:#WA_Zoom=#WA_Dummy+$1a:#WA_Height=#WA_Dummy+$4
+#WA_Width=#WA_Dummy+$3:#WA_Top=#WA_Dummy+$2:#WA_Left=#WA_Dummy+$1
+#WA_MinWidth=#WA_Dummy+$f:#WA_MinHeight=#WA_Dummy+$10
+
+mywindow\a=#WA_Activate,True,#WA_CloseGadget,True,#WA_Zoom,&myzoom
+mywindow\g=#WA_Width,wwidth,#WA_Height,wheight,#WA_Left,wleft,#WA_Top,wtop
+mywindow\o=#WA_DragBar,True,#WA_MinWidth,283,#WA_MinHeight,11,#WA_DepthGadget,True,0,0
+
+t$=""
+t1$=""
+
+##[$80C8] pTable:For Count.w=0 To 35:Read sPeriod(Count):Next
+
+GTButton 0,0,10,2,120,11,"Load",$10
+GTButton 0,1,150,2,120,11,"Play",$10
+GTButton 0,2,290,2,120,11,"Stop",$10
+GTText 0,3,70,76,148,11,"Status:",1,"Waiting..."
+GTText 0,4,339,89,74,11,"Song",4,""
+GTCycle 0,5,150,15,120,11,"",$10,"Equalizer|VU Meters"
+GTCycle 0,6,10,15,120,11,"",$10, "Bars Active|Bars Always"
+GTButton 0,7,290,15,120,11,"Sample Lab",$10
+GTText 0,8,94,89,240,11,"Song name:",1,""
+GTButton 0,9,225,76,109,11,"Setup",$10
+DefaultIDCMP $2|$40|$200|$40000|$80000|$2000000
+WindowTags 0,0,"Blitz II Module Player",&mywindow
+AttachGTList 0,0
+
+Gosub makecop
+WBox 29,34+AddHeight,395,69+AddHeight,1
+GTBevelBox 0,7,28+AddHeight,412,45,$10
+##[$9B0E] 3,"mod.#?"
+
+q4.w=69+AddHeight
+q5.w=37+AddHeight
+q6.w=68+AddHeight
+
+id.l=1
+userdata.l=0
+*awport.MsgPort=##[$FEE2]
+*mywin.window=##[$80B8] localstat(0)
+*win.Window=*mywin\_window
+*appwin=##[$EE01](id,userdata,*win,*awport,0)
+
+For x.w=1 To 36
+	WLine (10*x)+23,69+AddHeight,(10*x)+31,69+AddHeight,2
+Next x
+
+CatchDosErrs
+##[$9C15] $0f
+
+If WriteMem(0,"ENV:modplayer.prefs")
+	FileInput 0
+	defdir$=Edit$(108)
+	CloseFile 0
+	DefaultInput
+	##[$9B0A] 3,defdir$
+EndIf
+
+If NumPars>0
+	GTSetString 0,3,"Loading"
+	MyLock.l=##[$9B0C](0)
+	err.l=##[$9C01] (0,Par$(1))
+	##[$9B0D] 0,MyLock
+	If NOT ##[$9C0C](0)
+		ret.w=##[$B58D]("Check...","File doesn't appear to be a module","Play Anyway|Cancel")
+		If ret=0
+			##[$9C08](0)
+		End If
+	Else
+		ret=##[$9C03](0)
+		GTSetString 0,8,##[$9C1F](0)
+		Activate 0
+		GTSetString 0,3,"Playing module"
+	EndIf
+EndIf
+
+##[$80BB]
+	If WinFullSize
+		ev.l=Event
+	Else
+		ev.l=WaitEvent
+	EndIf
+	*amsg=##[$FEB4](*awport)
+	If *amsg<>0
+		GTSetString 0,3,"Loading"
+		##[$9C04]
+		*argptr.WBArg=*amsg\am_ArgList
+		name$=Peek$(*argptr\wa_Name)
+		olddir.l=##[$FE11](*argptr\wa_Lock)
+		MyLock=##[$9B0C](0)
+		err.l=##[$9C01] (0,name$)
+		##[$9B0D] 0,MyLock
+		If NOT ##[$9C0C](0)
+			ret.w=##[$9B01]("Check...","File doesn't appear to be a module","Play Anyway|Cancel")
+			If ret=0
+				##[$9C08](0)
+			End If
+		Else
+			ret=##[$9C1B](0)
+			GTSetString 0,8,##[$9C1F](0)
+		EndIf
+		##[$FEB5](*amsg)
+		dummy.l=##[$FE11](olddir)
+		GTSetString 0,3,"Waiting"
+		Activate 0
+		FlushEvents
+	EndIf
+	If ev
+		Select ev
+			Case $2:
+;We got a message to say that the size of the window has changed.	This can only occur
+;if the user hit the zip gadget
+				WinFullSize=(WindowHeight=wheight) ;Check this each time
+				If WinFullSize
+;Redraw the contents of the window
+					Gosub makecop
+					If NOT VUBars
+						WBox 29,34+AddHeight,395,69+AddHeight,1
+					EndIf
+					GTBevelBox 0,7,28+AddHeight,412,45,$10
+					GTSetString 0,3,"Un-Zipping :)"
+					GTSetString 0,8,##[$9C1F](0)
+					t$=Right$("0"+Str$(##[$9C14]),2)+":"+Right$("0"+Str$(##[$9C11]),2)
+					t$+":"+Right$("0"+Str$(##[$9C11]),2)+":"+Right$("0"+Str$(##[$9C12]),2)
+					GTSetString 0,4,t$
+					If VUBars=False
+						For x.w=1 To 36
+							WLine (10*x)+23,69+AddHeight,(10*x)+31,69+AddHeight,2
+						Next x
+					End If
+					OldPri.w=##[$FEA8](ThisTask,19) ;Beef up performance a bit...
+				Else
+					Gosub freecop
+					OldPri.w=##[$FEA8](ThisTask,-5)
+				EndIf
+				FlushEvents
+			Case $40:
+				Select GadgetHit
+					Case 0:
+						GTSetString 0,3,"Loading module"
+						##[$9C04]
+						f$=##[$9B14]
+						If f$=""
+							Gosub freecop
+							ret=##[$9B13]("Select file(s)")
+							If ret
+								f$=##[$9B14]
+							EndIf
+						EndIf
+						If NOT VUBars
+							Gosub makecop
+						EndIf
+						If f$<>""
+							MyLock=##[$9B0C](0)
+							err.l=##[$9C01] (0,f$)
+							##[$9B0D] 0,MyLock
+							If NOT err
+									Gosub freecop
+									ret.w=##[$9B01]("Error!","DOS Error code:"+Str$(err),"Ok")
+									If NOT VUBars
+										Gosub makecop
+									EndIf
+							Else
+								If NOT ##[$9C0C](0)
+									Gosub freecop
+									ret=##[$9B01]("Check...","File doesn't appear to be a module","Play Anyway|Cancel")
+									If ret=0
+										##[$9C08](0)
+									End If
+									If NOT VUBars
+										Gosub makecop
+									EndIf
+								Else
+									ret=##[$9C1B](0)
+									GTSetString 0,8,##[$9C1F](0)
+								EndIf
+							EndIf
+						EndIf
+						GTSetString 0,3,"Waiting..."
+						FlushEvents
+					Case 1:
+						If NOT ##[$9C03](0)
+							Gosub freecop
+							ret=##[$9B01]("Check...","No module to play","Ok")
+							Gosub makecop
+							FlushEvents
+						Else
+							GTSetString 0,3,"Playing module"
+						End If
+					Case 2:
+						##[$9C04]
+						GTSetString 0,3,"Stopping module"
+					Case 5:
+						If VUBars=True
+							VUBars=False
+							WBox 29,30+AddHeight,395,69+AddHeight,0
+							Gosub freecop
+							Gosub makecop
+							WBox 29,34+AddHeight,395,69+AddHeight,1
+							For x.w=1 To 36
+								WBox (10*x)+23,69+AddHeight,(10*x)+31,69+AddHeight,2
+							Next x
+						Else
+							VUBars=True
+							Gosub freecop
+							WBox 10,29+AddHeight,396,69+AddHeight,0
+							Gosub makecop
+						End If
+					Case 6:
+						If CPUFriendly=True
+							CPUFriendly=False
+						Else
+							CPUFriendly=True
+						EndIf
+					Case 7:
+						Gosub freecop
+						##[$9C04]
+						If NOT ##[$9C1B](0)
+							ret=##[$9B01]("Check...","No module","Ok")
+							FlushEvents
+						Else
+							GTSetString 0,3,"Sample Lab"
+							MyLock.l=##[$9B0C](0)
+							Octave.w=0
+							Note.w=0
+							cSample.w=1
+							sName$="RAM:SavedSample"
+							For x.w=1 To 31
+								SamData(x)\SamLen=##[$9C1D](x)
+								SamData(x)\SamLoc=##[$9C1C](x)
+								SamData(x)\SamName=##[$9C1E](x)
+							Next x
+							DefaultIDCMP $40|$200
+							For x=1 To 16
+								GTButton 1,x,5,(x*11)-6,180,11,SamData(x)\SamName,$10
+							Next x
+							For x=17 To 31
+								GTButton 1,x,185,((x-17)*11)+5,180,11,SamData(x)\SamName,$10
+							Next x
+							GTNumber 1,32,500,10,60,11,"Sample Number",1,cSample
+							GTNumber 1,33,500,23,60,11,"Sample Length",1,SamData(cSample)\SamLen
+							GTButton 1,34,440,49,120,11,"Play",$10
+							GTButton 1,35,440,60,120,11,"Save",$10
+							GTCycle 1,36,460,98,80,11,"Period",4,"C-x|C#x|D-x|D#x|E-x|F-x|F#x|G-x|G#x|A-x|A#x|B-x"
+							GTCycle 1,37,460,109,80,11,"",0,"x-1|x-2|x-3"
+							GTNumber 1,38,460,120,80,11,"",1,sPeriod((12*Octave)+Note)
+							GTText 1,39,482,150,120,11,"",0,sName$
+							GTButton 1,40,380,150,100,11,"Save as",$10
+							localstat 1,(WBWidth-620)/2,(WBHeight-200)/2,620,189+AddHeight,$2|$4|$8|$1000,"Blitz II Sample Lab",2,1
+							AttachGTList 1,1
+							GTBevelBox 1,189,181,180,11,0
+							##[$80BB]
+								slev.l=WaitEvent
+								Select slev
+									Case $40
+										gh.w=GadgetHit
+										If gh <32
+											;User hit a sample gadget
+											GTSetInteger 1,32,gh
+											GTSetInteger 1,33,SamData(gh)\SamLen
+											cSample=gh
+											sName$=SamData(gh)\SamName
+											GTSetString 1,39,sName$
+										Else
+											Select gh
+												Case 34
+													If SamData(cSample)\SamLen>2
+													 ##[$9C1A] cSample,sPeriod((12*Octave)+Note),64,1
+													EndIf
+												Case 35
+													If sName$<>""
+														MemSave {sName$,SamData(cSample)\SamLoc,SamData(cSample)\SamLen*2}
+													Else
+														##[$FF8C](0)
+													EndIf
+												Case 36:
+													Note=EventCode
+													GTSetInteger 1,38,sPeriod((12*Octave)+Note)
+												Case 37:
+													Octave=EventCode
+													GTSetInteger 1,38,sPeriod((12*Octave)+Note)
+												Case 40:
+													fi$=SamData(cSample)\SamName
+													f$=##[$9B09]("Save sample as...",fi$)
+													If f$=""
+														sName$=SamData(cSample)\SamName
+													Else
+														sName$=f$
+													EndIf
+													GTSetString 1,39,sName$
+											End Select
+										EndIf
+								End Select
+							##[$80BC] slev=$200
+							Free localstat 1
+							Free GTList 1
+							##[$9B0D] 0,MyLock
+							Use localstat 0
+							GTSetString 0,3,"Waiting..."
+						EndIf
+						Gosub makecop
+					Case 9:
+						Gosub freecop
+						GTSetString 0,3,"Default setup"
+						defdir$=##[$9B0B]("Where shall I look for modules?")
+						If defdir$<>""
+							##[$9B0A] 0,defdir$
+							If ReadMem(0,"ENVARC:modplayer.prefs")
+								FileOutput 0
+								NPrint defdir$
+								CloseFile 0
+								DefaultOutput
+							EndIf
+							If ReadMem(0,"ENV:modplayer.prefs")
+								FileOutput 0
+								NPrint defdir$
+								CloseFile 0
+								DefaultOutput
+							EndIf
+						EndIf
+						If WinFullSize
+							Gosub makecop
+						EndIf
+						FlushEvents
+				End Select
+			Case $40000:
+				If WinFullSize
+					Gosub makecop
+				EndIf
+;The window is active, so we'll allow the analyser or VU bars to run
+				If CPUFriendly=True
+					UpdateDisplay=True
+					If VUBars=False
+						WBox 29,34+AddHeight,395,69+AddHeight,1
+						For x.w=1 To 36
+							WLine (10*x)+23,69+AddHeight,(10*x)+31,69+AddHeight,2
+						Next x
+					End If
+					GTSetString 0,3,"Running"
+				EndIf
+				OldPri.w=##[$FEA8](ThisTask,19)
+			Case $80000:
+				Gosub freecop
+;The window is inactive, so don't have any bars and save on CPU time if allowed
+				If CPUFriendly=True
+					UpdateDisplay=False
+					WBox 10,31+AddHeight,396,69+AddHeight,0
+					GTSetString 0,3,"Sleeping"
+				EndIf
+				OldPri.w=##[$FEA8](ThisTask,0)
+			Case $2000000
+				If WinFullSize
+					Gosub freecop
+					Gosub makecop
+				EndIf
+		End Select
+	EndIf
+	t$=Right$("0"+Str$(##[$9C14]),2)+":"+Right$("0"+Str$(##[$9C11]),2)+":"+Right$("0"+Str$(##[$9C12]),2)
+	If t1$<>t$
+		VWait
+		GTSetString 0,4,t$
+		t1$=t$
+	EndIf
+	If UpdateDisplay
+		If VUBars
+			For x=0 To 3
+				If ##[$9C16](x)
+					vu(x)=##[$9C0D](x)
+				EndIf
+			Next x
+			For x=0 To 3
+				If vu(x)>0 Then vu(x)-1
+				WBox (vu(x)*3)+104,((x+5)*10)-19+AddHeight,295,((x+5)*10)-12+AddHeight,1
+				WBox 103,((x+5)*10)-19+AddHeight,(vu(x)*3)+103,((x+5)*10)-12+AddHeight,2
+			Next x
+		Else
+;This routine now highly optimised.	Only 1 calculation per line,
+;and as many precalculated variables as possible.
+			For x.w=0 To 3
+				y.w=##[$9C16](x)
+				If y<>0 Then ceq(y)=##[$9C0D](x)/2
+			Next
+			For x=1 To 36
+				WBox hbs(x),q5,hbf(x),q6-ceq(x),3
+				If ceq(x)>0
+					WBox hbs(x),q4,hbf(x),q4-ceq(x),2
+					ceq(x)-1
+				EndIf
+			Next x
+		EndIf
+	EndIf
+##[$80BC] ev=$200
+
+##[$9C04]
+##[$9C08] 0
+##[$EE02](*appwin)
+##[$FEE3](*awport)
+Free localstat 0
+Free GadgetJam 0
+Gosub freecop
+End
+
+pTable:
+Data.w 856,808,762,720,678,640,604,570,538,508,480,453
+Data.w 428,404,381,360,339,320,302,285,269,254,240,226
+Data.w 214,202,190,180,170,160,151,143,135,127,120,113
+
+freecop
+	If *uc
+;Copperlist exists and can be deleted
+		##[$FF57] *uc\FirstCopList
+		*vp\UCopIns=0
+		##[$FE99] *uc,12
+		*uc=0
+		##[$FFBC]
+	EndIf
+	Return
+
+.makecop
+	If NOT *uc
+;Copperlist already exists and is patched in
+		*uc=##[$FE97](12,$10001)
+		##[$FF5F] *uc,1+256*2+1
+		blk.w=(Blue(1)*$100)+(Palette(1)*$10)+PalRGB(1)
+		frg.w=(Blue(2)*$100)+(Palette(2)*$10)+PalRGB(2)
+		oth.w=(Blue(3)*$100)+(Palette(3)*$10)+PalRGB(3)
+		hOffset.w=$30+((*myview\DxOffset-93)/2)
+;NB!! hOffset is correct for ECS PAL/NTSC display only!
+;For DblPal, hOffset may need to become $30+((*myview\DxOffset-93)/4)
+;For Lowres, hOffset may need to be $30+(*myview\DxOffset-93)
+		If NOT VUBars
+			For k=0 To 35
+				##[$FF3B] *uc,k+34+AddHeight+WindowY,(WindowX/4)+hOffset:##[$FF39] *uc
+				##[$FF3A] *uc,$186,fgd(k):##[$FF39] *uc
+				##[$FF3A] *uc,$184,fg(k):##[$FF39] *uc
+				##[$FF3B] *uc,k+34+AddHeight+WindowY,((WindowX+388)/4)+hOffset:##[$FF39] *uc
+				##[$FF3A] *uc,$184,frg:##[$FF39] *uc
+				##[$FF3A] *uc,$186,oth:##[$FF39] *uc
+			Next
+		Else
+			For v.w=0 To 40
+				##[$FF3B] *uc,v+30+AddHeight+WindowY,(WindowX/4)+hOffset+22:##[$FF39] *uc
+				For k=0 To 12
+					##[$FF3A] *uc,$184,vum(k):##[$FF39] *uc
+				Next k
+				##[$FF3A] *uc,$184,frg:##[$FF39] *uc
+			Next v
+		EndIf
+		##[$FF3B] *uc,10000,255
+		*vp\UCopIns=*uc
+		##[$FFBD]
+	EndIf
+	Return
+
+;Colour registers for Analyser bars
+cTable:
+Data.w $000,$000,$000,$f00,$000,$f20,$000,$f40,$000,$f60,$000,$f80,$000,$fa0,$000,$fc0,$000,$fe0,$000
+Data.w $ff0,$000,$ef0,$000,$cf0,$000,$af0,$000,$8f0,$000,$6f0,$000,$4f2,$000,$1f4,$000,$0f6
+
+dTable:
+Data.w $000,$000,$000,$400,$000,$420,$000,$420,$000,$420,$000,$430,$000,$440,$000,$440,$000,$440,$000
+Data.w $440,$000,$440,$000,$440,$000,$440,$000,$340,$000,$340,$000,$242,$000,$042,$000,$042
+
+vuTable:
+Data.w $0f0,$4f0,$6f0,$8f0,$af0,$cf0,$ef0,$ff0,$fe0,$fd0,$fc0,$fb0,$fa0,$f90

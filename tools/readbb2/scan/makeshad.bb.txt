@@ -1,0 +1,53 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makeshad.bb
++	Dim qsin(63),qcos(63)	 :; look up table for car motion
+	For cnt.w=0 To 63:qcos(cnt)=HCos(cnt/32*##[$80BA]):qsin(cnt)=HSin(cnt/32*##[$80BA]):Next
+
+NEWTYPE .ShadPt
+	ri0.q:rj0:ri1:rj1:ri2:rj2:ri3:rj3:ri4:rj4:ri5:rj5
+	rx0.w:ry0:rx1:ry1:rx2:ry2:rx3:ry3
+End NEWTYPE
+
+
+InitBank 0,64*SizeOf.ShadPt,0
+
+
+
+;		xdim=cvh(nxcar)\settings\shadowx
+;		ydim=cvh(nxcar)\settings\shadowy
+
+
+
+		#ysc=3:#xsc=4:#scal=5
+
+		xdim=20
+		ydim=12
+
+		For d=0 To 63
+			qs=qsin(d):qc=qcos(d)
+			*sha.ShadPt=Bank(0)+d*SizeOf.ShadPt
+			##[$80CA] *sha
+			\ri3=(-xdim*qc+ydim*qs) ASR #scal:\rj3=(-xdim*qs-ydim*qc)ASR #scal
+			\ri2=(-xdim*qc-ydim*qs) ASR #scal:\rj2=(-xdim*qs+ydim*qc)ASR #scal
+			\ri1=( xdim*qc-ydim*qs) ASR #scal:\rj1=( xdim*qs+ydim*qc)ASR #scal
+			\ri0=( xdim*qc+ydim*qs) ASR #scal:\rj0=( xdim*qs-ydim*qc)ASR #scal
+;			\rx3=QLimit(\ri3 ASL #xsc-\rj3 ASL #xsc+16,0,31)
+;			\rx2=QLimit(\ri2 ASL #xsc-\rj2 ASL #xsc+16,0,31)
+;			\rx1=QLimit(\ri1 ASL #xsc-\rj1 ASL #xsc+16,0,31)
+;			\rx0=QLimit(\ri0 ASL #xsc-\rj0 ASL #xsc+16,0,31)
+
+
+			\ry3=(\ri3 ASL #ysc+\rj3 ASL #ysc+23)*.75
+			\ry2=(\ri2 ASL #ysc+\rj2 ASL #ysc+23)*.75
+
+			\ry1=(\ri1 ASL #ysc+\rj1 ASL #ysc+23)*.75
+			\ry0=(\ri0 ASL #ysc+\rj0 ASL #ysc+23)*.75
+
+			\rx3=QLimit((\ri3 ASL #xsc-\rj3 ASL #xsc+16.5)*0.75,0,23)
+			\rx2=QLimit((\ri2 ASL #xsc-\rj2 ASL #xsc+16.5)*0.75,0,23)
+			\rx1=QLimit((\ri1 ASL #xsc-\rj1 ASL #xsc+16.5)*0.75,0,23)
+			\rx0=QLimit((\ri0 ASL #xsc-\rj0 ASL #xsc+16.5)*0.75,0,23)
+			\ri4=(\ri0+\ri3)*0.29:\rj4=(\rj0+\rj3)*0.29
+			\ri5=(\ri1+\ri2)*0.29:\rj5=(\rj1+\rj2)*0.29
+		Next
+
+SaveBank 0,"shadow.dat"

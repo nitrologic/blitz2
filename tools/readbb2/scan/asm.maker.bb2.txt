@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/quikasm/asm.maker.bb2
++;
+;A program to convert asm.table to a disk file
+;
+DEFTYPE.w
+
+Include asm.table.bb2
+
+If ReadMem(0,"asm.bin")
+	FileOutput 0
+	##[$80BB]
+		Read mn$:Print UCase$(mn$),Chr$(0)
+		If FileSeek(0) & 1 Then Print Chr$(0)
+		If mn$>""
+			mn+1
+			##[$80BB]
+				md+1
+				Read k
+				Print Mki$(k)
+			##[$80BC] k=-1
+		EndIf
+	##[$80BC] mn$=""
+	CloseFile 0:DefaultOutput
+	NPrint mn," ",md," DONE...Click mouse":MouseWait
+Else
+	NPrint "ERROR...Click mouse":MouseWait
+EndIf

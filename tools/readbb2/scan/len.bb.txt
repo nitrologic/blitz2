@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Len.bb
++Print Len("Hippo"): ; Will print 5

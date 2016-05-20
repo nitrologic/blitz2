@@ -1,0 +1,115 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/My_1stDemo.bb2
++;*****************************
+;
+; My first scroller in Blitz!
+;
+; 9-12-1993					J. Valks
+;
+;*****************************
+
+##[$80C3]:##[$80CC]
+LoadModule 0,"modules/mod.sheam"						; Load the module
+LoadShapes 0,"shapes/sensor_stuff.shapes"	 ; Get Font & Logo
+VWait 20
+
+BLITZ																											; Blitz rules!
+#bplmod1=$108
+#bplmod2=$10A
+PlayModule 0																							 ; Play some music
+lmaxlen 0,384,250,4																				 ; Define a bitmap
+
+##[$80C8] cdat																							 ;
+For tel=0 To 15																						; Read the colors
+	Read ri,rr,rg,rb																				 ; from the data
+	StopCycle 0,ri,rr,rg,rb																		 ; lines
+Next tel																									 ;
+Slice 0,44,320,250,$fff8,4,8,32,384,384				 ; Define a slice
+Use SetCycle 0
+
+;
+; Setup Copper bar, I hope the Rainbow commands are finished soon...
+;
+b=0
+For tel=48 To 96 Step 5
+	ColSplit 0,0,0,b,tel
+	b+1
+	If b>15 Then b=15
+Next tel
+For tel=97 To 144 Step 5
+	ColSplit 0,0,0,b,tel
+	b-1
+	If b<0 Then b=0
+Next tel
+ColSplit 0,0,0,0,145
+
+co$=Mki$(#bplmod1)+Mki$(-137)
+co$+Mki$(#bplmod2)+Mki$(-137)
+CustomCop co$,150+44
+
+co$=Mki$(#bplmod1)+Mki$(-41)
+co$+Mki$(#bplmod2)+Mki$(-41)
+CustomCop co$,245
+
+longdiv 41,30,50																					 ; Logo
+Show 0																					; Here we are!
+
+controle$="abcdefghijklmnopqrstuvwxyz0123456789.,-!"
+text$="hello		here is some scrolly on your screen made in the"
+text$+" the wonderfull blitz language												 "
+ftel=0
+lengte=Len(text$)
+teller=1
+ypos=0
+x=320
+##[$80BB]
+	find$=Mid$(text$,teller,1)
+	ftel=Instr(controle$,find$)-1
+	teller=QWrap(teller+1,1,lengte)
+	If ftel=-1 Goto verder
+	longdiv ftel,335,5
+	verder:
+	For tel=1 To 2
+		Scroll 5,5,350,8,0,5
+		VWait
+		If Joyb(0)=1 Then Goto eruit
+	Next tel
+##[$80BC] False
+
+eruit:
+;
+; Slow, slow slow....
+;
+For tel=48 To 144
+	ColSplit 0,0,0,0,tel
+	VWait
+Next tel
+
+For tel=15 To 0 Step -1
+	Green 1,tel,tel,tel
+	VWait 5
+Next tel
+For w=245 To 90 Step -1
+	CustomCop co$,w
+	VWait
+Next w
+VWait 5
+
+End
+
+cdat:
+Data 0,0,0,0
+Data 1,15,15,15
+Data 2,12,12,12
+Data 3,10,0,0
+Data 4,13,8,0
+Data 5,15,14,0
+Data 6,8,15,0
+Data 7,0,8,0
+Data 8,8,0,0
+Data 9,10,0,0
+Data 10,12,0,0
+Data 11,14,0,0
+Data 12,15,10,0
+Data 13,15,11,0
+Data 14,15,13,0
+Data 15,15,14,0

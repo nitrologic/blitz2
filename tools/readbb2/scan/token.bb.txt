@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/token.bb
++LoadBank 0,"deflibs"
+a.l=Bank(0)
+
+While Peek.l(a)<>0
+	NPrint Peek$(a+$60)
+	a+Peek.l(a)+4
+	n+1
+Wend
+
+NPrint n
+MouseWait
+End
+

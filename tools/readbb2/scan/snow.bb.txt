@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/snow.bb
++BLITZ
+Slice 0,44,4
+lmaxlen 0,320,256,4
+Show 0
+
+miny=199
+##[$80BB]
+	x=Rnd(640)
+	y=miny-1
+	##[$80BB]
+		ok=False
+		y+1
+		If y=200 Then ok=True
+		If Cls(x-1,y)<>0 Then ok=True
+		If Cls(x	,y)<>0 Then ok=True
+		If Cls(x+1,y)<>0 Then ok=True
+	##[$80BC] ok
+	y-1
+	If y<miny Then miny=y
+	Point x,y,Rnd(15)
+
+##[$80BC] Joyb(0)<>0

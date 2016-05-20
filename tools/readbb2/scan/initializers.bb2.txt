@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/initializers.bb2
++;
+; $VER: initializers.bb2 40.0 (28.02.94)
+;
+
+; No garand for working
+Macro OFFSET:(&(*`1)`2):End Macro
+Macro INITBYTE:$e000,(`1),(`2LSL8):End Macro
+Macro INITWORD:$d000,(`1),(`2):End Macro
+Macro INITLONG:$c000,(`1),(`2LSR16),(`2&$FFFF):End Macro
+Macro INITSTRUCT:$c000|(`1LSL12)|(`4LSL8)|(`2LSR16),(`2&$FFFF):End Macro

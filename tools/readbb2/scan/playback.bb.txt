@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PlayBack.bb
++; ; brex program example; low=DispHeight*2-1	 ;allow for NTSC or PAL displays TapeTrap 0					 ;start creating a tapeQuietTrap On					;set recording mode to quiet. AbsMouse 639,lowMouseButton 0,OnAbsMouse 639,low/2MouseButton 0,Off TapeTrap						;Turn off trapping. PlayBack 0					 ;Play it Back!MouseWait 

@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/parts.bb2/not.bb2
++
+Dc.b "pART"
+Dc.b "SN54/74LS04",0
+Event
+;
+Dc 0					;version
+Dc 0					;flags. b0=start separate task
+;
+Dc.l shape_	 ;shape table
+;
+Dc 1					;# inputs
+Dc 1					;# outputs
+;
+Dc 9,15			 ;turn off delay...typ/max
+Dc 10,15			;turn on delay...type/max
+;
+Dc.l calcout_ ;calc output routine
+
+calcout_
+;
+;calc output - d0.l=input, return d0.b=output
+;
+NOT d0:AND #1,d0:RTS
+
+shape_
+IncBin "shapes/not"

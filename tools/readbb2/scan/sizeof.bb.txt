@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SizeOf.bb
++; ; sizeof program example; NEWTYPE.test					;create a custom variable type...  a.l b.w c.qEnd NEWTYPE					 ;end of custom variable type. NPrint SizeOf.b		 ;print size of a byte!NPrint SizeOf.test	 ;print size of our custom typeNPrint SizeOf.test\b	;print offset to 'b' entry of our type. MouseWait 

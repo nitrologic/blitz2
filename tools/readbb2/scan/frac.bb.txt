@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Frac.bb
++Print Frac(23.456) ; Will print .456

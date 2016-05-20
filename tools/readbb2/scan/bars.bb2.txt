@@ -1,0 +1,649 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/blitzlibs/bars.bb2
++;/*
+;(c) Copyright 1988-1994 Microsoft Corporation.
+;
+;Microsoft Bars&Pipes Professional Source Code License
+;
+;This License governs Use of the accompanying Software.
+;Microsoft hopes you find this Software useful.
+;
+;You are licensed To do anything you want with the Software.
+;
+;In Return, we simply require that you agree:
+;
+;1.			NOT To remove any copyright notices from the Software.
+;
+;2.			That the Software comes "as is", with no warranties.
+;				None whatsoever. This means no implied warranty of merchantability OR
+;				fitness For a particular purpose OR any warranty of non-infringement.
+;				Also, you must pass this disclaimer On whenever you distribute the Software.
+;
+;3.			That we will NOT be liable For any of those types of damages known as indirect,
+;				special, consequential, OR incidental related To the Software OR this License,
+;				To the Maximum extent the law permits. Also, you must pass this limitation of
+;				liability On whenever you distribute the Software.
+;
+;4.			That If you sue anyone over patents that you think may apply To the Software
+;				For that persons Use of the Software, your license To the Software ends automatically.
+;
+;5.			That the patent rights Microsoft is licensing only apply To the Software,
+;				NOT To any derivatives you make.
+;
+;6.			That your rights under the License End automatically If you breach this in any way.
+;*/
+;
+
+Macro bars
+CNIF `0=8
+##[$C0A2] `8
+CEND
+CNIF `0=>7
+##[$C0A2] `7
+CEND
+CNIF `0=>6
+##[$C0A2] `6
+CEND
+CNIF `0=>5
+##[$C0A2] `5
+CEND
+CNIF `0=>4
+##[$C0A2] `4
+CEND
+CNIF `0=>3
+##[$C0A2] `3
+CEND
+CNIF `0=>2
+##[$C0A2] `2
+CEND
+##[$C09F] *functions\`1
+MOVE.l d0,a0
+JSR (a0)
+CNIF `0=8
+LEA 28(a7),a7
+CEND
+CNIF `0=7
+LEA 24(a7),a7
+CEND
+CNIF `0=6
+LEA 20(a7),a7
+CEND
+CNIF `0=5
+LEA 16(a7),a7
+CEND
+CNIF `0=4
+LEA 12(a7),a7
+CEND
+CNIF `0=3
+ADDQ #8,a7
+CEND
+CNIF `0=2
+ADDQ #4,a7
+CEND
+End Macro
+Macro usebasic
+MOVEM.l d2-d7/a2-a6,-(a7)
+MOVE.l storea5+4,a4
+MOVE.l storea5,a5
+End Macro
+Macro puta5
+MOVE.l a4,storea5+4
+MOVE.l a5,storea5
+End Macro
+Macro useasm
+MOVEM.l (a7)+,d2-d7/a2-a6
+End Macro
+
+NEWTYPE ._event
+		*_next._event;		 /* The next event in the list. */
+		time.l;				/* When this event occurs. */
+		_type.b;				/* What type of event. */
+		status.b;	 /* MIDI status. */
+		byte1.b;		/* First byte of data. */
+		byte2.b;		/* Second byte of data. */
+		_data.l;				/* Data storage. */
+		*tool.Tool;			/* Tool that processes this next. */
+End NEWTYPE
+NEWTYPE .EventList
+		*first._event;		/* First in list. */
+		*_Point._event;		/* Current position in list. */
+End NEWTYPE
+NEWTYPE .TimeSigList
+ *first.TimeSigList
+ *_point.TimeSigList
+ measure.w:beat.w:clock.w
+End NEWTYPE
+NEWTYPE .Accessory
+
+		*_Next.Accessory ;*Next;	 /* Next accessory in this list. */
+		id.l;				/* Accessory ID. */
+		*image.image;		/* Icon for this accessory. */
+		*onimage.image;		/* Icon for when selected. */
+		name.b[100];		 /* Name. */
+		filename.b[100];		 /* Where it is stored on disk. */
+		*_Window._Window;
+		left.w:top.w;		/* Position of edit window. */
+		width.w:height.w;	/* Size of edit window. */
+		x.w:y.w;		 /* Position in access box. */
+		*remove;
+		*_edit;		 /* Routine to edit accessory. */
+		*open;		 /* Routine to open it. */
+		*close;
+		*size;
+		*save;
+		*load;
+		*install;			/* Install in environment. */
+		*clear;			/* Clear from environment. */
+		*expandc;			/* Future routine? */
+		segment.l;		 /* This accessory's segment list. */
+		altsegment.l;			/* Alternate segment list. */
+		selected.b;			/* Icon selected in graph. */
+End NEWTYPE
+
+NEWTYPE .Clip
+		*_Next.Clip;			/* List of clips. */
+		events.EventList;		/* Event list. */
+		chords.EventList;		/* List of bass chords. */
+		keys.EventList;		/* List of keys. */
+		lyrics.EventList;		/* List of lyrics. */
+		rhythm.EventList;		/* List of rhythm templates. */
+		dynamics.EventList;		/* List of dynamic changes. */
+		timesig.TimeSigList;	 /* List of time signatures. */
+		*name.String;		/* Name of this clip. */
+		*notes.String;	 /* Notes for this clip. */
+		begin.l;			 /* Time this begins. */
+		_End.l;			 /* Time this ends. */
+		highnote.b;	 /* Highest note, for display. */
+		lownote.b;		/* Lowest note, for display. */
+		locked.b;			/* Locked during record. */
+End NEWTYPE
+
+
+NEWTYPE .functions
+		locked.b
+		measureres.b;			/* Cuts resolve To measures. */
+		recording.b;		 /* Set when recording. */
+		running.b;		 /* Set when running. */
+		punchenabled.b;			/* Auto punch in AND out enabled. */
+		loopenabled.b;		 /* Loop mode turned On. */
+		clicking.b;			/* Click track On? */
+		seeclick.b;			/* Visual metronome. */
+		multiin.b;		 /* Multiple inputs? */
+		clickchannel.b;			/* MIDI CLick channel. */
+		midiclock.b;		 /* Sync to MIDI clocks. */
+		smpteclock.b;			/* Sync to SMPTE. */
+		sendmidiclock.b;		 /* Send out MIDI clocks. */
+		smptetype.b;		 /* Which SMPTE format. */
+		countdown.b;		 /* Do count down. */
+		midiclick.b;		 /* Use MIDI for click track. */
+		 chop.b;
+		leadinstart.l;		 /* Length of lead in. */
+		timenow.l;		 /* Current time. */
+		markone.l;		/* Auto locate register. */
+		marktwo.l;		/* Auto locate register. */
+		punchin.l;		/* Punch in point. */
+		punchout.l;	 /* Punch out point. */
+		loopin.l;	 /* Loop in point. */
+		loopout.l;		/* Loop out point. */
+		cutin.l;		/* Cut in point. */
+		cutout.l;	 /* Cut out point. */
+		starttime.l;		 /* Where to play from. */
+		stoptime.l;			/* Marker to stop at. */
+		padcutin.l;	 /* For non real time edits. */
+		padcutout.l;		/* For non real time edits. */
+		songlength.l;
+		startoffset.l;		 /* Starting hi res clock offset. */
+		tempos.w[4];
+		tempo.w;	 /* Current tempo. */
+		inittempo.w;	 /* Initial tempo. */
+		songname.b[100];
+		author.b[100];
+		Palete.w[8];		 /* Colors. */
+		remotecontrol.b[128];		/* Table of remote controls. */
+		markthree.l;		/* Auto locate register. */
+		markfour.l;	 /* Auto locate register. */
+		volumenum.b;		/* Mix Maestro Volume CC. */
+		pannum.b;	 /* Mix Maestro Pan CC. */
+		subdivide.b;		/* Metronome subdivision. */
+		bypassmix.b;
+		savestop.l;			/* Place to save stop sign. */
+		printflags.l;			/* Print flags. */
+		more.l[11];			/* Expansion space. */
+		songlist.l;			/* For time-line stuff. */
+		clockcycles.l;		/* Time in clock cycles! */
+		useclip.b;		 /* Use the ClipBoard. */
+		externclock.b;		 /* External clock flag. */
+		timeroffset.w;			/* For external clock. */
+		coordlist.l;
+		*tracklist.Track;		/* Top track in list. */
+		masterclip.Clip;	 /* Master key, chord, signature. */
+		masterundo.Clip;
+		mastercut.Clip;
+		*masteredit;
+		*edittools[16];	 /* 16 Tools to edit with. */
+		toolid.w;		/* Global tool id. */
+		groupid.w;			/* Currently selected group. */
+		*scalelist;		/* All scales. */
+		*chordlist;		/* All chords. */
+		*rhythmlist;		/* All rhythms. */
+		*sectionlist;	/* ABA list. */
+		*tempochangelist;/* Tempo Change list. */
+
+		whoops.l;			/* Time line song list used to be here. */
+		frame.l;		/* Current frame. */
+		hirestime.l;		/* Hi res clock. */
+		version.b;
+		SysBase.l;		 /* Exec library. */
+		DosBas.l;		 /* DOS library. */
+		IntuitionBas.l;
+		GfxBase.l;
+		LayersBase.l;
+		standardout.l;		 /* Ignore. */
+		pipequeue.l;		 /* Ignore. */
+		earlyqueue.l;			/* Ignore. */
+		*ActScreen;		/* Screen we all exist in. */
+		*MainWindow;		/* Main (backdrop) window. */
+		*toolmasterlist;	/* All ToolMasters. */
+		*accesslist; /* All Accessories. */
+		*midiouttool;	 /* Tool to send MIDI clocks. */
+		*stealmidi;		/* Steal serial interrupt.				 Funktion*/
+		*releasemidi;		/* Release MIDI.								 Funktion*/
+
+;/*	New additions. */
+
+		*audioclick;	 /* Play click sound. */
+
+		*selectedtrack;	/* Track currently selected. */
+
+		flags.l;			 /* Additional flags. */
+		pad.l[$3c];		 /* Room for more. */
+		*openeditwindow
+		pad2.l[13]
+		*installtransportp;	/* Install prioritized transport handler. Funktion */
+
+		*fastgets;		 /* fgets()													Funktion*/
+		*fastseek;		 /* Fast seek file io.							 Funktion*/
+
+		*adddisplayserver;																 Funktion
+		*removedisplayserver;															Funktion
+
+		*dragtool;																				 Funktion
+		*addtoolserver;		/* Server for dragging tools. */Funktion
+		*removetoolserver;																 Funktion
+
+		*editsysex;		/* Open sysex requester. */
+		*dupeevent; /* Duplicate an event. */
+
+		*frametotime;		/* Convert frame to time. */
+		*timetoframe;		/* Convert time to frame. */
+		*frametohmsf;		/* Convert frame to hmsf. */
+		*hirestotime;		/* Hires clock to time. */
+		*timetohires;		/* Time to hires. */
+		*hirestoframe;	 /* Hires clock to frame. */
+		*frametohires;	 /* Frame to hires clock. */
+
+		*deletetool;	 /* Delete a tool. */
+		*createtool;	 /* Allocate a new tool. */
+		*sizetool;		 /* Returns size prior to save. */
+		*savetool;		 /* Save a Tool to disk. */
+		*loadtool;		 /* Load a Tool from disk. */
+
+		*gettoolmaster;		/* Returns selected ToolMaster. */
+
+;/*	Old routines: */
+
+		*processsmpteclock;	/* Process a SMPTE event. */
+		*processmidiclock;	 /* Process a MIDI clock event .*/
+		*processsysex;	 /* Handle a sysex packet. */
+		*processinputevent;	/* Process a PipeLine input event. */
+
+		*clearenvironment;	 /* Clear the environment. */
+		*installenvironment; /* Replace the environment. */
+		*loadsong;
+		*savesong;
+
+		*installtransport;	 /* Install transport handler. */
+		*removetransport;		/* Remove transport handler. */
+		*transportcommand;	 /* Send command to handlers. */
+
+		*qevent;		 /* Put event in queue. */
+		*allocevent;	 /* Allocate an event. */
+		*fastallocevent;	 /* Allocate an event from interrupt. */
+		*freeevent;		/* Free an event. */
+		*sorteventlist;		/* Sort a list of events. */
+		*freelist;		 /* Free a list of events. */
+		*dupelist;		 /* Duplicate a list. */
+
+		*allocstring;		/* Allocate a string. */
+		*freestring;	 /* Free a string. */
+		*replacestring;		/* Replace a string with another. */
+		*dupestring;	 /* Duplicate a string. */
+		*stringtext;	 /* Get string. */
+
+		*clearclip;		/* Clear a clip. */
+		*dupeclip;		 /* Duplicate a clip. */
+		*cutclip;			/* Clip cut operation. */
+		*copyclip;		 /* Clip copy operation. */
+		*pasteclip;		/* Clip paste operation. */
+		*mixclip;			/* Clip mix operation. */
+		*loadclip;		 /* Load a clip from disk. */
+		*saveclip;		 /* Save a clip. */
+		*clipboard;		/* Clipboard operation. */
+
+		*createtrack;		/* Create a track. */
+		*deletetrack;		/* Delete a track. */
+
+		*myalloc;			/* Internal allocation routine. */
+		*myfree;		 /* Internal free routine. */
+
+		*doscall;			/* Make a DOS command. */
+		*fastopen;		 /* Fast file open. */
+		*fastwrite;		/* Fast file write. */
+		*fastread;		 /* Fast file read. */
+		*fastclose;		/* Fast file close. */
+
+		*popupkey;
+		*popupnote;
+		*popupoctave;
+		*popupchord;
+		*popuprhythm;
+		*popupscale;
+
+		*measuretotime;
+		*timetomeasure;
+		*totalbeatstotime;
+		*timetototalbeats;
+		*lengthtostring;
+		*stringtolength;
+		*timetostring;
+		*stringtotime;
+		*frametostring;
+		*stringtoframe;
+		*notetostring;
+		*stringtonote;
+
+		*noteinkey;		/* Check for note in key. */
+		*noteinchord;		/* Check for note in chord. */
+		*noteinrhythm;	 /* Align note with rhythm. */
+		*timetokey;
+		*timetochord;
+		*timetodynamics;
+		*nextrhythmbeat;
+		*scaletotwelve;
+		*twelvetoscale;
+		*random;		 /* Return random number. */
+
+		*areyousure;	 /* Put up "are you sure?" requester. */
+		*openwait;		 /* Open wait requester. */
+		*closewait;		/* Close wait requester. */
+
+		*display;			/* Display main window. */
+		*ScrollingPopUpMenu;
+		*DragSlider;
+		*DrawSlider;
+	*Itoa
+*Atoi
+*RefreshGadget
+*GetGadget;
+*GetStringInfo
+*SetStringInfo
+*GetStringInfoNumber
+*SetStringInfoNumber
+*GetPropInfo
+*SetPropInfo
+*GetSelectIntuiMessage
+*GetIntuiMessage
+*ClearIntuiMessages
+*GetMenu
+*GetMenuItem
+*CheckMenuItem
+*EnableMenuItem
+*EnableMenu
+*EnableGadget
+*SelectGadget
+*DupeNewWindow
+*DeleteNewWindow
+*DupeMenu
+*DeleteMenu
+*SendCloseWindow
+*List_Len
+*List_Position
+*List_Pred
+*List_Index
+*List_Cat
+*List_Insert
+*List_Remove
+*SetScrollBar
+*DrawList
+*ScrollList
+*SizeList
+*InitListInfo
+*RemoveListInfo
+*GetListItem
+*ClickList
+*InsertListItem
+*RemoveListItem
+*PopUpMenu
+*DragGadget
+*FileName
+*FlashyOpenWindow
+*FlashyCloseWindow
+*WhichWindow
+*DupeListInfo
+*DeleteListInfo
+*RealTimeScroll
+*EmbossOn
+*EmbossOff
+*DrawEmbossed
+*EnableEmbossed
+*SelectEmbossed
+*ModifyEmbossedProp
+*DragEmbossedProp
+*DrawEmbossedProp
+*ShiftEmbossedPropOnce
+*ShiftEmbossedProp
+*EmbossedPropOn
+*FatEmbossedPropOn
+*EmbossedPropOff
+*FatEmbossedPropOff
+*DrawEmbossedRect
+*DrawEmbossedWindow
+*EmbossWindowOff
+*EmbossWindowOn
+*EmbossRequestOn
+*RefreshEmbossedWindowFrame
+*SystemGadgets
+*ModifyWindowProps
+*EmbossedWindowTitle
+*EmbossedWindowText
+*dummy1
+*dummy2
+*SetNormalFont ;rp
+*SetSmallFont;rp
+End NEWTYPE
+
+
+					;/* More tool unique stuff here... */
+
+
+#TOUCH_EDIT	=	1 ;/* Tool has been edited. */
+#TOUCH_INIT	 = 2 ;/* Tool has been initialised. */
+
+#TOOL_SEQUENCE =	1 ;/* This is actually the track. */
+#TOOL_INPUT		=2 ;/* This is an input tool. */
+#TOOL_OUTPUT	 =4 ;/* This is an output tool. */
+#TOOL_NORMAL	 =8 ;/* This is a normal tool. */
+#TOOL_ONTIME	 =$10	;/* This tool doesn't accept early events. */
+#TOOL_BRANCHIN	= $20	;/* This tool merges two inputs. */
+#TOOL_BRANCHOUT	 = $40	;/* This tool has two outputs. */
+#TOOL_MACRO		=$80	;/* This tool is a Macro tool. */
+#TOOL_MACROOUT	 =$100 ;/* This is the output of Macro. */
+#TOOL_MACROBRANCH = $200 ;/* This is the branch output of Macro. */
+#TOOL_MACROIN		=$400 ;/* This is the input of Macro. */
+#TOOL_GROUPIN		=$800 ;/* This tool part of group input. */
+#TOOL_MIDI	 =$1000	;/* This tool is MIDI capable. */
+NEWTYPE .Tool
+		*_Next.Tool;			/* Next tool used by this track. */
+		*branch.Tool;		/* Tool on other track. */
+		*parent.Tool;		/* Parent tool (for macros.) */
+		*toolmaster.ToolMaster; /* Pointer to actual tool. */
+		*clip.l;			/* Clip to be worked on. */
+		*name;		/* Name of this tool. */
+		*_Window._Window;		/* Edit window. */
+		*track.Track;		/* Track that owns this tool. */
+		toolid.l;			/* Tool ID. */
+		left.w:top.w;		/* Position of edit window. */
+		width.w:height.w;	/* Size of edit window. */
+		x.w:y.w;		 /* Position in pipe display. */
+		xindex.w;		/* How far down list this is. */
+		yindex.w;		/* How far down track list this is. */
+		branchindex.w;			/* How far away branch tool is. */
+		id.w;			/* ID for file io. */
+		intool.b;			/* True if inlist, false if outlist. */
+		inedit.b;			/* Flag to indicate editing now. */
+		touched.b;		 /* This tool has been edited. */
+		selected.b;			/* Icon selected in graph. */
+		tooltype.l;			/* Sequence? Input? Branch? */
+End NEWTYPE
+#Tool_touched=$3a
+NEWTYPE .ToolMaster
+		*_Next.ToolMaster;		/* Next tool in this list. */
+		toolid.l;			/* Tool ID. */
+		*image.image;		/* Icon for this tool. */
+		*upimage.image;		/* Icon for branching up. */
+		x.w:y.w;				/* Position in toolbox for display. */
+		name.b[100];		 /* Tool name. */
+		filename.b[100];		 /* Where it is stored on disk. */
+		*createtool.l; /* Routine to allocate a new tool. */
+		*edittool.l;		 /* Routine to edit tool parameters. */
+		*processevent.l;	/* Routine to process an event. */
+		*processlist.l; /* Routine to process a list of events. */
+		*deletetool.l;	 /* Routine to delete a tool. */
+		*removetool.l;	 /* Routine to close down. */
+		*savesize;		 /* Returns size prior to save. */
+		*savetool;		 /* Routine to save to disk. */
+		*loadtool;	 /* Routine to load from disk. */
+		*readsysex;		/* Pass sysex byte */
+		*expandb;			/* Clear environment */
+		*expandc;			/* Install environment */
+		segment.l;		 /* This tool's segment list. */
+		altsegment.l;			/* For later.. */
+		*intrack.Track;		/* Input track for this tool. */
+		toolsize.w;		 /* Tool size for loading and saving. */
+		inedit.b;			/* Flag to indicate editing now. */
+		selected.b;			/* Icon selected in graph. */
+		tooltype.l;			/* Type of tool. */
+End NEWTYPE
+
+NEWTYPE .Track
+		*_Next.Track;		 /* Next Track in the list. */
+		*_Edit;			/* Edit structure for this track. */
+		clip.Clip;		 /* A clip that defines the sequence. */
+		cut.Clip;			/* A clip for global editing. */
+		undo.Clip;		 /* A clip for undo command. */
+		_Record.EventList;		/* Event list for recording. */
+		*toollist.Tool;		/* List of tools. */
+		tool.Tool;		 /* Sequence tool. */
+		*_Point.Tool;		 /* For making display. */
+		channelin.b;		/* MIDI Channel coming in. */
+		channelout.b;	 /* MIDI Channel going out. */
+		mode.b;		 /* Mute | Through | Record. */
+		selected.b;	 /* Track is highlighted. */
+		group.l;			 /* Group bits. */
+		marks.l[20];		/* For figuring out display. */
+		markindex.w;			/* Farthest right bit in marks. */
+		height.w;		 /* Height in display. */
+		nameleft.w;		 /* Left edge of name. */
+		namewidth.w;			/* Width of name field. */
+		nameindent.w;		 /* Indentation into name field. */
+		channelinleft.w;		/* Left edge of channel in. */
+		toolsinleft.w;			/* Left edge of toolsin. */
+		toolsinwidth.w;		 /* Width of toolsin field. */
+		toolsinindent.w;		/* Indentation into toolsin field. */
+		playrecordleft.w;	 /* Left edge of play/record. */
+		sequenceleft.w;		 /* Left edge of sequence. */
+		sequencewidth.w;		/* Width of sequence field. */
+		sequenceindent.w;		/* Indentation into sequence field. */
+		muteleft.w;		 /* Left edge of mute/through. */
+		toolsoutleft.w;		 /* Left edge of toolsout. */
+		toolsoutwidth.w;		/* Width of toolsout field. */
+		toolsoutindent.w;	 /* Indentation into toolsout field. */
+		toolsouttotalwidth.w;	 /* Total width of tools out. */
+		channeloutleft.w;	 /* Left edge of channel out. */
+End NEWTYPE
+
+#TRACK_MUTE	=1
+#TRACK_THROUGH =2
+#TRACK_RECORD	=4
+#TRACK_SOLOMUTE	=8;	 /* Track was muted For solo. */
+#TRACK_INEDIT	=16
+#TRACK_REALTIME	=32
+#TRACK_MERGE =64	 ; /* Merge While recording. */
+#TC_START =1
+#TC_STOP	=2
+#TC_POSITION =3
+#TC_RECORDON =4
+#TC_RECORDOFF =5
+#TC_PLAY	=6
+#TC_TICK =7
+#MIDI_NOTEOFF =$80
+#MIDI_NOTEON =$90
+#MIDI_PTOUCH =$A0
+#MIDI_CCHANGE	=$B0
+#MIDI_PCHANGE	=$C0
+#MIDI_MTOUCH =$D0
+#MIDI_PBEND	=$E0
+#MIDI_SYSX =$F0
+#MIDI_MTC	=$F1
+#MIDI_SONGPP =$F2
+#MIDI_SONGS	=$F3
+#MIDI_EOX	=$F7
+#MIDI_CLOCK	=$F8
+#MIDI_START	=$FA
+#MIDI_CONTINUE =$FB
+#MIDI_STOP =$FC
+#MIDI_SENSE	=$FE
+
+#EVENT_ONTIME	=$10 ;	 /* This Event is an On-time Event. */
+#EVENT_BRANCH	=$20 ;	 /* This Event is traversing a branch. */
+#EVENT_PADEDIT =$40	;	/* NOT a real time Event. */
+#EVENT_PLAYONLY	=$80 ;	 /* Discard Event when recording. */
+#EVENT_VOICE= 1	; /* Performance Event */
+#EVENT_SYSX = 2	; /* System exclusive Event. */
+#EVENT_LYRIC= 3	; /* Lyric string. */
+#EVENT_TIMESIG= 4 ;	/* Time signature change Event. */
+#EVENT_KEY= 5	; /* Key change Event. */
+#EVENT_CHORD= 6 ;	/* Chord change Event. */
+#EVENT_RHYTHM=	7 ;	/* Rhythm template Event. */
+#EVENT_DYNAMICS=	8 ;	/* Dynamics Event. */
+
+
+
+#event_next=0:#event_time=4:#event_type=8:#event_status=9
+#event_byte1=10:#event_byte2=11:#event_duration=12:#event_tool=16
+
+
+NEWTYPE .NoteEvent
+		*_next.NoteEvent;	 /* The next event in the list. */
+		time.l;				/* When this event occurs. */
+		_type.b;				/* What type of event. */
+		status.b;	 /* MIDI status. */
+		value.b;		/* Note value. */
+		velocity.b;	 /* Note velocity. */
+		duration.w;		/* The duration of this event. */
+		_data.w;			 /* Data storage. */
+		*tool.Tool;			/* Tool that processes this next. */
+End NEWTYPE
+
+NEWTYPE .String
+		length.w;		/* The length of the string that follows. */
+		string.b[1];		 /* This is actually a variable length array. */
+End NEWTYPE
+
+NEWTYPE .image
+left.w:top.w
+width.w:heigth.w
+_depth.w
+*Imagedata.w
+Planep.b: Planeo.b
+*NextImage.image
+End NEWTYPE

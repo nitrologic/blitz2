@@ -1,0 +1,669 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/PUZZLE/puzzle.bb
++##[$80C3]
+
+.set_defaults
+
+	;misc programme constants
+
+	;start location of board in window
+
+	#sboardx=20
+	#sboardy=18
+
+	;width of the board borders
+
+	#boarderx=8
+	#boardery=4
+
+	;width of the board seperators
+
+	#boardsx=2
+	#boardsy=1
+
+	;offset to tiles
+
+	#tile_offx=350
+
+	;default and current values for cells
+
+	NEWTYPE .cell_struct
+		def.q
+		cur.q
+	End NEWTYPE
+
+	NEWTYPE .history_struct
+		pos.q
+		obj.q
+	End NEWTYPE
+
+	;event capture variable
+
+	DEFTYPE.l event_capture
+
+	Dim cells.cell_struct(31), history.history_struct(16)
+
+	;overall dimensions of the board
+
+	board_endx=#sboardx+240+2*#boarderx+3*#boardsx-1
+	board_endy=#sboardy+120+2*#boardery+3*#boardsy-1
+
+
+Gosub create_gadget_shape
+Gosub create_pointers
+
+For cell=0 To 15
+	Gosub get_board_coords
+	ShapeGadget 0,x,y,0,cell,0
+Next
+
+For cell=16 To 31
+	Gosub get_tile_coords
+	ShapeGadget 0,x,y,0,cell,0
+Next
+
+Gosub setup_palette
+Gosub setup_menus
+allocst 0,11,"Puzzle Screen"
+Use SetCycle 0
+Gosub set_pointer_colours
+
+; IDCMP gadgets, menus, window activate
+DefaultIDCMP	$20 | $100 | $40000
+WJam 0
+localstat 0,0,20,640,200,$1800,"",1,2,0
+WPointer 6
+arrmult 0
+
+For x=0 To 31
+	Read cells(x)\def
+Next
+
+Gosub draw_default_cells
+move_number=0
+##[$80BB]
+	event_capture=WaitEvent
+	Use localstat EventWindow
+	Select event_capture
+
+	Case $20
+		;gadget down
+		;
+		Gosub gadget_event
+
+	Case $100
+		;menus
+		;
+		Gosub menu_event
+
+	Case $200
+		;close window
+		;
+		Gosub close_window
+
+	End Select
+
+##[$80BC] EventWindow=0 AND event_capture=$100	AND MenuHit=0	AND ItemHit=2
+
+
+End
+
+.defualt_figures
+
+	;default figures for cells 0 to 31
+
+	Data 4,2,4,2,3,1,5,1,5,4,2,3,3,1,5,4
+	Data 1,1,1,1,2,2,2,3,3,3,4,4,4,5,5,5
+
+.create_gadget_shape
+
+	;creates a blank 'active' square gadget to be drawn over
+	;later, as dynamic gadget rendering appears a little tricky
+
+	lmaxlen 0,61,31,3
+	Boxf 0,0,60,30,0
+	GetaShape 0,0,0,60,30
+	Free lmaxlen 0
+
+Return
+
+
+.create_pointers
+
+	;create a new mouse pointer shape
+
+	lmaxlen 0,20,35,2
+	Boxf 0,0,60,30,0
+	Line 0,1,0,33,1
+	Line 4,1,4,11,1
+	Line 4,8,14,8,1
+	Line 7,8,7,11,1
+	Line 10,8,10,11,1
+	Line 13,8,13,11,1
+	Line 15,9,15,33,1
+	Line 0,33,15,33,1
+
+	Line 1,0,3,0,1
+	FloodFill 2,4,2,1
+
+	Boxf 1,1,3,3,3
+
+	;and hex segment
+
+	Boxf 1,19,14,25,1
+	Boxf 5,20,9,24,3
+	Line 4,21,4,23,3
+	Line 10,21,10,23,3
+	Point 3,22,3
+	Point 11,22,3
+	GetaShape 1,0,0,16,27
+
+	;and circle segment
+
+	Boxf 1,19,14,25,1
+	Circlef 7,22,3,4,3
+	GetaShape 2,0,0,16,27
+
+	;and square segment
+
+	Boxf 1,19,14,25,1
+	Boxf 5,20,10,24,3
+	GetaShape 3,0,0,16,27
+
+	;and double V
+
+	Boxf 1,19,14,25,1
+	Line 3,20,7,24,3
+	Line 11,20,3
+	Line 11,24,7,20,3
+	Line 3,24,3
+	GetaShape 4,0,0,16,27
+
+	;and triangle segment
+
+	Boxf 1,19,14,25,1
+	Line 3,24,7,20,3
+	Line 11,24,3
+	Line 3,24,3
+	FloodFill 7,22,3
+	GetaShape 5,0,0,16,27
+
+	;and null segment
+
+	Boxf 1,19,14,25,1
+	GetaShape 6,0,0,16,27
+
+	;and information segment
+
+	Line 6,20,8,20,3
+	Line 6,24,8,24,3
+	Line 7,20,7,24,3
+	GetaShape 7,0,0,16,27
+
+	Free lmaxlen 0
+
+Return
+
+
+.set_pointer_colours
+
+	;set the colours of the mouse pointer
+
+	Green 17,0,0,0
+	Green 18,$f,$c,$a
+	Green 19,$f,$f,$f
+
+Return
+
+
+
+.get_board_coords
+
+	x=#sboardx+#boarderx+((cell&3)*(60+#boardsx))
+	y=#sboardy+#boardery+Int(cell ASR 2)*(30+#boardsy)
+
+Return
+
+.get_tile_coords
+
+	If(cell>=16 AND cell<=19)
+		x=#tile_offx+(cell-16)*(60+#boardsx)
+		y=#sboardy+#boardery
+	Else
+		If(cell>=20 AND cell<=22)
+			x=#tile_offx+(cell-19)*(60+#boardsx)
+			y=#sboardy+#boardery+30+#boardsy
+		Else
+			If(cell>=23 AND cell<=25)
+				x=#tile_offx+(cell-22)*(60+#boardsx)
+				y=#sboardy+#boardery+2*(30+#boardsy)
+			Else
+				If(cell>=26 AND cell<=28)
+					x=#tile_offx+(cell-25)*(60+#boardsx)
+					y=#sboardy+#boardery+3*(30+#boardsy)
+				Else
+					If(cell>=29 AND cell<=31)
+						x=#tile_offx+(cell-28)*(60+#boardsx)
+						y=#sboardy+#boardery+4*(30+#boardsy)
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+
+Return
+
+.draw_figure:
+
+	;draw a figure, given figure, x, y, for_colour and bac_colour
+
+	Select figure
+
+	Case 1
+		;hex figure
+		;
+		WBox x,y,x+59,y+29,bac_colour
+		WLine x+19,y+4,x+39,y+4,x+49,y+14,x+39,y+24,x+19,y+24,x+9,y+14,x+19,y+4,for_colour
+		WLine x+39,y+5,x+48,y+14,x+39,y+23,for_colour
+		WLine x+19,y+23,x+10,y+14,x+19,y+5,for_colour
+
+	Case 2
+		;circle figure
+		;
+		WBox x,y,x+59,y+29,bac_colour
+		WEllipse x+29,y+14,20,10,for_colour
+		WEllipse x+29,y+14,19,10,for_colour
+
+	Case 3
+		;square figure
+		;
+		WBox x,y,x+59,y+29,bac_colour
+		WLine x+9,y+4,x+9,y+24,x+49,y+24,x+49,y+4,x+9,y+4,for_colour
+		WLine x+10,y+5,x+10,y+23,for_colour
+		WLine x+48,y+5,x+48,y+23,for_colour
+
+	Case 4
+		;double V figure
+		;
+		WBox x,y,x+59,y+29,bac_colour
+		WLine x+9,y+24,x+29,y+4,x+49,y+24,for_colour
+		WLine x+9,y+4,x+29,y+24,x+49,y+4,for_colour
+		WLine x+10,y+24,x+29,y+5,x+48,y+24,for_colour
+		WLine x+10,y+4,x+29,y+23,x+48,y+4,for_colour
+
+	Case 5
+		;triangle figure
+		;
+		WBox x,y,x+59,y+29,bac_colour
+		WLine x+9,y+24,x+29,y+4,x+49,y+24,x+9,y+24,for_colour
+		WLine x+11,y+23,x+29,y+5,x+47,y+23,for_colour
+
+	End Select
+
+Return
+
+
+.setup_palette:
+
+	StopCycle 0,0,0,5,0				;dark green
+	StopCycle 0,1,$f,$f,$f		 ;white
+	StopCycle 0,2,0,8,0				;green
+	StopCycle 0,3,$f,0,0			 ;red
+	StopCycle 0,4,$d,8,0			 ;brown
+	StopCycle 0,5,$c,$c,$c		 ;grey
+	StopCycle 0,6,$e,9,5			 ;tan
+	StopCycle 0,7,4,4,$f			 ;blue
+
+Return
+
+
+.draw_board_borders
+
+
+	;draw the boards brown borders
+	;
+	WBox #sboardx,#sboardy,board_endx,#sboardy+#boardery-1,4
+	WBox #sboardx,board_endy,board_endx,board_endy-#boardery+1,4
+
+	WBox #sboardx,#sboardy,#sboardx+#boarderx-1,board_endy,4
+	WBox board_endx,#sboardy,board_endx-#boarderx+1,board_endy,4
+
+	;and the grey tile seperators
+	;
+	WLine #sboardx+#boarderx,#sboardy+#boardery+30,board_endx-#boarderx,#sboardy+#boardery+30,5
+	WLine #sboardx+#boarderx,#sboardy+#boardery+#boardsy+60,board_endx-#boarderx,#sboardy+#boardery+#boardsy+60,5
+	WLine #sboardx+#boarderx,#sboardy+#boardery+2*#boardsy+90,board_endx-#boarderx,#sboardy+#boardery+2*#boardsy+90,5
+
+	WBox #sboardx+#boarderx+60,#sboardy+#boardery,#sboardx+#boarderx+59+#boardsx,board_endy-#boardery,5
+	WBox #sboardx+#boarderx+#boardsx+120,#sboardy+#boardery,#sboardx+#boarderx+119+2*#boardsx,board_endy-#boardery,5
+	WBox #sboardx+#boarderx+2*#boardsx+180,#sboardy+#boardery,#sboardx+#boarderx+179+3*#boardsx,board_endy-#boardery,5
+
+
+Return
+
+
+.setup_menus
+
+	;create menu entries main window
+	;
+	newlocarr 0,0,"Project		 "
+	MenuItem 0,0,0,0,"About"
+	MenuItem 0,0,0,1,"Restart		 ","S"
+	MenuItem 0,0,0,2,"Quit				","Q"
+
+	newlocarr 0,1,"Game"
+	MenuItem 0,0,1,0,"Rules			 "
+	MenuItem 0,0,1,1,"Backup			","B"
+	MenuItem 0,0,1,2,"Replay			","R"
+
+	;create menu entries rules and about windows
+	;
+	newlocarr 1,0,"Close"
+	MenuItem 1,0,0,0,"Close Window		 ","C"
+
+Return
+
+
+.draw_default_cells
+
+	InnerCls
+
+	For x=0 To 31
+		cells(x)\cur=cells(x)\def
+	Next
+
+	;draw the default shapes into the cells
+
+	bac_colour=6
+	for_colour=3
+
+	For cell=0 To 15
+		figure=cells(cell)\def
+		Gosub get_board_coords
+		Gosub draw_figure
+	Next
+
+	bac_colour=1
+	For cell=16 To 31
+		figure=cells(cell)\def
+		Gosub get_tile_coords
+		Gosub draw_figure
+	Next
+
+	Gosub draw_board_borders
+
+	current_obj=0
+
+Return
+
+
+.gadget_event
+
+	;handle gadget selection
+
+	cell=GadgetHit
+
+	If((cell >= 0) AND (cell <= 15) AND (current_obj))
+
+		;board cell with an active mouse pointer
+
+		;look for existing obj's=current_obj
+		err=0:sx=0:ex=0:sy=0:ey=0
+		If(cell & 3) Then sx=-1
+		If(cell & 3)<>3 Then ex=1
+		If(cell & $c) Then sy=-4
+		If(cell & $c)<>12 Then ey=4
+		For y=sy To ey Step 4
+			For x=sx To ex
+				If cells(cell+x+y)\cur=current_obj Then err=-1
+			Next x
+		Next y
+		If(err=0)
+			move_number=move_number+1
+			history(move_number)\pos=cell
+			history(move_number)\obj=current_obj
+			bac_colour=6
+			for_colour=4
+			Gosub place_tile
+			If move_number=16 Gosub winner
+		End If
+	Else
+		If((cell >= 16) AND (cell <= 31))
+
+		;tile cell
+
+			If(current_obj)
+				;there is an outstanding current_obj
+				If((cells(cell)\cur=0) AND (cells(cell)\def=current_obj))
+					;put back active tile
+					bac_colour=6
+					for_colour=4
+					Gosub putback_tile
+				End If
+			Else
+				;no current_obj, pick up tile
+				;is tile active
+				If(cells(cell)\cur)
+					;yes, pick it up and erase
+					bac_colour=7
+					for_colour=4
+					Gosub pickup_tile
+				End If
+			End If
+		End If
+	End If
+
+Return
+
+
+.pickup_tile
+
+	;pickup a tile
+
+	Gosub get_tile_coords
+	figure=cells(cell)\cur
+	Gosub draw_figure
+	current_obj=figure
+	cells(cell)\cur=0
+	WPointer current_obj
+
+Return
+
+
+.place_tile
+
+	;place a tile on the board
+
+	figure=current_obj
+	Gosub get_board_coords
+	Gosub draw_figure
+	cells(cell)\cur=current_obj
+	current_obj=0
+	WPointer 6
+
+Return
+
+
+.liftoff_tile
+
+	;remove a tile from the board
+
+	Gosub get_board_coords
+	figure=cells(cell)\def
+	Gosub draw_figure
+	current_obj=cells(cell)\cur
+	cells(cell)\cur=cells(cell)\def
+	WPointer current_obj
+
+Return
+
+
+.putback_tile
+
+	;put a tile back down
+
+	figure=current_obj
+	Gosub get_tile_coords
+	Gosub draw_figure
+	cells(cell)\cur=current_obj
+	current_obj=0
+	WPointer 6
+
+Return
+
+
+.menu_event
+
+	;handle menu event game window
+
+	If(EventWindow=0)
+		If(MenuHit=0	AND ItemHit=0) Then Gosub display_about
+		If(MenuHit=0	AND ItemHit=1) Then Gosub restart
+		If(MenuHit=1	AND ItemHit=0) Then Gosub display_rules
+		If(MenuHit=1	AND ItemHit=1) Then Gosub backup
+		If(MenuHit=1	AND ItemHit=2) Then Gosub replay
+
+	Else
+
+	;handle menu event rules window
+
+		If(MenuHit=0	AND ItemHit=0) Then Gosub close_window
+
+	End If
+
+Return
+
+
+.restart
+
+	;restart menu event
+
+	Gosub draw_default_cells
+	move_number=0
+
+Return
+
+
+.display_rules
+
+	;report menu hit or close object
+	DefaultIDCMP $100 | $200
+
+	;window drag, close and activate
+	localstat 1,68,35,432,121,$2 | $8 | $1000,"Rules Window",1,2
+	arrmult 1
+	Use localstat 1
+	WPointer 7
+	WLocate 0,4
+	NPrint "1) Place the white tiles onto the brown board so that"
+	NPrint ""
+	NPrint "	 Symbols are never placed on top of or adjacent to"
+	NPrint ""
+	NPrint "	 like symbols."
+	NPrint ""
+	NPrint "2) On covering a symbol, the white symbol now rules."
+	NPrint ""
+	NPrint "3) To 'put back' a tile, before it has been placed on"
+	NPrint ""
+	NPrint "	 the board, click on an empty tile position for"
+	NPrint ""
+	NPrint "	 that shape."
+
+Return
+
+
+.close_window
+
+	FlushEvents
+	Free localstat EventWindow
+	Activate 0
+
+Return
+
+
+.display_about
+
+	;report menu hit or close object
+	DefaultIDCMP $100 | $200
+
+	;window drag, close and activate
+	localstat 2,#sboardx,#sboardy,240,60,$2 | $8 | $1000,"About Window",1,2
+	arrmult 1
+	Use localstat 2
+	WPointer 7
+	WLocate 0,4
+	NPrint "Puzzle Play ver 1.0"
+	NPrint ""
+	NPrint "Programmed by Bruce Rae"
+	NPrint ""
+	NPrint "using Blitz Basic 01/10/92"
+
+Return
+
+
+.replay
+
+	;replay moves to current move
+
+	Gosub draw_default_cells
+
+	For sx=1 To move_number
+		figure=history(sx)\obj
+
+		;find a tile supporting a specified figure
+		cell=16
+		While (cells(cell)\cur <> figure)
+			cell=cell+1
+		Wend
+
+		bac_colour=0
+		for_colour=3
+		Gosub pickup_tile
+
+		VWait 25
+		cell=history(sx)\pos
+
+		bac_colour=1
+		for_colour=3
+		Gosub place_tile
+		VWait 25
+	Next
+
+Return
+
+
+.backup
+
+	;go back a move
+
+	If(current_obj)
+		;find an empty tile to place a specified figure
+		cell=16
+		While ((cells(cell)\def <> current_obj) OR (cells(cell)\cur <> 0))
+			cell=cell+1
+		Wend
+		bac_colour=1
+		for_colour=3
+		Gosub putback_tile
+	End If
+
+	If(move_number)
+		cell=history(move_number)\pos
+		bac_colour=6
+		for_colour=3
+		Gosub liftoff_tile
+		move_number=move_number-1
+	End If
+
+Return
+
+
+.winner
+
+	SetVoice 146,65,1,0,64,16311
+
+	Speak "KAANGRAECHUWULEYSHIHNNNZ."
+	VWait 100
+
+	Speak "You are a winner."
+
+Return

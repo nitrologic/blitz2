@@ -1,0 +1,6 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/workbench/icon.bb2
++;
+; $VER: icon.bb2 40.0 (01.03.94)
+;
+
+Macro ICONNAME:"icon.library":End Macro
