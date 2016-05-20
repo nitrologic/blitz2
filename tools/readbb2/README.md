@@ -7,6 +7,7 @@ Lost Tokens:##[$80C3]##[$FFB5]##[$D007]##[$80BA]##[$80C8]##[$80CA]##[$80B8]##[$F
 
 # Scan version 1
 
-Unfortunately github is complaining. Back in my day...
+Unfortunately github is complaining when viewing from web:
 
 Sorry, we had to truncate this directory to 1,000 files. 65 entries were omitted from the list.
+
