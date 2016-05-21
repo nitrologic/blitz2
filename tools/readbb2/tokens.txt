@@ -7,6 +7,9 @@ tok192="EndIf,Wend"
 ;,80c3,80c4,80c5,
 tok197="On,Off"
 
+
+List=$80b3
+
 wbstart=$bf00
 ;
 ;	lib - 65534: varslib
