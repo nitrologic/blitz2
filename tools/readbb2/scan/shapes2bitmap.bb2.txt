@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Other_Stuff/Shapes2Bitmap.bb2
-+LoadShapes 0,"DH1:Deadly/FONT.SHAPES"
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Other_Stuff/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Other_Stuff/Shapes2Bitmap.bb2
+LoadShapes 0,"DH1:Deadly/FONT.SHAPES"
 casestrcomp 0,"Dh1:Deadly/Graficos/LETRAS"
 First_Shape.w=0: End_Shape.w=##[$80C4] MidHandle-1
 

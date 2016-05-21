@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sw/makep.bb
-+;
+;
 ; make guardian pattern files
 ;
 

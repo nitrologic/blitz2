@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Objects.bb2
-+;================================================;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Objects.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Objects.bb2
+;================================================;
 ; Blitz Basic 2 Library - 3d Object Manipulation ;
 ;																								;
 ; Author: Nigel Hughes													 ;

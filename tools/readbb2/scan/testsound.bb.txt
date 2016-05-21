@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/testsound.bb
-+LoadSound 0,"sfx/motor3.iff"
+LoadSound 0,"sfx/motor3.iff"
 LoadSound 1,"sfx/crash3.iff"
 LoadSound 2,"sfx/screech2.iff"
 LoadSound 3,"sfx/horn.iff"

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/gtb/Demos/Calculator.bb2
-+; []----------------------------------------------------------------------[]
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk2/gtb/Demos/Calculator.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/gtb/Demos/Calculator.bb2
+; []----------------------------------------------------------------------[]
 ; |							 (C) 1994 Tim Caldwell. All rights reserved.							|
 ; |																																				|
 ; |					File: Calculator.bb2																					|

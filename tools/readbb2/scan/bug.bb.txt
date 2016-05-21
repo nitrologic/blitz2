@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bug.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bakup/bug.bb,/Users/simon/Google Drive/amiga/w/sega/shit/bug.bb
+
 
 NEWTYPE .test
 	x.w

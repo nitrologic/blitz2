@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/blitzlibs/bars.bb2
-+;/*
+;/*
 ;(c) Copyright 1988-1994 Microsoft Corporation.
 ;
 ;Microsoft Bars&Pipes Professional Source Code License

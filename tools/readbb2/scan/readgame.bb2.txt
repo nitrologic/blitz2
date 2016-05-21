@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/readgame.bb2
-+
+
 DEFTYPE.l
 
 p=##[$FEC9]("potgo.resource")

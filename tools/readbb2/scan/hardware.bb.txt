@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/hardware.bb
-+;********************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/hardware.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/hardware.bb
+;********************************************************
 ;*																											*
 ;*			 BlitzII hardware.library Include file					*
 ;*																											*

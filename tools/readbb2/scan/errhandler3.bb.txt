@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/errhandler3.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/errhandler3.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/errhandler3.bb
+;
 ; the following 4 lines need to be used when developing programs
 ; on a DblPAL machine, we will remedy this soon!
 ;

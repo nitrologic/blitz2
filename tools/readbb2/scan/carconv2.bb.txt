@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/code/carconv2.bb
-+
+
 a$="porsche"
 
 lmaxlen 0,640,320,2

@@ -1,0 +1,179 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/asllib.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/asllib.bb2
+##[$80CB]
+
+NEWTYPE.WBArg
+*wa_Lock.b
+*wa_Name.b
+End NEWTYPE
+
+
+#LIBRARIES_ASL_H=1
+;**
+;** $Filename: libraries/asl.h $
+;** $Release: 2.04 Includes, V37.4 $
+;** $Revision: 36.5 $
+;** $Date: 91/11/08 $
+;**
+;** ASL library name and useful definitions.
+;**
+;** (C) Copyright 1989,1990 Charlie Heath
+;** (C) Copyright 1989-1991 Commodore-Amiga, Inc.
+;**		 All Rights Reserved
+;**
+; XINCLUDE "exec/types.h"
+; XINCLUDE "exec/lists.h"
+; XINCLUDE "exec/libraries.h"
+; XINCLUDE "utility/hooks.h"
+; XINCLUDE "utility/tagitem.h"
+; XINCLUDE "workbench/startup.h"
+; XINCLUDE "graphics/text.h"
+;**
+; ************************************************************************
+; * Standard definitions for asl library information				*
+; ************************************************************************
+; **
+;#AslName="asl.library"
+;**
+; ************************************************************************
+; *																 *
+; * The ASL file requester data structure...						*
+; *																 *
+; * The fields described here are for READ ACCESS to the structure	*
+; * returned by AllocAslRequest( ASL_FileRequest, ... )				 *
+; *																 *
+; * Any modifications MUST be done via TAGS either at the time of	 *
+; * creation by AllocAslRequest(), or when used, via AslRequest()	 *
+; *																 *
+; ************************************************************************
+; **
+NEWTYPE .FileRequester
+	rf_Reserved1.l
+	*rf_File.b		;/* Filename pointer	*/
+	*rf_Dir.b ;/* Directory name pointer */
+	rf_Reserved2.l
+	rf_Reserved3.b
+	rf_Reserved4.b
+	rf_Reserved5.l
+	rf_LeftEdge.w
+	rf_TopEdge.w	;/* Preferred window pos */
+	rf_Width.w
+	rf_Height.w	;/* Preferred window size */
+	rf_Reserved6.w
+	rf_NumArgs.l	;/* A-la WB Args, for multiselects */
+	*rf_ArgList.WBArg
+	rf_UserData.l ;/* Applihandle (you may write!!) */
+	rf_Reserved7.l
+	rf_Reserved8.l
+	*rf_Pat.b ;/* Pattern match pointer */
+End NEWTYPE
+;**
+; * The following defined values are the ASL_FuncFlags tag values which
+; * are defined for the ASL file request.	These values may be passed
+; * as a TagItem to modify the way the requester is presented.	Each
+; * flag value defined has a description of the particular action.
+; *
+; * Also related to the ASL_FuncFlags values is the ASL_HookFunc tagitem,
+; * which provides a callback function pointer to allow the application
+; * to interact with the requester.	If an ASL_HookFunc TagItem is
+; * provided, the hook function will be called like so:
+; *
+; * ULONG rf_Function(ULONG Mask, CPTR Object, CPTR AslRequester)
+; *
+; * The Mask value is a copy of the specific ASL_FuncFlags value
+; * the callback is for; Object is a pointer to a data object.
+; * AslRequester is a pointer to the requester structure.
+; *
+; * For the ASL file and font requesters, two ASL_FuncFlags values
+; * are currently defined; FILF_DOWILDFUNC and FILF_DOMSGFUNC.
+; *
+; **
+#FILB_DOWILDFUNC=7 ;/* Called with an Object=AnchorPath, */
+#FILB_DOMSGFUNC=6	;/* Called with Object=IDCMP message */
+#FILB_SAVE=5	 ;/* For a SAVE operation, set this bit */
+#FILB_NEWIDCMP=4	 ;/* Force a new IDCMP (only if rf_Window != NULL)	*/
+#FILB_MULTISELECT=3		;/* Request multiple selections returned from FR. */
+#FILB_PATGAD=0 ;/* Ask for pattern gadget				*/
+#FILF_DOWILDFUNC=1 LSL #FILB_DOWILDFUNC
+#FILF_DOMSGFUNC=1 LSL #FILB_DOMSGFUNC
+#FILF_SAVE=1 LSL #FILB_SAVE
+#FILF_NEWIDCMP=1 LSL #FILB_NEWIDCMP
+#FILF_MULTISELECT=1 LSL #FILB_MULTISELECT
+#FILF_PATGAD=1 LSL #FILB_PATGAD
+;** The following additional flags may be passed with the
+; * ASL_ExtFlags1 tag.
+; **
+#FIL1B_NOFILES=0	 ;/* Do not want a file gadget, no files shown			*/
+#FIL1B_MATCHDIRS=1	;/* Have Patgad or rf_Pat screen files AND DIRS		*/
+#FIL1F_NOFILES=1 LSL #FIL1B_NOFILES
+#FIL1F_MATCHDIRS=1 LSL #FIL1B_MATCHDIRS
+;**
+; ************************************************************************
+; * The ASL font requester data structure...						*
+; *																 *
+; * As with the FileRequest structure, the fields documented here are	 *
+; * for READ ACCESS ONLY.	Any modifications must be done via tags. *
+; ************************************************************************
+; **
+NEWTYPE .FontRequester
+	fo_Reserved1.l[2]
+	fo_Attr.TextAttr	;/* Returned TextAttr	*/
+	fo_FrontPen.b ;/* Returned pens, if selected */
+	fo_BackPen.b
+	fo_DrawMode.b
+	fo_UserData.l
+End NEWTYPE
+;/* Bit defines for ASL_FuncFlags, for FONT requester	 */
+;/* See descriptive text for FILF_ values above for an overview.	*/
+;/* Note - old mixed-case defines were nonstandard, now obsolete	*/
+#FONB_FRONTCOLOR=0	;/* Display Front color selector? */
+#FONB_BACKCOLOR=1	 ;/* Display Back color selector?	*/
+#FONB_STYLES=2	;/* Display Styles checkboxes?	*/
+#FONB_DRAWMODE=3		;/* Display DrawMode NWay?	*/
+#FONB_FIXEDWIDTH=4	;/* Only allow fixed-width fonts? */
+#FONB_NEWIDCMP=5		;/* Create a new IDCMP port, not shared */
+#FONB_DOMSGFUNC=6	 ;/* Called with Object=IntuiMessage for */
+#FONB_DOWILDFUNC=7	;/* Called with Object=TextAttr to approve*/
+#FONF_FRONTCOLOR=1 LSL #FONB_FRONTCOLOR
+#FONF_BACKCOLOR=1 LSL #FONB_BACKCOLOR
+#FONF_STYLES=1 LSL #FONB_STYLES
+#FONF_DRAWMODE=1 LSL #FONB_DRAWMODE
+#FONF_FIXEDWIDTH=1 LSL #FONB_FIXEDWIDTH
+#FONF_NEWIDCMP=1 LSL #FONB_NEWIDCMP
+#FONF_DOMSGFUNC=1 LSL #FONB_DOMSGFUNC
+#FONF_DOWILDFUNC=1 LSL #FONB_DOWILDFUNC
+;/************************************************************************/
+;/* Arguments to AllocAslRequest()		 */
+;/* Types of requester structures which may be allocated:	*/
+;/************************************************************************/
+#ASL_FileRequest=0
+#ASL_FontRequest=1
+;/************************************************************************/
+;/* Tags for AllocAslRequest() and AslRequest()		*/
+;/************************************************************************/
+#ASL_Dummy=#TAG_USER + $80000
+#ASL_Hail=#ASL_Dummy+1		;/* Hailing text follows			 */
+#ASL_Window=#ASL_Dummy+2	;/* Parent window for IDCMP & screen	*/
+#ASL_LeftEdge=#ASL_Dummy+3		;/* Initialize LeftEdge			 */
+#ASL_TopEdge=#ASL_Dummy+4 ;/* Initialize TopEdge			 */
+#ASL_Width=#ASL_Dummy+5
+#ASL_Height=#ASL_Dummy+6
+#ASL_HookFunc=#ASL_Dummy+7		;/* Hook function pointer			*/
+;/* Tags specific to file request					*/
+#ASL_File=#ASL_Dummy+8		;/* Initial name of file follows			*/
+#ASL_Dir=#ASL_Dummy+9 ;/* Initial string of filerequest dir */
+;/* Tags specific to font request					*/
+#ASL_FontName=#ASL_Dummy+10	 ;/* Initial font name			 */
+#ASL_FontHeight=#ASL_Dummy+11 ;/* Initial font height			 */
+#ASL_FontStyles=#ASL_Dummy+12 ;/* Initial font styles			 */
+#ASL_FontFlags=#ASL_Dummy+13	;/* Initial font flags for textattr	 */
+#ASL_FrontPen=#ASL_Dummy+14	 ;/* Initial frontpen color			*/
+#ASL_BackPen=#ASL_Dummy+15		;/* Initial backpen color			*/
+#ASL_MinHeight=#ASL_Dummy+16	;/* Minimum font height to display		*/
+#ASL_MaxHeight=#ASL_Dummy+17	;/* Max font height to display			*/
+#ASL_OKText=#ASL_Dummy+18 ;/* Text displayed in OK gadget			*/
+#ASL_CancelText=#ASL_Dummy+19 ;/* Text displayed in CANCEL gadget	 */
+#ASL_FuncFlags=#ASL_Dummy+20	;/* Function flags, depend on request */
+#ASL_ModeList=#ASL_Dummy+21	 ;/* Substitute list for font drawmodes */
+#ASL_ExtFlags1=#ASL_Dummy+22	;/* For passing extended FIL1F flags	 */
+#ASL_Pattern=#ASL_FontName		;/* File requester pattern string		 */
+;/******** END of ASL Tag values *****************************************/

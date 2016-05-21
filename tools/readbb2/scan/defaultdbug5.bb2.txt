@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/shit/defaultdbug5.bb2
-+#test=1
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/les/defaultdbug5.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/defaultdbug5.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/les/defaultdbug5.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/shit/defaultdbug5.bb2
+#test=1
 ;If TaskName$(0)<>"Blitz ][ Debug Proc" AND #test=1 Then End
 
 

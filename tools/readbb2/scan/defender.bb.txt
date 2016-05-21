@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/pddisks/pddisk1/defender/defender.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/acidpd/defender/defender.bb,/Users/simon/Google Drive/amiga/w/disks/pddisks/pddisk1/defender/defender.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/pddisks/pddisk1/defender/defender.bb
+;
 If NumPars Then spatt=Val(Par$(1)):If spatt Then spatt-1
 ;
 For k=1 To 100

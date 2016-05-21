@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/3d/demo.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/old/demo.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/old/demo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/3d/demo.bb
+;
 ; hmmm demo of Blitz2 3D library
 ;
 ; not looking that cool at present....

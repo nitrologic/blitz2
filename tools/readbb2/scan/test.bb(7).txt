@@ -1,0 +1,622 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/test.bb
+;
+; skidmarks sega track converter
+;
+
+NEWTYPE .ablocks
+	n.w:f:w:h				;shapenumber, framecount, width, height
+End NEWTYPE
+
+Dim ab.ablocks(32)
+
+NEWTYPE .ppl
+	x.w:y.w:t.w
+End NEWTYPE
+
+Dim ##[$80B3] ppl.ppl(128)
+Dim spri.ppl(3)
+
+LoadShapes 16,"people.shapes"
+
+If WriteMem(0,"people.dat")
+	np=FileSeek(0)/SizeOf.ablocks
+	##[$BE14] 0,&ab(0),np*SizeOf.ablocks
+	CloseFile 0
+EndIf
+
+;----------------------------------------------------------------
+; main functions
+;----------------------------------------------------------------
+
+; convert 8x8 nibble->8x8 brush
+
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3
+	ASL.l#5,d3:ADD.l d3,a1:ADD.l d3,a1:ADD.l d3,a1
+	MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #96,a1:MOVE.l#96*384,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+Function.w chkblock{b0.l,b1.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVEM.l (a0),d0-d7:BRA nxchk2
+dochk2:
+	CMP.l	(a1),d0:BNE bad
+	CMP.l 4(a1),d1:BNE bad
+	CMP.l 8(a1),d2:BNE bad
+	CMP.l 12(a1),d3:BNE bad
+	CMP.l 16(a1),d4:BNE bad
+	CMP.l 20(a1),d5:BNE bad
+	CMP.l 24(a1),d6:BNE bad
+	CMP.l 28(a1),d7:BNE bad
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+bad:
+	ADD#32,a1
+nxchk2:
+	CMP.l a1,a2:BNE dochk2:MOVEM.l d0-d7,(a1):ADD#1,count
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+End Function
+
+Function.l cmpblock{b0.l,b1.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVE #31,cmax:MOVEM.l (a0),d0-d7:BRA nxchk
+	Macro tt
+		MOVEQ#0,d2
+		LSR.l#1,d0:BCC b0`@:MOVEQ#1,d2:b0`@
+		LSR.l#1,d0:BCC b1`@:MOVEQ#1,d2:b1`@
+		LSR.l#1,d0:BCC b2`@:MOVEQ#1,d2:b2`@
+		LSR.l#1,d0:BCC b3`@:MOVEQ#5,d2:b3`@
+		ADD d2,d3
+	End Macro
+dochk:
+	MOVEQ#0,d3
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	SUB.l#32,a0:SUB.l#32,a1:CMP cmax(pc),d3:BPL nobeta
+	MOVE d3,cmax:MOVE.l a1,cblo:nobeta:ADD#32,a1
+nxchk:
+	CMP.l a1,a2:BNE dochk:MOVE.l cblo(pc),d0:SUB.l a3,d0
+	OR cmax(pc),d0:AsmExit
+
+cmax:Dc 0
+cblo:Dc.l 0
+
+End Function
+
+Function.w addblock{b0.l,b1.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a1
+	MOVEM.l (a0),d0-d7:MOVEM.l d0-d7,(a1)
+	MOVE count(pc),d0:ADD #1,count:AsmExit
+End Statement
+
+Statement drawblok{blok.l,brush.l}
+	MOVE.l d0,a0:MOVE.l d1,a2:MOVEQ#7,d1
+nxlino:
+	MOVE.l a2,a1:ADDQ#2,a2:MOVE.l (a0)+,d0
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	MOVE.b d7,(a1)
+	MOVE.b d6,16(a1)
+	MOVE.b d5,32(a1)
+	MOVE.b d4,48(a1)
+	DBRA d1,nxlino:AsmExit
+End Statement
+
+;----------------------------------------------------------------
+; editor
+;----------------------------------------------------------------
+
+.editpumpkins:
+
+	tr=25
+
+;	tr=Val(Par$(1)):NPrint tr
+
+	DecodePalette 0,256
+	casestrcomp 0,"start.iff",16
+
+	Dim wind.w(95,47)				 ;map
+	Dim first.w(95,47)				;counts
+	Dim bcount(8192)
+	Dim bptr.l(8192)
+	Dim cols.w(32)
+
+	##[$CD10] 0,8,8,4
+	CludgeBitMap 0,0
+	Use lmaxlen 0:Boxf 0,0,7,7,2:MakeCookie 0
+	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+
+	LoadShape 1,"mouse.iff":GetaSprite 0,1
+
+	LoadShape 2,"start.iff"
+
+	lmaxlen 0,768,384,4
+	lmaxlen 1,768,384,4
+	lmaxlen 2,768,384,4
+	lmaxlen 3,320,80,4
+	lmaxlen 4,768,384,4		 ;front playfield
+
+	Use lmaxlen 3
+	Box 0,0,319,79,1
+	x=4:y=60:Dim ppx(32)
+	For i=0 To np-1
+		ppx(i)=x:ClipBlit ab(i)\n+16,x,y:x+ab(i)\w*8+2
+	Next
+
+.readtrack
+
+	LoadBitMap 1,"rod/old/track.fix"+Str$(tr),0:bm.l=##[$80B8] lmaxlen(1)
+
+	pa.l=Peek.l(##[$80B8] SetCycle(0))+4
+	##[$FEDB] pa+13*12,pa+18*12,12
+	##[$FEDB] pa+12*12,pa+19*12,12
+
+	d$="win/track."+Str$(tr)
+	e$="win/data."+Str$(tr)
+
+	bs.l=##[$BE15](d$)
+	If bs=0 Then count.w=1 Else count.w=(bs-96*48*2)/32
+	Poke.w ?count,count
+
+	InitBank 0,64,0					;bank 0=work block
+	InitBank 1,8192*32,0		 ;bank 1=all blocks
+
+	If WriteMem(0,d$)
+		##[$BE14] 0,&cols(0),64
+		##[$BE14] 0,&wind(0,0),96*48*2
+		##[$BE14] 0,Bank(1),count*32
+		CloseFile 0
+	EndIf
+
+.readdata
+	If WriteMem(0,e$)
+		FileInput 0
+		While NOT(DosBuffLen(0))
+			a$=Edit$(80)
+			If a$="blocks" Then bf=0:Goto nxbf
+			If a$="anims" Then bf=1:Goto nxbf
+			If a$="sprites" Then bf=2:Goto nxbf
+			Select bf
+				Case 1
+					If globalloc(ppl())						;x,y,t	000,000,000
+						ppl()\x=Val(Mid$(a$,1,3))
+						ppl()\y=Val(Mid$(a$,5,3))
+						ppl()\t=Val(Mid$(a$,9,3))
+					EndIf
+				Case 2
+;					If AddItem(spri())					;x,y,t	00,00,00
+;						spri()\x=Val(Mid$(a$,1,3))
+;						spri()\y=Val(Mid$(a$,5,3))
+;						spri()\t=Val(Mid$(a$,9,3))
+;					EndIf
+			End Select
+			nxbf:
+		Wend
+		CloseFile 0
+		DefaultInput
+	EndIf
+
+	InitCopList 0,30,200,$13038,8,32,0:DisplayPalette 0,0
+	DisplayControls 0,64,$1c00,0
+
+	InitCopList 1,232,80,$13004,8,16,0:DisplayBitMap 1,3
+	DisplayPalette 1,0,16
+
+	DisplayPalette 0,0
+
+main:
+	BLITZ
+	BlitzKeys On:BitMapInput
+	Mouse On:MouseArea 0,0,767,383
+	CreateDisplay 0,1
+
+	SetInt 5
+		bx=MouseX:by=MouseY
+		bmx=QLimit(bx-160,0,768-320)
+		bmy=QLimit(by-100,0,383-200)
+		bx=Int(bx ASR 3):by=Int(by ASR 3)
+		DisplayBitMap 0,0,bmx,bmy,4,bmx,bmy
+		DisplaySprite 0,0,bx*8-bmx-1,by*8-bmy-1,0
+	End SetInt
+
+	Gosub refreshmap
+	Gosub refreshoverlay
+	BitMapOutput 3
+
+	##[$80BB]
+		VWait
+		a$=Inkey$:If a$<>"" Then a=Asc(a$) Else a=0
+
+		Use lmaxlen 3
+		Box ppx(bp)-1,59,ppx(bp)+ab(bp)\w*8,60+ab(bp)\h*8,0
+
+		Locate 1,.25:Print Peek.w(?count),"	"
+
+		If a=129 Then Gosub newblock
+		If a=130 Then Gosub sameblock
+		If a=131 Then Gosub pickblock
+
+		If a=138 Then Gosub quickscan:Gosub dirtyscan
+
+		If a=134 Then pp=bp:Gosub addshape
+
+;		If a=135 Then sp=0:Gosub addsprite
+;		If a=136 Then sp=1:Gosub addsprite
+;		If a=137 Then sp=2:Gosub addsprite
+;		If a=138 Then sp=3:Gosub addsprite
+
+		If a=127 Then Gosub killshape
+		If a=139 Then Gosub backshape
+
+		If a=31 Then bp=QLimit(bp-1,0,np-1)
+		If a=30 Then bp=QLimit(bp+1,0,np-1)
+
+		Use lmaxlen 3
+		Box ppx(bp)-1,59,ppx(bp)+ab(bp)\w*8,60+ab(bp)\h*8,1
+
+		Gosub animateoverlay
+
+	##[$80BC] a=27
+
+	pal.l=Peek.l(##[$80B8] SetCycle(0))+4
+	For i=0 To 15
+		r.w=(Peek.b(pal) AND 255) LSR 4:pal+4
+		g.w=(Peek.b(pal) AND 255) LSR 4:pal+4
+		b.w=(Peek.b(pal) AND 255) LSR 4:pal+4
+		cols(i)=(b*256+g*16+r) AND $eee
+	Next
+
+	AMIGA
+
+
+.writetrack
+
+	If ReadMem(0,d$)
+		Exists 0,&cols(0),64
+		Exists 0,&wind(0,0),96*48*2
+		Exists 0,Bank(1),Peek.w(?count)*32
+		CloseFile 0
+	EndIf
+
+.writedata
+	If ReadMem(0,e$)
+		FileOutput 0
+
+		NPrint "anims"
+		newmem ppl()
+		While globfree(ppl())
+			a$=Right$(Str$(ppl()\x+1000),3)+","
+			a$+Right$(Str$(ppl()\y+1000),3)+","
+			a$+Right$(Str$(ppl()\t+1000),3)
+			NPrint a$
+		Wend
+
+;		NPrint "sprites"
+;		ResetList spri()
+;		While NextItem(spri())
+;			a$=Right$(Str$(spri()\x+1000),3)+","
+;			a$+Right$(Str$(spri()\y+1000),3)+","
+;			a$+Right$(Str$(spri()\t+1000),3)
+;			NPrint a$
+;		Wend
+
+		CloseFile 0
+		DefaultOutput
+	EndIf
+
+	End
+	BLITZ
+
+;----------------------------------------------------------
+DEFTYPE .w n
+
+.animateoverlay:
+	fr+.25
+	If fr=Int(fr)
+		Use lmaxlen 4
+		newmem ppl()
+		While globfree(ppl())
+			##[$80CA] ppl()
+			longdiv ab(\t)\n+16+(fr ##[$80B9] ab(\t)\f),\x,\y
+		Wend
+	EndIf
+	Return
+
+.refreshoverlay:
+	Use lmaxlen 4
+	BlockScroll
+	newmem ppl()
+	While globfree(ppl())
+		##[$80CA] ppl()
+		longdiv ab(\t)\n+16,\x,\y
+	Wend
+	For i=0 To 3
+		If spri(i)\x>0 Then longdiv 2,spri(i)\x,spri(i)\y
+	Next
+	Return
+
+.addshape:
+	Gosub killshape
+	If globalloc(ppl())
+		ppl()\x=bx*8,by*8,pp
+		Gosub refreshoverlay
+	EndIf
+	Return
+
+.addsprite:
+	spri(sp)\x=bx*8,by*8,pp
+	Gosub refreshoverlay
+	Return
+
+.killshape:
+	newmem ppl()
+	While globfree(ppl())
+		If ppl()\x=bx*8 AND ppl()\y=by*8 Then freelast ppl()
+	Wend
+	Gosub refreshoverlay
+	Return
+
+.backshape:
+	newmem ppl()
+	While globfree(ppl())
+		If ppl()\x=bx*8 AND ppl()\y=by*8
+			t=ppl()\t:##[$80CA] ab(t)
+			For sh=\n To \n+\f-1
+				CludgeBitMap sh+16,5
+				For x=0 To \w*8-1
+					For y=0 To \h*8-1
+						Use lmaxlen 0:c=Cls(bx*8+x,by*8+y)
+						If c=12
+							Use lmaxlen 5:If Cls(x,y)=2 Then Point x,y,3
+						EndIf
+					Next
+				Next
+			Next
+		EndIf
+	Wend
+	Gosub refreshoverlay
+	Return
+
+.pickblock
+	x=bx*8:y=by*8
+	n=(wind(x ASR 3,y ASR 3) AND 1023) -128
+	Return
+
+
+.sameblock:
+	Use lmaxlen 0
+	x=bx*8:y=by*8
+	wind(x ASR 3,y ASR 3)=n+128+32768
+	drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+	Return
+
+.newblock:
+	Use lmaxlen 0
+	x=bx*8:y=by*8
+	getblock{Bank(0),bm,x,y}
+	cb.l=cmpblock{Bank(0),Bank(1)}:diff=cb AND 31
+	If diff=0
+		cb=cb LSR 5:n.w=cb
+	Else
+		n=addblock{Bank(0),Bank(1)}
+	EndIf
+	wind(x ASR 3,y ASR 3)=n+128+32768
+	drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+	Return
+
+.refreshmap:
+	Use lmaxlen 0
+	For y=0 To 47
+		For x=0 To 95
+			ind.l=wind(x,y)-128
+			blok.l=Bank(1)+(ind AND 2047)*32
+			drawblok{blok,brush}:longdiv 0,x*8,y*8
+		Next
+	Next
+	Return
+
+;----------------------------------------------------------
+count:Dc.w0
+
+.quickscan:
+
+	Use lmaxlen 0:BlockScroll
+
+	n.w=0:nn.w=0
+	Dim bcount(8192)
+	Dim bptr.l(8192)
+
+	Poke.w ?count,1							;first block is 0000000
+	For y=0 To 383 Step 8				 ;pass 1 count pumpkins
+		For x=0 To 767 Step 8
+			getblock{Bank(0),bm,x,y}
+			n=chkblock{Bank(0),Bank(1)}
+			first(x ASR 3,y ASR 3)=n
+			bcount(n)+1
+		Next
+	Next
+	Poke.w ?count,1							;pass 2 add multiple pumpkins
+	For y=0 To 383 Step 8
+		For x=0 To 767 Step 8
+			If bcount(first(x ASR 3,y ASR 3))>1
+				getblock{Bank(0),bm,x,y}
+				n=chkblock{Bank(0),Bank(1)}
+				wind(x ASR 3,y ASR 3)=n+128+32768
+				drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+			Else
+				wind(x ASR 3,y ASR 3)=0
+			EndIf
+		Next
+	Next
+	Return
+
+.dirtyscan
+
+	NEWTYPE .cbok
+		x.w:y.w:diff.w
+	End NEWTYPE
+
+	limit=6
+
+	##[$80BB]
+		Dim ##[$80B3] cb.cbok(4608)
+		hits=0:Gosub scancount
+		SortList cb(),SizeOf .cbok\diff
+		ii=1200-Peek.w(?count)
+		For i=1 To ii/2
+			If LastItem(cb())
+				x=cb()\x:y=cb()\y
+				getblock{Bank(0),bm,x,y}
+				n=addblock{Bank(0),Bank(1)}
+				wind(x ASR 3,y ASR 3)=n+128+32768
+				drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+				bcount(first(x ASR 3,y ASR 3))=2
+				Locate 0,0:Print Peek.w(?count),"	"
+				freelast cb()
+			EndIf
+		Next
+		limit+2
+	##[$80BC] hits=0
+	Return
+
+.scancount:
+	For y=0 To 383 Step 8				;pass 3 find orphan pumpkins
+		For x=0 To 767 Step 8
+			first=first(x ASR 3,y ASR 3)
+			If bcount(first)<2
+				getblock{Bank(0),bm,x,y}
+				cb.l=cmpblock{Bank(0),Bank(1)}:diff=cb AND 31
+				If diff<limit
+					cb=cb LSR 5:n=cb:bcount(first)=2
+					wind(x ASR 3,y ASR 3)=n+128+32768
+					drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+				Else
+					If globalloc(cb()) Then cb()\x=x,y,diff:hits+1
+				EndIf
+			EndIf
+		Next
+		If Joyb(0)<>0 Then End
+	Next
+	Return
+
+.compiletracks
+
+AMIGA
+
+NEWTYPE.cmstruc ;	 STRUCTURE cmCrunchStruct,0
+	Src.l:Seclen.l
+	Dest.l
+	DestLen.l
+	DataHdr.l :Hook.l :pad1.w[4]
+	MaxOff.l
+	RealOff.l
+	MinSecDist.l
+	CrunLen.l	;*ADD 14!!*
+	pad3.l[6]:pad4.b[4]
+End NEWTYPE
+
+NEWTYPE .theader
+	nmp.l						;8k+ contours NOT CRUNCHED
+	blockmap.l			 ;8k crunched
+	blocks.l[8]			;40k+ crunched
+End NEWTYPE
+
+NEWTYPE .frend :lti.w:ltj:rti:rtj:End NEWTYPE
+
+Dim th.theader(23)
+ptr.l=0
+InitBank 2,65536,0	;crunch buffer
+
+Dim tags.l(100)
+tags(0)=$80000001:tags(1)=1
+*mine.cmstruc=##[$E407](&tags(0))
+
+If ReadMem(0,"ram:tracks.bin")
+	;
+	For i=1 To 24
+		;
+		; do nmp file
+		;
+		th(i-1)\nmp=ptr
+		;
+		If WriteMem(1,"maps/track"+Str$(i)+".map")
+			FreeBank 0:InitBank 0,FileSeek(1)+7*SizeOf.frend,0
+			##[$BE14] 1,Bank(0),FileSeek(1)
+			CloseFile 1
+		Else
+			NPrint "maps/track"+Str$(i)+".map not found"
+		EndIf
+		maptr.l=Bank(0)
+		pts.w=Peek.w(maptr+64*64*2):pts1.w=pts+1:pts2.w=pts+2:pts3=pts+3:pts4=pts+4
+		condt.l=maptr+64*64*2 + 2
+		For cnt.w=0 To 7*SizeOf.frend Step 2
+			Poke.w condt+cnt+(pts1*SizeOf.frend),Peek.w (condt+cnt)
+		Next
+		Exists 0,Bank(0),BankSize(0)
+		ptr+BankSize(0)
+		;
+		; do block map (crunch 96*48*2+64)
+		;
+		th(i-1)\blockmap=ptr
+		bsize.l=96*48*2+64
+		FreeBank 0:LoadBank 0,"win/track."+Str$(i)
+		*mine\Src=Bank(0),bsize,Bank(2)+14,BankSize(2)
+		*mine\DataHdr=Bank(2)
+		##[$E406] *mine
+		Exists 0,Bank(2),*mine\CrunLen+14
+		ptr+*mine\CrunLen+14
+		;
+		; do blocks (max 8 banks of 8K)
+		;
+		bsrc.l=Bank(0)+96*48*2+64
+		bsize.l=BankSize(0)-96*48*2-64
+		;
+		For j=0 To 7:th(i-1)\blocks[j]=0:Next
+		;
+		j=0
+		;
+		##[$80BB]
+			If bsize>8192 Then bsiz=8192 Else bsiz=bsize
+			th(i-1)\blocks[j]=ptr:j+1
+			*mine\Src=bsrc,bsiz,Bank(2)+14,BankSize(2)
+			*mine\DataHdr=Bank(2):##[$E406] *mine
+			Exists 0,Bank(2),*mine\CrunLen+14
+			ptr+*mine\CrunLen+14
+			bsize-bsiz:bsrc+bsiz
+		##[$80BC] bsize=0
+		NPrint "!"
+	Next
+	CloseFile 0
+EndIf
+
+If ReadMem(0,"ram:tracks.ptr")
+	Exists 0,&th(0),24*SizeOf .theader
+	CloseFile 0
+EndIf
+
+End

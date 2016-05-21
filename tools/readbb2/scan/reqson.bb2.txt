@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/reqson.bb2
-+;
+;
 ;reqson
 ;
 Poke.l Peek.l(Peek.l(4)+276)+184,Peek.l(128)

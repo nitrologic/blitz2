@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/javier/cubo_v1.1.bb2
-+BLITZ
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/3D/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/3D/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/javier/cubo_v1.1.bb2
+BLITZ
 lmaxlen 0,320,256,2
 lmaxlen 1,320,256,2
 Slice 0,44,2

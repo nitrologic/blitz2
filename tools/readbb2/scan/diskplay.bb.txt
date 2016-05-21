@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/DiskPlay.bb
-+; ; diskplay program example; DiskPlay "Introduction.iff",1,64
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/DiskPlay.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/DiskPlay.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/DiskPlay.bb
+; ; diskplay program example; DiskPlay "Introduction.iff",1,64

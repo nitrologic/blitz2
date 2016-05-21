@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/debugcludge.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/debugcludge.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/debugcludge.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/debugcludge.bb
+;
 ; debugger cludge for dblpal users
 ;
 ; include this file at the start of your program

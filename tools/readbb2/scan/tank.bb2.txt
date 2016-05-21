@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/examples/tank.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/tank.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/tank.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/tank.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/examples/tank.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/tank.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/tank.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/tank.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/examples/tank.bb2
+;
 ; tank game using super bitmap window
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/people/old/people.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/people.bb,/Users/simon/Google Drive/amiga/w/sega/shit/people/old/people.bb
+;
 ; pull sega blocks from people iff
 ; increase shape width after gap of 8/16 line gap
 ; adjust height for each strip

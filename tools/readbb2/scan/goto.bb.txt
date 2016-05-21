@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Goto.bb
-+; ; goto program example; Goto thereNPrint "What happened to me?" there:NPrint "Program flow has reached 'there'" MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Goto.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Goto.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Goto.bb
+; ; goto program example; Goto thereNPrint "What happened to me?" there:NPrint "Program flow has reached 'there'" MouseWait 

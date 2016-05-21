@@ -1,7 +1,20 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/insectoids2/insectoids2.bb2
-+##[$80CB]:##[$80CC]
-
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum3/insectoids2/insectoids2.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/insectoids2/insectoids2.bb2
 #final=1
+
+##[$80CC]:##[$80CB]:##[$80C3]
+
+##[$80B4]
+If ReadMem(0,"con:0/0/640/200/ERROR!")
+	FileOutput 0:FileInput 0
+	NPrint "Error runnning Insectoids2!"
+	NPrint ""
+	NPrint "Are you 'CD'd to the insectoids2 drawer?"
+	NPrint ""
+	NPrint "Hit Return..."
+	NPrint Edit$(1)
+EndIf
+End
+End ##[$80B4]
 
 DEFTYPE.w
 
@@ -102,14 +115,10 @@ LoadSound 8,"tune2.sfx"
 CNIF #final=1
 	LoadShapes 0,"shapes"
 	LoadSprites 0,"sprites"
-
-
-;*** patch here ***
-For i = 0 To 8
- casestrcomp i,"pal"+Chr$(48+i)
-Next i
-
-
+	If WriteMem(0,"palettes")
+		##[$BE14] 0,##[$80B8] SetCycle(0),128*9
+		CloseFile 0
+	EndIf
 CELSE
 LoadShape 0,"ship1":DecodeShapes 0:GetaSprite 0,0:casestrcomp 0,"ship1",16
 LoadShape 0,"ship2":DecodeShapes 0:GetaSprite 1,0
@@ -141,7 +150,7 @@ For k=96 To 99:DecodeShapes k:Next
 SaveShapes 0,199,"shapes"
 SaveSprites 0,5,"sprites"
 If ReadMem(0,"palettes")
-	Exists 0,##[$80B8] SetCycle(0),1024*9
+	Exists 0,##[$80B8] SetCycle(0),128*9
 	CloseFile 0
 EndIf
 CEND

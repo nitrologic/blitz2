@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/Fugue_writer.bb
-+;THIS PROGRAMME NEEDS TO LOAD TWO SAMPLES. THE FIRST SHOULD BE
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/Fugue_writer.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/Fugue_writer.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/Fugue_writer.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/Fugue_writer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/Fugue_writer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/Fugue_writer.bb
+;THIS PROGRAMME NEEDS TO LOAD TWO SAMPLES. THE FIRST SHOULD BE
 ;TWO OCTAVES LOWER THAN THE SECOND.
 ;Ted Jones 17/12/93
 

@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PalRGB.bb
-+; ; setting up a palette program example; PalRGB 0,0,6,6,6PalRGB 0,1,15,15,15 PalRGB 0,2,0,0,0PalRGB 0,3,15,15,0Screen 0,3,"A Manually created palette object!" Use Palette 0 MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/PalRGB.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PalRGB.bb
+; ; setting up a palette program example; PalRGB 0,0,6,6,6PalRGB 0,1,15,15,15 PalRGB 0,2,0,0,0PalRGB 0,3,15,15,0Screen 0,3,"A Manually created palette object!" Use Palette 0 MouseWait 

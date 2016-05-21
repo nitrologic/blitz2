@@ -1,10 +1,15 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/NeilsCIATrackerLib.bb
-+;******************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/NeilsCIATrackerLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/NeilsCIATrackerLib.bb
+;******************************************
 ;*																				*
 ;*	CIA Protracker Module Player Library	*
 ;*	By Neil O'Rourke											*
 ;*																				*
-;*	Version: 1.3	 .././94								*
+;*	Original PlayRoutine by							 *
+;*	Amiga Freelancers										 *
+;*																				*
+;*	Enhancements by neil									*
+;*																				*
+;*	Version: 1.6	 26/6/94								*
 ;*																				*
 ;******************************************
 
@@ -25,10 +30,65 @@
 ;								 - Returns True if a TrackerEvent has occured
 ;								WaitTrackerEvent
 ;								 - Returns when any TrackerEvent occurs
-;V1.3	Added:		CheckTrackerID
+;V1.3	Added:		CheckTrackerModuleID
 ;								 - Returns True if Module ID is M.K. or M!K!
 ;			Changed:	StartTracker
 ;								 - Returns True if the module was able to start.
+;V1.4 Suggestions by Richard Elmore
+;			Added:		GetTrackerVolume
+;								 - Returns the volume of the current instrument in channel n
+;								GetTrackerNote
+;								 - Returns the last note the playroutine encountered
+;								SetTrackerTempo
+;								 - A stub to SetTempo
+;								GetTrackerInstrument
+;								 - Returns the instrument currently playing
+;		 Added by Neil for another project
+;								GetSongPosition
+;								 - Returns the current position in a song
+;								GetPatternPosition
+;								 - Returns positioin in the current pattern
+;								SetSongPatternPosition
+;								 - Sets what is playing where
+;								GetSongLength
+;								 - Returns the number of patterns in a song
+;								SetTrackerMask
+;								 - Set the audio channel mask
+;								GetTrackerNoteNumber
+;								 - Get the number of the note played
+;		 Suggestions By Roy
+;								StartTrackerPatPos
+;								 - Same as StartTracker, but specifies what pattern
+;								PauseTracker
+;								 - Stops the current module
+;								RestartTracker
+;								 - Restarts a paused module
+;								PlayTrackerSample
+;								 - Plays the named sample
+;		 More by Neil
+;								InitTracker
+;								 - Initialises a tracker module for use
+;V1.5 Added for another project
+;								GetSampleLocation
+;								 - Returns the address of the sample
+;								GetSampleLength
+;								 - Returns the length of the sample
+;								GetSampleName
+;								 - Returns the name of the sample
+;								GetTrackerName
+;								 - Returns the name of the current module
+;V1.6 Maintenance release
+;								LoadTrackerModule
+;								 - Doesn't crash if the file can't be found
+;								TrackerEvents stopped working!	Now fixed.
+;								SetTrackerMask
+;								 - Caused problems, and is now disabled.	Will
+;									 appear again soon!
+;								GetTrackerNoteNumber
+;								 - New command replaces OldGetTrackerNoteNumber
+;								BuildNoteTable
+;								 - Builds a look-up table for GetTrackerNoteNumber
+;								Little optimisations here and there...
 
 ;#neilsciatrklib=56 ;this is final!
 
@@ -104,7 +164,133 @@
 !args{#word}
 !libs
 !subs{_checkid,0,0}
-!name{"CheckTrackerID","(TrackerModule#)"}
+!name{"CheckTrackerModuleID","(TrackerModule#)"}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_getvolume,0,0}
+!name{"GetTrackerVolume","(TrackerChannel#)"}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_getnote,0,0}
+!name{"GetTrackerNote","(TrackerChannel#)"}
+
+!astatement
+!args{#word}
+!libs
+!subs{SetTempo,0,0}
+!name{"SetTrackerTempo","Tempo"}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_getinstr,0,0}
+!name{"GetTrackerInstrument","(TrackerChannel#)"}
+
+!afunction{#byte}
+!args
+!libs
+!subs{_getsongpos,0,0}
+!name{"GetSongPosition",""}
+
+!afunction{#word}
+!args
+!libs
+!subs{_getpatpos,0,0}
+!name{"GetPatternPosition",""}
+
+!astatement
+!args{#byte,#word}
+!libs
+!subs{_setpatpos,0,0}
+!name{"SetSongPatternPosition","Pattern#,Position#"}
+
+!afunction{#byte}
+!args
+!libs
+!subs{_getsonglength,0,0}
+!name{"GetSongLength",""}
+
+!astatement
+!args{#byte}
+!libs
+!subs{_setmask,0,0}
+!name{"SetTrackerMask","Mask"}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_getnotenum,0,0}
+!name{"OldGetTrackerNoteNumber","(TrackerChannel#)"}
+
+!afunction{#long}
+!args{#word,#word,#word}
+!libs
+!subs{_starttmpatpos,0,0}
+!name{"StartTrackerPatPos","(TrackerModule#,Pattern#,Position#)"}
+
+!astatement
+!args
+!libs
+!subs{mt_end,0,0}
+!name{"PauseTracker",""}
+
+!astatement
+!args
+!libs
+!subs{_restart,0,0}
+!name{"RestartTracker",""}
+
+!astatement
+!args{#word,#word,#word,#word}
+!libs
+!subs{_playsample,0,0}
+!name{"PlayTrackerSample","Sample#,Period,Volume,Channel"}
+
+!afunction{#long}
+!args {#word}
+!libs
+!subs {_InitTrkModule,0,0}
+!name {"InitTracker","(TrackerModule#)"}
+
+!afunction{#long}
+!args{#word}
+!libs
+!subs{_getloc,0,0}
+!name{"GetSampleLocation","(Sample#)"}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_getlen,0,0}
+!name{"GetSampleLength","(Sample#)"}
+
+!afunction{#string}
+!args{#word}
+!libs
+!subs{_getname,0,0}
+!name{"GetSampleName","(Sample#)"}
+
+!afunction{#string}
+!args{#word}
+!libs
+!subs{_getmodname,0,0}
+!name{"GetTrackerName","(TrackerModule#)"}
+
+!astatement
+!args
+!libs
+!subs{_buildnotetable,0,0}
+!name{"BuildNoteTable",""}
+
+!afunction{#word}
+!args{#word}
+!libs
+!subs{_newgetnotenum,0,0}
+!name{"GetTrackerNoteNumber","(TrackerChannel#)"}
 
 init:!nullsub{_inittrackerlib,0,0}
 finit:!nullsub{_finittrackerlib,0,0}
@@ -167,6 +353,7 @@ freefib:
 	MOVE.l readerr,d0			 ;Get the error code
 	CMP.l #-1,d0						;Was it a "true"?
 	BEQ		nofile					 ;Yes, no more error processing
+fileerr:
 	JSR -$84(a6)						;Call IOErr()
 	MOVE.l d0,readerr			 ;and save it
 nofile:
@@ -174,14 +361,10 @@ nofile:
 	MOVE.l readerr,d0			 ;Set a return code
 	RTS										 ;Done
 
-fileerr:
-	MOVE.l #mess,d0
-	TRAP#0
 trackererr:
 	MOVE.l #mess2,d0
 	TRAP#0
 
-mess:Dc.b "Can't Open Tracker Module",0
 mess2:Dc.b "Tracker Library Error",0
 	Event
 
@@ -274,6 +457,12 @@ clrmem:
 	JSR _StopTracker
 	JSR ResetCIAInt
 	MOVEM.l (a7)+,a4-a6
+	MOVE.l TabAddr,a1		 ;Free up the NoteTable
+	CMP.l #0,a1
+	BEQ exCIA
+	MOVE.l #$800,d0
+	ALibJsr $c003
+exCIA:
 	RTS
 
 ._checkid
@@ -301,8 +490,80 @@ _idpos:
 id1: Dc.b "M.K."
 id2: Dc.b "M!K!"
 
+Event
+
+_getvolume
+	LEA mt_chan1temp,a3
+	MULU #44,d0
+	ADDA d0,a3
+	MOVE.b n_volume(a3),d0
+	RTS
+
+_getnote
+	LEA mt_chan1temp,a3
+	MULU #44,d0
+	ADDA d0,a3
+	MOVE.w 0(a3),d0
+	ANDI.w #$0FFF,d0
+	RTS
+
+_getnotenum
+	JSR _getnote					;Get the last note played
+	CMPI.w #0,d0					;Was there a note?
+	BEQ gotit
+	MOVE.w d0,d1
+	MOVE.w #1,d0
+	LEA mt_PeriodTable,a0 ;Get the period table
+huntnote
+	CMP.w (a0)+,d1				;Is this the note?
+	BEQ gotit						 ;Yep...
+	ADDI.w #1,d0					;Look at next note
+	BRA huntnote
+gotit
+	RTS
+
+_getinstr
+	LEA mt_chan1temp,a3	 ;Get the last description
+	MULU #44,d0					 ;Offset for the channel
+	ADDA d0,a3
+	MOVE.l 0(a3),d0			 ;and now the command its self
+	ANDI.l #$f000f000,d0	;Mask out all but the sample data
+	LSR.w #8,d0					 ;Shift over the lsb of the sample
+	LSR.w #4,d0
+	MOVE.l d0,d1					;And save
+	SWAP d0							 ;Now get msb
+	LSR.w #8,d0					 ;move it over
+	ADD.w d0,d1					 ;and get the true sample number
+	ANDI.l #$ff,d1				;Mask out any garbage
+	MOVE.l d1,d0					;Done!
+	RTS
+
 ._setdmawait
 	MOVE.w d0,DMA_Wait	;Oh, so complex, eh?
+	RTS
+
+_getsongpos
+	MOVE.b mt_SongPos,d0
+	RTS
+
+_getpatpos
+	MOVE.w mt_PatternPos,d0
+	DIVS.w #$10,d0
+	RTS
+
+._setpatpos
+	MOVE.b d0,mt_SongPos
+	MULU.w #$10,d1
+	MOVE.w d1,mt_PatternPos
+	RTS
+
+_getsonglength
+	MOVE.l mt_data,a0
+	MOVE.b 950(a0),d0
+	RTS
+
+_setmask
+	MOVE.b d0,nor_mask
 	RTS
 
 ._StartTrkModule:
@@ -324,35 +585,77 @@ _nomod:
 	MOVEM.l (a7)+,a4-a6
 	RTS
 
+._starttmpatpos
+	MOVEM.l a4-a6,-(a7)
+	MOVEM.l d1-d2,-(a7)	 ;Save the other params
+	LEA modtable,a3			 ;Get the address of the module table
+	MULU #10,d0					 ;Offset into table
+	ADDA d0,a3						;Now a3 points to the correct entry
+	MOVE.l 0(a3),d0
+	BEQ _nomod						;Exit if no module
+	MOVE.l 0(a3),mt_data	;Get address of module for the replay routine
+	JSR mt_init
+	MOVEM.l (a7)+,d0-d1	 ;Retrieve params (this is naughty)
+	JSR _setpatpos				;Set the starting pattern and position
+	ST	mt_Enable				 ;And start the music
+	MOVEM.l (a7)+,a4-a6
+	MOVE.l #-1,d0				 ;Return True
+	RTS
+
+_restart:
+	ST mt_Enable
+	RTS
+
 ._StopTracker
 	MOVEM.l d0-d7/a0-a6,-(a7)
 	JSR mt_end
 	MOVEM.l (a7)+,d0-d7/a0-a6
 	RTS
 
+._InitTrkModule:
+	MOVEM.l a4-a6,-(a7)
+	LEA modtable,a3			 ;Get the address of the module table
+	MULU #10,d0					 ;Offset into table
+	ADDA d0,a3						;Now a3 points to the correct entry
+	MOVE.l 0(a3),d0
+	BEQ _nomod						;Exit if no module
+	MOVE.l 0(a3),mt_data	;Get address of module for the replay routine
+	JSR mt_init
+	MOVEM.l (a7)+,a4-a6
+	MOVE.l #-1,d0				 ;Return True
+	RTS
+
+._buildnotetable
+	MOVE.l #$800,d0							 ;2K of Ram
+	MOVE.l #$10000,d1						 ;Cleared
+	ALibJsr $c002								 ;Allocate the memory
+	MOVE.l d0,TabAddr						 ;Save the address
+	MOVE.l d0,a0									;and prepare to build the table
+	MOVE.w #1,d0
+	LEA mt_PeriodTable,a1				 ;The base of the PeriodTable
+btDoIt:
+	MOVE.w (a1)+,d1							 ;Get the entry
+	LSL.w #1,d1									 ;Multiply by two for word access
+	MOVE.w d0,0(a0,d1.w)					;And make that entry the d0'th NoteNumber
+	ADDI.w #1,d0
+	CMPI.w #37,d0								 ;Done all the notes?
+	BNE btDoIt										;Nope, go and do another
+	RTS
+
+._newgetnotenum
+	LEA mt_chan1temp,a3					 ;The "current" playroutine data
+	MOVE.l TabAddr,a0
+	MULU #44,d0									 ;Offset for the requested channel
+	MOVE.w 0(a3,d0.w),d1					;and get the period of the note
+	LSL.w #1,d1									 ;Multiply by two for word access
+	MOVE.w 0(a0,d1.w),d0					;and retrieve the number stored there
+	RTS
+
+
+TabAddr:	Dc.l 0
+
 modtable: Dc.l 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 DMA_Wait: Dc.w 300
-
-;**************************************************
-;*		----- Protracker V2.3A Playroutine -----		*
-;**************************************************
-
-; CIA Version 1:
-; Call SetCIAInt to install the interrupt server. Then call mt_init
-; to initialize the song. Playback starts when the mt_enable flag
-; is set to a nonzero value. To end the song and turn off all voices,
-; call mt_end. At last, call ResetCIAInt to remove the interrupt.
-
-; This playroutine is not very fast, optimized or well commented,
-; but all the new commands in PT2.3 should work.
-; If it's not good enough, you'll have to change it yourself.
-; We'll try to write a faster routine soon...
-
-; Changes from V1.0C playroutine:
-; - Vibrato depth changed to be compatible with Noisetracker 2.0.
-;	 You'll have to double all vib. depths on old PT modules.
-; - Funk Repeat changed to Invert Loop.
-; - Period set back earlier when stopping an effect.
 
 ;---- CIA Interrupt ----
 
@@ -460,9 +763,110 @@ RemInt:	LEA MusicIntServer(PC),A1
 	JSR RemICRVector(A6)
 	RTS
 
+._getloc
+	SUBI.w #1,d0
+	LEA mt_SampleStarts,a0	;Get the Sample Address table
+	MULU.w #4,d0						;Convert the sample num into a byte offset
+	MOVE.l 0(a0,d0.w),d0		;and return the start address
+	RTS
+
+._getlen
+	SUBI.w #1,d0
+	MOVE.l mt_data,a0			 ;Start of the SoundTracker module
+	ADDA.l #20,a0					 ;Now point to the start of the inst data
+	MULU.w #30,d0					 ;Convert into byte offset
+	MOVE.w 22(a0,d0.w),d0	 ;Now get word length of sample
+	RTS
+
+._getname
+	SUBI.w #1,d0
+	MOVE.l mt_data,a0			 ;Start of the SoundTracker module
+	ADDA.l #20,a0					 ;Now point to the start of the inst data
+	MULU.w #30,d0					 ;Convert into byte offset
+	ADDA.l d0,a0						;Now a0 points to the sample name
+	MOVEQ #0,d0
+_sloop:
+	MOVE.b (a0)+,(a3)+			;Copy a byte of the sample name
+	ADDI.l #1,d0
+	CMPI.l #21,d0
+	BNE _sloop
+	RTS
+
+._getmodname
+	LEA modtable,a0				 ;Get the address of the module table
+	MULU #10,d0						 ;Offset into table
+	ADDA d0,a0							;Now a3 points to the correct entry
+	MOVEA.l 0(a0),a1				;Get address of module
+	MOVEQ #0,d0
+_sloop1:
+	MOVE.b (a1)+,(a3)+			;Copy a byte of the module name
+	ADDI.l #1,d0
+	CMPI.l #19,d0
+	BNE _sloop1
+	RTS
+
+._playsample
+	SUBI.w #1,d0
+	MOVE.w d0,MySam				 ;Save the sample number
+	MOVE.w d1,MyPer				 ;the period
+	MOVE.w d2,MyVol				 ;the volume
+	MOVE.w d3,MyChan				;and the channel number
+	LEA mt_SampleStarts,a0	;Get the Sample Address table
+	MULU.w #4,d0						;Convert the sample num into a byte offset
+	MOVE.l 0(a0,d0.w),SAddr ;and store the start address
+	MOVE.l mt_data,a0			 ;Start of the SoundTracker module
+	ADDA.l #20,a0					 ;Now point to the start of the inst data
+	MOVE.w MySam,d0				 ;Get back the sample number
+	MULU.w #30,d0					 ;Convert into byte offset
+	MOVE.w 22(a0,d0.w),SLen ;Now get word length of sample
+	MOVE.w MyChan,d0
+	LEA masktable,a0
+	MOVE.b 0(a0,d0.w),MyMask;Save the channel mask
+
+	LEA $dff000,a0					;"The metal"
+	MOVE.w MyChan,d0				;The channel number
+	MULU.w #$10,d0					;convert to a byte address
+	ADDI.w #$a0,d0					;offset into the chips
+	MOVE.w d0,cOff					;Save the offset
+
+	MOVE.w #0,d0
+	MOVE.b MyMask,d0
+	MOVE.w d0,$96(a0)			 ;Stop any activity on this channel
+
+	MOVE.w cOff,d0					;Get the chip offset back
+	MOVE.l SAddr,0(a0,d0.w) ;The address of the sample
+	MOVE.w SLen,4(a0,d0.w)	;the length
+	MOVE.w MyPer,6(a0,d0.w) ;the period
+	MOVE.w MyVol,8(a0,d0.w) ;and the volume
+	MOVE.w #$8200,d0				;DMA Enable stuff
+	MOVE.b MyMask,d0				;and the audio bits...
+	MOVE.w d0,$96(a0)			 ;Start the sound
+
+	MOVE.W	DMA_Wait,D0		 ;Wait for the DMA to do its stuff
+ps_WaitDMA
+	DBRA	D0,ps_WaitDMA
+
+	MOVE.w cOff,d0					;Regain the chip offset
+	MOVE.w #2,4(a0,d0.w)		;Kill looping (remember this in PT?)
+	RTS
+
+MySam:	 Dc.w 0
+MyPer:	 Dc.w 0
+MyVol:	 Dc.w 0
+SLen:		Dc.w 0
+SAddr:	 Dc.l 0
+MyChan:	Dc.w 0
+MyMask:	Dc.b 0
+pad:		 Dc.b 0
+cOff:		Dc.w 0
+OldNMask:Dc.w 0
+
+masktable:
+Dc.b 1,2,4,8
+
 ;---- Tempo ----
 
-SetTempo
+.SetTempo
 	MOVE.L	CIAAbase(PC),D2
 	BEQ mt_Return
 	CMP.W #32,D0
@@ -668,7 +1072,7 @@ mt_plvskip
 	MOVE.W	0(A3,D4.L),n_length(A6)
 	MOVE.W	0(A3,D4.L),n_reallength(A6)
 	MOVE.B	2(A3,D4.L),n_finetune(A6)
-	MOVE.B	3(A3,D4.L),n_volume(A6)
+	MOVE.b	3(A3,D4.L),n_volume(A6)
 	MOVE.W	4(A3,D4.L),D3 ; Get repeat
 	TST.W D3
 	BEQ mt_NoLoop
@@ -852,6 +1256,8 @@ mt_CheckEfx
 	BEQ mt_TonePlusVolSlide
 	CMP.B #6,D0
 	BEQ mt_VibratoPlusVolSlide
+	CMP.b #8,d0
+	BEQ nor_TrackEvent
 	CMP.B #$E,D0
 	BEQ mt_E_Commands
 SetBack: MOVE.W	n_period(A6),6(A5)
@@ -859,8 +1265,6 @@ SetBack: MOVE.W	n_period(A6),6(A5)
 	BEQ mt_Tremolo
 	CMP.B #$A,D0
 	BEQ mt_VolumeSlide
-	CMP.b #8,d0
-	BEQ nor_TrackEvent
 mt_Return
 	RTS
 
@@ -915,8 +1319,7 @@ mt_Arpeggio4
 	RTS
 
 .nor_TrackEvent
-	MOVE.b n_cmdlo(a6),d0
-	MOVE.b d0,nor_TrkEvt
+	MOVE.b n_cmdlo(a6),nor_TrkEvt
 	RTS
 
 mt_FinePortaUp
@@ -1626,3 +2029,4 @@ mt_PatternPos: Dc.w 0
 mt_DMACONtemp: Dc.w 0
 nor_TrkEvt: Dc.b 0
 nor_LstEvt: Dc.b 0
+nor_mask: Dc.w $ff

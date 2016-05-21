@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Orbital/Source Code/Orbital Source/Orbital 0.7.bb
-+; --------------------------------------------------------------------
+; --------------------------------------------------------------------
 
 ; Orbital V0.7
 ; By Challenge Logic

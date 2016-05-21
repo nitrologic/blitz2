@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/CiaTrackerDemo.bb
-+; Demo of most of the CIATrackerLib command set (V1.6)
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/userlibprogs/neil/CiaTrackerDemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/CiaTrackerDemo.bb
+; Demo of most of the CIATrackerLib command set (V1.6)
 
 ; hmm, after running from Blitz2 go to workbench screen to use
 ; as their is a nocli....

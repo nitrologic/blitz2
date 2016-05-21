@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Cursor.bb
-+; ; cursor example; Screen 0,3														 ;open a simple creenWindow 0,0,0,320,200,0,"Cursor types",0,1		;and a window Print "This is a block cursor."							 ;show a block cursora$=Edit$("Hello",10)Cursor 1												;change cursor to underline Print "This is an underline one." a$=Edit$("Hello",10)End 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Cursor.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Cursor.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Cursor.bb
+; ; cursor example; Screen 0,3														 ;open a simple creenWindow 0,0,0,320,200,0,"Cursor types",0,1		;and a window Print "This is a block cursor."							 ;show a block cursora$=Edit$("Hello",10)Cursor 1												;change cursor to underline Print "This is an underline one." a$=Edit$("Hello",10)End 

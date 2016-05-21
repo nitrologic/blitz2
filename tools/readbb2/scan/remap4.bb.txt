@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/remap4.bb
-+lmaxlen 0,768,384,4
+lmaxlen 0,768,384,4
 allocst 0,0,0,768,384,4,$8004,"",1,2,0
 casestrcomp 0,"snow.palette":FadePalette 0
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/blitzman.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/blitzman.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/blitzman.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/blitzman.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/blitzman.bb
+;
 ; Dancing BlitzMan v0.0 by Simon Armstrong
 ;
 

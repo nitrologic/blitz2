@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/3ded.bb2
-+
+
 ;OH MY GOD...
 ;
 ;A 3D EDITOR!

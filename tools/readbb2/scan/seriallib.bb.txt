@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/seriallib.bb
-+;*************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/code/seriallib.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/libsdev/seriallib.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/DEVELOPERS/libsdev/seriallib.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/code/seriallib.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/seriallib.bb
+;*************************************
 ;*																	 *
 ;*			SERIAL PORT LIBRARY					*
 ;*																	 *

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/number/PICK.NUM.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/number/PICK.NUM.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/number/PICK.NUM.bb
+
 
 ##[$F300]
 

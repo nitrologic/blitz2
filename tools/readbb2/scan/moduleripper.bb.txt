@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/neil/ModuleRipper.bb
-+; Module Ripper 1.0 - written TOTALLY in Blitz Basic 2
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/neil/ModuleRipper.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/neil/ModuleRipper.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/neil/ModuleRipper.bb
+; Module Ripper 1.0 - written TOTALLY in Blitz Basic 2
 ;
 ; This will only run under System 2.0 (V36 or better), as it
 ; makes use of a lot of new features in AmigaDOS.	If ya want, I

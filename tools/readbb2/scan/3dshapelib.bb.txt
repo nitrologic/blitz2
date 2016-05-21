@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/3D/3dshapelib.bb
-+#lib3d=86
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/3D/3dshapelib.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/3D/3dshapelib.bb
+#lib3d=86
 #object3dlib=84
 
 !libheader {#object3dlib,0,0,0,0}

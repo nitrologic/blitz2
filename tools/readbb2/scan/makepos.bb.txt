@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEPOS.BB
-+
+
 MaxLen p$=192
 MaxLen n$=192
 

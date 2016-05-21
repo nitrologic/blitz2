@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/diamonds/game/Diamonds.bb2
-+##[$80CB]:##[$80CC]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/diamonds/game/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/diamonds/game/Diamonds.bb2
+##[$80CB]:##[$80CC]
 For k=1 To 100:VWait:##[$FF89]:Next
 ##[$80C3]
 VWait 10

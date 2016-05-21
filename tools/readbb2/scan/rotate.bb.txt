@@ -1,2 +1,9 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Rotate.bb
-+; ; rotate shape example with qblit for smooth spinning ; Screen 0,1	ScreensBitMap 0,0				;grab it's bitmap BitMapOutput 0				 ;use bitmap for 'Print' commandsQueue 0,1						;set up a Queue for the QBlit...Cls							 ;clear the bitmap Boxf 0,0,15,63,1				;draw a rectangle GetaShape 0,0,0,16,64			;grab it as a shape Cls							 ;clear bitmap Print "Please Wait" For k=1 To 64			 ;start of loop  CopyShape 0,k			;make 64 copies of original shape!  Rotate k,k/64			;rotate each copy a little more than last MidHandle k			 ;and handle in the middle Print "."				;tell user we're doin the jobNext						;end of copy loopCls					 ;clear bitmapWhile Joyb(0)=0		 ;while joystick button not down...  For k=1 To 64			;show all shapes  VWait					;wait for top of frame  UnQueue 0				;clear the Queue  QBlit 0,k,160,100		;Draw next shape  Next Wend	
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/rotate.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/rotate.bb
+freest 0:AddIDCMP $10+$400000
+		GTButton 1,0,204,29,104,12," Cancle ",16
+		GTButton 1,1,12,29,104,12," Rotate ",16
+		GTScroller 1,2,98,8,200,12,"Degrees: ",$201,1,360,360
+		localstat 1,176,56,328,60,4102,"Rotate",1,2:AttachGTList 1,1
+		ResetString 16,15,296,20
+##[$80BB]:VWait:##[$80BC] Event=$40 AND GadgetHit=0
+		CloseWindow 1:Use localstat 0

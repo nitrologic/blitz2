@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Anim/doanim.bb
-+
+
 bm:
 lmaxlen 0,320,256,5
 

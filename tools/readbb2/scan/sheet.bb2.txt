@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Sheet.bb2
-+;================================================================
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Sheet.bb2
+;================================================================
 ; Draw a nice 'sheet' of dots....
 ; Written by Stephen McNamara of Leading Edge Software
 ;

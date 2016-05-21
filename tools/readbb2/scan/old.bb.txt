@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/old.bb
-+;big things
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/sega/old.bb,/Users/simon/Google Drive/amiga/w/sega/old.bb
+;big things
 ;	password/champs etc
 ;	options page
 ;	turbo mode

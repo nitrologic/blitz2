@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Cybertech/CyberTech.bb2
-+; []----------------------------------------------------------------------[]
+; []----------------------------------------------------------------------[]
 ; |									 (C) 1993, 1994. All rights reserved.								 |
 ; |																																				|
 ; |					File: CyberTech.bb2																					 |

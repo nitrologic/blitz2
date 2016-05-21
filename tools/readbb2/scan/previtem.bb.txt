@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PrevItem.bb
-+; ; print list backwards program example; Dim List a(10)				 ;initialize list arrayWhile AddLast(a())			 ;fill list...  a()=c							;with 0,1,2...  c+1WendNPrint "List contents (backwards) are..." If LastItem(a())				 ;go to last item in list Repeat						 ;repeat...	NPrint a() Until NOT PrevItem(a())		 ;until no more previous items EndIf MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/PrevItem.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PrevItem.bb
+; ; print list backwards program example; Dim List a(10)				 ;initialize list arrayWhile AddLast(a())			 ;fill list...  a()=c							;with 0,1,2...  c+1WendNPrint "List contents (backwards) are..." If LastItem(a())				 ;go to last item in list Repeat						 ;repeat...	NPrint a() Until NOT PrevItem(a())		 ;until no more previous items EndIf MouseWait 

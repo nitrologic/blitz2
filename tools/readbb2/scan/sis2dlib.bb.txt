@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/m/sis2dlib.bb
-+; all should work with > 1024 size bitmaps
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/sis2dlib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/sis2dlib.bb
+; all should work with > 1024 size bitmaps
 ; clipblit works like blit but clips
 ; shapesbitmap means you can do fast 1 or 2 bitplane blits
 ;	(more control as dummy bitmap is created with planepick)

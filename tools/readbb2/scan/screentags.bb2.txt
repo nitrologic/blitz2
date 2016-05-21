@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/fabio/Include/ScreenTags.bb2
-+;Screen Tags
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/fabio/Include/ScreenTags.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/fabio/Include/ScreenTags.bb2
+;Screen Tags
 #SA_Left=$80000021:#SA_Top=$80000022:#SA_Width=$80000023
 #SA_Height=$80000024:#SA_Depth=$80000025:#SA_DetailPen=$80000026
 #SA_BlockPen=$80000027:#SA_Title=$80000028:#SA_Colors=$80000029

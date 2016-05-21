@@ -1,8 +1,8 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/fill.bb
-+allocst 0,4
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bakup/fill.bb
+allocst 0,4
 ScreensBitMap 0,0
-casestrcomp 0,"overlays/fill.iff"
-LoadShapes 0,"overlays/fill.shapes"
+casestrcomp 0,"sprites/fill.iff"
+LoadShapes 0,"sprites/fill.shapes"
 
 FadePalette 0:BlockScroll
 
@@ -26,17 +26,18 @@ Statement drawbeach{corner.w,size.w}
 	Next
 End Statement
 
-Statement drawline{corner.w,size.w,sh.w,ox.w}
+Statement drawline{corner.w,size.w,sh.w}
 	Select corner
-		Case 0:sh+0:ss=size:x=-32+ox:y=-16:ii=1:jj=1
-		Case 1:sh+1:ss=size:x=320-ox-16:y=-16:ii=-1:jj=1
-		Case 2:sh+1:ss=size:x=-32+ox:y=256-8:ii=1:jj=-1
-		Case 3:sh+0:ss=size:x=320-ox-16:y=256-8:ii=-1:jj=-1
+		Case 0:sh+0:ss=size:x=-32:y=-16:ii=1:jj=1
+		Case 1:sh+1:ss=size:x=320-16:y=-16:ii=-1:jj=1
+		Case 2:sh+1:ss=size:x=-32:y=256-8:ii=1:jj=-1
+		Case 3:sh+0:ss=size:x=320-16:y=256-8:ii=-1:jj=-1
 	End Select
-	If ox=0 Then hi=-size Else hi=-1
-	For i=hi To size Step .5
-		k=i+(size AND 1)/2
-		ClipBlit sh,x+(k*32+size*16)*ii,y-(k*16-size*8)*jj
+	For i=-size To size
+		For j=size To size
+			k=i+(j AND 1)/2
+			ClipBlit sh,x+(k*32+j*16)*ii,y-(k*16-j*8)*jj
+		Next
 	Next
 End Statement
 
@@ -57,16 +58,15 @@ Statement drawroad{corner.w,size.w}
 	Next
 End Statement
 
-;drawroad{0,5}
-;drawroad{1,5}
-;drawroad{2,5}
-;drawroad{3,5}
+drawroad{0,5}
+drawroad{1,5}
+drawroad{2,5}
+drawroad{3,5}
 
-drawline{0,2,6,177}
-drawline{1,2,6,176}
-
-drawline{2,6,6,0}
-drawline{3,6,6,0}
+drawline{0,6,6}
+drawline{1,6,6}
+drawline{2,6,6}
+drawline{3,6,6}
 
 ;drawbeach{0,1}
 ;drawbeach{1,1}
@@ -76,7 +76,7 @@ drawline{3,6,6,0}
 ;For x=0 To 320 Step 8:Line x,0,x,255,-1:Next
 ;For y=0 To 256 Step 8:Line 0,y,320,y,-1:Next
 
-;Line 160,0,160,255,1
+Line 160,0,160,255,1
 
 MouseWait
 End

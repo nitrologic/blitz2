@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ClickButton.bb
-+; ; brex clickbutton program example; TextGadget 0,32,32,0,1," CLICK ME " Screen 0,3Window 0,0,0,320,200,$100f,"Magic!",1,2,0 AbsMouse 40,0 For k=1 To 18 RelMouse 4,4NextClickButton 0 MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/ClickButton.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ClickButton.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ClickButton.bb
+; ; brex clickbutton program example; TextGadget 0,32,32,0,1," CLICK ME " Screen 0,3Window 0,0,0,320,200,$100f,"Magic!",1,2,0 AbsMouse 40,0 For k=1 To 18 RelMouse 4,4NextClickButton 0 MouseWait 

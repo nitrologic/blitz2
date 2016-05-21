@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/ASLRequestLib/ASLRequestLib.bb2
-+; ##################################################################
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/vs/ASLRequestLib/ASLRequestLib.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/vs/ASLRequestLib/ASLRequestLib.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/ASLRequestLib/ASLRequestLib.bb2
+; ##################################################################
 ; #																																#
 ; #								A S L	 F I L E R E Q U E S T									 #
 ; #																																#

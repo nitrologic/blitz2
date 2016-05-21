@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dbug/oldhandler.bb2
-+
+
 DEFTYPE.l
 
 MOVE.l 4,a0:MOVE.l 276(a0),a0:MOVE.l 88(a0),d_table:MOVE.l a5,d_a5

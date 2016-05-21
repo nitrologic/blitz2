@@ -1,0 +1,321 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/sega.bb
+;
+; sega megadrive skidmarks code
+;
+
+; $0000 = 64x32 map	(4096)
+; $1000 = blocks
+; $e000 = window		 (2048)?
+; $f000 = sprites		(640)
+; $f200 = spdata		 (start at #$790)
+; $fc00 = scroll
+
+#vd=$c00000	;vdp data port
+#cp=$c00004	;vdp control port
+#hv=$c00008	;hv counter
+
+#wvram=$40000000:#wcram=$c0000000:#wsram=$40000010
+#vram=$0:#cram=$80000000:#vsram=$40000000
+#z80=$a11100:#z80sram=$a00000:#z80dram=$ff8000
+
+NEWTYPE .sprite
+	vp.w
+	size.b:splink.b
+	spdata.w
+	hp.w
+End NEWTYPE
+
+Macro reg #$8000+`1*256:End Macro
+Macro setreg:MOVE.w #$8000+`1*256+`2,cp:End Macro
+Macro setmem:MOVE.l `1,cp:MOVE.w `2,vd:End Macro
+Macro pokemem:MOVE.l `1,cp:Poke.w #vd,`2:End Macro
+
+globals:
+
+	Dim map.w(63,63)
+	For x=0 To 63:For y=0 To 63:map(x,y)=256:Next:Next
+;	For x=0 To 39:For y=0 To 31
+;		If (x+y)&1
+;			map(x,y)=257
+;		Else
+;			map(x,y)=258
+;
+;		EndIf
+;		map(x,y+32)=259
+;
+;	Next:Next
+
+Statement dofence{x.w,y.w,w.w,c.w}
+	Shared map(),numchars
+	DEFTYPE.w choff,hi,ch
+	choff=$4100+numchars:hi=4
+	If c>2 AND c<5 Then c-2:choff+$2000
+	If c=5 Then c=3:hi=6
+	For i=0 To w-1
+		Select i
+			Case 0:ch=0
+			Case w-1:ch=4
+			Default:ch=1
+		End Select
+		ch=ch*hi+choff+c*20
+		For j=0 To hi-1:map(x,y+j)=ch+j:Next
+		x+1
+	Next
+End Statement
+
+Statement segaprint{a$,x.w,y.w,col.w}
+	Shared map()
+	DEFTYPE .w bloff,blah
+	a$=UCase$(a$)
+	big=(col AND 1)=0:col LSR 1:If col>2 Then col+2
+	If (col AND 4)=0 Then bloff=$4100 Else bloff=$6100
+	For i=1 To Len(a$)
+		blah=-1:ch=Asc(Mid$(a$,i,1))
+		If ch>64 AND ch<91 Then blah=ch-65
+		If ch>47 AND ch<58 Then blah=ch-17
+		If ch=Asc(".") Then blah=26
+		If ch=Asc("!") Then blah=27
+		If ch=Asc("?") Then blah=28
+		If ch=Asc(":") Then blah=29
+		If ch=Asc("_") Then blah=30
+		If big
+			If blah=-1
+				blah=bloff
+				map(x,y)=blah:map(x+1,y)=blah
+				map(x,y+1)=blah:map(x+1,y+1)=blah:x+2
+			Else
+				blah=blah*4+bloff+1+(col AND 3)*205
+				map(x,y)=blah:map(x+1,y)=blah+1
+				map(x,y+1)=blah+2:map(x+1,y+1)=blah+3:x+2
+			EndIf
+		Else
+			If blah=-1
+				map(x,y)=bloff:x+1
+			Else
+				map(x,y)=blah+bloff+41*4+1+(col AND 3)*205:x+1
+			EndIf
+	 EndIf
+	Next
+End Statement
+
+numchars=(?fontf-?font)/32
+
+For i=0 To 5
+	dofence{0,32+i*5,16,i}
+Next
+
+For i=0 To 9
+	segaprint{"A BCDE 4 .!?:_",0,i*2.5+1,i}
+Next
+
+setup:
+	;
+	##[$C482] ?mypalette,#cram+0,16
+	##[$C482] ?carpalette,#cram+64,32
+	##[$C482] &map(0,0),#vram,4096
+	##[$C482] ?blocks,#vram+8192,64+16
+
+	##[$C489] ?font,#vram+8192,?fontf-?font
+	##[$C489] ?fence,#vram+8192+numchars*32,?fencef-?fence
+
+	!setmem{#wvram+$3c000003,#0}						;horizontal
+	!setmem{#wvram+$3c020003,#0}
+
+	!setmem{#wsram+$00000000,#0}						;vertical
+	!setmem{#wsram+$00020000,#-32*8}
+
+	!setreg{2,0}		 ;map location=0*8192
+	!setreg{4,0}		 ;map location=0*8192
+	!setreg{5,$78}	 ;sprites location=$f000
+	!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+	!setreg{12,$89}	;32 cell mode shadows no interlace
+	!setreg{13,$3f}	;hs=$fc00
+	!setreg{16,1+16}		;64x64 sized map
+	!setreg{3,$38}	 ;windowpos= $e000
+	!setreg{17,$0};$8a}
+	!setreg{18,$0};$ff}
+	!setreg{7,0}
+
+	vv=1
+
+
+CNIF 1=0
+	x1=10
+	xfac=t ASR 9
+	For y=240 To 0 Step -1
+		If t<y
+			Point x1,240-y,1
+			x1=x1+xfac
+			dif =t+t-y
+			If dif>0
+				fac=240-dif
+				x=10+fac *xfac
+				Point x,240-y,1
+			EndIf
+		EndIf
+	Next
+CEND
+
+Statement squiggle{frame.w}
+	MOVE d0,d2
+	MOVEQ#0,d0:LEA sincos(pc),a0:MOVE.l #cp,a1:MOVE.l#vd,a2
+	MOVEQ #0,d3
+	MOVE d2,d3:LSL.l #8,d3:LSL.l #1,d3
+	MOVE #240,d4:SUB d2,d4:MULU d2,d4:LSL.l #8,d4
+	MOVEQ #0,d6
+
+nxlin
+	wl1:MOVE.w $c00008,d1:LSR#8,d1:CMP d1,d0:BPL wl1
+
+
+	BSR DoUpper
+	ADDQ #1,d0
+	wl2:MOVE.w $c00008,d1:LSR#8,d1:CMP d1,d0:BPL wl2
+	BSR DoLower
+
+
+
+	;
+;	MOVE d2,d1:ADD d0,d1:AND#1023,d1:ASL#2,d1:MOVE 0(a0,d1),d1
+;	ASR#8,d1:ASR#1,d1
+
+
+
+
+	;
+;	MOVE d0,d1:AND#15,d1:OR.w#$8700,d1:MOVE d1,$c00004
+	ADDQ#1,d0:CMP #240,d0:BNE nxlin:AsmExit
+
+.DoLower
+	CMP d2,d0
+		BLE half
+		ADD.l d3,d6
+		MOVE.l d6,d1:SWAP d1
+		MOVE.l d2,d5:ADD d5,d5:SUB d0,d5
+
+		CMP #0,d5
+		BLE whole
+		SUB d0,d5
+		BRA twice
+
+
+
+.DoUpper
+	MOVE #240,d7:SUB d2,d7
+
+	CMP d7,d0
+	BGE half
+;		MOVEQ #4,d1
+
+
+		SUB.l d3,d4
+		MOVE.l d4,d1:SWAP d1
+		MOVE #480,d5
+		SUB d2,d5:SUB d2,d5
+		SUB d0,d5
+
+
+		CMP #31*8,d5
+		BGE whole
+		SUB d0,d5
+
+
+twice:MOVEQ #0,d7
+			MOVE.l #wvram+$3c000003,(a1):MOVE d1,(a2)
+			MOVE.l #wvram+$3c020003,(a1):MOVE d7,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d5,(a2)
+			MOVE.l #wsram+$00020000,(a1):MOVE #0,(a2)
+			RTS
+
+whole:MOVEQ #0,d7
+			MOVE.l #wvram+$3c000003,(a1):MOVE d7,(a2)
+			MOVE.l #wvram+$3c020003,(a1):MOVE d7,(a2)
+			MOVE.l #wsram+$00000000,(a1):MOVE d7,(a2)
+			MOVE.l #wsram+$00020000,(a1):MOVE d7,(a2)
+			RTS
+
+	half
+		MOVEQ #0,d1:MOVE #32*8,d7
+
+		MOVE.l #wvram+$3c000003,(a1):MOVE d1,(a2)
+		MOVE.l #wvram+$3c020003,(a1):MOVE d1,(a2)
+		MOVE.l #wsram+$00000000,(a1):MOVE d7,(a2)
+		MOVE.l #wsram+$00020000,(a1):MOVE d7,(a2)
+		RTS
+
+End Statement
+
+Statement showjoy{value.w,map.l}
+	MOVE.l d1,a2:MOVEQ#7,d1
+nxbit2:
+	MOVE#256,(a2)+:BTST d1,d0:BEQ nobit2:MOVE#257,-2(a2):nobit2
+	DBRA d1,nxbit2:AsmExit
+End Statement
+
+Statement myjoy{port.w,map.l,code.b}
+	LEA $a10000,a0:SUBQ#4,d0:ASL#4,d0:OR#$c,d0
+	;
+	MOVE.b#$7f,11(a0):MOVE.b d0,5(a0):MOVE.b#$40,9(a0)
+	MOVE.b#$40,3(a0):MOVE.b 3(a0),d0
+	MOVE.b#$00,3(a0):MOVE.b 3(a0),d1
+	ROL#2,d1:AND#$3f,d0:AND#$c0,d1:OR d1,d0:NOT d0
+	;
+showjoy:
+	MOVEQ#7,d1
+nxbit:
+	MOVE#256,(a2)+:BTST d1,d0:BEQ nobit:MOVE#257,-2(a2):nobit
+	DBRA d1,nxbit:AsmExit
+End Statement
+
+.poka
+	nj.w=##[$C48E]
+	vbwait2:TST $ff0000:BEQ vbwait2:MOVE#0,$ff0000
+	##[$C482] &map(0,0),#vram,4096
+
+;	showjoy{SegaJoy(0),&map(0,0)}
+;	showjoy{SegaJoy(1),&map(0,1)}
+
+	showjoy{##[$C484](4),&map(0,2)}
+	showjoy{##[$C484](5),&map(0,3)}
+	showjoy{##[$C484](6),&map(0,4)}
+	showjoy{##[$C484](7),&map(0,5)}
+
+
+;	myjoy{1,&map(20,0),0}
+;	x=0:y=1
+;	For i=0 To 127
+;		myjoy{2,&map(x,y),i+67}:x+8:If x=40 Then x=0:y+1
+;	Next
+
+	Goto poka
+
+	cc3:MOVE $c00004,d0:BTST #3,d0:BNE cc3
+	squiggle{count}:count+3
+	If count>300 Then count=0
+
+	Goto poka
+
+blocks:
+	Dc.l 0,0,0,0,0,0,0,0
+;	Dc.l -1,$f0eee00f,$f0eee00f,$f0eee00f,$f000000f,$f000000f,$f000000f,-1
+	Dc.l -1,-1,-1,-1,-1,-1,-1,-1
+	Dc.l $eeeeeeee,$eeeeeeee,$eeeeeeee,$eeeeeeee,$eeeeeeee,$eeeeeeee,$eeeeeeee,$eeeeeeee
+	Dc.l $44444444,$40000004,$40000004,$40444404,$40000004,$40444404,$40000004,$44444444
+
+mypalette:
+	IncBin "palette.dat"
+
+carpalette:
+	IncBin "car.palette"
+
+sincos
+	IncBin "sincos.bin"
+
+font:
+	Dc.l 0,0,0,0,0,0,0,0
+	IncBin "font.bin"
+fontf:
+
+fence:
+	IncBin "fence.bin"
+fencef

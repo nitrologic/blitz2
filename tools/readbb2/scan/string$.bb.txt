@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/String$.bb
-+Print String$("Hi!",3): ; Will print Hi!Hi!Hi!
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/String$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/String$.bb
+Print String$("Hi!",3): ; Will print Hi!Hi!Hi!

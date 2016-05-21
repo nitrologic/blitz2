@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot7.bb
-+;To explore mathematical pictures it is handy to write
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot7.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot7.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot7.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot7.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot7.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot7.bb
+;To explore mathematical pictures it is handy to write
 ;a tiny utility with zooms and saves and anything else you fancy.
 
 ;HOLD DOWN RIGHT MOUSE BUTTON TO INTERRUPT PLOTTING

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/battmem.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/resources/battmem.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/battmem.bb2
+;
 ; $VER: battmem.bb2 40.0 (01.03.94)
 ;
 

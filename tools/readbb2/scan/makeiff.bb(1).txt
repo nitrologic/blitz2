@@ -1,0 +1,232 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/makeiff.bb
+;
+; create sega iff tracks from .pax files
+;
+
+Use ##[$8526] 0
+
+dt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100
+t$="start"
+#maxpost=300:#maxedge=200:#maxngon=40
+#dp=48:curb.b=0
+
+g$="GFX:"; m$=??!?
+
+DEFTYPE .w i,j
+
+#MaxNam=24
+Dim nam.s(#MaxNam),com.s(#MaxNam)
+
+
+NEWTYPE.frend
+	lti.w:ltj.w:rti.w:rtj
+End NEWTYPE
+
+CNIF 1=0
+NEWTYPE .frend
+	lti.q:ltj
+	rti.q:rtj
+	lsx.w:lsy
+	rsx.w:rsy
+	lpost.w:rpost.w
+
+	lb.q:mb:rb
+	lh	:mh:rh
+
+	go.w
+End NEWTYPE
+CEND
+
+NEWTYPE .grunt
+	i.q:j:k:sx.w:sy
+End NEWTYPE
+Dim gr.grunt(14):*tgr.grunt=gr(0)
+
+Dim con.frend(200):SetConDt &con(0):condt.l=&con(0)
+
+Dim map.w(63,63),changed.b(63,63):SetMaptr &map(0,0):maptr.l=&map(0,0)
+Dim import.w(63,63)
+Dim lsx(8),lsy(8),lsz(8)
+
+NEWTYPE .rend :x.w:y.w	:End NEWTYPE
+Dim tri.rend(10):ad.l=&tri(0):ae.l=&tri(1)
+
+
+NEWTYPE.ij
+	i.q:j:k:l
+End NEWTYPE
+bez.ij\i=0:*bez.ij=bez:io.l=&bez
+SetIO io
+
+
+;bigx=1024:bigy=512
+bigx=768*2:bigy=384*2
+lmaxlen 0,bigx,bigy,8
+BitPlanesBitMap 0,3,128
+BitMapOutput 0
+Use lmaxlen 0
+
+#map=Off:#exo=Off:#exo24=On:#freq=Off:#pmap=Off
+Include "LoadINC.bb"
+
+m$="maps/"
+t$="track25"
+
+GetExo24{m$+t$}
+
+
+Use lmaxlen 0
+
+
+
+Use lmaxlen 0
+
+CNIF Off
+
+;	LoadBitMap 0,"maps:f1.bff"
+	LoadBitMap 0,"ram:blah.iff"
+
+	VWait 30:BLITZ
+
+	Gosub OpenUp
+
+	Gosub DoCurve
+
+	MouseWait
+	VWait 10:AMIGA
+	SaveBitmap 0,"ram:blah.iff",0
+
+	End
+CELSE
+	VWait 30:BLITZ
+	Gosub OpenUp
+	Gosub Main
+	Gosub DoCurve
+	VWait 10
+
+
+	AMIGA
+	SaveBitmap 0,"ram:blah.iff",0
+	VWait 30:End
+
+
+CEND
+
+.OpenUp
+BLITZ
+InitCopList 0,44,256,$10008,0,256,0
+DisplayBitMap 0,0
+CreateDisplay 0
+Mouse On:MouseArea 0,0,bigx-320,bigy-256
+DecodePalette 0,256
+CNIF 1=0
+For cnt.w=0 To 127
+	tens=cnt/127*255
+	AGAGreen 0,cnt,tens,tens,tens
+	AGAGreen 0,cnt+128,255,tens ASR 1,tens
+Next
+CEND
+
+;For cnt.w=0 To 63
+;	tens=cnt/64*255
+;	AGAPalRGB 0,cnt+10,tens,tens,tens
+;	AGAPalRGB 0,cnt+138,255,tens ASR 1,tens
+;Next
+		##[$CE18] 0,10,73,	 0,64,0,0,240,0						 ;greens = 0..12
+		##[$CE18] 0,138,202, 64,32,0,192,128,64				 ;browns = 13..25
+		##[$CE18] 0,224,227, 64,64,64,192,192,192		 ;greys = 26..28
+		##[$CE18] 0,240,243, 64,0,0,192,0,0					 ;reds = 29..31
+
+DisplayPalette 0,0
+
+SetInt 5
+	DisplayBitMap 0,0,MouseX,MouseY
+End SetInt
+Return
+
+.Main
+	jstp=1/16/1.5
+	myscal=2/##[$80BA]
+	Colour 127
+	Locate 0,0:Print MapX(0,32)
+
+		For delj=32 To -32 Step -jstp
+			x=MapX(0,delj)*1.5
+			ii=0.5:istp=jstp
+			miny=Int(MapY(ii,ii+delj)*1.5)
+			If miny<0 Then miny=0
+
+
+			##[$80BB]
+				jj=ii+delj
+				y=MapY(ii,jj)*1.5
+				If y<(miny-34) Then ii+1:istp=0.5
+				If y<miny Then ii+istp
+
+
+				If Int(y-1)=miny
+					fac1=Cos((QHite(ii-0.8,jj)-QHite(ii+0.8,jj))*0.12)*myscal
+					fac2=Cos((QHite(ii-0.4,jj)-QHite(ii+0.4,jj))*0.06) *myscal
+;					fac3=ATan((QHite(ii-0.2,jj)-QHite(ii+0.2,jj))*0.4)
+;					col=QLimit(64-(fac1*30+fac2*25),1,127)
+					col=QLimit(32-fac1*40-fac2*28,0,63.99)
+					Point x,miny,col+10
+
+
+					miny+1
+				EndIf
+
+				If (y-1)>miny Then ii-istp:istp ASR 1:Else istp=jstp
+
+				ii+istp
+
+			##[$80BC] (miny>bigy) OR (ii>63.5) OR (jj>63.5)
+			If Joyb(0)<>0 Then End
+		Next
+Return
+
+Solve	;solve's a 2x2 system of equations..
+	det= mata1*matb2-mata2*matb1
+	lam=(matc1*matb2-matc2*matb1)/det
+	mu =(matc2*mata1-matc1*mata2)/det
+Return
+
+.DoCurve
+
+	Use lmaxlen 3
+	For dtp.q=2 To pts3+0.2 Step 0.02
+		FindLo dtp.q
+
+;		Line MapX(bez\i,bez\j),MapY(bez\i,bez\j),MapX(bez\k,bez\l),MapY(bez\k,bez\l),1
+		tri(0)\x=MapX(bez\i,bez\j)*1.5,MapY(bez\i,bez\j)*1.5
+		tri(2)\x=MapX(bez\k,bez\l)*1.5,MapY(bez\k,bez\l)*1.5
+
+		If dtp>2 Then Polyf 3,ad,1:Polyf 3,ae,1
+
+		tri(1)\x=tri(0)\x,tri(0)\y
+		tri(3)\x=tri(2)\x,tri(2)\y
+
+	Next
+Return
+
+
+
+
+.DoStartLine
+	Use lmaxlen 3
+	dtf=pts3+0.5
+	FindLo dtf
+	tri(0)\x=MapX(bez\i,bez\j),MapY(bez\i,bez\j)
+	tri(1)\x=MapX(bez\k,bez\l),MapY(bez\k,bez\l)
+
+	dtf+0.02
+	FindLo dtf
+	tri(3)\x=MapX(bez\i,bez\j),MapY(bez\i,bez\j)
+	tri(2)\x=MapX(bez\k,bez\l),MapY(bez\k,bez\l)
+
+	Polyf 4,ad.l,8
+
+;	Line xx1,yy1,xx2,yy2,8
+;	Line xx1,yy1,xx2,yy2,8
+Return
+

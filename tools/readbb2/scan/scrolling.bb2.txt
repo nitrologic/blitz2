@@ -1,13 +1,11 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/scrolling.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/scrolling.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/scrolling.bb2
+;
 ;This dinky little example shows a technique by which
 ;map based horizontal scrolling may be achieved.
 ;
 ;Once running, a joystick in joyport 1 controls scrolling.
 ;hit joystick button to quit...
 ;
-
-##[$80B4]:End:End ##[$80B4]
 
 lmaxlen 0,256,12,1
 LoadBitMap 0,"data/map"
@@ -22,8 +20,6 @@ Next:Next
 LoadShape 0,"data/block",0
 
 BLITZ
-
-Mouse On
 
 w=704
 
@@ -49,9 +45,9 @@ Next
 ;
 Next
 
-Slice 0,44,320,192,$fff8,3,8,32,w,w
-
-Use SetCycle 0
+InitCopList 0,44,192,$13,8,8,0
+DisplayPalette 0,0
+CreateDisplay 0
 
 sx=0	;scroll x
 mx=0	;map x
@@ -63,60 +59,54 @@ f=.25	;friction
 
 g=15:ga=-.5
 
-While Joyb(1)=0
-;
-VWait
-;
-Green 4,0,g,0:g+ga:If g>=16 OR g<8 Then g-ga:ga=-ga
-;
-Show 0,sx,sy
-;
-ox2=x2
-oy2=y2
-oxs=xs
-;
-x2=Int(mx LSR 4)
-y2=Int(my LSR 4)
-;
-Select Joyx(1)
-Case -1
+While Joyb(1)=0 AND RawStatus($45)=0
 	;
-	xs-a:If xs<-16 Then xs=-16
+	VWait
 	;
-Case 1
+	StopCycle 0,4,0,g,0:g+ga:If g>=16 OR g<8 Then g-ga:ga=-ga
 	;
-	xs+a:If xs>16 Then xs=16
+	DisplayBitMap 0,0,sx,sy
+	DisplayPalette 0,0
 	;
-Default
+	ox2=x2
+	oy2=y2
+	oxs=xs
+	;
+	x2=Int(mx LSR 4)
+	y2=Int(my LSR 4)
+	;
+	If Joyx(1)=-1 OR RawStatus($4f) Then xs-a:If xs<-16 Then xs=-16
+	If Joyx(1)=1 OR RawStatus($4e) Then xs+a:If xs>16 Then xs=16
+	If Joyy(1) OR RawStatus($40) Then xs=0
+	;
 	If xs>0 Then xs-f:If xs<0 Then xs=0
 	If xs<0 Then xs+f:If xs>0 Then xs=0
-End Select
-
-xs=QLimit(xs+MouseXSpeed ASR 3,-16,16)
-
-If Joyy(1) Then xs=0
-;
-;
-If x2<>ox2 OR Sgn(oxs)<>Sgn(xs)
-	If xs>0
-		sx2=sx AND $fff0
-		For y=0 To 11
-		b{m(x2+21 AND 255,y),sx2+336,y LSL 4}
-		b{m(x2+21 AND 255,y),sx2-16,y LSL 4}
-		Next
+	;
+	If Joyy(1) Then xs=0
+	;
+	;
+	If x2<>ox2 OR Sgn(oxs)<>Sgn(xs)
+		If xs>0
+			sx2=sx AND $fff0
+			For y=0 To 11
+			b{m(x2+21 AND 255,y),sx2+336,y LSL 4}
+			b{m(x2+21 AND 255,y),sx2-16,y LSL 4}
+			Next
+		EndIf
+		If xs<0
+			sx2=sx AND $fff0
+			For y=0 To 11
+			b{m(x2-1 AND 255,y),sx2-16,y LSL 4}
+			b{m(x2-1 AND 255,y),sx2+336,y LSL 4}
+			Next
+		EndIf
 	EndIf
-	If xs<0
-		sx2=sx AND $fff0
-		For y=0 To 11
-		b{m(x2-1 AND 255,y),sx2-16,y LSL 4}
-		b{m(x2-1 AND 255,y),sx2+336,y LSL 4}
-		Next
-	EndIf
-EndIf
-;
-mx=QWrap(mx+xs,0,4096)
-sx=QWrap(sx+xs,16,368)
-;
-;Poke.w $dff180,8
-;
+	;
+	mx=QWrap(mx+xs,0,4096)
+	sx=QWrap(sx+xs,16,368)
+	;
+	;Poke.w $dff180,8
+	;
 Wend
+
+End

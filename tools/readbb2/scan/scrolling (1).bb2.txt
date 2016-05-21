@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/scrolling (1).bb2
-+;
+;
 ;This dinky little example shows a technique by which
 ;map based horizontal scrolling may be achieved.
 ;

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/Bombs208.bb2
-+;
+;
 ;
 ; Bombs v 0208
 ;

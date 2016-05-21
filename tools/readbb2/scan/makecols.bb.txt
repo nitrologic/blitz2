@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKECOLS.BB
-+
+
 MaxLen p$=192
 MaxLen n$=192
 allocst 0,0,0,640,256,5,$8000,"",0,1

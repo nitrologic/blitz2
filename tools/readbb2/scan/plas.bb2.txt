@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/plas.BB2
-+xm.w=320:ym.w=256 :im=1
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/Fuzzy/plas.BB2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Fuzzy/plas.BB2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/Fuzzy/plas.BB2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/plas.BB2
+xm.w=320:ym.w=256 :im=1
 cl=5:mnc=16:mxc=23
 
 allocst 0,0,0,xm,ym,cl,$00,"",0,1

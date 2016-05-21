@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/AMOS_Banks.bb2
-+; AMOS BANK MANAGEMENT
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/AMOS_Banks.bb2
+; AMOS BANK MANAGEMENT
 ; --------------------
 
 *First_Bank.l=0

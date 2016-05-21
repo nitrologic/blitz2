@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Andre/PPDecrunch_Demo.bb
-+If NumPars<>2
+If NumPars<>2
 	NPrint "Usage: PPDec <Source> <Destination>"
 	End
 EndIf

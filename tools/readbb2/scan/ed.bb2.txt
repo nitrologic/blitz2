@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/3d/ed.bb2
-+
+
 ##[$D501]
 
 DEFTYPE.l ev,layerinfo,layer,wadd,sizeofw,sizeofg,sizeofb,wof,raw

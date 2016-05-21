@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RawStatus.bb
-+; ; rawkey program example; BLITZ BitMap 0,320,DispHeight,3 BitMapOutput 0Slice 0,44,3Show 0BlitzKeys OnNPrint "Click Mouse to exit..." While Joyb(0)=0  Locate 0,1 Print "F1 Key is Currently:" If RawStatus(80)	Print "Down" Else	Print "Up " EndIf WendEnd 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/RawStatus.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RawStatus.bb
+; ; rawkey program example; BLITZ BitMap 0,320,DispHeight,3 BitMapOutput 0Slice 0,44,3Show 0BlitzKeys OnNPrint "Click Mouse to exit..." While Joyb(0)=0  Locate 0,1 Print "F1 Key is Currently:" If RawStatus(80)	Print "Down" Else	Print "Up " EndIf WendEnd 

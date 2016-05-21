@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Activate.bb
-+; ; activate windows example; Screen 0,2Window 0,0,0,320,100,0,"Window 1",0,1 Window 1,0,100,320,100,0,"Window 2",0,1 Activate 0Print "Hello" Activate 1Print "Good Bye"MouseWait End 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Activate.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Activate.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Activate.bb
+; ; activate windows example; Screen 0,2Window 0,0,0,320,100,0,"Window 1",0,1 Window 1,0,100,320,100,0,"Window 2",0,1 Activate 0Print "Hello" Activate 1Print "Good Bye"MouseWait End 

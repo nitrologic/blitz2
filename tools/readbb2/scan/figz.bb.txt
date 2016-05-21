@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/figz/figz.bb
-+;FigZ rendering programme
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/FigZ/figz.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/FigZ/figz.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/FigZ/figz.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/FigZ/figz.bb
+;FigZ rendering programme
 ;(c) Mike Cooper 1995
 
 DEFTYPE.q
@@ -12,7 +12,7 @@ DEFTYPE.pt impact,max
 #edonly=0
 
 ##[$80B4]:End:End ##[$80B4]
-MaxLen path$=160:path$="FigZ:":MaxLen path2$=160:path2$=""
+MaxLen path$=160:path$="":MaxLen path2$=160:path2$=""
 MaxLen fnmobj$=64
 MaxLen fnmbm2$=64
 MaxLen fnmshp$=64
@@ -83,7 +83,7 @@ localstat 0,0,0,256,256,$800,"",3,1;editor
 CNIF #edonly=0
 For i=0 To 15:spec(i)=0:diff(i)=1:Next
 For i=0 To 31:For j=0 To 2:buff(i*3+j)=1&15:Next:Next
-If WriteMem(0,"FigZ:def.col")
+If WriteMem(0,"def.col")
  ##[$BE14] 0,&buff(0),482
  ##[$BE14] 0,&spec(0),64
  ##[$BE14] 0,&diff(0),64

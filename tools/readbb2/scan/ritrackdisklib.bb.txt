@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RITrackDiskLib.bb
-+;#ritrackdisklib=91
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RITrackDiskLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RITrackDiskLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RITrackDiskLib.bb
+;#ritrackdisklib=91
 
 !libheader {#ritrackdisklib,init,0,finit,0}
 

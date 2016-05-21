@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/hap/husker2.bb2
-+;SM
+;SM
 ;	Skidmarks demo version release	 27/01/94, late..
 ;
 

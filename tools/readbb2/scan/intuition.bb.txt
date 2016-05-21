@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/intuition.bb
-+;********************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/intuition.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/intuition.bb
+;********************************************************
 ;*																											*
 ;*			 BlitzII Intuition.library Include file				 *
 ;*																											*

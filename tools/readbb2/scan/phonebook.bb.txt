@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PhoneBook/phonebook.bb
-+Include "arexxres.bb"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/PhoneBook/phonebook.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/PhoneBook/phonebook.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/PhoneBook/phonebook.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PhoneBook/phonebook.bb
+Include "arexxres.bb"
 
 ;****************************** functions and statements *******************************************
 Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}

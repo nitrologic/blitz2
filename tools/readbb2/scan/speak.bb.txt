@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Speak.bb
-+NPrint "Type something and hit return..." NPrint "(just return to exit)"Repeat a$=Edit$(80) Speak a$Until a$="" 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Speak.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Speak.bb
+NPrint "Type something and hit return..." NPrint "(just return to exit)"Repeat a$=Edit$(80) Speak a$Until a$="" 

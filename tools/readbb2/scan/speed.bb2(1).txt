@@ -1,0 +1,845 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/speed/speed.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/speed/speed.bb2
+##[$80C3]:##[$80CC]:##[$80CB]
+##[$80B4]:End:End ##[$80B4]
+;
+If WriteMem(0,"speed.readme")
+	freest 0:##[$FFB5]
+	localstat 0,0,0,640,200,$1000,"Speed",1,2
+	FileInput 0:y=-4
+	While NOT DosBuffLen(0)
+		t$=Edit$(80)
+		y+8:WLocate 4,y
+		Print t$
+		If y>152 OR DosBuffLen(0)
+			WLocate 4,y+16
+			Print "Click mouse for more..."
+			##[$80BB]
+			##[$80BC] WaitEvent=8 AND MButtons=1
+			InnerCls:y=-4
+		EndIf
+	Wend
+	Free localstat 0
+EndIf
+;
+;SPEED! A CHOICE CARD GAME!
+;
+NEWTYPE.obj
+;
+;these must be initialized....
+;
+n.w		 ;number of card 1-14 (A-K,blank)
+x.q		 ;x axis of card
+y.q		 ;y axis of card
+xs.q		;x speed of card
+ys.q		;y speed of card
+nm.w		;number of moves to make before finish.
+a.w		 ;<>0 = animate to this card
+dx.w		;destination x,
+dy.w		;and y!
+;
+;not these
+;
+c.w		 ;counter for anim
+;
+End NEWTYPE
+
+NEWTYPE.back
+n.w
+x.w
+y.w
+m.w
+d.w
+End NEWTYPE
+
+nt=892/4
+
+Dim lon$(12),lot(12),lol(12)
+;
+Dim x(nt),y(nt) ;for title effect
+;
+Dim pack(52)		;all cards in pack
+;
+Dim nhand(1)		;number of cards in hand!
+Dim hand(5,1)	 ;cards in hand	-	 0 means no card here!
+;
+Dim npile(1)		;number of cards in pile
+Dim pile(52,1)	;cards in pile
+;
+Dim ndown(1)		;number of face down cards
+Dim down(52,1)	;cards face down
+Dim downx(52,1) ;x of down card
+Dim downy(52,1) ;y of down card
+;
+Dim nup(1)			;number of up cards
+Dim up(52,1)		;actual up cards
+;
+Dim cl(1)			 ;cards left per player.
+;
+Dim ##[$80B3] obj.obj(64),##[$80B3] back.back(64)		;64 cards ?
+##[$80CA] obj()
+
+lon$(1)="TOP":lot(1)=100:lol(1)=8
+
+LoadShape 0,"hand"
+Handle 0,4,0:GetaSprite 0,0:Free MidHandle 0
+casestrcomp 0,"hand",16
+;
+LoadShapes 0,"cards.rotted"
+casestrcomp 0,"pal"
+;
+If OpenFile(0,"title.xys")
+		FileInput 0
+		For k=1 To nt
+		x(k)=Cvi(Inkey$(2)):y(k)=Cvi(Inkey$(2))
+		Next
+		CloseFile 0:DefaultInput
+Else
+		End
+EndIf
+;
+fc=NTSC*10+50	 ;frames per second
+;
+VWait fc*5
+;
+BLITZ
+
+longmult 0,64
+longmult 1,64
+;Buffer 0,4096
+;Buffer 1,4096
+
+Gosub gamebitmaps
+BlitzKeys On:BitMapInput
+
+.main
+Gosub intro:If stf Then Goto start
+Gosub loscores:If stf Then Goto start
+Goto main
+
+.start
+Gosub getlevel
+Gosub table
+Gosub animon
+Gosub deal
+
+cd=skill+skill
+
+.game	 ;this is THE main game loop!
+;
+VWait
+;
+Gosub human
+Gosub computer
+Gosub lockout
+If cl(1)=0 Then Goto win
+If cl(0)=0 Then Goto lose
+;
+Goto game
+
+.win		;player has won the game!
+lot=ti.w:ti=-1
+VWait fc*3:ClrInt 5:VWait
+Locate 6,18.5:Print "***** CONGRATULATIONS!! *****"
+Locate 14,20.5:Print "YOU HAVE WON!"
+For k=1 To fc*5
+VWait
+If Joyb(0) Then ##[$80BE] For:Goto popped
+Next
+popped
+For fl=1 To 12
+If lot<lot(fl) OR lot(fl)=0
+		;insert name before here!
+		##[$80BE] For
+		;
+		For k=11 To fl Step -1
+		lon$(k+1)=lon$(k)
+		lot(k+1)=lot(k)
+		lol(k+1)=lol(k)
+		Next
+		;
+		lon$(fl)="":lol(fl)=sl:lot(fl)=lot
+		;
+		lsf=0:Gosub loscores2:ClrInt 5:Use lmaxlen 2
+		;
+		Locate 1,26.5
+		Print "New Low Score!	Please Enter you name!"
+		Locate 4,fl+8
+		lon$(fl)=Edit$(12)
+		;
+		Goto main
+EndIf
+Next
+Goto main
+
+.lose	 ;player has lost game!
+ti=-1
+VWait fc*3:ClrInt 5:VWait
+Locate 10,6.5:Print "***** OH DEAR!! *****"
+Locate 10,8.5:Print "THE COMPUTER HAS WON!"
+For k=1 To fc*5
+VWait
+If Joyb(0) Then ##[$80BE] For:Goto main
+Next
+Goto main
+
+;****************** SUBROUTINES *****************
+
+.lockout
+If lo Then Return	;no computer lockout
+up1=up(nup(0),0)
+up2=up(nup(1),1)
+For k=1 To 5
+j=hand(k,1)
+If j
+		cup2=QWrap(j+1,1,14)
+		cup1=QWrap(j-1,1,14)
+		If cup1=up1 OR cup2=up1 ;can throw onto left hand pile!
+				##[$80BE] For:Return
+		EndIf
+		If cup1=up2 OR cup2=up2 ;can throw onto right hand pile!
+				##[$80BE] For:Return
+		EndIf
+Else
+		If ndown(1) Then ##[$80BE] For:Return
+EndIf
+Next
+;
+;LOCKOUT!
+;
+Gosub fliptwo
+;
+Return
+
+.computer
+;in which the computer does something really clever!
+;
+lo=-1
+If cd>0 Then cd-1:Return
+cd=Rnd(skill)+skill
+;
+up1=up(nup(0),0)		;left hand pile!
+up2=up(nup(1),1)		;right hand pile!
+For k=1 To 5
+j=hand(k,0)
+If j
+		cup2=QWrap(j+1,1,14)
+		cup1=QWrap(j-1,1,14)
+		If cup1=up1 OR cup2=up1 ;can throw onto left hand pile!
+				p=0:##[$80BE] For:Goto compput
+		EndIf
+		If cup1=up2 OR cup2=up2 ;can throw onto right hand pile!
+				p=1:##[$80BE] For:Goto compput
+		EndIf
+EndIf
+Next
+;
+;No cards can be thrown out! - can we pick up?
+;
+tryget
+If nhand(0)<5
+		If ndown(0)
+				cd LSR 1:p=0:Goto picknew
+		EndIf
+EndIf
+;
+lo=0
+;
+Return
+
+.compput
+;
+pp=0
+cn2=cn:ch2=ch
+cn=k:ch=j
+Gosub putok
+cn=cn2:ch=ch2
+;
+If Rnd>skill2
+		If nhand(0)<5
+				If ndown(0)>0
+						p=0:Goto picknew
+				EndIf
+		EndIf
+EndIf
+Return
+
+.human
+;UnBuffer db
+If ch	 ;card held?
+		mx=MouseX:my=MouseY
+		If mx<16 Then mx=16 Else If mx>304 Then mx=304
+		If my<16 Then my=16 Else If my>208 Then my=208
+		QBlit db,ch,mx,my
+EndIf
+If Joyb(0)=2 Then End
+If Joyb(0)>0
+		If lb
+				;mouse click!
+				If MouseY>=192 AND MouseY<224
+						cn=Int((MouseX-40)/48)+1
+						If cn>0 AND cn<6 Then ch=hand(cn,1) Else ch=0
+				Else
+						If ch
+								If MouseY>=96-16 AND MouseY<128+16 ;click on dest card?
+										pp=1
+										If MouseX>=124-12 AND MouseX<160
+												p=0:Gosub tryput
+										Else
+												If MouseX>160 AND MouseX<196+12
+														p=1:Gosub tryput
+												EndIf
+										EndIf
+								Else
+										ch=0
+								EndIf
+						EndIf
+				EndIf
+				If MouseY>=144 AND MouseY<176 AND nhand(1)<5
+						nd=ndown(1)
+						If nd
+								dx=downx(nd,1)-12:dy=downy(nd,1)-16
+								If MouseX>=dx AND MouseX<dx+24
+										If MouseY>=dy AND MouseY<dy+32
+												;grab a card from pile!
+												p=1:Gosub picknew:ch=0
+										EndIf
+								EndIf
+						EndIf
+				EndIf
+				lb=0
+		EndIf
+Else
+		lb=-1
+EndIf
+;
+Return
+
+.tryput ;try to put a card there!
+;
+cup=up(nup(p),p)
+If ch=QWrap(cup+1,1,14) Then Goto putok
+If ch<>QWrap(cup-1,1,14)
+		ch=0:Return
+EndIf
+;
+.putok
+nup(p)+1:up(nup(p),p)=ch
+dy=112:dx=136:If p Then dx=184
+y=16:If pp Then y=208
+x=cn*48+16:Gosub homein
+Gosub addcard:If pp Then \n=ch Else \a=ch
+Gosub addblank
+hand(cn,pp)=0:nhand(pp)-1:cl(pp)-1
+ch=0
+Return
+
+.mycls
+For k=0 To 2
+Use lmaxlen k:BlockScroll
+Next
+Return
+
+.dispinit
+;
+DisplayOff
+;
+ClrInt 5
+Gosub mycls:FreeSlices:Gosub gamedisplay
+;
+DisplayOn
+;
+Return
+
+.loscores
+;
+lsf=-1:stf=-1
+;
+loscores2
+Gosub dispinit:Green 0,0,0,0
+;
+For y=0 To 7
+ColSplit 9,y+7,15,0,y
+Next
+;
+For y=0 To 7
+ColSplit 9,y+8,8,0,y+56
+Next
+ColSplit 9,15,15,15,64
+;
+Locate 12,0
+Print "SPEED LOW SCORES"
+;
+x=160:y=96
+;
+If lsf Then longdiv 14,x,y:Gosub animon
+;
+dy=32:For dx=16 To 304 Step 24
+If Joyb(0) AND lsf Then ##[$80BE] For:Return
+Gosub locard:Next
+;
+dx=304:For dy=64 To 176 Step 32
+If Joyb(0) AND lsf Then ##[$80BE] For:Return
+Gosub locard:Next
+;
+dy=192:For dx=304 To 16 Step -24
+If Joyb(0) AND lsf Then ##[$80BE] For:Return
+Gosub locard:Next
+;
+dx=16:For dy=64 To 176 Step 32
+If Joyb(0) AND lsf Then ##[$80BE] For:Return
+Gosub locard:Next
+;
+If lsf Then Gosub adderase
+;
+If lsf Then VWait 40
+;
+Locate 4,7:Print "NAME					 TIME				LEVEL"
+;
+For k=1 To 12
+If lot(k)
+		Locate 4,k+8:Print lon$(k)
+		Format "0000"
+		Locate 19,k+8:Print lot(k)
+		Format "#"
+		Locate 33,k+8:Print lol(k)
+EndIf
+Next
+Format ""
+;
+If lsf
+		For k=1 To fc*10
+		VWait
+		If Joyb(0) Then ##[$80BE] For:Return
+		Next
+Else
+		Return
+EndIf
+;
+stf=0:Return
+
+.locard
+If lsf
+		VWait 4:Gosub homein:Goto addcard2
+Else
+		longdiv 14,dx,dy:Return
+EndIf
+
+.getlevel	 ;find out desired skill level
+;
+Gosub dispinit:Green 0,0,0,0
+;
+For y=0 To 7
+ColSplit 9,y+8,0,y+8,y+32
+Next
+ColSplit 9,15,15,15,40
+;
+Locate 8,4
+Print "PLEASE SELECT SKILL LEVEL"
+;
+For k=1 To 8
+longdiv k,k*36-2,112
+Next
+;
+Locate 2,17:Print "HARD"
+Locate 34,17:Print "EASY"
+;
+Gosub animon
+;
+sl=0
+##[$80BB]
+		VWait
+		If Joyb(0)
+				For k=1 To 8
+				x=k*36-2-12:y=112-16
+				If MouseX>=x AND MouseX<x+24
+						If MouseY>=y AND MouseY<y+32
+								sl=k:##[$80BE] For:Goto undo
+						EndIf
+				EndIf
+				Next
+		EndIf
+		undo
+##[$80BC] sl
+;
+x=sl*36-2:y=112:dx=x:dy=y:Gosub homein
+Gosub addcard2
+\n=sl:\a=14:\c=-\c:\xs=0:\ys=0:\nm=10
+Gosub adderase
+;
+VWait 40
+skill=sl*10:skill2=sl/10+.1111
+Return
+
+.intro
+;
+stf=-1
+Gosub dispinit:Green 0,0,0,0
+For y=0 To 7
+ColSplit 9,15,y+7,0,y
+Next
+ColSplit 9,15,15,15,9
+For y=0 To 15
+ColSplit 0,y,y,y,y+60
+ColSplit 0,15-y,15-y,15-y,y+76
+Next
+ColSplit 0,0,0,0,96
+For y=0 To 15
+For j=0 To 7
+ColSplit 15,15,j,y,y*8+24+j
+Next
+Next
+;
+Locate 8,0
+Print "A BLITZ BASIC ][ PROGRAM"
+;
+VWait fc
+;
+x=160:y=208:c=1
+longdiv 14,x,y
+Gosub animon
+For k=1 To nt
+If Joyb(0)>0 Then ##[$80BE] For:Return
+VWait 3
+dx=x(k)+4:dy=y(k)+16:Gosub homein
+Gosub addcard2
+\xs LSL 1:\ys LSL 1:\nm LSR 1:\a=c:c=QWrap(c+1,1,14)
+If k=nt Then Gosub adderase
+Next
+;
+VWait 20
+For k=nt To 1 Step -1
+If Joyb(0)>0 Then ##[$80BE] For:Return
+VWait:Use lmaxlen 2
+BlitMode SolidMode:longdiv 14,x(k)+4,y(k)+16:BlitMode CookieMode
+Next
+;
+For k=1 To fc*10
+VWait
+If Joyb(0) Then ##[$80BE] For:Return
+Next
+;
+stf=0:Return
+
+.table
+;
+ClrInt 5:Gosub dispinit
+;
+For x=64 To 256 Step 48
+longdiv 0,x,16:longdiv 0,x,208
+Next
+;
+For x=88 To 232 Step 48
+longdiv 0,x,112
+Next
+;
+Locate 0,11.5:Print "LEVEL:"
+Locate 0,12.5:Print sl
+Locate 0,14.5:Print "TIME:"
+Return
+
+.animon
+;
+ClrInt 5
+;
+ti.w=-1
+;
+ClearList obj():ClearList back()
+;
+SetInt 5		;animation system!
+		;
+		ShowF db:db=1-db:UnQueue db
+		;
+		newmem back():Use lmaxlen 2
+		;
+		While globfree(back())
+				If back()\d
+						back()\d=0
+				Else
+						BlitMode back()\m
+						longdiv back()\n,back()\x,back()\y
+						freelast back()
+				EndIf
+		Wend
+		BlitMode CookieMode
+		If ti>=0
+				fc2-1:If fc2=0
+						fc2=fc:ti+1:Locate 0,15.5:Print ti
+				EndIf
+		EndIf
+		;
+		newmem obj():Use lmaxlen db
+		;
+		While globfree(obj())
+				If \nm>0
+						\x+\xs:\y+\ys
+						QBlit db,\n,\x,\y
+						If \a
+								If \c>0
+										\c-1
+										If \c=0
+												\c=2
+												If \a>0
+														\n+14:If \n>56 Then \n=\a:\a=-1
+												Else
+														If \n>14 Then \n-14 Else \a=0
+												EndIf
+										EndIf
+								Else
+										\c+1
+										If \c=0
+												\c=-2
+												If \a>0
+														\n+14:If \n>42 Then \n=\a:\a=-1
+												Else
+														If \n>14 Then \n-14 Else \a=0
+												EndIf
+										EndIf
+								EndIf
+						EndIf
+						\nm-1
+				Else
+						If AddLast(back())
+								back()\x=\dx
+								back()\y=\dy
+								back()\n=\n
+								back()\m=CookieMode
+						EndIf
+						freelast obj()
+				EndIf
+		Wend
+		;
+End SetInt
+;
+VWait
+;
+Return
+
+.shuffle
+;shuffle cards!
+;
+For j=0 To 3:For k=1 To 13
+pack(j*13+k)=k
+Next k,j
+;
+For k=1 To 52
+##[$80C9] pack(k),pack(Rnd(52)+1)
+Next
+;
+cat=1	 ;card at.
+;
+Return
+
+.deal
+;
+Gosub shuffle
+For p=0 To 1
+ndown(p)=0
+npile(p)=0
+nhand(p)=0
+nup(p)=0
+For k=1 To 5
+hand(k,p)=0
+Next k,p
+ch=0
+;
+x=160:y=208
+n=14:m=CookieMode:Gosub addback
+;
+p=1:Gosub dealplayer:Gosub dealpile
+;
+dx=160:dy=16:Gosub homein
+VWait 5
+Gosub addcard:Gosub addblank
+;
+VWait 50
+;
+p=0:Gosub dealplayer:Gosub dealpile:Gosub addblank
+;
+VWait 20
+;
+;pick up 5 each!
+;
+For p=0 To 1
+For k=1 To 5
+VWait 5:Gosub picknew
+Next
+Next
+;
+VWait 20:Gosub fliptwo
+;
+fc2=1:ti=0	 ;turn on clock!
+;
+Return
+
+.picknew		;pick up a new card from 'down'
+;
+For fs=1 To 5
+If hand(fs,p)=0 Then ##[$80BE] For:Goto found
+Next
+;
+found
+;
+dx=fs*48+16
+dy=16:If p Then dy=208
+x=downx(ndown(p),p):y=downy(ndown(p),p)
+Gosub homein:Gosub addcard
+If p Then \a=down(ndown(p),p)
+Gosub adderase
+nhand(p)+1:hand(fs,p)=down(ndown(p),p)
+ndown(p)-1
+If ndown(p)
+		x=downx(ndown(p),p)
+		y=downy(ndown(p),p)
+		n=14:m=CookieMode:Gosub addback
+EndIf
+Return
+
+.flipnew ;flip a new card from pile to up!
+;
+VWait 20
+;
+If npile(p)
+		flipnew2
+		x=88+p*144:dx=136+p*48
+		y=112:dy=112
+		Gosub homein:Gosub addcard
+		\a=pile(npile(p),p)
+		nup(p)+1:up(nup(p),p)=pile(npile(p),p)
+		npile(p)-1
+		If npile(p)=0	 ;all outa cards in pile?
+				Gosub addblank
+		EndIf
+		VWait 20
+Else
+		;
+		;all out of cards in pile!
+		;
+		y=112:x=136+p*48:dx=88+p*144:dy=y
+		Gosub homein:Gosub addcard
+		\n=up(nup(p),p):\a=14:\c=-\c
+		Gosub addblank
+		npile(p)=nup(p)
+		For zzt=1 To npile(p)
+		pile(zzt,p)=up(npile(p)-zzt+1,p)
+		Next:nup(p)=0
+		VWait 20
+		Goto flipnew2
+EndIf
+Return
+
+.fliptwo		;flip 2 cards at top of left area!
+;
+For p=0 To 1
+Gosub flipnew
+Next
+;
+Return
+
+.dealplayer: ;deal a hand to player at x,y
+;
+y=16:If p Then y=208
+If p
+		dy=y-48
+Else
+		dy=y+48
+EndIf
+x=160
+For k=1 To 20
+If p
+		dx=k LSL 3+32
+Else
+		dx=320-32-k LSL 3
+EndIf
+;
+Gosub homein
+;
+down(k,p)=pack(cat):cat+1
+downx(k,p)=dx:downy(k,p)=dy
+;
+VWait 3:Gosub addcard
+Next:ndown(p)=20:cl(p)=20
+;
+Return
+
+.dealpile
+;
+dy=112:dx=232:If p Then dx=88
+Gosub homein:VWait 8
+;
+For k=1 To 5
+VWait 3:Gosub addcard
+pile(k,p)=pack(cat):cat+1
+Next:npile(p)=5
+;
+Return
+
+.addblank
+Gosub adderase
+n=0:m=CookieMode:Goto addback
+
+.adderase
+n=14:m=EraseMode
+;
+.addback
+;
+If AddLast(back())
+		back()\x=x:back()\y=y:back()\n=n:back()\m=m
+		back()\d=1
+EndIf
+Return
+
+addcard2:VWait
+;
+.addcard
+If AddLast(obj())
+		\n=14:\nm=nm LSR 2
+		\x=x:\y=y:\xs=xs LSL 2
+		\ys=ys LSL 2
+		\dx=dx:\dy=dy
+		\a=0:\c=2
+EndIf
+Return
+
+.homein ;calculate xs,ys,nm for x,y to dx,dy
+;
+xs=Abs(dx-x):ys=Abs(dy-y)
+If xs>ys		;x bigger than y?
+		nm=xs:ys=(dy-y)/xs:xs=Sgn(dx-x)
+Else
+		nm=ys:xs=(dx-x)/ys:ys=Sgn(dy-y)
+EndIf
+Return
+
+.gamebitmaps
+;
+;Make some 16*16 numbers
+;
+;BitMap 0,320,8,1:BitMapOutput 0:Locate 0,0
+;Print "0123456789"
+;For x=0 To 9
+;GetaShape 57+x,x*8,0,8,8
+;Scale 57+x,2,2
+;Next
+;
+lmaxlen 0,320,224,3	;db foreground
+lmaxlen 1,320,224,3	;ditto
+;
+lmaxlen 2,320,224,3	;for background
+BitMapOutput 2
+;
+Return
+
+.gamedisplay
+;
+Slice 0,32,320,224,$fff2,6,8,32,320,320
+Use SetCycle 0:ShowF 0:ShowB 2
+;
+For k=1 To 7
+Green k+8,Blue(k),Palette(k),PalRGB(k)
+Next
+;
+MouseArea 0,0,320,224
+Mouse On
+Pointer 0,0
+;
+Return

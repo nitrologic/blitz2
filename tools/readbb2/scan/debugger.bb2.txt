@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/m/debugger.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/debugger.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/debugger.bb2
+;
 freest 0
 w=WBWidth
 Gosub opensmall

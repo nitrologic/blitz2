@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEROUTE.BB
-+
+
 k.f=##[$80BA]/180
 k2.f=360/16
 

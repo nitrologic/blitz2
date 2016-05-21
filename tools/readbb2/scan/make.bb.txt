@@ -1,40 +1,131 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/make.bb
-+
-For i=1 To 24
-	Read a$
-	b$="track"+Str$(i)
-	x$="copy data/"+a$+".map "+b$+".map"
-	##[$FE1F] x$,0,0 ;NPrint x$
-	x$="copy data/"+a$+".pax "+b$+".pax"
-	##[$FE1F] x$,0,0 ;NPrint x$
-Next
-MouseWait
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/make.bb
+;
+; converts contents/header/commands file into reference manual
+;
+; create poo-write format ifftext file
+;
+
+;style = $5500
+;Line	= $1
+;bold	= $2
+;ital	= $4
+;shad	= $5500,0400,0
+
+;FORM .... WORD
+
+;FONT .... 5500 000B 746F 7061 7A00
+;DOC	.... 0001 0000 002E 0000
+;PARA	.... 01680168 01680000 55000000 00000000
+
+;TEXT .... This is a bold ok
+;FSCC .... 000A 5502 0000 0000 000E 5500 0000 0000
+;TEXT .... This is italics ok
+;FSCC .... 0008 5504 0000 0000 000F 5500 0000 0000
+
+Function.s text{a$}
+	If (Len(a$) AND 1)=1 Then a$+Chr$(0)
+	Function Return "TEXT"+Mkl$(Len(a$))+a$
+End Function
+
+t$=Chr$(9) ;tab$
+
+co$="Command"+t$+"Description"
+
+l0$=String$(Chr$($ad),51)	;12 point separator
+l1$=String$(Chr$($ad),68)	;9 point separator
+
+f0$=Mkl$($5500000c)+"Triumvirate"+Chr$(0)
+f1$=Mkl$($6500000a)+"Triumvirate"+Chr$(0)
+f2$=Mkl$($75000009)+"Times"+Chr$(0)
+
+p0$=Mkl$($01680168)+Mkl$($01680000)+Mkl$($55020000)+Mkl$(0)
+p1$=Mkl$($01680168)+Mkl$($01680000)+Mkl$($65000000)+Mkl$(0)
+p2$=Mkl$($01680168)+Mkl$($01680000)+Mkl$($75020000)+Mkl$(0)
+p3$=Mkl$($01680168)+Mkl$($01680001)+Mkl$($75000000)+Mkl$(0)
+p4$=Mkl$($01680168)+Mkl$($01680000)+Mkl$($65020000)+Mkl$(0)
+
+p0$="PARA"+Mkl$(Len(p0$))+p0$
+p1$="PARA"+Mkl$(Len(p1$))+p1$
+p2$="PARA"+Mkl$(Len(p2$))+p2$
+p3$="PARA"+Mkl$(Len(p3$))+p3$
+p4$="PARA"+Mkl$(Len(p4$))+p4$
+
+Dim t$(10000),f$(10000)
+
+n=1
+
+z$="THIS IS A FUCKING TEST!"
+
+If ReadMem(0,"ram:blitzdoc")
+	FileOutput 0
+	;
+	Print "FORM",Mkl$(0),"WORD"
+	Print "FONT",Mkl$(Len(f0$)),f0$
+	Print "FONT",Mkl$(Len(f1$)),f1$
+	Print "FONT",Mkl$(Len(f2$)),f2$
+	;
+	If WriteMem(1,"contents2")
+		FileInput 1
+		;
+		Print p0$
+		##[$80BB]
+			a$=Edit$(2048);:Print text{a$}
+		##[$80BC] a$="HITME"
+		;
+		While NOT DosBuffLen(1)
+			##[$80BB]:a$=Edit$(2048):##[$80BC] a$<>""
+			Print p0$,text{l0$},text{a$},text{l0$}
+			Print p1$
+			##[$80BB]
+				a$=Edit$(2048)
+				If a$="Commands:"
+					Print p4$
+					Print text{co$}
+				Else
+					a$=Replace$(a$,"Blitz 2","Blitz")
+					a$=Replace$(a$,"Blitz2","Blitz")
+					Print text{a$}
+				EndIf
+			##[$80BC] a$="Commands:"
+			##[$80BB]:a$=Edit$(2048):##[$80BC] a$<>""
+			While a$<>""
+				f$=a$:Gosub dostatement
+				FileInput 1:a$=Edit$(2048)
+			Wend
+		Wend
+	EndIf
+	;
+	a.l=FileSeek(0)-8:Loc 0,4:Print Mkl$(a)
+	CloseFile 0
+Else
+	Print "CAN'T OPEN FILE":MouseWait
+EndIf
+
 End
 
-Data.s cross
-Data.s "format"
-Data.s blob
-Data.s power
-Data.s spot
-Data.s fold
-
-Data.s hook
-Data.s warble
-Data.s twirl
-Data.s jyro
-Data.s one
-Data.s twistie
-
-Data.s f1
-Data.s f2
-Data.s f8
-Data.s f9
-Data.s f5
-Data.s f3
-
-Data.s t11
-Data.s f4
-Data.s t13
-Data.s f14
-Data.s f7
-Data.s f6
+dostatement:
+	Print p2$,text{l1$}							;insert cross bar
+	If WriteMem(2,"help/"+f$)
+		FileInput 2
+		While NOT DosBuffLen(2)
+			a$=Edit$(2048)
+			If Left$(a$,8)="Syntax: "
+				g$=f$+t$+Mid$(a$,9)
+				Print text{g$}
+				h$=Mki$(Len(f$))+Mki$($7506)+Mkl$(0)+Mki$(Len(g$))+Mki$($7502)+Mkl$(0)
+				Print "FSCC"+Mkl$(Len(h$))+h$
+				Print p3$
+			EndIf
+			If a$="See Also:" Then ##[$80BE] While:Goto dun
+			If a$<>""
+				s=Instr(a$," ")-1:If s<1 Then s=Len(a$)
+				If Mid$(a$,s,1)<>":"
+					a$=Replace$(a$,"Blitz 2","Blitz")
+					a$=Replace$(a$,"Blitz2","Blitz")
+					Print text{t$+t$+t$+a$}
+				EndIf
+			EndIf
+		Wend
+		dun:CloseFile 2
+	EndIf
+	Return

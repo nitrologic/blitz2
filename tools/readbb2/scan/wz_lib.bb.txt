@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/libsource/wz_lib.bb
-+#banklib=129
+#banklib=129
 					 #PP_CODE		= 0		 ;Ptr to PPC code
 					 #PP_OFFSET	= 4		 ;Offset to PP_CODE
 					 #PP_FLAGS	 = 8		;flags (see below)

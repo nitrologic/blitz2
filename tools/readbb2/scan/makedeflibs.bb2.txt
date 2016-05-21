@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/makedeflibs.bb2
-+DEFTYPE.l
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/tools/makedeflibs.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/tools/makedeflibs.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/makedeflibs.bb2
+DEFTYPE.l
 ;
 ;program to create a 'blitz2:deflibs' file based on 'blitzlibs:#?/' libs
 ;

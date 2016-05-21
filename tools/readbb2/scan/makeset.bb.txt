@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/shit/makeset.bb
-+NEWTYPE .handling
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/nu/makeset.bb,/Users/simon/Google Drive/amiga/w/skid2/shit/makeset.bb
+NEWTYPE .handling
 	speed.w:accel.w:slide.w:steer.w
 	bounce.w:penalty.w:shadowx.w:shadowy.w
 	new.w

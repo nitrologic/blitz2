@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/tri/graf.bb
-+; Rogers Graph Creator for TriAnalyse	 --08/06/93
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/tri/graf.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/tri/graf.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/tri/graf.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/tri/graf.bb
+; Rogers Graph Creator for TriAnalyse	 --08/06/93
 ; This is the type of utility code that can save you time
 ; its heaps quicker than drawing everything in dpaint
 ; note it wont work if you dont have small.font

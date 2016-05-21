@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/harmonogram8.bb
-+##[$80C3]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/harmonogram8.bb
+##[$80C3]
 Dim s.l(2096),c.l(2096)
 
 For i=0 To 2096

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot6.bb
-+;Animations can be created using these patterns.
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot6.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot6.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot6.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot6.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot6.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot6.bb
+;Animations can be created using these patterns.
 ;Introduce a third variable related to the frame number. (u in this example)
 ;Animated lattices are quick and easy on memory
 ;because the whole screen is filled with the same shape.

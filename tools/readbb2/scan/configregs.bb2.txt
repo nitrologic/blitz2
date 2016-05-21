@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/configregs.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/libraries/configregs.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/configregs.bb2
+;
 ; $VER: configregs.bb2 (03.03.94)
 ;
 

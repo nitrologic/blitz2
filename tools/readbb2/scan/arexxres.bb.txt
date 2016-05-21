@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/arexxres.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/PhoneBook/arexxres.bb,/Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/arexxres.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/PhoneBook/arexxres.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/arexxres.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/arexx/arexxres.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/PhoneBook/arexxres.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/arexx/arexxres.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/arexx/arexxres.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PhoneBook/arexxres.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/arexxres.bb
+
 ; Field definitions
 ;ACTION	 =			rm_Action						; action code
 ;RESULT1	=			rm_Result1					 ; primary return/error level

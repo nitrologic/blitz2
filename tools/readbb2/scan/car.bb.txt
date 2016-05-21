@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/car.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/car.bb,/Users/simon/Google Drive/amiga/w/skid/skidw/junk/code/car.bb,/Users/simon/Google Drive/amiga/w/skid2/skidpc/car.bb
+;
 ; convert 24bit skidcars to 3 color
 ;
 

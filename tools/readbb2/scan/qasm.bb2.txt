@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/quikasm/qasm.bb2
-+#unbug=0
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/quikasm/qasm.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/quikasm/qasm.bb2
+#unbug=0
 ;
 ##[$80C3]:##[$80CC]:##[$80CB]
 ;

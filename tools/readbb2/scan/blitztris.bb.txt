@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Tetris/BlitzTris.bb
-+Ver$ = "BlitzTris 18.7.1995 Timo Suoranta"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Games/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abc/bums/out/new/Tetris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Games/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Tetris/BlitzTris.bb
+Ver$ = "BlitzTris 18.7.1995 Timo Suoranta"
 
 ; READ ME NOW:
 ;

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/pddisks/pddisk3/buzzbar/incfincs.bb
-+If ReadMem(0,"ram:distance.inc")
+; ascii translation of /Users/simon/Google Drive/amiga/w/acidpd/buzzbar/incfincs.bb,/Users/simon/Google Drive/amiga/w/disks/pddisks/pddisk3/buzzbar/incfincs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/pddisks/pddisk3/buzzbar/incfincs.bb
+If ReadMem(0,"ram:distance.inc")
 	Exists 0,?distance,?distance2-?distance
 	CloseFile 0
 EndIf

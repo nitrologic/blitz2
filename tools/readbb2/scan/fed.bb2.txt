@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/fed.bb2
-+;
+;
 ;font editor
 ;
 ;p() data:

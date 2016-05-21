@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/code/disk/RawDiscLib.bb
-+
+
 ; readlen - 512*24	xc does 512*26
 
 #useblit	= 0											 ;use blitter?

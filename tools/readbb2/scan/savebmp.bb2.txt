@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Examples/savebmp.bb2
-+;									 +++++++++++++++++;;;;;;;;;;;;;;;;;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Examples/savebmp.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Examples/savebmp.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Examples/savebmp.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Examples/savebmp.bb2
+;									 +++++++++++++++++;;;;;;;;;;;;;;;;;
 ;									 SaveBMP Routine for Blitz Basic II
 ;									 +++++++++++++++++;;;;;;;;;;;;;;;;;
 ;

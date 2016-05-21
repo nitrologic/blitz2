@@ -1,0 +1,882 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/Circus/Circus.bb2
+;************************************************************************
+;
+;									 Circus by Graham Mackarel
+;									 6th February 1994
+;									 Version 1.1
+;
+;									 Amendments:
+;
+;										-	Produced baloon explosion animation
+;										-	Obtain shapes from shapes file instead of individual brushes
+;										-	Produced tightrope bounce animation
+;										-	Use background blits to ensure graphics background stays put
+;										-	Make Clown energy vary according to position Clown hit see saw
+;										-	Ensure introduction screen comes on straight from workbench
+;
+;*************************************************************************
+;
+##[$80C3]
+
+;					 Introduction screen
+
+ILBMDepth "clown.hires"
+
+;
+; simon was here with a cludge to load the medmodule
+; in as a crunched file as disk space is low, this replaces the
+; LoadMedModule 1,"circus.med", if some of the following
+; commands appear as ???? then rem the block out before
+; attempting to compile also if you look through the source
+; you can find out all sorts of info such as when Graham decides
+; to drop a bonus and other useful stuff
+
+	InitBank 0,154818,2
+	If WriteMem(0,"circus.med.cm")
+		##[$BE14] 0,BankLoc(0),FileSeek(0):CloseFile 0
+		CrMDecrunch BankLoc(0)
+		DecodeMedModule 1,BankLoc(0)
+	EndIf
+	StartMedModule 1
+
+;
+; simon is now not here...
+;
+
+LoadModule 2, "Dead.str"
+freest 0
+allocst 1,##[$D087]+16
+ScreensBitMap 1,0
+ShowScreen 0
+LoadBitMap 0,"clown.hires",0
+Use SetCycle 0
+ShowScreen 1
+While Joyb(0) = 0
+ VWait
+ PlayMed
+Wend
+StopMed
+
+Free lmaxlen 0
+Free lmaxlen 1
+
+; Load shapes and sounds
+
+LoadShapes 0,"game.shapes2"
+LoadShapes 15,"explode.shapes4"
+LoadShapes 26,"tightrope.shapes"
+LoadShape 30,"tent.iff",1
+
+casestrcomp 0,"circus_images.iff"
+
+LoadSound 0,"boing.sample"
+LoadSound 1,"pop.sample"
+LoadSound 2,"bonus.sample"
+
+;	Wait a while before computer is blitzed
+
+VWait 100
+
+BLITZ
+
+;	Enable mouse to allow see saw to be moved with the mouse movement
+
+Mouse On
+BlitzKeys On:BitMapInput
+BitMapOutput 1
+
+;	Initialise varibles
+
+.init
+NEWTYPE .high_score										 ; set high score type
+	name_high$
+	score_high.l
+End NEWTYPE
+
+Dim table.high_score(11)								; Dimension high score table
+																				; and initialise it with default scores
+For index = 0 To 11
+	Select index													; cannot use data statement as it causes
+	 Case 0															 ; strange out of memory errors when program
+		 name$ = "Duck Egg David	"				 ; lines are greater than 80 characters !!!
+		 score_table.l = 85000
+	 Case 1
+		 name$ = "Juicy Joanne		"
+		 score_table = 71000
+	 Case 2
+		 name$ = "Graham the Great"
+		 score_table = 47000
+	 Case 3
+		 name$ = "Little Mo			 "
+		 score_table = 24500
+	 Case 4
+		 name$ = "Hairy Carl			"
+		 score_table = 12300
+	 Case 5
+		 name$ = "San						 "
+		 score_table = 10100
+	 Case 6
+		 name$ = "Hooligan	Nick	"
+		 score_table = 8100
+	 Case 7
+		 name$ = "Loony Lisa			"
+		 score_table = 7000
+	 Case 8
+		 name$ = "Barrie's Best	 "
+		 score_table = 5000
+	 Case 9
+		 name$ = "Wobbly Joyce		"
+		 score_table = 4100
+	 Case 10
+		 name$ = "Battle Axe Hilda"
+		 score_table = 3200
+	 Case 11
+		 name$ = "Lounging Les		"
+		 score_table = 2900
+	End Select
+	table(index)\name_high = name$
+	table(index)\score_high = score_table
+Next
+
+Dim baloon.b(11,2)						; Baloons popped array
+baloon_count.b = 0						; Number of baloons popped
+manx.w=48										 ; Initial clown x position
+many.w=183										; Initial clown y position
+mandx.w=1										 ; Clown x move increment
+mandy.w=-4										; Clown y move increment
+level.w=12										; game level, lower = faster
+right_see_saw.b = True
+y0.w=256-40									 ; See Saw y screen position
+screendX.w=3									; Scroll speed of baloons
+score.l=0										 ; initial score
+game_started.b = False
+play.b = False								; Tune play boolean
+man.b = 5										 ; Initial clown shape
+lives.b=3										 ; Number of lives left
+released.b = False						; Bonus shape released boolean
+Format "00000000"						 ; score display format
+popped_index.b = 15
+hit_position.b = 40
+
+;	Set up bitmap 0 for scrolling the baloons
+
+lmaxlen 0,800,256,3
+
+;	Set up the shape queue to allow automatic creation and removal of shapes
+;	on the BitMap.
+
+Buffer 0,16384
+
+;	Put baloon shapes onto bitmap 0
+
+Gosub setup_baloons
+
+;	Set up a second bitmap to allow the See Saw and clowns to move
+;	without being scrolled.
+
+lmaxlen 1,400,256,3
+
+;	Set up a slice for dual playfield mode.
+
+Slice 0,44,320,256,$fffa,6,8,16,400,800
+
+; use 16 colour palette from the shapes IFF file to ensure the colours
+; on both bitmaps are the same
+
+Use SetCycle 0
+
+; set the handle of the clown to the middle for correct collision detection
+
+DecodeShapes 5
+DecodeShapes 6
+
+Gosub score_display
+Gosub display_lives
+
+
+longdiv 30,10,0										 ; Display tent
+.main_game:
+
+While NOT RawStatus($45)				 ; while escape key	not pressed
+																 ; wait for user to start game
+
+	If Joyb(0)=1 AND NOT game_started
+	 game_started = True
+	 Sound 0,1
+	EndIf
+
+	Gosub display_bitmaps					; Display screen bitmaps 0 and 1
+
+	Gosub move_seesaw							; Move see saw with mouse
+
+	If game_started								; If player started game via left mouse button
+
+		If many >= 240							 ; If clown below seesaw
+																 ; clown dead
+		 Gosub clown_death
+
+		Else												 ; Else do main game checks and moves
+
+			If fly.b									 ; If wings have been caught then move clown
+				ftimeout.w + 1					 ; up screen when mouse button pressed for
+				If ftimeout > 400				; a limited period.
+					fly = False
+					If NOT (bounce.b OR mouse_move.b)
+						Sound 2,2,64,64							; remove looping bonus sound
+					EndIf
+				EndIf
+				If mandy > 0	AND Joyb(0) <> 0		 ; Allow clown to move upwards
+					mandy = -mandy
+				EndIf
+			EndIf
+
+; Increment clown x and y screen position and check boundaries
+
+			Gosub change_clown_position
+
+; check For collision with see saw
+
+			Gosub see_saw_collision
+
+; blit clown onto bitmap 0
+
+			BBlit 0,man,manx,many
+
+			If popped.b								 ; Display baloon explosion
+				BBlit 0,popped_index,save_popx.w,save_popy.w
+				If popped_index = 25
+					popped = False
+					popped_index = 15
+				EndIf
+				popped_index + 1
+		 EndIf
+
+; Check for Clown/Baloon collision
+
+			If many < 130
+				Gosub Baloon_collision
+			EndIf
+
+; Calculate y increment for clown providing a kind of gravity effect
+
+			Gosub clown_y_velocity
+
+			If released						; If bonus shape has been released then
+			 Gosub bonus_release	 ; implement bonus release subroutine
+			EndIf
+
+		EndIf
+
+	Else										 ; waiting to start game
+		BBlit 0,5,manx,many		; blit clown at bottom left of screen
+		Gosub score_display		;
+	EndIf
+
+Wend
+
+End
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.setup_baloons:
+
+Use lmaxlen 0
+
+; Reduce speed to give player a chance
+
+
+; Blit baloon shapes onto bitmap 1 in 3 rows of 3 colours
+
+	For screenx = 10 To 310 Step 32
+		 longdiv 0,screenx,10
+		 longdiv 1,screenx,48
+		 longdiv 2,screenx,86
+	Next
+
+; initialise number of baloons popped counter to 0
+
+	baloon_count=0
+
+; copy left half of bitmap to the right of for smooth scroll
+; of the baloons.
+
+
+
+	Scroll 0,0,320,256,320,0
+
+;	Boxf 0,245,650,250,2
+; set elements of baloon popped array to true
+
+	For ya.b=0 To 2
+		For xa.b= 1 To 10
+			baloon(xa,ya) = True
+		Next
+	Next
+
+	baloon_setup.w=baloon_setup+1	; Bonus every 6 screens
+	If baloon_setup = 6
+		baloon_setup = 0
+		bonus_type.b = 1
+		Gosub bonus
+	EndIf
+
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.Baloon_collision:
+
+; check baloon collision with clown using bitmap 0 to detect baloon collisions
+
+	Use lmaxlen 0
+
+	checkcol.w=QLimit (manx+x.w,0,640)
+	If ##[$CB09] (5,checkcol,many)	OR ##[$CB09] (6,checkcol,many)
+		Sound 1,1
+
+		baloon_popped.w=(checkcol)/32		; Get the baloon number (0 to 19)
+																	 ; that has been hit by the clown
+
+		If baloon_popped < 10					; set the array x coordinate to
+			xa = baloon_popped+1				 ; the baloon number popped
+		Else
+			xa = baloon_popped-9
+		EndIf
+
+; Obtain the baloon row clown has collided with to ensure the baloon to be
+; popped is the correct one. The collision routine appears to be complex,
+; This is partly due to the fact that the exact x and y coordinate of the point
+; the shape made contact with the non zero colour cannot be determined. This
+; function would be a welcome addition to Blitz BASIC.
+
+		If mandy < 0												 ; Clown ascending
+			For checky.b =	86 To 10 Step -38
+				If PColl(manx-10,many-13,19,25,manx-10,checky-2,manx+10,25)
+				 popy.w = checky								 ; Y coordinate of baloon to be erased
+																				 ; row number 0 to 2 for array check
+				 ya = checky/43
+				EndIf
+			Next
+		Else															 ; Clown descending reverse row priority
+			For checky.b = 10 To 86 Step 38
+				If PColl(manx-10,many-13,19,25,manx-10,checky-2,manx+10,25)
+					popy = checky
+					ya = checky/43
+				EndIf
+			Next
+		EndIf
+
+		Select ya
+		 Case 2
+			score=score+10
+			popped_score = 15
+		 Case 1
+			score = score + 25
+			popped_score = 16
+		 Case 0
+			score = score + 50
+			popped_score = 17
+		End Select
+
+		Gosub score_display
+																	 ; If the baloon has already been popped
+		If NOT baloon(xa,ya)					 ; then the current x coordinate of the
+			If NOT baloon(xa-1,ya)			 ; clown is not correct for the baloon to be
+				baloon_popped + 1					; popped, therefore pop the one before it or
+				xa+1											 ; the one after it depending on which one exists.
+			Else
+				baloon_popped-1
+				xa-1
+			EndIf
+		EndIf
+
+		popx.w=baloon_popped*32				; get the x coordinate of the baloon to
+																	 ; be popped.
+
+		If baloon_popped < 10					; As bitmap 1 is scrolled, the first half
+		 popx2.w=popx+320							; of the bitmap has to be identical to the
+		Else													 ; the second half, this routine obtains the
+		 popx2=popx-320								; x coordinate of the baloon to be popped on
+		EndIf													; the non displayed part of bitmap 1.
+
+		baloon(xa,ya) = False					; set the baloon array for the baloon just
+																	 ; popped to false.
+
+		Boxf popx.w,popy.w,popx+30,popy+25,0	 ; remove baloon on displayed part of bitmap
+		Boxf popx2,popy,popx2+30,popy+25,0		 ; remove baloon on non displayed part of bitmap
+
+		popped = True													; allow baloon value to be displayed when popped
+		save_popx.w = manx
+		save_popy.w = popy+10
+		time.b = 10
+
+		baloon_count+1												 ; increment baloon counter.
+		If score > 3000
+		 Select baloon_count									 ; make it more difficult the more baloons
+			Case 0															 ; popped.
+			 level = 10
+			 mandx = 1
+			Case 20
+			 level =9
+			 If score > 10000 Then level = 8
+			 If score > 20000 Then level = 7
+			 mandx = 1
+			End Select
+		EndIf
+
+		mandy =-mandy													; reverse y direction of clown
+		rand.b=Rnd(10)												 ; reverse x direction occasionally
+		If rand < 6
+			mandx=-mandx
+		EndIf
+
+		If baloon_count = 30									 ; If all baloons gone reset them
+				Gosub setup_baloons
+		EndIf
+
+		If xa = 5 AND ya = 1	AND NOT released	 ; Release bonus shape on 5th baloon pop
+			released = True												; of the second row
+			objectx.w = manx
+			objecty.w = popy
+			If rand < 2														;	Select object to be released, this is
+				object = 11													;	used in the bonus release subroutine
+			Else
+				If rand < 5
+				 object = 12
+				Else
+					If rand < 9
+						object = 13
+					Else
+						object = 14
+					EndIf
+				EndIf
+			EndIf
+			Gosub bonus_release
+		EndIf
+
+	EndIf
+
+	Use lmaxlen 1										; go back to other bitmap
+
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.see_saw_collision:
+
+; if clown hits see saw, change see saw shape.
+; reverse direction of clown and move clown x position to the other
+; side of the see saw.
+; Sound boing.
+
+If mandy > 0		 ; only check if clown descending
+	If right_see_saw
+	 If SpritesHit (6,manx,many,3,x0.w,y0+20)
+	 right_see_saw = False
+	 mandy = -mandy
+	 manx = manx + 15
+	 Sound 0,1
+	 hit_position.b = manx-x0-5
+	EndIf
+ Else
+	If SpritesHit (6,manx,many,8,x0,y0+20)
+	 right_see_saw = True
+	 mandy = -mandy
+	 manx = manx-15
+	Sound 0,1
+	hit_position = x0+15-manx
+	EndIf
+ EndIf
+EndIf
+
+
+
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.clown_y_velocity:
+
+; bounce off elephants trunk (Not sure if this is a good idea)
+;
+; If (RectsHit(manx-10,many-13,19,25,0,150,60,8) OR	RectsHit(manx-10,many-13,19,25,270,150,60,8)) AND mandy > 0
+;	mandy = -mandy
+; Sound 0,1
+; EndIf
+
+ If bounce OR mouse_move OR fly					; Maximum energy if bonus
+	hit_position = 8
+ EndIf
+
+ energy.w =	3 * hit_position						; Energy depends on position Clown hit seesaw
+																				 ; The seesaw was hit. edges, more energy
+ If mandy < 0														; If y clown increment for clown is negative then
+	 mandy = - Tan(40*(many-energy))/level ;	reverse direction and re-calculate a new.
+	 man = 5															 ;	Increment according to rough velocity formula
+ Else																		; else
+	 mandy = Tan(40*(many-energy))/level	 ;	 keep same direction and re-calculate
+	 man = 6															 ; endif
+ EndIf
+
+ If mandy = 0 Then mandy = 1						 ; If y clown increment is zero then set it to
+																				 ; 1 to prevent clown staying in one position
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.change_clown_position:
+
+	If bounce.b											 ; If bonus bounce then bounce clown off
+																		; tightrope for a limited period.
+	 If tightrope_index = 29
+		 tightrope_offset.b = 11				; change Tightrope position when bottom of bounce reached
+	 Else														 ; to centre it.
+		 tightrope_offset = 0
+	 EndIf
+	 BBlit 0,tightrope_index,10,145 - tightrope_offset
+	 If NOT bounced.b
+		 tightrope_index = 26
+	 Else
+		tightrope_index + 1
+		 If tightrope_index > 29
+			tightrope_index = 26
+			bounce_time.b = QLimit (bounce_time - 1,0,5)
+			If bounce_time = 0 Then bounced = False
+		 EndIf
+	 EndIf
+
+	 If PColl(manx-10,many-13,19,25,0,142,320,100) AND mandy > 0
+		bounced = True
+		bounce_time = 4
+		Sound 0,1
+			mandy = -mandy
+			many = many + mandy
+		EndIf
+		btimeout.w + 1
+		If btimeout > 400
+			bounce = False
+			Use lmaxlen 0
+			If NOT (fly.b OR	mouse_move.b)	 ; If no other bonus active
+			 Sound 2,2,64,64									;	remove looping bonus sound
+			EndIf
+		 Use lmaxlen 1
+		EndIf
+	EndIf
+
+	many = QLimit (many+mandy,13,240)
+	If many <=20
+		mandy = -mandy
+		many = many + mandy
+	EndIf
+
+	If mouse_move.b										 ; Bonus clown move with mouse for a
+																			; limited period when diddy baloons are caught
+		If right_see_saw
+			manx = x0											 ; Ensure clown is caught at edges of seesaw to
+		Else															; allow clown to gain maximum height.
+			manx = x0 + 25
+		EndIf
+		mtimeout.w+1
+		If mtimeout > 400
+			mouse_move = False
+			If NOT (fly.b OR bounce.b)
+				Sound 2,2,64,64							 ; Remove looping bonus sound
+			EndIf
+
+		EndIf
+	Else
+		manx=QLimit (manx+mandx,18,330)	 ; Normal clown move
+	EndIf
+
+	If manx < 25												; Screen limits for clown
+		manx=25
+		mandx=-mandx
+	EndIf
+	If manx >320
+		mandx=-mandx
+		manx =320
+	EndIf
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.score_display:
+	Locate 5,0
+	Colour 3
+	Print	score
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.display_lives:
+	Use lmaxlen 1
+	Boxf 150,0,340,10,0								; Erase lives from screen
+	If lives > 11											; Display all lives below 11
+		lives_left.b = 11
+	Else
+		lives_left = lives
+	EndIf
+	For index =	lives_left To 1 Step -1
+		longdiv 10,150+(index * 15),0
+	Next
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.initialise:
+	 baloon_count.b = 0			; re-initialise variables
+	 manx=50
+	 many=183
+	 mandx=1
+	 mandy=-4
+	 score=0
+	 xa=0
+	 ya=0
+	 play = False
+	 man = 5
+	 lives= 3
+	 baloon_setup = 0
+	 demo.b = False
+	 baloon_count = 0
+	 released = False
+	 popped_index.b = 15
+	 hit_position = 40
+	 level = 12
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.move_seesaw:
+	If right_see_saw						 ; If right see saw to be displayed
+		x0=QLimit(MouseX,0,310)		; Limit see saw movement to the screen edges
+		If demo.b	Then x0 = manx	; If demo move seesaw automatically
+		BBlit 0,3,x0,y0+14				 ; Blit right half see saw onto the screen
+		BBlit 0,4,x0+16,y0				 ;	 "	left half "	 "	 "		"		 "
+
+	Else												 ; If left see saw to be displayed
+		x0=QLimit(MouseX,15,320)	 ; Limit see saw movement to the screen edges
+		If demo Then x0 = manx-18	; If demo move seesaw automatically
+		BBlit 0,7,x0+10,y0+14			; Blit right half see saw onto the screen
+		BBlit 0,8,x0-10,y0				 ; Blit left half see saw onto the screen
+	EndIf
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.clown_death:
+
+	 If NOT play.b							; If Death just happened
+		 Use lmaxlen 1
+		 play = True							;	 just after clowns death.
+		 PlayModule 2
+		 deathy.w= 280						;	 Allows dead clown to pause before going
+	 EndIf											;	 to heaven which allows death march to finish before
+															;	 dead clown reaches heaven.
+
+	deathy.w-1									; Move dead clown up screen and play death march
+	If deathy > 236
+		deady.w = 236
+	Else
+		deady	= deathy
+	EndIf
+
+	 BBlit 0,9,manx,deady			 ; blit dead clown
+
+	 If deathy <= 10						; If dead clown in heaven then
+		 game_started = False		 ; re-initialise variables for next clown
+		 play = False
+		 many = 183
+		 manx = 50
+		 mandy = -4
+		 lives-1
+		 bounce = False
+		 released = False
+		 popped = False
+		 hit_position = 40
+		 Use lmaxlen 1
+
+			If lives = 0							 ; All lives lost.
+				StopModule
+				Gosub high_score_update	; Display high score table.
+				Gosub initialise				 ; Re -initialise for next game.
+				timeout_start.l = 0			; demo start time limit
+				demo.b = False					 ; demo start boolean
+
+				While Joyb(0) = 0 AND NOT RawStatus($45)	 ; Wait for user to press mouse or Esc
+					timeout_start + 1
+					Gosub display_bitmaps
+
+					If disp_score_table.b					; To prevent unqueue overwriting
+						Gosub high_score_update			; high score table
+						disp_score_table = False
+					EndIf
+
+					Gosub move_seesaw
+
+					If timeout_start > 1000 OR demo.b
+
+						If NOT demo									; If demo just started clear high score
+						 Gosub setup_baloons
+						 Use lmaxlen 1
+						 BlockScroll 0
+						 longdiv 30,10,0								; Display background
+						EndIf
+
+						demo = True									; Demo started
+
+; Increment clown x and y screen position and check boundaries
+
+						Gosub change_clown_position
+
+ ; check For collision with see saw
+
+						Gosub see_saw_collision
+
+; Blit clown onto bitmap 0
+
+						BBlit 0,man,manx,many
+
+; Display baloon explosion
+
+
+						If popped.b
+							BBlit 0,popped_index,save_popx.w,save_popy.w
+							If popped_index = 25
+								popped = False
+								popped_index = 15
+							EndIf
+							popped_index + 1
+						EndIf
+
+; Check for Clown/Baloon collision
+
+						If many < 130
+							Gosub Baloon_collision
+						EndIf
+
+; Calculate y increment for clown providing a kind of gravity effect
+
+						Gosub clown_y_velocity
+
+						If timeout_start > 3000		 ; stop demo and display high score table
+							timeout_start = 0
+							demo = False
+							disp_score_table = True
+							Gosub setup_baloons
+							Gosub initialise
+						EndIf
+					EndIf
+				Wend
+
+				BlockScroll 0
+				longdiv 30,10,0										; Display backkround
+				Gosub setup_baloons
+				Gosub initialise								; Re -initialise for next game.
+			EndIf
+
+			Gosub display_lives
+			Gosub score_display
+			StopModule
+	 EndIf
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.bonus:
+ Use lmaxlen 1
+ LoopSound 2,2,64,64
+ Select bonus_type.b
+ Case 1													; extra clown and 1000 points
+	For index = 1 To 1000 Step 20
+		score = score + 20
+		Gosub score_display
+		Gosub display_bitmaps
+		BBlit 0,man,manx,many
+		Gosub move_seesaw
+		Sound 2,2,64,64
+	Next
+
+	If fly.b OR bounce.b OR mouse_move.b
+		LoopSound 2,2,64,64					; Reinstate looped bonus sound
+	EndIf
+
+	 lives = lives + 1
+	 Gosub display_lives
+ Case 2													; Tightrope bounce
+	 bounce = True								 ; Produced by catching flowers
+	 btimeout = 0									; with see saw
+	 Use lmaxlen 1
+ Case 3													; Magnetic see saw bonus
+	 mouse_move.b = True
+	 mtimeout = 0
+ Case 4
+	 fly.b = True									; clown fly bonus
+	 ftimeout = 0
+End Select
+
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.display_bitmaps
+	x.w=QWrap(x+screendX,0,320)	; Wrap screen for smooth scroll of baloons.
+	VWait												; Wait for screen sync.
+	UnBuffer 0									 ; unbuffer shapes to remove fron screen
+
+	ShowF 1,10,0,x+10						; Show clown move bitmap.
+	ShowB 0,x+10,y.w,10					; Show baloon scroll bitmap.
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.bonus_release
+	Use lmaxlen 1
+	objecty + 1
+	BBlit 0,object,objectx,objecty
+	If SpritesHit (object,objectx,objecty,3,x0.w,y0+20)
+		Select object					 ;	Select bonus depending on object
+			Case 11							 ;	released. this is used in the bonus
+				bonus_type = 2			;	subroutine
+			Case 12
+				bonus_type = 3
+			Case 13
+				bonus_type = 1
+			Case 14
+				bonus_type = 4
+		End Select
+
+		Gosub bonus
+		released = False
+	EndIf
+	If objecty > 228 Then released = False
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+.high_score_update
+
+	Use lmaxlen 1
+	If NOT demo
+		position.b = -1										 ; Obtain high score position in table
+		For index = 11 To 0 Step - 1
+		 If score > table(index)\score_high
+			 position.b = index
+		 EndIf
+		Next
+
+		If position >= 0										; If High score position obtained.
+																				; Shuffle high scores below new one
+																				; pushing bottom one off.
+			For index = 11 To position + 1 Step -1
+				table(index)\name_high = table(index-1)\name_high
+				table(index)\score_high = table(index-1)\score_high
+			Next
+
+			Colour 5													 ; Display high score name request.
+			Locate 14,14
+			NPrint "Congratulations"
+			Locate 14,16
+			NPrint "A new high score"
+			Locate 11,18
+			NPrint "Please enter your name:"
+
+			Colour 4													 ; Text colour is blue.
+			Locate 14,20											 ; Position text on screen.
+			name$=Edit$(" ",16)								; Get users name.
+			length.b = 16 - Len (name$)				; Get length of name and pad with
+			If length > 0											; Spaces if less than 16 characters long.
+				For index = 1 To length
+					name$=name$ + " "
+				Next
+		 EndIf
+
+		 table(position)\name_high = name$	; Put users name on high score table.
+		 table(position)\score_high = score ; Put users score on high score table.
+		 BlockScroll0
+		EndIf
+	EndIf
+
+	Colour 5													 ; Display high score table
+	VWait
+	BlockScroll 0
+	longdiv 30,10,0										 ; Display tent
+	For index = 0 To 22 Step 2
+	Locate 9,index+3
+	NPrint table(index/2)\name_high," ",table(index/2)\score_high
+Next
+
+Return
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

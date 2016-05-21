@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/buzzbar/makeincs.bb
-+If ReadMem (0,"ram:angle.inc")
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum3/buzzbar/makeincs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/buzzbar/makeincs.bb
+If ReadMem (0,"ram:angle.inc")
 	Exists 0,?angle,?angle2-?angle
 	CloseFile 0
 EndIf

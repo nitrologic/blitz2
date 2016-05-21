@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/QuickFont.bb2
-+;==================================================================
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/QuickFont.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/QuickFont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/QuickFont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/QuickFont.bb2
+;==================================================================
 ; Draw some fast 8x8 text using the CPU instead of the blitter....
 ; Printing has to be adjusted manually for different width bitmaps
 ;	(set up for high res)
@@ -65,7 +65,7 @@ exit:
 	##[$80BF] ""
 	Event
 font_dat:
-	IncBin "fns:8_High.FNS"
+	IncBin "8_High.FNS"
 
 End Statement
 

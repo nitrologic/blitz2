@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/TTypes/TTypes.bb2
-+; ##################################################
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/vs/TTypes/TTypes.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/vs/TTypes/TTypes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/TTypes/TTypes.bb2
+; ##################################################
 ; #																								#
 ; # ToolType function that gets a tooltype for ya! #
 ; #																								#

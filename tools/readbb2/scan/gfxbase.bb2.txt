@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/graphics/gfxbase.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/graphics/gfxbase.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/graphics/gfxbase.bb2
+;
 ; $VER: gfxbase.bb2 40.0 (02.03.94)
 ;
 

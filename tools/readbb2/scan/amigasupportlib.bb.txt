@@ -1,5 +1,9 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/neil/Libs/AmigaSupportLib.bb
-+!libheader{50,0,0,0,0}
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Neil/AmigaSupportLib.bb
+;
+; amiga support lib (rev bum 6)
+;
+
+!libheader{supportlib,0,0,0,0}
 
 !afunction{#long}
 !args{#long,#long}

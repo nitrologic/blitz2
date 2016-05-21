@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEHAM8.BB
-+
+
 MaxLen pa$=192
 MaxLen na$=192
 pa$=""

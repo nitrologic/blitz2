@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/AaronsIconLib.bb
-+;============================================================
+;============================================================
 ;
 ; TOOLTYPES COMES TO BLITZ2!!!!!!!!!!!!
 ;

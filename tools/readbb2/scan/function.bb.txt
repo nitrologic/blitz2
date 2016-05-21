@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Function.bb
-+; ; function program example; Function$ hexof{a}			 ;declare function with one parameter  Function Return Hex$(a)	 ;return hex value of parameter End Function					;end of function NPrint hexof{16384}			;call function MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Function.bb
+; ; function example; Function double{a}	 ;start of function code... Function Return a+a	;return double the passed parameter End Function			;end of function code.For k=1 To 10			;start of loop NPrint double{k}	 ;output 'k' doubled Next					;end of loopMouseWait 

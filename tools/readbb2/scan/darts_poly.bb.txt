@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/darts/darts_poly.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/darts_poly.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/darts_poly.bb
+;
 ; Darts program by Simon Armstrong
 ;
 ; Please note copyright notice on the projection algorithm
@@ -14,18 +14,18 @@ NPrint "Setting up, please wait..."
 ; processor cls for extra speed
 
 Statement mycls{a.l}
-	UNLK a4:MOVE.l d0,a0:ADD.l#40*256,a0
+	MOVE.l d0,a0:ADD.l#40*256,a0
 	MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3:MOVEQ#0,d4
 	MOVEQ#0,d5:MOVEQ#0,d6:MOVE.ld0,a1:MOVE.ld0,a2:MOVE.ld0,a3
 	MOVE#255,d7
 	loop1:MOVEM.l d0-d6/a1-a3,-(a0):DBRA d7,loop1
-	RTS
+	AsmExit
 End Statement
 
 Macro p {SizeOf.object\`1}(a5):End Macro
 
 Statement calcid{object.l,rottable.l}
-	UNLK a4:MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:MOVE.l d1,a3
+	MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:MOVE.l d1,a3
 	MOVEM.l!p{rotx-2},d0-d2:MOVE#4092,d3:AND d3,d0:AND d3,d1
 	AND d3,d2:LEA !p{id},a5
 	MOVEM 0(a3,d2.w),d4-d5
@@ -44,14 +44,14 @@ Statement calcid{object.l,rottable.l}
 	MULS d0,d7:ADD.l d6,d7:SWAP d7:ADD d7,d7:MOVE d7,(a5)+
 	MULS d1,d2:SWAP d2:ADD d2,d2:MOVE d2,(a5)+
 	NEG d0:MOVE d0,(a5)+:MULS d1,d3:SWAP d3:ADD d3,d3:MOVE d3,(a5)+
-	MOVEM.l (a7)+,a4-a6:RTS
+	MOVEM.l (a7)+,a4-a6:AsmExit
 End Statement
 
 Statement moveonz{object.l,shift.w}
-	UNLK a4:EXG d0,a5
+	EXG d0,a5
 	MOVEM !p{id+12},d3-d5:ASL.l d1,d3:ASL.l d1,d4:ASL.l d1,d5
 	MOVEM.l d3-d5,!p{vx}
-	EXG d0,a5:RTS
+	EXG d0,a5:AsmExit
 End Statement
 
 Macro genvert
@@ -74,32 +74,32 @@ Macro genvert
 End Macro
 
 Function.w gendart{object.l}
-	UNLK a4:MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
+	MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
 	!genvert{0,0,0,0,8,ADD}
 	!genvert{0,0,7,SUB,8,SUB}
 	!genvert{8,SUB,0,0,8,SUB}:!genvert{8,ADD,0,0,8,SUB}
 	!genvert{7,SUB,0,0,8,SUB}:!genvert{7,ADD,0,0,8,SUB}
 	!genvert{0,0,6,ADD,8,SUB}
-	MOVEM.l (a7)+,a4-a6:MOVEQ#-1,d0:RTS
-	flow:MOVEM.l (a7)+,a4-a6:MOVEQ#0,d0:RTS
+	MOVEM.l (a7)+,a4-a6:MOVEQ#-1,d0:AsmExit
+	flow:MOVEM.l (a7)+,a4-a6:MOVEQ#0,d0:AsmExit
 End Statement
 
 Function.w genstar{object.l}
-	UNLK a4:MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
+	MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
 	!genvert{8,ADD,0,0,0,0}:!genvert{8,SUB,0,0,0,0}
 	!genvert{0,0,8,ADD,0,0}:!genvert{0,0,8,SUB,0,0}
 	!genvert{0,0,0,0,8,ADD}:!genvert{0,0,0,0,8,SUB}
-	MOVEM.l (a7)+,a4-a6:RTS
+	MOVEM.l (a7)+,a4-a6:AsmExit
 End Statement
 
 Statement genline{object.l}
-	UNLK a4:MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
+	MOVEM.l a4-a6,-(a7):MOVE.l d0,a5:LEA !p{v},a6
 	MOVEM.l (a6),d0-d7:MOVEM.l d0-d7,4(a6)
 	MOVEM.l !p{x},d0-d2
 	ASR.l#2,d0:ASR.l#2,d1:SWAP d2:DIVS d2,d0:DIVS d2,d1
 	MULS#640,d0:MULS#512,d1:SWAP d0:SWAP d1
 	ADD#160,d0:ADD#128,d1:MOVEM d0-d1,(a6)
-	MOVEM.l (a7)+,a4-a6:RTS
+	MOVEM.l (a7)+,a4-a6:AsmExit
 End Statement
 
 ;-------------------------------------------------------------
@@ -154,8 +154,10 @@ For i=0 To 7
 Next
 CEND
 
-BLITZ:Slice 0,44,320,256,$fffa,3,8,32,320,320
-;RGB 1,15,12,15:RGB 9,4,4,8
+BLITZ
+
+InitCopList 0,3
+CreateDisplay 0
 
 f=2		 ;frame of anim
 xo=1000 ;current laser
@@ -165,7 +167,7 @@ Mouse On:MouseArea -150,-150,120,120:BlitzKeys On
 .mainloop
 
 ##[$80BB]
-	VWait:Show db:db=1-db:Use lmaxlen db	;double buffer
+	VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db	;double buffer
 ;	ShowB f:f+1:If f=10 Then f=2
 	 mycls{Peek.l (##[$80B8] lmaxlen(db)+8)}
 	 mycls{Peek.l (##[$80B8] lmaxlen(db)+12)}

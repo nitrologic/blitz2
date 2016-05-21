@@ -1,11 +1,12 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/cfd/CaffeineFree.bb
-+;THE CAFFIENE-FREE DIET SHOOT'EM-UP
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/CaffeineFree/CaffeineFree.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/CaffeineFree/CaffeineFree.bb
+;THE CAFFIENE-FREE DIET SHOOT'EM-UP
 ;
 ;By Ben Campbell and JS Hong
 ;September, '93
 
-;Note: to recompile this game, you'll need the files in the
-;			'inc' directory, and more than 1 meg memory (sorry)
+;Note: to compile&run this game, you'll need the files in the
+; 'inc' directory (CD!), and more than 1 meg memory (sorry),
+; otherwise create executable, quit then run it
 
 ##[$80C3] ;run from an icon
 

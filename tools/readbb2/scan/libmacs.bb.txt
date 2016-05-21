@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/minlibs/libmacs.bb
-+;pchk{a,b}
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/blitzlibs/libmacs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/coollibs/libmacs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/userlibs/libmacs.bb,/Users/simon/Google Drive/amiga/w/sega/shit/dev/minlibs/libmacs.bb
+;pchk{a,b}
 ;
 Macro pchk
 CNIF `1<>`2

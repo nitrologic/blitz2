@@ -1,12 +1,14 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/dbscrolling.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/dbscrolling.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/dbscrolling.bb2
+;
 ;This example demonstartes a technique by which map/block based
 ;horizontal scrolling may be achieved. This is identical
 ;to the 'scrolling.bb2' demo, only it takes into account
 ;double buffering.
 ;
 ;Use the joystick to control scrolling, joystick button to exit
+;Or keyboard leftright arrows and Esc to exit
 ;
+;TURN OFF RUNTIME ERRORS ONCE YOU GET IT RUNNING!
 
 lmaxlen 0,256,64,1
 LoadBitMap 0,"data/map"
@@ -48,9 +50,9 @@ Next
 
 ShapesBitMap 0,1
 
-Slice 0,44,320,192,$fff8,3,8,32,w,w
-
-Use SetCycle 0
+InitCopList 0,44,192,$13,8,8,0
+DisplayPalette 0,0
+CreateDisplay 0
 
 sx=0 ;scroll x
 mx=0 ;map x
@@ -62,33 +64,24 @@ oxs=0:xs=0
 
 a=.25
 
-While Joyb(1)=0
-;
-VWait
-;
-Show db,sx,sy:db=1-db:Use lmaxlen db
-;
-ox2=x2
-oy2=y2
-oxs=xs
-;
-x2=Int(mx LSR 4)
-y2=Int(my LSR 4)
-;
-Select Joyx(1)
-Case -1
+While Joyb(1)=0 AND RawStatus($45)=0
 	;
-	xs-a:If xs<-8 Then xs+a
+	VWait
 	;
-Case 1
+	DisplayBitMap 0,db,sx,sy:db=1-db:Use lmaxlen db
 	;
-	xs+a:If xs>8 Then xs-a
+	ox2=x2
+	oy2=y2
+	oxs=xs
 	;
-End Select
-If Joyy(1) Then xs=0
-;
-;
-;If x2<>ox2 OR Sgn(oxs)<>Sgn(xs)
+	x2=Int(mx LSR 4)
+	y2=Int(my LSR 4)
+	;
+	If Joyx(1)=-1 OR RawStatus($4f) Then xs-a:If xs<-8 Then xs+a
+	If Joyx(1)=1 OR RawStatus($4e) Then xs+a:If xs>8 Then xs-a
+	If Joyy(1) OR RawStatus($40) Then xs=0
+	;
+	;
 	If xs>0
 		sx2=sx AND $fff0
 		For y=0 To 11
@@ -103,9 +96,10 @@ If Joyy(1) Then xs=0
 		b{m(x2-1 AND 255,y2+y AND 63),sx2+336,y LSL 4}
 		Next
 	EndIf
-;EndIf
-;
-mx=QWrap(mx+xs,0,4096)
-sx=QWrap(sx+xs,16,368)
-;
+	;
+	mx=QWrap(mx+xs,0,4096)
+	sx=QWrap(sx+xs,16,368)
+	;
 Wend
+;
+End

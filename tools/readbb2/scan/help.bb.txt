@@ -1,155 +1,368 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/shit/help.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/help.bb
+;
 ; blitz2 online help system
 ;
 
-; need support for tabs, tables etc.
-; need to handle example code
+; token is the parameter that will be passed as argument from ted
+; for testing your lib doc set the token to lib*128+1
 
-lmaxlen 0,512,512,1
-Box 0,0,511,511,1
-For i=1 To 50:Line Rnd(512),Rnd(512),Rnd(512),Rnd(512),1:Next
+##[$80B4]:End:End ##[$80B4]
 
-Gosub renderbitmap
+Statement fixstring{a.l}
+	MOVE.l d0,a0:MOVEQ#10,d0
+	nx:MOVE.b (a0)+,d1:BEQ dun:CMP.b d0,d1:BNE nx:MOVE.b #0,-1(a0)
+	dun:AsmExit
+End Statement
 
-f$="window"
+NEWTYPE .index
+	c.w:a.l
+End NEWTYPE
+
+Dim i.index(1024)
+
+token.w=Val("$"+Par$(1))	 ;143*128+1			 ;$4501 ; Window command in lib 138
+
+;token.w=$c501
+
+Dim a$(1024)
+Dim c(256)
+Dim nc.w(10)
+
+Dim offset.w(511)
+
+InitBank 0,32768,0
+
+If WriteMem(0,"blitz2:help.dat")
+	##[$BE14] 0,&offset(0),1024
+Else
+	End
+EndIf
+
+Gosub loadlib
+
+#bmw=576			 ;55K of chip needed (ouch)
+#bmh=768
+#bmc=#bmw/8
+#winw=#bmw+24
+
+lmaxlen 0,#bmw,#bmh,1
 
 ##[$80CC]:FindScreen 0:*s.Screen=Peek.l(##[$80B8] allocst(0))
 
-ww.w=*s\Width&$fff0 ;windowwidth
-wh.w=*s\Height/2		;windowheight
-ww=640
-
-ww=536
-
-Dim a$(128)
-
-SelectMode 0,3:SetString 1,2
-PropGadget 0,-14,10,$11000+2+16+128,1,12,-20 ;gadgets for sliders
-
-workstart 0,024,0,$14000,2,"BLITZ ONLINE REFERENCE MANUAL"
-
-workstart 0,004,-12,$18004,3,"ABOUT"
-workstart 0,054,-12,$18004,4,"LIBRARY"
-workstart 0,120,-12,$18004,5,"DESCRIPTION"
-workstart 0,220,-12,$18004,6,"EXAMPLE"
-workstart 0,290,-12,$18004,7,"EXIT"
+Gosub initgadgets
 
 AddIDCMP $10 ;report mouse moves for domove routine
+SizeLimits #winw,64,#winw,#bmh+27
+localstat 0,0,12,#winw,*s\Height-48,$143b+$c0,"",1,2,0
 
-SizeLimits 536,64,536,1024
-
-localstat 0,0,12,ww,wh,$143b+$80,"",1,2,0
-
-;WColour 0,1;:WCls 1
-
-WLocate 0,4
-
-Gosub sizewindow
-Gosub readhelp
-WCls 2
-;Gosub reprint
+Gosub newcommand
 
 ##[$80BB]
-	WindowInput 0
 	ev.l=WaitEvent
-	If ev=2 Then Gosub sizewindow:Gosub reprint
-	If ev=$20
-		If GadgetHit=1
-			##[$80BB]
-				y=VPropPot(0,1)*l/2:
-				BitMaptoWindow 0,0,0,y,1,1,512,WindowHeight-27
-				;Gosub reprint:
-			##[$80BC] WaitEvent<>$10
+	If ev=2 Then Gosub update
+	If ev=8
+		If ng>0
+			ex=EMouseX-WLeftOff:ey=EMouseY-WTopOff+y
+			If PColl(ex,ey,1,1,0,ny,#bmw,Int(ng/3)*16)
+				If indy=0
+					command=Int((ey-ny)/16)*3+Int(ex/192)
+					Gosub newcommand
+				Else														 ;index page
+					i=Int((ey-ny)/16)*3+Int(ex/192)
+					i+indp*141
+					token=i(i)\c:Gosub loadlib:Gosub newcommand:indy=0
+				EndIf
+			EndIf
+			Else
+
 		EndIf
+	EndIf
+	If ev=$20
+		Select GadgetHit
+			Case 1
+				##[$80BB]
+					y=VPropPot(0,1)*(#bmh-h):BitMaptoWindow 0,0,0,y,1,1,#bmw,h
+				##[$80BC] WaitEvent<>$10
+			Case 3:Gosub doabout:indy=0
+			Case 4:Gosub libpage
+			Case 5:Gosub newcommand:indy=0
+			Case 6:Gosub doexample:indy=0
+			Case 7:pdir=-1:Gosub flippage
+			Case 8:pdir=1:Gosub flippage
+			Case 9:Gosub indexpage
+		End Select
 	EndIf
 	If ev=$400
 		WLocate 0,0:a$=Inkey$
-		If RawKey=$4c Then y-1:Gosub reprint
-		If RawKey=$4d Then y+1:Gosub reprint
+		b=4-((Qualifier AND $8003)<>0)*4		;shift=faster!
+		If RawKey=$4c Then y-b:Gosub update
+		If RawKey=$4d Then y+b:Gosub update
+		If RawKey=$4e Then pdir=1:Gosub flippage
+		If RawKey=$4f Then pdir=-1:Gosub flippage
 		If RawKey=$45 Then End
+		If RawKey=$5f Then Gosub libpage
 	EndIf
 ##[$80BC] ev=$200
 
 End
 
-renderbitmap: ;f$=file
-	If WriteMem(0,"help/"+f$)
-		FileInput 0
-		BitMapOutput 0
-		Use lmaxlen 0:BlockScroll
-		While NOT(DosBuffLen(0))
-			a$=Edit$(1024)
-			While Len(a$)>64
-				j=64:While Mid$(a$,j,1)<>" ":j-1:Wend
-				NPrint Left$(a$,j)
-				a$=Mid$(a$,j+1)
-			Wend
-			NPrint a$
-		Wend
+.libpage
+	y=0:pos0=0:pos1=c(0):Gosub renderbitmap:Gosub update:indy=0
+	Return
+
+.flippage:
+	If indy=0
+		command=QWrap(command+pdir,0,nn):Gosub newcommand
+	Else
+		indp+pdir:Gosub indexpage
 	EndIf
 	Return
 
-sizewindow
-	w=(WindowWidth-20)/8 ;textwidth
-	h=(WindowHeight-22)/8 ;textheight
+.newcommand:
+	y=0:pos0=c(command):pos1=c(command+1)
+	Gosub renderbitmap:Gosub update:Return
+
+.update
+	h=WindowHeight-27
+	y=QLimit(y,0,#bmh-h)
+	bod.q=h/#bmh
+	pot.q=y/(#bmh-h)
+	SetVProp 0,1,pot,bod:Redraw 0,1
+	BitMaptoWindow 0,0,0,y,1,1,#bmw,h
 	Return
 
-renderhelp
-	Use lmaxlen 0:BitMapOutput 0
-	;
-	h=QLimit(h,0,l-1)
-	y=QLimit(y,0,l-h)
-	;
-	WLocate 0,2
-	;
-	For i=y To QLimit(y+h-1,0,l-1)
-		If a$(i)<>""
-			NPrint LSet$(a$(i),w)
+.indexpage
+	Gosub readindex
+	If ind>0
+		BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+		If indp<0 Then indp=Int(indexx/141)
+		i=indp*141
+		If i=>indexx Then i=0:indp=0
+		NPrint "COMMAND INDEX	PAGE "+Str$(indp+1):NPrint ""
+		##[$80BB]
+			x1=CursX*8:y1=CursY*8
+			If ng=0 Then ny=y1-3
+			Print Centre$(Peek$(i(i)\a),24)
+			Boxf x1+10,y1-3,x1+182,y1+9,-1
+			Box x1+12,y1-2,x1+180,y1+8,0
+			If CursX=24*3 Then Locate 0,CursY+2
+			ng+1:i+1
+		##[$80BC] i=indexx OR i=indp*141+141
+		y=0:Gosub update:indy=1
+	EndIf
+	Return
+
+.doabout:
+	BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+	##[$80C8] about:Read a$
+	While a$<>"***"
+		If Left$(a$,1)="*"
+			NPrint "	",a$
 		Else
-			NPrint String$(" ",w)
-			WLine 0,WCursY-5,511,WCursY-5,2
+			NPrint Centre$(a$,#bmc)
 		EndIf
-	Next
-	;
-	SetVProp 0,1,y/l,.5:Redraw 0,1
-	;
+		Read a$
+	Wend
+	y=0:Gosub update
 	Return
 
-reprint
-	;
-	h=QLimit(h,0,l-1)
-	y=QLimit(y,0,l-h)
-	;
-	WLocate 0,2
-	;
-	For i=y To QLimit(y+h-1,0,l-1)
-		If a$(i)<>""
-			NPrint LSet$(a$(i),w)
-		Else
-			NPrint String$(" ",w)
-			WLine 0,WCursY-5,511,WCursY-5,2
-		EndIf
-	Next
-	;
-	SetVProp 0,1,y/l,.5:Redraw 0,1
-	;
-	Return
+.about:
+	Data$ "BLITZ ONLINE REFERENCE MANUAL"
+	Data$ ""
+	Data$ "Developed By Simon Armstrong"
+	Data$ ""
+	Data$ "(C)1995 Acid Software"
+	Data$
+	Data$ "* Use Arrow keys to scroll, Shift to scroll faster."
+	Data$ "* Hit Esc to exit back to the Blitz editor."
+	Data$ "* Click on Example to view example code if available."
+	Data$ "***"
 
-readhelp:
-	If WriteMem(0,"help/"+f$)
-		FileInput 0:l=0
-		While NOT(DosBuffLen(0))
-			a$(l)=Edit$(1024)
-			##[$80BB]
-				ll=Len(a$(l))
-				If ll>w
-					j=w:While Mid$(a$(l),j,1)<>" ":j-1:Wend
-					a$(l+1)=Mid$(a$(l),j+1)
-					a$(l)=Left$(a$(l),j):l+1
-				EndIf
-			##[$80BC] ll<=w
-			l+1
+.doexample
+	ex$="blitz2:help/examples/"+Mid$(a$(pos0),2)+".bb"
+	If WriteMem(1,ex$)
+		BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+		FileInput 1
+		While NOT DosBuffLen(1)
+			NPrint Edit$(256)
 		Wend
+		CloseFile 1
+		WindowInput 0
+	Else
+		ex$=""
+	EndIf
+	y=0:Gosub update
+	Return
+
+.renderbitmap:	 ;pos0..pos1
+	;
+	BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll:ng=0
+	;
+	For i=pos0 To pos1-1
+		;
+		a$=a$(i):y=0:c=#bmc:t$=""
+		;
+		If Instr(a$,Chr$(9))>0 Then Gosub dotable:Goto nxline
+		;
+		If Left$(a$,1)="+" Then Gosub dogadget:Goto nxline
+		;
+		If Left$(a$,1)="*"
+			a$=Mid$(a$,2):c-2:t$=" ":y=CursY*8+4:NPrint ""
+		EndIf
+		;
+		If Left$(a$,1)="@"
+			a$=Mid$(a$,2)
+			If a$<>"" Then a$="Parameters: "+a$+Chr$(10)
+		EndIf
+		;
+		While Len(a$)>64
+			j=#bmc:While Mid$(a$,j,1)<>" " AND j>0:j-1:Wend
+			If j=0 Then j=#bmc
+			NPrint t$,Left$(a$,j)
+			a$=Mid$(a$,j+1)
+		Wend
+		NPrint t$,a$
+		If y<>0
+			NPrint ""
+			Box 0,y-2,#bmw-1,CursY*8-3,1
+			Box 3,y+1,#bmw-4,CursY*8-6,1
+		EndIf
+		If i=pos0 Then NPrint ""
+		nxline
+	Next
+	Return
+
+.dogadget:
+	x1=CursX*8:y1=CursY*8
+	If ng=0 Then ny=y1-3
+	Print Centre$(Mid$(a$,2),24)
+	Boxf x1+10,y1-3,x1+182,y1+9,-1
+	Box x1+12,y1-2,x1+180,y1+8,0
+	If CursX=24*3 Then Locate 0,CursY+2
+	ng+1
+	Return
+
+.dotable: ;scan through for columns and size
+	;
+	nc=0:p=0			;scan title line
+	##[$80BB]
+		pp=Instr(a$,Chr$(9),p+1):If pp=0 Then pp=Len(a$)
+		nc+1:nc(nc)=pp-p+2:p=pp
+	##[$80BC] p=Len(a$)
+	;
+	j=i+1:tend=pos1
+	;
+	While j<tend
+		m=0:a$=a$(j):j+1:c=1
+		If a$<>""
+			##[$80BB]
+				mm=Instr(a$,Chr$(9),m+1)
+				If mm=0 Then mm=Len(a$)
+				If (mm-m)>nc(c) Then nc(c)=mm-m+2
+				m=mm:c+1
+			##[$80BC] m=Len(a$)
+		Else
+			If Instr(a$(j),Chr$(9))=0 Then tend=j-1 ;end of table
+		EndIf
+	Wend
+	;
+	tc=#bmc
+	For j=1 To nc-1:tc-nc(j):Next:If nc(j)>tc Then nc(j)=tc
+	;
+	y1=CursY*8+4:NPrint ""
+	;
+	For j=i To tend
+		b$=a$(j):Gosub printline
+		If j=i Then NPrint "" Else Locate CursX,CursY+.5
+	Next
+	;
+	y2=CursY*8:x1=4:x2=4	 ;nc(1)*8-6
+	For j=1 To nc:Line x2,y1,x2,y2,1:x2+nc(j)*8-8:Next:x2+8
+	Box x1,y1,x2,y1+14,1
+	Box x1,y1+16,x2,y2,1
+	;
+	i=tend
+	;
+	Return
+
+.printline:
+	Print " ":p=0:k=1:c=1
+	##[$80BB]
+		pp=Instr(b$,Chr$(9),p+1):If pp=0 Then pp=Len(b$)
+		c$=Mid$(b$,p+1,pp-p)
+		If Len(c$)<nc(c)
+			Print LSet$(c$,nc(c))
+		Else
+			cc=CursX
+			While Len(c$)>nc(c) ;nc(c)
+				k=nc(c)
+				While Mid$(c$,k,1)<>" " AND k>0:k-1:Wend
+				If k=0 Then k=nc(c)
+				Locate cc,CursY:NPrint Left$(c$,k)
+				c$=Mid$(c$,k+1)
+			Wend
+			Locate cc,CursY:Print c$
+		EndIf
+		p=pp:c+1
+	##[$80BC] p=Len(b$)
+	If c$<>"" Then NPrint ""
+	Locate 0,CursY
+	Return
+
+.initgadgets:
+	SelectMode 0,3:SetString 1,2
+	PropGadget 0,-14,12,$11000+2+16+128,1,12,-25 ;gadgets for sliders
+;	TextGadget 0,024,0,$14000,2,"BLITZ2 ONLINE REFERENCE MANUAL"
+	workstart 0,004,-12,$18004,3,"ABOUT"
+	workstart 0,054,-12,$18004,4,"LIBRARY"
+	workstart 0,120,-12,$18004,5,"DESCRIPTION"
+	workstart 0,220,-12,$18004,6,"EXAMPLE"
+	workstart 0,290,-12,$18004,7,"<<"
+	workstart 0,320,-12,$18004,8,">>"
+	workstart 0,350,-12,$18004,9,"INDEX"
+	Return
+
+.readindex
+	indexx=0
+	token=0:Gosub decrunchlib
+	ind=0:ptr.l=0
+	While ptr<bsize.l
+		i(ind)\c=Cvi(Peeks$(Bank(0)+ptr,2)):ptr+2
+		i(ind)\a=Bank(0)+ptr
+		fixstring{Bank(0)+ptr}:t$=Peek$(Bank(0)+ptr):ptr+Len(t$)+1
+		ind+1
+	Wend
+	indexx=ind
+	Return
+
+.loadlib
+	Gosub decrunchlib
+	n=0:m=0:nn=0
+	For i=0 To bsize-1
+		a.b=Peek.b(Bank(0)+i)
+		If a=10
+			ll.l=Bank(0)+m:a$(n)=Peeks$(ll,i-m)
+			If Left$(a$(n),1)="*" Then c(nn)=n:nn+1
+			If Left$(a$(n),1)="|" Then a$(n)="*"+Mid$(a$(n),2)
+			m=i+1:n+1
+		EndIf
+	Next
+	c(nn)=n
+	Return
+
+.decrunchlib
+	library.l=(token LSR 7) AND 511
+	If library>257 Then library-256
+	command=(token AND 127)-1
+	If offset(library)>0
+		seek.l=offset(library)
+		seek=(seek AND $ffff) ASL 2
+		Loc 0,seek
+		##[$BE14] 0,Bank(0),14
+		bsize.l=Peek.l(Bank(0)+6)
+		##[$BE14] 0,Bank(0)+14,Peek.l(Bank(0)+10)
+		CrMDecrunch Bank(0)
+	Else
+		End
 	EndIf
 	Return

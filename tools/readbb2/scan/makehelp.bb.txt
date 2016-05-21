@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/makehelp.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/makehelp.bb
+;
 ; makehelp 7/7/95
 ;
 
@@ -31,8 +31,8 @@ If ReadMem(0,"blitz2:help.dat")
 	;
 	Exists 0,&offset(0),1024:ptr.l=1024/4
 	;
-	i=0:f$="blitz2:dev/help/index":Gosub crunchlib
-	For i=1 To 511:f$="blitz2:dev/help/lib"+Str$(i):Gosub crunchlib:Next
+	i=0:f$="blitz2:helpdev/index":Gosub crunchlib
+	For i=1 To 511:f$="blitz2:helpdev/lib"+Str$(i):Gosub crunchlib:Next
 	;
 	Loc 0,0
 	Exists 0,&offset(0),1024

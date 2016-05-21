@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Blit.bb
-+; ; getashape and Blit example ; Screen 0,3ScreensBitMap 0,0 Cls Circlef 32,32,32,3Circlef 32,32,16,2GetaShape 0,0,0,64,64 Cls Blit 0,160,100MouseWait  See AlsoBlitMode, QBlit, BBlit
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Blit.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Blit.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Blit.bb
+; ; getashape and Blit example ; Screen 0,3ScreensBitMap 0,0 Cls Circlef 32,32,32,3Circlef 32,32,16,2GetaShape 0,0,0,64,64 Cls Blit 0,160,100MouseWait  See AlsoBlitMode, QBlit, BBlit

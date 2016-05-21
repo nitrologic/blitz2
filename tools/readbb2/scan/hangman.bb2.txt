@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Hangman/Source/Hangman.bb2
-+
+
 ; Hangman v1.05 by SD2
 ver$ = " v1.05"; last update 20.1.1994
 

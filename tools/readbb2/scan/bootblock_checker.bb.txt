@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/BootBlock_Checker.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/BootBlock_Checker.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/BootBlock_Checker.bb
+;
 
 ;
 ; * BOOT BLOCK CHECKER

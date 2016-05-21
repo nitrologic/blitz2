@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/cdr/wav.bb
-+;
+;
 ; .WAV file reader
 ;
 

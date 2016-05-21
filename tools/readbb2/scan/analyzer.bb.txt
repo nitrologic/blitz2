@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/analyzer.bb
-+##[$80C3]
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/analyzer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/analyzer.bb
+##[$80C3]
 AMIGA
 DEFTYPE.l
 lmaxlen 0,160,128,1

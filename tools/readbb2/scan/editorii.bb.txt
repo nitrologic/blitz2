@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/nevernoidii/NeverNoidIIE/Source/EditorII.bb
-+; NeverNoid-2 The Editor
+; NeverNoid-2 The Editor
 ; copyright 1987-1993
 ; by A.A. van de Woestijne & R.H. Keizer
 

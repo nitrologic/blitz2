@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/Copper_Balk.bb2
-+LoadShapes 0,"shapes/balk"
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/damen/Copper_Balk.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/damen/Copper_Balk.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/Copper_Balk.bb2
+LoadShapes 0,"shapes/balk"
 
 BLITZ
 lmaxlen 0,384,256,3

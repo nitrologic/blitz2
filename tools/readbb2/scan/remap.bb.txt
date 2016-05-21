@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/remap.bb
-+lmaxlen 0,320,256,4
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/old/remap.bb,/Users/simon/Google Drive/amiga/w/sega/gfx/bakup/remap.bb
+lmaxlen 0,320,256,4
 lmaxlen 1,320,256,4
 
 LoadBitMap 0,"front.end",0

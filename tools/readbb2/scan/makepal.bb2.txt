@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makepal.bb2
-+
+
 If NumPars<>4
 	NPrint "uasage: makepal inputiff outputfile colourreg numcols"
 	End

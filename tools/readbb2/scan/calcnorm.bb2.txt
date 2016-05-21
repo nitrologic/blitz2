@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/3d/calcnorm.bb2
-+Statement scalar{*dest.pnts,*a.pnts,*b.pnts}
+Statement scalar{*dest.pnts,*a.pnts,*b.pnts}
 ##[$80CA] *dest
 	\x=*a\y * *b\z-*a\z * *b\y
 	\y=*a\z * *b\x-*a\x * *b\z

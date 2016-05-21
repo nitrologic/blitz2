@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusLocaleLib.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RomulusLocaleLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RomulusLocaleLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusLocaleLib.bb
+;
 ; andre's localelib	(rev bum6)
 ;
 

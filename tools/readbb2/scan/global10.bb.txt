@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/mag/map/global10.bb
-+Use ##[$8526] 0
+Use ##[$8526] 0
 dt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100
 t$="start"
 #maxpost=300:#maxedge=200:#maxngon=40

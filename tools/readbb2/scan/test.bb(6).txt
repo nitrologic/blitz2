@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bakup/test.bb,/Users/simon/Google Drive/amiga/w/sega/shit/test.bb
+allocst 0,4
+ScreensBitMap 0,0
+BitMapOutput 0
+
+
+For i=9 To 0 Step -1
+	BlockScroll
+	Locate 0,0:Print Str$(i)
+	For x=0 To 7
+		For y=0 To 7
+			If Cls(x,y) Then Circle 20+x*32,10+y*32,5,1
+		Next
+	Next
+	VWait 20
+Next
+
+MouseWait
+End

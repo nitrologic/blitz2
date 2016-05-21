@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/scroller.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/scroller.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/scroller.bb2
+;
 ; mouse controlled scroller
 ;
 BLITZ
@@ -17,11 +17,12 @@ Next
 Scroll 0,0,320,256,320,0
 Scroll 0,0,640,256,0,256
 ;
-Slice 0,44,320,256,$fff8,3,8,8,640,640
+InitCopList 0,$13
+CreateDisplay 0
 ;
 While Joyb(0)=0
 	VWait
-	Show db,x,y
+	DisplayBitMap 0,db,x,y
 	xa=QLimit(xa+MouseXSpeed,-20,20)
 	ya=QLimit(ya+MouseYSpeed,-20,20)
 	x=QWrap(x+xa,0,320)

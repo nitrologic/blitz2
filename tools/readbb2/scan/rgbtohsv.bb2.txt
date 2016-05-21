@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/rgbtohsv.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Examples/rgbtohsv.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Examples/rgbtohsv.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Examples/rgbtohsv.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/rgbtohsv.bb2
+;
 ; hmmm, what's this doing here?
 ;
 

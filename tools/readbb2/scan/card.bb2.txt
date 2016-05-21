@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/card.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/resources/card.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/card.bb2
+;
 ; $VER: card.bb2 40.0 (01.03.94)
 ;
 

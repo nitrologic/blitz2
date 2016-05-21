@@ -1,0 +1,101 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/RatMail/Includes/Select.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/RatMail/Includes/Select.bb
+DEFTYPE.l
+
+	Dim LL$(1000)
+
+	ScreenPens 1,1,2,1,3,0
+	allocst 0,0,0,672,256,2,$8000,title$,1,2
+	Gosub init :CL=200
+	Gosub SELECTION
+	WCls 0
+	WLocate 0,10:NPrint "Selected ",SELECTED," ",LL$(SELECTED)
+	While Joyb(0)<>0:Wend
+	MouseWait
+	End
+
+.SELECTION
+
+; Send CL with number of lines to select from
+; LL$ loaded with text lines data
+; Returns SELECTED as a number of the line the user selected
+
+DL=CL-30:EL=CL-29
+BOD.q=.9999:If CL>30 Then BOD=30/CL
+L=1:SELquit.b=0:SELECTED=-1
+
+	PropGadget 2,650,21,160,1,16,221
+	SetVProp 2,1,0,BOD
+	workstart 2,650,9,0,2,"^"
+	workstart 2,650,242,0,3,"v"
+	SetString 2,1
+	localstat 2,0,0,672,256,$1808,"",1,2,2
+	WColour 1,0
+
+	OL=L:WBox 0,12,649,256,0
+	WLocate 0,4:For t=0 To 29:NPrint LL$(L+t):Next
+
+##[$80BB]
+	ev=WaitEvent
+	If ev=32
+		Select GadgetHit
+		Case 1
+			##[$80BB]
+				L=Int(VPropPot(2,1)*EL)+1
+				If L<>OL
+					OL=L
+					WBox 0,12,640,256,0
+					WLocate 0,4
+					For t=0 To 29:NPrint LL$(L+t):Next
+				EndIf
+			##[$80BC] Event=64
+		Case 2
+			While Event<>64 AND L>1
+				VWait
+				WScroll 0,13,640,252,0,-8
+				WBox 0,12,640,20,0
+				L-1:WLocate 0,4
+				Print LL$(L)
+				SetVProp 2,1,(L-1)/DL,BOD
+				Redraw 2,1
+			Wend
+			OL=L
+		Case 3
+			While Event<>64 AND L<=DL
+				VWait
+				WScroll 0,13,640,256,0,8
+				WBox 0,245,640,256,0
+				L+1:WLocate 0,236
+				Print LL$(L+29)
+				SetVProp 2,1,L/DL,BOD
+				Redraw 2,1
+			Wend
+			OL=L
+		End Select
+	EndIf
+	If ev=$8
+		If MButtons=1
+			x=WMouseX:y=WMouseY
+			If x>0 AND x<640 AND y>8 AND y<256
+				SELECTED=L-1+(y-4)/8
+				SELquit=1
+			End If
+		End If
+	End If
+
+##[$80BC] ev=$200 OR SELquit=1
+
+;Free Window 2
+;Use Window 0
+
+For t=0 To CL+1
+	LL$(t)=""
+Next
+
+Return
+
+
+init:
+	For t=1 To 200
+		LL$(t)="This is line "+Str$(t)+" isn't it a nice one?"
+ Next
+Return

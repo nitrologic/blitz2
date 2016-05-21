@@ -1,0 +1,155 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/shit/help.bb
+;
+; blitz2 online help system
+;
+
+; need support for tabs, tables etc.
+; need to handle example code
+
+lmaxlen 0,512,512,1
+Box 0,0,511,511,1
+For i=1 To 50:Line Rnd(512),Rnd(512),Rnd(512),Rnd(512),1:Next
+
+Gosub renderbitmap
+
+f$="window"
+
+##[$80CC]:FindScreen 0:*s.Screen=Peek.l(##[$80B8] allocst(0))
+
+ww.w=*s\Width&$fff0 ;windowwidth
+wh.w=*s\Height/2		;windowheight
+ww=640
+
+ww=536
+
+Dim a$(128)
+
+SelectMode 0,3:SetString 1,2
+PropGadget 0,-14,10,$11000+2+16+128,1,12,-20 ;gadgets for sliders
+
+workstart 0,024,0,$14000,2,"BLITZ ONLINE REFERENCE MANUAL"
+
+workstart 0,004,-12,$18004,3,"ABOUT"
+workstart 0,054,-12,$18004,4,"LIBRARY"
+workstart 0,120,-12,$18004,5,"DESCRIPTION"
+workstart 0,220,-12,$18004,6,"EXAMPLE"
+workstart 0,290,-12,$18004,7,"EXIT"
+
+AddIDCMP $10 ;report mouse moves for domove routine
+
+SizeLimits 536,64,536,1024
+
+localstat 0,0,12,ww,wh,$143b+$80,"",1,2,0
+
+;WColour 0,1;:WCls 1
+
+WLocate 0,4
+
+Gosub sizewindow
+Gosub readhelp
+WCls 2
+;Gosub reprint
+
+##[$80BB]
+	WindowInput 0
+	ev.l=WaitEvent
+	If ev=2 Then Gosub sizewindow:Gosub reprint
+	If ev=$20
+		If GadgetHit=1
+			##[$80BB]
+				y=VPropPot(0,1)*l/2:
+				BitMaptoWindow 0,0,0,y,1,1,512,WindowHeight-27
+				;Gosub reprint:
+			##[$80BC] WaitEvent<>$10
+		EndIf
+	EndIf
+	If ev=$400
+		WLocate 0,0:a$=Inkey$
+		If RawKey=$4c Then y-1:Gosub reprint
+		If RawKey=$4d Then y+1:Gosub reprint
+		If RawKey=$45 Then End
+	EndIf
+##[$80BC] ev=$200
+
+End
+
+renderbitmap: ;f$=file
+	If WriteMem(0,"help/"+f$)
+		FileInput 0
+		BitMapOutput 0
+		Use lmaxlen 0:BlockScroll
+		While NOT(DosBuffLen(0))
+			a$=Edit$(1024)
+			While Len(a$)>64
+				j=64:While Mid$(a$,j,1)<>" ":j-1:Wend
+				NPrint Left$(a$,j)
+				a$=Mid$(a$,j+1)
+			Wend
+			NPrint a$
+		Wend
+	EndIf
+	Return
+
+sizewindow
+	w=(WindowWidth-20)/8 ;textwidth
+	h=(WindowHeight-22)/8 ;textheight
+	Return
+
+renderhelp
+	Use lmaxlen 0:BitMapOutput 0
+	;
+	h=QLimit(h,0,l-1)
+	y=QLimit(y,0,l-h)
+	;
+	WLocate 0,2
+	;
+	For i=y To QLimit(y+h-1,0,l-1)
+		If a$(i)<>""
+			NPrint LSet$(a$(i),w)
+		Else
+			NPrint String$(" ",w)
+			WLine 0,WCursY-5,511,WCursY-5,2
+		EndIf
+	Next
+	;
+	SetVProp 0,1,y/l,.5:Redraw 0,1
+	;
+	Return
+
+reprint
+	;
+	h=QLimit(h,0,l-1)
+	y=QLimit(y,0,l-h)
+	;
+	WLocate 0,2
+	;
+	For i=y To QLimit(y+h-1,0,l-1)
+		If a$(i)<>""
+			NPrint LSet$(a$(i),w)
+		Else
+			NPrint String$(" ",w)
+			WLine 0,WCursY-5,511,WCursY-5,2
+		EndIf
+	Next
+	;
+	SetVProp 0,1,y/l,.5:Redraw 0,1
+	;
+	Return
+
+readhelp:
+	If WriteMem(0,"help/"+f$)
+		FileInput 0:l=0
+		While NOT(DosBuffLen(0))
+			a$(l)=Edit$(1024)
+			##[$80BB]
+				ll=Len(a$(l))
+				If ll>w
+					j=w:While Mid$(a$(l),j,1)<>" ":j-1:Wend
+					a$(l+1)=Mid$(a$(l),j+1)
+					a$(l)=Left$(a$(l),j):l+1
+				EndIf
+			##[$80BC] ll<=w
+			l+1
+		Wend
+	EndIf
+	Return

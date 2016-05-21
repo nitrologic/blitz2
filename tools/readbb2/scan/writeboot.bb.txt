@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/code/disk/writeboot.bb
-+
+
 
 ;SELFBOOTING PROGRAM MAKER - V4.0 Uses marks thing..(pp'ed)
 

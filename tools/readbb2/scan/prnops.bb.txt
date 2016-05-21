@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/PRNOPS.BB
-+#G7=6
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/PRNOPS.BB,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/PRNOPS.BB
+#G7=6
 #G5=5
 #G4=3
 #G3=2

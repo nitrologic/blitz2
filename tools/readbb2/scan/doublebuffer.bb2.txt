@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/doublebuffer.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/doublebuffer.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/doublebuffer.bb2
+;
 ;This example demonstrates the principle behind 'double buffering'
 ;
 ;Double buffering is a programming technique allowing you
@@ -64,9 +64,10 @@ longmult 1,50
 
 ;initialize a slice, and set it's colour palette
 ;
-Slice 0,44,320,200,$fff0,3,8,32,320,320
-Use SetCycle 0
-Show 0
+InitCopList 0,44,200,3,8,8,0
+DisplayPalette 0,0
+DisplayBitMap 0,0
+CreateDisplay 0
 
 ;now, process all ballss...
 ;
@@ -86,7 +87,7 @@ While Joyb(0)=0
 	;the 'db=1-db' will cause the 'db' variable to switch
 	;between 0/1/0/1/0/1...
 	;
-	Show db:db=1-db:Use lmaxlen db
+	DisplayBitMap 0,db:db=1-db:Use lmaxlen db
 
 	;unqueue items on the 'used' bitmap:
 	;
@@ -112,3 +113,5 @@ While Joyb(0)=0
 
 	Wend
 Wend
+
+End

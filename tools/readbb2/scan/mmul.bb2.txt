@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/mmul.bb2
-+;
+;
 ;mmul - matrix multiplication prog...
 ;
 ;mmul w1 h1 w2 h2

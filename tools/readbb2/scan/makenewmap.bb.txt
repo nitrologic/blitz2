@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makenewmap.bb
-+NEWTYPE .frend :lti.w:ltj:rti:rtj:End NEWTYPE
+NEWTYPE .frend :lti.w:ltj:rti:rtj:End NEWTYPE
 
 	f$="maps:t1/cross"
 

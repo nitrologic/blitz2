@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/lines.bb2
-+; LINES BY SPECTRE IN BLITZ II
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/spectre/lines.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/spectre/lines.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/spectre/lines.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/lines.bb2
+; LINES BY SPECTRE IN BLITZ II
 
 LoadModule 1,"mod.funkinator"
 

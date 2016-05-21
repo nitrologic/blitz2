@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/editmap.bb
-+
+
 k.f=##[$80BA]/180
 
 ##[$80C3]

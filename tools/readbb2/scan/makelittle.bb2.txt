@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makelittle.bb2
-+allocst 0,3:ScreensBitMap 0,0:BlockScroll
+allocst 0,3:ScreensBitMap 0,0:BlockScroll
 LoadShape 0,"little.iff",0:Use SetCycle 0
 longdiv 0,0,0
 

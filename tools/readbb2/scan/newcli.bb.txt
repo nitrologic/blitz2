@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/newcli.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/newcli.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/newcli.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/newcli.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/newcli.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/newcli.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/newcli.bb
+;
 ; launching a CLI from a Blitz2 application
 ;
 ; note the use of the new commands WBWidth and WBHeight for full size cli

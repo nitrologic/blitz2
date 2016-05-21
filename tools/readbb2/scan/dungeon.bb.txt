@@ -1,19 +1,26 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/stuff/dungeon.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/simonsdemos/dungeon.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/simonsdemos/dungeon.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/AF52_Listings/dungeon.bb,/Users/simon/Google Drive/amiga/w/disks/crap/art/af1/dungeon/dungeon.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/AF52_Listings/dungeon.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/dungeon/dungeon.bb
+;
 ; MONSTA's IN THE DUNGEON by Simon Armstrong
 ;
 
-DEFTYPE .w							;all variables are integers
+DEFTYPE .w						;all variables are integers
 
-xs=31:ys=15						 ;size of map
-nummonsters=5					 ;number of monsters
+console=False				 ;make true to run on std console (cli)
+width=128						 ;standard map size as in editor
+height=64
+size=width*height
+dispw=32
+disph=16							;display width and height
+map$="map1"
+nummonsters=256			 ;maximum number of monsters
 
-home$=Chr$($9b)+"H"				 ;strings for clearing a standard console
-mycls$=home$+Chr$($9b)+"J"	;including an ascii terminal
-
-NPrint mycls$
-
-Dim map.b(xs,ys)		;standard 2D array for the map
+If console
+	home$=Chr$($9b)+"H":mycls$=home$+Chr$($9b)+"J" ;strings for consoles
+Else
+	FindScreen 0
+	localstat 0,20,20,270,170,$1400,"MONSTER GAME",1,2
+	WindowInput 0:WindowOutput 0
+EndIf
 
 NEWTYPE .monstype	 ;the monster object
 	x.w:y.w
@@ -23,18 +30,41 @@ Dim ##[$80B3] monster.monstype(nummonsters)	;loads of monsters!
 
 Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
 
+Dim map.b(width-1,height-1)		;standard 2D array for the map
+
 .maingame:
-	Gosub setupmap
-	Gosub setupmonsters
-	Gosub setupgame
-	##[$80BB]										;main loop
-		Gosub drawmap
-		Gosub yourmove
-		Gosub monstermove
+	turn=0:gameover=False	;reset game variables
+	myx=10:myy=10					;in case no B found on the map
+	Gosub readmap					;read file map$ into map array
+	Gosub welcome					;do front end
+	##[$80BB]								 ;main loop
+		Gosub drawmap				;refresh display
+		Gosub yourmove			 ;get player's move
+		Gosub monstermove		;move the monsters
 	##[$80BC] gameover=True
 	Print "PLAY AGAIN? (Y/N)"
 	If UCase$(Edit$(1))="Y" Then Goto maingame
 	End
+
+.readmap
+	If WriteMem(0,map$)											;if file found
+		##[$BE14] 0,&map(0,0),size:CloseFile 0	 ;raw read into array
+		ClearList monster()										;find the monsters!
+		For x=0 To width-1:For y=0 To height-1 ;and record all their
+			If map(x,y)=3												;positions in list
+				If globalloc(monster()) Then monster()\x=x,y
+			EndIf
+			If map(x,y)=4 Then myx=x:myy=y ;found BMan's start position!
+		Next y,x
+	Else
+		End	;couldn't find file (we're in the wrong directory?)
+	EndIf
+	Return
+
+.welcome:
+	NPrint "WELCOME TO THE DUNGEON!"
+	NPrint "	 HIT RETURN TO PLAY	"
+	a$=Edit$(1):Return
 
 .monstermove:
 	##[$80CA] monster()
@@ -51,19 +81,12 @@ Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
 		Select map(\x,\y)													;whats in new pos?
 			Case 0:map(\x,\y)=3											;empty space cool!
 			Case 1:\x=oldx:\y=oldy:map(\x,\y)=3			;wall back up!
-			Case 2:freelast monster()								;down a hole!
+			Case 2:map(\x,\y)=1:freelast monster()	 ;down a hole!
+			Case 3:\x=oldx:\y=oldy:map(\x,\y)=3			;another monster!
 			Case 4:NPrint "HA GOTCHA!":gameover=True ;he got me!
 		End Select
 	Wend
 	If NOT LastItem(monster()) Then NPrint "SUCCESS!":gameover=True
-	Return
-
-.setupmonsters:
-	ClearList monster()
-	While globalloc(monster())							;fill list array
-		monster()\x=Rnd(xs-2)+1,Rnd(ys-2)+1 ;with monstas in rnd pos
-		map(monster()\x,monster()\y)=3			;and stick 'em on the map
-	Wend
 	Return
 
 .yourmove:
@@ -83,30 +106,11 @@ Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
 	EndIf
 	Return
 
-.drawmap:		 ;up to home position then loop through both dimensions
-	Print home$
-	For y=0 To ys:For x=0 To xs:Print c$(map(x,y)):Next:NPrint "":Next
-	Return
-
-.setupmap:			;add border than stick walls in random places
-	For y=0 To ys
-		For x=0 To xs
-			If y=0 OR x=0 OR y=ys OR x=xs	;its a border
-				map(x,y)=1
-			Else
-				map(x,y)=0
-				If Rnd(10)<1 Then map(x,y)=1	 ;wall
-				If Rnd(10)<.25 Then map(x,y)=2 ;hole
-			EndIf
-		Next
+.drawmap:
+	If console Then Print home$ Else WLocate 0,0
+	posx=QLimit(myx-dispw/2,0,width-dispw)
+	posy=QLimit(myy-disph/2,0,height-disph)
+	For y=0 To disph-1
+		For x=0 To dispw-1:Print c$(map(posx+x,posy+y)):Next:NPrint ""
 	Next
 	Return
-
-.setupgame
-	turn=0:gameover=False						;reset game variables
-	myx=xs/2:myy=ys/2:map(myx,myy)=4 ;put me in middle of map
-	Return
-
-;FindScreen 0:Window 0,20,20,320,256,$1400,"MONSTER GAME",1,2
-;WindowInput 0:WindowOutput 0
-;WLocate 0,0 replaces print home$

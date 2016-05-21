@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/examples/rgbtohsv.bb
-+;rgbtohsv
+;rgbtohsv
 
 max=0:min=255
 If r>max Then max=r

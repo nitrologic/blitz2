@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/acidlibsrc/defaultdbug.bb2
-+
+
 
 ;OK, here's the source code to the Blitz2 default debugger.
 ;

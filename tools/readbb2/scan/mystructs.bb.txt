@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/DropIt/mystructs.bb
-+;/* ======================================================================== */
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk2/DropIt/mystructs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/DropIt/mystructs.bb
+;/* ======================================================================== */
 ;/* === Window ============================================================= */
 ;/* ======================================================================== */
 NEWTYPE.AARONWindow

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makefrags.bb2
-+;
+;
 ;alien fragmenter!
 ;
 If NumPars<2 OR NumPars>4

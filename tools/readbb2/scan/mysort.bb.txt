@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/mysort.bb
-+##[$80B4]:End:End ##[$80B4]
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/mysort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/mysort.bb
+##[$80B4]:End:End ##[$80B4]
 
 Statement sortlist{mylist.l}
 	UNLK a4:MOVEM.l a4-a6,-(a7)

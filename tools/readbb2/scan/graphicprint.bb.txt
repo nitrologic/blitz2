@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicPrint.bb
-+##[$80CC]
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/GraphicPrint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicPrint.bb
+##[$80CC]
 ##[$80C3]
 freest 0
 ##[$FFB5]

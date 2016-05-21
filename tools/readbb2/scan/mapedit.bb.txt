@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/mapedit.bb
-+;
+;
 ;WINDOW/GADGETLIST							 USE
 ;			 0								 Back Drop
 ;			 1								 Block window

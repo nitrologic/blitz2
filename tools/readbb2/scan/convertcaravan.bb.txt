@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/skid2/skidpc/convertcaravan.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/convertcaravan.bb,/Users/simon/Google Drive/amiga/w/skid2/skidpc/convertcaravan.bb
+;
 ; imagine to skidmarks car converter
 ;
 

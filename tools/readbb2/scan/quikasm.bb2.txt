@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/quikasm/quikasm.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/quikasm/quikasm.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/quikasm/quikasm.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/quikasm/quikasm.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/quikasm/quikasm.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/quikasm/quikasm.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/quikasm/quikasm.bb2
+;
 ; WARNING 030&040 USERS MUST TURN OFF ALL CACHE'S WHEN RUNNING QUIKASM
 ;
 

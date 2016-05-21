@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/TANKX.1.BB2
-+allocst 0,0,0,640,256,2,$28000,"A CURVE",1,2
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/TANKX.1.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/TANKX.1.BB2
+allocst 0,0,0,640,256,2,$28000,"A CURVE",1,2
 ScreensBitMap 0,0
 BitMapOutput 0
 

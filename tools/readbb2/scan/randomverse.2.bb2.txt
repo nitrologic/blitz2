@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/RandomVerse.2.bb2
-+Dim BOOK$(64):Dim CHAPTER(64):Dim VERSE(64,150)
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/RandomVerse.2.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/RandomVerse.2.bb2
+Dim BOOK$(64):Dim CHAPTER(64):Dim VERSE(64,150)
 
 For COUNT=1 To 11
 	Read BOOK$(COUNT)

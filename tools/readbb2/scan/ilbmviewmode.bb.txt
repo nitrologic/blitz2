@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ILBMViewMode.bb
-+;;ilbminfo example ;;iff file name could use f$=par$(1) to use cli argument f$="test.iff" ;get ilbm information ILBMInfo f$ ;open screen with correct parametersScreen 0,0,0,ILBMWidth,ILBMHeight,ILBMDepth,ILBMViewMode,"",1,2 ;load the iff onto the screensLoadScreen 0,f$,0 ;set the paletteUse Palette 0 MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/ILBMViewMode.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ILBMViewMode.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ILBMViewMode.bb
+;;ilbminfo example ;;iff file name could use f$=par$(1) to use cli argument f$="test.iff" ;get ilbm information ILBMInfo f$ ;open screen with correct parametersScreen 0,0,0,ILBMWidth,ILBMHeight,ILBMDepth,ILBMViewMode,"",1,2 ;load the iff onto the screensLoadScreen 0,f$,0 ;set the paletteUse Palette 0 MouseWait 

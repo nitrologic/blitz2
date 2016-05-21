@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/shit/kill.bb
-+If ReadMem(1,"ram:errs")
+If ReadMem(1,"ram:errs")
 	FileOutput 1
 	FileOutput 0
 	If WriteMem(0,"ram:shit")

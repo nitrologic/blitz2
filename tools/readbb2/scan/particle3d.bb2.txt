@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Particle/Particle3d.bb2
-+;Hello,
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/Particle/Particle3d.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Particle/Particle3d.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/Particle/Particle3d.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Particle/Particle3d.bb2
+;Hello,
 ;Well, this program is a little experiment from me. It was created
 ;for Acid but it is not finished... yet :-)
 ;As you can see: it is not full documented (especially not the ASM-

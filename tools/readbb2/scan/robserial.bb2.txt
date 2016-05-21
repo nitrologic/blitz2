@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/RobSerial.bb2
-+Function.b initserial{devname$,unit.l,baud.l,serflags.b,buffsize.l}
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/net/RobSerial.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/RobSerial.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/RobSerial.bb2
+Function.b initserial{devname$,unit.l,baud.l,serflags.b,buffsize.l}
 	Shared *SerialMP.MsgPort, *SerialIO.IOExtSer
 
 	result.l = False

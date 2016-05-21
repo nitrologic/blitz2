@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abc/vr/fly/bbflight.bb
-+;INCDIR "BLITZ2:"
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABC3/vr/fly/bbflight.bb,/Users/simon/Google Drive/amiga/w/abc/vr/fly/bbflight.bb
+;INCDIR "BLITZ2:"
 
 ;INCLUDE "debug.bb"
 

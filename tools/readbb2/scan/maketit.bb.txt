@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/maketit.bb
-+Goto top
+Goto top
 
 Function.w chkblock{b0.l,b1.l}
 	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3

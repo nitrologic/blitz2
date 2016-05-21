@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreMathLib.bb
-+.MATH
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/ElmoreMathLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/ElmoreMathLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreMathLib.bb
+.MATH
 
 ;
 ; #elmoremathlib=105	(rev bum6)

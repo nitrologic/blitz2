@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/TurboHockey/TurboHockey.bb2
-+;												Turbo Hockey
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/TurboHockey/TurboHockey.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/TurboHockey/TurboHockey.bb2
+;												Turbo Hockey
 ;								 Copyright 1993 Michael Boeh
 ;
 ;	 A very simple hockey game I wrote in less than 2 days!

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/BTLEditor.bb2
-+								 ;;***************************;;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/bailey/BTLEditor.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/BTLEditor.bb2
+								 ;;***************************;;
 								 ;;													 ;;
 								 ;;	BIKE THING LEVEL EDITOR	;;
 								 ;;	 Ted Bailey - May 1994	 ;;

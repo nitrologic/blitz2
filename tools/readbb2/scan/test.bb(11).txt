@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/nu/test.bb,/Users/simon/Google Drive/amiga/w/skid2/shit/test.bb
+lmaxlen 0,1024,560,4
+LoadBitMap 0,"gfx/skidtoon.iff",0
+BLITZ
+InitCopList 0,$104
+CreateDisplay 0
+DisplayBitMap 0,0
+DisplayPalette 0,0
+
+DecodePalette 1,16
+
+n=0
+
+While Joyb(0)=0
+	VWait
+	DuplicatePalette 0,1,n
+	DisplayPalette 0,1
+	n+1/64
+	If n>1 Then n=0
+Wend
+
+MouseWait
+End

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/NeilsSupportLib.bb
-+;					**************************************************
+;					**************************************************
 ;					**																							**
 ;					**	 Amiga Support Library for Blitz Basic II	 **
 ;					**																							**

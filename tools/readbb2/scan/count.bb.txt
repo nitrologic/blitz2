@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/count.bb
-+Statement docount{vram.l,count.w}
+Statement docount{vram.l,count.w}
 	MOVE.l d0,a0:MULU #9*16,d1:LEA countdown(pc,d1),a1
 	MOVEQ#15,d7:MOVE.l a0,a2:ADDQ#1,a1:MOVE.l
 	MOVEQ#9,d6:MOVE.b(a1)+,d0:ADDQ#0,d0:MOVE d0,(a0)+

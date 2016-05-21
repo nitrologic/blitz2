@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/blits.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/blits.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/blits.bb2
+;
 ;A little demo of moving things using the Blit command...
 
 ;create a 'ball' type variable
@@ -39,9 +39,10 @@ lmaxlen 0,320,200,3
 
 ;initialize a slice, and set it's colour palette
 ;
-Slice 0,44,320,200,$fff0,3,8,32,320,320
-Use SetCycle 0
-Show 0
+InitCopList 0,44,200,3,8,32,0
+DisplayPalette 0,0
+DisplayBitMap 0,0
+CreateDisplay 0
 
 ;now, process all ballss...
 ;
@@ -88,3 +89,5 @@ While Joyb(0)=0
 		longdiv 0,balls()\x,balls()\y
 	Wend
 Wend
+
+End

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dev/devshell.bb2
-+
+
 #replymsg=-378
 ;
 #ioerr_openfail=-1

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/redo.bb
-+LoadShapes 0,"overlays/shapes.shapes"
+LoadShapes 0,"overlays/shapes.shapes"
 casestrcomp 0,"overlays/shapes.iff"
 
 lmaxlen 0,320,512,4

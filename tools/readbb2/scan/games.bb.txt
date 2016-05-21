@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/games.bb
-+casestrcomp 0,"work.iff"
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/games.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/games.bb
+casestrcomp 0,"work.iff"
 LoadShapes 0,"blocks.shapes"
 LoadShapes 4,"balls.shapes"
 

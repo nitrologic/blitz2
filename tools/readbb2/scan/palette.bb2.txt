@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/palette.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/palette.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum3/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/palette.bb2
+;
 ; simple palette requester
 ;
 FindScreen 0

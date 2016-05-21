@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/SpaceMan/SpaceManSource.bb2
-+;((F))2
+;((F))2
 ;a--------------------------------
 ;This is a development sourcecode for
 ;the SpaceMan program. I've tried to make it

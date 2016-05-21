@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/x-word/X-word.bb
-+;------------------------------------------------------------------
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/x-word/X-word.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/x-word/X-word.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/x-word/X-word.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/x-word/X-word.bb
+;------------------------------------------------------------------
 ; WordHacker V 0.91	(first release for B_U_M8!)	Written in Blitz
 ;
 ; This program is used to help solve Cross Word Puzzels.

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/random.bb
-+Statement Randomize{ThisSeed.l}
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/random.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/random.bb
+Statement Randomize{ThisSeed.l}
 ; This routine "seeds" the random number generator.	If you
 ; call Randomize{0}, the sequence is truly random.	By calling
 ; Randomize{x}, then the sequence of numbers returned is the same

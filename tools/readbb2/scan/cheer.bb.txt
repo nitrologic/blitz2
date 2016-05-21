@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/overlays/cheer.bb
-+Statement getblock{blok.l,bm.l,x.w,y.w}
+Statement getblock{blok.l,bm.l,x.w,y.w}
 	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
 	LSR#3,d2:ADD d2,a1:EXT.l d3
 	MULU#40,d3:ADD.l d3,a1

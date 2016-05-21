@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makekeys.bb2
-+
+
 DEFTYPE.l
 
 allocst 0,3:ScreensBitMap 0,0:BlockScroll

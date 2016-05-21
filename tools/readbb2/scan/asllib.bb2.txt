@@ -1,5 +1,4 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/asllib.bb2
-+##[$80CB]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/vs/ASLRequestLib/asllib.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/vs/ASLRequestLib/asllib.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/ASLRequestLib/asllib.bb2
 
 NEWTYPE.WBArg
 *wa_Lock.b

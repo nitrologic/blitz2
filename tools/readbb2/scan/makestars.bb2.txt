@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makestars.bb2
-+Dim a.l(3)
+Dim a.l(3)
 a(0)=$80000000
 a(1)=$00008000
 a(2)=$80008000

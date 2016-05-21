@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/cars/goodmake.bb
-+;
+;
 ; compress cars (72 longs each)
 ;
 

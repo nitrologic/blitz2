@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/smoothscrolling.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/blitzmode/smoothscrolling.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/blitzmode/smoothscrolling.bb2
+;
 ;This little example demonstrates how to achive 'smooth scrolling'
 ;
 ;This method is very memory intensive, as it involves the
@@ -26,7 +26,8 @@ Next
 
 ;set up a slice.
 ;
-Slice 0,44,320,200,$fff8,3,8,32,640,640
+InitCopList 0,44,200,$13,8,8,0
+CreateDisplay 0
 
 ;turn on mouse reading
 ;
@@ -42,5 +43,7 @@ While Joyb(0)=0
 
 	;show bitmap at offset
 	;
-	Show 0,MouseX,MouseY
+	DisplayBitMap 0,0,MouseX,MouseY
 Wend
+
+End

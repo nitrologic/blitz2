@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIAnimLib.bb
-+;RIAnimlib v1.0
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RIAnimLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RIAnimLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIAnimLib.bb
+;RIAnimlib v1.0
 ;(C)1994 Reflective Images
 ;Written by Stephen McNamara
 ;June-July 1994

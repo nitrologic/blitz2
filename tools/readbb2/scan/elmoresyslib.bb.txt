@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreSysLib.bb
-+.SYSTEM
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/ElmoreSysLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/ElmoreSysLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreSysLib.bb
+.SYSTEM
 
 ;
 ; #elmoresyslib=107 (rev bum6)

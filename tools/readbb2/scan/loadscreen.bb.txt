@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadScreen.bb
-+; ; loadscreen example program; Screen 0,3,"Click LMB to quit"					 ;open an intuition screen LoadScreen 0,"TestScreen320x200x3",0	;load an IFF ILBM pic.Use Palette 0												;use it's palette MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LoadScreen.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LoadScreen.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadScreen.bb
+; ; loadscreen example program; Screen 0,3,"Click LMB to quit"					 ;open an intuition screen LoadScreen 0,"TestScreen320x200x3",0	;load an IFF ILBM pic.Use Palette 0												;use it's palette MouseWait 

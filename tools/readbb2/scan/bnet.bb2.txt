@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/BNet/BNET.bb2
-+;BNET	 by Bruce Webster	(websbd2@cosc.canterbury.ac.nz
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk2/BNet/BNET.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/BNet/BNET.bb2
+;BNET	 by Bruce Webster	(websbd2@cosc.canterbury.ac.nz
 ;====										or craigw@pretzel.equinox.gen.nz)
 
 

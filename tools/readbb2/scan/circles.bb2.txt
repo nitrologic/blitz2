@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Circles.bb2
-+;================================================================
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/circles.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/circles.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/circles.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/circles.bb2
+;================================================================
 ; Draw a nice little circle pattern....
 ; Written by Stephen McNamara of Leading Edge Software
 ;
@@ -46,7 +46,19 @@ For h.l=0 To 5
 	lmaxlen 0,320,256,5
 Next h
 
-LoadBitMap 0,"circles.iff"
+;
+; simon was here, butchered to save disk space...
+;
+ Print "please wait..."
+ Use lmaxlen 0
+ For r=160 To 1 Step -1
+	 c=r ##[$80B9] 55:c * 30/55:If c>16 Then c=32-c
+	Circlef 160,128,r,c
+ Next
+;
+;
+;
+
 For h.l=1 To 5
 	ShapesBitMap 0,h
 Next h
@@ -88,7 +100,3 @@ dbuffer=1
 	VWait 2
 ##[$80BC] Joyb(0)
 End
-
-##[$80BF] ""
-circles_iff: IncBin "circles.iff"
-	NPrint "Cudd"

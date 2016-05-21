@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ASLFontRequest.bb
-+NEWTYPE .fontinfo name.s ysize.w style.b:flags.b pen1.b:pen2:drawmode:pad End NEWTYPE  FindScreen 0  *f.fontinfo=ASLFontRequest(15)  If *f NPrint *f\name NPrint *f\ysize NPrint *f\pen1 NPrint *f\pen2 NPrint *f\drawmode Else NPrint "cancelled" EndIf  MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/ASLFontRequest.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ASLFontRequest.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ASLFontRequest.bb
+NEWTYPE .fontinfo name.s ysize.w style.b:flags.b pen1.b:pen2:drawmode:pad End NEWTYPE  FindScreen 0  *f.fontinfo=ASLFontRequest(15)  If *f NPrint *f\name NPrint *f\ysize NPrint *f\pen1 NPrint *f\pen2 NPrint *f\drawmode Else NPrint "cancelled" EndIf  MouseWait 

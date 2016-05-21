@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/squareroot.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/squareroot.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/squareroot.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/squareroot.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/squareroot.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/squareroot.bb2
+;
 ; the "why skidmarks doesn't slow down on an A500" routine
 ;
 

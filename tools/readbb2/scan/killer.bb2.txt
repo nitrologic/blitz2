@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Killer.bb2
-+;================================================================
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Killer.bb2
+;================================================================
 ; Draw a nice	starfield + cute ship animation....
 ; Written by Stephen McNamara of Leading Edge Software
 ;

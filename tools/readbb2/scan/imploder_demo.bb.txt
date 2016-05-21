@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Andre/Imploder_Demo.bb
-+##[$80C3]
+##[$80C3]
 ;If NumPars<>1
 ;	DisplayBeep_0
 ;	End

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIToolTypesLib.bb
-+#ritooltypeslib=59
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RIToolTypesLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RIToolTypesLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIToolTypesLib.bb
+#ritooltypeslib=59
 
 ; (C)1994 Reflective Images
 ; Written by Stephen McNamara on 13th and 14th of June

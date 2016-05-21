@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot2.bb
-+;This programme uses integers instead of floating point.
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot2.bb
+;This programme uses integers instead of floating point.
 ;This way is faster than pure floating point and produces
 ;pictures which are just as interesting.
 ;It depends on whether you want a pretty picture

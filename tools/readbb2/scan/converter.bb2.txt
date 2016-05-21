@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/converter.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/converter.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum3/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/converter.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/converter.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/converter.bb2
+;
 ; decimal hex binary converter
 ;
 FindScreen 0

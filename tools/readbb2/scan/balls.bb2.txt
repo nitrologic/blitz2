@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/balls.bb2
-+; Dancing Balls By SPECTRE IN BLITZ II using Cos table
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/spectre/balls.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/spectre/balls.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/balls.bb2
+; Dancing Balls By SPECTRE IN BLITZ II using Cos table
 ; Using this means you don`t need the Maths Libs on disk
 
 LoadModule 1,"mod.funkinator"

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/drawsh.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/map/drawsh.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/drawsh.bb2
+
 Dim qs(256),qc(256)
 
 co.f=##[$80BA]*2/256

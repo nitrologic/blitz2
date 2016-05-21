@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/COWBOYS/cowboys.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/COWBOYS/cowboys.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/COWBOYS/cowboys.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/COWBOYS/cowboys.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/COWBOYS/cowboys.bb
+;
 ;Cowboys v1.0	 by Lawrence, 1992
 ;
 ;This is a very simple game that took a VERY short time To

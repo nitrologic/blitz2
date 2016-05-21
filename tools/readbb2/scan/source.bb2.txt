@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/bullit/source.bb2
-+maxshape=190
+maxshape=190
 .information
 ;
 ; BulletProof v3.28

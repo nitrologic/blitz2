@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/segaquad.bb
-+Function.w dosegaquad{verts.l,sprdata.l,table.l} ; returns ystart verts=xy xy xy xy
+Function.w dosegaquad{verts.l,sprdata.l,table.l} ; returns ystart verts=xy xy xy xy
 	;
 	MOVEM.l a4-a6,-(a7):
 	;

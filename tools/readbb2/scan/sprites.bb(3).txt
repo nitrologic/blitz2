@@ -1,0 +1,146 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/sprites/sprites.bb
+;
+; big sprite converter
+;
+
+esp=2
+
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3
+	MULU#40,d3:ADD.ld3,a1
+;	ASL.l#5,d3:ADD.l d3,a1:ADD.l d3,a1:ADD.l d3,a1
+	MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #40,a1:MOVE.l#40*256,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+
+NEWTYPE .quad
+	x.w:y:w:h
+End NEWTYPE
+
+NEWTYPE .sp
+	num.w
+	blocks.w
+	q.quad[8]
+End NEWTYPE
+
+DEFTYPE .sp mysp
+
+Dim ##[$80B3] q.quad(20)
+
+lmaxlen 0,320,256,4
+lmaxlen 1,320,256,4
+Use lmaxlen 0
+
+allocst 0,0,0,320,256,4,0,"",1,2,0
+
+bm.l=##[$80B8] lmaxlen(0)
+InitBank 0,8192,0
+
+localstat 0,0,0,320,256,$1800,"",1,2
+BlockScroll
+
+WindowInput 0
+BitMapOutput 0
+
+LoadShapes 0,"sprites.shapes"
+casestrcomp 0,"sprites.iff"
+
+FadePalette 0
+ClipBlit esp,0,0
+
+For y=0 To 19
+	For x=0 To 19
+		Box x*8,y*8,x*8+8,y*8+8,1
+	Next
+Next
+
+Dim p(4):p(1)=10:p(2)=30:p(3)=60
+
+For x=0 To 3
+	For y=0 To 3
+		Box 200+p(x),p(y),200+p(x)+8*(x+1),p(y)+8*(y+1),1
+	Next
+Next
+
+sp=0:sb=0
+
+##[$80BB]
+	;
+	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
+	;
+	Box bx,by,bx+bw,by+bh,-1
+	bx=sx AND $fff8:by=sy AND $fff8:bw=wx*8:bh=wy*8
+	Box bx,by,bx+bw,by+bh,-1
+	;
+	If Joyb(0)=1
+
+		If PColl(sx,sy,1,1,200,0,100,100)
+			For x=0 To 3
+				For y=0 To 3
+					If PColl (sx,sy,1,1,200+p(x),p(y),8*(x+1),8*(y+1))
+						wx=x+1:wy=y+1
+					EndIf
+				Next
+			Next
+		EndIf
+
+		If PColl(sx,sy,1,1,0,0,160,160)
+			Box bx,by,bx+bw,by+bh,5
+			If globalloc(q())
+				q()\x=bx,by,bw,bh:sp+1:sb+bw*bh/2
+			EndIf
+			While Joyb(0)<>0:VWait:Wend
+		EndIf
+
+	EndIf
+
+	If key=127
+		If LastItem(q())
+			##[$80CA] q()
+			Box \x,\y,\x+\w,\y+\h,1
+			freelast q()
+			sp-1 ;!!!
+		EndIf
+	EndIf
+
+	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
+	Locate 0,22:Print key,"	"
+
+##[$80BC] key=27
+
+makesprite:
+	Use lmaxlen 1:longdiv esp,0,0:Use lmaxlen 0
+	##[$80CA] q()
+	newmem q():nn=0:blok.l=Bank(0)
+	While globfree(q())
+		 mysp\q[nn]\x=\x/8,\y/8,\w/8,\h/8
+		 Scroll \x,\y,\w,\h,\x+160,\y,1
+		 For x=0 To mysp\q[nn]\w-1
+			 For y=0 To mysp\q[nn]\h-1
+				 getblock{blok,bm,\x+x*8+160,\y+y*8}:blok+32
+			 Next
+		 Next
+		 nn+1
+	Wend
+
+	mysp\num=nn,(blok-Bank(0))/32
+
+	If ReadMem(0,"sprite"+Str$(esp)+".dat")
+		Exists 0,&mysp,4+8*8
+		Exists 0,Bank(0),blok-Bank(0)
+	EndIf
+
+	VWait 50
+
+End

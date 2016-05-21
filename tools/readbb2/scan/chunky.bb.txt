@@ -1,143 +1,88 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/chunky.bb
-+;
-; sega chunky library
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/chunky/chunky.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/chunky/chunky.bb
+;
+; example of a chunky display
 ;
 
-NEWTYPE .map
-	src.l
-	wid.w
-	hi.w
-	pwid.w
-	phi.w
-End NEWTYPE
+DEFTYPE .w
 
-Macro m SizeOf .map/`1(a0):End Macro
+;ps=3:chw=95:chh=84			;3 pixel 95x84
+ps=2:chw=92:chh=92			 ;2 pixel 92x92
 
-Statement splot{map.l,x.w,y,c}
-	MOVE.l d0,a0
-	TST d1:BMI clop:CMP !m{pwid},d1:BPL clop
-	TST d2:BMI clop:CMP !m{phi},d2:BPL clop
-	MOVE d1,d0:LSR#3,d1:MULU !m{hi},d1:ASL#3,d1:ADD d2,d1:ASL#2,d1
-	MOVE.l !m{src},a0:ADD a1,a0:LSR#1,d0:BCC evenplot
-oddplot:
-	AND#7,d0:ADD d0,a0:MOVE.b(a0),d1:AND#15,d1:AND#240,d3:OR d3,d1
-	MOVE d1,(a0):AsmExit
-evenplot:
-	AND#7,d0:ADD d0,a0:MOVE.b(a0),d1:AND#240,d1:AND#15,d3:OR d3,d1
-	MOVE d1,(a0):clop:AsmExit
-End Statement
+chc=chw+chw/32+1+2:ox=10			 ;size of 3d window
 
-Statement scls{map.l,c.w}
-	MOVE.l d0,a0:MOVE !m{wid},d0:MULU !m{hi},d0:SUBQ#1,d0
-	MOVE d1,d2:SWAP d1:MOVE d2,d1:MOVE.l d1,d2:MOVE.l d1,d3:MOVE.l d1,d4
-	MOVE.l !m{src},a0:MOVEQ#16,d5
-nxclrb:
-	MOVEM.l d1-d4,(a0):ADD d5,a0:MOVEM.l d1-d4,(a0):ADD d5,a0:DBRA d0,nxclrb
-	AsmExit
-End Statement
+BLITZ
 
-Statement sbox{map.l,x.w,y,w,h,c}
-	MOVE.l d0,a0:MOVEM !m{wid},d6-d7:MOVE.l !m{src},a0
-	ASL#2,d2:ADD d2,a0:SUBQ#1,d3:SUBQ#1,d4
-nxcol:
-	MOVE d1,d0:LSR#3,d0:MULU d7,d0:ASL#5,d0:LEA 0(a0,d0),a1
-	MOVE d1,d0:LSR#1,d0:AND#3,d0:ADD d0,a1:MOVE d4,d0
-nxbop
-	MOVE.b d5,(a1):ADDQ#4,a1:DBRA d0,nxbop
-	ADDQ#1,d0:DBRA d3,nxcol:AsmExit
-End Statement
+;
+; rotating polygon guff
+;
 
-NEWTYPE .rect
-	map.l:w.w:h.w:x:y:w:h
-End NEWTYPE
+Dim qsin.q(511),qcos.q(511)
 
-Macro s SizeOf .rect/`1(a0):End Macro
-Macro d SizeOf .rect/`1(a1):End Macro
+For i=0 To 511
+	qsin(i)=HSin(i*##[$80BA]/128)
+	qcos(i)=HCos(i*##[$80BA]/128)
+Next
 
-Statement sblat{src_rect.l,dest_rect.l}
-	MOVEM.l a4-a6,-(a7):MOVE.l d0,a0:MOVE.l d1,a1
-	MOVE.l !s{map},a2:MOVE !s{y},d0:ASL#2,d0:ADD d0,a2
-	MOVE.l !d{map},a3:MOVE !d{y},d0:ASL#2,d0:ADD d0,a3
-	MOVE !s{x},d0:MOVE !d{x},d1:MOVE !s{w},d6
-nxrow:
-	MOVE d0,d2:LSR#3,d2:MULU !s{h},d2:ASL#2,d2:LEA 0(a2,d2),a4
-	MOVE d1,d2:LSR#3,d2:MULU !d{h},d2:ASL#2,d2:LEA 0(a3,d2),a5
-	MOVE d0,d2:AND#7,d2:LSR#1,d2:ADD d2,a4
-	MOVE d1,d2:AND#7,d2:LSR#1,d2:ADD d2,a5
-	MOVE !s{h},d7:SUBQ#1,d7
-nxbb:
-	MOVE.b (a4),(a5):ADDQ#4,a5:ADDQ#4,a4:DBRA d7 nxbb
-	ADDQ#1,d0:ADDQ#1,d1:DBRA d6,nxrow
-	MOVEM.l (a7)+,a4-a6:AsmExit
-End Statement
+NEWTYPE .tri:x0.w:y0.w:x1.w:y1.w:x2.w:y2.w:End NEWTYPE
 
-Statement sblot{map.l,x.w,y,src.l,size.w}
+DEFTYPE .tri t
+
+;
+; setup chunky and roatate a filled triangle
+;
+
+DecodePalette 0,256
+AGAGreen 0,0,0,0,0:AGAGreen 0,128,0,0,0
+AGAGreen 0,1,0,0,160:AGAGreen 0,129,0,0,160
+
+Gosub builddisplay
+Gosub setupbitmap
+
+While Joyb(0)=0
 	;
-	MOVE.l a4,-(a7)
+	Use CopList db:db=1-db:CreateDisplay db:VWait
 	;
-	MOVE.l d0,a0:MOVE.l d3,a2:MOVE !m{hi},a0:MOVE.l !m{src},a1:ASL#2,d2:ADD d2,a1
-	MOVEQ#0,d2:MOVE#15,d4
+	ChunkyCLS 0
 	;
-nxtx:
+	y=QWrap(y+1,0,255)
+	t\x0=46+qcos(y) ASL 6,46+qsin(y) ASL 6
+	t\x1=46+qcos(y+60) ASL 6,46+qsin(y+60) ASL 6
+	t\x2=46+qcos(y+120) ASL 6,46+qsin(y+120) ASL 6
 	;
-	MOVE d1,d0:LSR#3,d1:MULU !m{hi},d0:ASL#5,d0:LEA 0(a1,d0),a3
-	MOVE d1,d0:AND#7,d1:MOVEQ#15,d6:LSR#1,d1:BCS odo:NOT d6:odo:ADD d0,a4
+	ChunkyPoly 3,&t,$f00
 	;
-	MOVE d2,d0:LSR#3,d0:MULU #23,d0:LEA 0(a2,d0),a4
-	MOVE d2,d0:AND#7,d0:LSR#1,d0:ADD d0,a4
-	;
-	MOVE#15,d5
-	;
-nxty:			; a4->a3
-	;
-	MOVE d6,d7:MOVE.b (a4),d0:AND.b d7,d0:BEQ skip:NOT d7:AND.b (a3),d7
-	OR.b d0,d7:MOVE.b d7,(a3):skip:ADDQ#4,a2:ADDQ#4,a3:DBRA d5,nxty
-	;
-	ADDQ#1,d1:ADDQ#1,d2:DBRA d4,nxtx
-	;
-	MOVE.l (a7)+,a4:AsmExit
-	;
-End Statement
+Wend
 
-NEWTYPE .rect
-	map.l:ww.w:wh.w:x:y:w:h
-End NEWTYPE
+End
 
-Macro s SizeOf .rect\`1(a0):End Macro
-Macro d SizeOf .rect\`1(a1):End Macro
+.setupbitmap:
+	;
+	Use lmaxlen 0:Use CopList 0
+	;
+	For x=0 To chw-1
+		 dx=x*ps+ox
+		 Boxf dx,3,dx+ps-1,2+chh*ps,255-x
+	Next
+	;
+	Return
 
-Statement sblat{src_rect.l,dest_rect.l}
-	MOVEM.l a4-a6,-(a7):MOVE.l d0,a0:MOVE.l d1,a1
-	MOVE.l !s{map},a2:MOVE !s{y},d0:ASL#2,d0:ADD d0,a2
-	MOVE.l !d{map},a3:MOVE !d{y},d0:ASL#2,d0:ADD d0,a3
-	MOVE !s{x},d0:MOVE !d{x},d1:MOVE !s{w},d6:SUBQ #1,d6
-nxrow:
-	MOVE d0,d2:LSR#3,d2:MULU !s{wh},d2:ASL#5,d2:LEA 0(a2,d2),a4
-	MOVE d1,d2:LSR#3,d2:MULU !d{wh},d2:ASL#5,d2:LEA 0(a3,d2),a5
-	MOVE d0,d2:AND#7,d2:LSR#1,d2:ADD d2,a4
-	MOVE d1,d2:AND#7,d2:LSR#1,d2:ADD d2,a5
-	MOVE !s{h},d7:SUBQ#1,d7
-nxbb:
-	MOVE.b (a4),(a5):ADDQ#4,a5:ADDQ#4,a4:DBRA d7,nxbb
-	ADDQ#1,d0:ADDQ#1,d1:DBRA d6,nxrow
-	MOVEM.l (a7)+,a4-a6:AsmExit
-End Statement
-
-Statement sblot{src_rect.l,dest_rect.l}
-	MOVEM.l a4-a6,-(a7):MOVE.l d0,a0:MOVE.l d1,a1
-	MOVE.l !s{map},a2:MOVE !s{y},d0:ASL#2,d0:ADD d0,a2
-	MOVE.l !d{map},a3:MOVE !d{y},d0:ASL#2,d0:ADD d0,a3
-	MOVE !s{x},d0:MOVE !d{x},d1:MOVE !s{w},d6:SUBQ #1,d6
-nxrow2:
-	MOVE d0,d2:LSR#3,d2:MULU !s{wh},d2:ASL#5,d2:LEA 0(a2,d2),a4
-	MOVE d1,d2:LSR#3,d2:MULU !d{wh},d2:ASL#5,d2:LEA 0(a3,d2),a5
-	MOVEQ #$f0,d3:MOVE d0,d2:AND#7,d2:LSR#1,d2:BCC ko:MOVEQ#15,d3:ADD d2,a4
-	MOVE d1,d2:AND#7,d2:LSR#1,d2:ADD d2,a5
-	MOVE !s{h},d7:SUBQ#1,d7
-nxbb2:
-	MOVE.b (a4),d4:AND d3,d4:BEQ nopix:MOVE.b (a5),d5
-	NOT d3:AND d3,d5:NOT d3:OR d4,d5:MOVE.b d5,(a5):nopix
-	ADDQ#4,a5:ADDQ#4,a4:DBRA d7,nxbb2
-	ADDQ#1,d0:ADDQ#1,d1:DBRA d6,nxrow2
-	MOVEM.l (a7)+,a4-a6:AsmExit
-End Statement
+.builddisplay:
+	;
+	; CustomChunkySize calculates number of copper instructions needed
+	; CustomChunky creates fills in the copper list
+	;
+	lmaxlen 0,320,256,7:Box 0,0,319,255,1
+	;
+	ccc.l=CustomChunkySize(chw,chh)
+	InitCopList 0,44,256,$13007,8,256,ccc
+	InitCopList 1,44,256,$13007,8,256,ccc
+	;
+	DisplayBitMap 0,0:DisplayPalette 0,0
+	DisplayBitMap 1,0:DisplayPalette 1,0
+	;
+	CustomChunky 0,0,ps,chw,chh,ps
+	CustomChunky 1,0,ps,chw,chh,ps
+	;
+	CreateDisplay 0
+	;
+	Return

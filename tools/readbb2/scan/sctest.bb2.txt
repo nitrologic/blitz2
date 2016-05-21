@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/sctest.bb2
-+t$="hello there this is a test of a scrolly message written "
+t$="hello there this is a test of a scrolly message written "
 t$+"in blitz basic 2 - OH YEAH, it's groovy all right - buy it "
 t$+"now! OR Else......"
 

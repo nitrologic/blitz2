@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/readdir.bb
-+NEWTYPE.FileInfoBlock
+NEWTYPE.FileInfoBlock
 	 _DiskKey.l
 	 _DirEntryType.l
 	 _FileName.b[108]

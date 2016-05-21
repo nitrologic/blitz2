@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MacroKey.bb
-+; ; brex macrokey program example ; TapeTrap 0QuietTrap OnAbsMouse 0,0AbsMouse 639,0AbsMouse 639,399AbsMouse 0,399AbsMouse 0,0TapeTrapMacroKey 0,128,0NPrint "Hit F1..."MouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MacroKey.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MacroKey.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MacroKey.bb
+; ; brex macrokey program example ; TapeTrap 0QuietTrap OnAbsMouse 0,0AbsMouse 639,0AbsMouse 639,399AbsMouse 0,399AbsMouse 0,0TapeTrapMacroKey 0,128,0NPrint "Hit F1..."MouseWait 

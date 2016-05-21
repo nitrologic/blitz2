@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/dualplay_block.bb2
-+BLITZ
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/damen/dualplay_block.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/damen/dualplay_block.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/damen/dualplay_block.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/dualplay_block.bb2
+BLITZ
 lmaxlen 0,352,256+32,2
 lmaxlen 1,352,256+32,2
 Slice 0,44,320,256,$fffa,4,8,32,352,352

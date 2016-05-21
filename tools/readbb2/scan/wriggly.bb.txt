@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/wriggly/Source/Wriggly.bb
-+;----------------------------------------------------------------------
+;----------------------------------------------------------------------
 ;									 WRIGGLY II - The Worm Returns
 ;
 ;										 Written in Blitz Basic 2

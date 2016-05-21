@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/SABOTAGE/sabo.bb
-+.start
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/SABOTAGE/sabo.bb
+.start
 DEFTYPE.q
 DEFTYPE.q shapnum
 mx=160:my=200

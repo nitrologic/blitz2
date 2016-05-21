@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CopLoc.bb
-+; ; print out of copper list program example; Slice 0,44,3For k=0 To CopLen-1 Step 4 NPrint Hex$(k),":",Hex$(Peek.l(CopLoc+k)) NextMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/CopLoc.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/CopLoc.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CopLoc.bb
+; ; print out of copper list program example; Slice 0,44,3For k=0 To CopLen-1 Step 4 NPrint Hex$(k),":",Hex$(Peek.l(CopLoc+k)) NextMouseWait 

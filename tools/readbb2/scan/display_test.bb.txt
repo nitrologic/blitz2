@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/DisplayLibrary/display_test.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/DisplayLibrary/display_test.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DisplayLibrary/display_test.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/DisplayLibrary/display_test.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/DisplayLibrary/display_test.bb
+;
 ; display library demo
 ;
 ; see ABOUT requester for details

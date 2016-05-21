@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/ecv.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/bailey/ecv.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/ecv.bb2
+;
 ; Electronic CV - Ted Bailey Feb/Mar 1995
 ;
 ##[$80B4]:End:End ##[$80B4]

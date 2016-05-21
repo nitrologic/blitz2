@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/half.bb
-+lmaxlen 0,1024,516,4
+lmaxlen 0,1024,516,4
 LoadBitMap 0,"t11.iff4",0
 
 InitCopList 0,44,258,$104,8,16,-2

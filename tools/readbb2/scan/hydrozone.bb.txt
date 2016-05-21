@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/HydroZone/HydroZone.BB
-+;												HYDROZONE
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/HydroZone/HydroZone.BB,/Users/simon/Google Drive/amiga/w/lha/games/af/HydroZone/HydroZone.BB
+;												HYDROZONE
 
 ; CODING, GRAPHICS, FONTS AND MUSIC: by David J. Cruickshank
 

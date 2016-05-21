@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/medplayer.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/medplayer.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/medplayer.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/medplayer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/medplayer.bb
+;
 ; med test program
 ;
 

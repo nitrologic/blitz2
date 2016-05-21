@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/LDistort/LightDistort.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/LDistort/LightDistort.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/LDistort/LightDistort.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/LDistort/LightDistort.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/LDistort/LightDistort.bb2
+;
 ; Invisable, Light-distortion effect - Using display library
 ;
 ; Routine coded by Dave Cole (Thanks to members of the Blitz
@@ -17,7 +17,7 @@ LoadShapes	5,"Ring.shp"				; 16x16 sized shape (doughnut shape)
 InitCopList 0,40,256,$10006,8,64,0
 DisplayPalette 0,0
 
-VWait 250											 ; Make sure all disk access has finished
+VWait 50											 ; Make sure all disk access has finished
 BLITZ
 
 Mouse On
@@ -76,3 +76,5 @@ size.l=Peek.w(##[$80B8] MidHandle(mons)+22)
 		oldy = y
 	EndIf
 ##[$80BC] Joyb(0)<>0
+
+End

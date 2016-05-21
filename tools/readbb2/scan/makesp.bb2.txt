@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makesp.bb2
-+If NumPars<>2 Then End
+If NumPars<>2 Then End
 
 LoadShape 0,Par$(1),0
 While Peek.w(##[$80B8] MidHandle(s))

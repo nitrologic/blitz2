@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sw/rawinc.bb
-+If ReadMem(0,"rawinc") Then Exists 0,?l1,?l2-?l1:CloseFile 0
+If ReadMem(0,"rawinc") Then Exists 0,?l1,?l2-?l1:CloseFile 0
 End
 
 l1:

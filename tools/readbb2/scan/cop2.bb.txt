@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/cop2.bb
-+;
+;
 ; dualplayfield with 8 64 wide sprites
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Sweeper/BlitzSweeper.bb
-+Ver$ = "Blitz Sweeper 18.7.1995 Timo Suoranta"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Games/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abc/bums/out/new/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Games/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Sweeper/BlitzSweeper.bb
+Ver$ = "Blitz Sweeper 18.7.1995 Timo Suoranta"
 
 ; No graphics & colours like Workbench?
 ; Yep - You once again forgot the CD button!

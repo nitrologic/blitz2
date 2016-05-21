@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/trev/anim_db.bb2
-+; Program to page-flip/animate a sequence of .iff files.
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/trev/anim_db.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/trev/anim_db.bb2
+; Program to page-flip/animate a sequence of .iff files.
 ; Can only load as many .iff files as will fit in CHIP RAM (not enough!)
 ;
 ; Warning: crashes with hires/interlace 16 colour pictures!

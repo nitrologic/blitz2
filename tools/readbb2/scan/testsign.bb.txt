@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/testsign.bb
-+
+
 Statement dosign{s.l,d.l,l.l,flip.w}
 	MOVE.l a4,-(a7):MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE #4,a4
 	MOVE d3,d4:LEA 80(a1),a1:MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3

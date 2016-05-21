@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example0.bb2
-+NEWTYPE.Column_Type
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example0.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example0.bb2
+NEWTYPE.Column_Type
 	x.s
 	y.s
 	z.s

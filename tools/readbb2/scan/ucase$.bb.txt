@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/UCase$.bb
-+Print UCase$("hijklm"): ; Prints HIJKLM 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/UCase$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/UCase$.bb
+Print UCase$("hijklm"): ; Prints HIJKLM 

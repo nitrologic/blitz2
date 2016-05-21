@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makesfx.bb2
-+If NumPars<>2
+If NumPars<>2
 	NPrint "usage: makesfx inputfile outputfile"
 	End
 EndIf

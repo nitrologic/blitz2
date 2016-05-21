@@ -1,0 +1,214 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/neil/SRC/ModuleRipper.bb
+; Module Ripper 1.0 - written TOTALLY in Blitz Basic 2
+;
+; This will only run under System 2.0 (V36 or better), as it
+; makes use of a lot of new features in AmigaDOS.	If ya want, I
+; will do a version that runs under 1.3, but you'll still need a
+; bit of RAM to run it in.
+;
+; This program is PUBLIC DOMAIN, and the source may be used for
+; any system screwing around that you see fit.	C'mon, Blitz
+; users, lets all write real good code and release it as true
+; PD.	Lets make Blitz 2 the premier coding platform on the Amiga,
+; and make the Amiga the premier home computer! (again)
+
+##[$80BF] "blitz2:include/"
+XInclude "devices.bb"
+XInclude "dos.bb" ;There's only two things I need from this file grrrrr
+
+##[$80CC]:##[$80C3]:freest 0
+If ExecVersion<36 Then End ;Should put up a requester...
+
+MaxLen pa$=200:MaxLen fi$=200
+
+#TRACK_SIZE = #NUMSECS*#TD_SECTOR
+
+Function.l ReadTrack{*disk.IOExtTD,Buf.l,track.w}
+;As its name suggests, this routine reads a track from disk
+;into a FAST ram buffer -	V36 only, this one!!!
+	*disk\iotd_Req\io_Length=#TRACK_SIZE
+	*disk\iotd_Req\io_Data=Buf
+	*disk\iotd_Req\io_Command=#CMD_READ
+	*disk\iotd_Req\io_Offset=#TRACK_SIZE*track
+	##[$FEC2](*disk)
+	Function Return *disk\iotd_Req\io_Error
+;Now, some notes.	By setting the io_Length field to (say) #TRACKSIZE*160
+;and io_Offset to 0, you can read the whole damn disk in!	Because this
+;code runs under 2.0 only, the disk buffers don't have to be in chip ram !?!
+;I don't read the disk in, because I want the user to be able to abort the read
+;at any time.	The checking for this wastes around one second in total.
+End Function
+
+Statement MotorOn{*disk.IOExtTD}
+;Turn on a disk drive motor
+	*disk\iotd_Req\io_Length=1
+	*disk\iotd_Req\io_Command=#TD_MOTOR
+	##[$FEC2](*disk)
+;Strictly speaking, we don't need to turn the motor on...
+End Function
+
+Statement MotorOff{*disk.IOExtTD}
+;Turn off a disk drive motor
+	*disk\iotd_Req\io_Length=0
+	*disk\iotd_Req\io_Command=#TD_MOTOR
+	##[$FEC2](*disk)
+;... but turning the motor off IS a programmer's responsibility!
+End Function
+
+Statement DiskToZero{*disk.IOExtTD}
+;Send the heads to track 0
+	*disk\iotd_Req\io_Offset=0
+	*disk\iotd_Req\io_Command=#TD_SEEK
+	##[$FEC2](*disk)
+;This is not necessary, really.	The OS will move the heads back for us
+;when a disk is removed.	However, it is polite behaviour for a program
+;to do this, and we just might save on some head damage.
+End Function
+
+DEFTYPE .IOExtTD tdio ;The IO Request needed for trackdisk
+DEFTYPE .MsgPort myport
+
+myport\mp_Node\ln_Type = 4
+myport\mp_MsgList\lh_Head = &myport\mp_MsgList\lh_Tail
+myport\mp_MsgList\lh_TailPred=&myport\mp_MsgList\lh_Head
+
+tdio\iotd_Req\io_Message\mn_Node\ln_Type = 5
+tdio\iotd_Req\io_Message\mn_ReplyPort=&myport
+tdio\iotd_Req\io_Message\mn_Length= SizeOf.IOExtTD
+
+; Try and open unit 0
+
+If ##[$FEC0]("trackdisk.device",0,tdio,0)<>0 Goto BailOut1
+signal.l=##[$FEAD](-1):If signal <0 Then Goto BailOut2
+myport\mp_SigBit=signal
+myport\mp_SigTask=##[$FEA7](0)
+
+;Originally, this code asked for 880K of FAST mem.	However, a lot of
+;the users of this program will be A1200 users with 2 meg of chip ram.
+;So I ask for MEMF_PUBLIC instead.
+MyDiskBuffer.l=##[$FE97](#TRACK_SIZE*160,#MEMF_PUBLIC|#MEMF_CLEAR)
+If MyDiskBuffer=0 Then Goto BailOut3
+
+SetString 2,1
+workstart 1,10,80,0,1,"Start the rip..."
+workstart 1,170,80,0,2,"QUIT"
+workstart 1,235,80,0,3,"Stop ripping!!!"
+
+localstat 0,30,30,380,100,$1006,"Module Ripper 1.0",2,1,1
+SetString 1,2:ResetString 205,21,150,8
+WLocate 10,10:Print "Disk buffer located at:"
+ResetString 205,40,150,8
+WLocate 138,29:Print "Status:"
+WLocate 202,10:Print "$":Print Hex$(MyDiskBuffer)
+ResetString 30,60,321,10
+
+dummy.l=##[$FE72]("DF0:",#DOSTRUE)
+;Now, this little instruction puts a DF0:BUSY icon on screen, and prevents
+;Virus Checker and the Disk Validator from going crazy with NDOS disks.
+;ALWAYS ALWAYS ALWAYS turn off the Inhibit()!!!!!!
+
+Quitting.w=False
+##[$80BB]
+	Start:
+	##[$C620] 1,3:##[$C61F] 1,1:##[$C61F] 1,2
+	WLocate 202,29:Print "Make Selection	 "
+	WBox 30,60,350,69,0
+	ev.l=WaitEvent
+	If ev=64
+		Select GadgetHit
+		Case 1 ;Start ripping...
+			##[$C620] 1,1:##[$C620] 1,2:##[$C61F] 1,3
+			WLocate 202,29:Print "Reading Disk		 "
+			MyDiskPointer.l=MyDiskBuffer
+			MotorOn{&tdio}
+			For Track.w=0 To 159
+				If Event=64 AND GadgetHit=3
+					WLocate 202,29:Print "Aborting...			"
+					DiskToZero{&tdio}
+					MotorOff{&tdio}
+					Goto Start
+				End If
+				WBox 30+Track*2,60,32+Track*2,69,1
+				error.l=ReadTrack{&tdio,MyDiskPointer,Track}
+				MyDiskPointer + #TRACK_SIZE
+			Next Track
+			WLocate 202,29:Print "Homing heads		 "
+			DiskToZero{&tdio}
+			MotorOff{&tdio}
+			WLocate 202,29:Print "Scanning Memory	"
+			; Search memory for the magic letters
+			For MemPointer.l=MyDiskBuffer To MyDiskBuffer+(#TRACK_SIZE*160)
+				If Event=64 AND GadgetHit=3 ;User hit Stop
+					Goto Start
+				End If
+				Track2.w=30+((MemPointer-MyDiskBuffer)/(#TRACK_SIZE/2))
+				WLine Track2,60,Track2,69,3
+;The magic letters are "M.K.".	I've got the hex equivelent here so we can
+;do a longword comparison rather than a character comparison, but this is
+;mostly a hangover from my assembly days.
+				If Peek.l(MemPointer)=$4d2e4b2e
+
+;This routine calculates the potential module data.	I got all the
+;offsets from the doc files that came with ProTracker2.3.	In the
+;event that we DON'T have a module, the name will look like trash,
+;the length seems crap, etc.	There just isn't a 100% sure fire
+;way to say that this IS a module.
+					ModAddr.l=MemPointer-1080
+					SetString 2,1
+					workstart 2,10,65,0,1," Save Module "
+					workstart 2,150,65,0,2," Continue "
+					localstat 1,30,130,380,90,$1006,"Found Something!!!",2,1,2
+					WLocate 10,10:Print "Possible module located at $",Hex$(ModAddr)
+					WLocate 10,20:Print "Module name: ":Print Peek$(ModAddr)
+					WLocate 10,30:Print "No. of patterns: ":Print Peek.b(ModAddr+950)
+
+;Find the highest pattern used.	Note that this isn't necessarily the
+;number of patterns used - Pro/Noise/SoundTracker allow blank patterns
+;while OctaMED doesn't.	We need this information to calculate the length
+;of the song.
+					HiPattern.b=0
+					For HPScan.l=ModAddr+952 To ModAddr+1079
+						If Peek.b(HPScan) > HiPattern
+							HiPattern = Peek.b(HPScan)
+						EndIf
+					Next
+
+;Now calculate the length of all the samples
+					SamLength.l=0
+					For SamScan=ModAddr+42 To ModAddr+942 Step 30
+						SamLength+(2*Peek.w(SamScan))
+					Next
+
+					ModLen.l=SamLength+(HiPattern*1024)+1084
+					WLocate 10,40:Print "Module length: $":Print Hex$(ModLen)
+
+					##[$80BB]:##[$80BC] WaitEvent=64 AND EventWindow=1
+					If GadgetHit = 1
+;All this routine was originally a statement, but the ASL file requester
+;kept crashing on me, so I've had to move this into the control statement.
+						ModFile$=ASLFileRequest$("Save module as...",pa$,fi$)
+						If OpenFile(1,ModFile$)
+							Exists 1,ModAddr,ModLen
+							CloseFile 1
+						EndIf
+					EndIf
+					Free localstat 1:Free GadgetJam 2
+					Use localstat 0:Activate 0
+				End If
+			Next
+		Case 2 ;Quit
+			error.l=##[$FE99](MyDiskBuffer,#TRACK_SIZE*160)
+			Quitting=True
+		End Select
+	End If
+##[$80BC] Quitting
+
+dummy.l=##[$FE72]("DF0:",#DOSFALSE)
+BailOut3:
+##[$FEAE](Signal)
+BailOut2:
+##[$FEC1](tdio)
+BailOut1:
+End
+
+;Seesh!	I haven't written so much Basic code since I blew my ZX-81 up!

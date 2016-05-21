@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/blitzlibs/ahi.bb2
-+NEWTYPE .Fixed
+NEWTYPE .Fixed
 a.l
 End NEWTYPE
 DEFTYPE.l

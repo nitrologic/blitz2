@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/shit/go2.bb
-+Dim c$(1024)
+Dim c$(1024)
 
 If WriteMem(0,"ref.contents")
 	FileInput 0

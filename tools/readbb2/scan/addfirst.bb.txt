@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/AddFirst.bb
-+; ; addfirst program example; Dim List a(100)						 ;initialize list arrayWhile AddFirst(a())					 ;while an item is available... a()=c								 ;set it to something...  c+1									;increment counterWendNPrint c," items successfully added."	;output how many items addedMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/AddFirst.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/AddFirst.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/AddFirst.bb
+; ; addfirst program example; Dim List a(100)						 ;initialize list arrayWhile AddFirst(a())					 ;while an item is available... a()=c								 ;set it to something...  c+1									;increment counterWendNPrint c," items successfully added."	;output how many items addedMouseWait 

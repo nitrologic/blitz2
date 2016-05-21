@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RICommoditiesLib.bb
-+;#ricommoditieslib=89
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RICommoditiesLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RICommoditiesLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RICommoditiesLib.bb
+;#ricommoditieslib=89
 
 #ExecBase=4
 

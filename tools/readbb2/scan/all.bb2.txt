@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/blitzlibs/all.bb2
-+ #local					 = 13
+ #local					 = 13
  #base						=	2
  #stack					 =	1
  #trash					 =	0

@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sort.bb
-+; ; a sort of an example ; Dim a(9)					;dimension an 'a' array For k=0 To 9			;fill array with random values...  a(k)=RndNextSort a()					 ;sort the array For k=0 To 9			;print out sorted array  NPrint a(k) NextMouseWait				;wait for mouse click 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Sort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sort.bb
+; ; a sort of an example ; Dim a(9)					;dimension an 'a' array For k=0 To 9			;fill array with random values...  a(k)=RndNextSort a()					 ;sort the array For k=0 To 9			;print out sorted array  NPrint a(k) NextMouseWait				;wait for mouse click 

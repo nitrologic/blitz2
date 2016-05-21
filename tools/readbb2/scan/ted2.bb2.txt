@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABC3/src/ted2.bb2
-+ DEFTYPE .l
+ DEFTYPE .l
 Dim *nt2(15),pos2(15),pos$(15)
 ##[$ED11] 1
 Statement move_cursor {a$,lst,pos}

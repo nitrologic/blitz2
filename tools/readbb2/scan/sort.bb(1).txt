@@ -1,0 +1,37 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/sort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/sort.bb
+
+Statement sortlist{mylist.l}
+	UNLK a4:MOVEM.l a4-a6,-(a7)
+	MOVE.l d0,a0:SUB.l#24,d0				;d0 where lastnode points!
+	MOVE.l -28(a0),a0							 ;a0=first d0=where last points
+	TST.l(a0):BEQ dun							 ;empty list
+dopass:
+	MOVE.l a0,a1:MOVEM.l (a1),a2-a3:CMP.l a2,d0:BEQ dun
+	MOVE.l (a2),a4:MOVE.l 8(a1),d1
+nxpass:
+	MOVE.l 8(a2),d2:CMP.l d1,d2:BMI doswap:MOVE.l d2,d1
+nxitem:
+	CMP.l a4,d0:BEQ dunpass
+	MOVE.l a1,a3:MOVE.l a2,a1:MOVE.l a4,a2:MOVE.l (a2),a4:BRA nxpass
+dunpass:
+	MOVE.l a2,d0:BRA dopass
+dun:
+	MOVEM.l (a7)+,a4-a6:RTS
+doswap:
+	MOVE.l a2,(a3):MOVEM.l a1/a3,(a2):MOVE.l a2,4(a1)
+	MOVE.l a4,(a1):MOVE.l a1,4(a4):EXG a1,a2:BRA nxitem
+End Statement
+
+
+Dim ##[$80B3] a.q(20)
+
+globalloc a():a()=10
+globalloc a():a()=20
+globalloc a():a()=30
+
+newmem a():globfree a():sortlist{&a()-8}
+
+newmem a():While globfree(a()):NPrint a():Wend
+
+MouseWait
+End

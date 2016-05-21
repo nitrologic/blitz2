@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Circus/Circus.bb2
-+;************************************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/userprogs/circus/Circus.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/userprogs/circus/Circus.bb2,/Users/simon/Google Drive/amiga/w/lha/games/af/Circus/Circus.bb2
+;************************************************************************
 ;
 ;									 Circus by Graham Mackarel
 ;									 6th February 1994

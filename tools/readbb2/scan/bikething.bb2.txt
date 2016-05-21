@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/bikething.bb2
-+									;;****************************;;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/bailey/bikething.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/bailey/bikething.bb2
+									;;****************************;;
 									;;														;;
 									;; Bike Thing	by	Ted Bailey ;;
 									;;														;;

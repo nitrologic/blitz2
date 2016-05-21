@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/makecars.bb
-+Statement getblock{blok.l,bm.l,x.w,y.w}
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/makecars.bb
+Statement getblock{blok.l,bm.l,x.w,y.w}
 	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
 	LSR#3,d2:ADD d2,a1:EXT.l d3
 	MULU#40,d3:ADD.l d3,a1
@@ -17,7 +17,7 @@ nxnib:
 	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
 End Function
 
-Goto docars
+;Goto docars
 
 ;Goto getrails
 
@@ -25,7 +25,31 @@ Goto docars
 
 ;Goto dotags
 
-;Goto dostart
+Goto dostart
+
+.dobill:
+	InitBank 0,32768,0
+	allocst 0,4
+	ScreensBitMap 0,0:BlockScroll
+	blok.l=Bank(0)
+	bm.l=##[$80B8] lmaxlen(0)
+	LoadBitMap 0,"billboard.iff",0
+	Use SetCycle 0
+
+	InitBank 1,64,0
+	blok2.l=Bank(1)
+
+	For x=0 To 4
+		getblock{blok,bm,x*8,0}:blok+32
+	Next
+
+	If ReadMem(0,"ram:bill.bin")
+		Exists 0,Bank(0),blok-Bank(0)
+		CloseFile 0
+	EndIf
+
+	MouseWait
+	End
 
 .dostart:
 	InitBank 0,32768,0
@@ -70,14 +94,14 @@ Goto docars
 	InitBank 1,64,0
 	blok2.l=Bank(1)
 
-	For x=0 To 2														;48 chars
-		For y=0 To 16
+	For x=0 To 2
+		For y=0 To 15
 			getblock{blok,bm,x*8,y*8}:blok+32
 		Next
 	Next
 
 	For x=0 To 27+11
-		getblock{blok2,bm,x*8,128+8}
+		getblock{blok2,bm,x*8,128}
 		For i=0 To 14 Step 2
 			Poke.w blok+i,Peek.w(blok2+i+i)
 			Poke.w blok+i+16,Peek.w(blok2+i+i+2)
@@ -91,39 +115,20 @@ Statement shit{a.l}
 	MOVE.b(a0)+,d1:ROR.b#4,d1
 	MOVE.b(a0)+,d2:ROR.b#4,d2
 	MOVE.b(a0)+,d3:ROR.b#4,d3
-	MOVE.b d0,-(a0):MOVE.b d1,-(a0):MOVE.b d2,-(a0):MOVE.b d3,-(a0)
-	AsmExit
-End Statement
-
-Statement shit2{a.l}
-	MOVE.l d0,a0
-	MOVE.b(a0)+,d0:ROR.b#4,d0
-	MOVE.b(a0)+,d1:ROR.b#4,d1
-	MOVE.b d0,-(a0):MOVE.b d1,-(a0)
+	MOVE.b d0,-(a0)
+	MOVE.b d1,-(a0)
+	MOVE.b d2,-(a0)
+	MOVE.b d3,-(a0)
 	AsmExit
 End Statement
 
 	##[$FEDB] Bank(0),blok,blok-Bank(0)
-
-	For aa.l=0 To 51*32-1 Step 4							;blok To blok+blok-Bank(0) Step 4
-		shit{blok+aa}
+	For aa.l=blok To blok+blok-Bank(0) Step 4
+		shit{aa}
 	Next
 
-	For aa.l=51*32 To (51+38)*32-1 Step 2							;blok To blok+blok-Bank(0) Step 4
-		shit2{blok+aa}
-	Next
-
-	blok+blok-Bank(0)
-
-	For x=0 To 11:For y=0 To 1
-		getblock{blok,bm,x*8,144+y*8}:blok+32
-	Next:Next
-	For x=0 To 11:For y=0 To 1
-		getblock{blok,bm,x*8,144+16+y*8}:blok+32
-	Next:Next
-
-	If ReadMem(0,"ram:tags.bin")
-		Exists 0,Bank(0),blok-Bank(0)
+	If ReadMem(0,"tags.bin")
+		Exists 0,Bank(0),(blok-Bank(0))*2
 		CloseFile 0
 	EndIf
 
@@ -139,39 +144,23 @@ End Statement
 	casestrcomp 0,"cars.iff"
 	Use SetCycle 0
 	Use lmaxlen 0
-	For i=0 To 6
+	For i=0 To 5
 		XFlip i
-		If i<6
-			BlockScroll:longdiv i,(40-ShapeWidth(i))/2,24-ShapeHeight(i)
-		Else
-			BlockScroll:longdiv i,0,24-ShapeHeight(i)
-		EndIf
-
-;		Box 0,0,40,24,1
+		BlockScroll:longdiv i,(40-ShapeWidth(i))/2,28-ShapeHeight(i)
 		For x=0 To 4
-			For y=0 To 2
+			For y=0 To 3
 				getblock{blok,bm,x*8,y*8}:blok+32
 			Next
 		Next
-
-;		For x=0 To 39
-;			For y=0 To 23
-;				If (x+y)AND 1
-;				 c=Point(x,y):If c>7 Then Plot x,y,c+4
-;				EndIf
-;			Next
-;		Next
-;		MouseWait:End
-
-;		ReMap 8,12:ReMap 9,13:ReMap 10,14:ReMap 11,15
-;		For x=0 To 4
-;			For y=0 To 2
-;				getblock{blok,bm,x*8,y*8}:blok+32
-;			Next
-;		Next
+		ReMap 8,12:ReMap 9,13:ReMap 10,14:ReMap 11,15
+		For x=0 To 4
+			For y=0 To 3
+				getblock{blok,bm,x*8,y*8}:blok+32
+			Next
+		Next
 		VWait 30
 	Next
-	If ReadMem(0,"ram:cars.bin")
+	If ReadMem(0,"cars.bin")
 		Exists 0,Bank(0),blok-Bank(0)
 		CloseFile 0
 	EndIf

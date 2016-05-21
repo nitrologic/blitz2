@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makelup.bb
-+If ReadMem (0,"ram:tt")
+If ReadMem (0,"ram:tt")
 	FileOutput 0
 	NPrint "rightlup"
 	For i=0 To 23

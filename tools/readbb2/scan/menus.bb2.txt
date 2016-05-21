@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/menus.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/menus.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/amigamode/menus.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/amigamode/menus.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/menus.bb2
+
 ;a simple menus example...
 
 

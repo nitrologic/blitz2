@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sgn.bb
-+Print Sgn(-23) ; Prints -1 Print Sgn(0)	; Prints 0Print Sgn(123) ; Prints 1
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Sgn.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sgn.bb
+Print Sgn(-23) ; Prints -1 Print Sgn(0)	; Prints 0Print Sgn(123) ; Prints 1

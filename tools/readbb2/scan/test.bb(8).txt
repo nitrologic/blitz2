@@ -1,0 +1,762 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/test.bb
+;
+; skidmarks sega track converter
+;
+Use ##[$8526] 0
+
+;Goto blockout
+Goto dithermap
+;Goto makeiff
+
+;----------------------------------------------------------------
+; show pumpkins on amiga
+;----------------------------------------------------------------
+
+; convert 8x8 nibble->8x8 brush
+
+Statement drawblok{blok.l,brush.l}
+	MOVE.l d0,a0:MOVE.l d1,a2:MOVEQ#7,d1
+nxlino:
+	MOVE.l a2,a1:ADDQ#2,a2:MOVE.l (a0)+,d0
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	ASL.l#1,d0:ROXL#1,d4:ASL.l#1,d0:ROXL#1,d5:ASL.l#1,d0:ROXL#1,d6:ASL.l#1,d0:ROXL#1,d7
+	MOVE.b d7,(a1)
+	MOVE.b d6,16(a1)
+	MOVE.b d5,32(a1)
+	MOVE.b d4,48(a1)
+	DBRA d1,nxlino:AsmExit
+End Statement
+
+.showpumpkins:
+	t$="track6"
+	tr=10
+
+	casestrcomp 0,"rod/track.fix"+Str$(tr)		 ;"Sega.palette"
+	LoadBank 0,"win/track."+Str$(tr)			 ;t$+".win"
+	LoadShape 0,"mouse.iff":GetaSprite 0,0
+
+	map.l=Bank(0)
+	pumpkins.l=Bank(0)+96*48*2
+
+	InitCopList 0,$13014
+	lmaxlen 0,768,384,4
+	DisplayPalette 0,0
+	DisplayBitMap 0,0
+
+	##[$CD10] 0,8,8,4
+	CludgeBitMap 0,1:Use lmaxlen 1:Boxf 0,0,7,7,2:MakeCookie 0:Use lmaxlen 0
+	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+
+main:
+	BLITZ
+	BlockScroll 1
+	CreateDisplay 0
+	bm.l=##[$80B8] lmaxlen(0)
+
+	Mouse On
+	MouseArea 0,0,767,383
+	SetInt 5
+		bx=MouseX:by=MouseY
+		bmx=QLimit(bx-160,0,768-320)
+		bmy=QLimit(by-128,0,383-256)
+		bx=Int(bx ASR 3):by=Int(by ASR 3)
+		DisplayBitMap 0,0,bmx,bmy
+		DisplaySprite 0,0,bx*8-bmx,by*8-bmy,0
+	End SetInt
+
+	For y=0 To 47
+		For x=0 To 95
+			ind.l=Peek.w(map+y*96*2+x*2)-128
+			blok.l=pumpkins+(ind AND 2047)*32
+			drawblok{blok,brush}
+;			If ind AND 2048 Then XFlip 0
+;			If ind AND 4096 Then YFlip 0
+			longdiv 0,x*8,y*8
+		Next
+	Next
+	MouseWait
+	AMIGA
+;	SaveBitmap 0,"ram:"+t$+".seg",0
+
+	End
+
+;----------------------------------------------------------------
+; turn into pumpkins
+;----------------------------------------------------------------
+;
+; 3530 / 3532 / 3531 / 4608
+;
+
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3:ASL.l#7,d3:ADD.l d3,a1:MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #128,a1:MOVE.l#128*512,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+Function.w test1{b0.l,b1.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVEM.l (a0),d0-d7:BRA nxchk2
+dochk2:
+	CMP.l	(a1),d0:BNE bad
+	CMP.l 4(a1),d1:BNE bad
+	CMP.l 8(a1),d2:BNE bad
+	CMP.l 12(a1),d3:BNE bad
+	CMP.l 16(a1),d4:BNE bad
+	CMP.l 20(a1),d5:BNE bad
+	CMP.l 24(a1),d6:BNE bad
+	CMP.l 28(a1),d7:BNE bad
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+bad:
+	ADD#32,a1
+nxchk2:
+	CMP.l a1,a2:BNE dochk2:MOVEM.l d0-d7,(a1):ADD#1,count
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+End Function
+
+
+Function.w test2{b0.l,b1.l}
+
+	#mm=25 ;20 ;16 ;10 6
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVE #mm,cmax:MOVEM.l (a0),d0-d7:BRA nxchk
+
+	Macro tt
+		MOVEQ#0,d2
+		LSR.l#1,d0:BCC b0`@:MOVEQ#1,d2:b0`@
+		LSR.l#1,d0:BCC b1`@:MOVEQ#1,d2:b1`@
+		LSR.l#1,d0:BCC b2`@:MOVEQ#1,d2:b2`@
+		LSR.l#1,d0:BCC b3`@:MOVEQ#5,d2:b3`@
+		ADD d2,d3
+	End Macro
+
+dochk:
+	MOVEQ#0,d3
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	MOVE.l (a0)+,d0:MOVE.l (a1)+,d1:EOR.l d1,d0:!tt:!tt:!tt:!tt:!tt:!tt:!tt:!tt
+	SUB.l#32,a0:SUB.l#32,a1:CMP cmax(pc),d3:BPL nobeta
+	MOVE d3,cmax:MOVE.l a1,cblo:nobeta:ADD#32,a1
+nxchk:
+	CMP.l a1,a2:BNE dochk
+	CMP#mm,cmax:BPL addblo:MOVE.l cblo,a1:BRA gotit
+	addblo:ADD #1,count:MOVEM.l (a0),d0-d7:MOVEM.l d0-d7,(a1)
+gotit:
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+
+cmax:Dc 0
+cblo:Dc.l 0
+
+End Function
+
+
+.blockout:
+
+##[$80C8] fix
+Read trak
+While trak<>0
+	t$="rod/track.fix"+Str$(trak)
+	d$="win/track."+Str$(trak)
+	Gosub doblocks
+	Read trak
+Wend
+End
+
+For trak=3 To 3
+	t$="rod/track.fix"+Str$(trak)
+	d$="win/track."+Str$(trak)
+	Gosub doblocks
+Next
+MouseWait
+End
+
+;fix:Data 4,5,6,7,8,9,10,12,13,14,17,18,19,21,22,0
+;fix:Data 5,6,9,10,13,14,17,18,20,21,22,0
+;fix:Data 5,6,9,10,22,0
+fix: Data 5,0
+
+doblocks:
+lmaxlen 0,1024,512,4
+LoadBitMap 0,t$,0
+
+InitBank 0,64,0
+InitBank 1,8192*32,65536
+n.w=0:nn.w=0
+bm.l=##[$80B8] lmaxlen(0)
+
+Dim wind.w(95,47)
+Dim first.w(95,47)
+
+Dim bcount(8192)
+Dim bptr.l(8192)
+
+Poke.w ?count,1							;first block is 0000000
+
+For y=0 To 383 Step 8				 ;pass 1 count pumpkins
+	For x=0 To 767 Step 8
+		getblock{Bank(0),bm,x,y}
+		n=test1{Bank(0),Bank(1)}
+		first(x ASR 3,y ASR 3)=n
+		bcount(n)+1
+	Next
+	Print "."
+Next
+
+NPrint Peek.w(?count)
+
+Poke.w ?count,1							;pass 2 add multiple pumpkins
+For y=0 To 383 Step 8
+	For x=0 To 767 Step 8
+		getblock{Bank(0),bm,x,y}
+		If bcount(first(x ASR 3,y ASR 3))>1
+			n=test1{Bank(0),Bank(1)}
+			wind(x ASR 3,y ASR 3)=n+128+32768
+		EndIf
+	Next
+	Print "."
+Next
+
+NPrint Peek.w(?count)
+
+For y=0 To 383 Step 8				;pass 3 find orphan pumpkins
+	For x=0 To 767 Step 8
+		getblock{Bank(0),bm,x,y}
+		If bcount(first(x ASR 3,y ASR 3))<2
+			n=test2{Bank(0),Bank(1)}
+			wind(x ASR 3,y ASR 3)=n+128+32768
+		EndIf
+	Next
+	Print "."
+	If Joyb(0)<>0 Then End
+Next
+
+NPrint Peek.w(?count)
+
+If ReadMem(0,d$)
+	Exists 0,&wind(0,0),96*48*2
+	Exists 0,Bank(1),Peek.w(?count)*32
+	CloseFile 0
+EndIf
+
+Return
+
+count:Dc.w0
+
+
+;----------------------------------------------------------------
+; dither original 256 map to sega.palette
+;----------------------------------------------------------------
+
+.dithermap
+t$="track24"
+
+casestrcomp 0,"shit/shit/sega.palette2"
+
+lmaxlen 0,768,384,8
+lmaxlen 1,768,384,4
+
+LoadBitMap 0,"shit/maps/"+t$+".256"
+
+InitCopList 0,$13014
+DisplayPalette 0,0
+DisplayBitMap 0,1
+VWait 20
+BLITZ
+CreateDisplay 0
+
+Mouse On
+MouseArea 0,0,768-320,384-256
+SetInt 5
+	DisplayBitMap 0,1,MouseX,MouseY
+End SetInt
+
+
+For y=0 To 383
+	oddy=y&1
+	For x=0 To 767
+		If Joyb(0)<>0 Then End
+		oddx=x&1
+		Use lmaxlen 0:p=Cls(x,y)
+;		p=(y)+192
+		c=0
+		If p>0	 AND p<64	Then c=0:p-0
+		If p>63	AND p<128 Then c=1:p-64
+		If p>127 AND p<192 Then c=2:p-128
+		If p>191 AND p<256 Then c=3:p-192
+
+		If c=2 OR c=3
+			p=(p/64)*1.25
+			ord=(x AND 1)*2 + (y AND 1)
+			Select ord
+				Case 0:dith=0
+				Case 3:dith=0.25
+				Case 1:dith=0.5
+				Case 2:dith=0.75
+			End Select
+
+			p=(c-2)*8+1+p+dith
+		Else
+			;If c=0 Then	Else p=Int(p ASR 2) ASR 2
+;			If c=1 Then p=p/5*4
+
+;			p=p&$fffe
+			p=p ASR 4
+
+			p=QLimit(p-0.25,0,4)
+
+			ord=(x AND 1)*2 + (y AND 1)
+			Select ord
+				Case 0:dith=0
+				Case 3:dith=0.25
+				Case 1:dith=0.5
+				Case 2:dith=0.75
+			End Select
+
+			dith*4
+			ord=(x AND 2) + (y AND 2)/2
+			Select ord
+				Case 0:dith+0
+				Case 3:dith+0.25
+				Case 1:dith+0.5
+				Case 2:dith+0.75
+			End Select
+			dith/4
+
+;			dith1=((x+y)AND1)
+;			dith2=(((x AND 2)+(y AND 2))AND2)/2
+			p=11-c*8+(p+dith);+(dith1 OR dith2)-(dith1 AND dith2)
+
+
+;			Select (p&1)
+;				Case 0:dith=0
+;				Case 1:dith=(oddx AND oddy)
+;				Case 1:dith=(oddx OR oddy)-(oddx AND oddy)
+;				Case 3:dith=(oddx OR oddy)
+;			End Select
+;			dith=(oddx OR oddy)-(oddx AND oddy)
+;			p=11-c*8+Int(p/2)+dith
+		EndIf
+
+		Use lmaxlen 1:Point x,y,p
+	Next
+Next
+
+;MouseWait
+
+
+AMIGA
+
+SaveBitmap 1,"shit/maps/"+t$+".ami",0
+
+End
+
+;----------------------------------------------------------------
+; makeiff from original track
+;----------------------------------------------------------------
+
+.makeiff
+
+Dim circx.q(20),circy.q(20) ;for Linef{}
+
+scalfac=.75
+For temp.q=0 To 14
+	circx(temp)=HSin(temp*##[$80BA]/30)*3*scalfac
+	circy(temp)=HCos(temp*##[$80BA]/30)*1.5*scalfac
+Next
+
+dt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100
+t$="start"
+#maxpost=300:#maxedge=200:#maxngon=40
+#dp=48:curb.b=0
+
+g$="GFX:"; m$=??!?
+
+DEFTYPE .w i,j
+
+#MaxNam=24
+Dim nam.s(#MaxNam),com.s(#MaxNam)
+
+NEWTYPE.frend
+	lti.w:ltj.w:rti.w:rtj
+End NEWTYPE
+
+CNIF 1=0
+NEWTYPE .frend
+	lti.q:ltj
+	rti.q:rtj
+	lsx.w:lsy
+	rsx.w:rsy
+	lpost.w:rpost.w
+
+	lb.q:mb:rb
+	lh	:mh:rh
+
+	go.w
+End NEWTYPE
+CEND
+
+NEWTYPE .grunt
+	i.q:j:k:sx.w:sy
+End NEWTYPE
+Dim gr.grunt(14):*tgr.grunt=gr(0)
+
+Dim con.frend(200):SetConDt &con(0):condt.l=&con(0)
+
+Dim map.w(63,63),changed.b(63,63):SetMaptr &map(0,0):maptr.l=&map(0,0)
+Dim import.w(63,63)
+Dim lsx(8),lsy(8),lsz(8)
+
+NEWTYPE .rend :x.w:y.w	:End NEWTYPE
+Dim tri.rend(10):ad.l=&tri(0):ae.l=&tri(1)
+
+NEWTYPE.ij
+	i.q:j:k:l
+End NEWTYPE
+bez.ij\i=0:*bez.ij=bez:io.l=&bez
+SetIO io
+
+;bigx=1024:bigy=512
+
+bigx=768:bigy=384
+
+lmaxlen 0,bigx,bigy,8
+BitPlanesBitMap 0,1,63
+BitPlanesBitMap 0,3,192
+
+BitMapOutput 0
+Use lmaxlen 1
+
+#map=On:#exo=Off:#exo24=On:#freq=Off:#pmap=Off
+Include "shit/LoadINC.bb"
+
+
+For gri=24 To 24
+	m$="shit/maps/"
+	t$="track"+Str$(gri)
+	GetMap{m$+t$}									 ;loadtrack
+	Use lmaxlen 0:BlockScroll
+	VWait 30:BLITZ
+	Gosub OpenUp
+	Gosub Main
+	Gosub DoCurve
+	;Gosub DoStartLine
+	;Gosub PreScan1
+	;Gosub PreScan2
+;	MouseWait
+	AMIGA
+	SaveBitmap 0,m$+t$+".bff",0				 ;"ram:blah.iff",0
+	VWait 30
+Next
+
+End
+
+.OpenUp
+BLITZ
+InitCopList 0,44,256,$10008,0,256,0
+DisplayBitMap 0,0
+CreateDisplay 0
+Mouse On:MouseArea 0,0,bigx-320,bigy-256
+DecodePalette 0,256
+
+##[$CE18] 0,1,63,		0,64,0,0,240,0						 ;greens = 0..12
+##[$CE18] 0,65,127,	64,32,0,192,128,64				 ;browns = 13..25
+##[$CE18] 0,129,191, 64,64,64,192,192,192		 ;greys = 26..28
+##[$CE18] 0,193,255, 64,0,0,192,0,0					 ;reds = 29..31
+
+DisplayPalette 0,0
+
+SetInt 5
+	DisplayBitMap 0,0,MouseX,MouseY
+End SetInt
+Return
+
+.Main
+	jstp=1/16/.75
+	myscal=2/##[$80BA]
+	Use lmaxlen 1 ;only 6 bitplane plotting
+
+		For delj=32 To -32 Step -jstp
+			x=MapX(0,delj)*.75
+			If delj>0.5
+				ii=0.5
+			Else
+				ii=0.5+(0.5-delj)
+			EndIf
+
+			istp=jstp
+			miny=Int(MapY(ii,ii+delj)*.75)
+			If miny<0 Then miny=0
+
+
+			##[$80BB]
+				jj=ii+delj
+				y=MapY(ii,jj)*.75
+
+				If y<(miny-34) Then ii+1:istp=0.5
+;				If y<miny Then ii+istp
+
+				If Int(y-1)=miny
+					fac1=Cos((QHite(ii-0.8,jj)-QHite(ii+0.8,jj))*0.12)*myscal
+					fac2=Cos((QHite(ii-0.4,jj)-QHite(ii+0.4,jj))*0.06) *myscal
+;					fac3=ATan((QHite(ii-0.2,jj)-QHite(ii+0.2,jj))*0.4)
+;					col=QLimit(64-(fac1*30+fac2*25),1,127)
+					col=QLimit(32-fac1*40-fac2*28,1,63.99)
+					Point x,miny,col
+
+
+					miny+1
+				EndIf
+
+				If (y-1)>miny Then ii-istp:istp ASR 1:Else istp=jstp
+
+				ii+istp
+
+			##[$80BC] (miny>bigy) OR (ii>63.5) OR (jj>63.5)
+			If Joyb(0)<>0 Then End
+		Next
+Return
+
+Solve	;solve's a 2x2 system of equations..
+	det= mata1*matb2-mata2*matb1
+	lam=(matc1*matb2-matc2*matb1)/det
+	mu =(matc2*mata1-matc1*mata2)/det
+Return
+
+.DoCurve
+
+	Use lmaxlen 3
+	For dtp.q=2 To pts3+0.2 Step 1/256
+		FindLo dtp.q
+
+;		Line MapX(bez\i,bez\j),MapY(bez\i,bez\j),MapX(bez\k,bez\l),MapY(bez\k,bez\l),1
+		tri(0)\x=MapX(bez\i,bez\j)*.75,MapY(bez\i,bez\j)*.75
+		tri(2)\x=MapX(bez\k,bez\l)*.75,MapY(bez\k,bez\l)*.75
+
+		If dtp>2 Then Polyf 3,ad,1:Polyf 3,ae,1
+
+		tri(1)\x=tri(0)\x,tri(0)\y
+		tri(3)\x=tri(2)\x,tri(2)\y
+
+	Next
+Return
+
+Statement Linef{x,y,x2,y2,col}
+
+	Shared circx(),circy()
+	For temp.q=0 To 14
+		dx=circx(temp)
+		dy=circy(temp)
+		Line x+dx,y+dy,x2+dx,y2+dy,col
+		Line x-dx,y+dy,x2-dx,y2+dy,col
+		Line x+dx,y-dy,x2+dx,y2-dy,col
+		Line x-dx,y-dy,x2-dx,y2-dy,col
+	Next
+
+End Statement
+
+.PreScan1
+	scalfac=.75
+	Use lmaxlen 3
+	old.w=Off
+	shadel=2
+
+	For dtf=1 To pts2+0.5 Step 0.01
+		FindLo dtf.q											;,condt,io}
+
+		If plus=0
+			dpri=bez\i:dprj=bez\j
+		Else
+			dpri=bez\k:dprj=bez\l
+		EndIf
+
+		fpsx=MapX(dpri,dprj)*scalfac
+		fpsz=MapY(dpri,dprj)*scalfac
+
+
+
+		If old
+			Linef{oldx,oldy,fpsx,fpsz,shadel}
+			dx=(oldx-fpsx)ASR 5
+			dy=(oldy-fpsz)ASR 5
+			distl=distl+Tan(dx*dx+dy*dy)
+			If distl>2
+				distl-2
+				shadel=5-shadel
+			EndIf
+		EndIf
+		old.w=On
+		oldx=fpsx:oldy=fpsz
+
+	Next
+
+Return
+
+.PreScan2
+
+	scalfac=.75
+	Use lmaxlen 3
+	old.w=4
+	minus=3*scalfac
+
+	For dtf=1 To pts2+0.5 Step 0.01
+		FindLo dtf.q											;,condt,io}
+
+		lx=MapX(bez\i,bez\j)*scalfac
+		ly=MapY(bez\i,bez\j)*scalfac
+		rx=MapX(bez\k,bez\l)*scalfac
+		ry=MapY(bez\k,bez\l)*scalfac
+
+		dx=(lx-olx) ASR 4
+		dy=(ly-oly) ASR 4
+		dist=Tan(dx*dx+dy*dy) *16:dx/dist:dy/dist
+
+		fpx1=lx+dx*minus
+		fpy1=ly+dy*minus ASR 1
+
+		dx=(rx-orx) ASR 4
+		dy=(ry-ory) ASR 4
+		dist=Tan(dx*dx+dy*dy) *16:dx/dist:dy/dist
+
+		fpx2=rx-dx*minus
+		fpy2=ry-dy*minus ASR 1
+
+		If old>0
+			Linef{oldx1,oldy1,fpx1,fpy1,1}
+			Linef{oldx2,oldy2,fpx2,fpy2,1}
+		Else
+			old-1
+		EndIf
+
+
+		oldx1=fpx1
+		oldy1=fpy1
+		oldx2=fpx2
+		oldy2=fpy2
+		olx=lx:orx=rx:oly=ly:ory=ry
+
+	Next
+
+Return
+
+
+
+
+
+
+.DoStartLine
+	Use lmaxlen 3
+	dtf=pts3+0.5
+	FindLo dtf
+	tri(0)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
+	tri(1)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac
+
+	dtf+0.02
+	FindLo dtf
+	tri(3)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
+	tri(2)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac
+
+	Polyf 4,ad.l,2
+
+;	Line xx1,yy1,xx2,yy2,8
+;	Line xx1,yy1,xx2,yy2,8
+Return
+
+
+
+
+
+
+AMIGA
+
+lmaxlen 0,32,32,5
+DecodePalette 0,32
+##[$CE18] 0,0,12,	 0,64,0,0,240,0					 ;greens = 0..12
+##[$CE18] 0,13,25, 64,32,0,192,128,64			 ;browns = 13..25
+##[$CE18] 0,26,28, 64,64,64,192,192,192		 ;greys = 26..28
+##[$CE18] 0,29,31, 64,0,0,192,0,0					 ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+lmaxlen 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+##[$CE18] 0,0,127,0,64,0,0,240,0
+##[$CE18] 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End
+
+
+CNIF Off
+	DecodePalette 0,256
+		##[$CE18] 0,10,73,	 0,64,0,0,240,0						 ;greens = 0..12
+		##[$CE18] 0,138,202, 64,32,0,192,128,64				 ;browns = 13..25
+		##[$CE18] 0,224,227, 64,64,64,192,192,192		 ;greys = 26..28
+		##[$CE18] 0,240,243, 64,0,0,192,0,0					 ;reds = 29..31
+	NPrint "done pal"
+
+	##[$A402] 0,768,384,3
+	NPrint "chunk inttd"
+	##[$A404] 0,"maps/track1.24"
+	NPrint "loaded, converting now (takes ages)"
+	##[$A411] 0,0
+	NPrint "convert worked"
+	lmaxlen 0,768,384,8
+	NPrint "enuff mem.."
+
+	##[$A412] 0,0
+	NPrint "about to save"
+	SaveBitmap 0,"ram:blah.256",0
+	End
+CEND
+
+AMIGA
+
+lmaxlen 0,32,32,8
+DecodePalette 0,256
+##[$CE18] 0,0,63,	 0,64,0,0,240,0						 ;greens = 0..12
+##[$CE18] 0,64,127, 64,32,0,192,128,64				 ;browns = 13..25
+##[$CE18] 0,128,130, 64,64,64,192,192,192		 ;greys = 26..28
+##[$CE18] 0,131,133, 64,0,0,192,0,0					 ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+lmaxlen 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+##[$CE18] 0,0,127,0,64,0,0,240,0
+##[$CE18] 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End
+
+Statement flipblock{blok1.l,blok2.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVEQ#7,d0:MOVEQ#15,d7
+	nxf:MOVE.l (a0)+,d1:MOVEQ#0,d2
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	MOVE.l d2,(a1)+:DBRA d0,nxf:AsmExit
+End Statement

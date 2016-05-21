@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/cdtvdevice.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/cdtvdevice.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/cdtvdevice.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/cdtvdevice.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/cdtvdevice.bb
+;
 ; accessing exec level devices
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/mydir2.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/mydir2.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/mydir2.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/mydir2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/mydir2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/mydir2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/mydir2.bb
+;
 ; recursive DOS directory program
 ;
 ; note how we use global myfib as it is just a memory block

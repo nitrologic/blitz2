@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/bio.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/bio.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/bio.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/bio.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/bio.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/bio.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/bio.bb2
+;
 ; Blitz 2 biorhythm proggy
 ;
 ; developed by Simon Armstrong

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abc/eggs/tools/intuitools.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/tools/intuitools.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/tools/intuitools.bb
+;
 ##[$80C3]:##[$80CC]
 ;
 ;A window making programming

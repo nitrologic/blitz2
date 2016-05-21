@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/tests.bb
-+For tr=1 To 24
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/sega/tests.bb,/Users/simon/Google Drive/amiga/w/sega/tests.bb
+For tr=1 To 24
 	i$="tracks/info."+Str$(tr)
 	LoadBank 0,i$
 	ba.l=Bank(0)

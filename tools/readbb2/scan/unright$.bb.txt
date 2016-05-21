@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/UnRight$.bb
-+Print UnRight$("GoodBye",4): ; Will print Bye 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/UnRight$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/UnRight$.bb
+Print UnRight$("GoodBye",4): ; Will print Bye 

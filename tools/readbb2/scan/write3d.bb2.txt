@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/write3d.bb2
-+;*************************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/write3d.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/write3d.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/write3d.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/write3d.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/write3d.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/write3d.bb2
+;*************************************************************
 ;*																													 *
 ;*	 THIS IS A DEMO PROGRAMME THAT CREATES LARGE 3-D				 *
 ;*				LETTERS FROM 8*8 PIXEL FONTS											 *

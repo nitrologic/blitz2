@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Derring-Do/do77.bb2
-+; Derring-Do
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/Derring-Do/do77.bb2,/Users/simon/Google Drive/amiga/w/lha/games/af/Derring-Do/do77.bb2
+; Derring-Do
 ; N H Slaven
 ; Based on the classic arcade game Mr. Do
 ;

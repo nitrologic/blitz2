@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/ReqToolsEZDemo.bb
-+; wow this is one painful demo of Australian humour, if your mouse
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/userlibprogs/neil/ReqToolsEZDemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/ReqToolsEZDemo.bb
+; wow this is one painful demo of Australian humour, if your mouse
 ; button is broken don't run this!
 
 ##[$80C3]:##[$80CC]

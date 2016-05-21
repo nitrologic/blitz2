@@ -1,0 +1,59 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/makepalette.bb
+allocst 0,4
+;Goto carcar
+
+casestrcomp 0,"sega.palette"
+allocst 0,4
+ScreensBitMap 0,0
+BitMapOutput 0:NPrint ""
+Use SetCycle 0
+For i=0 To 15:Boxf i*8,0,i*8+7,7,i:Next
+
+;PaletteRange 0,0,15,255,255,255,255,255,255
+;PalRGB 0,0,0,0,0
+Use SetCycle 0
+
+If ReadMem (0,"palette.dat")							;(0,"palette.dat")
+	For i=0 To 15
+		r.w=Blue(i)
+		g.w=Palette(i)
+		b.w=PalRGB(i)
+		col.w=(b*256+g*16+r) AND $eee
+		Exists 0,&col,2
+		NPrint Hex$(col)
+	Next
+	CloseFile 0
+EndIf
+
+MouseWait
+
+carcar
+
+DecodePalette 0,32
+
+##[$CE18] 0,0,7,0,0,0,224,224,224				;8 grey		 car palette
+##[$CE18] 0,8,11,128,0,0,224,128,128		 ;red
+##[$CE18] 0,12,15,0,0,128,128,128,224		;blue
+
+##[$CE18] 0,16,23,0,0,0,224,224,224			;8 grey		 car palette
+##[$CE18] 0,24,27,128,64,0,224,192,0		;yellow
+;PaletteRange 0,28,31,0,64,0,0,192,0				;green
+##[$CE18] 0,28,31,0,64,32,128,192,160				;green
+
+Use SetCycle 0
+
+If ReadMem (0,"car.palette")							;(0,"palette.dat")
+	For i=0 To 31
+		r.w=Blue(i)
+		g.w=Palette(i)
+		b.w=PalRGB(i)
+		col.w=(b*256+g*16+r) AND $eee
+		Exists 0,&col,2
+		NPrint Hex$(col)
+	Next
+	CloseFile 0
+EndIf
+
+MouseWait
+
+End

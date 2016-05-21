@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot3.bb
-+;This programme shows what happens when convoluted iteration
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot3.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot3.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot3.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot3.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot3.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot3.bb
+;This programme shows what happens when convoluted iteration
 ;is applied to a simple function.
 ;Iterations 0,2,4,6,8 and 10 are drawn on the one screen.
 ;The change in boundary with the higher iterations is because

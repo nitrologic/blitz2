@@ -1,7 +1,4 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/3D/demo3d.bb
-+;
-; Demo of pre release 3D library by Simon Armstrong
-;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/old/demo3d.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/old/demo3d.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/3d/demo3d.bb
 
 #iso=0				 ;change to 1 for red/blue 3d glasses
 
@@ -38,7 +35,8 @@ End NEWTYPE
 		If #iso=0 Then Gosub showrgb Else Gosub showrb
 		db=1-db
 		Gosub moveship
-		b.l=##[$AB05](0,db,shapes())
+		b.l=##[$AB02](0,db,shapes())
+		MOVE #$fff,$dff180
 	Wend
 	End
 
@@ -71,8 +69,8 @@ End NEWTYPE
 .setuprgb
 	lmaxlen 0,320,192,3
 	lmaxlen 1,320,192,3
-	##[$AB02] 0,0,1,0,50,40			;,64,0,320-128,150
-	##[$AB04] 1,6								;3,2
+	##[$AB82] 0,0,1,0,50,40			;,64,0,320-128,150
+	##[$AB01] 1,6								;3,2
 	Slice 0,54,320,192,$fff8,3,8,8,320,320
 	Gosub palettergb
 	Return
@@ -80,14 +78,17 @@ End NEWTYPE
 .setuprb
 	lmaxlen 0,320,192*2,4
 	lmaxlen 1,320,192*2,4
-	##[$AB02] 0,0,1,1,50,40	;,64,0,320-128,150
-	##[$AB04] 0,0			 ;3,2
-	##[$AB06] 0,2000,12
+	##[$AB82] 0,0,1,1,50,50	;,64,0,320-128,150
+	##[$AB01] 0,0			 ;3,2
+	##[$AB03] 0,2000,12
 	Slice 0,54,320,192,$fff8,4,8,16,320,320
 	Gosub paletterb
 	Return
 
 .setupshapes
+
+;	Goto missem
+
 	For i=1 To 16								;16 boxes
 		If globalloc(shapes())
 			##[$80CA] shapes()
@@ -99,6 +100,8 @@ End NEWTYPE
 		EndIf
 	Next
 
+	Goto missem
+
 	For i=1 To 10								;10 pyramids
 		If globalloc(shapes())
 			##[$80CA] shapes()
@@ -109,7 +112,7 @@ End NEWTYPE
 			\animvals[0]=1
 		EndIf
 	Next
-
+missem
 	globalloc shapes()							;viewer
 	Return
 

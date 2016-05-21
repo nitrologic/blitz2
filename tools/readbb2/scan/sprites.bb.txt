@@ -1,98 +1,32 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/sprites.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/sprites.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/sprites.bb
+BLITZ
 
-Statement doSegaSprites{cars.l,vp.l,vram.l,flip.w}
-	;
-	MOVEM.l a4-a6,-(a7):MOVE d3,-(a7)
-	MOVE.l d2,a2:LEA 640(a2),a3													;a2a3=ptrs
-	MOVE.l d0,a0:MOVE.l d1,a1:MOVEM.l(a1),d0-d5/a4-a5		;d7
-	;
-nxtspri:																												 ;a6=?
-	MOVE.l (a0)+,a1:CMP.l #0,a1:BEQ dunspri:MOVEM.l 2(a1),d6-d7/a6 ;a4-a6
-	MOVEM.l d0-d1,-(a7)
-	;
-dotl:
-	ADD.l d0,d6:ADD d1,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
-	CMP#448,d7:BCC cltl:CMP#96,d7:BCS cltl
-	CMP (a6),d7:BCS dobl:MOVE d7,d0:SUB #288,d0:BCC cltl
-	;
-	NEG d0:TST8(a7):BEQ now0:MOVE d0,d1:
-	AND#$fff8,d1:MOVE 14(a1,d1),d1:ADD d1,-4(a3):now0
-	;
-	ADD d0,d0:MOVE d6,d1:AND #$3ff,d1:OR mytab(pc,d0),d1
-	MOVE d1,-6(a2):BRA dobl:cltl:MOVE#0,-8(a2)
-dobl:
-	ADD.l d2,d6:ADD d3,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
-	CMP#448,d7:BCC clbl:CMP#96,d7:BCS clbl
-	CMP (a6),d7:BCS dotr:MOVE d7,d0:SUB #288,d0:BCC clbl
-	;
-	NEG d0:TST8(a7):BEQ now1:MOVE d0,d1:
-	AND#$fff8,d1:MOVE 14(a1,d1),d1:ADD d1,-4(a3):now1
-	;
-	ADD d0,d0:MOVE d6,d1:AND #$3ff,d1:OR mytab(pc,d0),d1
-	MOVE d1,-6(a3):BRA dotr:clbl:MOVE#0,-8(a3)
-	BRA dotr
-	;
-	;Dc.w 288-24,16
+lmaxlen 0,320,256,2
 
-mytab:Dc.w 0,0,0,0,0,0,0,0
-			Dc.w $400,$400,$400,$400,$400,$400,$400,$400
-			Dc.w $800,$800,$800,$800,$800,$800,$800,$800
-			Dc.w $c00,$c00,$c00,$c00,$c00,$c00,$c00,$c00
-	;
-dotr:
-	ADD.l d4,d6:ADD d5,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
-	CMP #449,d7:BCC cltr:CMP #288,d7:BCC dobr
-	MOVE #288,d0:SUB d7,d0:CMP 2(a6),d0:BPL cltr
-	TST8(a7):BNE now2:AND#$fff8,d0:MOVE 14(a1,d0),d1:ADD d1,-4(a2):now2
-	MOVEM mytab2(pc,d0),d0-d1
-	SUB d0,-6(a2):ADD d1,-2(a2):BRA dobr:cltr:MOVE#0,-8(a2)
-	;
-dobr:
-	ADD.l a4,d6:ADD a5,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
-	CMP #449,d7:BCC clbr:CMP #288,d7:BCC donx
-	;
-	MOVE #288,d0:SUB d7,d0:CMP 2(a6),d0:BPL clbr
-	TST8(a7):BNE now3:AND#$fff8,d0:MOVE 14(a1,d0),d1:ADD d1,-4(a3):now3
-	MOVEM mytab2(pc,d0),d0-d1
-	SUB d0,-6(a3):ADD d1,-2(a3):BRA donx:clbr:MOVE#0,-8(a3):BRA donx
-	;
-mytab2:Dc $400,8,0,0,$800,16,0,0,$c00,24,0,0
-	;
-donx:
-	MOVEM.l (a7)+,d0-d1:ADDQ#2,d0:BRA nxtspri
-	;
-dunspri:
-	MOVE.b #0,-5(a2):MOVE.b #0,-5(a3):MOVE(a7)+,d3:MOVEM.l (a7)+,a4-a6:AsmExit
-	;
-End Statement
+For i=15 To 0 Step -1:Circle 16,16,i,i:Next
+GetaShape 0,0,0,32,32
+GetaSprite 0,0:BlockScroll 3
 
-Statement dodoSegaSprites{cars.l,vp.l,vram.l}
-	;
-	MOVEM.l a4-a6,-(a7):MOVE.l d2,a2:LEA 640(a2),a3			;a2a3=ptrs
-	MOVE.l d0,a0:MOVE.l d1,a1:MOVEM.l(a1),d0-d5/a4-a5		;d7
-	;
-nxtspri2:																												 ;a6=?
-	MOVE.l (a0)+,a1:CMP.l #0,a1:BEQ dunspri2:MOVEM.l 2(a1),d6-d7/a6	;a4-a6
-dotl2:
-	ADD.l d0,d6:ADD d1,d7:MOVEM.l d6-d7,(a2):ADDQ#8,a2
-	CMP#96,d7:BCS cltl2:CMP #448,d7:BCS dobl2:cltl2:MOVE#0,-8(a2)
-dobl2:
-	ADD.l d2,d6:ADD d3,d7:MOVEM.l d6-d7,(a3):ADDQ#8,a3
-	CMP#96,d7:BCS clbl2:CMP #448,d7:BCS donx2:clbl2:MOVE#0,-8(a3)
-donx2:
-	ADDQ#1,d0:BRA nxtspri2
-dunspri2:
-	MOVE.b #0,-5(a2):MOVE.b #0,-5(a3):MOVEM.l (a7)+,a4-a6:AsmExit
-	;
-End Statement
+Circlef 160,50,50,2
 
+Slice 0,44,320,100,$fff8,2,8,32,320,320
+Show 0
 
+Slice 1,146,320,50,$fff8,2,8,32,320,320
+Show 0
 
-CEND
+Slice 2,198,320,100,$fff8,2,8,32,320,320
+Show 0
 
-mytable:
-	Dc.w 288-08,0
-	Dc.w 288-16,8
-	Dc.w 288-24,16
-	Dc.w 288-32,24
+a=1
+
+While Joyb(0)<>1
+	VWait
+	For i=0 To 2:Use Slice i:ShowSprite 0,64,y,0:ShowSprite 0,128,y,4:Next
+	y+a
+	If y>120 Then a=-1
+	If y<-40 Then a=1
+	While Joyb(0)=2:VWait:Wend
+Wend
+
+MouseWait

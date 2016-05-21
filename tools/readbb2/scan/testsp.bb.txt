@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/testsp.bb
-+#dpth=0
+#dpth=0
 
 Statement psort{a.l,b.l}
 	MOVEM.l a4-a6,-(a7):MOVE.l d0,a0

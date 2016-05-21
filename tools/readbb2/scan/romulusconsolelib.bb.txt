@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusConsoleLib.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RomulusConsoleLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RomulusConsoleLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusConsoleLib.bb
+;
 ; andre's consolelib	(rev bum6)
 ;
 

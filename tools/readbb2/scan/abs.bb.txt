@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Abs.bb
-+Print Abs(-23) ; Prints 23 too 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Abs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Abs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Abs.bb
+Print Abs(-23) ; Prints 23 too 

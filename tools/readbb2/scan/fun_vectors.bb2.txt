@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Vectors.bb2
-+;================================================;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Vectors.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Vectors.bb2
+;================================================;
 ; Blitz Basic 2 Library For Vector Manipulations ;
 ;																								;
 ; Author: Nigel Hughes													 ;

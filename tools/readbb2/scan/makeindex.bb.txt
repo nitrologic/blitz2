@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/makeindex.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/makeindex.bb
+;
 ; create index from libs files in blitz2:help drawer
 ;
 
@@ -17,7 +17,7 @@ Dim i.index(2048)
 NPrint "Scanning..."
 
 DEFTYPE .FileInfoBlock myfib				;myfib holds infoblock
-n=0:v$="blitz2:dev/help/"
+n=0:v$="blitz2:help/"
 lock.l=##[$FE0A](&v$,-2)
 If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
 	While ##[$FE0E](lock,myfib)<>0			;skip through files
@@ -26,7 +26,7 @@ If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
 			f$=Peek$(&\fib_FileName)
 			lib=Val(Mid$(f$,4)):com=1
 			If lib<>0
-				If WriteMem(0,"blitz2:dev/help/"+f$)
+				If WriteMem(0,"blitz2:help/"+f$)
 					FileInput 0
 					While NOT DosBuffLen(0)
 						a$=Edit$(512)
@@ -55,18 +55,10 @@ If n>0
 		Next
 	Next
 	;
-	If ReadMem(0,"blitz2:dev/help/index")
+	If ReadMem(0,"blitz2:help/index")
 		FileOutput 0
 		For i=0 To n-1
 			NPrint Mki$(i(i)\c),i(i)\a
-		Next
-		CloseFile 0
-	EndIf
-	;
-	If ReadMem(0,"ram:test.bb")
-		FileOutput 0
-		For i=0 To n-1
-			Print Mki$(i(i)\c OR $8000),Chr$(34),i(i)\a,Chr$(34),Chr$(0)
 		Next
 		CloseFile 0
 	EndIf

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/zinzeszins.bb2
-+	FindScreen 0
+	FindScreen 0
 	##[$C082] 1,?wzdata,20
 	##[$80BB]
 		 ev.l=WaitEvent

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/STARTREK/startrek.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/STARTREK/startrek.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/STARTREK/startrek.bb2
+;
 ;Allrighty - a cool space game type thingy!
 ;
 ;Loosely based on the old Star-Trek.

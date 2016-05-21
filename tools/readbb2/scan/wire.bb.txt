@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/wireman/wire.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/stuff/wire.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/stuff/wire.bb
+;
 ; Dancing Demon program
 ;
 
@@ -15,8 +15,9 @@ End NEWTYPE
 
 Dim ##[$80B3] segs.seg(500)
 
-Statement readfigure{*temp.seg}
+Statement readfigure{tempptr.l}
 	Shared segs()
+	*temp.seg=tempptr
 	##[$80CA] *temp
 	Read \numkids:Read \angle:Read \length
 	For i=1 To \numkids
@@ -25,8 +26,9 @@ Statement readfigure{*temp.seg}
 	Next
 End Statement
 
-Statement drawfigure{x.w,y,a,*temp.seg}
+Statement drawfigure{x.w,y,a,tempptr.l}
 	Shared qsin(),qcos(),ratio,size
+	*temp.seg=tempptr
 	##[$80CA] *temp
 	aa=(a+\angle)&255:slen=\length*size
 	xx=x+qcos(aa)*slen:yy=y+qsin(aa)*slen:\x=xx,yy,aa
@@ -40,25 +42,9 @@ Statement drawfigure{x.w,y,a,*temp.seg}
 	Next
 End Statement
 
-Statement drawtween{x.w,y,a,*t1.seg,*t2.seg,rr}
-	Shared qsin(),qcos(),ratio,size
-	r1.q=rr/100:r2.q=1-r1
-		aa=(a+*t1\angle*r1+*t2\angle*r2)&255
-	slen=(*t1\length*r1+*t2\length*r2)*size
-	xx=x+qcos(aa)*slen
-	yy=y+qsin(aa)*slen
-	If *t1\length<0
-		WEllipse xx,yy,-slen,-slen*ratio,1
-	Else
-		WLine x,y,xx,yy,1
-	EndIf
-	For i=1 To *t1\numkids
-		drawtween{xx,yy,aa,*t1\kids[i],*t2\kids[i],rr}
-	Next
-End Statement
-
-Function.l findpart{x,y,*temp.seg}
+Function.l findpart{x,y,tempptr.l}
 	##[$80CA] *temp
+	*temp.seg=tempptr
 	If PColl(x,y,1,1,\x-2,\y-2,5,5) Then Function Return *temp
 	For i=1 To \numkids
 		res.l=findpart{x,y,\kids[i]}
@@ -93,8 +79,7 @@ For y=0 To 3:For x=0 To 4
 Next:Next
 
 localstat 0,0,10,640,246,$1000,"",1,2,0:arrmult 0		;big window at back
-localstat 1,16,14,256,128,$1000,"",1,2:arrmult 0		 ;edit window
-localstat 2,16,150,600,100,$1000,"",1,2:arrmult 0		;stage window
+localstat 1,16,14,256,128,$1000,"",1,2:arrmult 0			;edit window
 
 Dim *f.seg(20)
 DEFTYPE .seg *myman
@@ -108,7 +93,6 @@ SetInt 5:PlayMed:End SetInt
 			If EventWindow=1 Then Gosub editman
 		Case $40
 			If GadgetHit<20 Then Gosub selectframe
-			Gosub testanim
 		Case $100
 			If MenuHit=0 AND ItemHit=0 Then Gosub loadmed
 			If MenuHit=0 AND ItemHit=1 Then StartMedModule 0
@@ -132,21 +116,7 @@ SetInt 5:PlayMed:End SetInt
 	Use localstat 1:InnerCls:size=1:drawfigure {128,64,0,*myman}
 	Return
 
-.testanim
-	f0=f1:f1=gman
-	If *f(f0)<>0 AND *f(f1)<>0
-		Use localstat 2:InnerCls:size=1:rr=0:ra=10
-		##[$80BB]
-			lr=rr:rr+ra:If rr=100 OR rr=0 Then ra=-ra
-			drawtween{32,64,0,*f(f0),*f(f1),rr} ;new frame
-			VWait
-			drawtween{32,64,0,*f(f0),*f(f1),rr} ;last frame
-		##[$80BC] Event
-	EndIf
-	Return
-
 .editman:
-	Use localstat 1
 	*part.seg=findpart{WMouseX,WMouseY,*myman}
 	If *part<>0
 		##[$80CA] *part
@@ -183,5 +153,4 @@ SetInt 5:PlayMed:End SetInt
 
 .loadmed:
 	a$=FileRequest$("SELECT MED MODULE TO LOAD",pa$,fi$)
-	If a$<>"" Then LoadMedModule 0,a$
-	Return
+	LoadMedModule 0,a$:Return

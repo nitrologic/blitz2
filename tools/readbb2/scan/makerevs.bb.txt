@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEREVS.BB
-+
+
 allocst 0,0,0,320,512+64,4,0,"",0,1
 ScreensBitMap 0,0
 

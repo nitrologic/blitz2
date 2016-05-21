@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIPackLib.bb
-+;#ripacklib=73
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RIPackLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RIPackLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIPackLib.bb
+;#ripacklib=73
 
 ; Reflective Images PACK-library
 ; (C)1994

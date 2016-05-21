@@ -1,2 +1,11 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Scale.bb
-+; ; scale shape example ; Screen 0,3					 ;An intuition screenScreensBitMap 0,0				;the screens bitmap Cls							 ;clear the bitmap For k=7 To 1 Step -1			;a loop to generate someCirclef 32,32,k*4,k			 ;kind of shapeNextGetaShape 0,0,0,64,64			;pick up the shapeFor k=1 To 6			 ;start of loop CopyShape 0,k			;copy shape  Scale k,k/4,k/4		 ;resize itNext					 ;end of loopCls For k=1 To 6			 ;start of loop Blit k,k*32,0			;show shapes we just generatedNext					 ;end of loopMouseWait See also:Rotate
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/Scale.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/Scale.bb
+#G11=10
+#G8=8
+#G8=9
+#W1=1
+
+allocst 0,0,0,640,256,2,-32768,"TEST",0,1
+GTText #W1,#G11,12,5,296,40,"",1,""
+GTButton #W1,#G8,204,49,104,12," Cancle ",16
+GTButton #W1,#G8,12,49,104,12," Scale ",16
+localstat #W1,176,56,328,80,4102,"Scale",1,2:AttachGTList #W1,#W1

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/FuzziesReqLib.bb
-+; *******************
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/FuzziesReqLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/FuzziesReqLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/FuzziesReqLib.bb
+; *******************
 ; *								 *
 ; *	Req	 Library	*
 ; *	Ver				 1	*

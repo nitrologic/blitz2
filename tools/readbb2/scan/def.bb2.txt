@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/def/def.bb2
-+
+
 ##[$D501]
 
 #cd32=0 ;set to 0 for non cd32 game!

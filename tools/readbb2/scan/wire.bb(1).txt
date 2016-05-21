@@ -1,0 +1,187 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/wireman/wire.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/wireman/wire.bb
+;
+; Dancing Demon program
+;
+
+Dim qsin.q(256),qcos.q(256)
+
+NEWTYPE .seg
+	numkids.w				;count of branches
+	*kids.seg[5]		 ;maximum of 4 branches
+	*parent.seg
+	x.w:y:a					;cartesian co-ordinates and actual orientation
+	angle.w:length	 ;polar coordinates
+End NEWTYPE
+
+Dim ##[$80B3] segs.seg(500)
+
+Statement readfigure{*temp.seg}
+	Shared segs()
+	##[$80CA] *temp
+	Read \numkids:Read \angle:Read \length
+	For i=1 To \numkids
+		globalloc segs()
+		\kids[i]=segs():segs()\parent=*temp:readfigure{segs()}
+	Next
+End Statement
+
+Statement drawfigure{x.w,y,a,*temp.seg}
+	Shared qsin(),qcos(),ratio,size
+	##[$80CA] *temp
+	aa=(a+\angle)&255:slen=\length*size
+	xx=x+qcos(aa)*slen:yy=y+qsin(aa)*slen:\x=xx,yy,aa
+	If \length<0
+		WEllipse xx,yy,-slen,-slen*ratio,1
+	Else
+		WLine x,y,xx,yy,1
+	EndIf
+	For i=1 To \numkids
+		drawfigure{xx,yy,aa,\kids[i]}
+	Next
+End Statement
+
+Statement drawtween{x.w,y,a,*t1.seg,*t2.seg,rr}
+	Shared qsin(),qcos(),ratio,size
+	r1.q=rr/100:r2.q=1-r1
+		aa=(a+*t1\angle*r1+*t2\angle*r2)&255
+	slen=(*t1\length*r1+*t2\length*r2)*size
+	xx=x+qcos(aa)*slen
+	yy=y+qsin(aa)*slen
+	If *t1\length<0
+		WEllipse xx,yy,-slen,-slen*ratio,1
+	Else
+		WLine x,y,xx,yy,1
+	EndIf
+	For i=1 To *t1\numkids
+		drawtween{xx,yy,aa,*t1\kids[i],*t2\kids[i],rr}
+	Next
+End Statement
+
+Function.l findpart{x,y,*temp.seg}
+	##[$80CA] *temp
+	If PColl(x,y,1,1,\x-2,\y-2,5,5) Then Function Return *temp
+	For i=1 To \numkids
+		res.l=findpart{x,y,\kids[i]}
+		If res.l<>0 Then ##[$80BE] For:Function Return res
+	Next
+	Function Return 0
+End Function
+
+;
+; main program goes here
+;
+
+MaxLen pa$=160 ;set path string variable for filerequester
+MaxLen fi$=64	;set filename string variable for filerequester
+
+ratio=.5
+
+For i=0 To 255
+	qsin(i)=HSin(i*##[$80BA]/128)*ratio:qcos(i)=HCos(i*##[$80BA]/128)
+Next
+
+allocst 0,10,"IF I WERE A BLITZMAN"
+
+newlocarr 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD MED			","L"
+MenuItem 0,0,0,1,"START MED		 ","S"
+MenuItem 0,0,0,2,"QUIT					","Q"
+
+g=0
+For y=0 To 3:For x=0 To 4
+	PropGadget 0,300+x*64,6+y*32,1,g,60,30:g+1
+Next:Next
+
+localstat 0,0,10,640,246,$1000,"",1,2,0:arrmult 0		;big window at back
+localstat 1,16,14,256,128,$1000,"",1,2:arrmult 0		 ;edit window
+localstat 2,16,150,600,100,$1000,"",1,2:arrmult 0		;stage window
+
+Dim *f.seg(20)
+DEFTYPE .seg *myman
+
+SetInt 5:PlayMed:End SetInt
+
+##[$80BB]
+	ev.l=WaitEvent
+	Select ev
+		Case 8
+			If EventWindow=1 Then Gosub editman
+		Case $40
+			If GadgetHit<20 Then Gosub selectframe
+			Gosub testanim
+		Case $100
+			If MenuHit=0 AND ItemHit=0 Then Gosub loadmed
+			If MenuHit=0 AND ItemHit=1 Then StartMedModule 0
+			If MenuHit=0 AND ItemHit=2 Then End
+	End Select
+##[$80C7]
+
+.selectframe
+	gman=GadgetHit
+	gadgetx=300+(gman ##[$80B9] 5)*64:gadgety=6+Int(gman/5)*32
+	If *f(gman)=0
+		globalloc segs():*f(gman)=segs():##[$80C8] mandata:readfigure{*f(gman)}
+	EndIf
+	*myman=*f(gman)
+	Gosub refreshgman
+	Return
+
+.refreshgman
+	Use localstat 0:WBox gadgetx+4,gadgety+2,gadgetx+55,gadgety+27,0
+	size=.25:drawfigure {gadgetx+30,gadgety+16,0,*myman}
+	Use localstat 1:InnerCls:size=1:drawfigure {128,64,0,*myman}
+	Return
+
+.testanim
+	f0=f1:f1=gman
+	If *f(f0)<>0 AND *f(f1)<>0
+		Use localstat 2:InnerCls:size=1:rr=0:ra=10
+		##[$80BB]
+			lr=rr:rr+ra:If rr=100 OR rr=0 Then ra=-ra
+			drawtween{32,64,0,*f(f0),*f(f1),rr} ;new frame
+			VWait
+			drawtween{32,64,0,*f(f0),*f(f1),rr} ;last frame
+		##[$80BC] Event
+	EndIf
+	Return
+
+.editman:
+	Use localstat 1
+	*part.seg=findpart{WMouseX,WMouseY,*myman}
+	If *part<>0
+		##[$80CA] *part
+		If \parent<>0
+			x=\parent\x:y=\parent\y:a=\parent\a:size=1
+			While Joyb(0)<>0
+				dx=WMouseX-x:dy=(WMouseY-y)*ratio:If dy=0 Then dy=.001
+				ang.q=Cos(dy/dx)*128/##[$80BA]:If dx<0 Then ang+128
+				\angle=(ang-a)&255
+				Use localstat 1:InnerCls:drawfigure {128,64,0,*myman}
+				VWait 10
+			Wend
+			Gosub refreshgman
+		EndIf
+	EndIf
+	While Joyb(0)<>0 Wend
+	Return
+
+.mandata:				;numbranches,angle,len (13 limbs)
+	Data.w 3,0,0					 ;origin
+		Data.w 1,32,40			 ;right thigh
+			Data.w 1,48,40		 ;right calf 80
+				Data.w 0,-80,16	 ;right foot
+		Data.w 1,96,40			 ;left thigh
+			Data.w 1,-48,40		;left calf
+				Data.w 0,80,16		;left foot
+		Data.w 3,192,20			;back bone
+			Data.w 1,76,40		 ;right top arm
+				Data.w 0,32,30	 ;right low arm
+			Data.w 1,192,40		;left top arm
+				Data.w 0,32,30	 ;left low arm
+			Data.w 0,128,-20
+
+
+.loadmed:
+	a$=FileRequest$("SELECT MED MODULE TO LOAD",pa$,fi$)
+	If a$<>"" Then LoadMedModule 0,a$
+	Return

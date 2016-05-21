@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/help.bb2
-+
+
 DEFTYPE.l
 
 MOVEQ #1,d1

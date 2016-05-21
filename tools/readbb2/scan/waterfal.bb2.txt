@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/djl/WATERFAL.BB2
-+; By David Linsley July 1994 E-Mail to djl102@unix.york.ac.uk
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/djl/WATERFAL.BB2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/djl/WATERFAL.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/djl/WATERFAL.BB2
+; By David Linsley July 1994 E-Mail to djl102@unix.york.ac.uk
 ; Converted from my original source code in 6809 assembler for
 ; the Dragon 32 and Dragon 64 computers!
 

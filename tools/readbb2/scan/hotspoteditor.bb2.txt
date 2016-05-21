@@ -1,7 +1,10 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/fabio/HotSpotEditor.bb2
-+; Hot Spot Editor
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/fabio/HotSpotEditor.bb2
+; Hot Spot Editor
 ; Starting Date: 2 Jan 1994
 
+; * simon was here, wo sorry some calls to reqtools library
+;	 which we haven't got a standard library number for, I
+;	 will try and implement this for bum7
 
 	#ANY=0
 	#CHIP=2

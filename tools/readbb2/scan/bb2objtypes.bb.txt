@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/blitzlibs/bb2objtypes.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/blitzlibs/bb2objtypes.bb,/Users/simon/Google Drive/amiga/w/abcstuff/coollibs/bb2objtypes.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/ressrc/bb2objtypes.bb,/Users/simon/Google Drive/amiga/w/abcstuff/userlibs/bb2objtypes.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/blitzlibs/bb2objtypes.bb
+;
 ; blitz2 objects
 ;
 

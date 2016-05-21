@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/fuzz/NEWbanklib.bb
-+#banklib=76
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/fuzz/NEWbanklib.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/fuzz/NEWbanklib.bb
+#banklib=76
 
 !libheader{#banklib,0,0,0,0}
 

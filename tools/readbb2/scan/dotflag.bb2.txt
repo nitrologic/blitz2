@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/dotflag.bb2
-+Dim c(360),s(360)
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/spectre/dotflag.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/spectre/dotflag.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/spectre/dotflag.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/dotflag.bb2
+Dim c(360),s(360)
 
 If WriteMem(0,"sincos.table")
 	Fields 0,c,s

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIAppLib.bb
-+;#riapplib=61
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RIAppLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RIAppLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RIAppLib.bb
+;#riapplib=61
 
 #ExecBase=4
 

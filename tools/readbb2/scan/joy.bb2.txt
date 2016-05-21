@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dev/joy.bb2
-+
+
 JMP start
 
 Macro initjoytrans

@@ -1,44 +1,83 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/bridge.bb
-+
-NEWTYPE .segasp					 ;sort points here
-	dpth.w
-	sy.w:l.w:spdata.w:sx.w:wptr.l	;points to ?mytable+spwid*8
-	h0.w:p0.w[3]
-	h1.w:p1.w[3]
-	h2.w:p2.w[3]
-	h3.w:p3.w[3]
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/bridge.bb
+;
+; bridge converter
+;
+
+NEWTYPE .quad
+	x.w:y:w:h
 End NEWTYPE
 
-Macro ssp SizeOf.segasp\`1(a1):End Macro
+Dim ##[$80B3] q.quad(20)
 
-Statement findsprites{myinfo.l,splist.l,cptr.l,mydata.l}
+allocst 0,4
+ScreensBitMap 0,0
+localstat 0,0,0,320,256,$1800,"",1,2
+BlockScroll
+
+WindowInput 0
+BitMapOutput 0
+
+LoadShape 0,"start.iff",0
+FadePalette 0
+ClipBlit 0,0,0
+
+For y=0 To 19
+	For x=0 To 19
+		Box x*8,y*8,x*8+8,y*8+8,1
+	Next
+Next
+
+Dim p(4):p(1)=10:p(2)=30:p(3)=60
+
+For x=0 To 3
+	For y=0 To 3
+		Box 200+p(x),p(y),200+p(x)+8*(x+1),p(y)+8*(y+1),1
+	Next
+Next
+
+sp=0:sb=0
+
+##[$80BB]
 	;
-	MOVEM.l a4-d6,-(a7)
+	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
 	;
-	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d0,a2:MOVE.l d2,a4:MOVE.l d3,a5
-	domore:MOVE (a0)+,d0:BPL domore
-donother
-	MOVE (a0)+,d0:BMI dun:MOVE (a0)+,d1						 ;d0-d3=x y n block
-	MOVE (a0)+,d2:LEA 0(a2,d2),a3:MOVEM (a3)+,d2-d3
-nxpart:
-	MOVEM (a3)+,d4-d5
-	ADD d1,d5:MOVE d5,!ssp{sy}
-	ADD d0,d4:MOVE d4,!ssp{sx}
-	MOVE d3,!ssp{spdata}
+	Box bx,by,bx+bw,by+bh,-1
+	bx=sx AND $fff8:by=sy AND $fff8:bw=wx*8:bh=wy*8
+	Box bx,by,bx+bw,by+bh,-1
 	;
-	MOVE (a3),d4:AND#$f00,d4:OR#5,d4:MOVE d4,!ssp{l}:ADD 2(a3),d3
-	;
-	MOVE.b(a3),d4:ADDQ#4,a3:MOVE d4,d5:AND #12,d4 ;d4=w d5=h+1
-	LEA 0(a5,d4),a6:MOVE.l a6,!ssp{wptr}
-	AND#3,d5:ADDQ#1,d5:MOVE d5,d4
-	MOVE d4,!ssp{h0}:ADD d5,d4
-	MOVE d4,!ssp{h1}:ADD d5,d4
-	MOVE d4,!ssp{h2}:ADD d5,d4
-	MOVE d4,!ssp{h3}
-	;
-	MOVE.l a1,(a4)+:ADD #SizeOf.segasp,a1:SUBQ#1,d2:BNE nxpart:BRA donother
-	;
-dun:
-	MOVE.l #0,(a4):MOVEM.l (a7)+,a4-a6:AsmExit
-	;
-End Statement
+	If Joyb(0)=1
+
+		If PColl(sx,sy,1,1,200,0,100,100)
+			For x=0 To 3
+				For y=0 To 3
+					If PColl (sx,sy,1,1,200+p(x),p(y),8*(x+1),8*(y+1))
+						wx=x+1:wy=y+1
+					EndIf
+				Next
+			Next
+		EndIf
+
+		If PColl(sx,sy,1,1,0,0,160,160)
+			Box bx,by,bx+bw,by+bh,5
+			If globalloc(q())
+				q()\x=bx,by,bw,bh:sp+1:sb+bw*bh/2
+			EndIf
+			While Joyb(0)<>0:VWait:Wend
+		EndIf
+
+	EndIf
+
+	If key=127
+		If LastItem(q())
+			##[$80CA] q()
+			Box \x,\y,\x+\w,\y+\h,1
+			freelast q()
+		EndIf
+	EndIf
+
+	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
+	Locate 0,22:Print key,"	"
+
+##[$80BC] key=27
+
+End

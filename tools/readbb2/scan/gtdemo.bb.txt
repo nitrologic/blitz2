@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/GadTools/gtdemo.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/gtdemo.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/gtdemo.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/GadTools/gtdemo.bb
+;
 ; GadTools Demo
 ;
 

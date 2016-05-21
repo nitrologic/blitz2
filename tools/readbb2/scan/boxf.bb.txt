@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Boxf.bb
-+; ; boxf example; Screen 0,3,"Hello There"		;an intuition screenScreensBitMap 0,0				;bitmap of the screen Boxf 0,0,47,9,-1				;an inversed boxMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Boxf.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Boxf.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Boxf.bb
+; ; boxf example; Screen 0,3,"Hello There"		;an intuition screenScreensBitMap 0,0				;bitmap of the screen Boxf 0,0,47,9,-1				;an inversed boxMouseWait 

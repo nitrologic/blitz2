@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/temp.bb
-+For j=2 To 11
+For j=2 To 11
 	Gosub doconvert
 Next
 

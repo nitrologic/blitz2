@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/bin/B_search.bb2
-+; BS the Binary Searcher V1.0
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/B_search.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/bin/B_search.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/B_search.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/bin/B_search.bb2
+; BS the Binary Searcher V1.0
 ; 26-9-93
 
 poss.l=0

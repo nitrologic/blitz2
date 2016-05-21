@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makeblurb.bb2
-+If WriteMem(0,"blurb.asc")
+If WriteMem(0,"blurb.asc")
 	If ReadMem(1,"blurb.bin")
 		FileInput 0
 		FileOutput 1

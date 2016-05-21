@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_ProcControl.bb2
-+;LES Debugger v1.21 Test program
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/net/debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_ProcControl.bb2
+;LES Debugger v1.21 Test program
 ;Testing procedure control
 
 ;Some dummy statements

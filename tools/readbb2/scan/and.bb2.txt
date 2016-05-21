@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/parts.bb2/and.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/map/parts.bb2/and.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/parts.bb2/and.bb2
+
 Dc.b "pART"
 Dc.b "SN54/74LS08",0
 Event

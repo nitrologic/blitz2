@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/textview.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/textview.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/textview.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/EXAMPLES/textview.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/textview.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/EXAMPLES/textview.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/textview.bb2
+;
 ;a little text viewer!
 ;
 ;as used on the Blitz 2 pd disks

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Gobble2/Gobble2/OPTIONS.BB
-+#G3=5
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Gobble2/Gobble2/OPTIONS.BB,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Gobble2/Gobble2/OPTIONS.BB
+#G3=5
 #G4=4
 #G2=1
 #G1=0

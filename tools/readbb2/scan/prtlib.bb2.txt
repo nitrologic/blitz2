@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/prtlib.BB2
-+; Little updated...
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/code/prtlib.BB2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/libsdev/prtlib.BB2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/DEVELOPERS/libsdev/prtlib.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/code/prtlib.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/prtlib.BB2
+; Little updated...
 
 ; V0.2 Now supports Screen object for HardCopy
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/hankie.bb2
-+#dots=7				; CHANGE ME!!!
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/hankie.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/hankie.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/hankie.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/hankie.bb2
+#dots=7				; CHANGE ME!!!
 
 
 lmaxlen 0,320,256,2:lmaxlen 1,320,256,2

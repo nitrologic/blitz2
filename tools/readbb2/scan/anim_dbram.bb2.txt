@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/trev/anim_dbram.bb2
-+; This is my attempt at trying to animate from FAST RAM.
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/trev/anim_dbram.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/trev/anim_dbram.bb2
+; This is my attempt at trying to animate from FAST RAM.
 ; The only way I could think of doing this was to transfer
 ; the .iff images from disk to RAM: using "LoadShape" and "SaveShape".
 ; Then use "LoadBitMap" to load the .iff images from RAM: in the animation loop.

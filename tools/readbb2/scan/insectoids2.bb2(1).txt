@@ -1,0 +1,1717 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/afold/insectoids2/insectoids2.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/insectoids2/insectoids2.bb2
+##[$80CB]:##[$80CC]
+
+#final=1
+
+DEFTYPE.w
+
+MOVE #$8400,$dff096
+
+.newtypes
+NEWTYPE.alien1		;flying around
+;
+s.w			 ;shape (0,16,32)
+p.w			 ;path step
+m.w			 ;mirror flag!
+px.w			;pat x
+py.w			;pat y
+xo.w			;x offset
+yo.w			;y offset
+;
+End NEWTYPE
+
+NEWTYPE.alien2		;finding formation position
+;
+x.w
+y.w
+d.q
+px.w
+py.w
+s.w
+;
+End NEWTYPE
+
+NEWTYPE.alien3
+;
+px.w
+py.w
+s.w
+;
+End NEWTYPE
+
+NEWTYPE.bomb
+;
+x.q
+y.w
+xs.q
+;
+End NEWTYPE
+
+NEWTYPE.bull
+;
+x.w
+y.w
+s.w
+f.w
+;
+End NEWTYPE
+
+NEWTYPE.exp
+;
+x.w
+y.w
+s.q
+a.q
+f.w
+;
+End NEWTYPE
+
+.constants
+w=256:w2=w+64					 ;display width
+w3=w/2+32
+nr=16:nr2=nr-1:nr3=nr/4		;number of rotations
+
+.arrays
+Dim f$(127),f(16)		;flight path information!
+Dim px(5000),py(5000),pd.b(5000)
+Dim ##[$80B3] a.alien1(25)
+Dim xa.q(nr2),ya.q(nr2)
+Dim ##[$80B3] b.bomb(5)
+;
+Dim ##[$80B3] c.bull(3)
+;
+Dim ##[$80B3] a2.alien2(25)
+Dim ##[$80B3] a3.alien3(80)
+Dim rc(16),rl(16)
+Dim ##[$80B3] e.exp(20)
+Dim bo(5)						 ;bonuss collected...
+Dim sd(4)
+Dim hi(11),hi$(11)
+sd(0)=10000:sd(1)=1000:sd(2)=100:sd(3)=10:sd(4)=1
+
+.diskio
+LoadSound 0,"ufo.sfx"
+LoadSound 1,"shipfire.sfx"
+LoadSound 3,"aliendie.sfx"
+LoadSound 4,"alienfly.sfx"
+LoadSound 5,"bonus.sfx"
+LoadSound 6,"nrf.sfx"
+LoadSound 7,"tune1.sfx"
+LoadSound 8,"tune2.sfx"
+;
+CNIF #final=1
+	LoadShapes 0,"shapes"
+	LoadSprites 0,"sprites"
+
+
+;*** patch here ***
+For i = 0 To 8
+ casestrcomp i,"pal"+Chr$(48+i)
+Next i
+
+
+CELSE
+LoadShape 0,"ship1":DecodeShapes 0:GetaSprite 0,0:casestrcomp 0,"ship1",16
+LoadShape 0,"ship2":DecodeShapes 0:GetaSprite 1,0
+LoadShape 0,"shipexp"
+For k=0 To 3:DecodeShapes k:GetaSprite k+2,k:Next
+;
+LoadShape 132,"alien1",0:LoadShape 134,"alien2":LoadShape 136,"alien3"
+LoadShape 138,"chaliens1",1
+LoadShape 142,"alien4",2:LoadShape 144,"alien5":LoadShape 146,"alien6"
+LoadShape 148,"chaliens2",3
+LoadShape 152,"alien7",4:LoadShape 154,"alien8":LoadShape 156,"alien9"
+LoadShape 158,"chaliens3",5
+LoadShape 162,"alien10",6:LoadShape 164,"alien11":LoadShape 166,"alien12"
+LoadShape 168,"chaliens4",7
+;
+For k=0 To 7:StopCycle k,9,15,15,15:Next
+;
+LoadShape 54,"exp1":LoadShape 56,"exp2":LoadShape 58,"exp3"
+LoadShape 60,"ufo":LoadShape 61,"expufo"
+LoadShape 63,"bonuss",8
+LoadShape 70,"digits"
+LoadShape 100,"letters"
+LoadShape 99,"bomb"
+LoadShape 98,"bullet"
+LoadShape 97,"bullet2"
+LoadShape 96,"200"
+For k=54 To 68:DecodeShapes k:Next
+For k=96 To 99:DecodeShapes k:Next
+SaveShapes 0,199,"shapes"
+SaveSprites 0,5,"sprites"
+If ReadMem(0,"palettes")
+	Exists 0,##[$80B8] SetCycle(0),1024*9
+	CloseFile 0
+EndIf
+CEND
+;
+If WriteMem(0,"flightpaths")
+	FileInput 0
+	For k=0 To 127:j=Cvi(Inkey$(2)):f$(k)=Inkey$(j):Next
+	CloseFile 0
+EndIf
+;
+VWait 250:BLITZ
+
+.allox
+longmult 0,64:longmult 1,64
+lmaxlen 0,w2,256+64,3:lmaxlen 1,w2,256+64,3		;foregrounds
+lmaxlen 2,w,512,2		;starfield - background
+For k=1 To 200
+x=Rnd(320):y=Rnd(256):c=Rnd(3)+1:Point x,y,c:Point x,y+256,c
+Next
+;Line 0,0,0,511,1:Line w-1,0,w-1,511,1
+lmaxlen 3,176,128,3:lmaxlen 4,176,128,3		;formation anim!
+GetaShape 95,0,0,20,20:DecodeShapes 95
+lmaxlen 5,w,16,3	 ;scorebar...
+GetaShape 69,0,0,15,15:DecodeShapes 69
+Boxf 0,0,15,15,1:GetaShape 67,0,0,16,16:BlockScroll
+
+.init
+
+SetCollHi
+ass=1				 ;alien speed shift
+as=1 LSL ass	;alien speed
+as2=as+as
+
+co.q=##[$80BA]*2/nr
+For k=0 To nr2
+xa(k)=HCos((k-nr3)*co):ya(k)=HSin((k-nr3)*co)
+Next
+
+.displayinit
+DisplayOff
+Slice 0,28,w,16,$fff0,3,8,32,w,w
+Use SetCycle 8:Show 5
+;
+Slice 1,46,w,256,$fff2,5,8,32,w2,w
+Use SetCycle 0:Green 9,15,15,15:Green 10,0,0,0:Green 11,0,0,0
+ShowB 2:ShowF 0
+r=15:g=0:b=0:ga=1
+For y=0 To 255-2 Step 4
+ColSplit 10,g,b,r,y
+ColSplit 11,r,g,b,y+2
+g+ga:If g=15 OR g=0 Then ga=-ga
+Next
+die.q=-1
+
+.interupt
+SetInt 5
+	ShowF db,32,32
+	ShowB 2,sx,sy:sy=QWrap(sy+sa,0,256)
+	;
+	If die
+		If die>=0
+			ShowSprite die,yx,yy-32,0:die+.25:If die>=6 Then die=-1:aok=0
+		Else
+			ShowSprite 5,-64,yy-32,0
+		EndIf
+	Else
+		ShowSprite ys,yx,yy-32,0:jd=Joyx(1)
+		If jd<0 Then yx=QLimit(yx-ya,40,w+23)
+		If jd>0 Then yx=QLimit(yx+ya,40,w+23)
+	EndIf
+	;
+	vf+1
+End SetInt
+
+LoopSound 0,1,0
+
+itext
+Data$ "insectoids 2"
+Data 150
+Data$ ""
+Data 1
+Data$ "programmed"
+Data 50
+Data$ "entirely in"
+Data 50
+Data$ "blitz basic 2"
+Data 150
+Data$ ""
+Data 1
+Data$ "by mark sibly"
+Data -250
+
+hi$(1)="mak":hi(1)=10000
+hi$(2)="rod":hi(2)=5000
+hi$(3)="axe":hi(3)=2000
+hi$(4)="mon":hi(4)=1000
+hi$(5)="pal":hi(5)=500
+hi$(6)="jim":hi(6)=400
+hi$(7)="fil":hi(7)=300
+hi$(8)="bob":hi(8)=200
+hi$(9)="spr":hi(9)=100
+hi$(10)="end"
+
+.intro
+DisplayOff
+db=1:Gosub makehiscores
+db=0:Use lmaxlen db:BlockScroll:DisplayOn
+
+die=-1:sa=-4
+##[$80BB]
+	##[$80C8] itext:y=64:Green 2,10,9,15:Green 3,7,6,10
+	##[$80BB]
+		VWait:Read k$,d:Gosub printit:y+16:FlushQueue db
+		For k=1 To QAbs(d):VWait:If Joyb(1) Then ##[$80BE] For:Goto newgame Else Next
+	##[$80BC] d<0:Green 2,0,12,14:Green 3,0,9,10:db=1
+	For k=1 To 250:VWait:If Joyb(1) Then ##[$80BE] For:Goto newgame Else Next
+	BlockScroll:db=0
+##[$80C7]
+
+.newgame
+sc=0:scf=2000:drpf=0
+sd=0:For k=0 To 4:bo(k)=0:Next:bo(5)=2
+BlockScroll:Use lmaxlen 1:BlockScroll
+Use lmaxlen 5:BlockScroll:For k=1 To 5:Gosub updatescore:Next:Gosub drawbonuss
+Use SetCycle 0
+##[$80C8] pattern1
+wa=0
+ya=2				;2-3	your x speed
+ys=0:df=0	 ;0,0	double fire flag -> 1,-1
+mb=2				;2-4, max bullets
+bs=4				;4-5, bullet speed
+bus=62
+fch.q=.99	 ;fire chance...
+lchw=1			;last wave type
+shn=132		 ;source shape number
+pln=-1			;palette number
+fsa.q=1 LSR 4
+fa.q=.25
+bag.f=.25		 ;bomb angle
+Gosub initship
+
+.newwave
+;
+wa+1:If wa&7=0 Then sa=-sa
+Read chw:If chw<0 Then ##[$80C8] pattern1:Read chw
+glw=0:If chw=2 Then glw=-1:chw=0
+If fch>.95 Then fch-.002
+;
+ClearList a():ClearList a2():ClearList a3()
+ClearList b():ClearList c():ClearList e()
+;
+ux=0:buy=0:uc=0		 ;ufo/bonus info...
+ab=0								;active bullets
+scy=0:sch=1				 ;scroll area
+ta=1								;total aliens in wave
+div=0							 ;aliens ok to dive
+afa=0							 ;how many flying around
+aaa=0							 ;all aliens added!
+awd=0							 ;attack wave done!
+aif=0							 ;aliens in formation
+ad=0
+as2=as+as					 ;how fast we seek formation
+fx.q=34						 ;formation x
+fy=56							 ;formation y
+fs.q=3							;formation anim frame
+fsa.q=1 LSR 4			 ;add for above
+sa=-ass						 ;starfield speed
+hts=0							 ;for challenge wave
+If bag<1.5 Then bag+.125
+;
+fst=2:ado=3:fst2=1:as3=as
+If wa>16 Then fst=3:fst2=2:ado=2:as3+ast3
+;
+Use lmaxlen 3:BlockScroll:Use lmaxlen 4:BlockScroll
+;
+Use lmaxlen db:k$="attack wave "+Str$(wa):y=128:Gosub printit
+y=152:If chw Then k$="challenging wave":Gosub printit
+If glw Then k$="flashback{":Gosub printit
+;
+Sound 7,2,32
+;
+naw=1:f=0:p=0 ;put position...
+##[$80BB]
+	Read j
+	If j>=0
+		naw+1:f+1:f(f)=p
+		;
+		;create px,py,pd arrays
+		;
+		fld=0:rn=0
+		flx.q=Cvi(Left$(f$(j),2))
+		fly.q=Cvi(Mid$(f$(j),3,2))
+		;
+		For k=5 To Len(f$(j))-1 Step 2
+		s$=Mid$(f$(j),k,1):v=Asc(Mid$(f$(j),k+1,1))
+		Select s$
+		Case "l"
+			fld=QWrap(fld-v,0,nr)
+		Case "r"
+			fld=QWrap(fld+v,0,nr)
+		Case "d"
+			rn+1:rc(rn)=v:rl(rn)=k
+		Case "e"
+			rc(rn)-1:If rc(rn) Then k=rl(rn) Else rn-1
+		Case "m"
+			For s=1 To v LSR ass
+				px(p)=flx:py(p)=fly:pd(p)=fld
+				flx=QWrap(flx+xa(fld)*as,16,w+48)
+				fly=QWrap(fly+ya(fld)*as,16,304)
+				p+1
+			Next
+		End Select
+		Next
+		For k=1 To 8:px(p)=0:p+1:Next
+	EndIf
+##[$80BC] j<0
+
+If p>5000 Then End
+
+If lchw
+	For k=0 To 5:CopyShape shn+k,48+k:DecodeShapes 48+k:Next
+EndIf
+;
+If chw
+	For k=0 To 2:CopyShape shn+6+k,48+k+k:DecodeShapes 48+k+k
+	Next:shn+10:If shn=172 Then shn=132
+	fa=QLimit(QAbs(fa)+.25,-1,1)
+EndIf
+;
+If lchw<>0 OR chw<>0
+	pln+1:If pln=8 Then pln=0
+	s=48:For k=0 To 32 Step 16
+	For a.q=0 To 15
+	CopyShape s,k+a:Rotate k+a,a/16:DecodeShapes k+a
+	Next:s+2:Next
+EndIf
+;
+lchw=chw
+;
+If glw
+	fya=4
+	Read scy,sch,k
+	s=48:For y=scy To scy+sch-1
+	For x=0 To 9
+	x2=x LSL 4+9:y2=y LSL 4+7+fya
+	AddLast a3():a3()\px=x2,y2,s:aif+1
+	Use lmaxlen 3:longdiv s,x2,y2
+	Use lmaxlen 4:longdiv s+1,x2,y2
+	Next:If s<52 Then s+2
+	Next
+	fya=2:ta=aif:atw=1:aaa=-1:nrf=0:div=-1:fst=fst2:as2=as
+	scy LSL 4:sch LSL 4+fya+fya
+Else
+	fya=0:If chw=0 Then Read atw:naw-atw
+EndIf
+;
+##[$80BB]:##[$80BC] vf>150:UnQueue db:Use SetCycle pln
+;
+.main:aok=-1:vf=0
+While aok
+	;
+	.main2
+	If Joyb(0)=1 Then End
+	If chw
+		Gosub doublebuffer
+		Gosub movealiens
+		Gosub movebulls
+		Gosub movebangs
+		;
+		Gosub addaliens
+		Gosub checkship
+		;
+	Else
+		Gosub doublebuffer
+		Gosub moveform
+		Gosub moveufo
+		Gosub movealiens
+		Gosub movealiens2
+		Gosub movealiens3
+		Gosub movebombs
+		Gosub movebulls
+		Gosub movebangs
+		;
+		Gosub addaliens
+		Gosub checkship
+		;
+	EndIf
+	;
+Wend
+
+If die
+	If afa>0 OR locfree(b())<>0 OR ab>0 Then Goto main2
+	;
+	If grw
+		If bo(5) Then k$="get ready{" Else k$="game over"
+		y=160:Gosub printit:grw-1:If grw Then Goto main2
+	Else
+		grw=100:Goto main2
+	EndIf
+	;
+	If bo(0) Then bo(0)-1 Else If ya>2 Then ya-1
+	If bo(1) Then bo(1)-1 Else df=0:ys=0
+	If bo(2) Then bo(2)-1 Else If bs>4 Then bs-1
+	If bo(3) Then bo(3)-1 Else If mb>2 Then mb-1
+	;
+	If bo(5)
+		bo(5)-1
+		Gosub drawbonuss:Gosub initship:If ta Then Goto main Else Goto newwave
+	EndIf
+	;
+	Volume 1,0
+	;
+	For he=1 To 10
+		If sc>hi(he)
+			For k=10 To he Step -1:hi(k+1)=hi(k):hi$(k+1)=hi$(k):Next
+			hi(he)=sc:hi$(he)="aaa":Gosub makehiscores
+			;
+			y=he LSL 4+72:x=1:j=0
+			;
+			cloop2
+			c2=Asc(Mid$(hi$(he),x,1)):c=c2:x2=x LSL 4+56
+			If c>96 Then c+3 Else If c>47 Then c+22
+			cloop:If c2<>32 Then longdiv c,x2,y:If j Then VWait 10
+			Gosub getjoy:If j<3 Then BlitMode EraseMode:longdiv 67,x2,y:BlitMode CookieMode
+			If j=0
+				Gosub getjoy:If j=0 Then Goto cloop
+				If j>2 AND c2<>32 Then longdiv c,x2,y
+			EndIf
+			;
+			If j=3 Then If x>1 Then x-1:Goto cloop2 Else Goto cloop
+			If j=4 OR (j=5 AND x<3) Then If x<3 Then x+1:Goto cloop2 Else Goto cloop
+			If j=2
+				c2-1
+				If c2=96 Then c2=57
+				If c2=47 Then c2=32
+				If c2=31 Then c2=122
+				cmake
+				hi$(he)=Left$(hi$(he),x-1)+Chr$(c2)+Mid$(hi$(he),x+1)
+				Goto cloop2
+			EndIf
+			If j=1
+				c2+1
+				If c2=123 Then c2=32
+				If c2=33 Then c2=48
+				If c2=58 Then c2=97
+				Goto cmake
+			EndIf
+			;
+			he=10
+		EndIf
+	Next
+	;
+	Goto intro
+	;
+EndIf
+
+If ta=0
+	If locfree(b())<>0 Then Goto main2
+	If chw=0 Then If ux<>0 Then Goto main2
+	If grw
+		grw-1:If grw Then Goto main2
+	Else
+		grw=50:Goto main2
+	EndIf
+	Volume 1,0:UnQueue db:UnQueue 1-db
+	If chw
+		k$="shots hit| "+Str$(hts):y=128:Gosub printit:VWait 100
+		scb=hts*10:If hts=40 Then scb=1000
+		k$="bonus| "+Str$(scb):y=152:Gosub printit:k$=""
+		If scb=1000 Then k$="perfect{"
+		If scb>340 AND k$="" Then k$="very good{"
+		If scb>290 AND k$="" Then k$="not bad{"
+		If scb>240 AND k$="" Then k$="unlucky{"
+		If scb>190 AND k$="" Then k$="keep trying{"
+		If k$="" Then k$="hi monique{"
+		y=176:Gosub printit
+		Sound 8,2,32
+		sc+scb:For k=1 To 10:Gosub updatescore:Next
+		Use lmaxlen db:VWait 150:UnQueue db
+	EndIf
+	Goto newwave
+EndIf
+
+End
+
+;***************** SUBROUTINES ***************
+
+.getjoy
+j=0:For k=1 To 25
+VWait
+If Joyb(1) Then ##[$80BB]:VWait:##[$80BC] Joyb(1)=0:j=5
+If Joyx(1)<0 Then j=3 Else If Joyx(1)>0 Then j=4
+If Joyy(1)<0 Then j=1 Else If Joyy(1)>0 Then j=2
+If j Then ##[$80BE] For:Return
+Next:Return
+
+.makehiscores
+Use lmaxlen db:BlockScroll:FlushQueue db
+y=64:k$="high scores":Gosub printit:FlushQueue db:y+8
+For hi=1 To 10
+k$=hi$(hi)+RSet$(Str$(hi(hi)),8)
+y+16:Gosub printit:FlushQueue db
+Next:Return
+
+initship
+yx=w/2+16+8:yy=256:die=0:VWait:##[$B40C]:Return
+
+.printit
+x=w3-Len(k$)*8
+For k=1 To Len(k$)
+s=Asc(Mid$(k$,k,1))
+If s>96 Then QBlit db,s+3,x,y Else If s>47 Then QBlit db,s+22,x,y
+x+16:Next
+Return
+
+.updatescore
+If sd=0 Then sc2=sc:sux=w-80:suz=0
+s=sc2/sd(sd)
+If s<>0 OR suz<>0 OR sd=4
+	Use lmaxlen 5:sc2-s*sd(sd):suz=-1:BlitColl s+70,sux,0
+EndIf
+sd=QWrap(sd+1,0,5):sux+16:Return
+
+.drawbonuss
+Use lmaxlen 5:x=7:y=7:k=5
+While k>=0
+	j=0
+	While j<bo(k)
+		BlitColl k+63,x,y:x+16:If x>=w-80 Then Return
+		j+1
+	Wend
+	k-1
+Wend
+;
+While x<w-80
+	BlitColl 69,x,y:x+16
+Wend
+;
+Return
+
+.bullcheck
+hf=0
+If bf
+	newmem c()
+	While globfree(c())
+		If c()\f
+			If SpritesHit(s,x,y,c()\s,c()\x,c()\y)
+				freelast c():ab-1:bf-1:hf=-1:Return
+			EndIf
+		EndIf
+	Wend
+EndIf
+Return
+
+.bang2	;s=shapenumber<48
+s LSR 4:s+s+48
+;
+.bang	 ;s=shapenumber>=48
+;
+If chw
+	hts+1
+Else
+	If s=48 Then sc+5 Else If s=50 Then sc+10 Else If s=52 Then sc+20
+EndIf
+ta-1:If ta=0 Then aok=0
+sfx3=-1
+;
+bang3
+##[$80CA] e()
+AddLast e():\x=x,y,s+6,.25,s+8
+Return
+
+.movebangs
+##[$80CA] e()
+newmem e()
+While globfree(e())
+	QBlit db,\s,\x,\y:\s+\a:If \s>=\f Then freelast e()
+Wend
+Return
+
+.doublebuffer
+If vf=0
+	If sfx6 Then sfx6=0:sfx5=0:sfx1=0:Sound 6,2
+	If sfx5 Then sfx5=0:sfx1=0:Sound 5,2
+	If sfx1 Then sfx1=0:Sound 1,2
+	If sfx3 Then sfx3=0:Sound 3,4
+	If sfx4 Then sfx4=0:Sound 4,8,16
+	If vf=0
+		Gosub updatescore
+		##[$80BB]:##[$80BC] vf
+	EndIf
+EndIf
+;
+vf=0:db=1-db:Use lmaxlen db:UnQueue db
+;
+Return
+
+.checkship
+;
+If die Then Return
+;
+##[$B40C]
+If ##[$B40B](0)
+	If chw Then Return
+	If busc
+		busc-1
+	Else
+		di=-1
+		If ux<>0 AND buy<>0
+			If RectsHit(95,bux,buy,ys,yx,yy)
+				ub=0
+				Select bush
+				Case 63	 ;speed up...
+					If ya<3 Then ya+1 Else bo(0)+1:ub=-1
+				Case 64	 ;double fire
+					If df=0 Then df=-1:ys=1 Else bo(1)+1:ub=-1
+				Case 65	 ;bullet boost
+					If bs<5 Then bs+1 Else bo(2)+1:ub=-1
+				Case 66	 ;max bullets
+					If mb<4 Then mb+1 Else bo(3)+1:ub=-1
+				Case 67	 ;warp
+					bo(4)+1:ub=-1
+				Case 68
+					bo(5)+1:ub=-1
+				End Select
+				If ub Then Gosub drawbonuss:Use lmaxlen db
+				ux=0:buy=0:di=0:busc=4:sfx5=-1
+			EndIf
+		EndIf
+		If di Then die=2
+	EndIf
+EndIf
+;
+If Joyb(1)
+	If lb
+		If ab<mb Then If AddLast(c()) Then sfx1=-1:lb=0:ab+1:c()\x=yx,yy-6,98+df
+	EndIf
+Else
+	lb=-1
+EndIf
+Return
+
+.addaliens
+##[$80CA] a()
+;
+If aaa|awd Then Return				;all aliens added flag!
+;
+If ad
+	ad-1
+Else
+	If die Then Return
+	ad=ado
+	;
+	iloop
+	Read ali
+	Select ali
+	Case 0
+		Read scy,sch:scy LSL 4:sch LSL 4
+	Case 1
+		f=-1:Gosub readalien:##[$80BE] Select:Return
+	Case 2
+		f=-1:Gosub readalien
+	Case 3
+		awd=-1:##[$80BE] Select:Return
+	Case 4
+		f=0:Gosub readalien:##[$80BE] Select:Return
+	Case 5
+		f=0:Gosub readalien
+	Case 999
+		ta-1:If ta=0 Then aok=0
+		aaa=-1:##[$80BE] Select:Return
+	End Select
+	Goto iloop
+EndIf
+Return
+
+.readalien
+Read p,s:If f Then Read px,py Else px=0:py=0
+afa+1:ta+1:nrf=-1
+AddLast a():\px=px LSL 4+9,py LSL 4+7,0,0
+\s=s LSL 4,f(QAbs(p)),0:If p<0 Then \m=-1
+Return
+
+.killflyer
+afa-1
+;
+If afa=0
+	awd=0:If chw Then ad LSL 4
+	If aaa Then div=-1:fst=fst2:as2=as3
+	If nrf	;none reached formation! 200 bonus!
+		nrf=0:AddLast e():e()\x=x,y,96,.0625,97:sc+200:ux=-1:Gosub addbonus:sfx6=-1
+	EndIf
+EndIf
+;
+Return
+
+.moveform
+Scroll 0,scy,164,sch,fx,fy+scy,fs:fs=QWrap(fs+fsa,3,5)
+fx+fa
+If fx<34 OR fx>w-132
+	fx-fa:fa=-fa:fy+fya:If fy<56 OR fy>152 Then fy-fya:fya=-fya
+EndIf
+Return
+
+.movealiens
+;
+##[$80CA] a():newmem a()
+;
+While globfree(a())
+	p=\p
+	If px(p)
+		;
+		x=px(p)+\xo:d=pd(p):If \m Then x=w2-x:d=QWrap(8-d+8,0,nr)
+		x=QWrap(x,16,w+48):y=QWrap(py(p)+\yo,16,304)
+		;
+		s=\s+d:QBlit db,s,x,y
+		;
+		\p=p+fst
+		;
+		Gosub dropbomb
+		;
+		Gosub bullcheck
+		If hf Then freelast a():Gosub killflyer:Gosub bang2
+		;
+	Else
+		If chw
+			freelast a():ta-1:If ta=0 Then aok=0
+			nrf=0:Gosub killflyer
+		Else
+			##[$80BB]:p-1:##[$80BC] px(p)
+			x=px(p)+\xo:y=py(p)+\yo:If \m Then x=w2-x
+			px=\px:py=\py:s=\s
+			freelast a():globalloc a2()
+			a2()\x=x,y,pd(p),px,py,s
+		EndIf
+	EndIf
+Wend
+Return
+
+dropbomb
+If Rnd>fch
+	If afa>12 OR y>184 OR chw<>0 Then Return
+	If (wa>2 OR div<>0)
+		If AddLast(b())
+			If lbo
+				lbo-1
+			Else
+				lbo=4:b()\x=x,y,QLimit(((yx-x)/(yy-y))LSL 2,-bag,bag)
+			EndIf
+		EndIf
+	EndIf
+EndIf
+Return
+
+.movealiens2
+##[$80CA] a2():newmem a2()
+While globfree(a2())
+	;
+	dd.q=\d:If dd Then dd=QWrap(dd+.25,0,nr)
+	;
+	x=\x:px=\px+fx:xd=px-x:axd=QAbs(xd)
+	y=\y:py=\py+fy:yd=py-y:ayd=QAbs(yd)
+	;
+	If axd<as2 AND ayd<as2
+		;
+		s=\s+dd:QBlit db,s,px,py
+		s LSR 4:s+s+48:px=\px:py=\py
+		Use lmaxlen 3:longdiv s,px,py
+		Use lmaxlen 4:longdiv s+1,px,py
+		Use lmaxlen db:freelast a2():nrf=0:Gosub killflyer
+		globalloc a3():a3()\px=px,py,s:aif+1
+		;
+	Else
+		;
+		If axd<as2
+			x+xd
+		Else
+			If x<px Then x=QWrap(x+as2,16,w+48) Else x=QWrap(x-as2,16,w+48)
+		EndIf
+		;
+		If ayd<as2
+			y+yd
+		Else
+			If y<py Then y=QWrap(y+as2,16,304) Else y=QWrap(y-as2,16,304)
+		EndIf
+		;
+		\x=x,y,dd:s=\s+dd:QBlit db,s,x,y
+		;
+		Gosub bullcheck
+		If hf Then freelast a2():Gosub killflyer:Gosub bang2
+		;
+	EndIf
+Wend
+Return
+
+.movealiens3
+##[$80CA] a3()
+If div
+	If divc
+		divc-1
+	Else
+		If die Then Return
+		;make an alien dive
+		If aif
+			newmem a3():For k=0 To Rnd(aif):globfree a3():Next
+			k=f(Rnd(naw)+atw)		;attack wave to use!
+			x=\px:y=\py:m=0:If x+fx>w3 Then m=-1
+			xo=x+fx:If m Then xo=w2-xo
+			xo-px(k):yo=y+fy-py(k)
+			BlitMode EraseMode
+			Use lmaxlen 3:longdiv \s,x,y
+			Use lmaxlen 4:longdiv \s+1,x,y
+			BlitMode CookieMode:Use lmaxlen db
+			AddLast a():afa+1:a()\px=x,y,xo,yo
+			a()\s=(\s-48) LSR 1 LSL 4,k,m
+			freelast a3():aif-1:divc=Rnd(32)+32:sfx4=-1
+		EndIf
+		Return
+	EndIf
+EndIf
+;
+If bf
+	newmem a3()
+	While globfree(a3())
+		s=\s:x=\px+fx:y=\py+fy:Gosub bullcheck
+		If hf
+			Gosub bang
+			BlitMode EraseMode
+			Use lmaxlen 3:longdiv s,\px,\py
+			Use lmaxlen 4:longdiv s+1,\px,\py
+			Use lmaxlen db:BlitMode CookieMode
+			freelast a3():aif-1:If bf=0 Then Return
+		EndIf
+	Wend
+EndIf
+Return
+
+.movebombs
+##[$80CA] b():newmem b()
+While globfree(b())
+	\x+\xs
+	\y+4
+	If \y<296
+		QBlit db,99,QLimit(\x,16,w+48),\y
+	Else
+		freelast b()
+	EndIf
+Wend
+Return
+
+.movebulls
+##[$80CA] c():newmem c()
+bf=0
+While globfree(c())
+	\y-bs
+	If \y>23
+		If ##[$CB09](\s,\x,\y) Then bf+1:\f=-1 Else \f=0
+		QBlit db,\s,\x,\y
+	Else
+		freelast c():ab-1
+	EndIf
+Wend
+Return
+
+addbonus
+bux=x:buy=y
+If sc>=scf AND chw=0 Then bush=68:scf+3000 Else bus=QWrap(bus+1,63,67):bush=bus
+Return
+
+.moveufo
+If ux ;ufo here?
+	If buy
+		buy+2
+		If buy>304
+			If bush=68 Then scf-3000
+			ux=0:buy=0:Return
+		EndIf
+		x=bux:y=buy:Gosub bullcheck
+		If hf Then If bush<68 Then bush=QWrap(bush+1,63,67)
+		QBlit db,bush,bux,buy:Return
+	Else
+		x=ux:y=uy:s=60:Gosub bullcheck
+		If hf
+			s=55:sc+50:Gosub bang3:Gosub addbonus:Volume 1,0
+		Else
+			ux+uxa:If ux<16 OR ux>w+48 Then ux=0:Volume 1,0 Else QBlit db,s,x,y
+		EndIf
+	EndIf
+Else
+	If div
+		If uc
+			uc-1
+		Else
+			If ta<4
+				ux=-1
+			Else
+				If Rnd>.5 Then ux=w+48:uxa=-1 Else ux=16:uxa=1
+				uy=44:uc=Rnd(64)+64:Volume 1,16
+			EndIf
+		EndIf
+	EndIf
+EndIf
+Return
+
+.pattern1
+;
+Data 0						;normal wave
+Data 0,1,64,65,-1	 ;list of waves to use! later, you use 1,2,3...
+Data 3						;start of attack waves...
+;
+Data 0,3,1				;inst. new formation...,scroll area (y,hite)
+Data 1,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,1,0,2,3
+Data 1,1,0,3,3
+Data 1,1,0,4,3
+Data 1,1,0,5,3
+Data 1,1,0,6,3
+Data 1,1,0,7,3
+Data 1,1,0,8,3
+Data 3
+;
+Data 0,2,2				;inst. new formation...,scroll area (y,hite)
+Data 1,-1,0,1,2
+Data 1,-1,0,2,2
+Data 1,-1,0,3,2
+Data 1,-1,0,4,2
+Data 1,-1,0,5,2
+Data 1,-1,0,6,2
+Data 1,-1,0,7,2
+Data 1,-1,0,8,2
+Data 3
+;
+Data 0,0,4				;inst. new formation...,scroll area (y,hite)
+Data 2,2,1,2,1
+Data 1,-2,1,7,1
+Data 2,2,2,3,0
+Data 1,-2,2,6,0
+Data 2,2,1,3,1
+Data 1,-2,1,6,1
+Data 2,2,2,4,0
+Data 1,-2,2,5,0
+Data 2,2,1,4,1
+Data 1,-2,1,5,1
+;
+Data 999					;inst. end of pattern
+
+.pattern2
+;
+Data 0						;normal wave
+Data 2,3,67,67,-1	 ;list of waves to use! later, you use 1,2,3...
+Data 3						;start of attack waves...
+;
+Data 0,2,2				;inst. new formation...,scroll area (y,hite)
+Data 2,1,0,1,2		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,2,2
+Data 2,1,0,3,2
+Data 1,-1,0,4,2
+Data 2,1,0,5,2
+Data 1,-1,0,6,2
+Data 2,1,0,7,2
+Data 1,-1,0,8,2
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,2,3
+Data 2,1,0,3,3
+Data 1,-1,0,4,3
+Data 2,1,0,5,3
+Data 1,-1,0,6,3
+Data 2,1,0,7,3
+Data 1,-1,0,8,3
+Data 3
+;
+Data 0,1,3				;inst. new formation...,scroll area (y,hite)
+Data 1,2,1,1,1
+Data 1,2,1,2,1
+Data 1,2,1,3,1
+Data 1,2,1,4,1
+Data 1,2,1,5,1
+Data 1,2,1,6,1
+Data 1,2,1,7,1
+Data 1,2,1,8,1
+Data 3
+;
+Data 0,0,4				;inst. new formation...,scroll area (y,hite)
+Data 1,-2,2,2,0
+Data 1,-2,2,3,0
+Data 1,-2,2,4,0
+Data 1,-2,2,5,0
+Data 1,-2,2,6,0
+Data 1,-2,2,7,0
+;
+Data 999					;inst. end of pattern
+
+.pattern3
+;
+Data 0						;normal wave
+Data 3,2,1,67,65,-1	 ;list of waves to use! later, you use 1,2,3...
+Data 4						;start of attack waves...
+;
+Data 0,3,1				;inst. new formation...,scroll area (y,hite)
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,2,3
+Data 2,1,0,3,3
+Data 1,-1,0,4,3
+Data 2,1,0,5,3
+Data 1,-1,0,6,3
+Data 2,1,0,7,3
+Data 1,-1,0,8,3
+Data 3
+
+Data 0,2,2
+Data 2,1,0,1,2		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,2,2
+Data 2,1,0,3,2
+Data 1,-1,0,4,2
+Data 2,1,0,5,2
+Data 1,-1,0,6,2
+Data 2,1,0,7,2
+Data 1,-1,0,8,2
+Data 3
+;
+Data 0,1,3				;inst. new formation...,scroll area (y,hite)
+Data 1,2,1,1,1
+Data 1,2,1,2,1
+Data 1,2,1,3,1
+Data 1,2,1,4,1
+Data 1,2,1,5,1
+Data 1,2,1,6,1
+Data 1,2,1,7,1
+Data 1,2,1,8,1
+Data 3
+;
+Data 0,0,4				;inst. new formation...,scroll area (y,hite)
+Data 1,3,2,1,0
+Data 1,3,2,2,0
+Data 1,3,2,3,0
+Data 1,3,2,4,0
+Data 1,3,2,5,0
+Data 1,3,2,6,0
+Data 1,3,2,7,0
+Data 1,3,2,8,0
+;
+Data 999					;inst. end of pattern
+
+.pattern4				 ;challenging wave!
+Data 1
+Data 96,97,-1
+;
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 3
+;
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 3
+;
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 3
+;
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+;
+Data 999
+
+.pattern5
+;
+Data 0
+Data 4,5,6,68,69,70,-1
+Data 4
+;
+Data 0,3,2
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,4
+Data 2,1,0,2,3
+Data 1,-1,0,2,4
+Data 2,1,0,3,3
+Data 1,-1,0,3,4
+Data 2,1,0,4,3
+Data 1,-1,0,4,4
+Data 2,1,0,5,3
+Data 1,-1,0,5,4
+Data 2,1,0,6,3
+Data 1,-1,0,6,4
+Data 2,1,0,7,3
+Data 1,-1,0,7,4
+Data 2,1,0,8,3
+Data 1,-1,0,8,4
+Data 3
+;
+Data 0,1,4				;inst. new formation...,scroll area (y,hite)
+Data 1,2,1,1,1
+Data 1,2,1,1,2
+Data 1,2,1,2,1
+Data 1,2,1,2,2
+Data 1,2,1,3,1
+Data 1,2,1,3,2
+Data 1,2,1,4,1
+Data 1,2,1,4,2
+Data 3
+;
+Data 1,-2,1,5,1
+Data 1,-2,1,5,2
+Data 1,-2,1,6,1
+Data 1,-2,1,6,2
+Data 1,-2,1,7,1
+Data 1,-2,1,7,2
+Data 1,-2,1,8,1
+Data 1,-2,1,8,2
+Data 3
+;
+Data 0,0,5
+Data 1,3,2,1,0
+Data 1,3,2,2,0
+Data 1,3,2,3,0
+Data 1,3,2,4,0
+Data 1,3,2,5,0
+Data 1,3,2,6,0
+Data 1,3,2,7,0
+Data 1,3,2,8,0
+;
+Data 999
+
+.pattern6
+;
+Data 0
+Data 6,8,7,69,70,71,-1
+Data 4
+;
+Data 0,3,2
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,4
+Data 2,1,0,2,3
+Data 1,-1,0,2,4
+Data 2,1,0,3,3
+Data 1,-1,0,3,4
+Data 2,1,0,4,3
+Data 1,-1,0,4,4
+Data 2,1,0,5,3
+Data 1,-1,0,5,4
+Data 2,1,0,6,3
+Data 1,-1,0,6,4
+Data 2,1,0,7,3
+Data 1,-1,0,7,4
+Data 2,1,0,8,3
+Data 1,-1,0,8,4
+Data 3
+;
+Data 0,1,4				;inst. new formation...,scroll area (y,hite)
+Data 2,2,1,1,1
+Data 1,3,1,1,2
+Data 2,2,1,2,1
+Data 1,3,1,2,2
+Data 2,2,1,3,1
+Data 1,3,1,3,2
+Data 2,2,1,4,1
+Data 1,3,1,4,2
+Data 3
+;
+Data 1,-2,1,5,1
+Data 1,-2,1,5,2
+Data 1,-2,1,6,1
+Data 1,-2,1,6,2
+Data 1,-2,1,7,1
+Data 1,-2,1,7,2
+Data 1,-2,1,8,1
+Data 1,-2,1,8,2
+Data 3
+;
+Data 0,0,5
+Data 1,3,2,1,0
+Data 1,3,2,2,0
+Data 1,3,2,3,0
+Data 1,3,2,4,0
+Data 1,3,2,5,0
+Data 1,3,2,6,0
+Data 1,3,2,7,0
+Data 1,3,2,8,0
+;
+Data 999
+
+.pattern7
+;
+Data 2
+Data 68,69,70,71,-1
+;
+Data 0,4					;scy,sch
+;
+Data 999
+
+.pattern8				 ;challenging wave!
+Data 1
+Data 100,101,-1
+;
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 3
+;
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 3
+;
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 4,-1,1
+Data 3
+
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+Data 4,2,1
+;
+Data 999
+
+.pattern9
+Data 0
+Data 8,9,10,72,73,74,-1
+Data 4
+;
+Data 0,3,2
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,4
+Data 2,1,0,2,3
+Data 1,-1,0,2,4
+Data 2,1,0,3,3
+Data 1,-1,0,3,4
+Data 2,1,0,4,3
+Data 1,-1,0,4,4
+Data 2,1,0,5,3
+Data 1,-1,0,5,4
+Data 2,1,0,6,3
+Data 1,-1,0,6,4
+Data 2,1,0,7,3
+Data 1,-1,0,7,4
+Data 2,1,0,8,3
+Data 1,-1,0,8,4
+Data 3
+;
+Data 0,1,4				;inst. new formation...,scroll area (y,hite)
+Data 1,2,1,1,1
+Data 1,2,1,1,2
+Data 1,2,1,2,1
+Data 1,2,1,2,2
+Data 1,2,1,3,1
+Data 1,2,1,3,2
+Data 1,2,1,4,1
+Data 1,2,1,4,2
+Data 3
+;
+Data 2,-2,1,5,1
+Data 1,-3,1,5,2
+Data 2,-2,1,6,1
+Data 1,-3,1,6,2
+Data 2,-2,1,7,1
+Data 1,-3,1,7,2
+Data 2,-2,1,8,1
+Data 1,-3,1,8,2
+Data 3
+;
+Data 0,0,5
+Data 1,3,2,1,0
+Data 1,3,2,2,0
+Data 1,3,2,3,0
+Data 1,3,2,4,0
+Data 1,3,2,5,0
+Data 1,3,2,6,0
+Data 1,3,2,7,0
+Data 1,3,2,8,0
+;
+Data 999
+
+.pattern10
+Data 0
+Data 10,11,8,73,74,75,-1
+Data 4
+;
+Data 0,3,2
+Data 2,1,0,1,3		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,4
+Data 2,1,0,2,3
+Data 1,-1,0,2,4
+Data 2,1,0,3,3
+Data 1,-1,0,3,4
+Data 2,1,0,4,3
+Data 1,-1,0,4,4
+Data 2,1,0,5,3
+Data 1,-1,0,5,4
+Data 2,1,0,6,3
+Data 1,-1,0,6,4
+Data 2,1,0,7,3
+Data 1,-1,0,7,4
+Data 2,1,0,8,3
+Data 1,-1,0,8,4
+Data 3
+;
+Data 0,1,4				;inst. new formation...,scroll area (y,hite)
+Data 1,2,1,1,1
+Data 1,2,1,1,2
+Data 1,2,1,2,1
+Data 1,2,1,2,2
+Data 1,2,1,3,1
+Data 1,2,1,3,2
+Data 1,2,1,4,1
+Data 1,2,1,4,2
+Data 3
+;
+Data 2,-2,1,5,1
+Data 1,-3,1,5,2
+Data 2,-2,1,6,1
+Data 1,-3,1,6,2
+Data 2,-2,1,7,1
+Data 1,-3,1,7,2
+Data 2,-2,1,8,1
+Data 1,-3,1,8,2
+Data 3
+;
+Data 0,0,5
+Data 1,3,2,1,0
+Data 1,3,2,2,0
+Data 1,3,2,3,0
+Data 1,3,2,4,0
+Data 1,3,2,5,0
+Data 1,3,2,6,0
+Data 1,3,2,7,0
+Data 1,3,2,8,0
+;
+Data 999
+
+.pattern11
+;
+Data 2
+Data 72,73,74,75,-1
+;
+Data 0,5					;scy,sch
+;
+Data 999
+
+.pattern12				 ;challenging wave!
+Data 1
+Data 104,105,-1
+;
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 3
+;
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 3
+;
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 3
+;
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+;
+Data 999
+
+.pattern13
+;
+Data 0						;normal wave
+Data 12,14,15,76,77,78,79,-1	 ;list of waves to use! later, you use 1,2,3...
+Data 4						;start of attack waves...
+;
+Data 0,4,2				;inst. new formation...,scroll area (y,hite)
+Data 2,1,0,1,4		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,5
+Data 2,1,0,2,4
+Data 1,-1,0,2,5
+Data 2,1,0,3,4
+Data 1,-1,0,3,5
+Data 2,1,0,4,4
+Data 1,-1,0,4,5
+Data 2,1,0,5,4
+Data 1,-1,0,5,5
+Data 2,1,0,6,4
+Data 1,-1,0,6,5
+Data 2,1,0,7,4
+Data 1,-1,0,7,5
+Data 2,1,0,8,4
+Data 1,-1,0,8,5
+Data 3
+;
+Data 0,2,4				;inst. new formation...,scroll area (y,hite)
+Data 2,2,1,2,2
+Data 1,-2,1,2,3
+Data 2,2,1,3,2
+Data 1,-2,1,3,3
+Data 2,2,1,4,2
+Data 1,-2,1,4,3
+Data 2,2,1,5,2
+Data 1,-2,1,5,3
+Data 2,2,1,6,2
+Data 1,-2,1,6,3
+Data 2,2,1,7,2
+Data 1,-2,1,7,3
+Data 3
+;
+Data 0,0,6				;inst. new formation...,scroll area (y,hite)
+Data 2,3,2,2,0
+Data 1,-3,2,2,1
+Data 2,3,2,3,0
+Data 1,-3,2,3,1
+Data 2,3,2,4,0
+Data 1,-3,2,4,1
+Data 2,3,2,5,0
+Data 1,-3,2,5,1
+Data 2,3,2,6,0
+Data 1,-3,2,6,1
+Data 2,3,2,7,0
+Data 1,-3,2,7,1
+Data 3
+;
+Data 1,1,0,0,5
+Data 1,1,0,0,4
+Data 1,1,1,0,3
+Data 1,1,1,1,3
+Data 1,1,1,0,2
+Data 1,1,1,1,2
+Data 1,1,2,0,1
+Data 1,1,2,1,1
+Data 1,1,2,0,0
+Data 1,1,2,1,0
+Data 3
+;
+Data 1,-1,0,9,5
+Data 1,-1,0,9,4
+Data 1,-1,1,9,3
+Data 1,-1,1,8,3
+Data 1,-1,1,9,2
+Data 1,-1,1,8,2
+Data 1,-1,2,9,1
+Data 1,-1,2,8,1
+Data 1,-1,2,9,0
+Data 1,-1,2,8,0
+;
+Data 999					;inst. end of pattern
+
+.pattern14
+;
+Data 0						;normal wave
+Data 12,13,14,76,77,78,79,-1	 ;list of waves to use! later, you use 1,2,3...
+Data 4						;start of attack waves...
+;
+Data 0,4,2				;inst. new formation...,scroll area (y,hite)
+Data 2,1,0,1,4		;inst. add alien...wave,alien,patx,paty
+Data 1,-1,0,1,5
+Data 2,1,0,2,4
+Data 1,-1,0,2,5
+Data 2,1,0,3,4
+Data 1,-1,0,3,5
+Data 2,1,0,4,4
+Data 1,-1,0,4,5
+Data 2,1,0,5,4
+Data 1,-1,0,5,5
+Data 2,1,0,6,4
+Data 1,-1,0,6,5
+Data 2,1,0,7,4
+Data 1,-1,0,7,5
+Data 2,1,0,8,4
+Data 1,-1,0,8,5
+Data 3
+;
+Data 0,2,4				;inst. new formation...,scroll area (y,hite)
+Data 2,2,1,2,2
+Data 1,-2,1,2,3
+Data 2,2,1,3,2
+Data 1,-2,1,3,3
+Data 2,2,1,4,2
+Data 1,-2,1,4,3
+Data 2,2,1,5,2
+Data 1,-2,1,5,3
+Data 2,2,1,6,2
+Data 1,-2,1,6,3
+Data 2,2,1,7,2
+Data 1,-2,1,7,3
+Data 3
+;
+Data 0,0,6				;inst. new formation...,scroll area (y,hite)
+Data 2,3,2,2,0
+Data 1,-3,2,2,1
+Data 2,3,2,3,0
+Data 1,-3,2,3,1
+Data 2,3,2,4,0
+Data 1,-3,2,4,1
+Data 2,3,2,5,0
+Data 1,-3,2,5,1
+Data 2,3,2,6,0
+Data 1,-3,2,6,1
+Data 2,3,2,7,0
+Data 1,-3,2,7,1
+Data 3
+;
+Data 1,1,0,0,5
+Data 1,1,0,0,4
+Data 1,1,1,0,3
+Data 1,1,1,1,3
+Data 1,1,1,0,2
+Data 1,1,1,1,2
+Data 1,1,2,0,1
+Data 1,1,2,1,1
+Data 1,1,2,0,0
+Data 1,1,2,1,0
+Data 3
+;
+Data 1,-1,0,9,5
+Data 1,-1,0,9,4
+Data 1,-1,1,9,3
+Data 1,-1,1,8,3
+Data 1,-1,1,9,2
+Data 1,-1,1,8,2
+Data 1,-1,2,9,1
+Data 1,-1,2,8,1
+Data 1,-1,2,9,0
+Data 1,-1,2,8,0
+;
+Data 999					;inst. end of pattern
+
+.pattern15
+;
+Data 2
+Data 76,77,78,79,-1
+;
+Data 0,6					;scy,sch
+;
+Data 999
+
+.pattern16				 ;challenging wave!
+Data 1
+Data 108,109,-1
+;
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 4,1,0
+Data 3
+;
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 4,-2,1
+Data 3
+;
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 5,1,2
+Data 4,-1,2
+Data 3
+;
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+Data 5,2,1
+Data 4,-2,1
+;
+Data 999
+
+Data -1

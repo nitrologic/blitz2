@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af3/stickers.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af3/stickers.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af3/stickers.bb2
+;
 ; takes text file and prints address labels
 ;
 ; fields should be on their own line

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/NeilsIndicatorLib.bb
-+;*****************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/NeilsIndicatorLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/NeilsIndicatorLib.bb
+;*****************************************************
 ;*																									 *
 ;*	Progress Indicator Lib													 *
 ;*																									 *

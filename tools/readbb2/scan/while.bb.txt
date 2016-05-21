@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/While.bb
-+; ; while...wend program example; While a<10 NPrint a a+1 WendMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/While.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/While.bb
+; ; while...wend program example; While a<10 NPrint a a+1 WendMouseWait 

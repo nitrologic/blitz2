@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/EditExit.bb
-+; ; edit exit example; Screen 0,2					 ;open a simple screen Window 0,0,0,320,200,$1000,"Press ESCAPE to quit",0,1 Repeat FlushEvents			 ;to get rid of outstanding window events.  WLocate 0,0			 ;to top left...  EditFrom Editat		 ;edit from last quit position  a$=Edit$(a$,38) Until EditExit=27 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/EditExit.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/EditExit.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/EditExit.bb
+; ; edit exit example; Screen 0,2					 ;open a simple screen Window 0,0,0,320,200,$1000,"Press ESCAPE to quit",0,1 Repeat FlushEvents			 ;to get rid of outstanding window events.  WLocate 0,0			 ;to top left...  EditFrom Editat		 ;edit from last quit position  a$=Edit$(a$,38) Until EditExit=27 

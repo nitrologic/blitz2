@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/Blitzeroids.BB2
-+##[$80C3]:##[$80CC]
+##[$80C3]:##[$80CC]
 ##[$80B4]:End:End ##[$80B4]
 MaxLen gdir$=28
 MaxLen sdir$=26

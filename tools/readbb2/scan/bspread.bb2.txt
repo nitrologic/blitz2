@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/bspread/bspread.bb2
-+#test=0
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/bspread/bspread.bb2
+#test=0
 ;
 ##[$80C3]:##[$80CC]:##[$80CB]
 ;

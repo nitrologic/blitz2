@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WaitEvent.bb
-+; ; wait event example program; Screen 0,2																;open a simple screen Window 0,0,0,320,100,0,"Click in me to close",0,1 ev.l=WaitEvent														;wait for an event. 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WaitEvent.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WaitEvent.bb
+; ; wait event example program; Screen 0,2																;open a simple screen Window 0,0,0,320,100,0,"Click in me to close",0,1 ev.l=WaitEvent														;wait for an event. 

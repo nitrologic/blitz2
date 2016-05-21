@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/fdconvert.bb2
-+; Right, now create Resource fixed
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/tools/fdconvert.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/tools/fdconvert.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/fdconvert.bb2
+; Right, now create Resource fixed
 
 ; Now the program presents you the best library ID !!!
 

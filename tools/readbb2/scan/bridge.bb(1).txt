@@ -1,0 +1,44 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/bridge.bb
+
+NEWTYPE .segasp					 ;sort points here
+	dpth.w
+	sy.w:l.w:spdata.w:sx.w:wptr.l	;points to ?mytable+spwid*8
+	h0.w:p0.w[3]
+	h1.w:p1.w[3]
+	h2.w:p2.w[3]
+	h3.w:p3.w[3]
+End NEWTYPE
+
+Macro ssp SizeOf.segasp\`1(a1):End Macro
+
+Statement findsprites{myinfo.l,splist.l,cptr.l,mydata.l}
+	;
+	MOVEM.l a4-d6,-(a7)
+	;
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d0,a2:MOVE.l d2,a4:MOVE.l d3,a5
+	domore:MOVE (a0)+,d0:BPL domore
+donother
+	MOVE (a0)+,d0:BMI dun:MOVE (a0)+,d1						 ;d0-d3=x y n block
+	MOVE (a0)+,d2:LEA 0(a2,d2),a3:MOVEM (a3)+,d2-d3
+nxpart:
+	MOVEM (a3)+,d4-d5
+	ADD d1,d5:MOVE d5,!ssp{sy}
+	ADD d0,d4:MOVE d4,!ssp{sx}
+	MOVE d3,!ssp{spdata}
+	;
+	MOVE (a3),d4:AND#$f00,d4:OR#5,d4:MOVE d4,!ssp{l}:ADD 2(a3),d3
+	;
+	MOVE.b(a3),d4:ADDQ#4,a3:MOVE d4,d5:AND #12,d4 ;d4=w d5=h+1
+	LEA 0(a5,d4),a6:MOVE.l a6,!ssp{wptr}
+	AND#3,d5:ADDQ#1,d5:MOVE d5,d4
+	MOVE d4,!ssp{h0}:ADD d5,d4
+	MOVE d4,!ssp{h1}:ADD d5,d4
+	MOVE d4,!ssp{h2}:ADD d5,d4
+	MOVE d4,!ssp{h3}
+	;
+	MOVE.l a1,(a4)+:ADD #SizeOf.segasp,a1:SUBQ#1,d2:BNE nxpart:BRA donother
+	;
+dun:
+	MOVE.l #0,(a4):MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Statement

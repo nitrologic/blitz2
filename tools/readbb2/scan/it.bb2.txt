@@ -1,19 +1,21 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/it.bb2
-+
-h=100
-d=256
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/it.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/it.bb2
 
-nd=4096
+b.q=20
 
-co.f=##[$80BA]*2/nd
+Statement test{}
 
-a.q=Cos(1/d)/co
+a.l=10
 
-NPrint a
+NPrint SizeOf a
 
-a=1/a
+;ADD.l #65536,SizeOf b(a5)
+;
+;NPrint a
 
-NPrint Hex$(Peek.l(&a))
+End Statement
+
+test{}
+
+NPrint SizeOf b
 
 MouseWait
-

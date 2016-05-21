@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/magazin2/rollasex.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/rollasex.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/rollasex.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/rollasex.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/af3/rollasex.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/af3/up/rollasex.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/magazin2/rollasex.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/rollasex.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/rollasex.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/rollasex.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af3/rollasex.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af3/up/rollasex.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/magazin2/rollasex.bb2
+;
 ; my little black book v0.0
 ;
 

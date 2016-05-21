@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/hires/blocks.bb
-+InitBank 0,32*8*4,0
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/blocks.bb,/Users/simon/Google Drive/amiga/w/sega/shit/dev/hires/blocks.bb
+InitBank 0,32*8*4,0
 
 allocst 0,4
 ScreensBitMap 0,0

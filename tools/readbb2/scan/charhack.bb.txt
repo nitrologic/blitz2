@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/cludgeted/charhack.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/cludgeted/charhack.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/cludgeted/charhack.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/cludgeted/charhack.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/cludgeted/charhack.bb
+;
 ; cludgy ted character set hack (by simon! cool programming eh?)
 ;
 

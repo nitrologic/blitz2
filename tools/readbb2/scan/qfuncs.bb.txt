@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/buzzbar/qfuncs.bb
-+Function.w distance{x1.w,y1.w,x2.w,y2.w}
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/BUZZBAR/qfuncs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/BUZZBAR/qfuncs.bb
+Function.w distance{x1.w,y1.w,x2.w,y2.w}
  UNLK a4															 ;unlink (no recursion)
  SUB d2,d0:BPL xpos:NEG d0:xpos				;d0=width
  SUB d3,d1:BPL ypos:NEG d1:ypos				;d1=height
@@ -29,3 +29,7 @@ Function.w angle{x1.w,y1.w}
 			Dc.w $8000,-1,$4000,0,$8000,0,$C000,-1
 	arc:IncBin "arc.inc"
 End Function
+
+NPrint distance{0,0,40,70}
+MouseWait
+End

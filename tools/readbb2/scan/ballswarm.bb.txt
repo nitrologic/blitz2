@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/swarm/ballswarm.bb
-+; A simple ball swarming proggie
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/swarm/ballswarm.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/swarm/ballswarm.bb
+; A simple ball swarming proggie
 ; J.A.Eames 6/1/94
 ; Manchester is as wet as my thighs!!!
 

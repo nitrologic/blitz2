@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/libs/AnaJoyLib/AnaJoyLib.bb
-+!libheader{50,0,0,0,0}
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/libs/AnaJoyLib/AnaJoyLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/libs/AnaJoyLib/AnaJoyLib.bb
+!libheader{50,0,0,0,0}
 
 !astatement
 !args

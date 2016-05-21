@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/it.bb2
+
+h=100
+d=256
+
+nd=4096
+
+co.f=##[$80BA]*2/nd
+
+a.q=Cos(1/d)/co
+
+NPrint a
+
+a=1/a
+
+NPrint Hex$(Peek.l(&a))
+
+MouseWait
+

@@ -1,37 +1,106 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/test.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/test.bb2
 DEFTYPE.l
 
-p=##[$FEC9]("potgo.resource")
-
-GetReg a6,p:MOVE #$f000,d0:JSR -6(a6):##[$80BD] d0,pb
-
-NPrint Hex$(pb)," pot bits allocated"
-
-BCLR #6,$bfe201
-BSET #7,$bfe201
+;mounts.bin file:
 ;
-While Joyb(0)<>2
+;starts with table of 256 info's for each 16 wide column
+;
+;00.w y of start of blit.
+;02.w offset of above
+;04.w bltsize of blit.
+;06.w offset to bitmap data
+;
+NEWTYPE.info
+y.w
+y2.w
+y3.l
+bltsize.w
+offset.l
+dummy.w
+End NEWTYPE
+
+Dim i.info(255)
+Dim b.w(32768),h.b(4095)	;hite of mounts.
+
+maxy=512
+
+ty=maxy-256
+
+lmaxlen 0,4096,256,2
+
+LoadBitMap 0,"newmounts.iff",0
+
+BitMapOutput 0
+
+BLITZ
+
+Slice 0,44,320,256,$fff8,2,8,32,4096,4096
+
+Use SetCycle 0
+
+Green 0,8,0,0
+
+Show 0
+
+b1.l=Peek.l(##[$80B8] lmaxlen(0)+8)
+b2.l=Peek.l(##[$80B8] lmaxlen(0)+12)
+
+yad=12		;y adjust
+
+ybot=256-yad
+
+For x=0 To 511 Step 2
+If Joyb(0) Then End
+x2=x LSL 3
+;
+Scroll x2,yad,16,ybot,x2,0
+Boxf x2,ybot,x2+15,255,2
+;
+For x3=x2 To x2+15
+y=0
+While Cls(x3,y)=0
+	y+1
+Wend
+h(x4)=256-y:x4+1
+Next
+;
+;Locate x,31:Print x AND 7
+y=0
+While Peek.w(b1+x+y*512)=0 AND Peek.w(b2+x+y*512)=0
+	y+1
+Wend
+;
+Boxf x2,0,x2+15,y-1,3
+bs=(256-y)*128+1:y2=y-32
+i(x LSR 1)\y=y2,y2*128,y2*176,bs,b+b+4096-x LSL 3
+While y<256
+	b(b)=Peek.w(b1+x+y*512):b+1
+	b(b)=Peek.w(b2+x+y*512):b+1
+	y+1
+Wend
+Next
+
+Green 0,0,0,0
+
+While Joyb(0)=0
 	VWait
-	;
-	MOVE $dff00c,d0
-	MOVE d0,d1:AND #512,d1:##[$80BD] d1,left
-	MOVE d0,d1:AND #2,d1:##[$80BD] d1,rite
-	MOVE d0,d1:ADD d1,d1:EOR d0,d1:AND #512,d1:##[$80BD] d1,forw
-	MOVE d0,d1:ADD d1,d1:EOR d0,d1:AND #2,d1:##[$80BD] d1,back
-	;
-	NPrint "L:",left," R:",rite," F:",forw," B:",back
-	;
-	Select Joyb(0)
-	Case 1
-		BCLR #7,$bfe001
-		GetReg a6,p:MOVE #$a000,d0:MOVE #$f000,d1:JSR -18(a6)
-	Default
-		BSET #7,$bfe001
-		GetReg a6,p:MOVE #$f000,d0:MOVE #$f000,d1:JSR -18(a6)
-	End Select
+	Show 0,bx,0
+	bx=QWrap(bx+Joyx(1)LSL 3,0,4096)
 Wend
 
-GetReg a6,p:MOVE #$f000,d0:JSR -12(a6)
+AMIGA
 
+DefaultOutput
 
+NPrint b
+
+If ReadMem(0,"mounts.bin")
+	Exists 0,&h(0),4096
+	Exists 0,&i(0),4096
+	Exists 0,&b(0),b*2
+	CloseFile 0
+EndIf
+
+NPrint "Done...!"
+
+MouseWait

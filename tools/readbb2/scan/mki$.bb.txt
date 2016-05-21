@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Mki$.bb
-+Print Mki$($4141): ; Prints "AA"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Mki$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Mki$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Mki$.bb
+Print Mki$($4141): ; Prints "AA"

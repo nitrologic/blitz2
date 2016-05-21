@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/dev.bb2
-+
+
 #io_command=28
 #io_flags=30
 #io_error=31

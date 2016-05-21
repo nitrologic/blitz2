@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/jskid.bb
-+cmpacc=-1
+cmpacc=-1
 cmpacc7=cmpacc*0.7
 
 lapdir.w=-1

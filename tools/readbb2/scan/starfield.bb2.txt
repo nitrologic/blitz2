@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Starfield.bb2
-+;================================================================
+;================================================================
 ; Draw a nice little starfield....
 ; Written by Stephen McNamara of Leading Edge Software
 ;

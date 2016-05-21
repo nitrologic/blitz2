@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/TRON/Tron.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/TRON/Tron.bb
+;
 ; This took about an hour to write !!!
 ;
 

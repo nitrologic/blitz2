@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/chunky/ed.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/ed.bb,/Users/simon/Google Drive/amiga/w/abc/acid/chunky/ed.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/ed.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/chunky/ed.bb
+;
 ; 3D editor
 ;
 

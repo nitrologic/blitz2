@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/RatMail/Ratreader.bb
-+DEFTYPE.l
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/RatMail/Ratreader.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/RatMail/Ratreader.bb
+DEFTYPE.l
 
 #dmax=100
 #areamax=100

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/libsource/fpulib.bb2
-+#fplib=217:#real=$ec00			 ;uses lib 217,218 ;muilib has num 218
+#fplib=217:#real=$ec00			 ;uses lib 217,218 ;muilib has num 218
 ;***************** calc results
 #byte=$60000
 #word=$50000

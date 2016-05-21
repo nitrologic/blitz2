@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/road.bb
-+Dim qsin.w(256),qcos.w(256)			;128 = straight ahead
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/road.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/road.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/road.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/road.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/road.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/road.bb
+Dim qsin.w(256),qcos.w(256)			;128 = straight ahead
 
 Dim qdist.q(2048)
 For i=1 To 2048

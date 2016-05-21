@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/ENCOUNTER/enc.bb2
-+NPrint "OK..."
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/ENCOUNTER/enc.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/ENCOUNTER/enc.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/ENCOUNTER/enc.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/ENCOUNTER/enc.bb2
+NPrint "OK..."
 
 ;
 ;A rather weird 3D system in use here...

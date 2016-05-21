@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/spectre/jellylogo.bb2
-+
+
 lmaxlen 0,640,256,4
 LoadBitMap 0,"strlogo.iff",0
 

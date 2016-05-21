@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/MED.bb
-+Statement PPDec{Source$,Destination$}
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/MED.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/MED.bb
+Statement PPDec{Source$,Destination$}
 If WriteMem(0,Source$)
 	buf.l=##[$FEE5](FileSeek(0),0)
 	##[$BE14] 0,buf,FileSeek(0)

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot5.bb
-+;Lattice symmetry is achieved by setting x and y to periodic
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot5.bb
+;Lattice symmetry is achieved by setting x and y to periodic
 ;functions of x and y prior to calculating the z.
 ;This is an easy way of filling the screen with smoothly fitting pieces.
 ##[$80C3]

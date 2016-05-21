@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/3D/EDITOR.BB
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/ed.bak/EDITOR.BB,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/ed.bak/EDITOR.BB,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/3D/EDITOR.BB,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/3D/EDITOR.BB,/Users/simon/Google Drive/amiga/w/lha/bbold/3d/ed.bak/EDITOR.BB,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/3D/EDITOR.BB
+;
 ; 3d shape editor by Paul Andrews (c) Vision Software 1994
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/map.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/map/map.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/map.bb2
+
 DEFTYPE.l in,oldin,time,time2,ev,mem,siz,sh,shl
 DEFTYPE.l fga,fpn,fpd,fus,fga2,fpn2,fpd2,fus2
 DEFTYPE.l nl

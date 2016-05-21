@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/BlitzBlank.bb
-+; BlitzBlank 1.01 - Copyright 1993 by Thomas Boerkel
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/BlitzBlank.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/BlitzBlank.bb
+; BlitzBlank 1.01 - Copyright 1993 by Thomas Boerkel
 
 ; need to use the icon bum5:blitzblank/blitzblank.info
 ; or else it crashes!

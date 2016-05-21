@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/WBPaint.3.bb2
-+VER$="V3.5"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/WBPaint.3.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/WBPaint.3.bb2
+VER$="V3.5"
 ;*****************************************************
 ;*	PROGRAM	 : WBPAINT															*
 ;*	RELEASE	 : 1																		*

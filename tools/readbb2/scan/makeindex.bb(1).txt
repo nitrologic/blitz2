@@ -1,0 +1,76 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/makeindex.bb
+;
+; create index from libs files in blitz2:help drawer
+;
+
+; description
+; example code
+; index
+; about
+
+NEWTYPE .index
+	c.w:a$
+End NEWTYPE
+
+Dim i.index(2048)
+
+NPrint "Scanning..."
+
+DEFTYPE .FileInfoBlock myfib				;myfib holds infoblock
+n=0:v$="blitz2:dev/help/"
+lock.l=##[$FE0A](&v$,-2)
+If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
+	While ##[$FE0E](lock,myfib)<>0			;skip through files
+		##[$80CA] myfib
+		If \fib_DirEntryType=-3
+			f$=Peek$(&\fib_FileName)
+			lib=Val(Mid$(f$,4)):com=1
+			If lib<>0
+				If WriteMem(0,"blitz2:dev/help/"+f$)
+					FileInput 0
+					While NOT DosBuffLen(0)
+						a$=Edit$(512)
+						If Left$(a$,1)="+"
+							i(n)\c=lib*128+com,Mid$(a$,2):com+1:n+1
+						EndIf
+					Wend
+					CloseFile 0
+				EndIf
+			EndIf
+		EndIf
+	Wend
+EndIf
+##[$FE0B] lock
+
+NPrint "Sorting..."
+
+If n>0
+	;
+	For i=n-2 To 0 Step -1
+		For j=0 To i
+			If i(j)\a>i(j+1)\a
+				##[$80C9] i(j)\a,i(j+1)\a
+				##[$80C9] i(j)\c,i(j+1)\c
+			EndIf
+		Next
+	Next
+	;
+	If ReadMem(0,"blitz2:dev/help/index")
+		FileOutput 0
+		For i=0 To n-1
+			NPrint Mki$(i(i)\c),i(i)\a
+		Next
+		CloseFile 0
+	EndIf
+	;
+	If ReadMem(0,"ram:test.bb")
+		FileOutput 0
+		For i=0 To n-1
+			Print Mki$(i(i)\c OR $8000),Chr$(34),i(i)\a,Chr$(34),Chr$(0)
+		Next
+		CloseFile 0
+	EndIf
+	;
+EndIf
+;
+End

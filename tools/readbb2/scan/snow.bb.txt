@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/snow.bb
-+BLITZ
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/snow.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/snow.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/snow.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/snow.bb
+BLITZ
 Slice 0,44,4
 lmaxlen 0,320,256,4
 Show 0

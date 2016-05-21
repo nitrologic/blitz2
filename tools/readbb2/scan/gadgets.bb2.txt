@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/amigamode/gadgets.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/gadgets.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/gadgets.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/amigamode/gadgets.bb2
+
 ;a simple example of gadgets...
 
 ;first, we load in some IFF brushes for some flash gadgets...

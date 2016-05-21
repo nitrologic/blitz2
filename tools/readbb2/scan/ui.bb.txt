@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/cricket/bup2/ui.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/cricket/bup/ui.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/cricket/bup2/ui.bb
+;
 ; cricket scoring program
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/3d.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/3d.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/3d.bb
+
 MOVE #$8400,$dff096
 ;
 NPrint "OK!"

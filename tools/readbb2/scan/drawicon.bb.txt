@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/drawicon.bb
-+;An example of rendering an icon's image onto your OWN
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/drawicon.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/drawicon.bb
+;An example of rendering an icon's image onto your OWN
 ;screens (well, windows that is!)
 
 ;Sorry, 1.3 Users!	I have the habit of using lots of

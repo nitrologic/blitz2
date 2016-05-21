@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/skid/junk/code/carconv.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/imagine/carconv.bb
+
 NEWTYPE .frame
 	size.l
 	a.l[192]
@@ -7,13 +7,13 @@ End NEWTYPE
 
 Dim fr.frame(800)
 
-f$="police"
+f$="f1"
 
 Gosub getsprite
 
 lmaxlen 0,1280,320,3
 For i=1 To 4
-	LoadBitMap 0,"f1:skid/imagine/frames/"+f$+Str$(i)+".8"
+	LoadBitMap 0,"f1:skid/cars/logos/"+f$+Str$(i)+".8"
 	y=0
 	##[$80BB]
 		gfr=Int(fr/32)*32+31-((fr+40) ##[$80B9] 32)

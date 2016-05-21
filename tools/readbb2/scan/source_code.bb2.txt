@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/sound_the_space_cadet/SOURCE_CODE.BB2
-+;
+;
 ;							Sound The Space Cadet
 ;				 (C) Copyright 1994 Scott Hayne
 ;		 Please DO NOT give out this source code!

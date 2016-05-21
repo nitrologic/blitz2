@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/testsort.bb
-+Dim ##[$80B3] a.q(10)
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/testsort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/testsort.bb
+Dim ##[$80B3] a.q(10)
 
 While globalloc(a()):a()=Rnd(50):Wend
 

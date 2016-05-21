@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/clock/CharmClock2.4.bb2
-+;Noe som ble en klokke!
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/CharmClock/CharmClock2.4.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/CharmClock/CharmClock2.4.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/clock/CharmClock2.4.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/CharmClock/CharmClock2.4.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/CharmClock/CharmClock2.4.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/clock/CharmClock2.4.bb2
+;Noe som ble en klokke!
 
 ##[$80B4]:Gosub Error:End:End ##[$80B4]
 
@@ -98,7 +98,7 @@ If WBHeight < WinY
 	WinOHeight = WinOHeight*11/16
 EndIf
 
-If WBWidth < WinX
+If WBWidth < WinX+WinOWidth
 	WinX=WBWidth-(WinOWidth+10)
 EndIf
 

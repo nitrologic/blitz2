@@ -1,0 +1,131 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/damen/Circle_text.bb2
+;----------------------------------------
+;
+;	CIRCLE TEXT - DOOR JOOP DAMEN.
+;
+;-----------------------------------------
+LoadShapes 0,"Blitz_products:shapes/blitzfonts-2c"
+VWait
+;
+BLITZ
+lmaxlen 0,320,256,1
+lmaxlen 1,320,256,1
+Slice 0,44,320,256,$fff8,1,8,32,320,320
+Show 0,0,0
+Show 1,0,0
+BitMapOutput 0
+Use lmaxlen 0
+GetaShape 0,0,0,1,1
+;
+;
+Dim X(600),Y(600),IM(400)
+Gosub icos
+;
+SCN$="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:"
+T$=".......................YOU..CAN..MOVE..THIS..CIRCLE..TEXT.."
+T$=T$+"UP..EN..DOWN..LEFT..EN..RIGHT.......COMING.SOON.NITRAX."
+T$=T$+"A.SHOOT.EM.UP.GAME..SO.WATCH.OUT.FOR.IT..........."
+T$=T$+".....BYEEE........................................"
+TL=Len(T$)
+;
+For LOP=1 To TL
+ UP=QWrap(UP+1,1,TL)
+ IM(LOP)=Instr(SCN$,Mid$(T$,UP,1))
+Next
+TL=TL-20
+;
+##[$80C8] copcol1
+ YCOP=15
+	For LOP=0 To 46
+	 Read a,b,c
+	 For TAL=0 To 4
+	 ColSplit 1,a,b,c,YCOP+TAL
+	Next
+ YCOP+5
+Next
+;
+##[$80C8] copcol2
+For lop=0 To 10
+		Read a
+		ColSplit 0,0,0,a,lop
+		ColSplit 0,0,0,a,245+lop
+Next
+;
+;
+Mouse On
+While Joyb(0)=0
+		TEX=QWrap(TEX+1,1,TL)
+		For DIS=1 To 6
+		POS=QWrap(POS-1,0,6)
+		For LOP=1 To 35
+			 longdiv IM(TEX+LOP),X(POS+LOP*6+MouseX),Y(POS+LOP*6+MouseY)
+		Next
+		VWait
+		Show db,0,0:db=1-db:Use lmaxlen db:BlockScroll 0
+		Next
+Wend
+End
+;
+;
+icos:
+For LOP=0 To 600
+		S+.03
+		Y(LOP)=120+HSin(S)*82
+		X(LOP)=160+HCos(S)*85
+Next
+Return
+;
+copcol1:
+Data 15,0,0
+Data 15,1,0
+Data 15,2,0
+Data 15,3,0
+Data 15,4,0
+Data 15,5,0
+Data 15,6,0
+Data 15,7,0
+Data 15,8,0
+Data 15,9,0
+;
+Data 15,10,0
+Data 15,11,0
+Data 15,12,0
+Data 15,13,0
+Data 15,14,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+;
+Data 10,15,0
+Data 9,15,0
+Data 8,15,0
+Data 7,15,0
+Data 6,15,0
+Data 5,15,0
+Data 4,15,0
+Data 3,15,0
+Data 2,15,0
+Data 1,15,0
+Data 0,15,0
+Data 0,15,0
+;
+Data 0,15,2
+Data 0,15,3
+Data 0,15,4
+Data 0,15,5
+Data 0,15,6
+Data 0,15,7
+Data 0,15,8
+Data 0,15,9
+Data 0,15,10
+Data 0,15,11
+Data 0,15,12
+Data 0,15,13
+Data 0,15,15
+Data 0,15,15
+Data 0,0,0
+;
+copcol2:
+Data 3,5,7,9,11,13,11,9,7,5,3

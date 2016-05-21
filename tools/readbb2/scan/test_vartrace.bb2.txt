@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_VarTrace.bb2
-+;This program is used to test variable tracing with the LES Debugger
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/net/debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/debugger/examples/Test_VarTrace.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_VarTrace.bb2
+;This program is used to test variable tracing with the LES Debugger
 ;When it stops the debugger will in invoked.	You should then use the
 ;STEP gadget on the debugger screen to single step through this program.
 ;Variables will be added to the debuggers trace list by this prog, and the

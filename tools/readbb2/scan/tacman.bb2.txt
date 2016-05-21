@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/pacdarts/TACmanGame/TACman.bb2
-+; ==========	TACMAN	 Last modified 20 May 1994 ==========
+; ==========	TACMAN	 Last modified 20 May 1994 ==========
 ;
 ; Variable Notes:
 ;

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusPrtLib.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RomulusPrtLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RomulusPrtLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusPrtLib.bb
+;
 ; andre's prtlib	(rev bum6)
 ;
 

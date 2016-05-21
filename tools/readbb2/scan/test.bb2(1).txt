@@ -1,0 +1,116 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dev/test.bb2
+
+DEFTYPE.l
+
+If NumPars<>1 Then End
+
+pg=##[$FEC9]("potgo.resource")
+
+GetReg a6,pg:MOVE #$c000,d0:JSR -6(a6):##[$80BD] d0,a ;reserve bits!
+
+If a<>$c000 Then NPrint "Can't allocate pot bits!":MouseWait:End
+
+Statement tout{n}		;set timing to n
+If n
+	BCLR #7,$bfe001
+Else
+	BSET #7,$bfe001
+EndIf
+End Statement
+
+Function.w tin{}
+If Peek.b($dff00c)&2
+	Function Return 1
+Else
+	Function Return 0
+EndIf
+End Function
+
+Statement dout{n}		;set data to n
+Shared pg
+If n
+	GetReg a6,pg:MOVE #$8000,d0:MOVE #$c000,d1:JSR -18(a6)	;write pot!
+Else
+	GetReg a6,pg:MOVE #$c000,d0:MOVE #$c000,d1:JSR -18(a6)	;write pot!
+EndIf
+End Statement
+
+Function.w din{}
+If Peek.b($dff00d)&2
+	Function Return 1
+Else
+	Function Return 0
+EndIf
+End Function
+
+Statement bitout{n}		;send a bit!
+##[$80BB]
+##[$80BC] tin{}=0
+dout{n}	;set data line...
+tout{1}	;set timing
+##[$80BB]
+##[$80BC] tin{}
+tout{0}
+End Statement
+
+Function.l bitin{}
+##[$80BB]
+##[$80BC] tin{}
+d=din{}
+tout{1}
+##[$80BB]
+##[$80BC] tin{}=0
+tout{0}
+Function Return d
+End Function
+
+Statement byteout{n}	 ;send a byte!
+MOVE #$f,$dff180
+For k=1 To 8
+If n&128 Then bitout{1} Else bitout{0}
+n+n
+Next
+MOVE #0,$dff180
+End Statement
+
+Function.w bytein{}
+##[$80BB]
+##[$80BC] tin{}
+MOVE #$f00,$dff180
+For k=1 To 8
+d = d LSL 1+bitin{}
+Next
+MOVE #0,$dff180
+Function Return d
+End Function
+
+BSET #7,$bfe201	 ;fire 1 -> output
+tout{0}:dout{0}				 ;timer and data to 0!
+
+allocst 0,0,0,320,256,3,0,"",1,0
+localstat 0,0,0,320,256,$100f,Par$(1),1,0
+
+##[$80BB]
+	If Left$(LCase$(Par$(1)),1)="i"
+		Gosub input
+		If Event=512 Then Goto cleanup
+	Else
+		ev.l=WaitEvent:If ev=512 Then Goto cleanup
+		If ev=1024 Then i$=Inkey$:Gosub outputchar
+	EndIf
+##[$80C7]
+
+cleanup
+GetReg a6,pg:MOVE #$c000,d0:JSR -12(a6)
+
+End
+
+.input
+Print Chr$(bytein{}):If WCursX>=320-16 Then NPrint ""
+Return
+
+.outputchar
+byteout{Asc(i$)}
+Print i$:If WCursX>=320-16 Then NPrint ""
+Return
+

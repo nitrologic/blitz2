@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/joypad.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/joypad.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/joypad.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/joypad.bb
+;
 ; CD32 joypad reader
 ;
 

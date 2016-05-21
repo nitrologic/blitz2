@@ -1,6 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/speed/speed.bb2
-+##[$80C3]:##[$80CC]:##[$80CB]
-##[$80B4]:End:End ##[$80B4]
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/afold/speed/speed.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/speed/speed.bb2
+##[$80C3]:##[$80CC]:##[$80CB]
 ;
 If WriteMem(0,"speed.readme")
 	freest 0:##[$FFB5]

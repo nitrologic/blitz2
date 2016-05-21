@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example4.bb2
-+##[$80CC]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example4.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example4.bb2
+##[$80CC]
 ##[$80C3]
 
 ##[$80BF]	"FUN_Math:"

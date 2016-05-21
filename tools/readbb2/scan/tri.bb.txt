@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/tri/tri.bb
-+; BEFORE YOU RUN THIS MAKESURE THE FOLLOWING BITMAP FONTS
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/tri/tri.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/tri/tri.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/tri/tri.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/tri/tri.bb
+; BEFORE YOU RUN THIS MAKESURE THE FOLLOWING BITMAP FONTS
 ; ARE IN YOUR FONTS: DIRECTORY!!!!!!
 
 ;Topaz.font

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/shit/NeilsRTLib.bb
-+;*********************************************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/NeilsRTLib.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/shit/NeilsRTLib.bb
+;*********************************************************
 ;*																											 *
 ;*	ReqTools																						 *
 ;*																											 *

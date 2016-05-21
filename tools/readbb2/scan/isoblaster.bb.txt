@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/isoblast/isoblaster.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/simonsdemos/isoblaster.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/simonsdemos/isoblaster.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/AF52_Listings/isoblaster.bb,/Users/simon/Google Drive/amiga/w/disks/crap/art/af1/isoblast/isoblaster.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/AF52_Listings/isoblaster.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/isoblast/isoblaster.bb
+;
 ; IsoBlaster V0.1 by Simon Armstrong
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/libs/db/dbaselib_1_05.bb2
-+; include library here
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/libs/db/dbaselib_1_05.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/libs/db/dbaselib_1_05.bb2
+; include library here
 ; +----------+-------------------------------------------------+
 ; | dbaselib | A simple memory based database system					 |
 ; +----------+----------+--------------------------------------+

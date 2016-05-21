@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/token.bb
-+LoadBank 0,"deflibs"
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/token.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/token.bb
+LoadBank 0,"deflibs"
 a.l=Bank(0)
 
 While Peek.l(a)<>0

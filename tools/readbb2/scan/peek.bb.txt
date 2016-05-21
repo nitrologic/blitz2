@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Peek.bb
-+; ; peek example program; NPrint "Exec Base can be found at"Print Peek.l (4) MouseWait
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Peek.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Peek.bb
+; ; peek example program; NPrint "Exec Base can be found at"Print Peek.l (4) MouseWait

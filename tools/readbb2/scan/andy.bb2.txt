@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/andy.bb2
-+
+
 DEFTYPE.l
 
 s=##[$FE15]("sw")

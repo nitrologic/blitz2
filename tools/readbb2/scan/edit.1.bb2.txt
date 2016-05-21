@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/edit.1.bb2
-+Dim ##[$80B3] lines$(40)
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/edit.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/edit.1.bb2
+Dim ##[$80B3] lines$(40)
 
 freest 0; ,0,0,320,172,2,0,"test",1,2
 

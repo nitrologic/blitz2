@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/stest.bb2
-+allocst 0,0,0,1280,256,8,$8020,"",1,2
+allocst 0,0,0,1280,256,8,$8020,"",1,2
 
 ScreensBitMap 0,0
 

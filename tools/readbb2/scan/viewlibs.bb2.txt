@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/viewlibs.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/tools/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/tools/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/toolssrc/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/libsdev/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Tools/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/DEVELOPERS/libsdev/viewlibs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/libsdev/viewlibs.bb2
+
 DEFTYPE.l
 ;
 ;'viewlibs' utility

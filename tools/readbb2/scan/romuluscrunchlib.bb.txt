@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusCrunchLib.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RomulusCrunchLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RomulusCrunchLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusCrunchLib.bb
+;
 ; andre's crunchlib	(rev bum6)
 ;
 

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bbdev/vfont.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/vfont.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/bbdev/vfont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bbdev/vfont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/vfont.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bbdev/vfont.bb2
+
 DEFTYPE.l bp
 
 allocst 0,9:ScreensBitMap 0,0:BlockScroll

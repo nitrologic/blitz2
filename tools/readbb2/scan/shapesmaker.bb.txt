@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/tools/shapesmaker.bb
-+##[$80C3]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/tools/shapesmaker.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/tools/shapesmaker.bb
+##[$80C3]
 ;
 ;Marks shape gatherer prog.
 ;
@@ -44,9 +44,9 @@ MaxLen fi$=192	;input file,
 MaxLen fo$=192	;output file
 
 newlocarr 0,0,"PROJECT"
-MenuItem 0,0,0,0,"LOAD				","L"
-MenuItem 0,0,0,1,"CONVERT		 ","X"
-MenuItem 0,0,0,2,"QUIT				","Q"
+MenuItem 0,0,0,0,"LOAD					","L"
+MenuItem 0,0,0,1,"CONVERT			 ","X"
+MenuItem 0,0,0,2,"QUIT					","Q"
 
 newlocarr 0,1,"OPTIONS"
 MenuItem 0,3,1,0,"	MAKE SHAPES?"
@@ -103,7 +103,7 @@ If a=256	;menu picked
 				;
 				Scroll 0,0,fw,fh,0,24
 				;
-				Boxf 0,0,fw,23,0
+				Boxf 0,0,319,23,0
 				;
 				Use SetCycle 0:arrmult 0
 				;

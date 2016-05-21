@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/BombsUseful.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Bombs/BombsUseful.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Bombs/BombsUseful.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Bombs/BombsUseful.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Bombs/BombsUseful.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/BombsUseful.bb2
+;
 ; BombsUseful
 ;
 ; Created by ARV

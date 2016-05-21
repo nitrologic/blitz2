@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Maximum.bb
-+; ; maximum program example ; NPrint "Maximum Windows available:",Maximum WindowMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Maximum.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Maximum.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Maximum.bb
+; ; maximum program example ; NPrint "Maximum Windows available:",Maximum WindowMouseWait 

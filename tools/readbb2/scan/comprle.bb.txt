@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/pack/CompRLE.bb
-+
+
 ;
 ;Go Backwards!!!!
 ;

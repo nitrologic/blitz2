@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abc/vr/fly/makedata.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABC3/vr/fly/makedata.bb,/Users/simon/Google Drive/amiga/w/abc/vr/fly/makedata.bb
+;
 ; create the object file
 ;
 

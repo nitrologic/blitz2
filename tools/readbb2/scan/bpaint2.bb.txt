@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/bpaint2.bb
-+Include arexxres.bb
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/bpaint2.bb
+Include arexxres.bb
 
 ##[$80CC]
 Dim arg$(32)

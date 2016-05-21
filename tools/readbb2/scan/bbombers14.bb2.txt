@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bomb/bbombers14.bb2
-+; BlitzBombers (C)1994 Leading Edge Software
+; BlitzBombers (C)1994 Leading Edge Software
 ; Design AND Programming
 ;						 -
 ;								 Stephen McNamara

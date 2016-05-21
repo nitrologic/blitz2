@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/Vectorballs.bb2
-+;----------------------------------
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/damen/Vectorballs.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/damen/Vectorballs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/Vectorballs.bb2
+;----------------------------------
 ;
 ;	JUMPING BALLS - DOOR JOOP DAMEN
 ;

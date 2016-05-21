@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/cleanbig.bb
-+;16 May 94	- revamp..
+;16 May 94	- revamp..
 
 Use ##[$8526] 0
 scalfac=0.75

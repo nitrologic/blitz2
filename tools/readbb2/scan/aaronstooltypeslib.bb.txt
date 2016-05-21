@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/AaronsToolTypesLib.bb
-+;============================================================
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/AaronsToolTypesLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/AaronsToolTypesLib.bb
+;============================================================
 ;
 ; TOOLTYPES COMES TO BLITZ2!!!!!!!!!!!!
 ;

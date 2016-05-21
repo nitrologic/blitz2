@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreFuncsLib.bb
-+.FUNCTIONS
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/ElmoreFuncsLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/ElmoreFuncsLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/ElmoreFuncsLib.bb
+.FUNCTIONS
 
 ;
 ;	#elmorefuncslib=101	(rev BUM6)

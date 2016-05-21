@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/nu/iffconv (1).bb
-+;
+;
 ; iff => pc format
 ;
 

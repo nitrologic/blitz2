@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/Function_error~3f.bb
-+;This mystifies me completely, but if there really is an error
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/Function_error~3f.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/Function_error~3f.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/Function_error~3f.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/Function_error~3f.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/Function_error~3f.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/Function_error~3f.bb
+;This mystifies me completely, but if there really is an error
 ;it would be a nasty one so I'm sending it in without delay.
 ;Ted Jones 16/12/93
 

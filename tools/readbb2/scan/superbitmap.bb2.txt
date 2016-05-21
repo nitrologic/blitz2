@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/superbitmap.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/superbitmap.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/superbitmap.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/superbitmap.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/superbitmap.bb2
+;
 ; super bitmap example
 ;
 

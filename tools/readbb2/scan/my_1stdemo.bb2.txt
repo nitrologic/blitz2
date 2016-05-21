@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/My_1stDemo.bb2
-+;*****************************
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/damen/My_1stDemo.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/damen/My_1stDemo.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/My_1stDemo.bb2
+;*****************************
 ;
 ; My first scroller in Blitz!
 ;

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/intuition/intuition (1).bb2
-+;
+;
 ;	$VER: intuition.bb2 40.0 (02.03.94)
 ;
 

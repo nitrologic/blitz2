@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/systemcopper.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/systemcopper.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/systemcopper.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/systemcopper.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/systemcopper.bb2
+;
 ; basics for adding copper lists to a screen, might even
 ; use this for combining my new display library with
 ; screenslib for non-blitz wacko macko control.

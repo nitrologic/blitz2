@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/terminal.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/terminal.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/terminal.bb
+;
 ; tiny terminal program using serial port by Simon
 ;
 
@@ -16,7 +16,7 @@ arrmult 0
 
 WindowOutput 0:WindowInput 0
 
-If OpenSerial(0,2400,0)=0 Then End
+If OpenSerial("serial.device",0,2400,0)=0 Then End
 
 ##[$80BB]
 	ev.l=Event:If ev=256 Then End

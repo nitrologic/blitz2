@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/NumPars.bb
-+;; numpars program example ; ;before running this program, enter several items of text, space;separated, into the 'CLI Arguement' requester. For k=1 To NumPars NPrint Par$(k)NextMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/NumPars.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/NumPars.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/NumPars.bb
+;; numpars program example ; ;before running this program, enter several items of text, space;separated, into the 'CLI Arguement' requester. For k=1 To NumPars NPrint Par$(k)NextMouseWait 

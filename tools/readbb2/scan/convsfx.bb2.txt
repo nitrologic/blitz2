@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/convsfx.bb2
-+
+
 If NumPars<>2 Then ##[$FF8C] 0
 
 If ReadMem(0,Par$(2))=0 Then ##[$FF8C] 0:End

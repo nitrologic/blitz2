@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/divtest.bb2
-+
+
 DEFTYPE.l
 
 ;MOVE.l #$1,d0

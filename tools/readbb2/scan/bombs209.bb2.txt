@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/Bombs209.bb2
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Bombs/Bombs209.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Bombs/Bombs209.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Bombs/Bombs209.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Bombs/Bombs209.bb2
+;
 ;
 ; Bombs v 0209
 ;
@@ -149,7 +149,7 @@ NEWTYPE.gameVars
 		oldProgressiveGame				; check for default settings
 		bombs.bombtype						; type of bomb
 		person.persontype				 ; details of the player
-		square.squarestype[#maxSquares]	 ; grid -- finetune later on
+		square.squarestype[#maxSquares+1] ; grid -- finetune later on
 		ratings.ratingstype[#maxRatings]	; list of the best ratings
 		downSquare.downsquaretype[9]			; square(s) selected with a Mouse Button down
 		progressBar.progresstype					; keeps track of the progress-runner
@@ -232,9 +232,9 @@ End If
 
 ; ---------------------------------------
 
-##[$80B4]
-		End
-End ##[$80B4]
+;SetErr
+;		End
+;End SetErr
 
 ; =======================================
 ; =======================================

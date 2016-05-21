@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/blitzlibs/blitzoffs.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/blitzlibs/blitzoffs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/coollibs/blitzoffs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/ressrc/blitzoffs.bb,/Users/simon/Google Drive/amiga/w/abcstuff/userlibs/blitzoffs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/blitzlibs/blitzoffs.bb
+
 ;
 ;	 intuition
 ;

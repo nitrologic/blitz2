@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/minlibs/libnums.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/blitzlibs/libnums.bb,/Users/simon/Google Drive/amiga/w/abcstuff/coollibs/libnums.bb,/Users/simon/Google Drive/amiga/w/abcstuff/userlibs/libnums.bb
+
 ;SYSTEM LIBRARIES:
 
 #varslib				 =65534
@@ -71,6 +71,8 @@
 #xprzlib				 =218 ;* reserved
 
 #reqlib					=201 ;* fuzzy
+#crmlib					=200
+
 
 ;BASIC LIBRARIES:
 
@@ -114,6 +116,7 @@
 #vallib					=120
 #sis2dlib				=119
 #shapetrixlib		=118
+#blitzoslib			=117			;new for bum8
 #audiolib				=116
 #iffmakelib			=114
 #spriteslib			=112

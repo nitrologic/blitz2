@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/sprite2.bb
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bakup/sprite2.bb,/Users/simon/Google Drive/amiga/w/sega/shit/sprite2.bb
+
 
 NEWTYPE .segasp					 ;sort points here
 	dpth.w:car.w						;car=0 for car or numsprites for bridge

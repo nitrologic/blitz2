@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/simvbr.bb2
-+DEFTYPE.l
+DEFTYPE.l
 
 v=##[$FE97](1024,1)
 o=cr_vbr

@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/adu/art3/list5.bb
-+LoadShape 0,"animbrush.iff",0
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/adu/art3/list5.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/adu/art3/list5.bb
+LoadShape 0,"animbrush.iff",0
 
 NEWTYPE .obj
 	x.q:y:xa:ya:frame

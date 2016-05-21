@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/Bouncers1.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/Bouncers1.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/Bouncers1.bb
+;
 ;			 Bouncing Balls							by Raith 9/5/94
 ;			 --------------
 ;

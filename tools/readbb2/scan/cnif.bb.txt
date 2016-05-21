@@ -1,2 +1,2 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CNIF.bb
-+; ; conditional debugging example ; #debugit=1			 ;a debug flag.For k=1 To 10			;start of loop CNIF #debugit=1		;is debug flag=1 ? NPrint k			 ;yes, print out value of 'k' CEND				 ;end of conditional compiling.NextMouseWait 
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/CNIF.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/CNIF.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CNIF.bb
+; ; conditional debugging example ; #debugit=1			 ;a debug flag.For k=1 To 10			;start of loop CNIF #debugit=1		;is debug flag=1 ? NPrint k			 ;yes, print out value of 'k' CEND				 ;end of conditional compiling.NextMouseWait 

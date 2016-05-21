@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/pacdarts/ArrowsGame/Arrows.bb2
-+;
+;
 ;	OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
 ; O			__			____		____		 ____							 _______		O
 ; O		 /	\		|		\	|		\	 /		\	|				| /					 O

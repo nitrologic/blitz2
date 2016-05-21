@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/cck/cck.bb2
-+##[$80C3]:##[$80CC]:##[$80CB]
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/cck/cck.bb2
+##[$80C3]:##[$80CC]:##[$80CB]
 ;
 ;Marks Computer Construction Kit.
 ;

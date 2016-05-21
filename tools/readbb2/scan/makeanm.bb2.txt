@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makeanm.bb2
-+;
+;
 ;possible flags values:
 ;
 ;low 2 bits:

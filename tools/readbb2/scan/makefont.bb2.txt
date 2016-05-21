@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bbdev/makefont.bb2
-+
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/makefont.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/bbdev/makefont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bbdev/makefont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/makefont.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bbdev/makefont.bb2
+
 DEFTYPE.l
 
 If NumPars<>1

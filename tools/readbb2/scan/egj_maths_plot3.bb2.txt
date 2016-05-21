@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/egj_maths_plot3.bb2
-+;This programme shows what happens when convoluted iteration
+;This programme shows what happens when convoluted iteration
 ;is applied to a simple function.
 ;Iterations 0,2,4,6,8 and 10 are drawn on the one screen.
 ;The change in boundary with the higher iterations is because

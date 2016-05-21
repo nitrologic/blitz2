@@ -1,5 +1,5 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/wireman/wireman.bb
-+;
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/wireman/wireman.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/wireman/wireman.bb
+;
 ; Dancing BlitzMan v0.0 by Simon Armstrong
 ;
 
