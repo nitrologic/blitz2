@@ -7,7 +7,7 @@ NEWTYPE .quad
 	x.w:y:w:h
 End NEWTYPE
 
-Dim ##[$80B3] q.quad(20)
+Dim List q.quad(20)
 
 allocst 0,4
 ScreensBitMap 0,0

@@ -49,7 +49,7 @@ End NEWTYPE
 
 	DEFTYPE .part3d *ship,*curr,*scan
 
-	Dim ##[$80B3] shapes.part3d(200)
+	Dim List shapes.part3d(200)
 
 	Gosub setupshapes
 

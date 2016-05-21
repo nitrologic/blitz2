@@ -74,16 +74,16 @@ nr=16:nr2=nr-1:nr3=nr/4		;number of rotations
 .arrays
 Dim f$(127),f(16)		;flight path information!
 Dim px(5000),py(5000),pd.b(5000)
-Dim ##[$80B3] a.alien1(25)
+Dim List a.alien1(25)
 Dim xa.q(nr2),ya.q(nr2)
-Dim ##[$80B3] b.bomb(5)
+Dim List b.bomb(5)
 ;
-Dim ##[$80B3] c.bull(3)
+Dim List c.bull(3)
 ;
-Dim ##[$80B3] a2.alien2(25)
-Dim ##[$80B3] a3.alien3(80)
+Dim List a2.alien2(25)
+Dim List a3.alien3(80)
 Dim rc(16),rl(16)
-Dim ##[$80B3] e.exp(20)
+Dim List e.exp(20)
 Dim bo(5)						 ;bonuss collected...
 Dim sd(4)
 Dim hi(11),hi$(11)

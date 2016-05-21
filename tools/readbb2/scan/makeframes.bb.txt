@@ -7,7 +7,7 @@ NEWTYPE .balltype
 	depth.q:col:x:y:z:sx:sy
 End NEWTYPE
 
-Dim ##[$80B3] ball.balltype(50)
+Dim List ball.balltype(50)
 
 casestrcomp 0,"work.iff"
 LoadShapes 4,"balls.shapes"

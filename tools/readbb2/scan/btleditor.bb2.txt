@@ -42,7 +42,7 @@ NEWTYPE .scrn
 	c.blck[180]									; max blocks = 20*9
 End NEWTYPE
 
-Dim ##[$80B3] level.scrn(maxscrn-1) ; for the editor
+Dim List level.scrn(maxscrn-1) ; for the editor
 Dim bmap.w(1023,8)						 ; block map array for game
 Dim gmap.gm(1023,4)						; gradient map array for game
 Dim pix(15,15)								 ; pixel arrays used when making

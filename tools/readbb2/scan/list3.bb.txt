@@ -5,7 +5,7 @@ NEWTYPE .obj
 	x.q:y:xa:ya:frame
 End NEWTYPE
 
-Dim ##[$80B3] balls.obj(20)
+Dim List balls.obj(20)
 
 While globalloc(balls())
 	balls()\x=Rnd(250),Rnd(200),Rnd(6)-3,Rnd(6)-3

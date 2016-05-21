@@ -18,7 +18,7 @@ DEFTYPE.w pz : pz=0
 
 DEFTYPE.Object_Type *Player
 
-Dim ##[$80B3]	Objects.Object_Type(16)
+Dim List	Objects.Object_Type(16)
 
 Dim DList.DList_Entry(16)
 

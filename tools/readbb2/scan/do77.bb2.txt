@@ -127,13 +127,13 @@ End NEWTYPE
 ;************************************************
 
 
-Dim ##[$80B3] Ash.AnimShape(40)
-Dim ##[$80B3] Mup.MapUpdate(10)
-Dim ##[$80B3] Sco.MapUpdate(10)
+Dim List Ash.AnimShape(40)
+Dim List Mup.MapUpdate(10)
+Dim List Sco.MapUpdate(10)
 
-Dim ##[$80B3] Ump.Character(#UmphsOut)
-Dim ##[$80B3] Mar.Character(2)
-Dim ##[$80B3] App.Apple(10)
+Dim List Ump.Character(#UmphsOut)
+Dim List Mar.Character(2)
+Dim List App.Apple(10)
 
 DEFTYPE.Character MrDo
 DEFTYPE.Character LM

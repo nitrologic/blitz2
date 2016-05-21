@@ -145,11 +145,11 @@ DEFTYPE.gate *gate,*dgate
 
 Dim pa.part(#maxparts):np=0	 ;number of parts
 
-Dim ##[$80B3] ga.gate(#maxgates)
-Dim ##[$80B3] pn.pin(#maxpins)
-Dim ##[$80B3] ta.task(#maxtasks)
-Dim ##[$80B3] tc.l(#maxtchanges)
-Dim ##[$80B3] us.user(#maxuser2)
+Dim List ga.gate(#maxgates)
+Dim List pn.pin(#maxpins)
+Dim List ta.task(#maxtasks)
+Dim List tc.l(#maxtchanges)
+Dim List us.user(#maxuser2)
 Dim ui.usinfo(#maxuser)
 Dim ups.l(#maxusernest)
 
@@ -168,7 +168,7 @@ End NEWTYPE
 
 DEFTYPE.pad *pad,*dpad
 
-Dim ##[$80B3] pd.pad(#maxpads)
+Dim List pd.pad(#maxpads)
 
 NEWTYPE.do
 ;
@@ -178,7 +178,7 @@ out.w		 ;output
 ;
 End NEWTYPE
 
-Dim ##[$80B3] do.do(#maxgates)
+Dim List do.do(#maxgates)
 
 NEWTYPE.text	;instance of user text
 ;
@@ -190,7 +190,7 @@ t$
 ;
 End NEWTYPE
 
-Dim ##[$80B3] tx.text(#maxtexts)
+Dim List tx.text(#maxtexts)
 
 Gosub loadparts:If er Then ##[$FF8C] 0:End
 Gosub loadusers:If er Then ##[$FF8C] 0:End

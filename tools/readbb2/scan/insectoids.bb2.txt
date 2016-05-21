@@ -139,14 +139,14 @@ ys.q
 c.w
 End NEWTYPE
 
-Dim ##[$80B3] stars.star(32)
-Dim ##[$80B3] dudes.alien(50)
-Dim ##[$80B3] bombs.bomb(50)
-Dim ##[$80B3] bulls.bullet(9)
+Dim List stars.star(32)
+Dim List dudes.alien(50)
+Dim List bombs.bomb(50)
+Dim List bulls.bullet(9)
 Dim wowx.q(50,63),wowy.q(50,63)
 Dim paths.fpath(24,8)
 Dim pathf(24)
-Dim ##[$80B3] capt.capt(8)
+Dim List capt.capt(8)
 Dim capx(4,3),capy(4,3) ;offsets for captured aliens.
 Dim blx(70),bly(70)
 ;

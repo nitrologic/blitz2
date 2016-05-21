@@ -15,7 +15,7 @@ NEWTYPE .user
 	t$[10]
 End NEWTYPE
 
-Dim ##[$80B3] u.user(5000)
+Dim List u.user(5000)
 
 f$="filename"					 ;put filename here!
 

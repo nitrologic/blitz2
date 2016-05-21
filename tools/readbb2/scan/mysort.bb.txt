@@ -23,7 +23,7 @@ doswap:
 	MOVE.l a4,(a1):MOVE.l a1,4(a4):EXG a1,a2:MOVEQ#1,d3:BRA nxitem
 End Statement
 
-Dim ##[$80B3] a.q(10)
+Dim List a.q(10)
 
 While globalloc(a()):a()=Rnd(50):Wend
 

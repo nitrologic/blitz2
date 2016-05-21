@@ -11,7 +11,7 @@ NEWTYPE .p
 	y.w
 End NEWTYPE
 
-Dim ##[$80B3] star.p(39)
+Dim List star.p(39)
 
 ##[$80CA] star()
 

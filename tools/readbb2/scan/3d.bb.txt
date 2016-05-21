@@ -21,7 +21,7 @@ zr.w
 f.w ;flags
 End NEWTYPE
 
-Dim ##[$80B3] o.obj(256)
+Dim List o.obj(256)
 
 For zz.l=-1024 To 1024 Step 512
 For xx.l=-1024 To 1024 Step 512

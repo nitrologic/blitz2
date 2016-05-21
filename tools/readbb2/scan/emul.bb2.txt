@@ -60,7 +60,7 @@ d.w		 ;current delay amount
 End NEWTYPE
 
 Dim g.gate(16384)		 ;16384 gates in circuit max
-Dim ##[$80B3] do.todo(256) ;256 to do items
+Dim List do.todo(256) ;256 to do items
 
 ;add 2 switches
 

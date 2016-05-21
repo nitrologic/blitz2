@@ -152,7 +152,7 @@ End NEWTYPE
 	;
 	##[$D312] ?myshape				 ;&sh(0)
 	;
-	Dim ##[$80B3] v.vert(128)
+	Dim List v.vert(128)
 	Dim fpos(3)
 	fpos(0)=-8:fpos(1)=-8:fpos(2)=-8
 	;
@@ -331,7 +331,7 @@ retry:
 
 .setup3d
 	;
-	Dim ##[$80B3] o.obj(256)
+	Dim List o.obj(256)
 	For zz.l=-1024 To 1024 Step 512
 	For xx.l=-1024 To 1024 Step 512
 	If AddLast(o())

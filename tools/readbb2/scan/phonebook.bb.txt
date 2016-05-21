@@ -95,7 +95,7 @@ NEWTYPE.person
  info$[#num]
 End NEWTYPE
 
-Dim ##[$80B3] people.person(200)
+Dim List people.person(200)
 ##[$80CA] people()
 
 If WriteMem (0,"phonebook.data")

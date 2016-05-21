@@ -590,15 +590,15 @@ Dim CMenu3.CMenuItem(4)
 Dim *DefNames.s(#MaxHiScores-1)
 Dim Demo.b(#MaxDemoSteps-1)
 
-Dim ##[$80B3] IFF.IFFBlock(#MaxIFFBlocks-1)
-Dim ##[$80B3] Doors.Object(#MaxDoors-1)
-Dim ##[$80B3] Animate.Animation(#MaxAnimations-1)
-Dim ##[$80B3] Switches.Switch(#MaxSwitches-1)
-Dim ##[$80B3] Objects.Object(#MaxObjects-1)
-Dim ##[$80B3] Explosions.Explosion(#MaxExplosions-1)
-Dim ##[$80B3] Hostages.Hostage(#MaxHostages-1)
-Dim ##[$80B3] HiScores.HiScoreEntry(#MaxHiScores)
-Dim ##[$80B3] FatalObjects.FatalObject(#MaxFatalObjects-1)
+Dim List IFF.IFFBlock(#MaxIFFBlocks-1)
+Dim List Doors.Object(#MaxDoors-1)
+Dim List Animate.Animation(#MaxAnimations-1)
+Dim List Switches.Switch(#MaxSwitches-1)
+Dim List Objects.Object(#MaxObjects-1)
+Dim List Explosions.Explosion(#MaxExplosions-1)
+Dim List Hostages.Hostage(#MaxHostages-1)
+Dim List HiScores.HiScoreEntry(#MaxHiScores)
+Dim List FatalObjects.FatalObject(#MaxFatalObjects-1)
 
 DEFTYPE ._BitScaleArgs BitMapScaleStruct
 DEFTYPE .MapInfo MapInfo
@@ -735,8 +735,8 @@ End Statement
 		MaxRobots	 = #MaxRobots_CRAM
 		MaxMissiles = #MaxMissiles_CRAM
 	EndIf
-	Dim ##[$80B3] Missiles.Missile(MaxMissiles-1)
-	Dim ##[$80B3] Robots.Robot(MaxRobots-1)
+	Dim List Missiles.Missile(MaxMissiles-1)
+	Dim List Robots.Robot(MaxRobots-1)
 
 	*Scr				= ScreenInfo
 	*Player		 = Plyr

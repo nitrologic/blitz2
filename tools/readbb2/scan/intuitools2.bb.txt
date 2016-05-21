@@ -61,7 +61,7 @@ NEWTYPE .sinfo:id.l:w.l:h.l:d.w:os.w:sc.w:bw.l:bh.l:End NEWTYPE
 NEWTYPE .finfo:name.s:ysize.w:style.b:flags:p1:p2:dm:pad:End NEWTYPE
 
 NEWTYPE .tst:a.w:c$:End NEWTYPE
-Dim ##[$80B3] test.tst(32)
+Dim List test.tst(32)
 While globalloc(test()):test()\c="ITEM"+Str$(i):i+1:Wend
 
 Statement drawbox{*g.obj}
@@ -94,7 +94,7 @@ DEFTYPE .obj *w,*o		 ;who wants predefined vars?
 
 DEFTYPE .l n0,n1,n2
 
-Dim ##[$80B3] q.obj(50)
+Dim List q.obj(50)
 
 remline 0,"topaz.font",8
 

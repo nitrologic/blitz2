@@ -5,9 +5,9 @@ NEWTYPE .ship
 	x.w:y:rot:thrust:rspeed:id:frame:xv:yv:px:py:upd
 End NEWTYPE
 
-Dim ##[$80B3] nme.ship(50)		 ;enemy
-Dim ##[$80B3] bul.ship(50)		 ;bullets
-Dim ##[$80B3] bng.ship(50)		 ;explosions
+Dim List nme.ship(50)		 ;enemy
+Dim List bul.ship(50)		 ;bullets
+Dim List bng.ship(50)		 ;explosions
 
 Dim qsin.q(1023)			 ;look up tables
 Dim qcos.q(1023)

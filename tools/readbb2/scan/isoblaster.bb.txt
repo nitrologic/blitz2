@@ -15,7 +15,7 @@ NEWTYPE .object	;same is IsoRender.bb but with extra fields
 	sx:sy					;screen position after an iso-projection
 End NEWTYPE
 
-Dim ##[$80B3] bob.object(50)
+Dim List bob.object(50)
 
 DEFTYPE .object *me
 

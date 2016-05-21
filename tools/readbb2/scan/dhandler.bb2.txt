@@ -48,7 +48,7 @@ s$	;string
 		;
 End NEWTYPE
 
-Dim ##[$80B3] d_e.d_event(10)
+Dim List d_e.d_event(10)
 
 Statement add_event{t,info,s$}
 ;

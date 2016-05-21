@@ -41,7 +41,7 @@ NEWTYPE .g
 	grad.q											 ;; gradient of jump
 End NEWTYPE
 
-Dim ##[$80B3] bikers.bike(numbikes-1)
+Dim List bikers.bike(numbikes-1)
 
 Dim m.w(1023,8)								;; this is for mapedit file
 Dim g.g(1025,4)								;; this is for gradients of blocks

@@ -54,10 +54,10 @@ mx=160:my=200
 		 flag
 		End NEWTYPE
 
-		Dim ##[$80B3] nme.heli(5)
-		Dim ##[$80B3] gunfire.fire(10)
+		Dim List nme.heli(5)
+		Dim List gunfire.fire(10)
 		Dim xstart(6),ystart(6),vxstart(6),vystart(6)		;set array
-		Dim ##[$80B3] men.para(5)
+		Dim List men.para(5)
 
 		For i = 0 To 6
 		 Read xstart(i),ystart(i),vxstart(i),vystart(i)	;build table

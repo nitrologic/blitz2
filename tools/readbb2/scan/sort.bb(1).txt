@@ -23,7 +23,7 @@ doswap:
 End Statement
 
 
-Dim ##[$80B3] a.q(20)
+Dim List a.q(20)
 
 globalloc a():a()=10
 globalloc a():a()=20

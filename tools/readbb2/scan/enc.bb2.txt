@@ -96,7 +96,7 @@ Dim tm(zm2)				 ;for magnification of towers
 Dim aa(zm2)				 ;alien x adds
 Dim sy.w(zm2)				 ;shadow y position
 Dim xl(zm2),xh(zm2) ;for wrap around at different z's
-Dim ##[$80B3] o.object(200)
+Dim List o.object(200)
 ##[$80CA] o()
 
 ;****************** SET UP STUFF ******************

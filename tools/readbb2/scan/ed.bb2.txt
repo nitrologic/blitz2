@@ -98,11 +98,11 @@ End NEWTYPE
 
 .arrays
 ;Dim dp.drawpoly(#maxdrawpolys)
-Dim ##[$80B3] ve.vert(#maxverts) ;vertices
-Dim ##[$80B3] po.poly(#maxpolys) ;polygons
-Dim ##[$80B3] pa.part(#maxparts) ;parts
-Dim ##[$80B3] sv.list(#maxverts) ;selected vertices
-Dim ##[$80B3] sp.list(#maxparts) ;select parts
+Dim List ve.vert(#maxverts) ;vertices
+Dim List po.poly(#maxpolys) ;polygons
+Dim List pa.part(#maxparts) ;parts
+Dim List sv.list(#maxverts) ;selected vertices
+Dim List sp.list(#maxparts) ;select parts
 Dim w.window(#maxw)
 Dim vi.viewinfo(6)	;six angles!
 Dim rk.w(4) ;raw key ops...

@@ -75,7 +75,7 @@ Dim up(52,1)		;actual up cards
 ;
 Dim cl(1)			 ;cards left per player.
 ;
-Dim ##[$80B3] obj.obj(64),##[$80B3] back.back(64)		;64 cards ?
+Dim List obj.obj(64),List back.back(64)		;64 cards ?
 ##[$80CA] obj()
 
 lon$(1)="TOP":lot(1)=100:lol(1)=8

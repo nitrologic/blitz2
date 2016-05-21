@@ -26,9 +26,9 @@ NEWTYPE .ifs
 	a.q:b:c:d:e:f:p
 End NEWTYPE
 
-Dim ##[$80B3] trans.crds(#maxtrans-1)
-Dim ##[$80B3] table.ifs(#maxtrans-1)
-Dim ##[$80B3] table2.ifs(#maxtrans-1)
+Dim List trans.crds(#maxtrans-1)
+Dim List table.ifs(#maxtrans-1)
+Dim List table2.ifs(#maxtrans-1)
 
 Dim a.q(4,3), b.q(4,3), z.q(4), w.q(4), ans.q(3)
 Dim bxx.w(3), bxy.w(3)
@@ -457,7 +457,7 @@ Return
 
 .maket
 	If LastItem(trans())
-		Dim ##[$80B3] table(trans()\bxn-1) ; Can I do this ?!
+		Dim List table(trans()\bxn-1) ; Can I do this ?!
 	EndIf
 	;
 	newmem trans()
@@ -589,7 +589,7 @@ Return
 	##[$80CA] table()
 
 	If LastItem(trans())
-		Dim ##[$80B3] table2(trans()\bxn-1)	;	here it is again !
+		Dim List table2(trans()\bxn-1)	;	here it is again !
 	EndIf
 
 	Use allocst 0
@@ -738,7 +738,7 @@ Return
 	demorun=0
 	newmem table2()
 	If globfree(table2())
-		Dim ##[$80B3] table.ifs(trans()\bxn-1)
+		Dim List table.ifs(trans()\bxn-1)
 		newmem table2()
 		While globfree(table2())
 			If globalloc(table())
@@ -1158,7 +1158,7 @@ Return
 		Use lmaxlen 1:BlockScroll
 		;
 		Read ntrans
-		Dim ##[$80B3] table.ifs(ntrans)
+		Dim List table.ifs(ntrans)
 		For i=0 To ntrans-1
 			globalloc table()
 			Read \a,\b,\c,\d,\e,\f,\p

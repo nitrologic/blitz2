@@ -28,8 +28,8 @@
 		a.w
 		b$
 	End NEWTYPE
-	Dim ##[$80B3] results.item(1000)
-	Dim ##[$80B3] test.item(20)
+	Dim List results.item(1000)
+	Dim List test.item(20)
 	While globalloc(test()):test()\b="Item #"+Str$(i):i+1:Wend
 	Return
 

@@ -7,7 +7,7 @@ NEWTYPE .fiend
 	t$[8]										 ;each record can have 8 lines (0..7)
 End NEWTYPE
 
-Dim ##[$80B3] u.fiend(5000)			;5000 max entries
+Dim List u.fiend(5000)			;5000 max entries
 
 Dim *ptr.fiend(10)					;pointers for multi column printing
 

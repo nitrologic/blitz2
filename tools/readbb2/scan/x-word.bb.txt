@@ -33,9 +33,9 @@ NEWTYPE.wt				; word storage structure
 	theword$
 End NEWTYPE
 
-Dim ##[$80B3]	swords.wt(30000)		; The words in the search list 28996
-Dim ##[$80B3]	fwords.wt(100)			; The words in the found list
-Dim ##[$80B3]	LO.w(#noc)					; A list of the known characters
+Dim List	swords.wt(30000)		; The words in the search list 28996
+Dim List	fwords.wt(100)			; The words in the found list
+Dim List	LO.w(#noc)					; A list of the known characters
 
 ##[$80CA] swords()
 

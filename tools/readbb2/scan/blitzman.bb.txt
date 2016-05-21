@@ -11,7 +11,7 @@ NEWTYPE .seg
 End NEWTYPE
 
 Dim qsin.q(256),qcos.q(256)
-Dim ##[$80B3] segs.seg(500)
+Dim List segs.seg(500)
 Dim *f.seg(20)
 
 DEFTYPE .seg *myman

@@ -41,7 +41,7 @@ NEWTYPE .test
  a.w:b$:c$
 End NEWTYPE
 
-Dim ##[$80B3] a.test(20):For i= 1 To 10:globalloc a():a()\b="ITEM "+Str$(i):Next
+Dim List a.test(20):For i= 1 To 10:globalloc a():a()\b="ITEM "+Str$(i):Next
 
 remline 1,"helvetica.font",12:Use IntuiFont 1
 

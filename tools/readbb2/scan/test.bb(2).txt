@@ -51,9 +51,9 @@ End NEWTYPE
 
 NEWTYPE .handle:x.w:y:*p.part3d:End NEWTYPE
 
-Dim ##[$80B3] shapes.part3d(200)
-Dim ##[$80B3] parts.part3d(200)
-Dim ##[$80B3] h.handle(200)
+Dim List shapes.part3d(200)
+Dim List parts.part3d(200)
+Dim List h.handle(200)
 
 NEWTYPE .rgb:r.w:g:b:End NEWTYPE
 NEWTYPE .p3d:x.w:y:z:End NEWTYPE
@@ -285,7 +285,7 @@ NEWTYPE .button
 End NEWTYPE
 
 .initui
-	Dim ##[$80B3] b.button(32)
+	Dim List b.button(32)
 	##[$80C8] topui:id=10:c=3:Gosub addbuttons
 	##[$80C8] mainui:id=0:c=7:Gosub addbuttons
 	Return

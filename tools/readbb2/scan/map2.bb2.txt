@@ -63,7 +63,7 @@ g.w				 ;gate we connect to
 n.w				 ;pin we're connect to
 End NEWTYPE
 
-Dim ##[$80B3] g.gate(8192)
+Dim List g.gate(8192)
 Dim c.con(16384)
 
 map_vw=280		;map view width
@@ -101,7 +101,7 @@ End NEWTYPE
 remline 1,"topaz.font",8
 remline 0,"microscopic.font",5
 
-Dim ##[$80B3] t.text(100)
+Dim List t.text(100)
 
 gf=0:n=1:x=256+24:y=0
 ##[$80BB]

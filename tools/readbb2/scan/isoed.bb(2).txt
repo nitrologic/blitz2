@@ -75,7 +75,7 @@ NEWTYPE .pl
 End NEWTYPE
 
 Dim tau.q(20),s(20)
-Dim ##[$80B3] aa.pl(8)
+Dim List aa.pl(8)
 Dim srcimage.xy(256,256)
 
 Dim qsin(256),qcos(256)
@@ -473,8 +473,8 @@ Gosub drawpix
 .convertcar
 	Dim d.b(16384):n=0:nn=0:nnn=0			 ;count bytes and pushes
 	NEWTYPE .xyz:x.w:y.w:z.w:End NEWTYPE
-	Dim ##[$80B3] stack.xyz(128)
-	Dim ##[$80B3] vec.xyz(128)
+	Dim List stack.xyz(128)
+	Dim List vec.xyz(128)
 	For xx=1 To 32
 		For zz=0 To 32
 			For yy=0 To 32

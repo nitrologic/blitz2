@@ -13,7 +13,7 @@ NEWTYPE .ppl
 	x.w:y.w:t.w
 End NEWTYPE
 
-Dim ##[$80B3] ppl.ppl(128)
+Dim List ppl.ppl(128)
 Dim spri.ppl(3)
 
 LoadShapes 16,"people.shapes"
@@ -484,7 +484,7 @@ count:Dc.w0
 	limit=6
 
 	##[$80BB]
-		Dim ##[$80B3] cb.cbok(4608)
+		Dim List cb.cbok(4608)
 		hits=0:Gosub scancount
 		SortList cb(),SizeOf .cbok\diff
 		ii=1200-Peek.w(?count)

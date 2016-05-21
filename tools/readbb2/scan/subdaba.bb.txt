@@ -161,7 +161,7 @@ NEWTYPE .entry
 	 listsort.l
 End NEWTYPE
 
-Dim ##[$80B3] people.entry(200)
+Dim List people.entry(200)
 ##[$80CA] people()
 
 

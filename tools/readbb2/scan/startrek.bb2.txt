@@ -96,13 +96,13 @@ End NEWTYPE
 
 .arrays
 
-Dim ##[$80B3] a.alien(127)
-Dim ##[$80B3] p.prog(100)
+Dim List a.alien(127)
+Dim List p.prog(100)
 Dim l$(100)
 Dim f.w(100)
-Dim ##[$80B3] g.gadget(100)
-Dim ##[$80B3] s.star(39) ;39)
-Dim ##[$80B3] z.zoom(64)
+Dim List g.gadget(100)
+Dim List s.star(39) ;39)
+Dim List z.zoom(64)
 Dim nc.w(5)						 ;nav color codes
 Dim no(4)							 ;number of each object
 Dim c.conv(50)					;50 conversations
@@ -110,7 +110,7 @@ Dim m1(255),m2(255)		 ;magnification for z moves
 Dim m3(255),m4(255)
 Dim m5(255)
 Dim cx.w(1),cy.w(1)
-Dim ##[$80B3] o.obj(20)
+Dim List o.obj(20)
 
 nc(0)=4:nc(1)=5:nc(2)=3:nc(3)=6:nc(4)=1:nc(5)=2
 

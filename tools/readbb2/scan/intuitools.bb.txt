@@ -60,7 +60,7 @@ MaxLen spa$=160:MaxLen sfi$=64
 MaxLen bpa$=160:MaxLen bfi$=64
 MaxLen fpa$=160:MaxLen ffi$=64
 
-Dim ##[$80B3] gads.agadget(100)
+Dim List gads.agadget(100)
 
 Dim fb.w(10)
 

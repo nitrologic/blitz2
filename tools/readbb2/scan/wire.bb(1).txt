@@ -13,7 +13,7 @@ NEWTYPE .seg
 	angle.w:length	 ;polar coordinates
 End NEWTYPE
 
-Dim ##[$80B3] segs.seg(500)
+Dim List segs.seg(500)
 
 Statement readfigure{*temp.seg}
 	Shared segs()

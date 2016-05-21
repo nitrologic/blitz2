@@ -264,8 +264,8 @@ End NEWTYPE
 
 ; START OF CODE
 
-	Dim ##[$80B3] lv.lv(#MAX_ENTRIES)				; Our listviews
-	Dim ##[$80B3] elv.lv(#MAX_EXECUTES)
+	Dim List lv.lv(#MAX_ENTRIES)				; Our listviews
+	Dim List elv.lv(#MAX_EXECUTES)
 
 	If ExecVersion<36 Then End		; Make sure we are using the correct OS
 

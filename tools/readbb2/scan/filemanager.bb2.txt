@@ -30,7 +30,7 @@ NEWTYPE .item
 	DIR.q
 End NEWTYPE
 
-Dim ##[$80B3] DIR.item(256)
+Dim List DIR.item(256)
 
 ;For N=1 To 10
 ;AddItem DIR()

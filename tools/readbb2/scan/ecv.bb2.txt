@@ -85,9 +85,9 @@ NEWTYPE.object		 ; this is structure is used
 	sh.w:fl.w				; shape number, flag for onscreen
 End NEWTYPE
 
-Dim ##[$80B3] strs1.object(numstrs1-1):ld1.l=&strs1(1)
-Dim ##[$80B3] lins1.object(numlins1-1):ld2.l=&lins1(1)
-Dim ##[$80B3] dots1.object(numdots1-1):ld3.l=&dots1(1)
+Dim List strs1.object(numstrs1-1):ld1.l=&strs1(1)
+Dim List lins1.object(numlins1-1):ld2.l=&lins1(1)
+Dim List dots1.object(numdots1-1):ld3.l=&dots1(1)
 sprit.object\x=0,0,0,0,0,0,0,0
 
 Dim coslup1.q(720),sinlup1.q(720)

@@ -159,10 +159,10 @@ NEWTYPE .object
 	id.w[9]
 End NEWTYPE
 
-Dim ##[$80B3] nme.object(darts) ;wow variable dimensioning in a compiler!
-Dim ##[$80B3] bul.object(20)
-Dim ##[$80B3] fire.object(5)
-Dim ##[$80B3] bang.object(10)
+Dim List nme.object(darts) ;wow variable dimensioning in a compiler!
+Dim List bul.object(20)
+Dim List fire.object(5)
+Dim List bang.object(10)
 
 ;generate sin_cos table
 

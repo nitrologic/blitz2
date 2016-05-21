@@ -253,7 +253,7 @@ Dim ff.w(4),fp.w(4)
 
 Dim coors.coor(40)
 
-Dim ##[$80B3] polysort.poly(10000)
+Dim List polysort.poly(10000)
 
 #WIRE=0
 #HIDDEN=1

@@ -7,7 +7,7 @@ NEWTYPE .object
 	depth.q:id:x:y:z:vx:vy:rot:rot2:rotv:sx:sy
 End NEWTYPE
 
-Dim ##[$80B3] bob.object(50)
+Dim List bob.object(50)
 
 DEFTYPE .object *me
 

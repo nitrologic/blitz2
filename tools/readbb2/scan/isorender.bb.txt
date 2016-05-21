@@ -10,7 +10,7 @@ NEWTYPE .balltype ;all fields are .q (fast 32 bit fixed decimal point)
 	sx:sy		;screen position of ball after iso-projection
 End NEWTYPE
 
-Dim ##[$80B3] ball.balltype(50)
+Dim List ball.balltype(50)
 
 LoadShapes 4,"balls.shapes" ;make sure we're in iso drawer (use CD)
 casestrcomp 0,"balls.iff"	 ;get palette from IFF

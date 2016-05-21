@@ -115,7 +115,7 @@ MaxLen bpa$=160:MaxLen bfi$=64
 
 .arrays
 ;
-Dim ##[$80B3] lines.aline(maxlines+1)
+Dim List lines.aline(maxlines+1)
 Dim labs.label(maxlabs)
 Dim cl.w(maxwins)					 ;current line
 Dim cc(maxwins)						 ;current line current item
@@ -130,7 +130,7 @@ Dim tr(1),r(1),rl(1)				;temp r code buffers
 ;
 Dim npc.w(1),pcr.w(#maxpcref,1)
 Dim lar.w(#maxlaref)
-Dim ##[$80B3] equs.ecode(maxequs)				 ;pointer to rcode for equates
+Dim List equs.ecode(maxequs)				 ;pointer to rcode for equates
 
 DEFTYPE.label *lab
 labat=labs(0)+32768				 ;address of middle of labels

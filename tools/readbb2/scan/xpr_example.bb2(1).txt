@@ -221,7 +221,7 @@ remline 0,"topaz.font",8
 
 
 ; This list stores names of files to be sent
-Dim ##[$80B3] Send$(100)
+Dim List Send$(100)
 
 
 ;Initialize XPR_IO structure for library

@@ -26,7 +26,7 @@ For image=1 To 6
 	;
 	Read trans,xscale,xoff,yscale,yoff,scxoff,scyoff,cspgreen,cspblue
 	;
-	Dim ##[$80B3] code.ifs(trans)
+	Dim List code.ifs(trans)
 	;
 	##[$80CA] code()
 	;

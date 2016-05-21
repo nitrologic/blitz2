@@ -13,7 +13,7 @@ NEWTYPE .t
 	d$
 End NEWTYPE
 
-Dim ##[$80B3] b.t(10)
+Dim List b.t(10)
 
 For i=1 To 20
 	If globalloc(b())

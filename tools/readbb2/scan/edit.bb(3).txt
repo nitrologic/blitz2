@@ -29,10 +29,10 @@ DEFTYPE .quad quak
 
 Dim spri.spri(32)
 Dim ab.ablocks(128)
-Dim ##[$80B3] ppl.ppl(256)
-Dim ##[$80B3] sp.ppl(32)
+Dim List ppl.ppl(256)
+Dim List sp.ppl(32)
 
-Dim ##[$80B3] sue.w(32)
+Dim List sue.w(32)
 
 terminate.ppl\x=-1,-1,-1
 
@@ -856,7 +856,7 @@ drawconcrete:
 	limit=6
 
 	##[$80BB]
-		Dim ##[$80B3] cb.cbok(4608)
+		Dim List cb.cbok(4608)
 		hits=0:Gosub scancount
 		SortList cb(),SizeOf .cbok\diff
 		ii=1200-Peek.w(?count)

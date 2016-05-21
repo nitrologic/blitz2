@@ -5,7 +5,7 @@ NEWTYPE .char
 	sx.w:sy.w
 End NEWTYPE
 
-Dim ##[$80B3] chars.char(80)
+Dim List chars.char(80)
 
 home:
 	ClearList chars():nxlink.w=1:Return

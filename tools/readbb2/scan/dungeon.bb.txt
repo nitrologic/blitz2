@@ -26,7 +26,7 @@ NEWTYPE .monstype	 ;the monster object
 	x.w:y.w
 End NEWTYPE
 
-Dim ##[$80B3] monster.monstype(nummonsters)	;loads of monsters!
+Dim List monster.monstype(nummonsters)	;loads of monsters!
 
 Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
 

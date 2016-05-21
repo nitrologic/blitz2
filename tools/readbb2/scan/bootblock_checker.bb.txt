@@ -17,7 +17,7 @@ DEFTYPE.l
 DEFTYPE.b count,drive
 
 Dim devicelist$(50)
-Dim ##[$80B3] errorlist$(50)
+Dim List errorlist$(50)
 
 ; ------------------------------------------------------------------------
 ; *		 ALLOCATE MEMORY		 *

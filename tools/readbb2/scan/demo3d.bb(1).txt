@@ -25,7 +25,7 @@ NEWTYPE .part3d
 End NEWTYPE
 
 .initialise
-	Dim ##[$80B3] shapes.part3d(100)
+	Dim List shapes.part3d(100)
 	##[$80CA] shapes()
 	BLITZ
 	Gosub setupshapes

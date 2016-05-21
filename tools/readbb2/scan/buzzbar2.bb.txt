@@ -120,11 +120,11 @@ NEWTYPE .rgb
 	r.w:g:b
 End NEWTYPE
 
-Dim ##[$80B3] nme.ship(50)			;enemy
-Dim ##[$80B3] bul.ship(16)			;bullets
-Dim ##[$80B3] bng.ship(50)			;explosions
-Dim ##[$80B3] fire.ship(32)		 ;nme fire
-Dim ##[$80B3] astro.hume(32)		;astronauts
+Dim List nme.ship(50)			;enemy
+Dim List bul.ship(16)			;bullets
+Dim List bng.ship(50)			;explosions
+Dim List fire.ship(32)		 ;nme fire
+Dim List astro.hume(32)		;astronauts
 
 Dim alien.nmedata(#nmetypes) ;nme information
 Dim patern.paterndata(200)	 ;patern information

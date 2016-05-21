@@ -262,9 +262,9 @@ cn.q
 ;
 End NEWTYPE
 
-Dim ##[$80B3] a.obj(300)
-Dim ##[$80B3] b.exp(200)
-Dim ##[$80B3] c.laser(3)
+Dim List a.obj(300)
+Dim List b.exp(200)
+Dim List c.laser(3)
 Dim g.glow(10)
 
 longmult 0,700

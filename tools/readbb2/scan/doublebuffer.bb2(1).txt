@@ -29,7 +29,7 @@ End NEWTYPE
 
 ;dimension a 'list' of 'balls'
 ;
-Dim ##[$80B3] balls.ball(12)
+Dim List balls.ball(12)
 
 ;load in a shape and it's palette
 ;

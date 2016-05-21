@@ -75,7 +75,7 @@ NEWTYPE .pl
 End NEWTYPE
 
 Dim tau.q(20),s(20)
-Dim ##[$80B3] aa.pl(8)
+Dim List aa.pl(8)
 Dim srcimage.xy(256,256)
 
 Dim qsin(256),qcos(256)
@@ -519,8 +519,8 @@ Gosub drawpix
 	DEFTYPE .l n
 	Dim d.b(16384)
 	NEWTYPE .xyz:x.w:y.w:z.w:End NEWTYPE
-	Dim ##[$80B3] stack.xyz(1024)
-	Dim ##[$80B3] vec.xyz(1024)
+	Dim List stack.xyz(1024)
+	Dim List vec.xyz(1024)
 	;
 	InitBank 2,65536,0
 	bnk.l=Bank(2)+16:jj.w=0

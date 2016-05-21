@@ -30,7 +30,7 @@ cl_ObjectCount.l
 cl_Flags.l
 End NEWTYPE
 
-#CLF_INLIST=$00000001;/* class is in public class ##[$80B3] */
+#CLF_INLIST=$00000001;/* class is in public class List */
 
 ;/* add offset for instance data to an object handle */
 ;#INST_DATA(=#cl,#o#)((#VOID*#)(((#UBYTE*#)o)+cl->cl_InstOffset))

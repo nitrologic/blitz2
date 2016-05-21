@@ -51,7 +51,7 @@ End NEWTYPE
 
 DEFTYPE .sp mysp
 
-Dim ##[$80B3] q.quad(20)
+Dim List q.quad(20)
 
 lmaxlen 0,320,256,4
 lmaxlen 1,320,256,4
