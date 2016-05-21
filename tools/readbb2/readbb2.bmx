@@ -1,6 +1,8 @@
 ' a blitzmax tool to untokenise old bb2 files
 ' by simon 
 
+' TODO - flush scan folder automatically before scanning
+
 Global func:String[65536]
 
 PopulateFuncTable
