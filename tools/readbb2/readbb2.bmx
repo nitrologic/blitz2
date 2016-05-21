@@ -24,12 +24,26 @@ Function ScanBB2(path$)
 			Case FILETYPE_FILE
 				Local src$=dir.ToLower()
 				If src.EndsWith(".bb2") Or src.EndsWith(".bb")					
-					Local dest$="scan/"+src+".txt"
 					bb2$=ReadBlitz2Source(path2)
-					Print dest													
-					bb2="; ascii translation of "+path2+"~r~n+"+bb2
+					Local dest$="scan/"+src+".txt"
+					Local suffix=0
+					While FileType(dest)=FILETYPE_FILE											
+						Local c$=LoadText(dest)
+						Local p=c.Find("~r~n")
+						Print "p="+p+" -> "+c[p+2..p+22]
+						If c[p+2..]=bb2 
+							Print "Duplicate found"
+							bb2=c[..p]+","+path2+c[p..]
+							Exit
+						EndIf
+						suffix:+1
+						dest="scan/"+src+"("+suffix+").txt"
+'						Print "Name collision with "+src+" trying "+dest
+					Wend
+					If FileType(dest)<>FILETYPE_FILE
+						bb2="; ascii translation of "+path2+"~r~n"+bb2
+					EndIf
 					SaveText bb2,dest	
-'					Print bb2				
 				EndIf
 		End Select
 	Next
@@ -38,7 +52,7 @@ End Function
 Function ReadBlitz2Source$(path$)
 
 	bank:TBank=LoadBank(path)
-	Print bank.Size()
+'	Print bank.Size()
 	
 	src$=""
 	lost$=""
@@ -82,7 +96,7 @@ Function ReadBlitz2Source$(path$)
 	
 	Next
 	
-	Print "Lost Tokens:"+lost
+	If lost Print path+" Lost Tokens:"+lost
 	
 	Return src
 End Function
