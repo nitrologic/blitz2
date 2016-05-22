@@ -1,2 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ScreensBitMap.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ScreensBitMap.bb
-; ; using a screen's bitmap program example ; Screen 0,3,"My Screen"		 ;A Simple Screen. ScreensBitMap 0,0				 ;pick up it's BitMap... Circlef 160,100,50,3MouseWait End 
+
+; 
+; using a screen's bitmap program example 
+; 
+Screen 0,3,"My Screen"     ;A Simple Screen. 
+ScreensBitMap 0,0         ;pick up it's BitMap... 
+Circlef 160,100,50,3
+MouseWait 
+End 
+

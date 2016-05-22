@@ -64,6 +64,11 @@ Function ReadBlitz2Source$(path$)
 		b=bank.PeekByte(i)
 		b1=bank.PeekByte(i+1)
 		
+		If b=13 Or b=10
+			Print "detected ascii file "+path
+			Return LoadText(path)
+		EndIf
+		
 		If b=0 
 			src:+"~r~n"
 		EndIf
@@ -130,6 +135,8 @@ Function PopulateFuncTable()
 		func[cmdnum]=op
 		cmdnum:+1
 	Next
+	
+	' libs
 	
 	lines$=LoadText(libs)
 	libnum=0

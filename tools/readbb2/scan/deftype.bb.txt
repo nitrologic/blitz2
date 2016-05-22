@@ -1,2 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/DEFTYPE.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/DEFTYPE.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/DEFTYPE.bb
-; ; deftype program example ; DEFTYPE.l a,b,c		;these variables are all 'longs' d=10					;'d' is a quick (the initial default type) DEFTYPE.w			 ;set default type to 'word'e=10					;'e' is a word 
+
+; 
+; deftype program example 
+; 
+DEFTYPE.l a,b,c    ;these variables are all 'longs' 
+d=10          ;'d' is a quick (the initial default type) 
+DEFTYPE.w       ;set default type to 'word'
+e=10          ;'e' is a word 
+
+

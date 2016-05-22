@@ -1,2 +1,4 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/StripTrail$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/StripTrail$.bb
+
 Print StripTrail$("AABBAAB",66): ;Will print AABBAA 
+

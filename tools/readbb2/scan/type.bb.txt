@@ -1,2 +1,14 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Type.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Type.bb
-; ; brex recording program example; Type "Hello There!" MouseWait 
+
+; 
+; brex recording program example
+; 
+Type "Hello There!" 
+MouseWait 
+
+
+
+
+
+
+

@@ -1,2 +1,4 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Asc.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Asc.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Asc.bb
+
 Print Asc("A"): ; Will print the number 65
+

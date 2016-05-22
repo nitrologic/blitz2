@@ -1,2 +1,14 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MouseButton.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MouseButton.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MouseButton.bb
-; ; brex mousebutton program example; low=DispHeight*2-1	 ;allow for NTSC or PALAbsMouse 639,low		;Move mouse pointer to lower right. MouseButton 0,On		;Click down left button.AbsMouse 319,low/2	 ;move mouse pointer to middle MouseButton 0,Off		;Release left button. MouseWait 
+
+; 
+; brex mousebutton program example
+; 
+low=DispHeight*2-1   ;allow for NTSC or PAL
+AbsMouse 639,low    ;Move mouse pointer to lower right. 
+MouseButton 0,On    ;Click down left button.
+AbsMouse 319,low/2   ;move mouse pointer to middle 
+MouseButton 0,Off    ;Release left button. 
+MouseWait 
+
+
+

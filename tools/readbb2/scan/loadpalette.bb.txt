@@ -1,2 +1,15 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LoadPalette.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LoadPalette.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadPalette.bb
-; ; palette program example ; Screen 0,3						;open a simple, 8 colour screenLoadScreen 0,"picture.iff"		;load a picture into the screenLoadPalette 0,"picture.iff"	 ;load pictures colours Use Palette 0					;display the colours.MouseWait End 
+
+; 
+; palette program example 
+; 
+Screen 0,3            ;open a simple, 8 colour screen
+LoadScreen 0,"picture.iff"    ;load a picture into the screen
+LoadPalette 0,"picture.iff"   ;load pictures colours 
+Use Palette 0          ;display the colours.
+MouseWait 
+End 
+
+
+
+

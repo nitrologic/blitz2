@@ -1,2 +1,16 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/RawKey.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RawKey.bb
-; ; qualifiers and keyboard events example; Screen 0,3Window 0,0,0,320,200,0,"Type a control character to quit",0,1 While (Qualifier AND $8) = 0 ev=WaitEvent WLocate 0,0  a$=Inkey$  Print Hex$(RawKey)Wend 
+
+; 
+; qualifiers and keyboard events example
+; 
+Screen 0,3
+
+Window 0,0,0,320,200,0,"Type a control character to quit",0,1 
+
+While (Qualifier AND $8) = 0
+ ev=WaitEvent
+ WLocate 0,0 
+ a$=Inkey$ 
+ Print Hex$(RawKey)
+Wend 
+

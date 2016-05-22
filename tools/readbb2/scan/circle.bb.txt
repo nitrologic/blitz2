@@ -1,2 +1,21 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Circle.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Circle.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Circle.bb
-; ; circle example; Screen 0,3									;an intuition screenScreensBitMap 0,0							 ;bitmap of screen For k=1 To 10								 ;start of loop Circle Rnd(320),Rnd(200),Rnd(100),Rnd(7)+1 ;random circles Next										 ;end of loopMouseWait 
+
+; 
+; circle example
+; 
+Screen 0,3                  ;an intuition screen
+ScreensBitMap 0,0               ;bitmap of screen 
+
+For k=1 To 10                 ;start of loop
+ Circle Rnd(320),Rnd(200),Rnd(100),Rnd(7)+1 ;random circles 
+Next                     ;end of loop
+
+MouseWait 
+
+
+
+
+
+
+
+

@@ -1,2 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/RSet$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RSet$.bb
-Print RSet$("Guy Fawkes",6): ; Will print "Fawkes"Print RSet$("Guy",6):		; Will print "	Guy"
+
+Print RSet$("Guy Fawkes",6): ; Will print "Fawkes"
+Print RSet$("Guy",6):    ; Will print "  Guy"
+

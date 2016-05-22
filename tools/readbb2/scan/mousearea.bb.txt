@@ -1,2 +1,21 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MouseArea.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MouseArea.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MouseArea.bb
-; ; mouse area program example; LoadShape 0,"MySprite"		 ;Must be 4 or 16 colour shape LoadPalette 0,"MySprite",16	 ;get the sprites paletteGetaSprite 0,0				 ;turn shape into a sprite BLITZ									;go into blitz mode BitMap 0,320,DispHeight,3		;initialize a bitmapSlice 0,44,3							;create a slice Use Palette 0					;add sprites colours to slice Show 0								 ;show bitmapMouse On								;turn mouse onMouseArea 80,50,240,150 ;limit mouse to 'middle' area of displayPointer 0,0							 ;attach pointer MouseWait 
+
+; 
+; mouse area program example
+; 
+LoadShape 0,"MySprite"     ;Must be 4 or 16 colour shape 
+LoadPalette 0,"MySprite",16   ;get the sprites palette
+GetaSprite 0,0         ;turn shape into a sprite 
+BLITZ                  ;go into blitz mode 
+BitMap 0,320,DispHeight,3    ;initialize a bitmap
+Slice 0,44,3              ;create a slice 
+Use Palette 0          ;add sprites colours to slice 
+Show 0                 ;show bitmap
+Mouse On                ;turn mouse on
+MouseArea 80,50,240,150 ;limit mouse to 'middle' area of display
+Pointer 0,0               ;attach pointer 
+MouseWait 
+
+
+
+

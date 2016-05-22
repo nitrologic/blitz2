@@ -1,2 +1,499 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/makemap.bb
-;----------------------------------------------------------------; dither original 256 map to sega.palette;----------------------------------------------------------------AMIGA.dithermapt$="track24"LoadPalette 0,"sega.palette2"BitMap 0,768,384,8BitMap 1,768,384,4LoadBitMap 0,"maps/"+t$+".256"InitCopList 0,$13014DisplayPalette 0,0DisplayBitMap 0,1VWait 20BLITZCreateDisplay 0Mouse OnMouseArea 0,0,768-320,384-256SetInt 5	DisplayBitMap 0,1,MouseX,MouseYEnd SetIntFor y=0 To 383	oddy=y&1	For x=0 To 767		If Joyb(0)<>0 Then End		oddx=x&1		Use BitMap 0:p=Point(x,y);		p=(y)+192		c=0		If p>0	 AND p<64	Then c=0:p-0		If p>63	AND p<128 Then c=1:p-64		If p>127 AND p<192 Then c=2:p-128		If p>191 AND p<256 Then c=3:p-192		If c=2 OR c=3			p=(p/64)*1.25			ord=(x AND 1)*2 + (y AND 1)			Select ord				Case 0:dith=0				Case 3:dith=0.25				Case 1:dith=0.5				Case 2:dith=0.75			End Select			p=(c-2)*8+1+p+dith		Else			;If c=0 Then	Else p=Int(p ASR 2) ASR 2;			If c=1 Then p=p/5*4;			p=p&$fffe			p=p ASR 4			p=QLimit(p-0.25,0,4)			ord=(x AND 1)*2 + (y AND 1)			Select ord				Case 0:dith=0				Case 3:dith=0.25				Case 1:dith=0.5				Case 2:dith=0.75			End Select			dith*4			ord=(x AND 2) + (y AND 2)/2			Select ord				Case 0:dith+0				Case 3:dith+0.25				Case 1:dith+0.5				Case 2:dith+0.75			End Select			dith/4;			dith1=((x+y)AND1);			dith2=(((x AND 2)+(y AND 2))AND2)/2			p=11-c*8+(p+dith);+(dith1 OR dith2)-(dith1 AND dith2);			Select (p&1);				Case 0:dith=0;				Case 1:dith=(oddx AND oddy);				Case 1:dith=(oddx OR oddy)-(oddx AND oddy);				Case 3:dith=(oddx OR oddy);			End Select;			dith=(oddx OR oddy)-(oddx AND oddy);			p=11-c*8+Int(p/2)+dith		EndIf		Use BitMap 1:Plot x,y,p	NextNext;MouseWaitAMIGASaveBitmap 1,"maps/"+t$+".ami",0End;----------------------------------------------------------------; makeiff from original track;----------------------------------------------------------------.makeiffDim circx.q(20),circy.q(20) ;for Linef{}scalfac=.75For temp.q=0 To 14	circx(temp)=Sin(temp*Pi/30)*3*scalfac	circy(temp)=Cos(temp*Pi/30)*1.5*scalfacNextdt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100t$="start"#maxpost=300:#maxedge=200:#maxngon=40#dp=48:curb.b=0g$="GFX:"; m$=??!?DEFTYPE .w i,j#MaxNam=24Dim nam.s(#MaxNam),com.s(#MaxNam)NEWTYPE.frend	lti.w:ltj.w:rti.w:rtjEnd NEWTYPECNIF 1=0NEWTYPE .frend	lti.q:ltj	rti.q:rtj	lsx.w:lsy	rsx.w:rsy	lpost.w:rpost.w	lb.q:mb:rb	lh	:mh:rh	go.wEnd NEWTYPECENDNEWTYPE .grunt	i.q:j:k:sx.w:syEnd NEWTYPEDim gr.grunt(14):*tgr.grunt=gr(0)Dim con.frend(200):SetConDt &con(0):condt.l=&con(0)Dim map.w(63,63),changed.b(63,63):SetMaptr &map(0,0):maptr.l=&map(0,0)Dim import.w(63,63)Dim lsx(8),lsy(8),lsz(8)NEWTYPE .rend :x.w:y.w	:End NEWTYPEDim tri.rend(10):ad.l=&tri(0):ae.l=&tri(1)NEWTYPE.ij	i.q:j:k:lEnd NEWTYPEbez.ij\i=0:*bez.ij=bez:io.l=&bezSetIO io;bigx=1024:bigy=512bigx=768:bigy=384BitMap 0,bigx,bigy,8BitPlanesBitMap 0,1,63BitPlanesBitMap 0,3,192BitMapOutput 0Use BitMap 1#map=Off:#exo=Off:#exo24=On:#freq=Off:#pmap=OffINCLUDE "LoadINC.bb"For gri=1 To 24	m$="maps/"	t$="track"+Str$(gri)	GetExo24{m$+t$}									 ;loadtrack	Use BitMap 0:Cls	VWait 30:BLITZ	Gosub OpenUp	Gosub Main	Gosub DoCurve	;Gosub DoStartLine	;Gosub PreScan1	;Gosub PreScan2;	MouseWait	AMIGA	SaveBitmap 0,m$+t$+".bff",0				 ;"ram:blah.iff",0	VWait 30NextEnd.OpenUpBLITZInitCopList 0,44,256,$10008,0,256,0DisplayBitMap 0,0CreateDisplay 0Mouse On:MouseArea 0,0,bigx-320,bigy-256InitPalette 0,256PaletteRange 0,1,63,		0,64,0,0,240,0						 ;greens = 0..12PaletteRange 0,65,127,	64,32,0,192,128,64				 ;browns = 13..25PaletteRange 0,129,191, 64,64,64,192,192,192		 ;greys = 26..28PaletteRange 0,193,255, 64,0,0,192,0,0					 ;reds = 29..31DisplayPalette 0,0SetInt 5	DisplayBitMap 0,0,MouseX,MouseYEnd SetIntReturn.Main	jstp=1/16/.75	myscal=2/Pi	Use BitMap 1 ;only 6 bitplane plotting		For delj=32 To -32 Step -jstp			x=MapX(0,delj)*.75			If delj>0.5				ii=0.5			Else				ii=0.5+(0.5-delj)			EndIf			istp=jstp			miny=Int(MapY(ii,ii+delj)*.75)			If miny<0 Then miny=0			Repeat				jj=ii+delj				y=MapY(ii,jj)*.75				If y<(miny-34) Then ii+1:istp=0.5;				If y<miny Then ii+istp				If Int(y-1)=miny					fac1=ATan((QHite(ii-0.8,jj)-QHite(ii+0.8,jj))*0.12)*myscal					fac2=ATan((QHite(ii-0.4,jj)-QHite(ii+0.4,jj))*0.06) *myscal;					fac3=ATan((QHite(ii-0.2,jj)-QHite(ii+0.2,jj))*0.4);					col=QLimit(64-(fac1*30+fac2*25),1,127)					col=QLimit(32-fac1*40-fac2*28,1,63.99)					Plot x,miny,col					miny+1				EndIf				If (y-1)>miny Then ii-istp:istp ASR 1:Else istp=jstp				ii+istp			Until (miny>bigy) OR (ii>63.5) OR (jj>63.5)			If Joyb(0)<>0 Then End		NextReturnSolve	;solve's a 2x2 system of equations..	det= mata1*matb2-mata2*matb1	lam=(matc1*matb2-matc2*matb1)/det	mu =(matc2*mata1-matc1*mata2)/detReturn.DoCurve	Use BitMap 3	For dtp.q=2 To pts3+0.2 Step 1/256		FindLo dtp.q;		Line MapX(bez\i,bez\j),MapY(bez\i,bez\j),MapX(bez\k,bez\l),MapY(bez\k,bez\l),1		tri(0)\x=MapX(bez\i,bez\j)*.75,MapY(bez\i,bez\j)*.75		tri(2)\x=MapX(bez\k,bez\l)*.75,MapY(bez\k,bez\l)*.75		If dtp>2 Then Polyf 3,ad,1:Polyf 3,ae,1		tri(1)\x=tri(0)\x,tri(0)\y		tri(3)\x=tri(2)\x,tri(2)\y	NextReturnStatement Linef{x,y,x2,y2,col}	SHARED circx(),circy()	For temp.q=0 To 14		dx=circx(temp)		dy=circy(temp)		Line x+dx,y+dy,x2+dx,y2+dy,col		Line x-dx,y+dy,x2-dx,y2+dy,col		Line x+dx,y-dy,x2+dx,y2-dy,col		Line x-dx,y-dy,x2-dx,y2-dy,col	NextEnd Statement.PreScan1	scalfac=.75	Use BitMap 3	old.w=Off	shadel=2	For dtf=1 To pts2+0.5 Step 0.01		FindLo dtf.q											;,condt,io}		If plus=0			dpri=bez\i:dprj=bez\j		Else			dpri=bez\k:dprj=bez\l		EndIf		fpsx=MapX(dpri,dprj)*scalfac		fpsz=MapY(dpri,dprj)*scalfac		If old			Linef{oldx,oldy,fpsx,fpsz,shadel}			dx=(oldx-fpsx)ASR 5			dy=(oldy-fpsz)ASR 5			distl=distl+Sqr(dx*dx+dy*dy)			If distl>2				distl-2				shadel=5-shadel			EndIf		EndIf		old.w=On		oldx=fpsx:oldy=fpsz	NextReturn.PreScan2	scalfac=.75	Use BitMap 3	old.w=4	minus=3*scalfac	For dtf=1 To pts2+0.5 Step 0.01		FindLo dtf.q											;,condt,io}		lx=MapX(bez\i,bez\j)*scalfac		ly=MapY(bez\i,bez\j)*scalfac		rx=MapX(bez\k,bez\l)*scalfac		ry=MapY(bez\k,bez\l)*scalfac		dx=(lx-olx) ASR 4		dy=(ly-oly) ASR 4		dist=Sqr(dx*dx+dy*dy) *16:dx/dist:dy/dist		fpx1=lx+dx*minus		fpy1=ly+dy*minus ASR 1		dx=(rx-orx) ASR 4		dy=(ry-ory) ASR 4		dist=Sqr(dx*dx+dy*dy) *16:dx/dist:dy/dist		fpx2=rx-dx*minus		fpy2=ry-dy*minus ASR 1		If old>0			Linef{oldx1,oldy1,fpx1,fpy1,1}			Linef{oldx2,oldy2,fpx2,fpy2,1}		Else			old-1		EndIf		oldx1=fpx1		oldy1=fpy1		oldx2=fpx2		oldy2=fpy2		olx=lx:orx=rx:oly=ly:ory=ry	NextReturn.DoStartLine	Use BitMap 3	dtf=pts3+0.5	FindLo dtf	tri(0)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac	tri(1)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac	dtf+0.02	FindLo dtf	tri(3)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac	tri(2)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac	Polyf 4,ad.l,2;	Line xx1,yy1,xx2,yy2,8;	Line xx1,yy1,xx2,yy2,8ReturnAMIGABitMap 0,32,32,5InitPalette 0,32PaletteRange 0,0,12,	 0,64,0,0,240,0					 ;greens = 0..12PaletteRange 0,13,25, 64,32,0,192,128,64			 ;browns = 13..25PaletteRange 0,26,28, 64,64,64,192,192,192		 ;greys = 26..28PaletteRange 0,29,31, 64,0,0,192,0,0					 ;reds = 29..31SaveBitmap 0,"palette.999",0EndBitMap 0,1024,512,8LoadBitMap 0,"f1.aff",0PaletteRange 0,0,127,0,64,0,0,240,0PaletteRange 0,128,255,64,32,0,192,128,64SaveBitmap 0,"f1.gbr",0EndCNIF Off	InitPalette 0,256		PaletteRange 0,10,73,	 0,64,0,0,240,0						 ;greens = 0..12		PaletteRange 0,138,202, 64,32,0,192,128,64				 ;browns = 13..25		PaletteRange 0,224,227, 64,64,64,192,192,192		 ;greys = 26..28		PaletteRange 0,240,243, 64,0,0,192,0,0					 ;reds = 29..31	NPrint "done pal"	InitChunky 0,768,384,3	NPrint "chunk inttd"	LoadChunky 0,"maps/track1.24"	NPrint "loaded, converting now (takes ages)"	ChunkyConvert 0,0	NPrint "convert worked"	BitMap 0,768,384,8	NPrint "enuff mem.."	ChunkyToBitMap 0,0	NPrint "about to save"	SaveBitmap 0,"ram:blah.256",0	EndCENDAMIGABitMap 0,32,32,8InitPalette 0,256PaletteRange 0,0,63,	 0,64,0,0,240,0						 ;greens = 0..12PaletteRange 0,64,127, 64,32,0,192,128,64				 ;browns = 13..25PaletteRange 0,128,130, 64,64,64,192,192,192		 ;greys = 26..28PaletteRange 0,131,133, 64,0,0,192,0,0					 ;reds = 29..31SaveBitmap 0,"palette.999",0EndBitMap 0,1024,512,8LoadBitMap 0,"f1.aff",0PaletteRange 0,0,127,0,64,0,0,240,0PaletteRange 0,128,255,64,32,0,192,128,64SaveBitmap 0,"f1.gbr",0EndStatement flipblock{blok1.l,blok2.l}	MOVE.l d0,a0:MOVE.l d1,a1:MOVEQ#7,d0:MOVEQ#15,d7	nxf:MOVE.l (a0)+,d1:MOVEQ#0,d2	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1	MOVE.l d2,(a1)+:DBRA d0,nxf:AsmExitEnd Statement
+;----------------------------------------------------------------
+; dither original 256 map to sega.palette
+;----------------------------------------------------------------
+
+AMIGA
+
+.dithermap
+t$="track24"
+
+LoadPalette 0,"sega.palette2"
+
+BitMap 0,768,384,8
+BitMap 1,768,384,4
+
+LoadBitMap 0,"maps/"+t$+".256"
+
+InitCopList 0,$13014
+DisplayPalette 0,0
+DisplayBitMap 0,1
+VWait 20
+BLITZ
+CreateDisplay 0
+
+Mouse On
+MouseArea 0,0,768-320,384-256
+SetInt 5
+  DisplayBitMap 0,1,MouseX,MouseY
+End SetInt
+
+
+For y=0 To 383
+  oddy=y&1
+  For x=0 To 767
+    If Joyb(0)<>0 Then End
+    oddx=x&1
+    Use BitMap 0:p=Point(x,y)
+;    p=(y)+192
+    c=0
+    If p>0   AND p<64  Then c=0:p-0
+    If p>63  AND p<128 Then c=1:p-64
+    If p>127 AND p<192 Then c=2:p-128
+    If p>191 AND p<256 Then c=3:p-192
+
+    If c=2 OR c=3
+      p=(p/64)*1.25
+      ord=(x AND 1)*2 + (y AND 1)
+      Select ord
+        Case 0:dith=0
+        Case 3:dith=0.25
+        Case 1:dith=0.5
+        Case 2:dith=0.75
+      End Select
+
+      p=(c-2)*8+1+p+dith
+    Else
+      ;If c=0 Then  Else p=Int(p ASR 2) ASR 2
+;      If c=1 Then p=p/5*4
+
+;      p=p&$fffe
+      p=p ASR 4
+
+      p=QLimit(p-0.25,0,4)
+
+      ord=(x AND 1)*2 + (y AND 1)
+      Select ord
+        Case 0:dith=0
+        Case 3:dith=0.25
+        Case 1:dith=0.5
+        Case 2:dith=0.75
+      End Select
+
+      dith*4
+      ord=(x AND 2) + (y AND 2)/2
+      Select ord
+        Case 0:dith+0
+        Case 3:dith+0.25
+        Case 1:dith+0.5
+        Case 2:dith+0.75
+      End Select
+      dith/4
+
+;      dith1=((x+y)AND1)
+;      dith2=(((x AND 2)+(y AND 2))AND2)/2
+      p=11-c*8+(p+dith);+(dith1 OR dith2)-(dith1 AND dith2)
+
+
+;      Select (p&1)
+;        Case 0:dith=0
+;        Case 1:dith=(oddx AND oddy)
+;        Case 1:dith=(oddx OR oddy)-(oddx AND oddy)
+;        Case 3:dith=(oddx OR oddy)
+;      End Select
+;      dith=(oddx OR oddy)-(oddx AND oddy)
+;      p=11-c*8+Int(p/2)+dith
+    EndIf
+
+    Use BitMap 1:Plot x,y,p
+  Next
+Next
+
+;MouseWait
+
+
+AMIGA
+
+SaveBitmap 1,"maps/"+t$+".ami",0
+
+End
+
+;----------------------------------------------------------------
+; makeiff from original track
+;----------------------------------------------------------------
+
+.makeiff
+
+Dim circx.q(20),circy.q(20) ;for Linef{}
+
+scalfac=.75
+For temp.q=0 To 14
+  circx(temp)=Sin(temp*Pi/30)*3*scalfac
+  circy(temp)=Cos(temp*Pi/30)*1.5*scalfac
+Next
+
+dt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100
+t$="start"
+#maxpost=300:#maxedge=200:#maxngon=40
+#dp=48:curb.b=0
+
+g$="GFX:"; m$=??!?
+
+DEFTYPE .w i,j
+
+#MaxNam=24
+Dim nam.s(#MaxNam),com.s(#MaxNam)
+
+NEWTYPE.frend
+  lti.w:ltj.w:rti.w:rtj
+End NEWTYPE
+
+CNIF 1=0
+NEWTYPE .frend
+  lti.q:ltj
+  rti.q:rtj
+  lsx.w:lsy
+  rsx.w:rsy
+  lpost.w:rpost.w
+
+  lb.q:mb:rb
+  lh  :mh:rh
+
+  go.w
+End NEWTYPE
+CEND
+
+NEWTYPE .grunt
+  i.q:j:k:sx.w:sy
+End NEWTYPE
+Dim gr.grunt(14):*tgr.grunt=gr(0)
+
+Dim con.frend(200):SetConDt &con(0):condt.l=&con(0)
+
+Dim map.w(63,63),changed.b(63,63):SetMaptr &map(0,0):maptr.l=&map(0,0)
+Dim import.w(63,63)
+Dim lsx(8),lsy(8),lsz(8)
+
+NEWTYPE .rend :x.w:y.w  :End NEWTYPE
+Dim tri.rend(10):ad.l=&tri(0):ae.l=&tri(1)
+
+NEWTYPE.ij
+  i.q:j:k:l
+End NEWTYPE
+bez.ij\i=0:*bez.ij=bez:io.l=&bez
+SetIO io
+
+;bigx=1024:bigy=512
+
+bigx=768:bigy=384
+
+BitMap 0,bigx,bigy,8
+BitPlanesBitMap 0,1,63
+BitPlanesBitMap 0,3,192
+
+BitMapOutput 0
+Use BitMap 1
+
+#map=Off:#exo=Off:#exo24=On:#freq=Off:#pmap=Off
+INCLUDE "LoadINC.bb"
+
+
+For gri=1 To 24
+  m$="maps/"
+  t$="track"+Str$(gri)
+  GetExo24{m$+t$}                   ;loadtrack
+  Use BitMap 0:Cls
+  VWait 30:BLITZ
+  Gosub OpenUp
+  Gosub Main
+  Gosub DoCurve
+  ;Gosub DoStartLine
+  ;Gosub PreScan1
+  ;Gosub PreScan2
+;  MouseWait
+  AMIGA
+  SaveBitmap 0,m$+t$+".bff",0         ;"ram:blah.iff",0
+  VWait 30
+Next
+
+End
+
+.OpenUp
+BLITZ
+InitCopList 0,44,256,$10008,0,256,0
+DisplayBitMap 0,0
+CreateDisplay 0
+Mouse On:MouseArea 0,0,bigx-320,bigy-256
+InitPalette 0,256
+
+PaletteRange 0,1,63,    0,64,0,0,240,0             ;greens = 0..12
+PaletteRange 0,65,127,  64,32,0,192,128,64         ;browns = 13..25
+PaletteRange 0,129,191, 64,64,64,192,192,192     ;greys = 26..28
+PaletteRange 0,193,255, 64,0,0,192,0,0           ;reds = 29..31
+
+DisplayPalette 0,0
+
+SetInt 5
+  DisplayBitMap 0,0,MouseX,MouseY
+End SetInt
+Return
+
+.Main
+  jstp=1/16/.75
+  myscal=2/Pi
+  Use BitMap 1 ;only 6 bitplane plotting
+
+    For delj=32 To -32 Step -jstp
+      x=MapX(0,delj)*.75
+      If delj>0.5
+        ii=0.5
+      Else
+        ii=0.5+(0.5-delj)
+      EndIf
+
+      istp=jstp
+      miny=Int(MapY(ii,ii+delj)*.75)
+      If miny<0 Then miny=0
+
+
+      Repeat
+        jj=ii+delj
+        y=MapY(ii,jj)*.75
+
+        If y<(miny-34) Then ii+1:istp=0.5
+;        If y<miny Then ii+istp
+
+        If Int(y-1)=miny
+          fac1=ATan((QHite(ii-0.8,jj)-QHite(ii+0.8,jj))*0.12)*myscal
+          fac2=ATan((QHite(ii-0.4,jj)-QHite(ii+0.4,jj))*0.06) *myscal
+;          fac3=ATan((QHite(ii-0.2,jj)-QHite(ii+0.2,jj))*0.4)
+;          col=QLimit(64-(fac1*30+fac2*25),1,127)
+          col=QLimit(32-fac1*40-fac2*28,1,63.99)
+          Plot x,miny,col
+
+
+          miny+1
+        EndIf
+
+        If (y-1)>miny Then ii-istp:istp ASR 1:Else istp=jstp
+
+        ii+istp
+
+      Until (miny>bigy) OR (ii>63.5) OR (jj>63.5)
+      If Joyb(0)<>0 Then End
+    Next
+Return
+
+Solve  ;solve's a 2x2 system of equations..
+  det= mata1*matb2-mata2*matb1
+  lam=(matc1*matb2-matc2*matb1)/det
+  mu =(matc2*mata1-matc1*mata2)/det
+Return
+
+.DoCurve
+
+  Use BitMap 3
+  For dtp.q=2 To pts3+0.2 Step 1/256
+    FindLo dtp.q
+
+;    Line MapX(bez\i,bez\j),MapY(bez\i,bez\j),MapX(bez\k,bez\l),MapY(bez\k,bez\l),1
+    tri(0)\x=MapX(bez\i,bez\j)*.75,MapY(bez\i,bez\j)*.75
+    tri(2)\x=MapX(bez\k,bez\l)*.75,MapY(bez\k,bez\l)*.75
+
+    If dtp>2 Then Polyf 3,ad,1:Polyf 3,ae,1
+
+    tri(1)\x=tri(0)\x,tri(0)\y
+    tri(3)\x=tri(2)\x,tri(2)\y
+
+  Next
+Return
+
+Statement Linef{x,y,x2,y2,col}
+
+  SHARED circx(),circy()
+  For temp.q=0 To 14
+    dx=circx(temp)
+    dy=circy(temp)
+    Line x+dx,y+dy,x2+dx,y2+dy,col
+    Line x-dx,y+dy,x2-dx,y2+dy,col
+    Line x+dx,y-dy,x2+dx,y2-dy,col
+    Line x-dx,y-dy,x2-dx,y2-dy,col
+  Next
+
+End Statement
+
+.PreScan1
+  scalfac=.75
+  Use BitMap 3
+  old.w=Off
+  shadel=2
+
+  For dtf=1 To pts2+0.5 Step 0.01
+    FindLo dtf.q                      ;,condt,io}
+
+    If plus=0
+      dpri=bez\i:dprj=bez\j
+    Else
+      dpri=bez\k:dprj=bez\l
+    EndIf
+
+    fpsx=MapX(dpri,dprj)*scalfac
+    fpsz=MapY(dpri,dprj)*scalfac
+
+
+
+    If old
+      Linef{oldx,oldy,fpsx,fpsz,shadel}
+      dx=(oldx-fpsx)ASR 5
+      dy=(oldy-fpsz)ASR 5
+      distl=distl+Sqr(dx*dx+dy*dy)
+      If distl>2
+        distl-2
+        shadel=5-shadel
+      EndIf
+    EndIf
+    old.w=On
+    oldx=fpsx:oldy=fpsz
+
+  Next
+
+Return
+
+.PreScan2
+
+  scalfac=.75
+  Use BitMap 3
+  old.w=4
+  minus=3*scalfac
+
+  For dtf=1 To pts2+0.5 Step 0.01
+    FindLo dtf.q                      ;,condt,io}
+
+    lx=MapX(bez\i,bez\j)*scalfac
+    ly=MapY(bez\i,bez\j)*scalfac
+    rx=MapX(bez\k,bez\l)*scalfac
+    ry=MapY(bez\k,bez\l)*scalfac
+
+    dx=(lx-olx) ASR 4
+    dy=(ly-oly) ASR 4
+    dist=Sqr(dx*dx+dy*dy) *16:dx/dist:dy/dist
+
+    fpx1=lx+dx*minus
+    fpy1=ly+dy*minus ASR 1
+
+    dx=(rx-orx) ASR 4
+    dy=(ry-ory) ASR 4
+    dist=Sqr(dx*dx+dy*dy) *16:dx/dist:dy/dist
+
+    fpx2=rx-dx*minus
+    fpy2=ry-dy*minus ASR 1
+
+    If old>0
+      Linef{oldx1,oldy1,fpx1,fpy1,1}
+      Linef{oldx2,oldy2,fpx2,fpy2,1}
+    Else
+      old-1
+    EndIf
+
+
+    oldx1=fpx1
+    oldy1=fpy1
+    oldx2=fpx2
+    oldy2=fpy2
+    olx=lx:orx=rx:oly=ly:ory=ry
+
+  Next
+
+Return
+
+
+
+
+
+
+.DoStartLine
+  Use BitMap 3
+  dtf=pts3+0.5
+  FindLo dtf
+  tri(0)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
+  tri(1)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac
+
+  dtf+0.02
+  FindLo dtf
+  tri(3)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
+  tri(2)\x=MapX(bez\k,bez\l)*scalfac,MapY(bez\k,bez\l)*scalfac
+
+  Polyf 4,ad.l,2
+
+;  Line xx1,yy1,xx2,yy2,8
+;  Line xx1,yy1,xx2,yy2,8
+Return
+
+
+
+
+
+
+AMIGA
+
+BitMap 0,32,32,5
+InitPalette 0,32
+PaletteRange 0,0,12,   0,64,0,0,240,0           ;greens = 0..12
+PaletteRange 0,13,25, 64,32,0,192,128,64       ;browns = 13..25
+PaletteRange 0,26,28, 64,64,64,192,192,192     ;greys = 26..28
+PaletteRange 0,29,31, 64,0,0,192,0,0           ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+BitMap 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+PaletteRange 0,0,127,0,64,0,0,240,0
+PaletteRange 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End
+
+
+CNIF Off
+  InitPalette 0,256
+    PaletteRange 0,10,73,   0,64,0,0,240,0             ;greens = 0..12
+    PaletteRange 0,138,202, 64,32,0,192,128,64         ;browns = 13..25
+    PaletteRange 0,224,227, 64,64,64,192,192,192     ;greys = 26..28
+    PaletteRange 0,240,243, 64,0,0,192,0,0           ;reds = 29..31
+  NPrint "done pal"
+
+  InitChunky 0,768,384,3
+  NPrint "chunk inttd"
+  LoadChunky 0,"maps/track1.24"
+  NPrint "loaded, converting now (takes ages)"
+  ChunkyConvert 0,0
+  NPrint "convert worked"
+  BitMap 0,768,384,8
+  NPrint "enuff mem.."
+
+  ChunkyToBitMap 0,0
+  NPrint "about to save"
+  SaveBitmap 0,"ram:blah.256",0
+  End
+CEND
+
+AMIGA
+
+BitMap 0,32,32,8
+InitPalette 0,256
+PaletteRange 0,0,63,   0,64,0,0,240,0             ;greens = 0..12
+PaletteRange 0,64,127, 64,32,0,192,128,64         ;browns = 13..25
+PaletteRange 0,128,130, 64,64,64,192,192,192     ;greys = 26..28
+PaletteRange 0,131,133, 64,0,0,192,0,0           ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+BitMap 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+PaletteRange 0,0,127,0,64,0,0,240,0
+PaletteRange 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End
+
+Statement flipblock{blok1.l,blok2.l}
+  MOVE.l d0,a0:MOVE.l d1,a1:MOVEQ#7,d0:MOVEQ#15,d7
+  nxf:MOVE.l (a0)+,d1:MOVEQ#0,d2
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+  MOVE.l d2,(a1)+:DBRA d0,nxf:AsmExit
+End Statement

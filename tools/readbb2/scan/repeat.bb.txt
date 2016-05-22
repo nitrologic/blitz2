@@ -1,2 +1,19 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Repeat.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Repeat.bb
-; ; repeat...until program example; Repeat Print "Type a number (0 to quit):" n=Edit(80) If n/2=Int(n/2) 	NPrint n," is an even number"  Else	NPrint n," is an odd number" EndIf Until n=0 
+
+; 
+; repeat...until program example
+; 
+
+Repeat
+
+ Print "Type a number (0 to quit):"
+ n=Edit(80)
+
+ If n/2=Int(n/2) 
+  NPrint n," is an even number" 
+ Else
+  NPrint n," is an odd number"
+ EndIf 
+
+Until n=0 
+

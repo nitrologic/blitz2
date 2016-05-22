@@ -1,2 +1,19 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SubHit.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SubHit.bb
-; ; subitems program example; Screen 0,3								 ;open a simple screenWindow 0,0,0,320,200,0,"Window with menus",0,1MenuColour 2									;set menu drawing pens MenuTitle 0,0,"Menus"					 ;menu title... MenuItem 0,0,0,0,"More "+Chr$(187)		 ;item 0. SubItem 0,0,0,0,0,"Quit"					;sub item 0SetMenu 0										;attach menulist Repeat WaitEvent Until SubHit=0
+
+; 
+; subitems program example
+; 
+Screen 0,3                 ;open a simple screen
+
+Window 0,0,0,320,200,0,"Window with menus",0,1
+
+MenuColour 2                  ;set menu drawing pens 
+MenuTitle 0,0,"Menus"           ;menu title... 
+MenuItem 0,0,0,0,"More "+Chr$(187)     ;item 0. 
+SubItem 0,0,0,0,0,"Quit"          ;sub item 0
+SetMenu 0                    ;attach menulist 
+
+Repeat
+ WaitEvent 
+Until SubHit=0
+

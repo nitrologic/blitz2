@@ -1,2 +1,20 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Mouse.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Mouse.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Mouse.bb
-; ; blitz mouse program example ; BLITZ BitMap 0,320,DispHeight,3 Slice 0,44,3Show 0Mouse OnWhile Joyb(0)=0  Line 160,100,MouseX,MouseY,1WendEnd 
+
+; 
+; blitz mouse program example 
+; 
+BLITZ 
+BitMap 0,320,DispHeight,3 
+Slice 0,44,3
+Show 0
+Mouse On
+
+While Joyb(0)=0 
+ Line 160,100,MouseX,MouseY,1
+Wend
+
+End 
+
+
+
+

@@ -1,2 +1,21 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/ClearString.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ClearString.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ClearString.bb
-;; clear string gadget example ; StringGadget 0,128,16,0,1,40,160		;make a string gadget TextGadget 0,8,180,0,2," EXIT " ;and an 'EXIT' gadget Screen 0,3									 ;open intuition screen and window...Window 0,0,0,320,200,$100f,"ClearString demo...",1,2,0WLocate 4,8 Print "Type your name:"		 ;prompt...ActivateString 0,1					 ;actiavte string gadget Repeat										 ;do...		a.l=WaitEvent							;wait for something to happen!		If a=64 AND GadgetHit=1		 ;string entry done? 				ClearString 0,1		 ;yup - clear text...				Redraw 0,1					 ;re draw gadget...				ActivateString 0,1			 ;and re-activate string gadget		EndIf Until a=64 AND GadgetHit=2
+
+;
+; clear string gadget example 
+; 
+StringGadget 0,128,16,0,1,40,160    ;make a string gadget 
+TextGadget 0,8,180,0,2," EXIT " ;and an 'EXIT' gadget 
+Screen 0,3                   ;open intuition screen and window...
+Window 0,0,0,320,200,$100f,"ClearString demo...",1,2,0
+WLocate 4,8 
+Print "Type your name:"     ;prompt...
+ActivateString 0,1           ;actiavte string gadget 
+Repeat                     ;do...
+    a.l=WaitEvent              ;wait for something to happen!
+    If a=64 AND GadgetHit=1     ;string entry done? 
+        ClearString 0,1     ;yup - clear text...
+        Redraw 0,1           ;re draw gadget...
+        ActivateString 0,1       ;and re-activate string gadget
+    EndIf 
+Until a=64 AND GadgetHit=2
+

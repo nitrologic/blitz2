@@ -1,2 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/sfxN.bb
-SLOAD "sfx/cannon",0SLOAD "sfx/slam",1SLOAD "sfx/inferno",2SLOAD "sfx/hammer",3SLOAD "sfx/demol",4SLOAD "sfx/cyclone",5SAVE "ram:soundsN.blk",SOUNDopts10,100,5,5,100,100,4096,80,1,1,1,1,1,
+
+SLOAD "sfx/cannon",0
+SLOAD "sfx/slam",1
+SLOAD "sfx/inferno",2
+SLOAD "sfx/hammer",3
+SLOAD "sfx/demol",4
+SLOAD "sfx/cyclone",5
+
+SAVE "ram:soundsN.blk",SOUND
+opts10,100,5,5,100,100,4096,80,1,1,1,1,1,

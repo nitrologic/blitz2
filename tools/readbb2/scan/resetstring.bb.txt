@@ -1,2 +1,23 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ResetString.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ResetString.bb
-; ; reset string gadget example ; StringGadget 0,128,16,0,1,40,160		;make a string gadget TextGadget 0,8,180,0,2," EXIT "		 ;and an 'exit' gadget Screen 0,3							 ;open a screen and a window...Window 0,0,0,320,200,$100f,"ResetString demo...",1,2,0WLocate 4,8 Print "Type your name:"			 ;prompt...ActivateString 0,1				 ;click on string gadget for them... Repeat							 ;do... a.l=WaitEvent					 ;wait for something to happen  If a=64 AND GadgetHit=1			;string entry complete? 	ResetString 0,1				 ;yes, reset string gadget...	ActivateString 0,1			 ;and re-activate it! EndIf Until a=64 AND GadgetHit=2			 ;until 'QUIT' hit.
+
+; 
+; reset string gadget example 
+; 
+StringGadget 0,128,16,0,1,40,160    ;make a string gadget 
+TextGadget 0,8,180,0,2," EXIT "     ;and an 'exit' gadget 
+Screen 0,3               ;open a screen and a window...
+
+Window 0,0,0,320,200,$100f,"ResetString demo...",1,2,0
+
+WLocate 4,8 
+Print "Type your name:"       ;prompt...
+ActivateString 0,1         ;click on string gadget for them... 
+
+Repeat               ;do...
+ a.l=WaitEvent           ;wait for something to happen 
+ If a=64 AND GadgetHit=1      ;string entry complete? 
+  ResetString 0,1         ;yes, reset string gadget...
+  ActivateString 0,1       ;and re-activate it!
+ EndIf 
+Until a=64 AND GadgetHit=2       ;until 'QUIT' hit.
+

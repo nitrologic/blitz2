@@ -1,2 +1,4 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/StripLead$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/StripLead$.bb
-Print StripLead$("AABBAAB",65)	 ;Will print BBAAB 
+
+Print StripLead$("AABBAAB",65)   ;Will print BBAAB 
+

@@ -1,2 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/FindScreen.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/FindScreen.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/FindScreen.bb
-; ; open a window on the front screen example program ; FindScreen 0														 ;get frontmost screenWindow 0,0,0,100,100,0,"Our window",0,1			;open windowMouseWait 
+
+; 
+; open a window on the front screen example program 
+; 
+FindScreen 0                             ;get frontmost screen
+Window 0,0,0,100,100,0,"Our window",0,1      ;open window
+MouseWait 
+
+
+

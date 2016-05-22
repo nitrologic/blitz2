@@ -1,2 +1,12 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Slice.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Slice.bb
-; ; slice with circle program example ; BLITZ									 ;Goodbye OS! BitMap 0,320,200,3						 ;make a bitmap Circlef 160,100,50,2						;draw a circle Slice 0,44,320,200,$fff8,3,8,32,320,320	;set up a sliceShow 0									 ;show the bitmap MouseWait 
+
+; 
+; slice with circle program example 
+; 
+BLITZ                   ;Goodbye OS! 
+BitMap 0,320,200,3             ;make a bitmap 
+Circlef 160,100,50,2            ;draw a circle 
+Slice 0,44,320,200,$fff8,3,8,32,320,320  ;set up a slice
+Show 0                   ;show the bitmap 
+MouseWait 
+

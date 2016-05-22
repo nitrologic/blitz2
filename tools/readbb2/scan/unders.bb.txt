@@ -1,2 +1,4 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/unders.bb
-;DisplayAdjust 0,-48,24,0,16,0	;under scan!;DisplayAdjust 0,-8,32,0,-32,48
+;DisplayAdjust 0,-48,24,0,16,0  ;under scan!
+
+;DisplayAdjust 0,-8,32,0,-32,48

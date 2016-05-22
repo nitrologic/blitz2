@@ -1,2 +1,22 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/AddItem.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/AddItem.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/AddItem.bb
-; ; list handling program example ; Dim List a(10)If AddFirst(a()) Then a()=1 If AddItem(a()) Then a()=2NPrint "List Array (first to last) is..." ResetList a() While NextItem(a())  NPrint a()WendMouseWait 
+
+; 
+; list handling program example 
+; 
+
+Dim List a(10)
+
+If AddFirst(a()) Then a()=1 
+
+If AddItem(a()) Then a()=2
+
+NPrint "List Array (first to last) is..." 
+
+ResetList a() 
+
+While NextItem(a()) 
+ NPrint a()
+Wend
+
+MouseWait 
+

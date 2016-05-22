@@ -1,2 +1,47 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Pop.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Pop.bb
-; ; guessing game program example (pop example in here somewhere); Repeat NPrint "Think of a number between 1 and 1000..." NPrint "I Shall try to guess it in ten goes!"  l=0:h=1000 For k=1 To 10 	n=Int((h-l)/2)+l	Repeat	 Print "Is your number ",n,"? (y)es, (h)igher, (l)ower ?"	 a$=LCase$(Edit$(1)) 	Until a$="y" OR a$="h" OR a$="l"	Select a$ 	 Case "y"		NPrint "Clever, aren't I ?" 		NPrint "I got it in ",k," guesses!" 		Pop Select:Pop For 		Goto right	 Case "l"		h=n 	 Case "h"		l=n 	 End Select Next NPrint "Huh??? You must have CHEATED!" right:  Print "Another Game ? (y)es, (n)o ?" a$=LCase$(Edit$(1)) Until a$="n"
+
+; 
+; guessing game program example (pop example in here somewhere)
+; 
+
+Repeat
+
+ NPrint "Think of a number between 1 and 1000..."
+ NPrint "I Shall try to guess it in ten goes!" 
+
+ l=0:h=1000
+
+ For k=1 To 10 
+  n=Int((h-l)/2)+l
+
+  Repeat
+   Print "Is your number ",n,"? (y)es, (h)igher, (l)ower ?"
+
+   a$=LCase$(Edit$(1)) 
+  Until a$="y" OR a$="h" OR a$="l"
+
+  Select a$ 
+   Case "y"
+    NPrint "Clever, aren't I ?" 
+    NPrint "I got it in ",k," guesses!" 
+    Pop Select:Pop For 
+    Goto right
+   Case "l"
+    h=n 
+   Case "h"
+    l=n 
+   End Select
+
+ Next
+
+ NPrint "Huh??? You must have CHEATED!"
+
+ right: 
+ Print "Another Game ? (y)es, (n)o ?"
+ a$=LCase$(Edit$(1)) 
+
+Until a$="n"
+
+
+
+

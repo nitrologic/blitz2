@@ -1,2 +1,32 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/anim.bb
-The following example loads and plays an Anim on a standard Amiga (Intuition) Screen.; ;play anim example; ;anim file name could use f$=par$(1) to play anim from clif$="test.anim";open screen same resolution as animation ILBMInfo f$ Screen 0,0,0,ILBMWidth,ILBMHeight,ILBMDepth,ILBMViewMode,"",1,2 ScreensBitMap 0,0 ;an extra bitmap same size as screensbitmap for double bufferingBitMap 1,ILBMWidth,ILBMHeight,ILBMDepth ;load anim and set screen colours to same as animationLoadAnim 0,f$,0:Use Palette 0 ;draws first frame to current bitmap (1) and bitmap #0InitAnim 0,0While Joyb(0)=0  ShowBitMap db		;tell intuition which bitmap to display VWait				;wait for top of frame  db=1-db			 ;swap current bitmap  Use BitMap db  NextFrame 0		 ;and draw next frame Wend
+The following example loads and plays an Anim on a standard Amiga (Intuition) Screen.
+
+; 
+;play anim example
+; 
+;anim file name could use f$=par$(1) to play anim from cli
+f$="test.anim"
+;open screen same resolution as animation 
+
+ILBMInfo f$ 
+Screen 0,0,0,ILBMWidth,ILBMHeight,ILBMDepth,ILBMViewMode,"",1,2 
+ScreensBitMap 0,0 
+
+;an extra bitmap same size as screensbitmap for double buffering
+
+BitMap 1,ILBMWidth,ILBMHeight,ILBMDepth 
+
+;load anim and set screen colours to same as animation
+
+LoadAnim 0,f$,0:Use Palette 0 
+
+;draws first frame to current bitmap (1) and bitmap #0
+
+InitAnim 0,0
+While Joyb(0)=0 
+ ShowBitMap db    ;tell intuition which bitmap to display
+ VWait        ;wait for top of frame 
+ db=1-db       ;swap current bitmap 
+ Use BitMap db 
+ NextFrame 0     ;and draw next frame 
+Wend

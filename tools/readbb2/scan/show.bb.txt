@@ -1,2 +1,18 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Show.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Show.bb
-; ; scrolling bitmap program example; BLITZ												;Go into Blitz ModeBitMap 0,640,200,2						 ;create bitmap 0 Circlef 320,100,80,1						;draw a cricle on it.. Circlef 320,100,40,2						;and another...Slice 0,44,320,200,$fff8,2,8,4,640,640	 ;create slice 0For k=0 To 319					 ;start of loop  VWait										;wait for top of frame  Show 0,k,0								;show bitmap 0 Next										;end of loop MouseWait 
+
+; 
+; scrolling bitmap program example
+; 
+BLITZ                        ;Go into Blitz Mode
+BitMap 0,640,200,2             ;create bitmap 0 
+Circlef 320,100,80,1            ;draw a cricle on it.. 
+Circlef 320,100,40,2            ;and another...
+Slice 0,44,320,200,$fff8,2,8,4,640,640   ;create slice 0
+
+For k=0 To 319           ;start of loop 
+ VWait                    ;wait for top of frame 
+ Show 0,k,0                ;show bitmap 0 
+Next                    ;end of loop 
+
+MouseWait 
+

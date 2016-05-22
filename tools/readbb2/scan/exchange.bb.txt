@@ -1,2 +1,18 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Exchange.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Exchange.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Exchange.bb
-; ; exchange program example; a=10					;put 10 into 'a'b=20					;put 20 into 'b'NPrint a				;print a & bNPrint bExchange a,b			;exchange variables...NPrint a				;print a & b again... NPrint bMouseWait 
+
+; 
+; exchange program example
+; 
+
+a=10          ;put 10 into 'a'
+b=20          ;put 20 into 'b'
+NPrint a        ;print a & b
+NPrint b
+Exchange a,b      ;exchange variables...
+NPrint a        ;print a & b again... 
+NPrint b
+MouseWait 
+
+
+
+

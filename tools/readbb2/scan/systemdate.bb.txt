@@ -1,2 +1,22 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SystemDate.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SystemDate.bb
-;; date/time test;Dim d$(6):Restore daynames:For i=0 To 6:Read d$(i):NextDim m$(12):Restore monthnames:For i=1 To 12:Read m$(i):NextNPrint Date$(SystemDate)NPrint d$(WeekDay)," ",Days," ",m$(Months)," ",YearsNPrint Hours,":",Mins,":",SecsNPrint "press mouse to quit"MouseWaitdaynames:Data$ SUNDAY,MONDAY,TUESDAY,WEDNESDAYData$ THURSDAY,FRIDAY,SATURDAYmonthnames:Data$ JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+
+;
+; date/time test
+;
+
+Dim d$(6):Restore daynames:For i=0 To 6:Read d$(i):Next
+Dim m$(12):Restore monthnames:For i=1 To 12:Read m$(i):Next
+
+NPrint Date$(SystemDate)
+NPrint d$(WeekDay)," ",Days," ",m$(Months)," ",Years
+NPrint Hours,":",Mins,":",Secs
+NPrint "press mouse to quit"
+MouseWait
+
+daynames:
+Data$ SUNDAY,MONDAY,TUESDAY,WEDNESDAY
+Data$ THURSDAY,FRIDAY,SATURDAY
+monthnames:
+Data$ JAN,FEB,MAR,APR,MAY,JUN,JUL,AUG,SEP,OCT,NOV,DEC
+
+

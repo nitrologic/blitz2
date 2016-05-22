@@ -1,2 +1,15 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Event.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Event.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Event.bb
-; ; key press idcmp example program ; Screen 0,3							 ;open a simple screen ScreensBitMap 0,0				;pick up it's bitmapDefaultIDCMP $400				;set 'key press' IDCMP for window Window 0,0,0,320,200,$1000,"Press a key to exit",0,1While Event=0					;while no event... Circlef Rnd(300),Rnd(200),Rnd(100),Rnd(8) Wend
+
+; 
+; key press idcmp example program 
+; 
+Screen 0,3               ;open a simple screen 
+ScreensBitMap 0,0        ;pick up it's bitmap
+DefaultIDCMP $400        ;set 'key press' IDCMP for window 
+
+Window 0,0,0,320,200,$1000,"Press a key to exit",0,1
+
+While Event=0          ;while no event...
+ Circlef Rnd(300),Rnd(200),Rnd(100),Rnd(8) 
+Wend
+

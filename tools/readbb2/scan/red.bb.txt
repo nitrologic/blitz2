@@ -1,2 +1,13 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Red.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Red.bb
-; ; red() function program example; Screen 0,3ScreensBitMap 0,0 BitMapOutput 0RGB 0,8,4,2 NPrint "Red of colour 0 = ";Red(0)MouseWait End 
+
+; 
+; red() function program example
+; 
+Screen 0,3
+ScreensBitMap 0,0 
+BitMapOutput 0
+RGB 0,8,4,2 
+NPrint "Red of colour 0 = ";Red(0)
+MouseWait 
+End 
+

@@ -1,2 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/BitMapOutput.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/BitMapOutput.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/BitMapOutput.bb
-; ; bitmapoutput program example; Screen 0,3									 ;open an Intuition screen ScreensBitMap 0,0								;get it's bitmapBitMapOutput 0						 ;send Print statements there... Print "Printing on a bitmap!"	;print something! MouseWait 
+
+; 
+; bitmapoutput program example
+; 
+Screen 0,3                   ;open an Intuition screen 
+ScreensBitMap 0,0                ;get it's bitmap
+BitMapOutput 0             ;send Print statements there... 
+Print "Printing on a bitmap!"  ;print something! 
+MouseWait 
+

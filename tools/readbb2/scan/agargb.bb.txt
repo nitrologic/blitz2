@@ -1,2 +1,18 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/AGARGB.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/AGARGB.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/AGARGB.bb
-;; AGA test;Screen 0,0,0,1280,512,8,$8024,"SUPER HIRES 256 COLORS",1,2ScreensBitMap 0,0For i=0 To 255AGARGB i,i/2,i/3,i		;shades of purple Circle 640,256,i*2,i,i	;big SMOOTH circlesNextMouseWait
+
+;
+; AGA test
+;
+
+Screen 0,0,0,1280,512,8,$8024,"SUPER HIRES 256 COLORS",1,2
+
+ScreensBitMap 0,0
+
+For i=0 To 255
+AGARGB i,i/2,i/3,i    ;shades of purple
+ Circle 640,256,i*2,i,i  ;big SMOOTH circles
+Next
+
+MouseWait
+
+

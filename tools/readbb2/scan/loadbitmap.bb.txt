@@ -1,2 +1,15 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LoadBitMap.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LoadBitMap.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadBitMap.bb
-; ; loadbitmap from disk and display program example; Screen 0,3,"My Screen"ScreensBitMap 0,0 LoadBitMap 0,"MyPic.iff",0Use Palette 0 MouseWait End 
+
+; 
+; loadbitmap from disk and display program example
+; 
+Screen 0,3,"My Screen"
+ScreensBitMap 0,0 
+LoadBitMap 0,"MyPic.iff",0
+Use Palette 0 
+MouseWait 
+End 
+
+
+
+

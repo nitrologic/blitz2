@@ -1,2 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/RGB.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/RGB.bb
-; ; setting a palette colour program example; Screen 0,3			 ;open up an Intuition ScreenRGB 0,15,0,0			;this will set background colour to red MouseWait 
+
+; 
+; setting a palette colour program example
+; 
+Screen 0,3       ;open up an Intuition Screen
+RGB 0,15,0,0      ;this will set background colour to red 
+MouseWait 
+

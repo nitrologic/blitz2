@@ -1,2 +1,32 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Scale.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Scale.bb
-; ; scale shape example ; Screen 0,3					 ;An intuition screenScreensBitMap 0,0				;the screens bitmap Cls							 ;clear the bitmap For k=7 To 1 Step -1			;a loop to generate someCirclef 32,32,k*4,k			 ;kind of shapeNextGetaShape 0,0,0,64,64			;pick up the shapeFor k=1 To 6			 ;start of loop CopyShape 0,k			;copy shape  Scale k,k/4,k/4		 ;resize itNext					 ;end of loopCls For k=1 To 6			 ;start of loop Blit k,k*32,0			;show shapes we just generatedNext					 ;end of loopMouseWait See also:Rotate
+
+; 
+; scale shape example 
+; 
+Screen 0,3           ;An intuition screen
+ScreensBitMap 0,0        ;the screens bitmap 
+Cls               ;clear the bitmap 
+For k=7 To 1 Step -1      ;a loop to generate some
+Circlef 32,32,k*4,k       ;kind of shape
+Next
+GetaShape 0,0,0,64,64      ;pick up the shape
+
+For k=1 To 6       ;start of loop
+ CopyShape 0,k      ;copy shape 
+ Scale k,k/4,k/4     ;resize it
+Next           ;end of loop
+
+Cls 
+
+For k=1 To 6       ;start of loop
+ Blit k,k*32,0      ;show shapes we just generated
+Next           ;end of loop
+
+MouseWait 
+
+See also:
+
+Rotate
+
+
+

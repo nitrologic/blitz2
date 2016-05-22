@@ -1,2 +1,21 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/StringGadget.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/StringGadget.bb
-; ; string gadget example ; StringGadget 0,80,16,0,1,40,160	;add string gadget to gadgetlist 0StringGadget 0,80,32,0,2,40,160	;add another string gadgetTextGadget 0,8,180,0,3," EXIT "	 ;add an 'EXIT' gadget Screen 0,3									 ;open a screen, and window... Window 0,0,0,320,200,$100f,"String Gadgets!",1,2,0WLocate 8,8									 ;print some text... Print "Name:" WLocate 8,24									;and some more... Print "Address:"Repeat										 ;wait for 'QUIT'Until WaitEvent=64 AND GadgetHit=3
+
+; 
+; string gadget example 
+; 
+StringGadget 0,80,16,0,1,40,160  ;add string gadget to gadgetlist 0
+StringGadget 0,80,32,0,2,40,160  ;add another string gadget
+TextGadget 0,8,180,0,3," EXIT "   ;add an 'EXIT' gadget 
+
+Screen 0,3                   ;open a screen, and window... 
+
+Window 0,0,0,320,200,$100f,"String Gadgets!",1,2,0
+
+WLocate 8,8                   ;print some text... 
+Print "Name:" 
+WLocate 8,24                  ;and some more... 
+Print "Address:"
+
+Repeat                     ;wait for 'QUIT'
+Until WaitEvent=64 AND GadgetHit=3
+

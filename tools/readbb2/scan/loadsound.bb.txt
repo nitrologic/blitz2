@@ -1,2 +1,10 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LoadSound.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LoadSound.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoadSound.bb
-; ; a sound program example ; LoadSound 0,"Zap.iff" Sound 0,1 MouseWait End 
+
+; 
+; a sound program example 
+; 
+LoadSound 0,"Zap.iff" 
+Sound 0,1 
+MouseWait 
+End 
+

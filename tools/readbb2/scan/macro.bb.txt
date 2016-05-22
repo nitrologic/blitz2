@@ -1,2 +1,15 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Macro.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Macro.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Macro.bb
-; ; simple macro program example; Macro test						;start of 'test' macro definition  NPrint "Hello!"				 ;macro contents... NPrint "This is a Macro!"		;...End Macro						 ;end of 'test' macro!test							 ;insert macro...!test									;insert macro MouseWait 
+
+; 
+; simple macro program example
+; 
+
+Macro test            ;start of 'test' macro definition 
+ NPrint "Hello!"         ;macro contents...
+ NPrint "This is a Macro!"    ;...
+End Macro             ;end of 'test' macro
+
+!test               ;insert macro...!test                  ;insert macro 
+
+MouseWait 
+

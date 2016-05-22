@@ -1,2 +1,16 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WPlot.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WPlot.bb
-; ; wplot example ; Screen 0,3Window 0,0,0,320,200,0,"",0,1 For t=1 To 40  For g=1 To 40	WPlot t,g,2 Next NextMouseWait 
+
+; 
+; wplot example 
+; 
+Screen 0,3
+Window 0,0,0,320,200,0,"",0,1 
+
+For t=1 To 40 
+ For g=1 To 40
+  WPlot t,g,2
+ Next 
+Next
+
+MouseWait 
+

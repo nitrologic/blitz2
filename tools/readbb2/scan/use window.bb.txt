@@ -1,2 +1,17 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Use Window.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Use Window.bb
-; ; use window example program; WBenchToFront_				 ;From Intuition Library.WbToScreen 0						;Use Workbench as Screen #0.Window 1,0,0,100,100,$f,"Window One",0,1Window 2,100,100,100,100,$f,"Window Two",0,1	;automatically 'used' Print "This is in window two" Use Window 0						;use window 0 Print "This is in window one" MouseWait 
+
+; 
+; use window example program
+; 
+WBenchToFront_         ;From Intuition Library.
+WbToScreen 0            ;Use Workbench as Screen #0.
+Window 1,0,0,100,100,$f,"Window One",0,1
+Window 2,100,100,100,100,$f,"Window Two",0,1  ;automatically 'used' 
+Print "This is in window two" 
+Use Window 0            ;use window 0 
+Print "This is in window one" 
+MouseWait 
+
+
+
+

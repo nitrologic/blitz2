@@ -1,2 +1,13 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WbToScreen.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WbToScreen.bb
-; ; open a window on the workbench example program; WBenchToFront_					;actually an OS call!WbToScreen 0						;pick up workbench screen! ;Window 0,2,1,600,180,15,"A Window on the WorkBench screen",0,1Print "Click the right mouse button to quit"While Joyb(0)<>2:Wend WBenchToBack_ 
+
+; 
+; open a window on the workbench example program
+; 
+WBenchToFront_          ;actually an OS call!
+WbToScreen 0            ;pick up workbench screen! 
+;
+Window 0,2,1,600,180,15,"A Window on the WorkBench screen",0,1
+Print "Click the right mouse button to quit"
+While Joyb(0)<>2:Wend 
+WBenchToBack_ 
+

@@ -1,2 +1,14 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/For.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/For.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/For.bb
-; ; nested for...next loops program example ; For a=1 To 3					;start up a for next loop  For b=3 To 1 Step -1		 ;and another, 'inner' loop	NPrint "a=",a," b=",b		;show what's happening to the index variables. Next						 ;next for 'b' For/Next loop...Next							;next for 'a' For/Next loop...MouseWait 
+
+; 
+; nested for...next loops program example 
+; 
+
+For a=1 To 3          ;start up a for next loop 
+ For b=3 To 1 Step -1     ;and another, 'inner' loop
+  NPrint "a=",a," b=",b    ;show what's happening to the index variables.
+ Next             ;next for 'b' For/Next loop...
+Next              ;next for 'a' For/Next loop...
+
+MouseWait 
+

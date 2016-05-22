@@ -1,2 +1,27 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Eof.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Eof.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Eof.bb
-; ; random access file program example; If WriteFile(0,"ram:test")	 ;create a new file		FileOutput 0					;send print to the file...		For k=1 To Rnd(50)+50	;print a random number of 		Print Chr$(Rnd(26)+65) ;random alphabetic characters 		Next									; 		CloseFile 0					 ;close the file 		DefaultOutput					;send output back to screen 		If ReadFile(0,"ram:test")		;open file for reading				FileInput 0					 ;get input from file				While NOT Eof(0)				;while end of file not reached... 						Print Inkey$			;print next character from file 				Wend									;and back for more				MouseWait 				End 		EndIf EndIf NPrint "Unable to open ram:test"		;couldn't open file End 
+
+; 
+; random access file program example
+; 
+
+If WriteFile(0,"ram:test")   ;create a new file
+    FileOutput 0          ;send print to the file...
+    For k=1 To Rnd(50)+50  ;print a random number of 
+    Print Chr$(Rnd(26)+65) ;random alphabetic characters 
+    Next                  ; 
+    CloseFile 0           ;close the file 
+    DefaultOutput          ;send output back to screen 
+    If ReadFile(0,"ram:test")    ;open file for reading
+        FileInput 0           ;get input from file
+        While NOT Eof(0)        ;while end of file not reached... 
+            Print Inkey$      ;print next character from file 
+        Wend                  ;and back for more
+        MouseWait 
+        End 
+    EndIf 
+EndIf 
+
+NPrint "Unable to open ram:test"    ;couldn't open file 
+
+End 
+

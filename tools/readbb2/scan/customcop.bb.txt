@@ -1,2 +1,33 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/CustomCop.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/CustomCop.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/CustomCop.bb
-; ; custom copper list program example; BLITZ										;Blitz mode#BPLMOD1=$108								;some clever stuff.. #BPLMOD2=$10A								;ditto BitMap 0,320,400,3	For k=7 To 1 Step -1 Circlef 160,250,k*10,k						;draw the SUN! NextSlice 0,44,320,200,$fff8,3,8,32,320,320	 ;set up a sliceRGB 0,0,8,15For k=1 To 7 RGB k,15,k*2,0NextColSplit 0,0,0,8,150							;groovy colour splitco$=Mki$(#BPLMOD1)+Mki$(-122) co$+Mki$(#BPLMOD2)+Mki$(-122) CustomCop co$,150+44					;custom copper instructions For k=0 To 199 VWait  Show 0,0,k							 ;up comes the sun...NextMouseWait 
+
+; 
+; custom copper list program example
+; 
+BLITZ                    ;Blitz mode
+#BPLMOD1=$108                ;some clever stuff.. 
+#BPLMOD2=$10A                ;ditto 
+BitMap 0,320,400,3  
+
+For k=7 To 1 Step -1
+ Circlef 160,250,k*10,k            ;draw the SUN! 
+Next
+
+Slice 0,44,320,200,$fff8,3,8,32,320,320   ;set up a slice
+RGB 0,0,8,15
+
+For k=1 To 7
+ RGB k,15,k*2,0
+Next
+
+ColSplit 0,0,0,8,150              ;groovy colour split
+co$=Mki$(#BPLMOD1)+Mki$(-122) 
+co$+Mki$(#BPLMOD2)+Mki$(-122) 
+CustomCop co$,150+44          ;custom copper instructions 
+
+For k=0 To 199
+ VWait 
+ Show 0,0,k               ;up comes the sun...
+Next
+
+MouseWait 
+

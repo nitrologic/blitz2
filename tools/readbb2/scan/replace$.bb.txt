@@ -1,2 +1,4 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Replace$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Replace$.bb
+
 Print Replace$("a a a ","a ","b-"): ; Will print b-b-b- 
+

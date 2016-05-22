@@ -1,2 +1,39 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/regs.bb
-hbl_control = $00 bit4=hbl on/off bit2=palette killvbl_control = $01 bit5=vbl on/off bit3=50/60hzfore_play = $02 foreground playfield addressover_play = $03 overlay playfield addressback_play = $04 background playfield addresssprt_tab	= $05 sprite control table addressback_col	= $07 background colourhbl_count = $0a num lines between HBLsscroll_mode = $0b bit2=vert,bits0-1=horizhoriz_control = $0c 32/40 column modescroll_tab	= $0d horiz scroll table addressincrement = $0f video mem increment valueback_size = $10 size of scrnover_leftright	= $11 size of overlay left/rightover_topbottom	= $12 size of overlay top/bottom*********************************************** Init the SEGA Hardwareinitregs	setreg	0,4							 ;hbl_control,$04 now init the others...	setreg	1,$74						 ;vbl_control,$74	setreg	7,0							 ;back_col,$00	setreg	$a,8							;hbl_count,$08	setreg	$b,0							;scroll_mode,$0	Screen Horiz,Vert	setreg	15,2							;increment,$02	setreg	16,$11						;back_size,$11	setreg	17,$00	setreg	18,$00	setreg	$06,$00 and the unknowns....	setreg	$08,$00	setreg	$09,$00	setreg	$0c,$c1	setreg	$0e,$00
+
+hbl_control = $00 bit4=hbl on/off bit2=palette kill
+vbl_control = $01 bit5=vbl on/off bit3=50/60hz
+fore_play = $02 foreground playfield address
+over_play = $03 overlay playfield address
+back_play = $04 background playfield address
+sprt_tab  = $05 sprite control table address
+back_col  = $07 background colour
+hbl_count = $0a num lines between HBLs
+scroll_mode = $0b bit2=vert,bits0-1=horiz
+horiz_control = $0c 32/40 column mode
+scroll_tab  = $0d horiz scroll table address
+increment = $0f video mem increment value
+back_size = $10 size of scrn
+over_leftright  = $11 size of overlay left/right
+over_topbottom  = $12 size of overlay top/bottom
+
+
+**********************************************
+* Init the SEGA Hardware
+
+initregs
+  setreg  0,4               ;hbl_control,$04 now init the others...
+  setreg  1,$74             ;vbl_control,$74
+  setreg  7,0               ;back_col,$00
+  setreg  $a,8              ;hbl_count,$08
+  setreg  $b,0              ;scroll_mode,$0  Screen Horiz,Vert
+  setreg  15,2              ;increment,$02
+  setreg  16,$11            ;back_size,$11
+  setreg  17,$00
+  setreg  18,$00
+
+  setreg  $06,$00 and the unknowns....
+  setreg  $08,$00
+  setreg  $09,$00
+  setreg  $0c,$c1
+  setreg  $0e,$00
+

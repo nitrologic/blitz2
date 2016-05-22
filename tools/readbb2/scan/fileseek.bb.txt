@@ -1,2 +1,33 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/FileSeek.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/FileSeek.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/FileSeek.bb
-; ; file seek random access file program example; If WriteFile(0,"ram:test")			 ;create new file		FileOutput 0							;send print there...		NPrint "Hello!"				 ;print something! 		CloseFile 0							 ;close file 		If OpenFile(0,"ram:test")		;open file again				FileSeek 0,Lof(0)				;fileseek to end of the file				NPrint "There!"		 ;add to the file				CloseFile 0					 ;close file again 				DefaultOutput					;send output back to normal 				If ReadFile(0,"ram:test")		;open file for reading						FileInput 0					 ;get input from file						NPrint Edit$(80)				;read file and print to screen						NPrint Edit$(80)				;ditto				If ReadFile(0,"ram:test")		;open file for reading						FileInput 0					 ;get input from file						NPrint Edit$(80)				;read file and print to screen						NPrint Edit$(80)				;ditto						MouseWait 						End 				EndIf 		EndIf EndIf NPrint "Couldn't open ram:test!"				;file open failed!MouseWait 
+
+; 
+; file seek random access file program example
+; 
+
+If WriteFile(0,"ram:test")       ;create new file
+    FileOutput 0              ;send print there...
+    NPrint "Hello!"         ;print something! 
+    CloseFile 0               ;close file 
+    If OpenFile(0,"ram:test")    ;open file again
+        FileSeek 0,Lof(0)        ;fileseek to end of the file
+        NPrint "There!"     ;add to the file
+        CloseFile 0           ;close file again 
+        DefaultOutput          ;send output back to normal 
+        If ReadFile(0,"ram:test")    ;open file for reading
+            FileInput 0           ;get input from file
+            NPrint Edit$(80)        ;read file and print to screen
+            NPrint Edit$(80)        ;ditto
+        If ReadFile(0,"ram:test")    ;open file for reading
+            FileInput 0           ;get input from file
+            NPrint Edit$(80)        ;read file and print to screen
+            NPrint Edit$(80)        ;ditto
+            MouseWait 
+            End 
+        EndIf 
+    EndIf 
+EndIf 
+
+NPrint "Couldn't open ram:test!"        ;file open failed!
+
+MouseWait 
+

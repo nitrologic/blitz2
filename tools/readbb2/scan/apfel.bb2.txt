@@ -1,2 +1,59 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/paule/APFEL.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/paule/APFEL.BB2
-;* * * * * * * * * * * * * * * * * * * * * * * *;*																						 *;*		Apfelmnnchenprogramm										*;*																						 *;*---------------------------------------------*;*	Demo von: Michael Paulwitz / Berlin				*;*						im Februar 1994 (PD)						 *;*---------------------------------------------*;*	Beenden des Programms mit der rechten			*;*	Maustaste																	*;*																						 *;* * * * * * * * * * * * * * * * * * * * * * * *Screen 0,4,"Apfelmnnchen"ScreensBitMap 0,0anzfarben.b=2^4erst.w=10xmax.w=320ymax.w=256rmin.w=-1rmax.w=2imin.q=-1.5imax.q=1.5itmax.w=34cr.q=rminci.q=imaxdx.q=(rmax-rmin)/xmaxdy.q=(imax-imin)/ymaxFor zeile=erst To ymax-1	For spalte=0 To xmax-1		it=0		zr=0		zi=0		While it<itmax AND (zr*zr+zi*zi)<4			i=zi			r=zr			zi=2*i*r-ci			zr=r*r-i*i-cr			it=it+1		Wend		farbe=it MOD anzfarben		Plot spalte,zeile,farbe		If Joyb(0)=2 Then End		cr=cr+dx	Next spalte	cr=rmin	ci=ci-dyNext zeileMouseWait
+
+
+;* * * * * * * * * * * * * * * * * * * * * * * *
+;*                                             *
+;*    Apfelmnnchenprogramm                    *
+;*                                             *
+;*---------------------------------------------*
+;*  Demo von: Michael Paulwitz / Berlin        *
+;*            im Februar 1994 (PD)             *
+;*---------------------------------------------*
+;*  Beenden des Programms mit der rechten      *
+;*  Maustaste                                  *
+;*                                             *
+;* * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+
+Screen 0,4,"Apfelmnnchen"
+ScreensBitMap 0,0
+
+anzfarben.b=2^4
+erst.w=10
+xmax.w=320
+ymax.w=256
+rmin.w=-1
+rmax.w=2
+imin.q=-1.5
+imax.q=1.5
+itmax.w=34
+cr.q=rmin
+ci.q=imax
+dx.q=(rmax-rmin)/xmax
+dy.q=(imax-imin)/ymax
+
+
+For zeile=erst To ymax-1
+  For spalte=0 To xmax-1
+    it=0
+    zr=0
+    zi=0
+    While it<itmax AND (zr*zr+zi*zi)<4
+      i=zi
+      r=zr
+      zi=2*i*r-ci
+      zr=r*r-i*i-cr
+      it=it+1
+    Wend
+    farbe=it MOD anzfarben
+    Plot spalte,zeile,farbe
+    If Joyb(0)=2 Then End
+    cr=cr+dx
+  Next spalte
+  cr=rmin
+  ci=ci-dy
+Next zeile
+MouseWait
+

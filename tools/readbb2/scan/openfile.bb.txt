@@ -1,2 +1,31 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/OpenFile.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/OpenFile.bb
-; ; random access file program example; If OpenFile(0,"ram:test")		;open random access file.  MaxLen c$=32				 ;set maximum length of c$ 		Fields 0,a,b,c$		 ;set up fields in a record		a=10					;initialize some variables... 		b=16		c$="Hello There!" 		Put 0,0					 ;write record 0		CloseFile 0				 ;close the file		If OpenFile(0,"ram:test")	;reopen file 				Fields 0,a,b,c$	 ;set up fields again 				a=0				 ;clear variables 				b=0 				c$="" 				Get 0,0						 ;read record 0 				NPrint "a=",a," b=",b," c$=",c$ 				CloseFile 0					 ;close the file				MouseWait 				End 		EndIf EndIf NPrint "Couldn't open ram:test" ;file open failed!MouseWait 
+
+; 
+; random access file program example
+; 
+
+If OpenFile(0,"ram:test")    ;open random access file. 
+ MaxLen c$=32         ;set maximum length of c$ 
+    Fields 0,a,b,c$     ;set up fields in a record
+    a=10          ;initialize some variables... 
+    b=16
+    c$="Hello There!" 
+    Put 0,0           ;write record 0
+    CloseFile 0         ;close the file
+    If OpenFile(0,"ram:test")  ;reopen file 
+        Fields 0,a,b,c$   ;set up fields again 
+        a=0         ;clear variables 
+        b=0 
+        c$="" 
+        Get 0,0             ;read record 0 
+        NPrint "a=",a," b=",b," c$=",c$ 
+        CloseFile 0           ;close the file
+        MouseWait 
+        End 
+    EndIf 
+EndIf 
+
+NPrint "Couldn't open ram:test" ;file open failed!
+
+MouseWait 
+

@@ -1,2 +1,22 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Select.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Select.bb
-; ; select...case program example ; Print "Enter a number from 1 to 3:" n=Edit(80)Select n Case 1	NPrint "One!"  Case 2	NPrint "Two!"  Case 3	NPrint "Three!"  Default 	NPrint "That number was not 1, 2 or 3!" End SelectMouseWait 
+
+; 
+; select...case program example 
+; 
+
+Print "Enter a number from 1 to 3:" 
+n=Edit(80)
+
+Select n
+ Case 1
+  NPrint "One!" 
+ Case 2
+  NPrint "Two!" 
+ Case 3
+  NPrint "Three!" 
+ Default 
+  NPrint "That number was not 1, 2 or 3!" 
+End Select
+
+MouseWait 
+

@@ -1,2 +1,21 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Use.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Use.bb
-; ; screens and windows program example ; Screen 0,3								;open a screen & 4 windows... Window 1,0,0,160,100,$100f,"Window 1",1,2 Window 2,160,0,160,100,$100f,"Window 2",1,2 Window 3,0,100,160,100,$100f,"Window 3",1,2 Window 4,160,100,160,100,$100f,"Window 4",1,2 For k=1 To 4							;start of loop Use Window k						 ;use window 'k'  NPrint "Currently using"			 ;output text...  NPrint "Window#:",k Next									;end of loopMouseWait 
+
+; 
+; screens and windows program example 
+; 
+
+Screen 0,3                ;open a screen & 4 windows... 
+
+Window 1,0,0,160,100,$100f,"Window 1",1,2 
+Window 2,160,0,160,100,$100f,"Window 2",1,2 
+Window 3,0,100,160,100,$100f,"Window 3",1,2 
+Window 4,160,100,160,100,$100f,"Window 4",1,2 
+
+For k=1 To 4              ;start of loop
+ Use Window k             ;use window 'k' 
+ NPrint "Currently using"       ;output text... 
+ NPrint "Window#:",k 
+Next                  ;end of loop
+
+MouseWait 
+
