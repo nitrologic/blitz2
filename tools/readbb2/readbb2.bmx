@@ -1,18 +1,11 @@
 ' a blitzmax tool to untokenise old bb2 files
 ' by simon 
 
-' TODO - flush scan folder automatically before scanning
-
 Global func:String[65536]
 
 PopulateFuncTable
 
-path$="/Users/simon/blitz2/husker3.bb2"
-src$=ReadBlitz2Source(path)
-SaveText src,"test.txt"
-
-'src$=LoadString(path)
-'Print src.length
+FlushDir "scan"
 
 ScanBB2("/Users/simon/Google Drive/amiga")
 
@@ -196,6 +189,17 @@ Function PopulateFuncTable()
 	Next
 
 	Return
+End Function
+
+Function FlushDir(path$)
+	For Local dir$=EachIn LoadDir(path)	
+		If dir[0]="." Continue
+		Local path2$=path+"/"+dir
+		Select FileType(path2)
+			Case FILETYPE_FILE
+				DeleteFile path2 
+		End Select	
+	Next
 End Function
 
 
