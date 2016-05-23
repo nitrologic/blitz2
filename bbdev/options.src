@@ -1,0 +1,633 @@
+optreqprep	moveq	#arrowf-uparrow,d0
+	moveq	#2,d1
+	move.l	4.w,a6
+	jsr	allocmem(a6)
+	move.l	d0,uimageloc
+	move.l	d0,a0
+	add.l	#(arrowf-uparrow)/2,d0
+	move.l	d0,dimageloc
+	lea	uparrow(pc),a1
+	moveq	#(arrowf-uparrow)/4-1,d0
+.loop	move.l	(a1)+,(a0)+
+	dbf	d0,.loop
+	rts
+
+optreqdone	move.l	uimageloc(pc),a1
+	moveq	#arrowf-uparrow,d0
+	move.l	4.w,a6
+	jmp	freemem(a6)
+
+upimage	dc	0,0,16,8,2
+uimageloc	dc.l	0
+	dc.b	3,0
+	dc.l	0
+
+downimage	dc	0,0,16,8,2
+dimageloc	dc.l	0
+	dc.b	3,0
+	dc.l	0
+
+optreq	dc.l	0
+	dc.w	44,2,424,172,0,0
+	dc.l	optreqga1,optreqbo1,optreqin1
+	dc.w	0
+	dc.b	0,0
+	dc.l	0
+	ds.b	32
+	dc.l	0,0
+	ds.b	36
+
+optreqbo1	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla1,optreqla2
+optreqla1	dc.w	199,76,136,76,136,87
+optreqla2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla3,optreqbo2
+optreqla3	dc.w	199,77,199,87,137,87
+optreqbo2	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla4,optreqla5
+optreqla4	dc.w	407,76,344,76,344,87
+optreqla5	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla6,optreqbo3
+optreqla6	dc.w	407,77,407,87,345,87
+optreqbo3	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla7,optreqla8
+optreqla7	dc.w	199,88,136,88,136,99
+optreqla8	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla9,optreqbo4
+optreqla9	dc.w	199,89,199,99,137,99
+optreqbo4	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla10,optreqla11
+optreqla10	dc.w	407,88,344,88,344,99
+optreqla11	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla12,optreqbo5
+optreqla12	dc.w	407,89,407,99,345,99
+optreqbo5	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla13,optreqla14
+optreqla13	dc.w	199,100,136,100,136,111
+optreqla14	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla15,optreqbo6
+optreqla15	dc.w	199,101,199,111,137,111
+optreqbo6	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla16,optreqla17
+optreqla16	dc.w	407,100,344,100,344,111
+optreqla17	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla18,optreqbo7
+optreqla18	dc.w	407,101,407,111,345,111
+optreqbo7	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla19,optreqla20
+optreqla19	dc.w	199,128,16,128,16,147
+optreqla20	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla21,optreqbo8
+optreqla21	dc.w	199,129,199,147,17,147
+optreqbo8	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla22,optreqla23
+optreqla22	dc.w	407,128,216,128,216,147
+optreqla23	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla24,optreqbo9
+optreqla24	dc.w	407,129,407,147,217,147
+optreqbo9	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla25,optreqla26
+optreqla25	dc.w	415,20,8,20,8,151
+optreqla26	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla27,optreqbo10
+optreqla27	dc.w	415,21,415,151,9,151
+optreqbo10	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla28,optreqla29
+optreqla28	dc.w	423,0,0,0,0,171
+optreqla29	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla30,0
+optreqla30	dc.w	423,1,423,171,1,171
+optreqbo11	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla56,optreqla57
+optreqla56	dc.w	23,0,0,0,0,11
+optreqla57	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla58,0
+optreqla58	dc.w	23,1,23,11,1,11
+optreqbo12	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla60,optreqla61
+optreqla60	dc.w	23,0,0,0,0,11
+optreqla61	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla62,0
+optreqla62	dc.w	23,1,23,11,1,11
+optreqbo13	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla64,optreqla65
+optreqla64	dc.w	23,0,0,0,0,11
+optreqla65	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla66,0
+optreqla66	dc.w	23,1,23,11,1,11
+optreqbo14	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla68,optreqla69
+optreqla68	dc.w	23,0,0,0,0,11
+optreqla69	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla70,0
+optreqla70	dc.w	23,1,23,11,1,11
+optreqbo15	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla72,optreqla73
+optreqla72	dc.w	23,0,0,0,0,11
+optreqla73	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla74,0
+optreqla74	dc.w	23,1,23,11,1,11
+optreqbo16	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla76,optreqla77
+optreqla76	dc.w	23,0,0,0,0,11
+optreqla77	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla78,0
+optreqla78	dc.w	23,1,23,11,1,11
+optreqbo17	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla80,optreqla81
+optreqla80	dc.w	23,0,0,0,0,11
+optreqla81	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla82,0
+optreqla82	dc.w	23,1,23,11,1,11
+optreqbo18	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla84,optreqla85
+optreqla84	dc.w	23,0,0,0,0,11
+optreqla85	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla86,0
+optreqla86	dc.w	23,1,23,11,1,11
+optreqbo19	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla88,optreqla89
+optreqla88	dc.w	39,0,0,0,0,11
+optreqla89	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla90,0
+optreqla90	dc.w	39,1,39,11,1,11
+optreqbo20	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla92,optreqla93
+optreqla92	dc.w	111,0,0,0,0,11
+optreqla93	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla94,0
+optreqla94	dc.w	111,1,111,11,1,11
+optreqbo21	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla96,optreqla97
+optreqla96	dc.w	159,0,0,0,0,11
+optreqla97	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla98,0
+optreqla98	dc.w	159,1,159,11,1,11
+optreqbo22	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreqla100,optreqla101
+optreqla100	dc.w	71,0,0,0,0,11
+optreqla101	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreqla102,0
+optreqla102	dc.w	71,1,71,11,1,11
+
+optreqin1	dc.b	1,0,1,0
+	dc.w	84,6
+	dc.l	0
+	dc.l	optreqla31,optreqin2
+optreqla31	dc.b	'BLITZ BASIC 2 COMPILER OPTIONS',0
+	even
+optreqin2	dc.b	1,0,1,0
+	dc.w	20,26
+	dc.l	0
+	dc.l	optreqla32,optreqin3
+optreqla32	dc.b	'Create Icons for Executable Files:',0
+	even
+optreqin3	dc.b	1,0,1,0
+	dc.w	20,38
+	dc.l	0
+	dc.l	optreqla33,optreqin8	;4
+optreqla33	dc.b	'Runtime Error Debugger...',0	;'RUNTIME ERRORS:',0
+	even
+	;
+optreqin4	dc.b	1,0,1,0
+	dc.w	20,38
+	dc.l	0
+	dc.l	optreqla34,optreqin5
+optreqla34	dc.b	'Debugger:',0
+	even
+optreqin5	dc.b	1,0,1,0
+	dc.w	212,38
+	dc.l	0
+	dc.l	optreqla35,optreqin6
+optreqla35	dc.b	'Long Arrays:',0
+	even
+optreqin6	dc.b	1,0,1,0
+	dc.w	20,50
+	dc.l	0
+	dc.l	optreqla36,optreqin7
+optreqla36	dc.b	'Expand Macros:',0
+	even
+optreqin7	dc.b	1,0,1,0
+	dc.w	212,50
+	dc.l	0
+	dc.l	optreqla37,optreqin8
+optreqla37	dc.b	'Quoted Macros:',0
+	even
+	;
+optreqin8	dc.b	1,0,1,0
+	dc.w	20,50	;62
+	dc.l	0
+	dc.l	optreqla38,optreqin9
+optreqla38	dc.b	'Make Smallest Code:',0
+	even
+optreqin9	dc.b	1,0,1,0
+	dc.w	20,62
+	dc.l	0
+	dc.l	optreqla39,optreqin10
+optreqla39	dc.b	'Create Debug Info for Executable Files:',0
+	even
+optreqin10	dc.b	1,0,1,0
+	dc.w	20,78
+	dc.l	0
+	dc.l	optreqla40,optreqin11
+optreqla40	dc.b	'Object Buffer:',0
+	even
+optreqin11	dc.b	1,0,1,0
+	dc.w	212,78
+	dc.l	0
+	dc.l	optreqla41,optreqin12
+optreqla41	dc.b	'Libs Buffer:',0
+	even
+optreqin12	dc.b	1,0,1,0
+	dc.w	20,90
+	dc.l	0
+	dc.l	optreqla42,optreqin13
+optreqla42	dc.b	'System Buffer:',0
+	even
+optreqin13	dc.b	1,0,1,0
+	dc.w	212,90
+	dc.l	0
+	dc.l	optreqla43,optreqin14
+optreqla43	dc.b	'Data Buffer:',0
+	even
+optreqin14	dc.b	1,0,1,0
+	dc.w	20,102
+	dc.l	0
+	dc.l	optreqla44,optreqin15
+optreqla44	dc.b	'Macro Buffer:',0
+	even
+optreqin15	dc.b	1,0,1,0
+	dc.w	212,102
+	dc.l	0
+	dc.l	optreqla45,optreqin16
+optreqla45	dc.b	'String Buffer:',0
+	even
+optreqin16	dc.b	1,0,1,0
+	dc.w	76-24,118
+	dc.l	0
+	dc.l	optreqla46,optreqin17
+optreqla46	dc.b	'Object Maximums',0
+	even
+optreqin17	dc.b	1,0,1,0
+	dc.w	268,118
+	dc.l	0
+	dc.l	optreqla47,0
+optreqla47	dc.b	'Resident',0
+	even
+optreqin18	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla59,0
+optreqla59	dc.b	'  ',0
+	even
+optreqin19	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla63,0
+optreqla63	dc.b	'  ',0
+	even
+optreqin20	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla67,0
+optreqla67	dc.b	'  ',0
+	even
+optreqin21	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla71,0
+optreqla71	dc.b	'  ',0
+	even
+optreqin22	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla75,0
+optreqla75	dc.b	'  ',0
+	even
+optreqin23	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla79,0
+optreqla79	dc.b	'  ',0
+	even
+optreqin24	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla83,0
+optreqla83	dc.b	'  ',0
+	even
+optreqin25	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla87,0
+optreqla87	dc.b	'  ',0
+	even
+optreqin26	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla91,0
+optreqla91	dc.b	' OK ',0
+	even
+optreqin27	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla95,0
+optreqla95	dc.b	' COMPILE/RUN ',0
+	even
+optreqin28	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla99,0
+optreqla99	dc.b	' CREATE EXECUTABLE ',0
+	even
+optreqin29	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreqla103,0
+optreqla103	dc.b	' CANCEL ',0
+	even
+optreqin34	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	optreqla108,0
+optreqla108	dc.b	'              ',0
+	even
+optreqin35	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	optreqla109,0
+optreqla109	dc.b	'              ',0
+	even
+optreqin36	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	optreqla110,0
+optreqla110	dc.b	'                     ',0
+	even
+optreqin37	dc.b	1,0,1,0
+	dc.w	0,0
+	dc.l	0
+	dc.l	optreqla111,0
+optreqla111	dc.b	'                     ',0
+	even
+
+
+optreqga1	dc.l	optreqga2
+	dc.w	140,78,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg1
+	dc.w	1
+	dc.l	0
+optreqsg1	dc.l	optreqla48,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+maxpc	dc.l	16384,0
+optreqla48	dc.b	'16384'
+	dcb.b	7,0
+	even
+optreqga2	dc.l	optreqga3
+	dc.w	348,78,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg2
+	dc.w	2
+	dc.l	0
+optreqsg2	dc.l	optreqla49,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+maxlib	dc.l	32768,0
+optreqla49	dc.b	'16384'
+	dcb.b	7,0
+	even
+optreqga3	dc.l	optreqga4
+	dc.w	140,90,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg3
+	dc.w	3
+	dc.l	0
+optreqsg3	dc.l	optreqla50,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+maxdata1	dc.l	4096,0
+optreqla50	dc.b	'4096'
+	dcb.b	8,0
+	even
+optreqga4	dc.l	optreqga5
+	dc.w	348,90,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg4
+	dc.w	4
+	dc.l	0
+optreqsg4	dc.l	optreqla51,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+maxdata2	dc.l	4096,0
+optreqla51	dc.b	'4096'
+	dcb.b	8,0
+	even
+optreqga5	dc.l	optreqga6
+	dc.w	140,102,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg5
+	dc.w	5
+	dc.l	0
+optreqsg5	dc.l	optreqla52,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+macrolen	dc.l	8192,0
+optreqla52	dc.b	'8192'
+	dcb.b	8,0
+	even
+optreqga6	dc.l	optreqga7
+	dc.w	348,102,56,8,0,2050,4
+	dc.l	0,0,0,0,optreqsg6
+	dc.w	6
+	dc.l	0
+optreqsg6	dc.l	optreqla53,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+stringwork	dc.l	10240,0
+optreqla53	dc.b	'10240'
+	dcb.b	7,0
+	even
+optreqga7	dc.l	optreqga8
+	dc.w	132,130,40,8,0,2051,4
+	dc.l	0,0,0,0,optreqsg7
+	dc.w	7
+	dc.l	0
+optreqsg7	dc.l	optreqla54,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	100,0
+optreqla54	dc.b	'100'
+	dcb.b	9,0
+	even
+optreqga8	dc.l	optreqga9
+	dc.w	132,138,40,8,0,2051,4
+	dc.l	0,0,0,0,optreqsg8
+	dc.w	8
+	dc.l	0
+optreqsg8	dc.l	optreqla55,undobuffer
+	dc.w	0,12,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	20,0
+optreqla55	dc.b	'20'
+	dcb.b	10,0
+	even
+	;
+optreqga9	dc.l	optreqga10		;executable icons
+	dc.w	384,24,24,12,128,257,1	;36 was 24
+	dc.l	optreqbo11,0,optreqin18,0,0
+	dc.w	9
+	dc.l	0
+optreqga10	dc.l	optreqga15 ;11		;runtime errors
+	dc.w	384,36,24,12,128,257,1
+	dc.l	optreqbo12,0,optreqin19,0,0
+	dc.w	10
+	dc.l	0
+optreqga11	dc.l	optreqga12		;debugger
+	dc.w	176,36,24,12,128,257,1
+	dc.l	optreqbo13,0,optreqin20,0,0
+	dc.w	11
+	dc.l	0
+optreqga12	dc.l	optreqga13
+	dc.w	384,36,24,12,128,257,1
+	dc.l	optreqbo14,0,optreqin21,0,0
+	dc.w	12
+	dc.l	0
+optreqga13	dc.l	optreqga14
+	dc.w	176,48,24,12,128,257,1
+	dc.l	optreqbo15,0,optreqin22,0,0
+	dc.w	13
+	dc.l	0
+optreqga14	dc.l	optreqga15
+	dc.w	384,48,24,12,0,257,1
+	dc.l	optreqbo16,0,optreqin23,0,0
+	dc.w	14
+	dc.l	0
+optreqga15	dc.l	optreqga16			;make smallest
+	dc.w	384,48,24,12,0,257,1	;48 was 60
+	dc.l	optreqbo17,0,optreqin24,0,0
+	dc.w	15
+	dc.l	0
+optreqga16	dc.l	optreqga17			;debug info
+	dc.w	384,60,24,12,0,257,1
+	dc.l	optreqbo18,0,optreqin25,0,0
+	dc.w	16
+	dc.l	0
+optreqga17	dc.l	optreqga18
+	dc.w	8,156,40,12,0,5,1
+	dc.l	optreqbo19,0,optreqin26,0,0
+	dc.w	17
+	dc.l	0
+optreqga18	dc.l	optreqga19
+	dc.w	56,156,112,12,0,5,1
+	dc.l	optreqbo20,0,optreqin27,0,0
+	dc.w	18
+	dc.l	0
+optreqga19	dc.l	optreqga20
+	dc.w	176,156,160,12,0,5,1
+	dc.l	optreqbo21,0,optreqin28,0,0
+	dc.w	19
+	dc.l	0
+optreqga20	dc.l	optreqga21
+	dc.w	344,156,72,12,0,5,1
+	dc.l	optreqbo22,0,optreqin29,0,0
+	dc.w	20
+	dc.l	0
+optreqga21	dc.l	optreqga22
+	dc.w	180,130,16,8,4,1,1
+	dc.l	upimage,0,0,0,0
+	dc.w	21
+	dc.l	0
+optreqga22	dc.l	optreqga23
+	dc.w	180,138,16,8,4,1,1
+	dc.l	downimage,0,0,0,0
+	dc.w	22
+	dc.l	0
+optreqga23	dc.l	optreqga24
+	dc.w	388,130,16,8,4,1,1
+	dc.l	upimage,0,0,0,0
+	dc.w	23
+	dc.l	0
+optreqga24	dc.l	optreqga25
+	dc.w	388,138,16,8,4,1,1
+	dc.l	downimage,0,0,0,0
+	dc.w	24
+	dc.l	0
+optreqga25	dc.l	optreqga26
+	dc.w	20,130,112,8,0,1,1
+	dc.l	0,0,optreqin34,0,0
+	dc.w	25
+	dc.l	0
+optreqga26	dc.l	optreqga27
+	dc.w	20,138,112,8,0,1,1
+	dc.l	0,0,optreqin35,0,0
+	dc.w	26
+	dc.l	0
+optreqga27	dc.l	optreqga28
+	dc.w	220,130,168,8,0,3,4
+	dc.l	0,0,0,0,optreqsgz
+	dc.w	27
+	dc.l	0
+optreqsgz	dc.l	resbuff,undobuffer
+	dc.w	0,64,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	0,0
+optreqga28	dc.l	0
+	dc.w	220,138,168,8,0,3,4
+	dc.l	0,0,0,0,optreqsgy
+	dc.w	28
+	dc.l	0
+optreqsgy	dc.l	resbuff+68,undobuffer
+	dc.w	0,64,0
+	dc.w	0,0,0,0,0,0,0
+	dc.l	0,0
+
+resbuff	dcb.b	8*68,0	;8 res max
+
+uparrow	dc	$ffff,$8000,$8180,$83c0,$87e0,$8ff0,$8000,$8000
+	dc	$0000,$0001,$0181,$03c1,$07e1,$0ff1,$0001,$ffff
+
+downarrow	dc	$ffff,$8000,$8ff0,$87e0,$83c0,$8180,$8000,$8000
+	dc	$0000,$0001,$0ff1,$07e1,$03c1,$0181,$0001,$7fff
+
+arrowf	;

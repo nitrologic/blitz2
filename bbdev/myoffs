@@ -1,0 +1,401 @@
+
+;
+;   intuition
+;
+
+OpenIntuition   EQU   -30 
+Intuition   EQU   -36 
+AddGadget   EQU   -42 
+ClearDMRequest   EQU   -48 
+ClearMenuStrip   EQU   -54 
+ClearPointer   EQU   -60 
+CloseScreen   EQU   -66 
+CloseWindow   EQU   -72 
+CloseWorkBench   EQU   -78 
+CurrentTime   EQU   -84 
+DisplayAlert   EQU   -90 
+DisplayBeep   EQU   -96 
+DoubleClick   EQU   -102 
+DrawBorder   EQU   -108 
+DrawImage   EQU   -114 
+EndRequest   EQU   -120 
+GetDefPrefs   EQU   -126 
+GetPrefs   EQU   -132 
+InitRequester   EQU   -138 
+ItemAddress   EQU   -144 
+ModifyIDCMP   EQU   -150 
+ModifyProp   EQU   -156 
+MoveScreen   EQU   -162 
+MoveWindow   EQU   -168 
+OffGadget   EQU   -174 
+OffMenu   EQU   -180 
+OnGadget   EQU   -186 
+OnMenu   EQU   -192 
+OpenScreen   EQU   -198 
+OpenWindow   EQU   -204 
+OpenWorkBench   EQU   -210 
+PrintIText   EQU   -216 
+RefreshGadgets   EQU   -222 
+RemoveGadget   EQU   -228 
+ReportMouse   EQU   -234 
+Request   EQU   -240 
+ScreenToBack   EQU   -246 
+ScreenToFront   EQU   -252 
+SetDMRequest   EQU   -258 
+SetMenuStrip   EQU   -264 
+SetPointer   EQU   -270 
+SetWindowTitles   EQU   -276 
+ShowTitle   EQU   -282 
+SizeWindow   EQU   -288 
+ViewAddress   EQU   -294 
+ViewPortAddress   EQU   -300 
+WindowToBack   EQU   -306 
+WindowToFront   EQU   -312 
+WindowLimits   EQU   -318 
+SetPrefs   EQU   -324 
+IntuiTextLength   EQU   -330 
+WBenchToBack   EQU   -336 
+WBenchToFront   EQU   -342 
+AutoRequest   EQU   -348 
+BeginRefresh   EQU   -354 
+BuildSysRequest   EQU   -360 
+EndRefresh   EQU   -366 
+FreeSysRequest   EQU   -372 
+MakeScreen   EQU   -378 
+RemakeDisplay   EQU   -384 
+RethinkDisplay   EQU   -390 
+AllocRemember   EQU   -396 
+AlohaWorkbench   EQU   -402 
+FreeRemember   EQU   -408 
+LockIBase   EQU   -414 
+UnlockIBase   EQU   -420 
+GetScreenData   EQU   -426 
+RefreshGList   EQU   -432 
+AddGList   EQU   -438 
+RemoveGList   EQU   -444 
+ActivateWindow   EQU   -450 
+RefreshWindowFrame   EQU   -456 
+ActivateGadget   EQU   -462 
+NewModifyProp   EQU   -468 
+
+;
+;   exec
+;
+
+Supervisor   EQU   -30 
+ExitIntr   EQU   -36 
+Schedule   EQU   -42 
+Reschedule   EQU   -48 
+Switch   EQU   -54 
+Dispatch   EQU   -60 
+Exception   EQU   -66 
+InitCode   EQU   -72 
+InitStruct   EQU   -78 
+MakeLibrary   EQU   -84 
+MakeFunctions   EQU   -90 
+FindResident   EQU   -96 
+InitResident   EQU   -102 
+Alert   EQU   -108 
+Debug   EQU   -114 
+Disable   EQU   -120 
+Enable   EQU   -126 
+Forbid   EQU   -132 
+Permit   EQU   -138 
+SetSR   EQU   -144 
+SuperState   EQU   -150 
+UserState   EQU   -156 
+SetIntVector   EQU   -162 
+AddIntServer   EQU   -168 
+RemIntServer   EQU   -174 
+Cause   EQU   -180 
+Allocate   EQU   -186 
+Deallocate   EQU   -192 
+AllocMem   EQU   -198 
+AllocAbs   EQU   -204 
+FreeMem   EQU   -210 
+AvailMem   EQU   -216 
+AllocEntry   EQU   -222 
+FreeEntry   EQU   -228 
+Insert   EQU   -234 
+AddHead   EQU   -240 
+AddTail   EQU   -246 
+Remove   EQU   -252 
+RemHead   EQU   -258 
+RemTail   EQU   -264 
+Enqueue   EQU   -270 
+FindName   EQU   -276 
+AddTask   EQU   -282 
+RemTask   EQU   -288 
+FindTask   EQU   -294 
+SetTaskPri   EQU   -300 
+SetSignal   EQU   -306 
+SetExcept   EQU   -312 
+Wait   EQU   -318 
+Signal   EQU   -324 
+AllocSignal   EQU   -330 
+FreeSignal   EQU   -336 
+AllocTrap   EQU   -342 
+FreeTrap   EQU   -348 
+AddPort   EQU   -354 
+RemPort   EQU   -360 
+PutMsg   EQU   -366 
+GetMsg   EQU   -372 
+ReplyMsg   EQU   -378 
+WaitPort   EQU   -384 
+FindPort   EQU   -390 
+AddLibrary   EQU   -396 
+RemLibrary   EQU   -402 
+OldOpenLibrary   EQU   -408 
+CloseLibrary   EQU   -414 
+SetFunction   EQU   -420 
+SumLibrary   EQU   -426 
+AddDevice   EQU   -432 
+RemDevice   EQU   -438 
+OpenDevice   EQU   -444 
+CloseDevice   EQU   -450 
+DoIO   EQU   -456 
+SendIO   EQU   -462 
+CheckIO   EQU   -468 
+WaitIO   EQU   -474 
+AbortIO   EQU   -480 
+AddResource   EQU   -486 
+RemResource   EQU   -492 
+OpenResource   EQU   -498 
+RawIOInit   EQU   -504 
+RawMayGetChar   EQU   -510 
+RawPutChar   EQU   -516 
+RawDoFmt   EQU   -522 
+GetCC   EQU   -528 
+TypeOfMem   EQU   -534 
+Procure   EQU   -540 
+Vacate   EQU   -546 
+OpenLibrary   EQU   -552 
+InitSemaphore   EQU   -558 
+ObtainSemaphore   EQU   -564 
+ReleaseSemaphore   EQU   -570 
+AttemptSemaphore   EQU   -576 
+ObtainSemaphoreList   EQU   -582 
+ReleaseSemaphoreList   EQU   -588 
+FindSemaphore   EQU   -594 
+AddSemaphore   EQU   -600 
+RemSemaphore   EQU   -606 
+SumKickData   EQU   -612 
+AddMemList   EQU   -618 
+CopyMem   EQU   -624 
+CopyMemQuick   EQU   -630 
+
+;
+;   graphics
+;
+
+BltBitMap   EQU   -30 
+BltTemplate   EQU   -36 
+ClearEOL   EQU   -42 
+ClearScreen   EQU   -48 
+TextLength   EQU   -54 
+Text   EQU   -60 
+SetFont   EQU   -66 
+OpenFont   EQU   -72 
+CloseFont   EQU   -78 
+AskSoftStyle   EQU   -84 
+SetSoftStyle   EQU   -90 
+AddBob   EQU   -96 
+AddVSprite   EQU   -102 
+DoCollision   EQU   -108 
+DrawGList   EQU   -114 
+InitGels   EQU   -120 
+InitMasks   EQU   -126 
+RemIBob   EQU   -132 
+RemVSprite   EQU   -138 
+SetCollision   EQU   -144 
+SortGList   EQU   -150 
+AddAnimOb   EQU   -156 
+Animate   EQU   -162 
+GetGBuffers   EQU   -168 
+InitGMasks   EQU   -174 
+DrawEllipse   EQU   -180 
+AreaEllipse   EQU   -186 
+LoadRGB4   EQU   -192 
+InitRastPort   EQU   -198 
+InitVPort   EQU   -204 
+MrgCop   EQU   -210 
+MakeVPort   EQU   -216 
+LoadView   EQU   -222 
+WaitBlit   EQU   -228 
+SetRast   EQU   -234 
+Move   EQU   -240 
+Draw   EQU   -246 
+AreaMove   EQU   -252 
+AreaDraw   EQU   -258 
+AreaEnd   EQU   -264 
+WaitTOF   EQU   -270 
+QBlit   EQU   -276 
+InitArea   EQU   -282 
+SetRGB4   EQU   -288 
+QBSBlit   EQU   -294 
+BltClear   EQU   -300 
+RectFill   EQU   -306 
+BltPattern   EQU   -312 
+ReadPixel   EQU   -318 
+WritePixel   EQU   -324 
+Flood   EQU   -330 
+PolyDraw   EQU   -336 
+SetAPen   EQU   -342 
+SetBPen   EQU   -348 
+SetDrMd   EQU   -354 
+InitView   EQU   -360 
+CBump   EQU   -366 
+CMove   EQU   -372 
+CWait   EQU   -378 
+VBeamPos   EQU   -384 
+InitBitMap   EQU   -390 
+ScrollRaster   EQU   -396 
+WaitBOVP   EQU   -402 
+GetSprite   EQU   -408 
+FreeSprite   EQU   -414 
+ChangeSprite   EQU   -420 
+MoveSprite   EQU   -426 
+LockLayerRom   EQU   -432 
+UnlockLayerRom   EQU   -438 
+SyncSBitMap   EQU   -444 
+CopySBitMap   EQU   -450 
+OwnBlitter   EQU   -456 
+DisownBlitter   EQU   -462 
+InitTmpRas   EQU   -468 
+AskFont   EQU   -474 
+AddFont   EQU   -480 
+RemFont   EQU   -486 
+AllocRaster   EQU   -492 
+FreeRaster   EQU   -498 
+AndRectRegion   EQU   -504 
+OrRectRegion   EQU   -510 
+NewRegion   EQU   -516 
+ClearRectRegion   EQU   -522 
+ClearRegion   EQU   -528 
+DisposeRegion   EQU   -534 
+FreeVPortCopLists   EQU   -540 
+FreeCopList   EQU   -546 
+ClipBlit   EQU   -552 
+XorRectRegion   EQU   -558 
+FreeCprList   EQU   -564 
+GetColorMap   EQU   -570 
+FreeColorMap   EQU   -576 
+GetRGB4   EQU   -582 
+ScrollVPort   EQU   -588 
+UCopperListInit   EQU   -594 
+FreeGBuffers   EQU   -600 
+BltBitMapRastPort   EQU   -606 
+OrRegionRegion   EQU   -612 
+XorRegionRegion   EQU   -618 
+AndRegionRegion   EQU   -624 
+SetRGB4CM   EQU   -630 
+BltMaskBitMapRastPort   EQU   -636 
+GraphicsReserved1   EQU   -642 
+GraphicsReserved2   EQU   -648 
+AttemptLockLayerRom   EQU   -654 
+
+;
+;   dos
+;
+
+Open   EQU   -30 
+Close   EQU   -36 
+Read   EQU   -42 
+Write   EQU   -48 
+Input   EQU   -54 
+Output   EQU   -60 
+Seek   EQU   -66 
+DeleteFile   EQU   -72 
+Rename   EQU   -78 
+Lock   EQU   -84 
+UnLock   EQU   -90 
+DupLock   EQU   -96 
+Examine   EQU   -102 
+ExNext   EQU   -108 
+Info   EQU   -114 
+CreateDir   EQU   -120 
+CurrentDir   EQU   -126 
+IoErr   EQU   -132 
+CreateProc   EQU   -138 
+Exit   EQU   -144 
+LoadSeg   EQU   -150 
+UnLoadSeg   EQU   -156 
+GetPacket   EQU   -162 
+QueuePacket   EQU   -168 
+DeviceProc   EQU   -174 
+SetComment   EQU   -180 
+SetProtection   EQU   -186 
+DateStamp   EQU   -192 
+Delay   EQU   -198 
+WaitForChar   EQU   -204 
+ParentDir   EQU   -210 
+IsInteractive   EQU   -216 
+Execute   EQU   -222 
+
+opendos   macro
+   lea   dosname(pc),a1
+   move.l   4,a6
+   jsr   oldopenlibrary(a6)
+   move.l   d0,dos
+   bra   dos+4
+dosname   dc.b   'dos.library',0
+   even
+dos   dc.l   0
+   endm
+
+calldos	macro
+	move.l	dos(pc),a6
+	jsr	\1(a6)
+	endm
+
+openint   macro
+   lea   intname(pc),a1
+   move.l   4,a6
+   jsr   oldopenlibrary(a6)
+   move.l   d0,int
+   bra   int+4
+intname   dc.b   'intuition.library',0
+   even
+int   dc.l   0
+   endm
+
+callint	macro
+	move.l	int(pc),a6
+	jsr	\1(a6)
+	endm
+
+opengr   macro
+   lea   grname(pc),a1
+   move.l   4,a6
+   jsr   oldopenlibrary(a6)
+   move.l   d0,gr
+   bra   gr+4
+grname   dc.b   'graphics.library',0
+   even
+gr   dc.l   0
+   endm
+
+callgr	macro
+	move.l	gr(pc),a6
+	jsr	\1(a6)
+	endm
+
+closedos   macro
+   move.l   dos(pc),a1
+   move.l   4,a6
+   jsr   closelibrary(a6)
+   endm
+
+closeint   macro
+   move.l   int(pc),a1
+   move.l   4,a6
+   jsr   closelibrary(a6)
+   endm
+
+closegr   macro
+   move.l   gr(pc),a1
+   move.l   4,a6
+   jsr   closelibrary(a6)
+   endm
+
+

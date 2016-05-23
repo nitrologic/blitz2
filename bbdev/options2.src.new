@@ -1,0 +1,247 @@
+optreq2	dc.l	0
+	dc.w	276,10,240,132,0,0
+	dc.l	optreq2ga1,optreq2bo1,optreq2in1
+	dc.w	0
+	dc.b	0,0
+	dc.l	0
+	ds.b	32
+	dc.l	0,0
+	ds.b	36
+
+optreq2bo1	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la1,optreq2la2
+optreq2la1	dc.w	231,20,8,20,8,111
+optreq2la2	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la3,optreq2bo2
+optreq2la3	dc.w	231,21,231,111,9,111
+optreq2bo2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la4,optreq2la5
+optreq2la4	dc.w	239,0,0,0,0,131
+optreq2la5	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la6,0
+optreq2la6	dc.w	239,1,239,131,1,131
+optreq2bo3	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la15,optreq2la16
+optreq2la15	dc.w	23,0,0,0,0,11
+optreq2la16	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la17,0
+optreq2la17	dc.w	23,1,23,11,1,11
+optreq2bo4	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la19,optreq2la20
+optreq2la19	dc.w	23,0,0,0,0,11
+optreq2la20	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la21,0
+optreq2la21	dc.w	23,1,23,11,1,11
+optreq2bo5	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la23,optreq2la24
+optreq2la23	dc.w	23,0,0,0,0,11
+optreq2la24	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la25,0
+optreq2la25	dc.w	23,1,23,11,1,11
+optreq2bo6	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la27,optreq2la28
+optreq2la27	dc.w	23,0,0,0,0,11
+optreq2la28	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la29,0
+optreq2la29	dc.w	23,1,23,11,1,11
+optreq2bo7	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la31,optreq2la32
+optreq2la31	dc.w	23,0,0,0,0,11
+optreq2la32	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la33,0
+optreq2la33	dc.w	23,1,23,11,1,11
+optreq2bo8	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la35,optreq2la36
+optreq2la35	dc.w	23,0,0,0,0,11
+optreq2la36	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la37,0
+optreq2la37	dc.w	23,1,23,11,1,11
+optreq2bo9	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la39,optreq2la40
+optreq2la39	dc.w	23,0,0,0,0,11
+optreq2la40	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la41,0
+optreq2la41	dc.w	23,1,23,11,1,11
+optreq2bo10	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la43,optreq2la44
+optreq2la43	dc.w	39,0,0,0,0,11
+optreq2la44	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la45,0
+optreq2la45	dc.w	39,1,39,11,1,11
+optreq2bo11	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	optreq2la47,optreq2la48
+optreq2la47	dc.w	71,0,0,0,0,11
+optreq2la48	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	optreq2la49,0
+optreq2la49	dc.w	71,1,71,11,1,11
+
+optreq2in1	dc.b	1,0,1,0
+	dc.w	12,6
+	dc.l	0
+	dc.l	optreq2la7,optreq2in2
+optreq2la7	dc.b	'Runtime Error Options',0
+	even
+optreq2in2	dc.b	1,0,1,0
+	dc.w	20,26
+	dc.l	0
+	dc.l	optreq2la8,optreq2in3
+optreq2la8	dc.b	'AUTO RUN:',0	;'REMEMBER LINE NUMBERS:',0
+	even
+optreq2in3	dc.b	1,0,1,0
+	dc.w	20,38
+	dc.l	0
+	dc.l	optreq2la9,optreq2in4
+optreq2la9	dc.b	'INTERUPT CHECKING:',0	;'ENABLE CONTINUE:',0
+	even
+optreq2in4	dc.b	1,0,1,0
+	dc.w	20,50
+	dc.l	0
+	dc.l	optreq2la10,optreq2in5
+optreq2la10	dc.b	'ASSEMBLER CHECKING:',0	;'STACK CHECKING:',0
+	even
+optreq2in5	dc.b	1,0,1,0
+	dc.w	20,62
+	dc.l	0
+	dc.l	optreq2la11,0	;optreq2in6
+optreq2la11	dc.b	'OVERFLOW CHECKING:',0	;'CTRL C CHECKING:',0
+	even
+;optreq2in6	dc.b	1,0,1,0
+;	dc.w	20,74
+;	dc.l	0
+;	dc.l	optreq2la12,optreq2in7
+;optreq2la12	dc.b	'PARAMETER CHECKING:',0
+;	even
+;optreq2in7	dc.b	1,0,1,0
+;	dc.w	20,86
+;	dc.l	0
+;	dc.l	optreq2la13,optreq2in8
+;optreq2la13	dc.b	'INTERUPT CHECKING:',0
+;	even
+;optreq2in8	dc.b	1,0,1,0
+;	dc.w	20,98
+;	dc.l	0
+;	dc.l	optreq2la14,0
+;optreq2la14	dc.b	'OVERFLOW CHECKING:',0
+	even
+optreq2in9	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la18,0
+optreq2la18	dc.b	'  ',0
+	even
+optreq2in10	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la22,0
+optreq2la22	dc.b	'  ',0
+	even
+optreq2in11	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la26,0
+optreq2la26	dc.b	'  ',0
+	even
+optreq2in12	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la30,0
+optreq2la30	dc.b	'  ',0
+	even
+optreq2in13	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la34,0
+optreq2la34	dc.b	'  ',0
+	even
+optreq2in14	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la38,0
+optreq2la38	dc.b	'  ',0
+	even
+optreq2in15	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la42,0
+optreq2la42	dc.b	'  ',0
+	even
+optreq2in16	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la46,0
+optreq2la46	dc.b	' OK ',0
+	even
+optreq2in17	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	optreq2la50,0
+optreq2la50	dc.b	' CANCEL ',0
+	even
+
+optreq2ga1	dc.l	optreq2ga2
+	dc.w	200,24,24,12,128,257,1
+	dc.l	optreq2bo3,0,optreq2in9,0,0
+	dc.w	1
+	dc.l	0
+optreq2ga2	dc.l	optreq2ga3
+	dc.w	200,36,24,12,128,257,1
+	dc.l	optreq2bo4,0,optreq2in10,0,0
+	dc.w	2
+	dc.l	0
+optreq2ga3	dc.l	optreq2ga4
+	dc.w	200,48,24,12,0,257,1
+	dc.l	optreq2bo5,0,optreq2in11,0,0
+	dc.w	3
+	dc.l	0
+optreq2ga4	dc.l	optreq2ga8
+	dc.w	200,60,24,12,0,257,1
+	dc.l	optreq2bo6,0,optreq2in12,0,0
+	dc.w	4
+	dc.l	0
+optreq2ga5	dc.l	optreq2ga6
+	dc.w	200,72,24,12,128,257,1
+	dc.l	optreq2bo7,0,optreq2in13,0,0
+	dc.w	5
+	dc.l	0
+optreq2ga6	dc.l	optreq2ga7
+	dc.w	200,84,24,12,128,257,1
+	dc.l	optreq2bo8,0,optreq2in14,0,0
+	dc.w	6
+	dc.l	0
+optreq2ga7	dc.l	optreq2ga8
+	dc.w	200,96,24,12,128,257,1
+	dc.l	optreq2bo9,0,optreq2in15,0,0
+	dc.w	7
+	dc.l	0
+optreq2ga8	dc.l	optreq2ga9
+	dc.w	8,116,40,12,0,5,1
+	dc.l	optreq2bo10,0,optreq2in16,0,0
+	dc.w	8
+	dc.l	0
+optreq2ga9	dc.l	0
+	dc.w	160,116,72,12,0,5,1
+	dc.l	optreq2bo11,0,optreq2in17,0,0
+	dc.w	9
+	dc.l	0
