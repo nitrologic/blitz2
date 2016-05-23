@@ -1,4 +1,5 @@
-# blitz2
+# BLITZ BASIC 2
+
 Official Acid Software Amiga development tools by Mark Sibly with contributions from Simon Armstrong and the wider Amiga Blitz community.
 
 ## Blitz2 Source
@@ -11,9 +12,9 @@ The build chain is Devpac/Genam based.
 
 ## Blitz User Magazines
 
-The contents of the BUM disks are here.
+The contents of the BUM disks are here. Cover disks are in the dms folder.
 
-Ascii source and pdf versions of magazines to be added shortly.
+ASCII source and pdf versions of magazines to be added shortly.
 
 Fans of Blitz Research can check out the founder's CV here:
 
