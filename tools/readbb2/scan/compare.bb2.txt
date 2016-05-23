@@ -2,11 +2,11 @@
 
 DEFTYPE.l
 
-##[$80B4]
+SetErr
 	err
 	NPrint "Usage: COMPARE file1 file2"
 	End
-End ##[$80B4]
+End SetErr
 
 If NumPars<>2 Then Goto err
 

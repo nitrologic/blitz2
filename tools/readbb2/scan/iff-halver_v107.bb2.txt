@@ -26,8 +26,8 @@
 ;--------------------------------------------------------------------
 .system
 
-##[$80C3] : ##[$80CC] : ##[$FFB5]
-##[$80B4] : End : End ##[$80B4]
+WBStartup : ##[$80CC] : ##[$FFB5]
+SetErr : End : End SetErr
 MaxLen pa$ = 192
 MaxLen fi$ = 192
 DefaultIDCMP $4|$8|$40|$100|$200|$400
@@ -109,8 +109,8 @@ arrmult 1
 ;--------------------------------------------------------------------
 .mainloop
 
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		Gosub _UseScr0Win1
 		FlushEvents
 		ev.l = WaitEvent
@@ -165,9 +165,9 @@ arrmult 1
 
 
 
-	##[$80BC] (ev=$200) OR ((evm=0) AND (evi=3))
+	Until (ev=$200) OR ((evm=0) AND (evi=3))
 	ok$="Really QUIT ?" : Gosub _OK_Cancel
-##[$80BC] yorn$="Y"
+Until yorn$="Y"
 
 ;--------------------------------------------------------------------
 .close
@@ -184,9 +184,9 @@ End
 
 	localstat 3,200,64,240,48,0,ok2$,0,1,1
 	WLocate 120-(Len(ok$)*4),8 : Print ok$
-	##[$80BB]
+	Repeat
 		ev3.l = WaitEvent
-	##[$80BC] (ev3=$40) AND (EventWindow=3)
+	Until (ev3=$40) AND (EventWindow=3)
 	Free localstat 3
 	Use localstat 1
 	FlushEvents
@@ -197,9 +197,9 @@ End
 
 	localstat 3,200,64,240,48,0,"Confirm",0,1,2
 	WLocate 120-(Len(ok$)*4),8 : Print ok$
-	##[$80BB]
+	Repeat
 		ev3.l = WaitEvent
-	##[$80BC] (ev3=$40) AND (EventWindow=3)
+	Until (ev3=$40) AND (EventWindow=3)
 	yorn$=Mid$("YN",GadgetHit,1)
 	Free localstat 3
 	Use localstat 1
@@ -209,7 +209,7 @@ End
 ;--------------------------------------------------------------------
 ._Load_IFF
 
-	##[$80B4] :	Goto _Fail_Load_IFF : End ##[$80B4]
+	SetErr :	Goto _Fail_Load_IFF : End SetErr
 	nfi$=FileRequest$("Select IFF file",pa$,fi$)
 	If nfi$="" Then Goto _Finished_Load_IFF
 
@@ -246,7 +246,7 @@ End
 	Gosub _UseScr0Win1
 
 	_Finished_Load_IFF
-	##[$80B4] : End : End ##[$80B4]
+	SetErr : End : End SetErr
 	Return
 
 _Fail_Load_IFF
@@ -380,7 +380,7 @@ Goto _Finished_Funky_Stuff
 	If evs=2 Then GetaShape 1,FXx(3),FXy(3),FXx(4),FXy(4)
 	If evs=3 Then GetaShape 1,FXx(4),FXy(4),FXx(4),FXy(4)
 
-	##[$80B4] :	Goto _Fail_Save_Half : End ##[$80B4]
+	SetErr :	Goto _Fail_Save_Half : End SetErr
 	sfi$=FileRequest$("Save filename ?",pa$,fi$)
 
 	If sfi$<>""
@@ -388,7 +388,7 @@ Goto _Finished_Funky_Stuff
 		End If
 
 	_Finished_Save_Half
-	##[$80B4] : End : End ##[$80B4]
+	SetErr : End : End SetErr
 	Return
 
 _Fail_Save_Half
@@ -399,16 +399,16 @@ Goto _Finished_Save_Half
 ._About
 
 	localstat 3,0,0,640,200,$1008,"ABOUT : "+Version$,0,1
-	##[$80C8] AboutDATA
+	Restore AboutDATA
 	Read ls.b
 	For l=1 To ls
 		Read t$
 		WLocate 8,l*8 : Print t$
 	Next
 
-	##[$80BB]
+	Repeat
 		ev3.l= WaitEvent
-	##[$80BC] (ev3=$200) AND (EventWindow=3)
+	Until (ev3=$200) AND (EventWindow=3)
 
 	Free localstat 3
 	VWait 50

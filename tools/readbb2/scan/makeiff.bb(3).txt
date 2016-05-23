@@ -8,7 +8,7 @@ px=0:py=0:n=0
 
 Read a$
 
-##[$80BB]
+Repeat
 	LoadBank 0,a$
 	car.l=Bank(0)+(400-16)*288
 	For n=0 To 15
@@ -27,7 +27,7 @@ Read a$
 		px+24:If px=312 Then px=0:py+24:car+288
 	Next
 	Read a$
-##[$80BC] a$="*"
+Until a$="*"
 
 MouseWait
 

@@ -29,8 +29,8 @@ Next i,num
 Scroll 0,0,360,256,359,0
 
 sc=0
-##[$80BB]
+Repeat
 	VWait
 	sc=sc+10 : If sc=360 Then sc=0
 	Show 0,sc,0
-##[$80BC] Joyb(0)=1
+Until Joyb(0)=1

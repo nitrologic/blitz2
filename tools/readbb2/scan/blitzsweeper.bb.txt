@@ -9,9 +9,9 @@ Ver$ = "Blitz Sweeper 18.7.1995 Timo Suoranta"
 ; Right MouseButton to warningflag.
 
 
-##[$80B4]:End:End ##[$80B4]								 ; Add ; to enable Debugger
+SetErr:End:End SetErr								 ; Add ; to enable Debugger
 
-##[$80C3]														 ; A Must for WB progs
+WBStartup														 ; A Must for WB progs
 ##[$80CB]															 ; Editor run only; free mem.
 ##[$80CC]																 ; Editor run only; free mem.
 DEFTYPE .w														; Mostly sufficient, quite fast
@@ -223,10 +223,10 @@ Function.b CheckMine {x,y,modf}
 	MFX = 0														 ; Set MineField Grfx Offset
 	MFY = 12+#PYY
 
-	##[$80BB]
+	Repeat
 		Gosub Play
 		##[$B38C]
-	##[$80C7]
+	Forever
 	End
 
 
@@ -249,7 +249,7 @@ Function.b CheckMine {x,y,modf}
 	Format "##0"	 : Digi {Str$(NotMines),IX1,IY1}		 ; Display 'Spots to be Checked'
 	Format "##0.0" : Digi {Str$(Time),IX2,IY2}				 ; Display Timer
 
-	##[$80BB]															; Loop Until Success or Hit Mine
+	Repeat															; Loop Until Success or Hit Mine
 
 		CurrTime.l = ##[$A588]								; Update Timer
 		If CurrTime>OldTime+5
@@ -271,7 +271,7 @@ Function.b CheckMine {x,y,modf}
 			EndIf
 		EndIf
 
-	##[$80BC] Hit OR Checked=NotMines			 ; End of Loop
+	Until Hit OR Checked=NotMines			 ; End of Loop
 
 	If Checked<NotMines								 ; Fail
 		Gosub DrawMineField
@@ -357,14 +357,14 @@ Function.b CheckMine {x,y,modf}
 
 	For n=1 To Mines										; Place Mines
 		MineOk = False
-		##[$80BB]
+		Repeat
 			x = Rnd(MXX-1)+1								; Random Position
 			y = Rnd(MYY-1)+1
 			If mf(x,y)=0										; Must be empty
 				mf(x,y) =		9
 				MineOk	= True
 			EndIf
-		##[$80BC] MineOk											; Retry until place ok
+		Until MineOk											; Retry until place ok
 	Next
 
 	For y=1 To MYY											; Precalculate MineField Values

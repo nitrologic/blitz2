@@ -49,8 +49,8 @@ If n>0
 	For i=n-2 To 0 Step -1
 		For j=0 To i
 			If i(j)\a>i(j+1)\a
-				##[$80C9] i(j)\a,i(j+1)\a
-				##[$80C9] i(j)\c,i(j+1)\c
+				Exchange i(j)\a,i(j+1)\a
+				Exchange i(j)\c,i(j+1)\c
 			EndIf
 		Next
 	Next

@@ -174,20 +174,20 @@ End Function
 
 Function.l GetMem32{size.l}
 	CNIF #c=#j
-		MOVEQ #0,d1:ADD.l #16,d0:##[$80C2] $c002
+		MOVEQ #0,d1:ADD.l #16,d0:SysJsr $c002
 
 		ADD.l #31,d0
 		AND #$ffe0,d0
 		AsmExit
 	CELSE
-		MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+		MOVEQ #0,d1:SysJsr $c002:AsmExit
 	CEND
 End Function
 
 
 
 Function.l GetMem{size.l}
-	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
 End Function
 
 
@@ -457,14 +457,14 @@ Return
 ;		MOVE d4,$f0002a
 ;	Until 1=0
 
-	##[$80BB]
+	Repeat
 
 
 		!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
 
 
 
-		##[$80C9] *bmr1.jbmap,*bmr2.jbmap
+		Exchange *bmr1.jbmap,*bmr2.jbmap
 		MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
 
 
@@ -486,7 +486,7 @@ Return
 
 		Gosub DoRot
 		For t=0 To 0; Step 2
-			##[$80C9] mapa.l,mapb.l
+			Exchange mapa.l,mapb.l
 			map.l=mapa
 			Gosub RotObj
 			Gosub Draw
@@ -507,7 +507,7 @@ Return
 
 		GetJoy{&jox.w,&joy.w,&butt.w}
 
-	##[$80BC] 1=0
+	Until 1=0
 
 Return
 
@@ -1128,7 +1128,7 @@ Return
 		Gosub Rot
 		Gosub Draw
 
-	 ##[$80BC] Joyb(0)<>0
+	 Until Joyb(0)<>0
 	End
 	CEND
 

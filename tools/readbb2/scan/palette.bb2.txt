@@ -18,7 +18,7 @@ localstat 0,100,50,300,72,$100A,"PALETTE REQUESTER",1,2,0
 ;
 cc=0:Borders 0,3+cc,On:Redraw 0,3+cc
 ;
-##[$80BB]
+Repeat
 	SetVProp 0,0,1-Blue(cc)/15,1/16
 	SetVProp 0,1,1-Palette(cc)/15,1/16
 	SetVProp 0,2,1-PalRGB(cc)/15,1/16
@@ -35,5 +35,5 @@ cc=0:Borders 0,3+cc,On:Redraw 0,3+cc
 		b.b=VPropPot(0,2)*16
 		Green cc,15-r,15-g,15-b
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 ;

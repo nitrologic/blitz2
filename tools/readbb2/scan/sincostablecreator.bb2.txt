@@ -12,8 +12,8 @@ If OpenFile(0,"sincos.table")
 	Fields 0,c,s
 	n=0
 	For k=0 To 1 Step 0.0027777
-		c=HCos(##[$80BA]*2*k)
-		s=HSin(##[$80BA]*2*k)
+		c=HCos(Pi*2*k)
+		s=HSin(Pi*2*k)
 		Put 0,n
 		n=n+1
 	Next k

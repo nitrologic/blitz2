@@ -56,11 +56,11 @@ Buffer 0,16384
 mons=5											; Shape number of the "monster"
 ldishape=6									; Shape number to be used for temp light-
 														;	distorted shape.
-size.l=Peek.w(##[$80B8] MidHandle(mons)+22)
+size.l=Peek.w(Addr MidHandle(mons)+22)
 
 ; Main distortion routine.
 
-##[$80BB]
+Repeat
 	x = MouseX/2+80
 	y = MouseY/2+70
 	If oldx<>x OR oldy<>y
@@ -69,10 +69,10 @@ size.l=Peek.w(##[$80B8] MidHandle(mons)+22)
 		GetaShape ldishape,x,y,15,13
 
 ; Gets cookie-cut of shape
-		##[$FEDB] Peek.l(##[$80B8] MidHandle(mons)+18),Peek.l(##[$80B8] MidHandle(ldishape)+18),size
+		##[$FEDB] Peek.l(Addr MidHandle(mons)+18),Peek.l(Addr MidHandle(ldishape)+18),size
 		BBlit 0,ldishape,x+1,y+1
 
 		oldx = x
 		oldy = y
 	EndIf
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0

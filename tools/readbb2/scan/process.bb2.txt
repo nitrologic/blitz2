@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/casey/Process.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/casey/Process.bb2
-##[$80C3]
+WBStartup
 
 allocst 0,5
 
@@ -38,7 +38,7 @@ ScreensBitMap 0,0
 Dim table.l(255)
 Dim Ptable.w(31)
 
-sWindow.l=Peek.l(##[$80B8] localstat(0))
+sWindow.l=Peek.l(Addr localstat(0))
 sScreen.l=Peek.l(sWindow+46)
 sBitMap.l=Peek.l(sScreen+88)
 

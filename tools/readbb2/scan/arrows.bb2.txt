@@ -15,7 +15,7 @@
 ;	The program is shareware.	You may make a single copy for back
 ;	up purposes only.	Enjoy the game.
 
-##[$80C3]
+WBStartup
 
 cx=100 :cy=106 :allcpu.b=False
 angle.q=0 :rad.q=0 :editing.b=False
@@ -70,12 +70,12 @@ LoadSound 9,"tapkey.snd"
 Use lmaxlen 0 :BitMapOutput 0 :Filter On
 
 For d=1 To 9
-	Poke.w ##[$80B8] Sound(d)+4,372
+	Poke.w Addr Sound(d)+4,372
 Next d
 For d=11 To 26 :Handle d,0,26 :Next d
 Buffer 0,9216 :Format "###"
 
-Dim segangle.b(20) :##[$80C8] segdat
+Dim segangle.b(20) :Restore segdat
 For d=1 To 20 :Read segangle(d) :Next d
 segdat
 Data.b 2,16,20,6,38,10,24,28,34,12
@@ -104,16 +104,16 @@ Statement waitbutton{onoff}	 ; Await for user to click Mouse
 	Shared mx,my,longwait,allcpu
 	longwait=0
 	If onoff=On
-		##[$80BB]
+		Repeat
 			If MouseXSpeed+MouseYSpeed<>0 Then longwait=0
 			VWait :If allcpu=True Then longwait+1
 			If Joyb(0)=1 Then Sound 9,8
-		##[$80BC] Joyb(0)=1 OR longwait>=468
+		Until Joyb(0)=1 OR longwait>=468
 	Else
-		##[$80BB]
+		Repeat
 			If MouseXSpeed+MouseYSpeed<>0 Then longwait=0
 			VWait :If allcpu=True Then longwait+1
-		##[$80BC] Joyb(0)<>1 OR lonwait>=468
+		Until Joyb(0)<>1 OR lonwait>=468
 	EndIf
 	mx=MouseX/8
 	my=(MouseY-8)/8+32
@@ -242,13 +242,13 @@ End Statement
 
 Function.q ax{radsize,ang}		 ; gives a value between 0 and 6300
 	Shared cx										; from given radius and angle.
-	pos=cx+radsize*HSin(ang*##[$80BA]/20)
+	pos=cx+radsize*HSin(ang*Pi/20)
 	Function Return pos
 End Function
 
 Function.q ay{radsize,ang}		 ; gives a value between 0 and 6300
 	Shared cy										; from given radius and angle.
-	pos=cy+(-radsize)*HCos(ang*##[$80BA]/20)
+	pos=cy+(-radsize)*HCos(ang*Pi/20)
 	Function Return pos
 End Function
 
@@ -263,7 +263,7 @@ End Function
 flashshow{} :waitbutton{Off}
 playgame=False :quit=False :gameover=False
 
-##[$80BB]
+Repeat
 	waitbutton{On}
 
 	If my>=50 OR my<35 OR mx<8	; Outside of panel area clicked.
@@ -317,7 +317,7 @@ playgame=False :quit=False :gameover=False
 
 	If my=45	; - START - PLAYERS - QUIT - line
 
-		If mx>=30 AND mx<=39 Then ##[$80BE] If :##[$80BE] ##[$80BB] :End ; QUIT
+		If mx>=30 AND mx<=39 Then Pop If :Pop Repeat :End ; QUIT
 		If mx>=9 AND mx<=18 Then playgame=True ; START
 
 		If mx>=20 AND mx<=28 ; PLAYERS gadget pressed
@@ -350,7 +350,7 @@ playgame=False :quit=False :gameover=False
 			If p(pl)\team=1 Then d$="GREEN TEAM" Else d$=" RED TEAM "
 			customgadget{d$,15,56}
 			customgadget{" FINISHED ",15,60} :t$=""
-			##[$80BB]
+			Repeat
 				waitbutton{On}
 				If mx>9 AND mx<30 AND my>39 AND my<48
 					qx=mx-9 :qy=my-39
@@ -397,7 +397,7 @@ playgame=False :quit=False :gameover=False
 					If my=60 Then quit=True
 				EndIf
 				waitbutton{Off}
-			##[$80BC] quit=True
+			Until quit=True
 			If flag=p(pl)\stat Then p(pl)\ranking=rank
 			UnBuffer 0 :flashwipe{} :flashshow{} :mx=0 :my=0
 		EndIf
@@ -445,7 +445,7 @@ playgame=False :quit=False :gameover=False
 	EndIf
 
 	waitbutton{Off}
-##[$80BC] playgame=True
+Until playgame=True
 
 Gosub sortplayers
 flashwipe{}
@@ -543,7 +543,7 @@ quit=False :winner=False :t=0
 Select gametype
 Case 0 ;					Standard and Doubles
 	numplayers=2+(doubles*2)
-	##[$80C9] play(1),play(2) :##[$80C9] play(3),play(4)
+	Exchange play(1),play(2) :Exchange play(3),play(4)
 	For leg=1 To numlegs+1
 		gameover=False :flashwipe{}
 		If winner=0
@@ -576,11 +576,11 @@ Case 0 ;					Standard and Doubles
 		If winner<>0 Then Sound 8,1 :VWait 33 :Sound 8,2
 		If winner=0 Then d$="PLAY MATCH" Else d$="C"
 		Gosub yesno :showtop{8} :Colour 1,3
-		##[$80C9] play(1),play(2) :##[$80C9] play(3),play(4)
+		Exchange play(1),play(2) :Exchange play(3),play(4)
 		Format "###" :Locate 9,1.2
 		If doubles=0 Then Print "STANDARD (",points,") "
 		If doubles=1 Then Print "DOUBLES (",points,")	"
-		##[$80BB]
+		Repeat
 			For pl=1 To numplayers
 				If gameover=False
 					symbols{} :req=p(play(pl))\score :remain=req
@@ -619,7 +619,7 @@ Case 0 ;					Standard and Doubles
 				EndIf
 				cleanup{0}
 			Next pl
-		##[$80BC] gameover=True
+		Until gameover=True
 		If winner=False
 			For d=1 To numplayers
 				If p(play(d))\wongames=Int(numlegs/2+1) AND winner=0
@@ -660,7 +660,7 @@ Case 2 ;					Killer
 	Colour 1,3 :Locate 9,1.2 :Print "KILLER				 "
 	For pl=1 To numplayers
 		quit=0 :symbols{}
-		##[$80BB]
+		Repeat
 			For dart=1 To 3
 				If quit=0
 					If cpu=True
@@ -678,31 +678,31 @@ Case 2 ;					Killer
 				EndIf
 			Next dart
 			cleanup{0}
-		##[$80BC] quit=True
+		Until quit=True
 		Gosub update_list
 	Next pl :Colour 1,0
 	ct{"all players now have their own",52}
 	ct{"double and the game may begin",53}
 	showbottom{8} :Gosub yesno
 	showtop{8} :Gosub update_list :pl=##[$B48C](1,numplayers)
-	##[$80BB]
+	Repeat
 		If gameover=False
-			##[$80BB]
+			Repeat
 				pl+1 :If pl>numplayers Then pl=1
-			##[$80BC] p(play(pl))\wongames>0
+			Until p(play(pl))\wongames>0
 			symbols{}
 		EndIf
 		For dart=1 To 3
 			If gameover=False
 				If cpu=True
 					multi=0
-					##[$80BB]
+					Repeat
 						d=##[$B48C](1,numplayers)
 						If d<>pl AND p(play(d))\wongames>0
 							attempt=p(play(d))\score :multi=2
 							Gosub calc_cpu_shot
 						EndIf
-					##[$80BC] multi=2
+					Until multi=2
 				EndIf
 				Gosub throwdart
 				If multi=2
@@ -731,12 +731,12 @@ Case 2 ;					Killer
 			EndIf
 		Next dart
 		cleanup{0}
-	##[$80BC] gameover=True
+	Until gameover=True
 Case 3 ;					Round the board
 	pl=1 :p(play(pl))\score=0 :miss=6
 	Colour 1,3 :Locate 9,1.2 :Print "ROUND THE BOARD"
 	showtop{8} :symbols{} :attempt=1 :gameover=False
-	##[$80BB]
+	Repeat
 		For dart=1 To 3
 			If NOT gameover=True
 				digit{attempt,216,21} :digit{miss,216,87}
@@ -758,7 +758,7 @@ Case 3 ;					Round the board
 			EndIf
 		Next dart
 		cleanup{1}
-	##[$80BC] gameover=True
+	Until gameover=True
 	flashwipe{}
 	If miss>0
 		ct{"congratulations!",40}
@@ -779,7 +779,7 @@ Case 4 ;					Hit the number
 	showtop{8} :symbols{} :attempt=1 :gameover=False :choice=1
 	throws=10 :sing=0 :doub=0 :treb=0 :miss=0
 	numthrows=0 :Colour 11,2 :ct{"game in progress",53} :Colour 1,0
-	##[$80BB]
+	Repeat
 		For dart=1 To 3
 			If NOT gameover=True
 				digit{attempt,216,21} :digit{throws,216,87}
@@ -817,7 +817,7 @@ Case 4 ;					Hit the number
 			EndIf
 		Next dart
 		cleanup{1}
-	##[$80BC] gameover=True
+	Until gameover=True
 	waitbutton{On} :cleanup{0}
 	flashwipe{} :ct{"END OF GAME",32}
 	longdiv p(play(pl))\fig,146,322 :Colour 11,0 :Format"##" :d=numthrows
@@ -833,7 +833,7 @@ Case 5 ;					Practice
 	numplayers=1 :pl=1
 	Colour 1,3 :Locate 9,1.2 :Print "PRACTICE			 " :showtop{8}
 	symbols{} :Colour 11,2 :ct{"game in progress",53} :Colour 1,0
-	##[$80BB]
+	Repeat
 		For dart=1 To 3
 			If cpu=True
 				d=##[$B48C](1,12)
@@ -852,7 +852,7 @@ Case 5 ;					Practice
 		Next dart
 		waitbutton{Off}
 		cleanup{1}
-	##[$80C7]
+	Forever
 End Select
 
 Goto mainscreen
@@ -901,7 +901,7 @@ Goto mainscreen
 	choice=0
 	If d$<>"C" Then customgadget{d$,15,57}
 	customgadget{"	 MENU	 ",15,60}
-	##[$80BB]
+	Repeat
 		waitbutton{Off} :waitbutton{On}
 		If mx>=15 AND mx<=24
 			If my=57 AND d$<>"C" Then choice=1
@@ -909,9 +909,9 @@ Goto mainscreen
 		EndIf
 		If longwait=True Then choice=1
 		If longwait=True AND d$="C" Then choice=2
-	##[$80BC] choice<>0
+	Until choice<>0
 	If choice=2 OR gameover=True
-		gameover=True :cleanup{0} :##[$80BE] Gosub :Goto mainscreen
+		gameover=True :cleanup{0} :Pop Gosub :Goto mainscreen
 	EndIf
 Return
 
@@ -932,7 +932,7 @@ Return
 		EndIf
 	Next d
 	For d=1 To ##[$B48C](30,70)
-		sing=##[$B48C](1,t) :doub=##[$B48C](1,t) :##[$80C9] play(sing),play(doub)
+		sing=##[$B48C](1,t) :doub=##[$B48C](1,t) :Exchange play(sing),play(doub)
 	Next d
 	If doubles=1
 		d=p(play(1))\team+p(play(2))\team+p(play(3))\team+p(play(4))\team
@@ -942,8 +942,8 @@ Return
 			ct{"	 team to play a game of doubles	",41}
 			d$="C" :Gosub yesno
 		EndIf
-		If p(play(1))\team=p(play(2))\team Then ##[$80C9] play(2),play(3)
-		If p(play(2))\team=p(play(3))\team Then ##[$80C9] play(3),play(4)
+		If p(play(1))\team=p(play(2))\team Then Exchange play(2),play(3)
+		If p(play(2))\team=p(play(3))\team Then Exchange play(3),play(4)
 	EndIf
 Return
 
@@ -963,7 +963,7 @@ Return
 	If remain=50 Then attempt=50 :multi=1 :Goto setrad
 	If remain<41
 		If remain/2=Int(remain/2)
-			attempt=remain/2 :multi=2 :##[$80BE] If :Goto setrad
+			attempt=remain/2 :multi=2 :Pop If :Goto setrad
 		EndIf
 	EndIf
 	If Int(Rnd(rank+50))<6 AND remain>51 Then multi=1 :attempt=50 :Goto setrad
@@ -987,9 +987,9 @@ tryshot
 		vl=d*multi
 		If Int(Rnd*12)=7 AND d>10 AND remain<70 Then d-5
 		If remain/2=Int(remain/2) ; even number
-			If vl/2=Int(vl/2) AND vl<remain-1 Then attempt=vl :##[$80BE] For :Goto doit
+			If vl/2=Int(vl/2) AND vl<remain-1 Then attempt=vl :Pop For :Goto doit
 		Else
-			If vl/2<>Int(vl/2) AND vl<remain-1 Then attempt=vl :##[$80BE] For :Goto doit
+			If vl/2<>Int(vl/2) AND vl<remain-1 Then attempt=vl :Pop For :Goto doit
 		EndIf
 	Next d
 	doit:
@@ -1019,7 +1019,7 @@ Return
 		Gosub doline
 	Next d
 	customgadget{"OK",20,60} :showbottom{8}
-	##[$80BB]
+	Repeat
 		waitbutton{On}
 		If my>39 AND my<56
 			pline=my-39 :pl=pline
@@ -1037,7 +1037,7 @@ Return
 			EndIf
 		EndIf
 		waitbutton{Off}
-	##[$80BC] quit=True
+	Until quit=True
 	If editing=False
 		For d=1 To 16
 			p(d)\gam[gametype+doubles]=sel(d)
@@ -1128,7 +1128,7 @@ Return
 	If Rnd>.5 Then px=##[$B48C](38,90) Else px=##[$B48C](108,158)
 	py=224 :delay=0
 
-	##[$80BB]
+	Repeat
 
 		If cpu=False
 			px=QLimit(px+MouseXSpeed*1.5,20,184)	; HUMAN to guide
@@ -1156,10 +1156,10 @@ Return
 
 		VWait :ShowSprite 18,px,py+14,6
 
-	##[$80BC] delay>=(73+rank)
+	Until delay>=(73+rank)
 	delay=0 :offs=QLimit(offs,7,8+(rank/2))
 
-	##[$80BB]													; send dart up screen until the
+	Repeat													; send dart up screen until the
 		py-9													; HUMAN/CPU	says stop or dart
 		If cpu=True									 ; reaches the upper limit
 			If py<by+offs Then delay=1
@@ -1167,7 +1167,7 @@ Return
 			If Joyb(0)<>1 Then delay=1
 		EndIf
 		VWait :ShowSprite 18,px,py+14,6
-	##[$80BC] delay=1 OR py<55
+	Until delay=1 OR py<55
 
 	ShowSprite 12,-24,80,6 :bx=px :by=py
 	bx+##[$B48C](3,5)-##[$B48C](3,5) :by+##[$B48C](4,7)-##[$B48C](3,5)	; shake up the

@@ -3,7 +3,7 @@
 ; Andrew J Postill's alarmclock program
 ;
 
-##[$80C3]
+WBStartup
 freest 0
 MaxLen LSD$=47
 If ##[$BE15] ("Alarm.Snd")
@@ -111,12 +111,12 @@ Redraw 0,1
 WSize 450,184
 Q=1
 LT=1
-##[$80BB]
+Repeat
 	y=(Q*10)+31
 	WLocate 50,y
 	NPrint Mid$(ALARM$(Q),1,10)+" "+Mid$(ALARM$(Q),11,5)+" "+Mid$(ALARM$(Q),16,30)
 	Q=Q+1
-##[$80BC] Q>12
+Until Q>12
 .ListLPL
 ev.l=Event
 If ev=64
@@ -179,12 +179,12 @@ INFO$=""
 WLocate 65,195
 NPrint "------------------------------"
 For y=1 To 30
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		a$=Inkey$
-	##[$80BC] a$<>""
+	Until a$<>""
 	a=Asc(a$)
-##[$80BC] a>13 AND a<129
+Until a>13 AND a<129
 INFO$=INFO$+a$
 WLocate 65,195
 NPrint INFO$

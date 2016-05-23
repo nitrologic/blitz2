@@ -18,7 +18,7 @@ EndIf
 
 For l=i-2 To 0 Step -1
 	For j=0 To l
-		If c$(j)>c$(j+1) Then ##[$80C9] c$(j),c$(j+1)
+		If c$(j)>c$(j+1) Then Exchange c$(j),c$(j+1)
 	Next
 Next
 

@@ -16,7 +16,7 @@ CLR d0
 SWAP d0
 ADD d0,d0
 
-##[$80BD] d0,a
+PutReg d0,a
 
 NPrint Hex$(a)
 

@@ -143,9 +143,9 @@ End Statement
 	Point 0, #YRes-1, Int(Rnd(255)+1)
 .main
 	Sub_Divide{0, 0, #XRes-1, #YRes-1}; draw a cloud
-	##[$80BB]
+	Repeat
 		VWait
-		CycleColours {##[$80B8] SetCycle (0)}
+		CycleColours {Addr SetCycle (0)}
 		Use SetCycle 0
-	##[$80BC] Joyb(0)<>0 OR Joyb(1)<>0
+	Until Joyb(0)<>0 OR Joyb(1)<>0
 	End

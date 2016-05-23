@@ -54,11 +54,11 @@ localstat 0,0,0,320,200,$1900,"",1,0
 ;
 arrmult 0
 
-##[$80BB]
+Repeat
 	a.l=WaitEvent
 	If a=256	;menupick?
 		If MenuHit=0 AND ItemHit=2 Then End
 		WLocate 0,12
 		NPrint "Menu: ",MenuHit,"	Item: ",ItemHit,"	Sub Item: ",SubHit,"	 "
 	EndIf
-##[$80C7]
+Forever

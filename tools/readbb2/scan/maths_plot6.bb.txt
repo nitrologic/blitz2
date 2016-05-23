@@ -3,10 +3,10 @@
 ;Introduce a third variable related to the frame number. (u in this example)
 ;Animated lattices are quick and easy on memory
 ;because the whole screen is filled with the same shape.
-##[$80C3]
+WBStartup
 lmaxlen 0,320,256,5
 lmaxlen 1,320,256,5
-p2.f=2*##[$80BA]
+p2.f=2*Pi
 AutoCookie Off
 VWait 250
 BLITZ
@@ -22,7 +22,7 @@ For s=0 To 6
 	BlockScroll 0
 	For i=0 To 63
 		x.f=(6*i)/64:x=HSin((p2*x)/6)
-		If Joyb(1)<>0:##[$80BE] For:##[$80BE] For:Goto l1:EndIf
+		If Joyb(1)<>0:Pop For:Pop For:Goto l1:EndIf
 		For j=0 To 63
 			y.f=6-(6*j)/64:y=HSin((p2*y)/6)
 ;----------------------------------------------------------

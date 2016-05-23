@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example9.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example9.bb2
 ##[$80CC]
-##[$80C3]
+WBStartup
 
-##[$80BF]	"FUN_Math:"
+INCDIR	"FUN_Math:"
 Include "FUN_Objects.bb2"
 
 NEWTYPE.DList_Entry
@@ -58,7 +58,7 @@ Statement Sort_DList{items.w}
 	DEFTYPE.DList_Entry Temp
 
 	swaps.b=False
-	##[$80BB]
+	Repeat
 		swaps=False
 		For count.w=0 To items-1
 			If DList(count)\z>DList(count+1)\z
@@ -68,7 +68,7 @@ Statement Sort_DList{items.w}
 				swaps=True
 			EndIf
 		Next count
-	##[$80BC] swaps=False
+	Until swaps=False
 End Statement
 
 Statement Draw_Plane{*VRC.Matrix_Type}
@@ -274,9 +274,9 @@ py.w=-20
 vy.q=0
 
 
-##[$80BB]
- yra.q=yr*(##[$80BA]/180)
- xra.q=xr*(##[$80BA]/180)
+Repeat
+ yra.q=yr*(Pi/180)
+ xra.q=xr*(Pi/180)
  rat.q=HCos(xra)*10
 
  If Joyx(1)=1
@@ -316,7 +316,7 @@ vy.q=0
  BitMapOutput 2 : Colour 2 : Locate 0,0
  DisplayBitMap 0,physical
  Use lmaxlen logical
-##[$80BC] Joyb(0)
+Until Joyb(0)
 
 End
 

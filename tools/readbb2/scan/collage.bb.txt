@@ -11,8 +11,8 @@ ff=1
 For y=0 To 31
 	For x=0 To 31
 		##[$A404] 1,f$(cc)+Mid$(Str$(ff+1000),2)
-		a.l=##[$80B8] ##[$A401](1)
-		If Peek.w(##[$80B8] ##[$A401](1)+16)>64
+		a.l=Addr ##[$A401](1)
+		If Peek.w(Addr ##[$A401](1)+16)>64
 			##[$A40C] 1,0,3,0,64,32,x*64,y*32
 		Else
 			##[$A40C] 1,0,0,0,64,32,x*64,y*32
@@ -50,7 +50,7 @@ FadePalette 0
 ;LoadChunky 0,"testpic.iff"
 
 a.l=##[$A410](0)
-ww=Peek.w(##[$80B8] ##[$A401](0)+22)
+ww=Peek.w(Addr ##[$A401](0)+22)
 w=426
 
 Function.w getcol{r.w,b.w,g.w}

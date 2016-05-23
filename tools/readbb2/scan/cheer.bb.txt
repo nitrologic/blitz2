@@ -22,7 +22,7 @@ ScreensBitMap 0,0
 Use lmaxlen 0
 InitBank 0,32768,0
 blok.l=Bank(0)
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 
 LoadBitMap 0,"cheer.iff",0
 FadePalette 0

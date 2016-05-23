@@ -37,11 +37,11 @@ Dim map.b(width-1,height-1)		;standard 2D array for the map
 	myx=10:myy=10					;in case no B found on the map
 	Gosub readmap					;read file map$ into map array
 	Gosub welcome					;do front end
-	##[$80BB]								 ;main loop
+	Repeat								 ;main loop
 		Gosub drawmap				;refresh display
 		Gosub yourmove			 ;get player's move
 		Gosub monstermove		;move the monsters
-	##[$80BC] gameover=True
+	Until gameover=True
 	Print "PLAY AGAIN? (Y/N)"
 	If UCase$(Edit$(1))="Y" Then Goto maingame
 	End

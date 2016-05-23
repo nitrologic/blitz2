@@ -87,7 +87,7 @@ thresh=120
 	ClearString 0,1:Gosub carsettings
 
 .main
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If ev=$40
 			Select GadgetHit
@@ -97,8 +97,8 @@ thresh=120
 					f$=FileRequest$("SELECT PIC.0001 OF 800",pa$,fi$)
 					If ##[$BE15](f$)
 						##[$A404] 0,f$
-						fw=Peek.w(##[$80B8] ##[$A401](0)+16)
-						fh=Peek.w(##[$80B8] ##[$A401](0)+18)
+						fw=Peek.w(Addr ##[$A401](0)+16)
+						fh=Peek.w(Addr ##[$A401](0)+18)
 						f$=UnLeft$(f$,8)
 						Gosub carsettings
 					Else
@@ -128,7 +128,7 @@ thresh=120
 					EndIf
 			End Select
 		EndIf
-	##[$80C7]
+	Forever
 
 .carsettings:
 	WLocate 14,24:NPrint "Path Name		= ",f$,"											"
@@ -152,9 +152,9 @@ thresh=120
 		fr=(fr AND $ffe0)+((23-fr)AND31):WLocate 0,0:Print fr,"	"
 ;		fr=Int(fr/32)*32+((fr+40) MOD 32)
 		SpriteMode 2:GetaSprite 0,0
-		##[$FEDB] Peek.l(##[$80B8] Sprite(0)),BankLoc(0)+fr*512,512
+		##[$FEDB] Peek.l(Addr Sprite(0)),BankLoc(0)+fr*512,512
 		SpriteMode 0:GetaSprite 0,1
-		##[$FEDB] Peek.l(##[$80B8] Sprite(0)),BankLoc(1)+fr*256,256
+		##[$FEDB] Peek.l(Addr Sprite(0)),BankLoc(1)+fr*256,256
 	Next
 	SaveBank 0,"ram:"+n$+".aga"
 	SaveBank 1,"ram:"+n$+".ecs"
@@ -166,7 +166,7 @@ thresh=120
 	If ReadMem(0,"ram:"+n$+".def")
 		FileOutput 0:NPrint n$:NPrint d$
 		Exists 0,&car\settings,SizeOf .handling
-		Exists 0,Peek.l(##[$80B8] lmaxlen(0)+8),64*32/4
+		Exists 0,Peek.l(Addr lmaxlen(0)+8),64*32/4
 		CloseFile 0
 	EndIf
 	WindowOutput 0
@@ -176,7 +176,7 @@ thresh=120
 	;
 	ff$=f$+"pic."+Right$(Str$(10000+frame),4)
 	If ##[$BE15](ff$)=0 Then BeepScreen 0:Return
-	##[$A404] 0,ff$:m.l=##[$80B8] ##[$A401](0):Use lmaxlen 0
+	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use lmaxlen 0
 	For y=0 To 31:For x=0 To 63
 		c=pickcolor{m,x+ox,y+oy,&a(0),0}
 		Use lmaxlen 0:Point x,y,c

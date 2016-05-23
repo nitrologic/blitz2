@@ -48,7 +48,7 @@ For ii=0 To big
 
 		x=(i-0.5)
 ;		y=0
-		y=HSin(jj/mass*##[$80BA])*HCos(ii/mass*##[$80BA]) *-0.1
+		y=HSin(jj/mass*Pi)*HCos(ii/mass*Pi) *-0.1
 		z=(j-0.5)
 
 		tx=x

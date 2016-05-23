@@ -11,7 +11,7 @@ Scroll 0,0,640,256,0,256
 
 SaveBitmap 0,"BACKDROP1.IFF",0
 
-*b.bitmap=##[$80B8] lmaxlen(0)
+*b.bitmap=Addr lmaxlen(0)
 
 c.l=ReadMem(0,"BACKDROP1.RAW")
 

@@ -5,20 +5,20 @@ lmaxlen 1,320,256,2
 Slice 0,44,2
 
 ox=320/2: oy=256/2		 ;centro de la pantalla de proyeccion
-theta=60*##[$80BA]/180
-phi=20*##[$80BA]/180
-angleinc=##[$80BA]/40				 ;r indica la distancia del ojo al objeto
+theta=60*Pi/180
+phi=20*Pi/180
+angleinc=Pi/40				 ;r indica la distancia del ojo al objeto
 r=4: d=250						 ;d es la distancia del ojo a la pantalla
 
-##[$80BB]
+Repeat
 
 	VWait: Show db: db=1-db: Use lmaxlen db: BlockScroll
-	##[$80C8] datos
+	Restore datos
 	s1=HSin(theta): c1=HCos(theta): s2=HSin(phi): c2=HCos(phi)
 	s3=c1*s2: s4=s1*s2: s5=c1*c2: s6=s1*c2
 
 	Read x,y,z
-	##[$80BB]
+	Repeat
 		x0=-x*s1+y*c1: y0=-x*s3-y*s4+z*c2: z0=-x*s5-y*s6-z*s2+r
 		xp=d*x0/z0: yp=d*y0/z0
 		Read x,y,z
@@ -26,12 +26,12 @@ r=4: d=250						 ;d es la distancia del ojo a la pantalla
 		xq=d*x0/z0: yq=d*y0/z0
 		Line ox+xp,oy-yp,ox+xq,oy-yq,3
 		Read x,y,z
-	##[$80BC] x=-3
+	Until x=-3
 
 	theta+angleinc/4
 	phi+angleinc
 
-##[$80BC] Joyb(0)
+Until Joyb(0)
 
 .datos
 Data 1,1,1,1,-1,1,1,-1,1,-1,-1,1,-1,-1,1,-1,1,1,-1,1,1,1,1,1

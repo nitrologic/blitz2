@@ -14,7 +14,7 @@
 ; Enjoy!
 ;
 
-##[$80CC]:##[$80C3]
+##[$80CC]:WBStartup
 
 DEFTYPE .l
 
@@ -35,7 +35,7 @@ EndIf
 ; Create simple sine waveform for alarm
 If alarm=1
  InitSound 0,16
- RadTo16.f=##[$80BA]/8
+ RadTo16.f=Pi/8
  For t.w=0 To 15
 	 SoundData 0,t,HSin(t*RadTo16)*127
  Next

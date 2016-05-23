@@ -84,7 +84,7 @@ For i=0 To 3:fix_pos(i)=i*fix_length:Next i
 ;Set out chromatic scale
 For i=0 To 45
 	Read chrom_scale(i)\period
-	chrom_scale(i)\adr_sound=##[$80B8] Sound(0)
+	chrom_scale(i)\adr_sound=Addr Sound(0)
 	chrom_scale(i)\ss=0
 Next
 
@@ -104,21 +104,21 @@ For i=0 To 5:For j=0 To 5:Read min_shifts(i,j):Next:Next
 
 For i=46 To 71
 	chrom_scale(i)\period=chrom_scale(i-24)\period
-	chrom_scale(i)\adr_sound=##[$80B8] Sound(1)
+	chrom_scale(i)\adr_sound=Addr Sound(1)
 	chrom_scale(i)\ss=1
 Next
 
 ;Set out diatonic major and minor scales
 For i=0 To 11:wi=0
 	For j=0 To 71
-		ij=((i+j) ##[$80B9] 12)
+		ij=((i+j) MOD 12)
 		If ij=0 OR ij=2 OR ij=4 OR ij=5 OR ij=7 OR ij=9 OR ij=11
 			maj_scale(i,wi)=j:wi+1
 		EndIf
 Next:Next
 For i=0 To 11:wi=0
 	For j=0 To 71
-		ij=((i+j) ##[$80B9] 12)
+		ij=((i+j) MOD 12)
 		If ij=0 OR ij=2 OR ij=3 OR ij=5 OR ij=7 OR ij=8 OR ij=11
 			min_scale(i,wi)=j:wi+1
 		EndIf
@@ -127,16 +127,16 @@ Next:Next
 ;Establish the positions of the tonic notes for each scale
 For i=0 To 11
 	j=-1
-	##[$80BB]
+	Repeat
 		j+1
-	##[$80BC] maj_scale(i,j)+6=maj_scale(i,j+3) AND maj_scale(i,j)+2=maj_scale(i,j+1)
+	Until maj_scale(i,j)+6=maj_scale(i,j+3) AND maj_scale(i,j)+2=maj_scale(i,j+1)
 	maj_tonics(i)=j+4
 Next
 For i=0 To 11
 	j=-1
-	##[$80BB]
+	Repeat
 		j+1
-	##[$80BC] min_scale(i,j)+3=min_scale(i,j+1)
+	Until min_scale(i,j)+3=min_scale(i,j+1)
 	min_tonics(i)=j+2
 Next
 
@@ -153,7 +153,7 @@ piece_mode.w=Int(Rnd(2))
 piece_mode=0
 piece_key.w=100*piece_mode+Int(Rnd(12))
 modes(0)=0
-##[$80BB]
+Repeat
 	For i=32 To 480 Step 32
 		If piece_mode.w=0
 			modes(i)=maj_shifts(modes(i-32),Int(Rnd(maj_shifts(modes(i-32),1))+2))
@@ -161,25 +161,25 @@ modes(0)=0
 			modes(i)=min_shifts(modes(i-32),Int(Rnd(min_shifts(modes(i-32),1))+2))
 		EndIf
 	Next
-##[$80BC] modes(480)=0
+Until modes(480)=0
 For i=0 To 480 Step 32
 	If piece_mode=0
 		r.w=maj_shifts(modes(i),0)
 		If r>90:q.w=100 Else:q=0:EndIf
-		r=(((r ##[$80B9] 100)+piece_key) ##[$80B9] 12)+q
+		r=(((r MOD 100)+piece_key) MOD 12)+q
 	Else
 		r.w=min_shifts(modes(i),0)
 		If r>90:q.w=100 Else:q=0:EndIf
-		r=(((r ##[$80B9] 100)+piece_key-100) ##[$80B9] 12)+q
+		r=(((r MOD 100)+piece_key-100) MOD 12)+q
 	EndIf
 	For j=0 To 31:modes(i+j)=r:Next
 Next
 
 ;Insert opening modulations
 If piece_mode=0
-	sub_dom=(piece_key+5) ##[$80B9] 12
+	sub_dom=(piece_key+5) MOD 12
 Else
-	sub_dom=((piece_key-95) ##[$80B9] 12)+100
+	sub_dom=((piece_key-95) MOD 12)+100
 EndIf
 For i=0 To 31:modes(i)=piece_key:Next i
 For i=32 To 63:modes(i)=sub_dom:Next i
@@ -256,14 +256,14 @@ fugue(504,3)=maj_scale(key,maj_tonics(key)+14)
 ;selected.
 Locate 2,10:NPrint "NOW COMPOSING BAR				"
 For ii.w=0 To 508 Step 4:Locate 22,10:NPrint (ii/8)+1:For voice.w=0 To 3
-If Joyb(1)<>0:##[$80BE] For:Goto fin:EndIf
+If Joyb(1)<>0:Pop For:Goto fin:EndIf
 If fixed(ii,voice)=1:Goto w1:EndIf
-	##[$80BB]
+	Repeat
 		mstart.w=Int(Rnd(10))*4:spitch.w=15+Int(Rnd(15)):s=-1
-		##[$80BB]
+		Repeat
 			s+1
 			k=-1
-				##[$80BB]
+				Repeat
 				k+1
 				key=modes(ii+k):mm=motifs(mstart+k)
 				If mm=999
@@ -278,13 +278,13 @@ If fixed(ii,voice)=1:Goto w1:EndIf
 				EndIf
 				fi=ii+k:Gosub chord_type
 				flag=0:j=-1
-				##[$80BB]
+				Repeat
 					j+1
 					If ctype=legit_chord(j):flag=1:EndIf
-				##[$80BC] j=24 OR flag=1
-			##[$80BC] k=3 OR flag=0
-		##[$80BC] s=6 OR flag=1
-	##[$80BC] flag=1
+				Until j=24 OR flag=1
+			Until k=3 OR flag=0
+		Until s=6 OR flag=1
+	Until flag=1
 w1:Next:Next
 
 ;Play fugue
@@ -293,7 +293,7 @@ For i=0 To fl1
 	fi=i:Gosub chord_type:fugue_ctype(i)=ctype
 Next i
 For i=0 To fl-8
-	If Joyb(1)<>0:##[$80BE] For:Goto fin:EndIf
+	If Joyb(1)<>0:Pop For:Goto fin:EndIf
 	Locate 22,12:Print Int(i/8+1)
 	If fugue(i,0)<999
 		Poke.w chrom_scale(fugue(i,0))\adr_sound+4,chrom_scale(fugue(i,0))\period
@@ -327,7 +327,7 @@ chord_type:
 	For m=1 To 3
 		If t(m)=999:t(m)=t(m-1):EndIf
 	Next
-	For q=0 To 3:t(q)=t(q) ##[$80B9] 12:Next q
+	For q=0 To 3:t(q)=t(q) MOD 12:Next q
 	Sort t()
 	For ri=1 To 3
 		interval(ri-1)=t(ri)-t(ri-1)

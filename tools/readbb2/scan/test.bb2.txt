@@ -42,8 +42,8 @@ Green 0,8,0,0
 
 Show 0
 
-b1.l=Peek.l(##[$80B8] lmaxlen(0)+8)
-b2.l=Peek.l(##[$80B8] lmaxlen(0)+12)
+b1.l=Peek.l(Addr lmaxlen(0)+8)
+b2.l=Peek.l(Addr lmaxlen(0)+12)
 
 yad=12		;y adjust
 

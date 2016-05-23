@@ -7,7 +7,7 @@ Else
 	End
 EndIf
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	i$=UCase$(Inkey$)
 	If i$=Chr$(27)
@@ -20,4 +20,4 @@ EndIf
 		Print Chr$(r),i$
 		WindowOutput 0
 	EndIf
-##[$80C7]
+Forever

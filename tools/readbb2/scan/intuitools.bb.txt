@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/tools/intuitools.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/tools/intuitools.bb
 ;
-##[$80C3]:##[$80CC]
+WBStartup:##[$80CC]
 ;
 ;A window making programming
 ;
@@ -421,10 +421,10 @@ Case 256
 			WLocate 96,49:Print sm$(sm)
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -454,7 +454,7 @@ Case 256
 						Gosub sussw:ex=-1
 					End Select
 				End Select
-			##[$80BC] ex
+			Until ex
 			newsc=-1
 		End Select
 	Case 2
@@ -470,10 +470,10 @@ Case 256
 			WLocate 80,4*14-7:Print jam$(wt_jam)
 			ClearString 2,1
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -509,13 +509,13 @@ Case 256
 						ex=-1
 					End Select
 				End Select
-			##[$80BC] ex
+			Until ex
 			Gosub fw2:Use localstat 0
 		Case 1	;test...
 			Gosub viewwin2
 			localstat 2,0,0,320,16,14,"CLOSE ME TO EXIT TEST MODE!",1,2
-			##[$80BB]
-			##[$80BC] WaitEvent=512 AND EventWindow=2
+			Repeat
+			Until WaitEvent=512 AND EventWindow=2
 			Free localstat 2:Gosub shownew
 		Case 2	;window options
 			ButtonId 12,6,Str$(wx)
@@ -538,10 +538,10 @@ Case 256
 			q{"MAX HEIGHT:"}
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				;
 				Select ev
 				Case 64
@@ -569,7 +569,7 @@ Case 256
 						ex=-1
 					End Select
 				End Select
-			##[$80BC] ex
+			Until ex
 			;
 			Free localstat 2
 			Gosub shownew
@@ -601,10 +601,10 @@ Case 256
 			ClearString 2,1
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -674,7 +674,7 @@ Case 256
 				Case 512
 					ex=-1
 				End Select
-			##[$80BC] ex
+			Until ex
 			Gosub fw2
 			Use localstat 0
 			;
@@ -693,10 +693,10 @@ Case 256
 			u{yn$(sg_bo),3}
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -750,12 +750,12 @@ Case 256
 								xl=gx+gw-1+wx:yl=gy+gh-1+wy
 								;
 								x=SMouseX:y=gy+gh-1:Gosub showabox
-								##[$80BB]
+								Repeat
 									WaitEvent:Use localstat EventWindow
 									Gosub showabox
 									x=SMouseX
 									Gosub showabox
-								##[$80BC] MButtons=1
+								Until MButtons=1
 								Gosub showabox
 								.
 								.makestring
@@ -777,7 +777,7 @@ Case 256
 				Case 512
 					ex=-1
 				End Select
-			##[$80BC] ex
+			Until ex
 			Gosub fw2
 			Use localstat 0
 			;
@@ -804,10 +804,10 @@ Case 256
 			u{yn$(hr),7}
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -859,11 +859,11 @@ Case 256
 								xl=gx+5+wx:yl=gy+5+wy
 								;
 								Gosub showabox2
-								##[$80BB]
+								Repeat
 									WaitEvent:Use localstat EventWindow
 									Gosub showabox
 									Gosub showabox2
-								##[$80BC] MButtons=1
+								Until MButtons=1
 								Gosub showabox
 								gw=x-wx-gx+1:gh=y-wy-gy+1
 								.
@@ -891,7 +891,7 @@ Case 256
 				Case 512
 					ex=-1
 				End Select
-			##[$80BC] ex
+			Until ex
 			Gosub fw2
 			Use localstat 0
 			;
@@ -906,10 +906,10 @@ Case 256
 			u{yn$(ig_up),2}
 			;
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					ev=WaitEvent
-				##[$80BC] EventWindow=2
+				Until EventWindow=2
 				Select ev
 				Case 64
 					Select GadgetHit
@@ -927,22 +927,22 @@ Case 256
 							;
 							Gosub prepmake
 							;
-							##[$80B4]
-								##[$80B5]
+							SetErr
+								ClrErr
 								##[$FF8C] 0
-								##[$80BE] Select:##[$80BE] Select
+								Pop Select:Pop Select
 								Goto sfail
-							End ##[$80B4]
+							End SetErr
 							;
 							LoadShape 0,text$,0
-							##[$80B5]
+							ClrErr
 							If ig_up=0 Then Use SetCycle 0
 							;
 							gw=ShapeWidth(0):gh=ShapeHeight(0)
 							;
 							gx=160-gw LSR 1:gy=88-gh LSR 1
 							;
-							sha.l=##[$80B8] MidHandle(0)
+							sha.l=Addr MidHandle(0)
 							bps=Peek.w(sha+4)
 							If bps>de Then Poke.w sha+4,de
 							;
@@ -977,7 +977,7 @@ Case 256
 				Case 512
 					ex=-1
 				End Select
-			##[$80BC] ex
+			Until ex
 			sfail
 			Gosub fw2
 			Use localstat 0
@@ -996,14 +996,14 @@ Case 8
 				xo=ex-ww:yo=ey-wh
 				ww2=ww:wh2=wh
 				;
-				##[$80BB]
+				Repeat
 					WaitEvent
 					x=QLimit(SMouseX-xo,9,mw-wx)
 					y=QLimit(SMouseY-yo,9,mh-wy)
 					Gosub showwin
 					ww=x:wh=y
 					Gosub showwin
-				##[$80BC] MButtons=5
+				Until MButtons=5
 				;
 				inw+(ww-ww2):inh+(wh-wh2)
 				;
@@ -1047,7 +1047,7 @@ Case 8
 						;
 						Gosub findhi
 						;
-						##[$80BB]
+						Repeat
 							Gosub posit2
 							If mb=1
 								If globalloc(gads())
@@ -1058,7 +1058,7 @@ Case 8
 									Gosub shownew
 								EndIf
 							EndIf
-						##[$80BC] mb=2
+						Until mb=2
 						Free localstat 2
 						Gosub shownew:Goto bdone
 					EndIf
@@ -1067,14 +1067,14 @@ Case 8
 				;move window around!
 				;
 				xo=ex-wx:yo=ey-wy
-				##[$80BB]
+				Repeat
 					WaitEvent
 					x=QLimit(SMouseX-xo,0,mw-ww)
 					y=QLimit(SMouseY-yo,0,mh-wh)
 					Gosub showwin
 					wx=x:wy=y
 					Gosub showwin
-				##[$80BC] MButtons=5
+				Until MButtons=5
 				Gosub showwin:Gosub viewwin:Gosub showwin
 				bdone
 			EndIf
@@ -1207,10 +1207,10 @@ u{yn$(wis),5}
 u{yn$(gas),6}
 ;
 ex=0
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		ev=WaitEvent
-	##[$80BC] EventWindow=2
+	Until EventWindow=2
 	Select ev
 	Case 64
 		Select GadgetHit
@@ -1232,7 +1232,7 @@ ex=0
 			ex=-1
 		End Select
 	End Select
-##[$80BC] ex
+Until ex
 Gosub fw2:Use localstat 0
 ;
 Return
@@ -1299,10 +1299,10 @@ For k=0 To mc2
 StopCycle 2,k,Blue(k),Palette(k),PalRGB(k)
 Next
 ex=0
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		ev=WaitEvent
-	##[$80BC] EventWindow=2
+	Until EventWindow=2
 	Select ev
 	Case 64
 		If GadgetHit=100
@@ -1322,12 +1322,12 @@ ex=0
 		If GadgetHit>64 AND GadgetHit<68 Then Gosub readprops
 	Case 32
 		If GadgetHit>64 AND GadgetHit<68
-			##[$80BB]
+			Repeat
 				Gosub readprops
-			##[$80BC] WaitEvent=64
+			Until WaitEvent=64
 		EndIf
 	End Select
-##[$80BC] ex
+Until ex
 Gosub fw2:Use localstat 0
 Return
 
@@ -1412,11 +1412,11 @@ Use localstat 0:Activate 1
 ;
 Gosub showwin:Gosub showgad
 ;
-##[$80BB]
+Repeat
 	WaitEvent:Use localstat EventWindow
 	Gosub showgad
 	mb=MButtons
-##[$80BC] mb=1 OR mb=2
+Until mb=1 OR mb=2
 UnBuffer 0
 Menus On
 Return
@@ -1431,10 +1431,10 @@ gx-wx:gy-wy
 Return
 
 .makeit
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		ev=WaitEvent
-	##[$80BC] EventWindow=2
+	Until EventWindow=2
 	Select ev
 	Case 64
 		Select GadgetHit
@@ -1468,7 +1468,7 @@ Return
 	Case 512
 		ex=-1
 	End Select
-##[$80BC] ex
+Until ex
 Return
 
 badid ;bad gadget ID error message
@@ -1710,7 +1710,7 @@ fw2:Free localstat 2:FlushEvents
 ;
 viewwin
 Gosub viewwin2
-Poke.l Peek.l(##[$80B8] localstat(1))+62,0:Return
+Poke.l Peek.l(Addr localstat(1))+62,0:Return
 
 showabox2:x=SMouseX:y=SMouseY
 .showabox

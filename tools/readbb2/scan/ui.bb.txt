@@ -98,7 +98,7 @@ out$(0)="CAUGHT":out$(1)="BOWLED":out$(2)="STUMPED"
 out$(3)="RUNOUT":out$(4)="RETIRED":out$(5)="HANDLEDBALL"
 
 Function.s nth{n.w}
-	a$=Str$(n):If n>20 Then n=n ##[$80B9] 10
+	a$=Str$(n):If n>20 Then n=n MOD 10
 	Select n
 		Case 1:a$+"st"
 		Case 2:a$+"nd"
@@ -123,7 +123,7 @@ End Function
 	batting=0
 
 	;
-	##[$80BB]
+	Repeat
 		;
 		ev.l=WaitEvent
 		id=-1:If ev=$20 Then id=GadgetHit
@@ -159,7 +159,7 @@ End Function
 				;
 		End Select
 		;
-	##[$80C7]
+	Forever
 
 .inittoss:
 	cmess=nxmess:nxmess+1:moff+1
@@ -188,7 +188,7 @@ End Function
 	##[$80CA] team(batting)
 	WaitEvent
 	b=\ba[id-1]:entry(cmess)\batter[openers]=b:bat(openers)=b
-	p=openers:b=id-1:If b<>p Then ##[$80C9] \ba[p],\ba[b]
+	p=openers:b=id-1:If b<>p Then Exchange \ba[p],\ba[b]
 	openers=1-openers:If openers=0 Then inningsok=1:over=1
 	Gosub listplayers
 	entry(cmess)\message="INNINGS: "+\team\name[bat(0)]+"&"+\team\name[bat(1)]+" OPENING BATSMEN"
@@ -213,12 +213,12 @@ End Function
 		oldid=id
 		If \bowl[bowler]\balls=0
 			jb=0
-			##[$80BB]
+			Repeat
 				id-1:If id>-1 Then jb=\bowl[\bo[id]]\balls<>0
-			##[$80BC] id<0 OR jb<>0
+			Until id<0 OR jb<>0
 			If jb<>0 Then id+1
 			If id<0 Then Then id=0
-			##[$80C9] \bo[id],\bo[oldid]
+			Exchange \bo[id],\bo[oldid]
 		EndIf
 		Gosub listplayers
 		overok=1
@@ -355,7 +355,7 @@ End Function
 		Next
 	Next
 	;
-	##[$80C8] funcs:id=50
+	Restore funcs:id=50
 	For x=0 To 1
 		For i=0 To 9
 			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
@@ -455,7 +455,7 @@ End Function
 	Return
 
 .initevents:
-	##[$80C8] header
+	Restore header
 	For i=0 To 6:Read entry(i)\message:Next
 	nxmess=7:cmess=5:Return
 

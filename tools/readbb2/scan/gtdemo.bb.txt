@@ -13,10 +13,10 @@
 	Gosub addevents		 ;enable intuiticks and mousemoves events
 	Gosub setuplists		;dim lists for both listviews
 	Gosub setupui			 ;open user interface window
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If ev<>#MOUSEMOVE AND ev<>#INTUITICKS Then Gosub addevent
-	##[$80BC] ev=$200
+	Until ev=$200
 	End
 
 .addevents:

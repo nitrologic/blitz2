@@ -16,7 +16,7 @@ Function.f Random{}
 ; This is the actual random number generator.	It requires the global
 ; variable "Seed.l" to be available.
 Shared Seed.l
-	Seed=((25173*Seed)+13849) ##[$80B9] 65536
+	Seed=((25173*Seed)+13849) MOD 65536
 ; Don't alter these numbers!	This routine DEPENDS upon big prime numbers!
 	Function Return Seed/65536
 ; Return a number between 0 and 1

@@ -148,7 +148,7 @@ FreeSlices
 
 			 longmult 0,30
 			 longmult 1,30
-			 ##[$80BB]
+			 Repeat
 
 				Select Joyr(1)
 						Case 7
@@ -305,7 +305,7 @@ If lright=4 Then Goto gameover
 If lleft=4 Then Goto gameover
 If kill=killnum Then Goto endoflev
 
-##[$80BC] Joyb(0)=1
+Until Joyb(0)=1
 End
 ; *********** SUB ROO TEENS ***********
 

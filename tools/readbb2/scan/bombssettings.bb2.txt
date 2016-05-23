@@ -21,7 +21,7 @@ Shared theArrow.selectarrowtype()
 
 ; Initialize
 		For i.b=0 To 9
-				If i ##[$80B9] 2=0
+				If i MOD 2=0
 						theArrow(i)\xpos = 190
 				Else
 						theArrow(i)\xpos = 244
@@ -48,7 +48,7 @@ Shared theArrow.selectarrowtype()
 
 		For i=0 To 9
 ##[$80CA] theArrow(i)
-				If i ##[$80B9] 2=0
+				If i MOD 2=0
 						WBlit 22, \xpos,\ypos
 				Else
 						WBlit 27, \xpos,\ypos
@@ -58,7 +58,7 @@ Shared theArrow.selectarrowtype()
 ; Now follows a simple event loop
 		*biptr\ev = 0
 		keep.b=True
-		##[$80BB]
+		Repeat
 				Gosub DrawArrows
 .SettingsEvents
 				GetUserInput{ *biptr}
@@ -80,7 +80,7 @@ Shared theArrow.selectarrowtype()
 					Default
 						Goto SettingsEvents
 				End Select
-		##[$80BC] NOT keep
+		Until NOT keep
 
 ; Get out of here
 		Free localstat 2
@@ -154,7 +154,7 @@ Shared theArrow.selectarrowtype()
 ##[$80CA] theArrow(arrowHit)
 		\state = 0
 		WBox \xpos,\ypos, \xpos+9,\ypos+9, 0
-		If arrowHit ##[$80B9] 2=0
+		If arrowHit MOD 2=0
 				WBlit 22, \xpos,\ypos
 		Else
 				WBlit 27, \xpos,\ypos

@@ -15,7 +15,7 @@ Gosub initchars	 ;string array for our objects
 Gosub initui			;open user interface
 Gosub sizewindow	;refresh map window
 
-##[$80BB]						;main loop based on Intuition events
+Repeat						;main loop based on Intuition events
 	ev.l=WaitEvent
 	Select ev
 		Case 2
@@ -37,7 +37,7 @@ Gosub sizewindow	;refresh map window
 		Case $40000
 			Use localstat 0:Redraw 0,0:Redraw 0,1
 	End Select
-##[$80C7]
+Forever
 
 .initmap
 	Dim map.b(width-1,height-1)
@@ -51,13 +51,13 @@ Gosub sizewindow	;refresh map window
 	Return
 
 .draw
-	##[$80BB]
+	Repeat
 		Use localstat 0
 		cx=QLimit(Int((WMouseX-6)/8),0,ww-1)
 		cy=QLimit(Int((WMouseY-10)/8),0,wh-1)
 		map(posx+cx,posy+cy)=brush
 		WindowOutput 0:WLocate cx*8,cy*8:Print c$(brush)
-	##[$80BC] Event
+	Until Event
 	Return
 
 .sizewindow

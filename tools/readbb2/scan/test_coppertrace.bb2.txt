@@ -23,7 +23,7 @@ lmaxlen 0,320,256,4
 DisplayBitMap 0,0
 offset.w=44
 
-ad.l=Peek.l(##[$80B8] CopList(0)+28)						 ; Get the custom area address
+ad.l=Peek.l(Addr CopList(0)+28)						 ; Get the custom area address
 
 ;Top half of the display
 For h.w=0 To 99
@@ -98,7 +98,7 @@ For h.w=99 To 0 Step -1
 Next h
 
 ;Open the copper trace window at the custom area of copper list 0
-##[$9985] ##[$80B8] CopList(0),28
+##[$9985] Addr CopList(0),28
 
 ;Stop the program to let you look at the window
 Stop

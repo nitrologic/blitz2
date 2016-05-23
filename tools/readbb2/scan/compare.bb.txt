@@ -26,7 +26,7 @@ If ReadMem(1,"missing")
 			If Left$(a$,4)="		"
 				a$=Mid$(a$,5):l=Instr(a$," "):If l>1 Then a$=Left$(a$,l-1)
 				For i=0 To n-1
-					If a$=c$(i) Then ##[$80BE] For:Goto nx
+					If a$=c$(i) Then Pop For:Goto nx
 				Next
 				NPrint a$
 				nx

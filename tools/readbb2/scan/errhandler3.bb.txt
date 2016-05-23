@@ -4,8 +4,8 @@
 ; on a DblPAL machine, we will remedy this soon!
 ;
 
-##[$80B4]
-	##[$80BD] d0,err.l:err$=Peek$(err):##[$FF8B] 0,&err$,20:End
-End ##[$80B4]
+SetErr
+	PutReg d0,err.l:err$=Peek$(err):##[$FF8B] 0,&err$,20:End
+End SetErr
 
 Dim a(10):a(11)=12	 ;this is an error just to test the above!

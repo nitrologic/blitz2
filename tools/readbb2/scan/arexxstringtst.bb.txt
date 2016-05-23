@@ -37,9 +37,9 @@ SendRexxCommand msg,"EXIT ERRORTEXT(10)",#RXCOMM|#RXFF_RESULT|#RXFF_STRING
 
 ;Get the first message Packet to arrive
  LABEL:
- ##[$80BB]
+ Repeat
 	 Wait
- ##[$80BC] Event = NULL			;WE will GURU If we attempt To GetRexxResult from an intuiMessage (not any more!!)
+ Until Event = NULL			;WE will GURU If we attempt To GetRexxResult from an intuiMessage (not any more!!)
  Rmsg.l=RexxEvent(Port)		;there is no error checking from here on!!
  NPrint Hex$(Rmsg)," ",Hex$(msg)," (MsgPackets Address)"
  NPrint Hex$(GetRexxResult(Rmsg,1))," (First Result)"
@@ -64,10 +64,10 @@ If IsRexxMsg(Rmsg)
 EndIf
 DeleteMsgPort(Port)
 DeleteRexxMsg(msg)
-##[$80BB]
+Repeat
 	Wait													;Wait on event from window
 	ev.l	= Event
 	NPrint Hex$(ev)							 ;Just to prove all the normal functions
 	NPrint Hex$(EventWindow)			;still work after Wait so long as you call EVENT
-##[$80BC] EventWindow = 0 AND ev = $200
+Until EventWindow = 0 AND ev = $200
 

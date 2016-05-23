@@ -10,7 +10,7 @@ lmaxlen 2,320,256,1
 
 #tags=$80080000
 
-##[$80C3]
+WBStartup
 
 MaxLen pa$=192
 MaxLen na$=192
@@ -616,7 +616,7 @@ If ev=8				 ;mouse click!!
 										Next
 										If cn>2
 												hito=o:hitn=n
-												##[$80BE] For:Goto qwe
+												Pop For:Goto qwe
 										EndIf
 								Next
 						EndIf
@@ -1093,7 +1093,7 @@ If ew=4
 												If mx>ssx-4 AND mx<ssx+4
 														If my>ssy-3 AND my<ssy+3
 																hito=o:hitn=n
-																##[$80BE] For:##[$80BE] For:Goto ch
+																Pop For:Pop For:Goto ch
 														EndIf
 												EndIf
 										Next
@@ -1104,7 +1104,7 @@ ch:				 If hito<>-1
 								If cplot>0
 										For l=0 To cplot-1
 												If plots(l)\typ=1 AND plots(l)\obj=hito AND plots(l)\num=hitn
-														hit=l:##[$80BE] For:Goto ch2
+														hit=l:Pop For:Goto ch2
 												EndIf
 										Next
 								EndIf
@@ -1177,7 +1177,7 @@ If ew>0 AND ew<4		;one of the view windows
 								lly=plots(l)\wy
 								If mx>llx-4 AND mx<llx+4
 										If my>lly-3 AND my<lly+3
-												hit=l:##[$80BE] For:Goto gotdot
+												hit=l:Pop For:Goto gotdot
 										EndIf
 								EndIf
 						EndIf
@@ -1393,11 +1393,11 @@ ptr+4
 n=0
 While Peek.l(ptr)<>$41584953 AND ptr<memend
 		faces(o,n)\p1=Peek.w(ptr):ptr+2
-		If ptr=>memend Then ##[$80BE] While:Goto sk
+		If ptr=>memend Then Pop While:Goto sk
 		faces(o,n)\p2=Peek.w(ptr):ptr+2
-		If ptr=>memend Then ##[$80BE] While:Goto sk
+		If ptr=>memend Then Pop While:Goto sk
 		faces(o,n)\p3=Peek.w(ptr):ptr+2
-		If ptr=>memend Then ##[$80BE] While:Goto sk
+		If ptr=>memend Then Pop While:Goto sk
 		faces(o,n)\p4=Peek.w(ptr):ptr+2
 		faces(o,n)\cc=Peek.w(ptr):ptr+2
 		n+1
@@ -1546,7 +1546,7 @@ For check=0 To ttt-1
 				If this<>check
 						If allps(this)\x=x AND allps(this)\y=y AND allps(this)\z=z
 								Gosub sortitout
-								##[$80BE] For:##[$80BE] For:Goto opti
+								Pop For:Pop For:Goto opti
 						EndIf
 				EndIf
 		Next
@@ -1858,7 +1858,7 @@ For o=sl To el
 								pp=picked(p)
 								If plots(pp)\typ=0 AND plots(pp)\obj=o
 										cc=7
-										If eobj=-1 Then leobj=eobj:eobj=o:##[$80BE] For:##[$80BE] For:Goto redrawtop
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawtop
 								EndIf
 						Next
 				EndIf
@@ -1986,7 +1986,7 @@ For o=sl To el
 								pp=picked(p)
 								If plots(pp)\typ=0 AND plots(pp)\obj=o
 										cc=7
-										If eobj=-1 Then leobj=eobj:eobj=o:##[$80BE] For:##[$80BE] For:Goto redrawfront
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawfront
 								EndIf
 						Next
 				EndIf
@@ -2111,7 +2111,7 @@ For o=sl To el
 								pp=picked(p)
 								If plots(pp)\typ=0 AND plots(pp)\obj=o
 										cc=7
-										If eobj=-1 Then leobj=eobj:eobj=o:##[$80BE] For:##[$80BE] For:Goto redrawright
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawright
 								EndIf
 						Next
 				EndIf
@@ -2228,7 +2228,7 @@ WLocate 0,0
 
 If cobj=0 Then Return
 
-rad.q=##[$80BA]/180
+rad.q=Pi/180
 
 rx.q=srx*rad
 ry.q=sry*rad
@@ -2354,7 +2354,7 @@ If perspmode=#SOLID
 		SortList polysort(),SizeOf .poly\nz
 		newmem polysort()
 		LastItem polysort()
-		##[$80BB]
+		Repeat
 				coors(0)\x=polysort()\x1,polysort()\y1
 				coors(1)\x=polysort()\x2,polysort()\y2
 				coors(2)\x=polysort()\x3,polysort()\y3
@@ -2379,7 +2379,7 @@ If perspmode=#SOLID
 								Poly np,&coors(0),3
 						EndIf
 				EndIf
-		##[$80BC] NOT PrevItem(polysort())
+		Until NOT PrevItem(polysort())
 		BitMaptoWindow 1,4,0,0,0,0,300,116
 		Use localstat 4
 EndIf
@@ -2394,7 +2394,7 @@ Use lmaxlen 2
 SortList polysort(),SizeOf .poly\nz
 newmem polysort()
 LastItem polysort()
-##[$80BB]
+Repeat
 		coors(0)\x=polysort()\x1,polysort()\y1
 		coors(1)\x=polysort()\x2,polysort()\y2
 		coors(2)\x=polysort()\x3,polysort()\y3
@@ -2405,7 +2405,7 @@ LastItem polysort()
 		Polyf np,&coors(0),1,1
 		If Cls(ppx,ppy)=1 AND nz<hzz Then hzz=nz:hito=polysort()\oo:hitn=polysort()\nn
 		Polyf np,&coors(0),0,0
-##[$80BC] NOT PrevItem(polysort())
+Until NOT PrevItem(polysort())
 
 Use localstat 4
 WindowOutput 4
@@ -2537,7 +2537,7 @@ For l=0 To cface(o)-1
 				If xa1=x3 AND ya1=y3 AND za1=z3 Then same+1
 				If xa2=x1 AND ya2=y1 AND za2=z1 Then same+1
 				If xa3=x2 AND ya3=y2 AND za3=z2 Then same+1
-				If same=2 Then hit=l:##[$80BE] For:Goto zzz
+				If same=2 Then hit=l:Pop For:Goto zzz
 		EndIf
 Next
 zzz:
@@ -2592,7 +2592,7 @@ For l=0 To cface(o)
 		For ll=0 To ccoal				;is this free??
 				If coal(ll)=l Then f=1
 		Next
-		If f=0 Then hit=l:##[$80BE] For:Goto ii
+		If f=0 Then hit=l:Pop For:Goto ii
 Next
 ii:
 num=hit
@@ -3012,7 +3012,7 @@ WLocate 10,247:WColour 0,1
 NPrint "Rotate:",sfac,Chr$($b0)+"		 "
 Use localstat EventWindow
 
-sfac=sfac*(##[$80BA]/180)
+sfac=sfac*(Pi/180)
 
 drawmode=2+9
 cplot=0

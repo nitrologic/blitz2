@@ -15,7 +15,7 @@ c=3:cr=Blue(c):cg=Palette(c):cb=PalRGB(c)
 
 Gosub inton
 
-##[$80BB]
+Repeat
 	VWait:j=Joyy(1)
 	If j<0 AND c<>3 Then Green c,cr,cg,cb:c=3:cr=Blue(c):cg=Palette(c):cb=PalRGB(c):cc=0:ccc=1
 	If j>0 AND c<>1 Then Green c,cr,cg,cb:c=1:cr=Blue(c):cg=Palette(c):cb=PalRGB(c):cc=0:ccc=1
@@ -31,12 +31,12 @@ Gosub inton
 		Use SetCycle 0
 		ShowScreen 0
 		##[$FF29]:MOVE #$20,$dff096
-		##[$80BB]
+		Repeat
 			VWait
-		##[$80BC] Joyb(1)=0
+		Until Joyb(1)=0
 		Gosub inton
 	EndIf
-##[$80C7]
+Forever
 
 End
 

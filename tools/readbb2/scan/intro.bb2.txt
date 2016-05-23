@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/Intro.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/Intro.bb2
-##[$80B4]
+SetErr
 	NPrint "Fatal Error !"
 	End
-End ##[$80B4]
-##[$80C3];:NoCli
+End SetErr
+WBStartup;:NoCli
 freest 0;:WBenchToFront_
 ;ScreensBitMap 0,0
 
@@ -69,10 +69,10 @@ If numpics
 			LoadScreen 1,picture$(pic)
 ;			ShowScreen 1
 			count=1
-			##[$80BB]
+			Repeat
 				VWait
 				count+1
-			##[$80BC] count=1500 OR Joyb(0)=1
+			Until count=1500 OR Joyb(0)=1
 		Else
 			NPrint picture$(pic)+": doesn't exist"
 		EndIf
@@ -82,7 +82,7 @@ Else
 	NPrint "Press both mouse buttons to stop module"
 EndIf
 
-##[$80BB]:VWait:##[$80BC] Joyb(0)=3
+Repeat:VWait:Until Joyb(0)=3
 
 ;For v=64 To 0 Step -0.1
 ;	VWait

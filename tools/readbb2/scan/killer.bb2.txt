@@ -13,7 +13,7 @@
 
 #num=400
 
-##[$80C3]
+WBStartup
 
 DEFTYPE.w
 DEFTYPE.l h
@@ -240,7 +240,7 @@ End NEWTYPE
 
 Dim plots.dotplot(#num),shipframes.w(28)
 
-##[$80C8] myframes
+Restore myframes
 For h=0 To 27
 	Read shipframes(h)
 Next h
@@ -273,7 +273,7 @@ longmult 1,5
 x=0
 ad.l=?ytable
 ad2.l=ad
-vll.w=Peek.w(##[$80B8] lmaxlen(0))
+vll.w=Peek.w(Addr lmaxlen(0))
 total.w=0
 For y=0 To 255
 	Poke.w ad2,total
@@ -283,18 +283,18 @@ Next y
 
 fram.w=0
 
-##[$80BB]
+Repeat
 	VWait
 	DisplayBitMap 0,dbuffer
 	dbuffer=1-dbuffer
 	UnQueue dbuffer
-	Drawfield{&plots(0),##[$80B8] lmaxlen(dbuffer),-1,ad}
+	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,ad}
 	Use lmaxlen dbuffer
 	QBlit dbuffer,shipframes(fram ASR 1),160,128
 	fram+1
 	If fram>56 Then fram=0
 	x+1 : If x>240 Then x=0
-##[$80BC] Joyb(0)
+Until Joyb(0)
 End
 
 myframes:

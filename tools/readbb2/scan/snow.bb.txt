@@ -5,19 +5,19 @@ lmaxlen 0,320,256,4
 Show 0
 
 miny=199
-##[$80BB]
+Repeat
 	x=Rnd(640)
 	y=miny-1
-	##[$80BB]
+	Repeat
 		ok=False
 		y+1
 		If y=200 Then ok=True
 		If Cls(x-1,y)<>0 Then ok=True
 		If Cls(x	,y)<>0 Then ok=True
 		If Cls(x+1,y)<>0 Then ok=True
-	##[$80BC] ok
+	Until ok
 	y-1
 	If y<miny Then miny=y
 	Point x,y,Rnd(15)
 
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0

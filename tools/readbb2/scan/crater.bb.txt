@@ -26,7 +26,7 @@ Next
 BLITZ
 
 Function.q hite{x,y}
-	x*2*##[$80BA]:y*2*##[$80BA]
+	x*2*Pi:y*2*Pi
 	first=y*HSin(y+x*HCos(x))
 	second=x*HCos(x+y*HSin(y))
 	t=Tan(first*first+second*second)/30
@@ -56,11 +56,11 @@ SetInt 5:t.l+1:End SetInt
 
 t.l=0:f.l=0
 
-##[$80BB]
+Repeat
 	VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
-	ang +0.05:If ang>(2*##[$80BA]) Then ang-(2*##[$80BA])
+	ang +0.05:If ang>(2*Pi) Then ang-(2*Pi)
 	qc=HCos(ang):qs=HSin(ang):Gosub Draw:f.l+1
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 
 rate.f=f*50/t
 

@@ -150,7 +150,7 @@ libbase=##[$FECF](&libname$,0)		; <--- Open the dos library
 rn=Peek.l (libbase+34)							 ; <--- Pointer to Rootnode	 Structure
 	df=Peek.l (rn+24)*4								; <--- Pointer to Dosinfo		Structure
 		dn=Peek.l (df+4)*4							 ; <--- Pointer to Devicelist Structure
-##[$80BB]
+Repeat
 	dtype.b=Peek.l(dn+4)							 ; <--- Type of Device
 	If dtype=0
 		fs=Peek.l(dn+28)*4
@@ -170,7 +170,7 @@ devicelist$(count)=d$+" "+name$+":" ; <--- Add device name to array
 			count+1												; <--- Next postion in array
 	End If
 	dn=Peek.l(dn)*4						; <--- Get next structure address / 0 = finished
-##[$80BC] dn=0													 ; <--- Repeat until no more structures
+Until dn=0													 ; <--- Repeat until no more structures
 closelib=##[$FEBB](libbase)			; <--- Finished with library close it
 End Statement
 ; ------------------------------------------------------------------------
@@ -195,9 +195,9 @@ Statement error_window {errorlist$}
 Shared errorlist$()											; <--- Array from main program
 wx=WindowX : wy=WindowY									; <--- Window = Main
 dum=locfree (errorlist$())						 ; <--- First Item of Array
-##[$80BB]
+Repeat
 If errorlist$()<>"" Then c+1						 ; <--- Count the errors
-##[$80BC] globfree (errorlist$())=0
+Until globfree (errorlist$())=0
 ;
 ; * WHICH GADGET *
 ;
@@ -223,12 +223,12 @@ Redraw 2,3
 ;
 ; * OPTIONS *
 ;
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=$80000 Then Activate 2
 		If GadgetHit=2 AND ev=$40 Then Gosub read_error
 			If locfree (errorlist$())=0 AND c>1 Then ##[$C620] 2,2 : Redraw 2,2
-##[$80BC] ev=$200 OR GadgetHit=1 OR GadgetHit=3
+Until ev=$200 OR GadgetHit=1 OR GadgetHit=3
 ;
 ; * LEAVE THE ERROR ROUTINE *
 ;
@@ -284,7 +284,7 @@ End Statement
 ;
 ; *		INIT		*
 ;
-##[$80C3]	 ; <--- Program can run from WB
+WBStartup	 ; <--- Program can run from WB
 freest 0 ; <--- Screen 0 is WB
 		devices_get {}
 
@@ -298,7 +298,7 @@ drive=0
 	##[$C620] 0,c
 		Next c
 count=1
-##[$80BB]
+Repeat
 If Left$(devicelist$(count),8)="<DEV> DF"
 						 dl$=UnRight$(devicelist$(count),6)
 For n=0 To 3
@@ -306,7 +306,7 @@ If dl$="DF"+Str$(n)+":"	Then ##[$C61F] 0,n
 Next n
 End If
 count+1
-##[$80BC] devicelist$(count)=""
+Until devicelist$(count)=""
 ;
 ; *		OPEN THE WINDOW			*
 ;
@@ -327,7 +327,7 @@ WLocate 20,52 : Print "O/System -"
 WLocate 20,62 : Print "Format	 -"
 WLocate 20,72 : Print "Bootable -"
 
-##[$80BB]
+Repeat
 ev=WaitEvent
 gh.b=GadgetHit
 
@@ -336,7 +336,7 @@ gh.b=GadgetHit
 If ev=$200 OR gh=4 Then End
 If gh>4 Then Gosub get_ready	: gh=0
 
-##[$80C7]
+Forever
 
 End
 ;
@@ -459,7 +459,7 @@ Return
 ; -------------------------------------------------------------------------
 install_disk:
 count=0															; <--- Make sure counter is zero
-##[$80C8] ofs													; <--- Start of data
+Restore ofs													; <--- Start of data
 	Gosub read_boot_block							; <--- Read data from disk
 		fmat=Peek.l(bbuffer)						 ; <--- What format
 For n=bbuffer To bbuffer+1020 Step 4 : Poke.l n,0 : Next ; <--- Zero boot blk

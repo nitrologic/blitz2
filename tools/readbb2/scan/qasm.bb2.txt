@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/quikasm/qasm.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/quikasm/qasm.bb2
 #unbug=0
 ;
-##[$80C3]:##[$80CC]:##[$80CB]
+WBStartup:##[$80CC]:##[$80CB]
 ;
 ;This example is a bit heavier...A no pass assembler!
 ;
@@ -146,7 +146,7 @@ Function Return Peek.l(lines(0)-40)
 End Function
 
 Statement setbps{n}
-Poke.w ##[$80B8] lmaxlen(0)+4,n
+Poke.w Addr lmaxlen(0)+4,n
 End Statement
 
 Function yesno{t$}
@@ -154,10 +154,10 @@ Function yesno{t$}
 localstat 1,80,32,480,64,$1002,"DECISION TIME!",1,2,1
 WLocate 8,16
 Print Centre$(t$,57)
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		ev=WaitEvent
-	##[$80BC] EventWindow=1
+	Until EventWindow=1
 	If ev=64
 		If GadgetHit=1 Then k=-1:Goto endfunc
 		If GadgetHit=2 Then k=0:Goto endfunc
@@ -167,7 +167,7 @@ Print Centre$(t$,57)
 		If i$=Chr$(13) Then k=-1:Goto endfunc
 		If i$=Chr$(27) Then k=0:Goto endfunc
 	EndIf
-##[$80C7]
+Forever
 ;
 endfunc
 Free localstat 1:Use localstat 0:BitMapOutput 0
@@ -495,7 +495,7 @@ Case $100
 			WLocate 4,128
 			Print "'HMMM' SAID POOH. 'I THINK IT'S TIME FOR BREAKFAST.....'"
 
-			##[$80BB]:Gosub readgad:##[$80BC] gad=1
+			Repeat:Gosub readgad:Until gad=1
 
 			localstat 1,64,16,512,184,$1002,"ABOUT QUIK ASM",1,2,4
 
@@ -527,7 +527,7 @@ Case $100
 			Print "PHONE OR FAX : (64)9-358-1658"
 			WColour 1,0
 			;
-			##[$80BB]:Gosub readgad:##[$80BC] gad=1
+			Repeat:Gosub readgad:Until gad=1
 			Gosub closereq
 			;
 		Case 4	;quit
@@ -717,7 +717,7 @@ Case $100
 			If blkb=0 Then blkb=cl:Goto markdone
 			If blkt=0
 				blkt=cl
-				If blkb<blkt Then ##[$80C9] blkt,blkb
+				If blkb<blkt Then Exchange blkt,blkb
 				Goto markshow
 			EndIf
 			If cl<blkt Then blkt=cl:Goto markshow
@@ -804,9 +804,9 @@ Case $100
 					k=Instr(li$," ")
 					If k
 						j=k
-						##[$80BB]
+						Repeat
 							j+1
-						##[$80BC] Mid$(li$,j,1)<>" "
+						Until Mid$(li$,j,1)<>" "
 						li$=Left$(li$,k-1)+Chr$(9)+Mid$(li$,j)
 						Goto mtabs
 					EndIf
@@ -829,7 +829,7 @@ Case $100
 			WLocate 4,16:Print "FIND		:"
 			WLocate 4,32:Print "REPLACE :"
 			ClearString 1,6
-			##[$80BB]
+			Repeat
 				Gosub readgad
 				If gad=1 OR gad=7 Then Gosub closereq:Goto dofind
 				If gad=2 Then Gosub closereq:Goto serdon
@@ -837,16 +837,16 @@ Case $100
 				If gad=4 Then sca=1-sca
 				If gad=5 Then snw=1-snw
 				If gad=6 Then ClearString 1,7 Else ClearString 1,6
-			##[$80C7]
+			Forever
 			serdon
 		Case 1	;next!
 			dofind	;find next occurance - cx=cursor X
 			;
 			Gosub initfind:dcl-1
 			;
-			##[$80BB]
+			Repeat
 				dcl+1:Gosub isfihere
-			##[$80BC] (NOT globfree(lines())) OR dcl>=hl OR dcp
+			Until (NOT globfree(lines())) OR dcl>=hl OR dcp
 			;
 			Gosub finitfind
 			;
@@ -854,9 +854,9 @@ Case $100
 			;
 			Gosub initfind:dcl+1
 			;
-			##[$80BB]
+			Repeat
 				dcl-1:Gosub isfihere
-			##[$80BC] (NOT PrevItem(lines())) OR dcl<2 OR dcp
+			Until (NOT PrevItem(lines())) OR dcl<2 OR dcp
 			;
 			Gosub finitfind
 			;
@@ -930,9 +930,9 @@ Case $100
 			WLocate 4,80
 			Print "RCODE AT $",Hex$(rcode)," ; LENGTH $",Hex$(rcodef-rcode)
 			;
-			##[$80BB]
+			Repeat
 				Gosub readgad
-			##[$80BC] gad=1
+			Until gad=1
 			Gosub closereq
 		Case 2	;cli
 			lo=##[$FE01]("con:0/0/640/"+Str$(DispHeight)+"/CLI",1006)
@@ -1051,8 +1051,8 @@ Return
 closereq
 Free localstat 1:Use localstat 0:BitMapOutput 0
 wac
-##[$80BB]
-##[$80BC] WaitEvent=$40000
+Repeat
+Until WaitEvent=$40000
 Return
 
 showbottom
@@ -1117,7 +1117,7 @@ WLocate 268,56:Print "....USE CHIPMEM?"
 WLocate 4,72:Print "MAXIMUM RCODE				:"
 WLocate 268,72:Print "....USE CHIPMEM?"
 ;
-##[$80BB]
+Repeat
 	Gosub readgad
 	If gad=2 Then End ;cancel
 	If gad=1					;ok
@@ -1150,7 +1150,7 @@ WLocate 268,72:Print "....USE CHIPMEM?"
 	If gad>=3 AND gad<=6
 		ClearString 1,gad+1
 	EndIf
-##[$80C7]
+Forever
 
 readstuff
 maxlines=Val(GadgetPens(0,3))
@@ -1161,9 +1161,9 @@ maxrcode=Val(GadgetPens(0,7))
 Return
 
 readgad
-##[$80BB]
+Repeat
 	ev=WaitEvent
-##[$80BC] EventWindow=1
+Until EventWindow=1
 If ev=64 Then gad=GadgetHit:Return
 If ev=$400
 	If Inkey$=Chr$(13) Then gad=1:Return
@@ -1211,7 +1211,7 @@ If unk	;any unknown labels?
 		For k=0 To #maxlaref-1
 		If \laref[k]<>-1
 			*lab=labat+\laref[k]
-			If *lab\init=0 Then erc=getcurr{}:##[$80BE] For:Goto unfnd
+			If *lab\init=0 Then erc=getcurr{}:Pop For:Goto unfnd
 		EndIf
 		Next
 	Wend:erl=0	;just in case!
@@ -1284,9 +1284,9 @@ j=Peek.l(?dumpregs+k LSL2)
 Print RSet$(Str$(j),12),"	$",Hex$(j),"	%",Bin$(j)
 If k=7 Then y+4
 y+8:Next
-##[$80BB]
+Repeat
 	Gosub readgad
-##[$80BC] gad=1
+Until gad=1
 Gosub closereq
 ;
 MOVEM.l dumpregs,d0-d7/a0-a7
@@ -1300,8 +1300,8 @@ Boxf 0,12,windwp-1,windhp+11,0 ;cls
 Colour 1,0:Locate 0,1.5:Return
 
 deoff
-##[$80BB]
-##[$80BC] Inkey$
+Repeat
+Until Inkey$
 setbps{1}:Gosub newwin:Goto refall
 
 viewsrc
@@ -1453,7 +1453,7 @@ If no(np)<>nc(np) Then Goto aser11
 evalrcode
 putrw{$4e75}	;rts!
 GetReg d0,tr(np):MOVE.l #aserr,d1:JSR execcode
-##[$80BD] d0,va:Return
+PutReg d0,va:Return
 
 makeeven
 If c&1 Then c+1:tcl+1
@@ -1586,11 +1586,11 @@ If t<11
 		Gosub fetchcon
 		;
 		ln=va LSL dcp:If ln&1 Then ln+1 ;make length even!
-		##[$80BE] Select:Goto newlen
+		Pop Select:Goto newlen
 		;
 	Case 3	;incbin! WOW!
 		f$=Left$(lz$,Len(lz$)-1):Gosub doincbin
-		##[$80BE] Select:Return
+		Pop Select:Return
 	Case 4	;equ - shit!
 		;
 		If \lab=-1 Then Goto aser13 ;no label on line!
@@ -1631,7 +1631,7 @@ If t<11
 		;
 		np+1:Gosub adjtemp:ln=0:Gosub newlen
 		Gosub makepcrefs:Gosub makelarefs
-		eqs+1:##[$80BE] Select:Return
+		eqs+1:Pop Select:Return
 		;
 	End Select
 	Goto asmed
@@ -1647,7 +1647,7 @@ If Len(ll$)>1
 EndIf
 ;
 p=tokp(t)
-##[$80BB]
+Repeat
 	If np=0 AND tokd(p)=0 AND tokd(p+1)=0				 ;simple!
 		Poke.w c,tokd(p+2):c+2:tcl+2:Goto asmed
 	EndIf
@@ -1658,7 +1658,7 @@ p=tokp(t)
 		Gosub asmit:Goto asmed
 	EndIf
 	p+5
-##[$80BC] tokd(p)=-1
+Until tokd(p)=-1
 ;
 ;error
 ;
@@ -1823,9 +1823,9 @@ j=tokd(p+3) LSR 12:If np Then j=(tokd(p+3) LSR 8)&15
 If j
 	mo2=mo(np):mo=-1
 	;
-	##[$80BB]
+	Repeat
 		mo+1:mo2 LSR 1
-	##[$80BC] mo2=0
+	Until mo2=0
 	;
 	If mo>6 Then re=mo-7:mo=7 Else re=re(np)
 	;
@@ -2267,18 +2267,18 @@ no(np)+1	;another operand!
 If c$="$" ;hex?
 	c$=LCase$(ch{}):If NOT he{c$} Then Goto aser4
 	va=0
-	##[$80BB]
+	Repeat
 		k=Asc(c$)-48:If k>9 Then k-39
 		va=(va LSL 4)+k:c$=LCase$(ch{})
-	##[$80BC] NOT he{c$}
+	Until NOT he{c$}
 	Goto putva
 EndIf
 ;
 If nu{c$} ;numeric? (decimal)
 	va=0
-	##[$80BB]
+	Repeat
 		va*10+(Asc(c$)-48):c$=ch{}
-	##[$80BC] NOT nu{c$}
+	Until NOT nu{c$}
 	putva:Gosub makevaimm
 	nc(np)+1:Return
 EndIf
@@ -2286,10 +2286,10 @@ EndIf
 If c$="%" ;bin?
 	c$=ch{}:If c$<>"1" AND c$<>"0" Then Goto aser4
 	va=0
-	##[$80BB]
+	Repeat
 		k=Asc(c$)-48:va LSL 1+k
 		c$=ch{}
-	##[$80BC] c$<>"0" AND c$<>"1"
+	Until c$<>"0" AND c$<>"1"
 	Goto putva
 EndIf
 ;
@@ -2304,9 +2304,9 @@ EndIf
 ;
 If al{c$} ;alphabetic? (label)
 	l$=""
-	##[$80BB]
+	Repeat
 		l$+c$:c$=ch{}
-	##[$80BC] NOT an{c$}
+	Until NOT an{c$}
 	;
 	;label name in l$
 	;
@@ -2693,7 +2693,7 @@ If l$
 	If NOT al{Left$(l$,1)} Then Gosub eder14:Goto laberr
 	For k=2 To Len(l$)
 	If NOT an{LCase$(Mid$(l$,k,1))}
-		##[$80BE] For:Gosub eder14:Goto laberr
+		Pop For:Gosub eder14:Goto laberr
 	EndIf
 	Next
 	;
@@ -2732,7 +2732,7 @@ If j>1	;more?
 		EndIf
 		;
 		For k=1 To hit
-		If m$=tok$(k) Then ##[$80BE] For:Goto tokfound
+		If m$=tok$(k) Then Pop For:Goto tokfound
 		Next
 		Gosub aser2:Goto doop
 		tokfound	;token found!
@@ -2777,7 +2777,7 @@ For k=0 To hil
 If *lab\flags
 	If *lab\name=l$ ;is it here?
 		lo=*lab-labat
-		##[$80BE] For:Return
+		Pop For:Return
 	EndIf
 Else
 	If e<0 Then e=k
@@ -2882,7 +2882,7 @@ If erf	;already an error there????
 	If Len(err$)>80 Then Return
 	err$+"/"+er$
 Else
-	##[$FF8C] Peek.l(##[$80B8] allocst(0))	;beep screen!
+	##[$FF8C] Peek.l(Addr allocst(0))	;beep screen!
 	err$="ERROR! : "+er$:erf=-1
 EndIf
 ;
@@ -3110,7 +3110,7 @@ If my>=y-4 AND my<y
 	;
 	;grab top of window...
 	;
-	##[$80BE] For
+	Pop For
 	If w>1 Then y=wt(w-1)LSL 3+vl(w-1)LSL 3 Else y=12;min y for top!
 	y2=wt(w)LSL 3+vl(w)LSL 3-28 ;max y for top!
 	oy=-8
@@ -3139,7 +3139,7 @@ If my>=y2 AND my<y2+4
 	;
 	;got bottom of window...
 	;
-	##[$80BE] For
+	Pop For
 	y=wt(w)LSL 3+24
 	If w<wo Then y2=wt(w+1)LSL 3-8 Else y2=windhp+8
 	oy=-8
@@ -3161,10 +3161,10 @@ If my>=y AND my<y2
 	;
 	;click in window! - main current...
 	;
-	##[$80BE] For:If w=cw Then Return
+	Pop For:If w=cw Then Return
 	;
 	Gosub oldwin
-	##[$80C9] w,cw:Gosub showbord:Gosub reftext
+	Exchange w,cw:Gosub showbord:Gosub reftext
 	w=cw:Gosub newwin:Gosub showbord
 	Goto reftext
 	;
@@ -3396,7 +3396,7 @@ Return
 
 windon	;turn on window
 localstat 0,0,0,640,windhp+12,$1900,"",3,0:CatchDosErrs
-wad=Peek.l(##[$80B8] localstat(0))	;intution window struct
+wad=Peek.l(Addr localstat(0))	;intution window struct
 arrmult 0:ScreensBitMap 0,0:BitMapOutput 0
 setbps{1}:Return
 
@@ -3473,28 +3473,28 @@ SelectMode 1,0
 workstart 5,240,160,0,1," OK "
 
 hit=-1
-##[$80BB]
+Repeat
 	hit+1:Read tok$(hit)
-##[$80BC] tok$(hit)=""
+Until tok$(hit)=""
 ;
 hit=10:k=?asmtable:j=0
 ;
-##[$80BB]
+Repeat
 	l$=""
-	##[$80BB]
+	Repeat
 		p=Peek.b(k):k+1
 		If p
 			l$+Chr$(p)
 		EndIf
-	##[$80BC] p=0
+	Until p=0
 	If k&1 Then k+1
 	If l$
 		hit+1:tok$(hit)=l$:tokp(hit)=j
-		##[$80BB]
+		Repeat
 			tokd(j)=Peek.w(k):k+2:j+1
-		##[$80BC] tokd(j-1)=-1
+		Until tokd(j-1)=-1
 	EndIf
-##[$80BC] l$=""
+Until l$=""
 sz$(1)="b":sz$(2)="w":sz$(3)="l":sz$(4)="s"
 ;
 lok=##[$FE9D](260,1) ;for dos lok's

@@ -279,7 +279,7 @@ Statement add_event{t,s$}
 	##[$FE8C]
 	If AddLast(d_e())
 		d_e()\t=t
-		MOVE bufferput(pc),d0:SUBQ #4,d0:AND #buffand,d0:##[$80BD] d0,d_e()\i
+		MOVE bufferput(pc),d0:SUBQ #4,d0:AND #buffand,d0:PutReg d0,d_e()\i
 		d_e()\s=s$
 	EndIf
 	##[$FE8D]
@@ -314,12 +314,12 @@ d_statehandler:
 .mybuffer: Dc.l 0
 
 	d_superhandler:
-	!d_basic:##[$80BD] a0,sa
+	!d_basic:PutReg a0,sa
 	Gosub stopit:add_event{0,Peek$(sa)}
 	RTS
 
 d_userhandler:
-	!d_basic:##[$80BD] a0,sa
+	!d_basic:PutReg a0,sa
 	Gosub stopit:add_event{1,Peek$(sa)}
 	RTS
 
@@ -337,7 +337,7 @@ d_waithandler:
 
 d_evalhandler:
 	;
-	!d_basic:##[$80BD] a0,sa
+	!d_basic:PutReg a0,sa
 	add_event{2,Peek$(sa)}
 	RTS
 
@@ -512,7 +512,7 @@ Statement NewTypeWindow{address.l}
 	typelength=7
 	num.w=0
 
-	##[$80BB]
+	Repeat
 		a$=Peek$(address)
 		address+Len(a$)+1
 		If a$
@@ -537,7 +537,7 @@ Statement NewTypeWindow{address.l}
 			typelist()\skip=skp
 			address+2
 		EndIf
-	##[$80BC] a$=""
+	Until a$=""
 
 	winheight.w=(num ASL 3)+23
 
@@ -579,7 +579,7 @@ Statement NewTypeWindow{address.l}
 		stepcnt+1
 		evalrequest=#_newtypewindow
 	CELSE
-		typepointer=##[$80B8] MidHandle(0)
+		typepointer=Addr MidHandle(0)
 		RefreshTypeWindow{}
 	CEND
 End Statement
@@ -615,7 +615,7 @@ newlocarr 0,2,"Objects"
 MenuItem 0,0,2,0,"==Trace objects==" : MenuColour 0,2,0,Off
 ad.l=?MyTypes
 num=1
-##[$80BB]
+Repeat
 	ad2.l=Peek.l(ad)
 	ad+4
 	If ad2
@@ -623,7 +623,7 @@ num=1
 		MenuItem 0,0,2,num,a$
 		num+1
 	EndIf
-##[$80BC] ad2=0
+Until ad2=0
 
 ;Leading Edge Software *********************************
 
@@ -637,7 +637,7 @@ Gosub RedrawMem
 Gosub RedrawRegs
 
 .mainloop
-##[$80BB]
+Repeat
 	Gosub getevent
 	gad=GadgetHit
 	i$=Inkey$
@@ -855,7 +855,7 @@ Gosub RedrawRegs
 					EndIf
 			End Select
 	End Select
-##[$80C7]
+Forever
 
 .CorruptWindow:
 	Select evw
@@ -948,7 +948,7 @@ Return
 	MOVE.l d_dadd(pc),a0:MOVE.l a1,-(a0)
 	;
 	If i2=cil
-		GetReg a0,i2+9:GetReg d0,cio:!d_call{7}:##[$80BD] d0,cio2
+		GetReg a0,i2+9:GetReg d0,cio:!d_call{7}:PutReg d0,cio2
 		d_d$=Left$(d_d$,cio2)+" "+Mid$(d_d$,cio2+1)
 	EndIf
 	;
@@ -983,7 +983,7 @@ Return
 	StringText$ 4,2:SetString 2,1
 	gx=4:gn=1
 	newlocarr 0,1,"Shortcuts"
-	##[$80BB]
+	Repeat
 		Read t$,but$
 		If t$<>""
 			gf=0:If gn=10 Then gx+64
@@ -991,7 +991,7 @@ Return
 			MenuItem 0,0,1,gn-1,t$+"				 ",but$
 			gn+1
 		EndIf
-	##[$80BC] t$=""
+	Until t$=""
 
 ;	Borders Off
 Return
@@ -1012,7 +1012,7 @@ Data$ "",""
 	CEND
 	arrmult 0
 	CatchDosErrs
-	s0=Peek.l(##[$80B8] allocst(0))
+	s0=Peek.l(Addr allocst(0))
 	sw=Peek.w(s0+12):sh=Peek.w(s0+14)
 Return
 
@@ -1049,7 +1049,7 @@ Return
 	localstat 3,wx+ww,wy,640-ww,wh,$2f|$200000,"Memory window",1,2
 	arrmult 0
 	SizeLimits ww,wh,640,256
-	localstat 0,wx,wy,ww,wh,$2f|$200000,"Source code window",1,2:w0=Peek.l(##[$80B8] localstat(0))
+	localstat 0,wx,wy,ww,wh,$2f|$200000,"Source code window",1,2:w0=Peek.l(Addr localstat(0))
 	arrmult 0
 
 	memwinheight=InnerHeight
@@ -1074,7 +1074,7 @@ Return
 Return
 
 .getevent
-	##[$80BB]
+	Repeat
 		While locfree(d_e())
 			If memwin Then Gosub RedrawMem
 			If regswin Then Gosub RedrawRegs
@@ -1122,7 +1122,7 @@ Return
 			MaxLen d_e()\s=0:freelast d_e()
 		Wend
 		ev=Event:If ev=0 Then ##[$FF29]
-	##[$80BC] ev
+	Until ev
 Return
 
 .RedrawMem:

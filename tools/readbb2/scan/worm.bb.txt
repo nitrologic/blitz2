@@ -45,7 +45,7 @@ End Function
 
 	For i=5 To 50 Step 5
 		x=192+i*496/50:y=416
-		If (i ##[$80B9] 10)=0
+		If (i MOD 10)=0
 			y=412:WLocate x-24,428:WColour 1,0:Print numero{i}
 			Boxf x-2,0,x-3,411,5
 		EndIf

@@ -38,7 +38,7 @@ MOVE.l d0,-(a7)
 Dc $4e7a,$0002
 MOVE.l d0,cr
 MOVE.l (a7)+,d0
-##[$80BD] d0,temp
+PutReg d0,temp
 ##[$FE90] temp
 
 NPrint Hex$(Peek.l(?cr))

@@ -9,8 +9,8 @@ Mouse On
 
 Dim pitch.w(256),vol.w(256)
 For i=0 To 256
-	pitch(i)=800-HSin(i*##[$80BA]/350)*650
-	vol(i)=10+HSin(i*##[$80BA]/350)*54
+	pitch(i)=800-HSin(i*Pi/350)*650
+	vol(i)=10+HSin(i*Pi/350)*54
 Next
 Filter Off
 my=0:tt=1

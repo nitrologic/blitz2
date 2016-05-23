@@ -60,7 +60,7 @@ allocst 0,-32,0,1024,512,4,$0,"KickMe",1,2,0
 
 BitPlanesBitMap 0,2,4
 
-##[$80C8] bob
+Restore bob
 Dim nam.s(12),sx.w(12),sy.w(12),stype.w(12)
 For cnt.w=0 To 11
 	NPrint cnt
@@ -143,10 +143,10 @@ initsign:
 		If i AND $01 Then signl(e+6)+$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(##[$80B8] lmaxlen(signbmap)+8)
+	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
 	LoadShape signshape,"sign.iff"
 	CopyShape signshape,signshape+1
 	XFlip signshape:Handle signshape,0,0
-	dsign(0)=Peek.l(##[$80B8] MidHandle(signshape)+14)
-	dsign(1)=Peek.l(##[$80B8] MidHandle(signshape+1)+14)
+	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)
+	dsign(1)=Peek.l(Addr MidHandle(signshape+1)+14)
 	Return

@@ -76,21 +76,21 @@ Boxf 32,y,w-1,y+i-1,k
 k+1
 Next
 
-##[$80BB]
+Repeat
 	Gosub pickaline
 	Gosub options
-##[$80C7]
+Forever
 
 .options
 Gosub openwindow0
-##[$80BB]
+Repeat
 ev.l=WaitEvent
 Select ev
 Case 32
 	If GadgetHit<4
-		##[$80BB]
+		Repeat
 			Gosub calcprop:Gosub printprop
-		##[$80BC] WaitEvent=64
+		Until WaitEvent=64
 		Gosub showprop
 	EndIf
 Case 64
@@ -106,7 +106,7 @@ Case 64
 			;
 			;loop to do colours
 			;
-			y2=co:If y2<y1 Then ##[$80C9] y1,y2
+			y2=co:If y2<y1 Then Exchange y1,y2
 			;
 			r1=ShowPalette(y1):g1=NewPaletteMode(y1):b1=CyclePalette(y1)
 			r2=ShowPalette(y2):g2=NewPaletteMode(y2):b2=CyclePalette(y2)
@@ -127,7 +127,7 @@ Case 64
 		End Select
 	EndIf
 End Select
-##[$80BC] ev=512
+Until ev=512
 Gosub closewindow0
 Return
 
@@ -149,7 +149,7 @@ Gosub savecols:Boxf 0,12,319,h+11,0
 lmaxlen 3,w,256,4 ;shapes created...
 lmaxlen 2,w,h,4
 lmaxlen 1,w,h+msp*4,8
-spin=0:ca=1/i:bb=w/8:mo=Peek.w(##[$80B8] lmaxlen(3)):tsh=0 ;total shapes
+spin=0:ca=1/i:bb=w/8:mo=Peek.w(Addr lmaxlen(3)):tsh=0 ;total shapes
 ;
 For k=0 To ni-1
 AGARed k+2,r(k),g(k),b(k)
@@ -162,7 +162,7 @@ For yo=msp To -msp Step -spst
 fir=0:las=w-1:ste=1
 ;
 If yo<0
-	##[$80C9] fir,las:ste=-ste
+	Exchange fir,las:ste=-ste
 EndIf
 ;
 col=2:Use lmaxlen 1:BlockScroll
@@ -200,9 +200,9 @@ If r(c)<>r2(0) OR g(c)<>g2(0) OR b(c)<>b2(0)
 	r2(0)=r(c):g2(0)=g(c):b2(0)=b(c)
 	;
 	If Cls(fir,y)<>Cls(las,y)
-		##[$80BB]
+		Repeat
 			bc+1:If bc=16 Then bc=1
-		##[$80BC] r2(bc)=r2(0) AND g2(bc)=g2(0) AND b2(bc)=b2(0)
+		Until r2(bc)=r2(0) AND g2(bc)=g2(0) AND b2(bc)=b2(0)
 	EndIf
 	;
 EndIf
@@ -244,27 +244,27 @@ Next
 Use lmaxlen 2:Line lx,y2,las,y2,ln
 GetaShape 0,0,y2,w,1	 ;what this scan line looks like...
 ;
-d0.l=Peek.l(##[$80B8] MidHandle(0)+14)
+d0.l=Peek.l(Addr MidHandle(0)+14)
 d1.l=d0+bb
 d2.l=d1+bb
 d3.l=d2+bb
 ;
-e0.l=Peek.l(##[$80B8] lmaxlen(3)+8)
-e1.l=Peek.l(##[$80B8] lmaxlen(3)+12)
-e2.l=Peek.l(##[$80B8] lmaxlen(3)+16)
-e3.l=Peek.l(##[$80B8] lmaxlen(3)+20)
+e0.l=Peek.l(Addr lmaxlen(3)+8)
+e1.l=Peek.l(Addr lmaxlen(3)+12)
+e2.l=Peek.l(Addr lmaxlen(3)+16)
+e3.l=Peek.l(Addr lmaxlen(3)+20)
 ;
 For k=0 To nsh-1
 ;
 For j=0 To bb-1 Step 4
 If Peek.l(d0+j)<>Peek.l(e0+j) OR Peek.l(d1+j)<>Peek.l(e1+j) OR Peek.l(d2+j)<>Peek.l(e2+j) OR Peek.l(d3+j)<>Peek.l(e3+j)
-	e0+mo:e1+mo:e2+mo:e3+mo:##[$80BE] For:Goto out2
+	e0+mo:e1+mo:e2+mo:e3+mo:Pop For:Goto out2
 EndIf
 Next
 ;
 ;shapes are same!
 ;
-sa.l=k*mo:##[$80BE] For:Goto out3
+sa.l=k*mo:Pop For:Goto out3
 out2
 Next
 ;
@@ -321,10 +321,10 @@ If y2
 EndIf
 ;
 For k=0 To 15		 ;double buffer dualplayfield banks...
-##[$80C9] r2(k),r3(k)
-##[$80C9] g2(k),g3(k)
-##[$80C9] b2(k),b3(k)
-##[$80C9] bc,bc2
+Exchange r2(k),r3(k)
+Exchange g2(k),g3(k)
+Exchange b2(k),b3(k)
+Exchange bc,bc2
 Next
 ;
 Use lmaxlen 0
@@ -339,10 +339,10 @@ While Eof(0)&7:Exists 0,&ali$,2:Wend
 .writecop
 spin+1
 bo(spin)=Eof(0)
-e0.l=Peek.l(##[$80B8] lmaxlen(3)+8)
-e1.l=Peek.l(##[$80B8] lmaxlen(3)+12)
-e2.l=Peek.l(##[$80B8] lmaxlen(3)+16)
-e3.l=Peek.l(##[$80B8] lmaxlen(3)+20)
+e0.l=Peek.l(Addr lmaxlen(3)+8)
+e1.l=Peek.l(Addr lmaxlen(3)+12)
+e2.l=Peek.l(Addr lmaxlen(3)+16)
+e3.l=Peek.l(Addr lmaxlen(3)+20)
 For k=0 To nsh-1
 Exists 0,e0,mo
 Exists 0,e1,mo
@@ -403,7 +403,7 @@ Return
 .pickaline
 oy=-1:FlushEvents
 While oy<0
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		Select ev
 		Case 1024
@@ -429,7 +429,7 @@ While oy<0
 				EndIf
 			EndIf
 		End Select
-	##[$80BC] ev=8
+	Until ev=8
 Wend
 ;
 co=(y-12)/i+2

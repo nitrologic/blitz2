@@ -22,9 +22,9 @@ Box 15,15,15+33,15+41,1	 ;shape must fit inside this frame
 
 GetaShape 0,16,15,32,1		;for clipping height
 
-For r=0 To 15:##[$80C8] myshape:f=16+r:Gosub makeframe:longdiv f,r*32+16,104:Next
-For r=0 To 15:##[$80C8] mozzy:f=32+r:Gosub makeframe:longdiv f,r*32+16,144:Next
-For r=0 To 15:##[$80C8] blade:f=48+r:Gosub makeframe:longdiv f,r*32+16,184:Next
+For r=0 To 15:Restore myshape:f=16+r:Gosub makeframe:longdiv f,r*32+16,104:Next
+For r=0 To 15:Restore mozzy:f=32+r:Gosub makeframe:longdiv f,r*32+16,144:Next
+For r=0 To 15:Restore blade:f=48+r:Gosub makeframe:longdiv f,r*32+16,184:Next
 
 SaveShapes 16,f,"isoshapes"
 
@@ -36,7 +36,7 @@ End
 
 .makeframe:
 	Read n
-	rsin=HSin(r*##[$80BA]/8):rcos=HCos(r*##[$80BA]/8)
+	rsin=HSin(r*Pi/8):rcos=HCos(r*Pi/8)
 	ClearList ball()
 	##[$80CA] ball()
 	For b=0 To n-1

@@ -10,9 +10,9 @@ Ver$ = "BlitzTris 18.7.1995 Timo Suoranta"
 ;	 Number-keypad 1235 to move & rotate, space to drop
 
 
-##[$80B4]:End:End ##[$80B4]								 ; Add ; to enable Debugger
+SetErr:End:End SetErr								 ; Add ; to enable Debugger
 
-##[$80C3]														 ; A Must for WB progs
+WBStartup														 ; A Must for WB progs
 ##[$80CB]															 ; Editor run only; free mem.
 ##[$80CC]																 ; Editor run only; free mem.
 DEFTYPE .w														; Mostly sufficient & fast
@@ -373,9 +373,9 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 	PFX = (SXX-(MXX+2)*#BXX)/2					; Set PlayField Grfx Offset
 	PFY = 12+#DYY
 
-	##[$80BB]
+	Repeat
 		Gosub Play
-	##[$80BC] Joyb(0)=3										 ; Both mousebuttons down -> Quit
+	Until Joyb(0)=3										 ; Both mousebuttons down -> Quit
 	End
 
 .Play																 ; Main Playing procedure
@@ -403,7 +403,7 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 
 	NextPiece = True										; Give First piece
 
-	##[$80BB]															; Loop Until End
+	Repeat															; Loop Until End
 
 		er = r														; Store current
 		ex = x														; rotation & position.
@@ -435,9 +435,9 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 		If G$="6":x+1:EndIf							 ; Move right
 		If G$="2":y+1:EndIf							 ; Move down
 		If G$=" " AND NOT NextPiece			 ; Drop
-			##[$80BB]													;
+			Repeat													;
 				y + 1												 ; go as down as possible
-			##[$80BC] NOT CheckBlock {n,r,x,y } ;
+			Until NOT CheckBlock {n,r,x,y } ;
 			DrawBlock	{n,er,ex, ey,0}			; remove old grfx
 			DrawBlock	{n, r, x,y-1,1}			; draw to new position
 			PlaceBlock {n, r, x,y-1	}			; fix in place
@@ -471,7 +471,7 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 			EndIf													 ;
 		EndIf
 
-	##[$80BC] GameOver OR Joyb(0)=3				 ; End of Loop, check mouse buttons
+	Until GameOver OR Joyb(0)=3				 ; End of Loop, check mouse buttons
 	Return															; Back to Main 'Interface' :-)
 
 

@@ -49,9 +49,9 @@ Statement SquareChecks{ *bombptr.gameVars}
 						If (\square[i]\hasBomb<0) AND (\square[i]\state=0)
 								\square[i]\state = 4
 								\markedBombs = \markedBombs + 1
-								xpos = \displayXCoord+(((i-1) ##[$80B9] \wide)-\leftWide)*10
+								xpos = \displayXCoord+(((i-1) MOD \wide)-\leftWide)*10
 								ypos = \displayYCoord+(i/\wide-\leftHigh)*10
-								If i ##[$80B9] \wide=0 Then ypos = ypos - 10
+								If i MOD \wide=0 Then ypos = ypos - 10
 								DrawSquare{ *bombptr, 11, xpos, ypos}
 						End If
 				Next i
@@ -89,9 +89,9 @@ Shared hold.holdtype()
 		hold(1)\num = num
 		hold(1)\hasBomb = 0
 ; CHANGE THE \xpos AND \ypos TO COORDINATES OF THE SQUARE RATHER THAN THE MOUSE-CLICK
-		hold(1)\xpos = \displayXCoord+(((num-1) ##[$80B9] \wide)-\leftWide)*10
+		hold(1)\xpos = \displayXCoord+(((num-1) MOD \wide)-\leftWide)*10
 		hold(1)\ypos = \displayYCoord+(num/\wide-\leftHigh)*10
-		If num ##[$80B9] \wide=0 Then hold(1)\ypos = hold(1)\ypos - 10
+		If num MOD \wide=0 Then hold(1)\ypos = hold(1)\ypos - 10
 		\openedSquares = \openedSquares + 1
 		\square[hold(1)\num]\state = 2
 		DrawSquare{ *bombptr, $EF, hold(1)\xpos, hold(1)\ypos}
@@ -759,10 +759,10 @@ Statement TheGame{ *bombptr.gameVars, *biptr.OSInput}
 		Menus Off
 		keep.b=True
 		FlushEvents
-		##[$80BB]
+		Repeat
 				GetGameInput{ *biptr}
 				Gosub GameEvents
-		##[$80BC] NOT keep
+		Until NOT keep
 		Menus On
 		FreeupDisplay{ *bombptr}
 		Statement Return

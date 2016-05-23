@@ -34,8 +34,8 @@ For d=0 To 6			;set screen	options to 7
 Next d
 Gosub makeshape
 sc=0:r=0
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 			For deh=0 To 360 Step 7
 					For sup=0 To 6
 					ShowScreen sc
@@ -50,9 +50,9 @@ sc=0:r=0
 			sc=0
 			Next deh
 	r=r+8
-	##[$80BC] r>360
+	Until r>360
 r=0
-##[$80BC] Joyb(0)=1
+Until Joyb(0)=1
 End
 makeshape:
 Circlef 14,14,8,3

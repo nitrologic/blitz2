@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/AMOS_JoyRead.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/AMOS_JoyRead.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/AMOS_JoyRead.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/AMOS_JoyRead.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/AMOS_JoyRead.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/AMOS_JoyRead.bb2
 ;MY JOY ROUTINE
 Giro.b=1;Default
-##[$80BB]: VWait
+Repeat: VWait
 
 Joy_Temp.b=Joyx(1)
 If Giro=1 ;Looking to the right
@@ -29,4 +29,4 @@ My_Joy+Joyb(1)ASL5
 
 If My_Joy=0 Then My_Joy=%1
 
-NPrint Right$(Bin$(My_Joy),8): ##[$80BC] Joyb(0)
+NPrint Right$(Bin$(My_Joy),8): Until Joyb(0)

@@ -59,7 +59,7 @@ Use lmaxlen 0
 
 allocst 0,0,0,320,256,4,0,"",1,2,0
 
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 InitBank 0,8192,0
 
 localstat 0,0,0,320,256,$1800,"",1,2
@@ -93,7 +93,7 @@ sp=0:sb=0
 If WriteMem(0,"sprite"+Str$(esp)+".dat")
 	##[$BE14] 0,&mysp,4+8*8:CloseFile 0
 	nn=0
-	##[$80BB]
+	Repeat
 		If mysp\q[nn]\w>0
 			globalloc q():##[$80CA] mysp\q[nn]
 			q()\x=\x*8,\y*8,\w*8,\h*8:##[$80CA] q()
@@ -101,10 +101,10 @@ If WriteMem(0,"sprite"+Str$(esp)+".dat")
 			sp+1:sb+\w*\h/2
 		EndIf
 		nn+1
-	##[$80BC] mysp\q[nn]\w=0
+	Until mysp\q[nn]\w=0
 EndIf
 
-##[$80BB]
+Repeat
 	;
 	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
 	;
@@ -147,7 +147,7 @@ EndIf
 	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
 	Locate 0,22:Print key,"	"
 
-##[$80BC] key=27
+Until key=27
 
 makesprite:
 	Use lmaxlen 1:longdiv esp,0,0

@@ -569,8 +569,8 @@ End NEWTYPE
 
 #KNOBHMIN=6;/* minimum horizontal size of the Knob */
 #KNOBVMIN=4;/* minimum vertical size of the Knob */
-#MAXBODY=$FFFF;/* ##[$80C4] body value */
-#MAXPOT=$FFFF;/* ##[$80C4] pot value */
+#MAXBODY=$FFFF;/* Maximum body value */
+#MAXPOT=$FFFF;/* Maximum pot value */
 
 
 ;/* ======================================================================== */

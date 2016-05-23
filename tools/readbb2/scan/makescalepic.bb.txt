@@ -3,7 +3,7 @@
 lmaxlen 0,640,402,3
 LoadBitMap 0,"scaleypic.iff"
 
-ad.l=##[$80B8] lmaxlen(0)
+ad.l=Addr lmaxlen(0)
 
 p.l=ad+8
 p1.l=Peek.l(p)

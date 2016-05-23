@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_3D_Editor.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_3D_Editor.bb2
 ##[$80CC]
-##[$80C3]
+WBStartup
 
 ;INCDIR	""
 Include "FUN_Matrix.bb2"
@@ -421,13 +421,13 @@ Statement demo{}
 	localstat 3,(WBWidth-100)/2,(WBHeight-50)/2,100,50,$1000|$2,"F3D Demo",0,1
 	AttachGTList	2,3
 
-	##[$80BB]
+	Repeat
 		dxrot+1 : If dxrot>359 Then dxrot=0
 		dyrot+1 : If dyrot>359 Then dyrot=0
 		dzrot+1 : If dzrot>359 Then dzrot=0
 		update_display_window{}
 		ev.l=Event
-	##[$80BC] (ev=$40) AND (GadgetHit=100)
+	Until (ev=$40) AND (GadgetHit=100)
 
 	Free localstat 3
 
@@ -442,7 +442,7 @@ Statement gadget_hold{gh.l}
 	Shared cpoint,dxrot,dyrot,dzrot,dscale
 	Shared point_list()
 
-	##[$80BB]
+	Repeat
 		VWait
 		ev.l=Event
 		If (ev<>$40) AND (cpoint<>-1)
@@ -488,7 +488,7 @@ Statement gadget_hold{gh.l}
 		EndIf
 		update_display_window{}
 		update_design_window{}
-	##[$80BC] (ev=$40) OR (Joyb(0)=0)
+	Until (ev=$40) OR (Joyb(0)=0)
 
 End Statement
 
@@ -504,13 +504,13 @@ Statement gadget_press{gh.l}
 	Select gh
 		Case 0
 			If cpoint>-1 Then point_list(cpoint)\x=GTGetInteger(0,0) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,1),Peek.l(##[$80B8] localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,1),Peek.l(Addr localstat (0)),0)
 		Case 1
 			If cpoint>-1 Then point_list(cpoint)\y=GTGetInteger(0,1) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,2),Peek.l(##[$80B8] localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,2),Peek.l(Addr localstat (0)),0)
 		Case 2
 			If cpoint>-1 Then point_list(cpoint)\z=GTGetInteger(0,2) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,0),Peek.l(##[$80B8] localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,0),Peek.l(Addr localstat (0)),0)
 		Case 3
 			If pcount<#PMAX Then pcount+1 : cpoint=pcount : ud=True : uc=True : point_list(pcount)\x=0,0,0,1
 		Case 4
@@ -521,22 +521,22 @@ Statement gadget_press{gh.l}
 			If cpoint<pcount Then cpoint+1 : uc=True : ud=True
 		Case 10
 			If cfacet>-1 Then facet_list(cfacet)\Points[0]=GTGetInteger(0,10) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,11),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,11),Peek.l(Addr localstat (0)),0)
 		Case 11
 			If cfacet>-1 Then facet_list(cfacet)\Points[1]=GTGetInteger(0,11) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,12),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,12),Peek.l(Addr localstat (0)),0)
 		Case 12
 			If cfacet>-1 Then facet_list(cfacet)\Points[2]=GTGetInteger(0,12) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,13),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,13),Peek.l(Addr localstat (0)),0)
 		Case 13
 			If cfacet>-1 Then facet_list(cfacet)\Points[3]=GTGetInteger(0,13) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,14),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,14),Peek.l(Addr localstat (0)),0)
 		Case 14
 			If cfacet>-1 Then facet_list(cfacet)\FColour=GTGetInteger(0,14) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,15),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,15),Peek.l(Addr localstat (0)),0)
 		Case 15
 			If cfacet>-1 Then facet_list(cfacet)\FCMask=GTGetInteger(0,15)
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,10),Peek.l(##[$80B8] localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,10),Peek.l(Addr localstat (0)),0)
 		Case 16
 			If fcount<#FMAX Then fcount+1 : cfacet=fcount : ud=True : uc=True
 		Case 17
@@ -596,7 +596,7 @@ End Statement
 
 initialise_editor{}
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	Select ev
 		Case $200
@@ -617,7 +617,7 @@ initialise_editor{}
 				EndIf
 			EndIf
 	End Select
-##[$80BC] quit
+Until quit
 
 ##[$FFB4]
 

@@ -6,7 +6,7 @@
 ; token is the parameter that will be passed as argument from ted
 ; for testing your lib doc set the token to lib*128+1
 
-##[$80B4]:End:End ##[$80B4]
+SetErr:End:End SetErr
 
 Statement fixstring{a.l}
 	MOVE.l d0,a0:MOVEQ#10,d0
@@ -47,7 +47,7 @@ Gosub loadlib
 
 lmaxlen 0,#bmw,#bmh,1
 
-##[$80CC]:FindScreen 0:*s.Screen=Peek.l(##[$80B8] allocst(0))
+##[$80CC]:FindScreen 0:*s.Screen=Peek.l(Addr allocst(0))
 
 Gosub initgadgets
 
@@ -57,7 +57,7 @@ localstat 0,0,12,#winw,*s\Height-48,$143b+$c0,"",1,2,0
 
 Gosub newcommand
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=2 Then Gosub update
 	If ev=8
@@ -80,9 +80,9 @@ Gosub newcommand
 	If ev=$20
 		Select GadgetHit
 			Case 1
-				##[$80BB]
+				Repeat
 					y=VPropPot(0,1)*(#bmh-h):BitMaptoWindow 0,0,0,y,1,1,#bmw,h
-				##[$80BC] WaitEvent<>$10
+				Until WaitEvent<>$10
 			Case 3:Gosub doabout:indy=0
 			Case 4:Gosub libpage
 			Case 5:Gosub newcommand:indy=0
@@ -102,7 +102,7 @@ Gosub newcommand
 		If RawKey=$45 Then End
 		If RawKey=$5f Then Gosub libpage
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 
 End
 
@@ -139,7 +139,7 @@ End
 		i=indp*141
 		If i=>indexx Then i=0:indp=0
 		NPrint "COMMAND INDEX	PAGE "+Str$(indp+1):NPrint ""
-		##[$80BB]
+		Repeat
 			x1=CursX*8:y1=CursY*8
 			If ng=0 Then ny=y1-3
 			Print Centre$(Peek$(i(i)\a),24)
@@ -147,14 +147,14 @@ End
 			Box x1+12,y1-2,x1+180,y1+8,0
 			If CursX=24*3 Then Locate 0,CursY+2
 			ng+1:i+1
-		##[$80BC] i=indexx OR i=indp*141+141
+		Until i=indexx OR i=indp*141+141
 		y=0:Gosub update:indy=1
 	EndIf
 	Return
 
 .doabout:
 	BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
-	##[$80C8] about:Read a$
+	Restore about:Read a$
 	While a$<>"***"
 		If Left$(a$,1)="*"
 			NPrint "	",a$
@@ -245,22 +245,22 @@ End
 .dotable: ;scan through for columns and size
 	;
 	nc=0:p=0			;scan title line
-	##[$80BB]
+	Repeat
 		pp=Instr(a$,Chr$(9),p+1):If pp=0 Then pp=Len(a$)
 		nc+1:nc(nc)=pp-p+2:p=pp
-	##[$80BC] p=Len(a$)
+	Until p=Len(a$)
 	;
 	j=i+1:tend=pos1
 	;
 	While j<tend
 		m=0:a$=a$(j):j+1:c=1
 		If a$<>""
-			##[$80BB]
+			Repeat
 				mm=Instr(a$,Chr$(9),m+1)
 				If mm=0 Then mm=Len(a$)
 				If (mm-m)>nc(c) Then nc(c)=mm-m+2
 				m=mm:c+1
-			##[$80BC] m=Len(a$)
+			Until m=Len(a$)
 		Else
 			If Instr(a$(j),Chr$(9))=0 Then tend=j-1 ;end of table
 		EndIf
@@ -287,7 +287,7 @@ End
 
 .printline:
 	Print " ":p=0:k=1:c=1
-	##[$80BB]
+	Repeat
 		pp=Instr(b$,Chr$(9),p+1):If pp=0 Then pp=Len(b$)
 		c$=Mid$(b$,p+1,pp-p)
 		If Len(c$)<nc(c)
@@ -304,7 +304,7 @@ End
 			Locate cc,CursY:Print c$
 		EndIf
 		p=pp:c+1
-	##[$80BC] p=Len(b$)
+	Until p=Len(b$)
 	If c$<>"" Then NPrint ""
 	Locate 0,CursY
 	Return

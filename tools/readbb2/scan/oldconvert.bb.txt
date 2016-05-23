@@ -108,7 +108,7 @@ LoadBitMap 0,"f1.ami",0
 InitBank 0,64,0
 InitBank 1,8192*32,0
 n.w=0:nn.w=0
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 
 For y=0 To 383 Step 8				;515 Step 8
 	For x=0 To 767 Step 8			;1023 Step 8

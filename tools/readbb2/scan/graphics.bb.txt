@@ -5,7 +5,7 @@
 ;*																											*
 ;********************************************************
 
-##[$80BF] "include/"
+INCDIR "include/"
 XInclude exec.bb
 XInclude utility.bb
 

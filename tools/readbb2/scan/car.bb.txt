@@ -12,7 +12,7 @@
 ;LoadChunky 0,"w:cars/midget1.iff":t1=140:t2=220
 ##[$A404] 0,"w:cars/porsche1.iff":t1=140:t2=220
 
-##[$A402] 1,64,32,1:m.l=Peek.l(##[$80B8] ##[$A401](1))
+##[$A402] 1,64,32,1:m.l=Peek.l(Addr ##[$A401](1))
 
 lmaxlen 0,1280,320,3
 AGAGreen 0,0,120,80,40:StopCycle 0,1,3,3,3:StopCycle 0,2,12,12,12:StopCycle 0,3,14,6,8

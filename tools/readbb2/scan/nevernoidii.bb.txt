@@ -3,7 +3,7 @@
 ; Copyright 1987-1994
 ; A.A. van de Woestijne & R.H. Keizer
 
-##[$80CC] : ##[$80CB] : ##[$80C3]
+##[$80CC] : ##[$80CB] : WBStartup
 
 lmaxlen 2,320,256,3
 Buffer 0,8192 : Buffer 1,8192
@@ -51,7 +51,7 @@ joyread.b=0
 options.b=1
 startgame.b=0
 stopintro.b=0
-##[$80BB]
+Repeat
 	VWait
 	PlayMed
 	switch.b-1 : If switch<0 Then switch=0
@@ -156,7 +156,7 @@ stopintro.b=0
 		startgame=0
 	EndIf
 	If RawStatus(69) Then Gosub FadeMusic : End
-##[$80BC] stopintro
+Until stopintro
 Return
 
 .GameOptions
@@ -224,7 +224,7 @@ DisplayOn
 StartMedModule 1
 
 .MainRout
-##[$80BB]
+Repeat
 	If glue.b
 		gluewait-1
 		If gluewait<0
@@ -263,7 +263,7 @@ StartMedModule 1
 		ball2x=ball2x+8 : ball2y=ball2y+4
 	EndIf
 	If Inkey$="p" Then ball1.b=1-ball1 : pause=1-ball1
-##[$80BC] RawStatus (69)
+Until RawStatus (69)
 Gosub FadeMusic
 FreeSlices
 Slice 0,44,3
@@ -1584,7 +1584,7 @@ If livespl1<0
 	If twoplayers
 		twoplayers=0 : livespl1=livespl2
 		muur=0
-		##[$80C9] scorepl1,scorepl2
+		Exchange scorepl1,scorepl2
 		Use lmaxlen 1-db
 		longdiv 284,278,78
 		longdiv 229+score1,310,12
@@ -1609,7 +1609,7 @@ If livespl1<0
 		score100000=score1000002
 		sc1p1=50
 	Else
-		##[$80BE] Gosub : Goto GameOver
+		Pop Gosub : Goto GameOver
 	EndIf
 EndIf
 If livespl1<7
@@ -2424,7 +2424,7 @@ For t.b=0 To 9
 Next
 lvl+1
 If lvl>31
-	lvl=0 : lvlbnk+1 : If lvlbnk>3 Then ##[$80BE] Gosub : Goto GameOver
+	lvl=0 : lvlbnk+1 : If lvlbnk>3 Then Pop Gosub : Goto GameOver
 	Gosub LevelLoader
 EndIf
 Gosub InitAfterDie
@@ -2449,7 +2449,7 @@ Select blocknumber
 			EndIf
 		EndIf
 		If ballquant=2 Then ballquant=1 : ball2=0
-		##[$80BE] Select : Return
+		Pop Select : Return
 	Case 33
 		lrgsml=1 : nofire.b=1 : Gosub NewExtra : fire=1
 		If ballquant=2 Then ballquant=1 : ball2=0
@@ -2466,32 +2466,32 @@ Select blocknumber
 		Select extrasbat
 			Case 0
 				firebat=0 : f=0 : tyoffs=6 : batpos(0)=1 : animbat(0)=27
-				animlengtht=0 : animdelayt=0 : ##[$80BE] Select : ##[$80BE] Select : Return
+				animlengtht=0 : animdelayt=0 : Pop Select : Pop Select : Return
 			Case 1
 				firebat=1 : f=0 : byoffs=4 : batpos(1)=1 : animbat(1)=16
-				animlengthb=0 : animdelayb=0 : ##[$80BE] Select : ##[$80BE] Select : Return
+				animlengthb=0 : animdelayb=0 : Pop Select : Pop Select : Return
 			Case 2
 				firebat=2 : f=1 : lxoffs=6 : batpos(2)=1 : animbat(2)=29
-				animlengthl=0 : animdelayl=0 : ##[$80BE] Select : ##[$80BE] Select : Return
+				animlengthl=0 : animdelayl=0 : Pop Select : Pop Select : Return
 			Case 3
 				firebat=3 : f=1 : rxoffs=4 : batpos(3)=1 : animbat(3)=31
-				animlengthr=0 : animdelayr=0 : ##[$80BE] Select : ##[$80BE] Select : Return
+				animlengthr=0 : animdelayr=0 : Pop Select : Pop Select : Return
 		End Select
 	Case 34
 		If twoplayers
 			If extrasbat=0 OR extrasbat=1
-				livespl1+1 : Gosub BlitLives : ##[$80BE] Select : Return
+				livespl1+1 : Gosub BlitLives : Pop Select : Return
 			EndIf
 			If extrasbat=2 OR extrasbat=3
-				livespl2+1 : Gosub BlitLives : ##[$80BE] Select : Return
+				livespl2+1 : Gosub BlitLives : Pop Select : Return
 			EndIf
 		Else
-			livespl1+1 : Gosub BlitLives : ##[$80BE] Select : Return
+			livespl1+1 : Gosub BlitLives : Pop Select : Return
 		EndIf
 	Case 35
-		Gosub ExtrasOff : ball1=0 : Edie1=1 : workend=1 : ##[$80BE] Select : Return
+		Gosub ExtrasOff : ball1=0 : Edie1=1 : workend=1 : Pop Select : Return
 	Case 36
-		If ball2 Then ##[$80BE] Select : Return
+		If ball2 Then Pop Select : Return
 		If extrasbat=0 OR extrasbat=1 Then p2=0 Else p2=1
 		If fire
 			If animbat(0)=27 Then batpos(0)=1 : animbat(0)=28 : tyoffs=4 : animlengtht=0 : animdelayt=0
@@ -2508,7 +2508,7 @@ Select blocknumber
 		flash=0 : heavy=0 : nodeflect=0 : strange=0
 		playbat2=extrasbat : ballquant=2 : ball2=1
 		ball2x=ball1x : ball2y=ball1y : ball2rx=ball1rx
-		ball2ry=ball1ry : ##[$80BE] Select : Return
+		ball2ry=ball1ry : Pop Select : Return
 	Case 37
 		lrgsml=1 : nofire=1 : Gosub NewExtra
 		bat2rx=1 : bat2ry=1 : batpos2=1 : animlength2=0 : animdelay2=0
@@ -2518,25 +2518,25 @@ Select blocknumber
 				bat2maxt=37 : bat2maxb=50 : bat2maxl=100 : bat2maxr=189
 				battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
 				If bat2=3 OR bat2=4 Then batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
-				bat2x=battx : bat2=1 : ##[$80BE] Select : ##[$80BE] Select : Return
+				bat2x=battx : bat2=1 : Pop Select : Pop Select : Return
 			Case 1
 				animbat2=21 : bat2y=batby-20 : xoffs2=14 : yoffs2=6
 				bat2maxt=200 : bat2maxb=213 : bat2maxl=100 : bat2maxr=189
 				battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
 				If bat2=3 OR bat2=4 Then batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
-				bat2x=batbx : bat2=2 : ##[$80BE] Select : ##[$80BE] Select : Return
+				bat2x=batbx : bat2=2 : Pop Select : Pop Select : Return
 			Case 2
 				animbat2=22 : bat2x=batlx+20 : xoffs2=4 : yoffs2=14
 				bat2maxl=66 : bat2maxr=79 : bat2maxt=71 : bat2maxb=160
 				batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
 				If bat2=1 OR bat2=2 Then battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
-				bat2y=batly : bat2=3 : ##[$80BE] Select : ##[$80BE] Select : Return
+				bat2y=batly : bat2=3 : Pop Select : Pop Select : Return
 			Case 3
 				animbat2=22 : bat2x=batrx-20 : xoffs2=6 : yoffs2=14
 				bat2maxl=229 : bat2maxr=242 : bat2maxt=71 : bat2maxb=160
 				batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
 				If bat2=1 OR bat2=2 Then battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
-				bat2y=batry : bat2=4 : ##[$80BE] Select : ##[$80BE] Select : Return
+				bat2y=batry : bat2=4 : Pop Select : Pop Select : Return
 		End Select
 	Case 38
 		Gosub NewExtra
@@ -2555,14 +2555,14 @@ Select blocknumber
 			batpos(1)=1 : animbat(1)=14 : animlengthb=0 : animdelayb=0
 			battmaxl=104 : battmaxr=186 : batbmaxl=104 : batbmaxr=186
 			bl1=-18 : bl2=-14 : bl3=-4
-			br1=18 : br2=14 : br3=5 : ##[$80BE] Select : Return
+			br1=18 : br2=14 : br3=5 : Pop Select : Return
 		EndIf
 		If extrasbat=2 OR extrasbat=3
 			batpos(2)=1 : animbat(2)=23 : animlengthl=0 : animdelayl=0
 			batpos(3)=1 : animbat(3)=23 : animlengthr=0 : animdelayr=0
 			batlmaxt=75 : batlmaxb=157 : batrmaxt=75 : batrmaxb=157
 			bl1lr=-18 : bl2lr=-14 : bl3lr=-4
-			br1lr=18 : br2lr=14 : br3lr=5 : ##[$80BE] Select : Return
+			br1lr=18 : br2lr=14 : br3lr=5 : Pop Select : Return
 		EndIf
 	Case 39
 		Gosub NewExtra
@@ -2581,14 +2581,14 @@ Select blocknumber
 			batpos(1)=1 : animbat(1)=15 : animlengthb=0 : animdelayb=0
 			battmaxl=97 : battmaxr=192 : batbmaxl=97 : batbmaxr=192
 			bl1=-11 : bl2=-7 : bl3=-4
-			br1=12 : br2=8 : br3=5 : ##[$80BE] Select : Return
+			br1=12 : br2=8 : br3=5 : Pop Select : Return
 		EndIf
 		If extrasbat=2 OR extrasbat=3
 			batpos(2)=1 : animbat(2)=24 : animlengthl=0 : animdelayr=0
 			batpos(3)=1 : animbat(3)=24 : animlengthl=0 : animdelayr=0
 			batlmaxt=68 : batlmaxb=163 : batrmaxt=68 : batrmaxb=163
 			bl1lr=-11 : bl2lr=-7 : bl3lr=-4
-			br1lr=12 : br2lr=8 : br3lr=5 : ##[$80BE] Select : Return
+			br1lr=12 : br2lr=8 : br3lr=5 : Pop Select : Return
 		EndIf
 	Case 40
 		lrgsml=1 : nofire=1 : Gosub NewExtra
@@ -2609,7 +2609,7 @@ Select blocknumber
 				EndIf
 				animbat2=21 : bat2y=batty : xoffs2=14 : yoffs2=4
 				bat2=1 : bat2maxt=17 : bat2maxb=50
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 1
 				If batbx<145
 					battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=139
@@ -2625,7 +2625,7 @@ Select blocknumber
 				EndIf
 				animbat2=21 : bat2y=batby : xoffs2=14 : yoffs2=6
 				bat2=2 : bat2maxt=200 : bat2maxb=233
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 2
 				If batly<116
 					batlmaxt=71 : batlmaxb=110 : batrmaxt=71 : batrmaxb=160
@@ -2641,7 +2641,7 @@ Select blocknumber
 				EndIf
 				animbat2=22 : bat2x=batlx : xoffs2=4 : yoffs2=14
 				bat2=3 : bat2maxl=46 : bat2maxr=79
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 3
 				If batry<116
 					batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=110
@@ -2658,7 +2658,7 @@ Select blocknumber
 				animbat2=22 : bat2x=batlx : xoffs2=4 : yoffs2=14
 				animbat2=22 : bat2x=batrx : xoffs2=6 : yoffs2=14
 				bat2=4 : bat2maxl=229 : bat2maxr=262
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 		End Select
 	Case 41
 		lrgsml=1 : nofire=1 : Gosub NewExtra
@@ -2670,39 +2670,39 @@ Select blocknumber
 				bat2maxt=17 : bat2maxb=50 : bat2maxl=100 : bat2maxr=189
 				battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
 				If bat2=3 OR bat2=4 Then batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 1
 				animbat2=21 : bat2y=batby : xoffs2=14 : yoffs2=6
 				bat2=2 : bat2x=290-batbx
 				bat2maxt=200 : bat2maxb=233 : bat2maxl=100 : bat2maxr=189
 				battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
 				If bat2=3 OR bat2=4 Then batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 2
 				animbat2=22 : bat2x=batlx : xoffs2=4 : yoffs2=14
 				bat2=3 : bat2y=232-batly
 				bat2maxt=71 : bat2maxb=160 : bat2maxl=46 : bat2maxr=79
 				batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
 				If bat2=1 OR bat2=2 Then battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 			Case 3
 				animbat2=22 : bat2x=batrx : xoffs2=6 : yoffs2=14
 				bat2=4 : bat2y=232-batry
 				bat2maxt=71 : bat2maxb=160 : bat2maxl=229 : bat2maxr=262
 				batlmaxt=71 : batlmaxb=160 : batrmaxt=71 : batrmaxb=160
 				If bat2=1 OR bat2=2 Then battmaxl=100 : battmaxr=189 : batbmaxl=100 : batbmaxr=189
-				##[$80BE] Select : ##[$80BE] Select : Return
+				Pop Select : Pop Select : Return
 		End Select
 	Case 42
 		nofire=1 : Gosub NewExtra
 		ball1sp=3 : ball1sx=ball1sp : ball1sy=ball1sp : ball2sp=3
 		ball2sx=ball2sp : ball2sy=ball2sp : normalbatsx=5
-		normalbatsy=5 : ##[$80BE] Select : Return
+		normalbatsy=5 : Pop Select : Return
 	Case 43
-		If extrasbat=0 Then wallt=5 : wallchanget=2 : ##[$80BE] Select : Return
-		If extrasbat=1 Then wallb=5 : wallchangeb=2 : ##[$80BE] Select : Return
-		If extrasbat=2 Then walll=5 : wallchangel=2 : ##[$80BE] Select : Return
-		If extrasbat=3 Then wallr=5 : wallchanger=2 : ##[$80BE] Select : Return
+		If extrasbat=0 Then wallt=5 : wallchanget=2 : Pop Select : Return
+		If extrasbat=1 Then wallb=5 : wallchangeb=2 : Pop Select : Return
+		If extrasbat=2 Then walll=5 : wallchangel=2 : Pop Select : Return
+		If extrasbat=3 Then wallr=5 : wallchanger=2 : Pop Select : Return
 	Case 44
 		If ball1sp>2
 			ball1sp=2 : ball1sx=ball1sp : ball1sy=ball1sp
@@ -2710,38 +2710,38 @@ Select blocknumber
 		heavy=0 : nodeflect=0 : extrasglue=0 : strange=0
 		normalbatsx=4 : normalbatsy=4
 		If ballquant=2 Then ballquant=1 : ball2=0
-		flash=1 : ##[$80BE] Select : Return
+		flash=1 : Pop Select : Return
 	Case 45
-		If minpl1l>8 Then ##[$80BE] Select : Return
-		minpl1l+1 : ##[$80BE] Select : Return
+		If minpl1l>8 Then Pop Select : Return
+		minpl1l+1 : Pop Select : Return
 	Case 46
-		Gosub ExtrasOff : ##[$80BE] Select : Return
+		Gosub ExtrasOff : Pop Select : Return
 	Case 47
 		nofire=1 : Gosub NewExtra : heavy=1
 		If ballquant=2 Then ballquant=1 : ball2=0
-		##[$80BE] Select : Return
+		Pop Select : Return
 	Case 48
 		lrgsml=1 : Gosub NewExtra
 		If twoplayers
 			If extrasbat=0 OR extrasbat=1
 				battrx=-1 : batbrx=-1
 				If bat2=1 OR bat2=2 Then bat2rx=-1
-				##[$80BE] Select : Return
+				Pop Select : Return
 			EndIf
 			If extrasbat=2 OR extrasbat=3
 				batlry=-1 : batrry=-1
 				If bat2=3 OR bat2=4 Then bat2ry=-1
-				##[$80BE] Select : Return
+				Pop Select : Return
 			EndIf
 		Else
 			battrx=-1 : batbrx=-1
 			batlry=-1 : batrry=-1
 			bat2rx=-1 : bat2ry=-1
-			##[$80BE] Select : Return
+			Pop Select : Return
 		EndIf
 	Case 49
 		lrgsml=1 : nofire=1 : Gosub NewExtra : bats=0 : batrs=-1
-		strange=1 : ##[$80BE] Select : Return
+		strange=1 : Pop Select : Return
 	Case 50
 		lrgsml=1 : Gosub NewExtra
 		If bat2
@@ -2758,12 +2758,12 @@ Select blocknumber
 		EndIf
 		If twoplayers
 			If extrasbat=0 OR extrasbat=1
-				normalbatsx=2 : ##[$80BE] Select : Return
+				normalbatsx=2 : Pop Select : Return
 			Else
-				normalbatsy=2 : ##[$80BE] Select : Return
+				normalbatsy=2 : Pop Select : Return
 			EndIf
 		Else
-			normalbatsx=2 : ##[$80BE] Select : Return
+			normalbatsx=2 : Pop Select : Return
 		EndIf
 End Select
 Return
@@ -3574,9 +3574,9 @@ Next t
 If ns Then Gosub NameRead Else If resethi Then Gosub SaveHi
 
 time.b
-##[$80BB]
+Repeat
 time+1
-##[$80BC] Joyb(0) OR Joyb(1) OR RawStatus(69) OR time=250
+Until Joyb(0) OR Joyb(1) OR RawStatus(69) OR time=250
 Show 2
 Free lmaxlen 0 : Free lmaxlen 1 : Free lmaxlen 3
 Free DecodeMedModule 1
@@ -3587,7 +3587,7 @@ Goto TopRout
 
 .NameRead
 BlitText{"enter name!",120,200,0}
-##[$80BB]
+Repeat
 	char$=Inkey$
 	If Asc(char$)>96 AND Asc(char$)<122
 		If Len(name$)<6
@@ -3602,7 +3602,7 @@ BlitText{"enter name!",120,200,0}
 		name$=""
 		VWait 10
 	EndIf
-##[$80BC] RawStatus(68)
+Until RawStatus(68)
 For t=1 To 6-Len(name$)
 	name$=name$+" "
 Next
@@ -3633,205 +3633,205 @@ load=0
 Return
 
 .ReadList:
-##[$80C8] EDOpen1
+Restore EDOpen1
 	Read bob(0)\length : Read bob(0)\delay : Read bob(0)\count
 	Read bob(0)\x : Read bob(0)\y
 	For x=0 To 15
 	Read image(0,x)
 	Next x
-##[$80C8] EDClose1
+Restore EDClose1
 	Read bob(1)\length : Read bob(1)\delay : Read bob(1)\count
 	Read bob(1)\x : Read bob(1)\y
 	For x=0 To 15
 	Read image(1,x)
 	Next x
-##[$80C8] EGlass
+Restore EGlass
 	Read bob(2)\length : Read bob(2)\delay : Read bob(2)\count
 	Read bob(2)\x : Read bob(2)\y
 	For x=0 To 15
 	Read image(2,x)
 	Next x
-##[$80C8] EStick
+Restore EStick
 	Read bob(3)\length : Read bob(3)\delay : Read bob(3)\count
 	Read bob(3)\x : Read bob(3)\y
 	For x=0 To 15
 	Read image(3,x)
 	Next x
-##[$80C8] EBall
+Restore EBall
 	Read bob(4)\length : Read bob(4)\delay : Read bob(4)\count
 	Read bob(4)\x : Read bob(4)\y
 	For x=0 To 15
 	Read image(4,x)
 	Next x
-##[$80C8] EBalls
+Restore EBalls
 	Read bob(5)\length : Read bob(5)\delay : Read bob(5)\count
 	Read bob(5)\x : Read bob(5)\y
 	For x=0 To 15
 	Read image(5,x)
 	Next x
-##[$80C8] ESatelite
+Restore ESatelite
 	Read bob(6)\length : Read bob(6)\delay : Read bob(6)\count
 	Read bob(6)\x : Read bob(6)\y
 	For x=0 To 15
 	Read image(6,x)
 	Next x
-##[$80C8] ECircle
+Restore ECircle
 	Read bob(7)\length : Read bob(7)\delay : Read bob(7)\count
 	Read bob(7)\x : Read bob(7)\y
 	For x=0 To 15
 	Read image(7,x)
 	Next x
-##[$80C8] EMorph
+Restore EMorph
 	Read bob(8)\length : Read bob(8)\delay : Read bob(8)\count
 	Read bob(8)\x : Read bob(8)\y
 	For x=0 To 15
 	Read image(8,x)
 	Next x
-##[$80C8] EUfo
+Restore EUfo
 	Read bob(9)\length : Read bob(9)\delay : Read bob(9)\count
 	Read bob(9)\x : Read bob(9)\y
 	For x=0 To 15
 	Read image(9,x)
 	Next x
-##[$80C8] ERect
+Restore ERect
 	Read bob(10)\length : Read bob(10)\delay : Read bob(10)\count
 	Read bob(10)\x : Read bob(10)\y
 	For x=0 To 15
 	Read image(10,x)
 	Next x
-##[$80C8] EElec
+Restore EElec
 	Read bob(11)\length : Read bob(11)\delay : Read bob(11)\count
 	Read bob(11)\x : Read bob(11)\y
 	For x=0 To 15
 	Read image(11,x)
 	Next x
-##[$80C8] ECoci
+Restore ECoci
 	Read bob(12)\length : Read bob(12)\delay : Read bob(12)\count
 	Read bob(12)\x : Read bob(12)\y
 	For x=0 To 15
 	Read image(12,x)
 	Next x
-##[$80C8] EExplode
+Restore EExplode
 	Read bob(13)\length : Read bob(13)\delay : Read bob(13)\count
 	Read bob(13)\x : Read bob(13)\y
 	For x=0 To 15
 	Read image(13,x)
 	Next x
-##[$80C8] BatNEBT
+Restore BatNEBT
 	Read bob(14)\length : Read bob(14)\delay : Read bob(14)\count
 	Read bob(14)\x : Read bob(14)\y
 	For x=0 To 15
 	Read image(14,x)
 	Next x
-##[$80C8] BatNSBT
+Restore BatNSBT
 	Read bob(15)\length : Read bob(15)\delay : Read bob(15)\count
 	Read bob(15)\x : Read bob(15)\y
 	For x=0 To 15
 	Read image(15,x)
 	Next x
-##[$80C8] BatNFB
+Restore BatNFB
 	Read bob(16)\length : Read bob(16)\delay : Read bob(16)\count
 	Read bob(16)\x : Read bob(16)\y
 	For x=0 To 15
 	Read image(16,x)
 	Next x
-##[$80C8] BatDieH
+Restore BatDieH
 	Read bob(17)\length : Read bob(17)\delay : Read bob(17)\count
 	Read bob(17)\x : Read bob(17)\y
 	For x=0 To 15
 	Read image(17,x)
 	Next x
-##[$80C8] BatENBT
+Restore BatENBT
 	Read bob(18)\length : Read bob(18)\delay : Read bob(18)\count
 	Read bob(18)\x : Read bob(18)\y
 	For x=0 To 15
 	Read image(18,x)
 	Next x
-##[$80C8] BatSNBT
+Restore BatSNBT
 	Read bob(19)\length : Read bob(19)\delay : Read bob(19)\count
 	Read bob(19)\x : Read bob(19)\y
 	For x=0 To 15
 	Read image(19,x)
 	Next x
-##[$80C8] BatFNB
+Restore BatFNB
 	Read bob(20)\length : Read bob(20)\delay : Read bob(20)\count
 	Read bob(20)\x : Read bob(20)\y
 	For x=0 To 15
 	Read image(20,x)
 	Next x
-##[$80C8] BatComeH
+Restore BatComeH
 	Read bob(21)\length : Read bob(21)\delay : Read bob(21)\count
 	Read bob(21)\x : Read bob(21)\y
 	For x=0 To 15
 	Read image(21,x)
 	Next x
-##[$80C8] BatComeV
+Restore BatComeV
 	Read bob(22)\length : Read bob(22)\delay : Read bob(22)\count
 	Read bob(22)\x : Read bob(22)\y
 	For x=0 To 15
 	Read image(22,x)
 	Next x
-##[$80C8] BatNELR
+Restore BatNELR
 	Read bob(23)\length : Read bob(23)\delay : Read bob(23)\count
 	Read bob(23)\x : Read bob(23)\y
 	For x=0 To 15
 	Read image(23,x)
 	Next x
-##[$80C8] BatNSLR
+Restore BatNSLR
 	Read bob(24)\length : Read bob(24)\delay : Read bob(24)\count
 	Read bob(24)\x : Read bob(24)\y
 	For x=0 To 15
 	Read image(24,x)
 	Next x
-##[$80C8] BatENLR
+Restore BatENLR
 	Read bob(25)\length : Read bob(25)\delay : Read bob(25)\count
 	Read bob(25)\x : Read bob(25)\y
 	For x=0 To 15
 	Read image(25,x)
 	Next x
-##[$80C8] BatSNLR
+Restore BatSNLR
 	Read bob(26)\length : Read bob(26)\delay : Read bob(26)\count
 	Read bob(26)\x : Read bob(26)\y
 	For x=0 To 15
 	Read image(26,x)
 	Next x
-##[$80C8] BatNFT
+Restore BatNFT
 	Read bob(27)\length : Read bob(27)\delay : Read bob(27)\count
 	Read bob(27)\x : Read bob(27)\y
 	For x=0 To 15
 	Read image(27,x)
 	Next x
-##[$80C8] BatFNT
+Restore BatFNT
 	Read bob(28)\length : Read bob(28)\delay : Read bob(28)\count
 	Read bob(28)\x : Read bob(28)\y
 	For x=0 To 15
 	Read image(28,x)
 	Next x
-##[$80C8] BatNFL
+Restore BatNFL
 	Read bob(29)\length : Read bob(29)\delay : Read bob(29)\count
 	Read bob(29)\x : Read bob(29)\y
 	For x=0 To 15
 	Read image(29,x)
 	Next x
-##[$80C8] BatFNL
+Restore BatFNL
 	Read bob(30)\length : Read bob(30)\delay : Read bob(30)\count
 	Read bob(30)\x : Read bob(30)\y
 	For x=0 To 15
 	Read image(30,x)
 	Next x
-##[$80C8] BatNFR
+Restore BatNFR
 	Read bob(31)\length : Read bob(31)\delay : Read bob(31)\count
 	Read bob(31)\x : Read bob(31)\y
 	For x=0 To 15
 	Read image(31,x)
 	Next x
-##[$80C8] BatFNR
+Restore BatFNR
 	Read bob(32)\length : Read bob(32)\delay : Read bob(32)\count
 	Read bob(32)\x : Read bob(32)\y
 	For x=0 To 15
 	Read image(32,x)
 	Next x
-##[$80C8] BatDieV
+Restore BatDieV
 	Read bob(33)\length : Read bob(33)\delay : Read bob(33)\count
 	Read bob(33)\x : Read bob(33)\y
 	For x=0 To 15

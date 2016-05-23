@@ -55,8 +55,8 @@ SetIO &bez.ij
 Dim circx.q(20),circy.q(20) ;for Linef{}
 
 For temp.q=0 To 14
-	circx(temp)=HSin(temp*##[$80BA]/30)*2*scalfac
-	circy(temp)=HCos(temp*##[$80BA]/30)*scalfac
+	circx(temp)=HSin(temp*Pi/30)*2*scalfac
+	circy(temp)=HCos(temp*Pi/30)*scalfac
 Next
 
 
@@ -383,7 +383,7 @@ start=5:fin=7:movb.w=On
 
 Gosub DoStartLine
 
-##[$80BB]
+Repeat
 ;	If NOT actif.w Then VWait
 	If Joyb(0)<>2 Then VWait
 
@@ -427,14 +427,14 @@ Gosub DoStartLine
 	EndIf
 	If (down=1) AND (job=0)
 		fix=mx:fiy=my
-		If stx>fix Then ##[$80C9] stx,fix
-		If sty>fiy Then ##[$80C9] sty,fiy
+		If stx>fix Then Exchange stx,fix
+		If sty>fiy Then Exchange sty,fiy
 		Use lmaxlen 2
 		Boxf stx,sty,fix,fiy,0
 		Use lmaxlen 0
 	EndIf
 
-##[$80BC] RawStatus($45)
+Until RawStatus($45)
 
 VWait 10
 AMIGA
@@ -632,11 +632,11 @@ Return
 
 .MovIn
 
-	##[$80BB]
+	Repeat
 		b.w=On
 		If (dtf>pts3) Then dtf-pts1:b.w=Off
 		If (dtf<	 2) Then dtf+pts1:b.w=Off
-	##[$80BC] b
+	Until b
 
 	FindLo{dtf.q,condt,io}
 	dtil=bez\i:dtjl=bez\j:dtir=bez\k:dtjr=bez\l
@@ -655,11 +655,11 @@ Return
 	dtg.q=dtf+0.01125:FindDif{dtg,condt,io}
 	dil=bez\i:djl=bez\j:dir=bez\k:djr=bez\l
 
-	##[$80BB]
+	Repeat
 		b.w=On
 		If (dtf>pts3) Then dtf-pts1:b.w=Off
 		If (dtf<	 2) Then dtf+pts1:b.w=Off
-	##[$80BC] b
+	Until b
 
 Return
 
@@ -675,7 +675,7 @@ Macro midy
 End Macro
 
 Statement pLine{x1.w,y1.w,x2.w,y2.w,col.w,flipped.w}
-	If flipped.w Then ##[$80C9] x1,y1:##[$80C9] x2,y2
+	If flipped.w Then Exchange x1,y1:Exchange x2,y2
 	Line x1,y1,x2,y2,col
 End Statement
 
@@ -700,9 +700,9 @@ Shared maincol,dithcol
 	If QAbs(delx) < QAbs(dely) Then \flipped=Off
 	;if delx=dely then keep flipped same..
 	If \flipped
-		##[$80C9] delx,dely:##[$80C9] x1,y1:##[$80C9] x2,y2
-		##[$80C9] \lastx	,\lasty		;:Exchange prevx,prevy
-		##[$80C9] \vstalex,\vstaley
+		Exchange delx,dely:Exchange x1,y1:Exchange x2,y2
+		Exchange \lastx	,\lasty		;:Exchange prevx,prevy
+		Exchange \vstalex,\vstaley
 	EndIf
 
 ;	pLine{x1,y1,x2,y2,maincol}
@@ -750,9 +750,9 @@ Shared maincol,dithcol
 die
 
 	If \flipped
-		##[$80C9] delx,dely:##[$80C9] x1,y1:##[$80C9] x2,y2
-		##[$80C9] \lastx,\lasty ;:Exchange prevx,prevy
-		##[$80C9] \vstalex,\vstaley
+		Exchange delx,dely:Exchange x1,y1:Exchange x2,y2
+		Exchange \lastx,\lasty ;:Exchange prevx,prevy
+		Exchange \vstalex,\vstaley
 	EndIf
 
 End Statement
@@ -809,14 +809,14 @@ CEND
 		olsxo=olsxc+(dj+di)*scalf
 		olsyo=olsyc+(dj-di)*scalf*0.5:cola=0
 
-		While ( (dtf-fin+pts1) ##[$80B9] pts1) > hpts
+		While ( (dtf-fin+pts1) MOD pts1) > hpts
 			dtf+0.1
 
-			##[$80BB]
+			Repeat
 				b.w=On
 				If (dtf>pts3) Then dtf-pts1:b.w=Off
 				If (dtf<	 2) Then dtf+pts1:b.w=Off
-			##[$80BC] b
+			Until b
 
 			If (dtf>fin) AND (dtf<fin+2) Then dtf=fin
 			FindLo {dtf,condt,io}

@@ -22,33 +22,33 @@ If WriteMem(0,"commands")
 				;
 				If ReadMem(1,"ram:lib"+num$)
 					FileOutput 1:NPrint UCase$(name$):n=0
-					##[$80BB]
+					Repeat
 						a$=Edit$(180)
 						If a$<>""
 							p=Instr(a$," ",3):If p=0 Then p=Len(a$)+1
 							c$(n)=Mid$(a$,3,p-3):s$(n)=Mid$(a$,p+1):n+1
 						EndIf
-					##[$80BC] a$=""
+					Until a$=""
 					For i=0 To n-1:NPrint "+",c$(i):Next
 					For i=0 To n-1
 						NPrint "*",c$(i):NPrint "@",s$(i)
 						If WriteMem(2,"help/"+c$(i))
 							FileInput 2
-							##[$80BB]
+							Repeat
 								ok=1:a$=Edit$(1024)
 								If a$="" Then ok=0
 								p=Instr(a$,":"):q=Instr(a$," "):If p<>0 AND p<q Then ok=0
 								If Left$(a$,6)="Syntax" Then a$=Edit$(1024):ok=0
 								If Right$(a$,1)=":" Then ok=0
-							##[$80BC] ok=1 OR DosBuffLen(2)
-							##[$80BB]
+							Until ok=1 OR DosBuffLen(2)
+							Repeat
 								ok=0
 								If UCase$(Left$(a$,8))="SEE ALSO"
 									ok=1
 								Else
 									NPrint a$:a$=Edit$(4096)
 								EndIf
-							##[$80BC] ok=1 OR DosBuffLen(2)
+							Until ok=1 OR DosBuffLen(2)
 							CloseFile 2:FileInput 0
 						Else
 							FileOutput 3:NPrint c$(i),"*":FileOutput 1

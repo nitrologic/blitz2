@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/insectoids/insectoids.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/insectoids/insectoids.bb2
-##[$80C3]:##[$80CC]:##[$80CB]
-##[$80B4]:End:End ##[$80B4]
+WBStartup:##[$80CC]:##[$80CB]
+SetErr:End:End SetErr
 ;
 ;INSECTOIDS!
 ;
@@ -156,7 +156,7 @@ For k=1 To 70
 tag
 x=Int(Rnd(10))*32+32:y=Int(Rnd(7))*32+32
 For j=1 To k-1
-	If x=blx(j) AND y=bly(j) Then ##[$80BE] For:Goto tag
+	If x=blx(j) AND y=bly(j) Then Pop For:Goto tag
 Next
 blx(k)=x:bly(k)=y
 Next
@@ -169,7 +169,7 @@ Next
 ;
 Function calcrot{xadd,yadd,steps}
 steps2=steps/2
-co.f=##[$80BA]/steps2
+co.f=Pi/steps2
 If xadd=0
 	a.f=steps2/2
 Else
@@ -178,7 +178,7 @@ End If
 If xadd<0 Then a=steps2+a
 If yadd<0 Then a=steps+a
 If Frac(a)>.5 Then a+1
-a=(a+(steps2/2)) ##[$80B9] steps
+a=(a+(steps2/2)) MOD steps
 Function Return Int(a)
 End Function
 
@@ -365,7 +365,7 @@ If ast=99 ;asteroid pattern?
 EndIf
 
 .main ;OK, let's doit!
-##[$80BB]
+Repeat
 	;
 	Gosub dothedb
 	;
@@ -638,7 +638,7 @@ EndIf
 	.showscore
 	If scu Then Gosub newscore ;update score?
 	;
-##[$80BC] nok
+Until nok
 ;
 ;something happened - all aliens killed or player done over!
 ;
@@ -890,7 +890,7 @@ Slice 0,sli+10,320,224,$fff0,5,8,32,320,320
 Show 0:Gosub blackpal
 Gosub dispon
 ;
-##[$80BB]
+Repeat
 	For k=1 To 3
 	QAMIGA
 	BlockScroll:LoadBitMap 0,"data/title"+Str$(k),4
@@ -899,7 +899,7 @@ Gosub dispon
 	For j=1 To 500
 	VWait
 	If Joyb(1)
-		##[$80BE] For:##[$80BE] For
+		Pop For:Pop For
 		For kk=64 To 0 Step -1
 		VWait:Volume 15,kk,kk,kk,kk
 		Next
@@ -909,7 +909,7 @@ Gosub dispon
 	Next
 	FadeOut 4
 	Next
-##[$80C7]
+Forever
 
 .gamesetup
 ;
@@ -1128,7 +1128,7 @@ ClearList bombs():ClearList bulls()
 ;
 na=0:n=0:scv=50	;default score value
 ;
-##[$80BB]
+Repeat
 	Read at
 	If at<3
 		If at>=0 Then Read a,fr:fr*16
@@ -1172,7 +1172,7 @@ na=0:n=0:scv=50	;default score value
 	Else
 		Read scv
 	EndIf
-##[$80BC] at<0
+Until at<0
 ;
 Return
 ;
@@ -1213,10 +1213,10 @@ Return
 
 .loadlevel	;load lv level stuff from disk
 ;
-lv+1:##[$80C8] level1
+lv+1:Restore level1
 For k=1 To lv-1 ;skip data to correct pattern!
-	##[$80BB]:Read j:##[$80BC] j=-1
-	If k<lv-1 Then Read j:If j=-2 Then ##[$80C8] level1
+	Repeat:Read j:Until j=-1
+	If k<lv-1 Then Read j:If j=-2 Then Restore level1
 Next:Read ast,yoff
 ;
 For k=0 To 95:Free MidHandle k:Next:Free lmaxlen 4
@@ -1227,12 +1227,12 @@ If ast<99
 	LoadBitMap 2,"data/backdrop."+Str$(ast),0
 	Use lmaxlen 2:Scroll 0,0,320,224,32,32
 	k=0
-	##[$80BB]
+	Repeat
 		Read j
 		If j
 			LoadShapes k,"data/insects."+Str$(j):k+16
 		EndIf
-	##[$80BC] j=0
+	Until j=0
 Else
 	Use lmaxlen 2:BlockScroll
 	If ast=100

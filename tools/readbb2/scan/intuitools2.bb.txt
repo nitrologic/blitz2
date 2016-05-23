@@ -113,7 +113,7 @@ bx=4:by=2						 ;gadget border settings
 mode=0
 
 .main
-	##[$80BB]
+	Repeat
 		WindowInput 0
 		ev.l=WaitEvent
 		If ev=$8 Then Gosub hitobject
@@ -141,7 +141,7 @@ mode=0
 				gtype=ItemHit+4:Gosub addgadget
 			EndIf
 		EndIf
-	##[$80C7]
+	Forever
 
 .createcode:
 	Use allocst 1:##[$80CA] q()
@@ -165,13 +165,13 @@ mode=0
 
 .testscreen:
 	mode=1:Gosub nuscreen
-	##[$80BB]:ev.l=WaitEvent:##[$80BC] ev=$100
+	Repeat:ev.l=WaitEvent:Until ev=$100
 	mode=0:Gosub nuscreen
 	Return
 
 .addwindow:
 	MenusOff:Use localstat 0:WTitle "","ADD WINDOW BY DRAGGING MOUSE"
-	##[$80BB]:ev.l=WaitEvent:##[$80BC] ev=$8		 ;wait for button
+	Repeat:ev.l=WaitEvent:Until ev=$8		 ;wait for button
 	x=SMouseX:y=SMouseY
 	If AddLast(q())
 		q()\obj=0:q()\id=p\numwin:p\numwin+1
@@ -188,7 +188,7 @@ mode=0
 	If *w=0 Then BeepScreen 1:Return
 	MenusOff:Use localstat 0:WTitle "","ADD GADGET BY DRAGGING MOUSE"
 	##[$80CA] q()
-	##[$80BB]:ev.l=WaitEvent:##[$80BC] ev=$8		 ;wait for button
+	Repeat:ev.l=WaitEvent:Until ev=$8		 ;wait for button
 	x=SMouseX:y=SMouseY
 	newmem q()
 	While globfree(q())
@@ -216,7 +216,7 @@ gotwin:
 		While globfree(q())		 ;check all handles
 			For i=0 To 7
 				If PColl (x,y,1,1,q()\c[i]\x,q()\c[i]\y,8,4)
-					*w=q()\win:tt=0:g=0:##[$80BE] For:Goto gothit
+					*w=q()\win:tt=0:g=0:Pop For:Goto gothit
 				EndIf
 			Next
 		Wend
@@ -230,19 +230,19 @@ gotwin:
 	Return
 
 gothit:
-	##[$80BB]											;crusty double click mechanism
+	Repeat											;crusty double click mechanism
 		VWait:tt+1:ev.l=Event
 		If ev=8
 			If MButtons=1 Then Goto editobject Else g=1
 		EndIf
-	##[$80BC] tt=10 OR (ev<>8 AND ev<>0 AND ev<>$10)
+	Until tt=10 OR (ev<>8 AND ev<>0 AND ev<>$10)
 	If g=0 Then Gosub sizeobject
 	Gosub redrawwindow
 	Return
 
 .sizeobject:
 	##[$80CA] q()
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		drawbox{q()}
 		ox=x:oy=y:x=SMouseX:y=SMouseY:dx=x-ox:dy=y-oy
@@ -260,7 +260,7 @@ gothit:
 		\w=QLimit(\w,16,1024):\h=QLimit(\h,8,1024)
 		\x=QLimit(\x,0,p\w-\w):\y=QLimit(\y,0,p\h-\h)
 		drawbox{q()}
-	##[$80BC] ev=$8
+	Until ev=$8
 	drawbox{q()}		 ;rubout
 	If gx Then \x=Int((\x+gx/2)/gx)*gx:\w=Int((\w+gx/2)/gx)*gx
 	If gy Then \y=Int((\y+gy/2)/gy)*gy:\h=Int((\h+gy/2)/gy)*gy
@@ -427,7 +427,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 					EndIf
 ;					\c0=Mki$($c698)+!gt+p$			;\pars[0]
 			End Select
-			If \gtype<4 Then a.l=##[$80B8] GadgetJam(*w\id+2) Else a.l=##[$80B8] GTList(*w\id+2)
+			If \gtype<4 Then a.l=Addr GadgetJam(*w\id+2) Else a.l=Addr GTList(*w\id+2)
 			While Peek.l(a)<>0
 				a=Peek.l(a)
 				If Peek.w(a+38)=\id
@@ -603,7 +603,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		WLocate 4,04:Print "WindowName:":ButtonId 1,0,\gstring:Redraw 1,0
 		WLocate 4,17:Print "	Constant:":ButtonId 1,1,\constant:Redraw 1,1
 		For i=0 To 12:Borders 1,i+2,\gflags AND Int(2^i):Next
-		##[$80BB]
+		Repeat
 			ev.l=WaitEvent:gh=GadgetHit
 			If ev=$40
 				If gh=0 Then \gstring=GadgetPens(1,0)
@@ -615,7 +615,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 				EndIf
 				If gh=19 Then freelast q():newmem q():*w=0:Goto spag1
 			EndIf
-		##[$80BC] ev=$40 AND gh=18
+		Until ev=$40 AND gh=18
 ;		Gosub calcwin
 	EndIf
 	If \obj=1
@@ -640,7 +640,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 			Redraw 1,i+3
 		Next
 		For i=0 To 3:WLocate 4,94+i*11:Print gt(g)\pars[i]:Next
-		##[$80BB]
+		Repeat
 			ev.l=WaitEvent:gh=GadgetHit
 			If ev=$40
 				If gh=0 Then \gtype=Disable(0,0)-1:Goto refreshtype
@@ -660,7 +660,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 				EndIf
 				If gh=19
 					freelast q():newmem q():gh=18
-					##[$80BB]:globfree q():##[$80BC] q()=*w		 ;cludge maximus
+					Repeat:globfree q():Until q()=*w		 ;cludge maximus
 				EndIf
 				If gh=20
 					*o=q()
@@ -680,7 +680,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 					EndIf
 				EndIf
 			EndIf
-		##[$80BC] ev=$40 AND gh=18
+		Until ev=$40 AND gh=18
 	EndIf
 spag1:
 	Free localstat 1
@@ -691,7 +691,7 @@ spag1:
 ;toggle|pos0-3|select|slider|propbox|mx|g00|label0-3|brdr0..3|gt0..3
 
 .initwui:
-	##[$80C8] wads
+	Restore wads
 	StringGadget 1,100,4,0,0,32,206
 	StringGadget 1,100,17,0,1,32,206
 	x=10:y=30
@@ -712,8 +712,8 @@ wads:
 	Data$ "ACTIVATE"
 
 .initgui:
-	##[$80C8] gads:i=0:gt$=""
-	##[$80BB]
+	Restore gads:i=0:gt$=""
+	Repeat
 		Read a$
 		If a$<>""
 			gt(i)\name=a$:gt$+"|"+gt(i)\name
@@ -721,7 +721,7 @@ wads:
 			Read gt(i)\mask
 			i+1
 		EndIf
-	##[$80BC] a$=""
+	Until a$=""
 	gt$=Mid$(gt$,2)
 	workstart 0,100,4,0,0,gt$
 	StringGadget 0,100,17,0,1,32,206

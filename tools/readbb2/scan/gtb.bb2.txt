@@ -9,16 +9,16 @@
 ; |								Sat 21.05.94	Release v 1.0														 |
 ; []----------------------------------------------------------------------[]
 
-##[$80C3]
+WBStartup
 
-##[$80BF]	"Include/"
+INCDIR	"Include/"
 Include "Intuition.bbi"
 Include "GadTools.bbi"
 Include "ILBM.bbi"
 
-##[$80B4]
+SetErr
 	End
-End ##[$80B4]
+End SetErr
 
 ; ** Gadget types
 ; **
@@ -518,7 +518,7 @@ Function.w Requester {Title.s,Message.s,Gadgets.s}
 	##[$80CA] Request
 	\es_StructSize = SizeOf.EasyStruct,0
 	\es_Title = &Title,&Message,&Gadgets
-	GadgetNo = ##[$FFDD](Peek.l(##[$80B8] localstat(0)),&Request,NULL,NULL)
+	GadgetNo = ##[$FFDD](Peek.l(Addr localstat(0)),&Request,NULL,NULL)
 	FlushEvents
 	Function Return GadgetNo
 End Function
@@ -530,8 +530,8 @@ End Function
 ; |	Parameters: NONE																											|
 ; []----------------------------------------------------------------------[]
 Statement ResetMenu {}
-	If Peek.l(##[$80B8] localstat(1))
-		Dummy = ##[$FFEF](Peek.l(##[$80B8] localstat(1)),Peek.l(##[$80B8] ##[$C40D](0)))
+	If Peek.l(Addr localstat(1))
+		Dummy = ##[$FFEF](Peek.l(Addr localstat(1)),Peek.l(Addr ##[$C40D](0)))
 	EndIf
 End Statement
 
@@ -549,7 +549,7 @@ Statement CheckMenuSubItem {Menu.w, Item.w, SItem.w, State.w}
 	DEFTYPE .MItem *ItemPtr
 
 	##[$80CA] *MenuPtr
-	*MenuPtr = Peek.l(##[$80B8] ##[$C40D](0))
+	*MenuPtr = Peek.l(Addr ##[$C40D](0))
 	While *MenuPtr <> 0 AND Menu > 0
 		*MenuPtr = \NextMenu
 		Menu-1
@@ -587,7 +587,7 @@ Statement CheckMenuItem {Menu.w, Item.w, State.w}
 	DEFTYPE .MItem *ItemPtr
 
 	##[$80CA] *MenuPtr
-	*MenuPtr = Peek.l(##[$80B8] ##[$C40D](0))
+	*MenuPtr = Peek.l(Addr ##[$C40D](0))
 	While *MenuPtr <> 0 AND Menu > 0
 		*MenuPtr = \NextMenu
 		Menu-1
@@ -645,7 +645,7 @@ Function.w GetFontNo {CurrentFont.w}
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 3
 			Select EventType
@@ -661,7 +661,7 @@ Function.w GetFontNo {CurrentFont.w}
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 3
 	Free GTList 3
 
@@ -710,7 +710,7 @@ Function.w SelectText {Title.s}
 
 		OK = False
 		CloseWin = False
-		##[$80BB]
+		Repeat
 			EventType.l = WaitEvent
 			If EventWindow = 2
 				Select EventType
@@ -732,7 +732,7 @@ Function.w SelectText {Title.s}
 						End Select
 				End Select
 			EndIf
-		##[$80BC] CloseWin = True
+		Until CloseWin = True
 		CloseWindow 2
 		Free GTList 2
 	Else
@@ -857,7 +857,7 @@ Function.w WinMouseX {WindowNo.w}
 	##[$80CA] *GridPtr
 	Use localstat WindowNo
 	X = QLimit(EMouseX-WLeftOff,\HBdr,InnerWidth-\HBdr-1)
-	If \Grid AND \X > 1 Then X-(X ##[$80B9] \X)
+	If \Grid AND \X > 1 Then X-(X MOD \X)
 	Function Return X
 End Function
 
@@ -877,7 +877,7 @@ Function.w WinMouseY {WindowNo.w}
 	##[$80CA] *GridPtr
 	Use localstat WindowNo
 	Y = QLimit(EMouseY-WTopOff,\VBdr,InnerHeight-\VBdr-1)
-	If \Grid AND \Y > 1 Then Y-(Y ##[$80B9] \Y)
+	If \Grid AND \Y > 1 Then Y-(Y MOD \Y)
 	Function Return Y
 End Function
 
@@ -1128,7 +1128,7 @@ End Function
 	Gosub CreateMenu
 	Gosub LoadSettings
 
-	##[$80C8] GTPens
+	Restore GTPens
 	For PenNo = 0 To #WIN_Pens-1
 		Read DefWinPens(PenNo)
 	Next PenNo
@@ -1149,12 +1149,12 @@ End Function
 		*FontPtr = Fonts()
 	EndIf
 
-	##[$80C8] GTNames
+	Restore GTNames
 	For Cmd = 0 To #GAD_Types-1
 		Read GTNames(Cmd)
 	Next Cmd
 
-	##[$80C8] GTCommands
+	Restore GTCommands
 	For Cmd = 0 To #GAD_Types-1
 		Read GTCommand(Cmd)
 	Next Cmd
@@ -1404,7 +1404,7 @@ CreateMenu:
 	WindowFlags.l = \Flags | #GTB_Flags & NOT (#WFLG_RMBTRAP)
 	localstat 1,\X,\Y,\Width,\Height,WindowFlags,\Title,DPen,BPen
 	WindowOutput 1
-	Dummy = ##[$FFB1](Peek.l(##[$80B8] localstat(1)),\MinWidth,\MinHeight,\MaxWidth,\MaxHeight)
+	Dummy = ##[$FFB1](Peek.l(Addr localstat(1)),\MinWidth,\MinHeight,\MaxWidth,\MaxHeight)
 	arrmult 0
 
 	Use localstat 1
@@ -1516,7 +1516,7 @@ NewScreenMode:
 
 	Mode = #MODE_None
 	Exit = False
-	##[$80BB]
+	Repeat
 		Use localstat 1
 		Use IntuiFont 0
 		##[$80CA] *WindowPtr
@@ -1594,7 +1594,7 @@ NewScreenMode:
 							Case	0 : GadgetType = SubHit
 							Case	2 : Gosub UpdateWindow
 							Case	3 : Mode	= #MODE_Select:MenusOff
-												Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&SelectMsg)
+												Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&SelectMsg)
 							Case	4 : Gosub SelectAll
 							Case	5 : Gosub DeselectAll
 							Case	7 : Gosub CutGadgets
@@ -1682,7 +1682,7 @@ NewScreenMode:
 				Case 1 : Gosub SaveProject
 			End Select
 		EndIf
-	##[$80BC] Exit
+	Until Exit
 	Return
 
 
@@ -1740,18 +1740,18 @@ ResizePasteRect:
 	\X1 = WinMouseX{1},WinMouseY{1}
 	If Grid AND GridX > 1
 		If \X1 <= \X2
-			\X2 = QLimit(\X2-(\X2 ##[$80B9] GridX)+GridX-1,0,InnerWidth-HBdr-1)
+			\X2 = QLimit(\X2-(\X2 MOD GridX)+GridX-1,0,InnerWidth-HBdr-1)
 		Else
-			\X1 = QLimit(\X1-(\X1 ##[$80B9] GridX)+GridX-1,0,InnerWidth-HBdr-1)
-			\X2-(\X2 ##[$80B9] GridX)
+			\X1 = QLimit(\X1-(\X1 MOD GridX)+GridX-1,0,InnerWidth-HBdr-1)
+			\X2-(\X2 MOD GridX)
 		EndIf
 	EndIf
 	If Grid AND GridY > 1
 		If \Y1 <= \Y2
-			\Y2 = QLimit(\Y2-(\Y2 ##[$80B9] GridY)+GridY-1,0,InnerHeight-VBdr-1)
+			\Y2 = QLimit(\Y2-(\Y2 MOD GridY)+GridY-1,0,InnerHeight-VBdr-1)
 		Else
-			\Y1 = QLimit(\Y1-(\Y1 ##[$80B9] GridY)+GridY-1,0,InnerHeight-VBdr-1)
-			\Y2-(\Y2 ##[$80B9] GridY)
+			\Y1 = QLimit(\Y1-(\Y1 MOD GridY)+GridY-1,0,InnerHeight-VBdr-1)
+			\Y2-(\Y2 MOD GridY)
 		EndIf
 	EndIf
 	BoundBox {\X1,\Y1,\X2,\Y2}
@@ -1760,7 +1760,7 @@ ResizePasteRect:
 	If \X1 < \X2 Then X = \X1 Else X = \X2
 	If \Y1 < \Y2 Then Y = \Y1 Else Y = \Y2
 	Info.s = "X="+Str$(X)+" Y="+Str$(Y)+" Width="+Str$(Abs(\X2-\X1)+1)+" Height="+Str$(Abs(\Y2-\Y1)+1)
-	Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&Info)
+	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
 	Format ""
 	Return
 
@@ -1779,7 +1779,7 @@ MovePasteRect:
 
 	Format "0000"
 	Info.s = "X="+Str$(X)+" Y="+Str$(Y)
-	Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&Info)
+	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
 	Format ""
 	Return
 
@@ -1877,7 +1877,7 @@ DeselectAll:
 ; ** EndOperation
 ; **
 .EndOperation
-	Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
 	##[$80CA] *PastePtr
 	Select Mode
 		Case #MODE_Draw		: freelast	Gadgets()
@@ -2094,7 +2094,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2114,7 +2114,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 	Free GTList 2
 
@@ -2150,7 +2150,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2166,7 +2166,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 
 	If OK
@@ -2210,7 +2210,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2249,7 +2249,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 
 	If OK
@@ -2286,7 +2286,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2302,14 +2302,14 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 
 	If OK
 		\Title		= GTGetString(2,0)
 		\Label		= GTGetString(2,1)
 		\ScreenNo = GTGetInteger(2,2)
-		Dummy		 = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&\Title)
+		Dummy		 = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&\Title)
 		ProjectChanged = True
 	EndIf
 	Free GTList 2
@@ -2335,7 +2335,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2350,7 +2350,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 
 	If OK
@@ -2396,7 +2396,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2425,7 +2425,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -2492,7 +2492,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2549,7 +2549,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -2617,7 +2617,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2638,7 +2638,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -2672,7 +2672,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2690,7 +2690,7 @@ PasteGadgets:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -2740,7 +2740,7 @@ PasteGadgets:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2767,7 +2767,7 @@ PasteGadgets:
 											 GTSetAttrs 2,2,#GTSL_Level,BlueVal
 										 EndIf
 						Case 5 : GotFile = False
-										 ##[$80BB]
+										 Repeat
 											 FPalName = ASLFileRequest$("Save ILBM Palette"+Chr$(0),PathName,CPalName,"#?.palette")
 											 If FPalName = ""
 												 GotFile = True
@@ -2783,7 +2783,7 @@ PasteGadgets:
 													 GotFile = True
 												 EndIf
 											 EndIf
-										 ##[$80BC] GotFile
+										 Until GotFile
 										 If FPalName Then SavePalette {1, FPalName}
 						Case 6 : For ColourReg = 0 To Colours-1
 											 StopCycle 1,ColourReg,DefPalRed(ColourReg),DefPalGreen(ColourReg),DefPalBlue(ColourReg)
@@ -2800,7 +2800,7 @@ PasteGadgets:
 					If GadgetHit < 3 Then Green ColourNo,RedVal,GreenVal,BlueVal
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -2833,7 +2833,7 @@ PasteGadgets:
 	##[$80CA] Fonts()
 	CloseWin = False
 	GadgetsChanged = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -2918,7 +2918,7 @@ PasteGadgets:
 			End Select
 			FlushEvents
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 	CloseWindow 2
 	Free GTList 2
 
@@ -2957,11 +2957,11 @@ PasteGadgets:
 	If Mode = #MODE_Draw OR Mode = #MODE_Resize
 		##[$80CA] *PastePtr
 		BoundBox {\X1,\Y1,\X2,\Y2}
-		If \X1 > \X2 Then ##[$80C9] \X1,\X2
-		If \Y1 > \Y2 Then ##[$80C9] \Y1,\Y2
+		If \X1 > \X2 Then Exchange \X1,\X2
+		If \Y1 > \Y2 Then Exchange \Y1,\Y2
 		*GadgetPtr\X = \X1,\Y1,\X2-\X1+1,\Y2-\Y1+1
 
-		Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+		Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
 		If Mode = #MODE_Resize Then Gosub UpdateWindow
 	EndIf
 
@@ -3043,7 +3043,7 @@ PasteGadgets:
 			EndIf
 
 			WindowTitle = "Edit "+GTNames(\GadgetType)+" Gadget Size"
-			Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(2)),&WindowTitle,&*ScreenPtr\Title)
+			Dummy = ##[$FFAA](Peek.l(Addr localstat(2)),&WindowTitle,&*ScreenPtr\Title)
 			GTSetString	2,0,\Text
 			GTSetString	2,1,\Label
 			GTSetInteger 2,2,\X
@@ -3053,7 +3053,7 @@ PasteGadgets:
 
 			OK = False
 			CloseWin = False
-			##[$80BB]
+			Repeat
 				EventType.l = WaitEvent
 				If EventWindow = 2
 					Select EventType
@@ -3075,7 +3075,7 @@ PasteGadgets:
 							End Select
 					End Select
 				EndIf
-			##[$80BC] CloseWin
+			Until CloseWin
 
 			If OK
 				\X		 = GTGetInteger(2,2),GTGetInteger(2,3)
@@ -3113,7 +3113,7 @@ GADButton:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3132,7 +3132,7 @@ GADButton:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3175,7 +3175,7 @@ GADCheckBox:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3196,7 +3196,7 @@ GADCheckBox:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3229,7 +3229,7 @@ GADCycle:
 	CPos = 1
 	Labels = 0
 	ClearList CycleList()
-	##[$80BB]
+	Repeat
 		Pos = Instr(\Options,"|",CPos)
 		If Right$(\Options,CPos) <> ""
 			If globalloc(CycleList())
@@ -3242,7 +3242,7 @@ GADCycle:
 				EndIf
 			EndIf
 		EndIf
-	##[$80BC] Pos = 0
+	Until Pos = 0
 	*ListPtr = 0
 
 	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-180)/2,320,180,#REQ_Flags,"Edit Cycle Gadget",DPen,BPen
@@ -3263,7 +3263,7 @@ GADCycle:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3366,7 +3366,7 @@ GADCycle:
 			ReqGadget = Requester {"ERROR",Message,"OK"}
 			CloseWin	= False:OK = False
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3418,7 +3418,7 @@ GADInteger:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3439,7 +3439,7 @@ GADInteger:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3472,7 +3472,7 @@ GADListView:
 	CPos = 1
 	Labels = 0
 	ClearList ListView()
-	##[$80BB]
+	Repeat
 		Pos = Instr(\ListView,Chr$(#LV_Seperator),CPos)
 		If Right$(\ListView,CPos) <> ""
 			If globalloc(ListView())
@@ -3485,7 +3485,7 @@ GADListView:
 				EndIf
 			EndIf
 		EndIf
-	##[$80BC] Pos = 0
+	Until Pos = 0
 	*ListPtr = 0
 
 	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-191)/2,320,191,#REQ_Flags,"Edit ListView Gadget",DPen,BPen
@@ -3507,7 +3507,7 @@ GADListView:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3605,7 +3605,7 @@ GADListView:
 					GTSetAttrs 2,7,#GTLV_Top,QLimit(Labels-7,0,Labels)
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3649,7 +3649,7 @@ GADMX:
 	CPos = 1
 	Labels = 0
 	ClearList CycleList()
-	##[$80BB]
+	Repeat
 		Pos = Instr(\Options,"|",CPos)
 		If Right$(\Options,CPos) <> ""
 			If globalloc(CycleList())
@@ -3662,7 +3662,7 @@ GADMX:
 				EndIf
 			EndIf
 		EndIf
-	##[$80BC] Pos = 0
+	Until Pos = 0
 	*ListPtr = 0
 
 	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-196)/2,320,196,#REQ_Flags,"Edit MX Gadget",DPen,BPen
@@ -3684,7 +3684,7 @@ GADMX:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3787,7 +3787,7 @@ GADMX:
 			ReqGadget = Requester {"ERROR",Message,"OK"}
 			CloseWin	= False:OK = False
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3835,7 +3835,7 @@ GADNumber:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3854,7 +3854,7 @@ GADNumber:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3900,7 +3900,7 @@ GADPalette:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3922,7 +3922,7 @@ GADPalette:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -3975,7 +3975,7 @@ GADScroller:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -3998,7 +3998,7 @@ GADScroller:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4059,7 +4059,7 @@ GADSlider:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4082,7 +4082,7 @@ GADSlider:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4136,7 +4136,7 @@ GADString:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4157,7 +4157,7 @@ GADString:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4200,7 +4200,7 @@ GADText:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4219,7 +4219,7 @@ GADText:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4252,7 +4252,7 @@ GADBevelBox:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4268,7 +4268,7 @@ GADBevelBox:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4327,7 +4327,7 @@ GADBevelBox:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4360,7 +4360,7 @@ GADBevelBox:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin = True
+	Until CloseWin = True
 
 	If OK
 		\Text	 = GTGetString(2,0)
@@ -4438,7 +4438,7 @@ MoveText:
 		Format "0000"
 		Info.s = "X="+Str$(\X1)+" Y="+Str$(\Y1)
 		Format ""
-		Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&Info)
+		Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
 	EndIf
 	Return
 
@@ -4456,7 +4456,7 @@ MoveText:
 	Mode = #MODE_None
 
 	MenusOn
-	Dummy = ##[$FFAA](Peek.l(##[$80B8] localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
 	Gosub UpdateWindow
 	Return
 
@@ -4511,7 +4511,7 @@ DeleteText:
 
 	OK = False
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4535,7 +4535,7 @@ DeleteText:
 					End Select
 			End Select
 		EndIf
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 2
 
 	If OK
@@ -4594,7 +4594,7 @@ DeleteText:
 	SelectedTitle = 0
 
 	CloseTitleWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 2
 			Select EventType
@@ -4674,7 +4674,7 @@ DeleteText:
 					EndIf
 			End Select
 		EndIf
-	##[$80BC] CloseTitleWin
+	Until CloseTitleWin
 	CloseWindow 2
 	Free GTList 2
 
@@ -4743,7 +4743,7 @@ EditMenuItems:
 	SelectedItem = 0
 
 	CloseItemWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 3
 			Select EventType
@@ -4915,7 +4915,7 @@ EditMenuItems:
 					ShowMenuFlags {3,*CurItem\Flags}
 			End Select
 		EndIf
-	##[$80BC] CloseItemWin
+	Until CloseItemWin
 	CloseWindow 3
 	Free GTList 3
 	Return
@@ -4981,7 +4981,7 @@ EditMenuSubItems:
 	SelectedSubItem = 0
 
 	CloseSubItemWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		If EventWindow = 4
 			Select EventType
@@ -5156,7 +5156,7 @@ EditMenuSubItems:
 					ShowMenuFlags {4,*CurSubItem\Flags}
 			End Select
 		EndIf
-	##[$80BC] CloseSubItemWin
+	Until CloseSubItemWin
 	CloseWindow 4
 	Free GTList 4
 	Return
@@ -5215,21 +5215,21 @@ EditMenuSubItems:
 			*CurTitle = *CurTitle\NextMenuItem
 		Wend
 
-		Dummy = ##[$FF85](Peek.l(##[$80B8] localstat(1)))
+		Dummy = ##[$FF85](Peek.l(Addr localstat(1)))
 
 		Flags = #REQ_Flags
 		If *WindowPtr\Flags & #WFLG_NEWLOOKMENUS Then Flags | #WFLG_NEWLOOKMENUS
 		localstat 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-11)/2,320,11,Flags,"Close Me to Kill Menu",DPen,BPen
 		arrmult 1
 
-		##[$80BB]
+		Repeat
 			EventType.l = WaitEvent
-		##[$80BC] EventType = #IDCMP_CLOSEWINDOW
+		Until EventType = #IDCMP_CLOSEWINDOW
 		CloseWindow	 2
 		Free ##[$C40D] 1
 
 		Activate 1
-		Dummy = ##[$FFA8](Peek.l(##[$80B8] localstat(1)),Peek.l(##[$80B8] ##[$C40D](0)))
+		Dummy = ##[$FFA8](Peek.l(Addr localstat(1)),Peek.l(Addr ##[$C40D](0)))
 	Else
 		ReqGadget = Requester {"","No menus have been created !","OK"}
 	EndIf
@@ -5253,22 +5253,22 @@ EditMenuSubItems:
 
 	If FileName = DefFileName OR UseRequester
 		GotFile = False
-		##[$80BB]
+		Repeat
 			FullName = ASLFileRequest$("Save Project"+Chr$(0),PathName,FileName,"#?.gtb")
-			If FullName = "" Then ##[$80BE] ##[$80BB]:Return
+			If FullName = "" Then Pop Repeat:Return
 			If Instr(FullName,".gtb") = 0 Then FullName+".gtb"
 
 			If ##[$BE15](FullName)
 				Message = FullName+Chr$(10)
 				Message + "already exists."
 				Select Requester {"",Message,"Replace|Select|Cancel"}
-					Case 0 : ##[$80BE] ##[$80BB]:##[$80BE] Select:Return
+					Case 0 : Pop Repeat:Pop Select:Return
 					Case 1 : GotFile = True
 				End Select
 			Else
 				GotFile = True
 			EndIf
-		##[$80BC] GotFile
+		Until GotFile
 	EndIf
 
 	If ##[$BE15](FullName+".info") = False AND *SettingsPtr\CreateIcons = True
@@ -5412,7 +5412,7 @@ EditMenuSubItems:
 		Message + "has been modified."+Chr$(10)
 		Message + "Save changes first ?"
 		Select Requester {"",Message,"Save|Abandon|Cancel"}
-			Case 0 : ##[$80BE] Select:Return
+			Case 0 : Pop Select:Return
 			Case 1 : Gosub SaveProject
 		End Select
 	EndIf
@@ -5510,7 +5510,7 @@ EditMenuSubItems:
 						##[$BE14] 0,*MenuPtr,#MenuInfo_DataSZ
 						*MenuPtr\Label = DiskReadString {0}
 						*CurTitle = *MenuBase
-						##[$80BB]
+						Repeat
 							##[$BE14] 0,&RecLev0,SizeOf.w
 							Select RecLev0
 								Case #REC_MenuItem
@@ -5525,7 +5525,7 @@ EditMenuSubItems:
 									EndIf
 								Case #REC_MenuLevel
 									*CurItem = *CurTitle\FirstSubItem
-									##[$80BB]
+									Repeat
 										##[$BE14] 0,&RecLev1,SizeOf.w
 										Select RecLev1
 											Case #REC_MenuItem
@@ -5540,7 +5540,7 @@ EditMenuSubItems:
 												EndIf
 											Case #REC_MenuLevel
 												*CurSubItem = *CurItem\FirstSubItem
-												##[$80BB]
+												Repeat
 													##[$BE14] 0,&RecLev2,SizeOf.w
 													If RecLev2 = #REC_MenuItem
 														*CurSubItem = AddMenuItem {&*CurItem\FirstSubItem,*CurSubItem}
@@ -5553,11 +5553,11 @@ EditMenuSubItems:
 															Error = True
 														EndIf
 													EndIf
-												##[$80BC] RecLev2 = #REC_MenuLevelEnd
+												Until RecLev2 = #REC_MenuLevelEnd
 										End Select
-									##[$80BC] RecLev1 = #REC_MenuLevelEnd
+									Until RecLev1 = #REC_MenuLevelEnd
 							End Select
-						##[$80BC] RecLev0 = #REC_MenuLevelEnd
+						Until RecLev0 = #REC_MenuLevelEnd
 						If Error
 							Message	 = "Out of Memory."+Chr$(10)
 							Message	 + "Incomplete menu loaded."
@@ -5568,7 +5568,7 @@ EditMenuSubItems:
 						Message	 = FullName+Chr$(10)
 						Message	 + "unknown record ($"+Hex$(RecordNo)+")."
 						ReqGadget = Requester {"ERROR",Message,"OK"}
-						##[$80BE] Select:##[$80BE] While:Goto LoadDone
+						Pop Select:Pop While:Goto LoadDone
 				End Select
 			Wend
 
@@ -5619,7 +5619,7 @@ LoadDone:
 		Message + "has been modified."+Chr$(10)
 		Message + "Save changes first ?"
 		Select Requester {"",Message,"Save|Abandon|Cancel"}
-			Case 0 : ##[$80BE] Select:Return
+			Case 0 : Pop Select:Return
 			Case 1 : Gosub SaveProject
 		End Select
 	EndIf
@@ -5689,22 +5689,22 @@ LoadDone:
 
 	GotFile = False
 	CSrcName = SwapFileExtension {FileName,".bb2"}
-	##[$80BB]
+	Repeat
 		FSrcName = ASLFileRequest$("Generate Source"+Chr$(0),PathName,CSrcName,"#?.bb2")
-		If FSrcName = "" Then ##[$80BE] ##[$80BB]:Return
+		If FSrcName = "" Then Pop Repeat:Return
 		If Instr(FSrcName,".bb2") = 0 Then FSrcName+".bb2"
 
 		If ##[$BE15](FSrcName)
 			Message = FSrcName+Chr$(10)
 			Message + "already exists."
 			Select Requester {"",Message,"Replace|Select|Cancel"}
-				Case 0 : ##[$80BE] Select:##[$80BE] ##[$80BB]:Return
+				Case 0 : Pop Select:Pop Repeat:Return
 				Case 1 : GotFile = True
 			End Select
 		Else
 			GotFile = True
 		EndIf
-	##[$80BC] GotFile
+	Until GotFile
 
 	If SortType <> #SORT_None
 		SortList Gadgets(),0
@@ -6172,7 +6172,7 @@ LoadDone:
 				DataStr.s = "	Data.s "
 				CPos = 1
 				FirstDataItem = True
-				##[$80BB]
+				Repeat
 					Pos = Instr(\ListView,Chr$(#LV_Seperator),CPos)
 					If Right$(\ListView,CPos) <> ""
 						If Pos
@@ -6194,7 +6194,7 @@ LoadDone:
 							DataStr+Chr$(34)+ItemText+Chr$(34)
 						EndIf
 					EndIf
-				##[$80BC] Pos = 0
+				Until Pos = 0
 				NPrint DataStr
 			EndIf
 			ListViewNo+1
@@ -6252,7 +6252,7 @@ DataFlags:
 ;											** **	** **	** **	***		 **
 ;											**	****	 ****	**	 ** *****
 ;
-	##[$80BF] ""
+	INCDIR ""
 GTBSrcIcon:
 	IncBin "gtb.info"
 GTBSaveIcon:

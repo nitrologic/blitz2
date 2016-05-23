@@ -22,7 +22,7 @@ Gosub IMPORT
 Gosub MAIN
 Goto	FIN
 
-##[$80BF] "dh0:Blitz/includes/"
+INCDIR "dh0:Blitz/includes/"
 Include BSAVE.Fun
 Include EXISTS.Fun
 Include DIR.Fun
@@ -44,7 +44,7 @@ End Statement
 
 .INIT:
 
-	##[$80C3]
+	WBStartup
 	##[$80CC]
 
 	Gosub LOADCONFIG
@@ -90,7 +90,7 @@ Return
 
 .MAIN
 
-##[$80BB]
+Repeat
 	ev=WaitEvent
 	Select ev
 
@@ -187,7 +187,7 @@ Return
 		End Select
 	End Select
 
-##[$80BC] quit=1
+Until quit=1
 
 Return
 
@@ -215,11 +215,11 @@ Return
 
 	If res
 		flag.b=-1:Pnt.w=0
-		##[$80BB]
+		Repeat
 			a$=dir$(pnt)
 			If Left$(a$,4)="MAIL" AND Right$(a$,4)=".TXT" Then flag=pnt
 			pnt+1
-		##[$80BC] flag>-1 OR pnt>#dmax
+		Until flag>-1 OR pnt>#dmax
 		If flag>-1
 			flength=dir(flag):fname$=work$+dir$(flag)
 			faddress=##[$FE97](flength,$01)
@@ -274,24 +274,24 @@ If mstart=0 Then Goto notoss
 	; Locate areas and messages and store pointers
 	 p=p+t-2:m=0:message(m)=p:m+1
 
-	##[$80BB]
+	Repeat
 		a=SEARCH{?EOM,p,mend-p}
 		If a>0
 			message(m)=a+12
 			p=a+20 :m+1
 		End If
-	##[$80BC] a=0
+	Until a=0
 
 	message(m)=mend:Message{"Found "+Str$(m)+" Messages."}
 
 	For t=1 To m-1
 		ps=message(t):pe=message(t+1)
 		a$="":a=0
-		##[$80BB]
+		Repeat
 			a=Peek.b(ps)
 			ps+1
 			If a<>10 Then a$=a$+Chr$(a)
-		##[$80BC] a=10
+		Until a=10
 		If a$<>oa$
 			numareas+1:area$(numareas)=a$:oa$=a$
 		End If
@@ -357,11 +357,11 @@ ps=message(m):pe=message(m+1):l=0:cl=0
 
 	For h=0 To 4
 		a$="":a=0
-		##[$80BB]
+		Repeat
 			a=Peek.b(ps)
 			ps+1
 			If a<>10 Then a$=a$+Chr$(a)
-		##[$80BC] a=10
+		Until a=10
 			WLocate 8,3+h*8
 			h$(h)=a$
 			If h=2 Then WColour 2,0 Else WColour 1,0
@@ -370,11 +370,11 @@ ps=message(m):pe=message(m+1):l=0:cl=0
 
 	While l<#linesmax AND ps<pe
 		a$=""
-		##[$80BB]
+		Repeat
 			a=Peek.b(ps)
 			ps+1
 			a$=a$+Chr$(a)
-		##[$80BC] a=10
+		Until a=10
 			t$(l)=Left$(a$,80)
 			l+1
 	Wend
@@ -408,13 +408,13 @@ Return
 
 .ERR
 
-	 ##[$80B4]
+	 SetErr
 			DefaultOutput
 			NPrint "FATAL RATREADER ERROR!	READ SYSMESSAGE BLOCK!"
 			End
 			Message {"Fatal Unknown Error!"}
 			Goto FINN
-	 End ##[$80B4]
+	 End SetErr
 
 ;**********************************************************************
 
@@ -665,7 +665,7 @@ Return
 
 	repquit=0:nogo=0
 
-	##[$80BB]
+	Repeat
 
 		Select WaitEvent
 
@@ -723,7 +723,7 @@ Return
 				End Select
 			End Select
 
-	##[$80BC] repquit=1
+	Until repquit=1
  
 	replines$(0)="	 Area: "+GadgetPens(1,1)						;		Area:
 	replines$(1)="		 To: "+GadgetPens(1,2)						;			To:
@@ -781,12 +781,12 @@ Return
 	OL=L:WBox 0,12,649,256,0
 	WLocate 0,4:For t=0 To 29:NPrint LL$(L+t):Next
 
-##[$80BB]
+Repeat
 	ev=WaitEvent
 	If ev=32
 		Select GadgetHit
 		Case 1
-			##[$80BB]
+			Repeat
 				L=Int(VPropPot(2,1)*EL)+1
 				If L<>OL
 					OL=L
@@ -794,7 +794,7 @@ Return
 					WLocate 0,4
 					For t=0 To 29:NPrint LL$(L+t):Next
 				EndIf
-			##[$80BC] Event=64
+			Until Event=64
 		Case 2
 			While Event<>64 AND L>1
 				VWait
@@ -841,7 +841,7 @@ Return
 		End If
 	End If
 
-##[$80BC] ev=$200 OR SELquit=1
+Until ev=$200 OR SELquit=1
 
 Free localstat 2
 Use localstat 1
@@ -872,7 +872,7 @@ Return
 	ClearString 3,1
 	keyquit=0:KEY$=""
 
-	##[$80BB]
+	Repeat
 		E=WaitEvent
 		If E=64
 			KEY$=GadgetPens(3,1)
@@ -883,7 +883,7 @@ Return
 		If E=512
 			keyquit=1
 		End If
-	##[$80BC] keyquit=1
+	Until keyquit=1
 
 	Free localstat 3
 	Use localstat	1

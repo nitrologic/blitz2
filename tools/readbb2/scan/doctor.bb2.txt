@@ -4,7 +4,7 @@
 
 
 ;Pre-Game
-##[$80C3]
+WBStartup
 
 
 
@@ -593,7 +593,7 @@ LoopSound samples\sampleloop,1,30
 
 
 ;Main loop
-##[$80BB]
+Repeat
 
 	.DoubleBuffer
 	;Wait for Display Update and Show Most Recently
@@ -958,7 +958,7 @@ LoopSound samples\sampleloop,1,30
 					;Check Joystick Movement
 					;If doclastmove=0 Check y First, 1 Check x First
 					e=doclastmove
-					##[$80BB]
+					Repeat
 						e=-e
 
 						;Horizontal Movement
@@ -1041,7 +1041,7 @@ LoopSound samples\sampleloop,1,30
 							EndIf
 						EndIf
 
-					##[$80BC] e=doclastmove
+					Until e=doclastmove
 
 				EndIf
 
@@ -1234,7 +1234,7 @@ LoopSound samples\sampleloop,1,30
 		Goto PreLevelVariables
 	EndIf
 
-##[$80BC] lives=0
+Until lives=0
 
 
 
@@ -1336,7 +1336,7 @@ End
 ;Play Castle and Music
 .TitleSequence
 
-	##[$80C8] TitleData
+	Restore TitleData
 
 	;Set Up Output Screen
 	Use Slice 0
@@ -1387,7 +1387,7 @@ End
 					e=725
 
 				Case -1
-					##[$80C8] TitleData
+					Restore TitleData
 					BlockScroll 0
 					BitMapOutput b
 					Gosub HighScoreTable
@@ -1537,23 +1537,23 @@ End
 	;Restore Level Data
 	Select level
 		Case 0
-			##[$80C8] Level0
+			Restore Level0
 		Case 1
-			##[$80C8] Level1
+			Restore Level1
 		Case 2
-			##[$80C8] Level2
+			Restore Level2
 		Case 3
-			##[$80C8] Level3
+			Restore Level3
 		Case 4
-			##[$80C8] Level4
+			Restore Level4
 		Case 5
-			##[$80C8] Level5
+			Restore Level5
 		Case 6
-			##[$80C8] Level6
+			Restore Level6
 		Case 7
-			##[$80C8] Level7
+			Restore Level7
 		Case 8
-			##[$80C8] Level8
+			Restore Level8
 	End Select
 
 
@@ -1592,7 +1592,7 @@ End
 		JoyWait{100}
 
 		c=10
-		##[$80BB]
+		Repeat
 			score+10
 			b-10
 			c+10
@@ -1615,7 +1615,7 @@ End
 				TextDisplay{40,23,"		 0",2}
 				b=-10
 			EndIf
-		##[$80BC] b<=0
+		Until b<=0
 
 		If b=0
 			JoyWait{100}
@@ -1643,7 +1643,7 @@ End
 		dblbuffer=1-dblbuffer
 		Use lmaxlen dblbuffer
 
-		##[$80BB]
+		Repeat
 			NextFrame 0
 			Select a
 				Case 0
@@ -1664,7 +1664,7 @@ End
 			If Joyb(1)<>0
 				a=29
 			EndIf
-		##[$80BC] a>27
+		Until a>27
 
 		If a=28
 			BlockScroll 0
@@ -1765,7 +1765,7 @@ End
 
 	;Place Other Scenery
 	d=274
-	##[$80BB]
+	Repeat
 		Read a,b,c
 		If a<999
 			b=b*16+32
@@ -1858,7 +1858,7 @@ End
 				longdiv d+a,b,c
 			EndIf
 		EndIf
-	##[$80BC] a=999
+	Until a=999
 
 
 	;SoundTrack Information
@@ -2139,23 +2139,23 @@ End
 
 	Select level
 		Case 0
-			##[$80C8] MonsterLevel0
+			Restore MonsterLevel0
 		Case 1
-			##[$80C8] MonsterLevel1
+			Restore MonsterLevel1
 		Case 2
-			##[$80C8] MonsterLevel2
+			Restore MonsterLevel2
 		Case 3
-			##[$80C8] MonsterLevel3
+			Restore MonsterLevel3
 		Case 4
-			##[$80C8] MonsterLevel4
+			Restore MonsterLevel4
 		Case 5
-			##[$80C8] MonsterLevel5
+			Restore MonsterLevel5
 		Case 6
-			##[$80C8] MonsterLevel6
+			Restore MonsterLevel6
 		Case 7
-			##[$80C8] MonsterLevel7
+			Restore MonsterLevel7
 		Case 8
-			##[$80C8] MonsterLevel8
+			Restore MonsterLevel8
 	End Select
 
 	;Set Up to 4 Monsters
@@ -2829,11 +2829,11 @@ End
 	a$="ABCDEFGHIJKLMNOPQRSTUVWXYZ!?& <*"
 	a=0
 	Colour 1,3
-	##[$80BB]
+	Repeat
 		Locate 13+(a-a/8*8)*2,7+(Int(a/8))*2
 		Print Mid$(a$,a+1,1)
 		a+1
-	##[$80BC] a+1>Len(a$)
+	Until a+1>Len(a$)
 
 	Colour 1,0
 	For a=0 To 2
@@ -2930,13 +2930,13 @@ End
 	highscore(5)=score
 	highscore$(5)=b$
 	a=5
-	##[$80BB]
+	Repeat
 		If highscore(a)>highscore(a-1)
-			##[$80C9] highscore(a),highscore(a-1)
-			##[$80C9] highscore$(a),highscore$(a-1)
+			Exchange highscore(a),highscore(a-1)
+			Exchange highscore$(a),highscore$(a-1)
 		EndIf
 		a-1
-	##[$80BC] a=0
+	Until a=0
 
 
 	;Print High Score Table
@@ -3007,10 +3007,10 @@ End
 
 		If e=1
 			If z<=1
-				a=170+HCos(##[$80BA]*2*z)*34
-				b=117-HSin(##[$80BA]*2*z)*34
-				c=170-HCos(##[$80BA]*2*z)*34
-				d=117+HSin(##[$80BA]*2*z)*34
+				a=170+HCos(Pi*2*z)*34
+				b=117-HSin(Pi*2*z)*34
+				c=170-HCos(Pi*2*z)*34
+				d=117+HSin(Pi*2*z)*34
 				z+.0040
 			EndIf
 		EndIf
@@ -3037,11 +3037,11 @@ End
 	longdiv 258,91,38
 	d=0
 	Colour 1,3
-	##[$80BB]
+	Repeat
 		TextDisplay{13,8+d,highscore$(d),1}
 		TextDisplay{28,8+d,Str$(highscore(d)),2}
 		d+1
-	##[$80BC] d>=5
+	Until d>=5
 	Return
 
 

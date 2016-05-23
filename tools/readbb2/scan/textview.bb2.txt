@@ -56,7 +56,7 @@ BitMapOutput 0:Colour 1,bc
 ResetString 628,14,8,dh-46
 cl=1:Gosub refresh
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=32
 		Select GadgetHit
@@ -81,9 +81,9 @@ cl=1:Gosub refresh
 			Wend
 			ocl=cl
 		Case 3
-			##[$80BB]
+			Repeat
 				Gosub propref
-			##[$80BC] WaitEvent=64
+			Until WaitEvent=64
 		End Select
 	EndIf
 	If ev=64
@@ -98,7 +98,7 @@ cl=1:Gosub refresh
 			cl=l(GadgetHit-5):Gosub refresh:Gosub showprop
 		End Select
 	EndIf
-##[$80C7]
+Forever
 
 propref
 cl=Int(VPropPot(0,3)*(l-vl+1)+1)

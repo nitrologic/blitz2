@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/bspread/bspread.bb2
 #test=0
 ;
-##[$80C3]:##[$80CC]:##[$80CB]
+WBStartup:##[$80CC]:##[$80CB]
 ;
 ;Blitz Spread
 ;
@@ -26,7 +26,7 @@ Dim cells.cell(99,99),xs(99),ys(99)
 
 Function$ colname{x}
 If x>25 Then c$=Chr$(64+Int(x/26))
-c$+Chr$(65+(x ##[$80B9] 26))
+c$+Chr$(65+(x MOD 26))
 Function Return c$
 End Function
 
@@ -52,15 +52,15 @@ Gosub element:r.f=r2.f ;get an element into r.f
 loop
 Select a$
 Case "+"
-	Gosub element:r+r2:##[$80BE] Select:Goto loop
+	Gosub element:r+r2:Pop Select:Goto loop
 Case "-"
-	Gosub element:r-r2:##[$80BE] Select:Goto loop
+	Gosub element:r-r2:Pop Select:Goto loop
 Case "*"
-	Gosub element:r*r2:##[$80BE] Select:Goto loop
+	Gosub element:r*r2:Pop Select:Goto loop
 Case "/"
-	Gosub element:r/r2:##[$80BE] Select:Goto loop
+	Gosub element:r/r2:Pop Select:Goto loop
 Case "^"
-	Gosub element:r^r2:##[$80BE] Select:Goto loop
+	Gosub element:r^r2:Pop Select:Goto loop
 End Select
 z$=a$+i$:Function Return r
 ;
@@ -311,11 +311,11 @@ Case 1024 ;keystroke! - enter some text!
 	If i$>=" " AND i$<=Chr$(127)
 		If i$<>Chr$(127)
 			eat=1
-			##[$80BB]
+			Repeat
 			WLocate 40,#vrows*8+8
 			EditFrom eat:i$=Edit$(i$,75)
 			eat=Editat
-			##[$80BC] EditExit=13
+			Until EditExit=13
 			i$=UCase$(i$)
 		Else
 			i$=""
@@ -480,9 +480,9 @@ If MButtons=1 ;left button down
 		sloop
 		omx=mx:omy=my:Gosub showarea
 		sloop2
-		##[$80BB]
+		Repeat
 		Gosub readmouse:mb=MButtons
-		##[$80BC] mx<>omx OR my<>omy OR mf=0 OR mb=5
+		Until mx<>omx OR my<>omy OR mf=0 OR mb=5
 		If (NOT mf) AND mb<>5 ;scroll!
 			x+xa:y+ya
 			xo-xa:yo-ya
@@ -514,7 +514,7 @@ If a=1024 ;key hit!
 	Case Chr$(31) ;left arrow
 		xa=-1
 	Default
-		##[$80BE] Select:Return
+		Pop Select:Return
 	End Select
 	If Qualifier AND 3
 		xa*sha:ya*sha

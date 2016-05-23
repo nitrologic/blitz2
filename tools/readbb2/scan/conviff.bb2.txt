@@ -15,11 +15,11 @@ DEFTYPE.l
 ;
 rowmod=40:hl=6		;header length
 ;
-##[$80B4]
+SetErr
 	err
 	##[$FF8C] 0
 	NPrint "USAGE: CONVIFF inputfile outputfile [cookie]":End
-End ##[$80B4]
+End SetErr
 
 If NumPars=3
 	If LCase$(Par$(3))<>"cookie" Then Goto err
@@ -31,7 +31,7 @@ LoadShape 0,Par$(1)
 
 If ReadMem(0,Par$(2))=0 Then Goto err Else FileOutput 0
 
-s=##[$80B8] MidHandle(0)
+s=Addr MidHandle(0)
 w=Peek.w(s)
 h=Peek.w(s+2)
 de=Peek.w(s+4)

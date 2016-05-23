@@ -30,11 +30,11 @@ Gosub initcolors:Use SetCycle 0
 
 localstat 0,0,0,320,256,$1800,"",1,2:arrmult 0
 
-backdrop.l=Peek.l(##[$80B8] localstat(0)) ;for direct calls to intuition library
+backdrop.l=Peek.l(Addr localstat(0)) ;for direct calls to intuition library
 
 localstat 1,100,100,150,82,$2,"TOOL BOX",1,2,0:arrmult 0:Gosub setprop
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=256
 		Select MenuHit
@@ -47,7 +47,7 @@ localstat 1,100,100,150,82,$2,"TOOL BOX",1,2,0:arrmult 0:Gosub setprop
 	If ev=32 AND GadgetHit>15 Then Gosub adjustcol
 	If ev=64 Then Gosub dotoolbox
 	If EventWindow=0 AND ev=8 Gosub dofunc
-##[$80C7]
+Forever
 
 dotoolbox:
 	If GadgetHit<8 Then currpen=GadgetHit:Gosub setprop
@@ -59,9 +59,9 @@ dotoolbox:
 	##[$FFB0] backdrop:Use localstat 0:x=WMouseX:y=WMouseY:Use lmaxlen 1
 	If currfunc<3
 		bs=1+currfunc*2							 ;do freehand with brushsize
-		##[$80BB]
+		Repeat
 			Boxf WMouseX-bs,WMouseY-bs,WMouseX,WMouseY,currpen
-		##[$80BC] Event=8 ;button up!
+		Until Event=8 ;button up!
 	EndIf															;do flood
 	If currfunc=3 OR currfunc=4
 		If currfunc=4 Then Use lmaxlen 1 Else Use lmaxlen 0
@@ -69,10 +69,10 @@ dotoolbox:
 	EndIf
 	If currfunc=6
 		Use lmaxlen 1				 ;do box
-		##[$80BB]
+		Repeat
 			xx=WMouseX:yy=WMouseY
 			Boxf x,y,xx,yy,-currpen:##[$FE1B] 5:Boxf x,y,xx,yy,-currpen
-		##[$80BC] Event=8
+		Until Event=8
 		Boxf x,y,WMouseX,WMouseY,currpen
 	EndIf
 	##[$FFAF] backdrop
@@ -80,9 +80,9 @@ dotoolbox:
 
 .dodraw
 	Use localstat 0
-	##[$80BB]
+	Repeat
 		Use lmaxlen 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
-	##[$80BC] MButtons=5
+	Until MButtons=5
 	Return
 
 .loadpic
@@ -116,10 +116,10 @@ Statement setcolors{pen.w,r,g,b}
 End Statement
 
 .adjustcol
-	##[$80BB]
+	Repeat
 		r=HPropPot(0,16)*16:g=HPropPot(0,17)*16:b=HPropPot(0,18)*16:
 		setcolors{currpen,r,g,b}:Use SetCycle 0
-	##[$80BC] Event
+	Until Event
 	Return
 
 .setprop:
@@ -129,7 +129,7 @@ End Statement
 	Return
 
 .initcolors
-	##[$80C8] cols:For p=0 To 7:Read r,g,b:setcolors{p,r,g,b}:Next:Return
+	Restore cols:For p=0 To 7:Read r,g,b:setcolors{p,r,g,b}:Next:Return
 cols:
 	Data 15,15,15,15,6,6,6,15,6,6,6,15	 ;primary colors
 	Data 15,6,15,6,15,15,15,15,6,15,12,8 ;and a few hues

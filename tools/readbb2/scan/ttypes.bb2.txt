@@ -177,7 +177,7 @@ Shared *TT_ToolTypes.TT_ToolTypeInfo,*TT_DiskObject.TT_DiskObject,TT_nttpoint(),
 	If *TT_DiskObject
 		i=0
 		pos=-1
-		##[$80BB]
+		Repeat
 			If UCase$(TT_ntt$(i))=TType$
 				r$=TType$:pos=i
 			Else
@@ -188,7 +188,7 @@ Shared *TT_ToolTypes.TT_ToolTypeInfo,*TT_DiskObject.TT_DiskObject,TT_nttpoint(),
 				EndIf
 			EndIf
 			i+1
-		##[$80BC] (i=21)OR(pos>=0)
+		Until (i=21)OR(pos>=0)
 	EndIf
 	Function Return r$
 End Function
@@ -210,7 +210,7 @@ Shared *TT_ToolTypes.TT_ToolTypeInfo,*TT_DiskObject.TT_DiskObject,TT_nttpoint(),
 	ret=False
 	i=0
 	pos=-1
-	##[$80BB]
+	Repeat
 		If UCase$(TT_ntt$(i))=TType$
 			pos=i
 		Else
@@ -228,7 +228,7 @@ Shared *TT_ToolTypes.TT_ToolTypeInfo,*TT_DiskObject.TT_DiskObject,TT_nttpoint(),
 			EndIf
 		EndIf
 		i+1
-	##[$80BC] (i=21)OR(pos>=0)
+	Until (i=21)OR(pos>=0)
 	If TValue$<>""
 		TTV$=TType$+"="+TValue$
 	Else
@@ -242,10 +242,10 @@ Shared *TT_ToolTypes.TT_ToolTypeInfo,*TT_DiskObject.TT_DiskObject,TT_nttpoint(),
 	Else
 		i=0
 		ret=False
-		##[$80BB]
+		Repeat
 			If TT_ntt$(i)="" Then TT_ntt$(i)=TTV$:ret=True
 			i+1
-		##[$80BC] (ret)OR(i=21)
+		Until (ret)OR(i=21)
 	EndIf
 	If ret
 		For i=0 To 20

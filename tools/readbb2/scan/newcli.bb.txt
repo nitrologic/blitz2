@@ -18,7 +18,7 @@ localstat 0,0,10,640,DispHeight-10,$1000,"NEWCLI DEMO (via menu)",1,2
 
 arrmult 0
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=256 AND MenuHit=0
 		Select ItemHit
@@ -27,13 +27,13 @@ arrmult 0
 			Case 2:End
 		End Select
 	EndIf
-##[$80C7]
+Forever
 
 docmd:
 	cli$="con:0/0/"+Str$(WBWidth)+"/"+Str$(WBHeight)+"/MY OWN APPLICATIONS CLI"
 	If ReadMem(0,cli$)
 		##[$FFB5]
-		##[$FE1F] &cmd$,Peek.l(##[$80B8] WriteFile(0)),0
+		##[$FE1F] &cmd$,Peek.l(Addr WriteFile(0)),0
 		##[$FFB4]
 		CloseFile 0
 	EndIf

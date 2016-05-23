@@ -197,9 +197,9 @@ Wend
 End Statement
 
 Statement turnoff2{id}
-##[$80BB]
+Repeat
 	VWait
-##[$80BC] Joyb(0)=0
+Until Joyb(0)=0
 turnoff{id}
 End Statement
 
@@ -275,7 +275,7 @@ End Statement
 Statement cprnt{k$}
 Shared cx,cy
 Colour 1,0:k$+" "
-##[$80BB]
+Repeat
 	k=Instr(k$," ")
 	If k
 		k2$=Left$(k$,k-1):k$=Mid$(k$,k+1)
@@ -285,7 +285,7 @@ Colour 1,0:k$+" "
 		Locate 44+cx,1+cy:prnt{k2$}:cx+k2
 		If cx<35 Then prnt{" "}:cx+1
 	EndIf
-##[$80BC] k=0
+Until k=0
 End Statement
 
 Statement cprntcr{k$}
@@ -367,15 +367,15 @@ Function$ findl{v,c}
 Shared l$(),nc()
 If l$(v) Then Function Return l$(v)
 filoop
-##[$80BB]
+Repeat
 	x=Int(Rnd(64))LSL 1:y=Int(Rnd(64))
-##[$80BC] Cls(x,y)=nc(c)
+Until Cls(x,y)=nc(c)
 x LSR 1
 gx=Int(x LSR 3):sx=x&7
 gy=Int(y LSR 3):sy=y&7
 l$=co{gx,gy,sx,sy}
 For k=1 To 100
-If l$(k)=l$ Then ##[$80BE] For:Goto filoop
+If l$(k)=l$ Then Pop For:Goto filoop
 Next
 l$(v)=l$
 Function Return l$
@@ -428,7 +428,7 @@ lmaxlen 0,144,80,3:longdiv 0,0,0
 
 If WriteMem(0,"prog")
 	FileInput 0
-	##[$80BB]
+	Repeat
 		f$=ed{}
 		If f$
 			Select Left$(f$,1)
@@ -440,7 +440,7 @@ If WriteMem(0,"prog")
 				Gosub evnt
 			End Select
 		EndIf
-	##[$80BC] f$=""
+	Until f$=""
 	CloseFile 0:DefaultInput
 Else
 	End
@@ -490,7 +490,7 @@ lmaxlen 5,448,192,3	;						 "
 Use lmaxlen 1:BitMapOutput 1
 
 Slice 0,32,320,128,$fffa,5,8,32,640,640
-*sl0.slice=##[$80B8] Slice(0):Gosub go4cols
+*sl0.slice=Addr Slice(0):Gosub go4cols
 Use SetCycle 1:Show 0
 
 Slice 1,162,640,144,$fff1,3,8,32,640,640
@@ -593,7 +593,7 @@ End
 .subs
 
 godualpf
-VWait:##[$80BB]:##[$80BC] VPos>160
+VWait:Repeat:Until VPos>160
 *sl0\_flags=$fffa
 *sl0\_numbitplanes=5
 slp.l=*sl0\_BPLCON1
@@ -603,7 +603,7 @@ Poke.w slp+28,38
 Return
 
 go4cols
-VWait:##[$80BB]:##[$80BC] VPos>160
+VWait:Repeat:Until VPos>160
 *sl0\_flags=$fff8
 *sl0\_numbitplanes=2
 slp.l=*sl0\_BPLCON1
@@ -613,7 +613,7 @@ Poke.w slp+28,38
 Return
 
 go16cols
-VWait:##[$80BB]:##[$80BC] VPos>160
+VWait:Repeat:Until VPos>160
 *sl0\_flags=$fff8
 *sl0\_numbitplanes=4
 slp.l=*sl0\_BPLCON1
@@ -840,13 +840,13 @@ Else
 	;
 EndIf
 ;
-##[$80BB]
+Repeat
 	VWait
-##[$80BC] asa+ala=0 OR Joyb(0)=2
+Until asa+ala=0 OR Joyb(0)=2
 ;
-##[$80BB]
+Repeat
 	VWait:locfree a()
-##[$80BC] NOT globfree(a())
+Until NOT globfree(a())
 ;
 VWait 2:ss2=0:Use lmaxlen 0:stpal2{}:x=Int(x):y=Int(y)
 Gosub go4cols:Show 0,x,y:Use SetCycle 1
@@ -936,9 +936,9 @@ For po=0 To \n
 *opt=\o[po]:fn=QAbs(*opt\f):fp=*opt\p
 If *opt\f<0 OR dit
 	If fp&1 ;true?
-		If f(fn) Then ##[$80BE] For:Goto doit
+		If f(fn) Then Pop For:Goto doit
 	Else
-		If f(fn)=0 Then ##[$80BE] For:Goto doit
+		If f(fn)=0 Then Pop For:Goto doit
 	EndIf
 EndIf
 Next
@@ -966,7 +966,7 @@ FadeIn 2:Return
 
 .speech
 tsp=1:cea=.5:ce2=0:ce=3
-exec{c(cc)\t}:##[$80BB]:VWait:##[$80BC] Int(ce)=3
+exec{c(cc)\t}:Repeat:VWait:Until Int(ce)=3
 ce=0:tsp=2
 Select cc ;special case conversations...
 Case 9
@@ -1019,7 +1019,7 @@ EndIf
 If g=66
 	pl$=co{gx,gy,sx,sy}
 	px=gx LSL 3+sx:py=gy LSL 3+sy
-	pm=px ##[$80B9] 17+py ##[$80B9] 39
+	pm=px MOD 17+py MOD 39
 	ps=so
 	If nve Then Gosub nveoff:Box 19+ix+1,48+iy+1,19+ix+14,48+iy+7,2
 	Gosub dowarp:Gosub doplanet:turnoff{66}
@@ -1315,13 +1315,13 @@ Case 2
 	LoadShape 3,"starbase.iff",1
 Case 5
 Default
-	k=pm ##[$80B9] 4
+	k=pm MOD 4
 	k$="planet"+Chr$(49+k)+".iff"
 	LoadShape 3,k$,1
 End Select
 BLITZ:stpal2{}:If ps=5 Then Return
 If ps=1 OR ps=3
-	k2=pm ##[$80B9] 6:Use SetCycle 1
+	k2=pm MOD 6:Use SetCycle 1
 	For k=4 To 15
 	Select k2
 	Case 0
@@ -1472,14 +1472,14 @@ Return
 QAMIGA
 
 Macro init
-##[$80BB]
+Repeat
 	t$=ed{}
 	If t$<>"#"
 End Macro
 
 Macro finit
 	EndIf
-##[$80BC] t$="#"
+Until t$="#"
 End Macro
 
 Function$ ced{}
@@ -1516,7 +1516,7 @@ Return
 .evnt ;t$=coords
 ##[$80CA] p()
 AddLast p():\l=f$:k=-1
-##[$80BB]
+Repeat
 	f$=ed{}
 	If f$<>"#"
 		Select Left$(f$,1)
@@ -1533,7 +1533,7 @@ AddLast p():\l=f$:k=-1
 		End Select
 		\o[k]\c=ced{}
 	EndIf
-##[$80BC] f$="#"
+Until f$="#"
 \n=k
 Return
 

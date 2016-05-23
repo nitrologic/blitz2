@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/firstppc.bb2
-##[$80C3]
+WBStartup
 ##[$C0A4] ?ppcprog,?_base			;use warpup (needs wizard.library)a4->r2
 End
 ##[$EC89]

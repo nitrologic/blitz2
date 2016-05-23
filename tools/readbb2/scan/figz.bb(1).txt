@@ -8,10 +8,10 @@ DEFTYPE.obj *ptr
 DEFTYPE.vec rayx,rayu,tmpx,tmpu,tmap,tmap1,light,nmx,nmy
 DEFTYPE.pt impact,max
 
-##[$80C3]
+WBStartup
 #edonly=0
 
-##[$80B4]:End:End ##[$80B4]
+SetErr:End:End SetErr
 MaxLen path$=160:path$="FigZ:":MaxLen path2$=160:path2$=""
 MaxLen fnmobj$=64
 MaxLen fnmbm2$=64
@@ -36,7 +36,7 @@ End Function
 
 Function.w wrap{x.q,y.q}
  If y<>0
-	tang.f=x/y:a=Cos(tang)*32/##[$80BA]:If y<0 Then a+32
+	tang.f=x/y:a=Cos(tang)*32/Pi:If y<0 Then a+32
 	Function Return a
  Else
 	Function Return 32-16*x
@@ -602,7 +602,7 @@ x0=16+(((pal0&3)+16)ASL 3)-1:y0=((pal0 ASR2)&7+8)ASL3
 WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal0
 x0=16+(((pal1&3)+16)ASL 3)-1:y0=((pal1 ASR2)&7+8)ASL3
 WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal1
-##[$80BB]
+Repeat
  ev=WaitEvent
  evw=EventWindow
  If evw=5
@@ -622,7 +622,7 @@ WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal1
 		Case 21:b0+1:b0&15:Green pal0,r0,g0,b0:!setrgb{pal0}
 		Case 22;spread rgb
 		 If Abs(pal1-pal0)>1
-			col1=pal0:col2=pal1:If col2<col1 Then ##[$80C9] col1,col2
+			col1=pal0:col2=pal1:If col2<col1 Then Exchange col1,col2
 			dr=Blue(col2)-Blue(col1):dg=Palette(col2)-Palette(col1):db=PalRGB(col2)-PalRGB(col1)
 			r0=Blue(col1):g0=Palette(col1):b0=PalRGB(col1)
 			dcol=col2-col1:dr/dcol:dg/dcol:db/dcol
@@ -766,7 +766,7 @@ WLine x0,y0,x0+8,y0,x0+8,y0+8,x0,y0+8,x0,y0,31-pal1
 	EndIf
  EndIf
 FlushEvents
-##[$80BC] qflag=1
+Until qflag=1
 qflag=0
 For i=0 To 31:i0=i*3:buff(i0)=Blue(i):buff(i0+1)=Palette(i):buff(i0+2)=PalRGB(i):Next
  For k=0 To 15
@@ -793,8 +793,8 @@ Next
 Statement zoom{bm0}
 Shared xpand()
 For k=0 To 3
-src.l=Peek.l(##[$80B8] lmaxlen(bm0)+8+k*4)
-dest.l=Peek.l(##[$80B8] lmaxlen(4)+8+k*4)
+src.l=Peek.l(Addr lmaxlen(bm0)+8+k*4)
+dest.l=Peek.l(Addr lmaxlen(4)+8+k*4)
 For j=0 To 63
 For i=0 To 7
 XPAND.l=xpand(Peek.b(src)&255)
@@ -825,8 +825,8 @@ For i=0 To 15:i0=1+(i&7)ASL 3:j0=209+(i&8):WBox i0,j0,i0+5,j0+5,i:Next
 pal0=0
 i0=(pal0&7)ASL 3:j0=208+(pal0&8):WLine i0,j0,i0+7,j0,i0+7,j0+7,i0,j0+7,i0,j0,15
 zoom{1}
-##[$80BB]
- ##[$80BB]
+Repeat
+ Repeat
 	ev.l=Event
 	Use localstat 7:x0=WMouseX ASR 2:y0=WMouseY ASR 2
 	If x0<>x1 OR y0<>y1 AND x0<64
@@ -834,7 +834,7 @@ zoom{1}
 	 WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
 	 x1=x0:y1=y0
 	EndIf
- ##[$80BC] ev<>0
+ Until ev<>0
  evw=EventWindow
  If evw=7 AND ev=$8 AND Joyb(0)=1
 	Use localstat 7
@@ -842,13 +842,13 @@ zoom{1}
 	If x0<64
 	x0&63:y0&63
 	Select SetGadgetStatus(3,1)
-	 Case 26:##[$80BB]:Use localstat 7:x0=WMouseX &252:y0=WMouseY &252
+	 Case 26:Repeat:Use localstat 7:x0=WMouseX &252:y0=WMouseY &252
 		Use localstat 7:WBox x0,y0,x0+3,y0+3,pal0:Use lmaxlen 1:Point x0 ASR 2,y0 ASR 2,pal0
 		Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
 		WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 	 Case 27
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1:Line x0,y0,x1,y1,-1
 			zoom{2}
@@ -856,10 +856,10 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		Use lmaxlen 1:Line x0,y0,x1,y1,pal0:zoom{1}
 	 Case 28
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
@@ -867,11 +867,11 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		Use lmaxlen 1:Box x0,y0,x1,y1,pal0
 		zoom{1}
 	 Case 29
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Boxf x0,y0,x1,y1,-1:zoom{2}
@@ -879,11 +879,11 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		Use lmaxlen 1:Boxf x0,y0,x1,y1,pal0
 		zoom{1}
 	 Case 30
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
@@ -891,11 +891,11 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		Use lmaxlen 1:Circle (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
 		zoom{1}
 	 Case 31
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
@@ -903,14 +903,14 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		Use lmaxlen 1:Circlef (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
 		zoom{1}
 	 Case 32:Use lmaxlen 1
 		FloodFill x0,y0,pal0
 		zoom{1}
 	 Case 33
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
@@ -918,10 +918,10 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		zoom{1}
-		If x0>x1 Then ##[$80C9] x0,x1
-		If y0>y1 Then ##[$80C9] y0,y1
+		If x0>x1 Then Exchange x0,x1
+		If y0>y1 Then Exchange y0,y1
 		;find min and max colours in box
 		cmax=8:cmin=6:Use lmaxlen 1
 		For i=x0 To x1:For j=y0 To y1
@@ -943,8 +943,8 @@ zoom{1}
 		EndIf
 		For i=0 To xlen:For j=0 To ylen:jj=j/ylen:ii=i/xlen:radi(i,j)=Tan(jj*jj+ii*ii):Next:Next
 		xx=x0
-		##[$80BB]:yy=y0
-		 ##[$80BB]
+		Repeat:yy=y0
+		 Repeat
 			Use lmaxlen 2:p0=Cls(xx,yy)
 			If p0<>cmin AND p0<>cmax
 			dmax=1:dmin=1
@@ -963,11 +963,11 @@ zoom{1}
 			Use lmaxlen 1:Point xx,yy,p0
 			Use lmaxlen 4:Boxf xx ASL 2,yy ASL 2,xx ASL 2 +3,yy ASL 2+3,p0
 			EndIf
-		 yy+1:yy&63:##[$80BC] yy=y1 OR Joyb(0)&2=2
-		xx+1:xx&63:##[$80BC] xx=x1 OR Joyb(0)&2=2
+		 yy+1:yy&63:Until yy=y1 OR Joyb(0)&2=2
+		xx+1:xx&63:Until xx=x1 OR Joyb(0)&2=2
 		If Joyb(0)&2=2 Then Use lmaxlen 1:Scroll 0,0,64,64,0,0,2:zoom{1}
 	 Case 34
-		##[$80BB]:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
 			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
@@ -975,9 +975,9 @@ zoom{1}
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
-		##[$80BC] Joyb(0)=0
-		If x0>x1 Then ##[$80C9] x0,x1
-		If y0>y1 Then ##[$80C9] y0,y1
+		Until Joyb(0)=0
+		If x0>x1 Then Exchange x0,x1
+		If y0>y1 Then Exchange y0,y1
 		x1=x1-x0+1:y1=y1-y0+1
 		x10=2
 		If x1>3 Then x10=4
@@ -993,9 +993,9 @@ zoom{1}
 		If y1>48 Then x10=64
 		y1=x10
 		Use lmaxlen 2:Scroll x0,y0,x1,y1,0,0,1:y0=0
-		##[$80BB]:x0=0:##[$80BB]
+		Repeat:x0=0:Repeat
 		 Use lmaxlen 1:Scroll 0,0,x1,y1,x0,y0,2
-		x0+x1:##[$80BC] x0>63:y0+y1:##[$80BC] y0>63
+		x0+x1:Until x0>63:y0+y1:Until y0>63
 		zoom{1}
 	 Case 35
 		Use lmaxlen 1:ReMap Cls(x0,y0),pal0
@@ -1026,7 +1026,7 @@ zoom{1}
 		 Use allocst 4:Green i,r0,g0,b0:Next
 		EndIf
 		ShowScreen 3
-		##[$80BB]:##[$80BC] (Joyb(0)&2)<>0
+		Repeat:Until (Joyb(0)&2)<>0
 		If Disable(3,19)=2
 		 For i=0 To 15:Use allocst 4:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
 		 Use allocst 3:Green i,r0,g0,b0:Next
@@ -1092,7 +1092,7 @@ zoom{1}
 	 EndIf
 	EndIf
  EndIf
-##[$80BC] gadg=36
+Until gadg=36
 Free localstat 6:Free localstat 7:Free allocst 4:Use localstat 4
 ShowScreen 1:Use allocst 1
 Return
@@ -1119,7 +1119,7 @@ WLocate 56,11:Print"X":WLocate 56,21:Print"Y"
 WLocate 1,41:Print"Light:E":WLocate 105,41:Print"A"
 WLocate 1,51:Print"Elevn:A":WLocate 105,51:Print"F"
 WLocate 1,61:Print"Merid:A":WLocate 105,61:Print"F"
-##[$80BB]
+Repeat
  ev.l=WaitEvent:evw=EventWindow
  If ev=$40 AND evw=4
 	gadg=GadgetHit:Use localstat 4
@@ -1169,7 +1169,7 @@ WLocate 1,61:Print"Merid:A":WLocate 105,61:Print"F"
 	End Select
  EndIf
  FlushEvents
-##[$80BC] qflag>0
+Until qflag>0
 qflag=0
 Free localstat 4:Use localstat 3
 ShowScreen 1:Use allocst 1
@@ -1179,11 +1179,11 @@ CEND
 .objtoshp
 ##[$80CA] object(iobj)
 Select Int(\typ/2)
- Case 0:##[$80C8] ellipsoid
- Case 1:##[$80C8] cylindroid
- Case 2:##[$80C8] cuboid
- Case 3:##[$80C8] pyramid
- Case 4:##[$80C8] cone
+ Case 0:Restore ellipsoid
+ Case 1:Restore cylindroid
+ Case 2:Restore cuboid
+ Case 3:Restore pyramid
+ Case 4:Restore cone
 End Select
 Read nlines(iobj)
 If \typ=3 Then nlines(iobj)-1
@@ -1544,7 +1544,7 @@ Return
 CNIF #edonly=0
 Statement gimme{shap0}
 Shared scrsize,nbpl
-adress.l=##[$80B8] MidHandle(shap0+343)
+adress.l=Addr MidHandle(shap0+343)
 Use lmaxlen 4:Boxf 64,0,scrsize-1,255,0:Boxf 0,150,63,180,0
 If Peek.w(adress)<>0
  nplanes=Peek.w(adress+4):gw=Peek.w(adress):gh=Peek.w(adress+2):gcol=(1 ASL nplanes)-1
@@ -1565,7 +1565,7 @@ owin=##[$80D1] localstat
 Use allocst 4:ButtonId 4,2,unsn{shap0,3}:gadg=0
 Boxf 0,0,scrsize-1,255,0:localstat 8,0,90,64,90,$800,"",0,1,4
 gimme{shap0}
-##[$80BB]
+Repeat
  ev.l=WaitEvent
  If ev=$40 AND EventWindow=8
 	gadg=GadgetHit
@@ -1578,15 +1578,15 @@ gimme{shap0}
 		gimme{shap0}
 	 Case 9;insert
 		For i=255 To shap0+2 Step -1
-		 If Peek.w(##[$80B8] MidHandle(i+342))<>0 Then CopyShape i+342,i+343
+		 If Peek.w(Addr MidHandle(i+342))<>0 Then CopyShape i+342,i+343
 		Next
 		Free MidHandle shap0+344
 		gimme{shap0}
 	 Case 4;delete
 		shapid=shap0+1
-		For i=shap0+1 To 255:If Peek.w(##[$80B8] MidHandle(343+i))<>0 Then CopyShape 343+i,342+i
+		For i=shap0+1 To 255:If Peek.w(Addr MidHandle(343+i))<>0 Then CopyShape 343+i,342+i
 		Next
-		If Peek.w(##[$80B8] MidHandle(599))<>0 Then Free MidHandle 599
+		If Peek.w(Addr MidHandle(599))<>0 Then Free MidHandle 599
 		gimme{shap0}
 	 Case 6
 		ShowScreen 1:Use allocst 1
@@ -1600,7 +1600,7 @@ gimme{shap0}
 		If a$<>"" Then LoadShapes shap0+343,a$
 	End Select
  EndIf
-##[$80BC] gadg=8
+Until gadg=8
 Free localstat 8
 Use localstat owin
 Return
@@ -1664,12 +1664,12 @@ If hqflag=1
 EndIf
 ii0=0:jj0=0:cosa=HCos(ang*0.0174533):sina=HSin(ang*0.0174533)
 nframe=rmerid*relev
-kkk=0:nkkk=0:nnkk=0:##[$80BB]:kkk+1:nkkk+1
+kkk=0:nkkk=0:nnkk=0:Repeat:kkk+1:nkkk+1
 rayx0=rayx00-0.5*drayx:rayy0=rayy00-0.5*drayy:rayz0=rayz00-0.5*drayz
 shxl=xsize ASR hqflag:shxr=0:shyt=ysize ASR hqflag:shyb=0
 For i=0 To nobj:Gosub invert:Next
 new_pixel=1:ii=0:jj=1
-##[$80BB]
+Repeat
  If new_pixel=1
 	rayx0+drayx:ii+1
 	If ii>xsize Then rayx0=rayx00+0.5*drayx:ii=1:jj+1:rayy0+drayy:rayz0+drayz
@@ -1682,7 +1682,7 @@ new_pixel=1:ii=0:jj=1
  rayx\x=rayx0,rayy0,rayz0
  rayu\x=0,rayuy,rayuz
  flag=0:nref=0:oproobj=-1:new_pixel=1:fshp=-1:specular=1
- ##[$80BB]
+ Repeat
 	max\dist=255:proobj=-1
 	For i=0 To nobj
 	 impact\dist=255
@@ -1818,7 +1818,7 @@ new_pixel=1:ii=0:jj=1
 		If col0=0 Then new_pixel=0:nongrata(fshp)=1
 	 EndIf
 	EndIf
- ##[$80BC] flag<>0
+ Until flag<>0
  Select hqflag
 	Case 0
 	 Use lmaxlen 4:Point scrx,scry,col0&bpmask
@@ -1861,7 +1861,7 @@ new_pixel=1:ii=0:jj=1
 	 EndIf
  End Select
  mbflag=Joyb(0)&2
-##[$80BC] (ii=xsize AND jj=Int(ysize)) OR mbflag=2
+Until (ii=xsize AND jj=Int(ysize)) OR mbflag=2
 If mbflag<>2
  If shxl<shxr AND shyb>shyt
 	shed=342+(kkk+shap0)&255
@@ -1895,7 +1895,7 @@ If mbflag<>2
 	Next
  EndIf
 EndIf
-##[$80BC] kkk=nframe OR mbflag=2
+Until kkk=nframe OR mbflag=2
  If scrsize=640 Then xsize/2
  For i=0 To nobj
 	##[$80CA] oldobj(i)
@@ -1903,7 +1903,7 @@ EndIf
 	object(i)\r2\x=\r2\x,\r2\y,\r2\z:object(i)\r3\x=\r3\x,\r3\y,\r3\z
  Next
  If mbflag=0 Then Gosub shapeman
- If mbflag<>0 Then ##[$80BB]:##[$80BC] Joyb(0)&2=0
+ If mbflag<>0 Then Repeat:Until Joyb(0)&2=0
 FlushEvents
 If hqflag=1 Then Free lmaxlen 8:xsize/2:ysize/2
 Free allocst 4:Free lmaxlen 4:Use allocst 1:Use localstat 4

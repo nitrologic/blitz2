@@ -33,7 +33,7 @@ End NEWTYPE
 	ver$="1.0"
 
 .setup
-	##[$80C3]:FindScreen 0
+	WBStartup:FindScreen 0
 	remline 0,"topaz.font",8
 
 	newlocarr 0,0," Actions "
@@ -60,7 +60,7 @@ End NEWTYPE
 	NPrint "			And The Depth Of Your Working Screen."
 	WLocate 28,44:Print "Screen Mode:"
 	WLocate 268,44:Print "Depth:"
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If ev=$200 Then End
 		If ev=$40
@@ -71,11 +71,11 @@ End NEWTYPE
 				If Disable(0,2)=2 Then flag+4:height=512:more.b=100
 				depth=Val(GadgetPens(0,0))
 				If depth>8 Then depth=5
-				##[$80BE] ##[$80BB]: Goto mkscreen
+				Pop Repeat: Goto mkscreen
 			EndIf
 			FlushEvents
 		EndIf
-	##[$80C7]
+	Forever
 
 .getname
 	*f.rtFileRequester=##[$ED01] (0,0)
@@ -87,7 +87,7 @@ End NEWTYPE
 			x$=Mid$(reqstring$,t,1)
 			If x$<>" " AND x$<>Chr$(0) AND x$<>Chr$(10)
 				reqstring$=Mid$(reqstring$,1,t)
-				##[$80BE] For:Goto rtskp1
+				Pop For:Goto rtskp1
 			EndIf
 		Next
 		rtskp1:
@@ -96,7 +96,7 @@ End NEWTYPE
 			x$=Mid$(path$,t,1)
 			If x$<>" " AND x$<>Chr$(0) AND x$<>Chr$(10)
 				path$=Mid$(path$,1,t)
-				##[$80BE] For:Goto rtskp2
+				Pop For:Goto rtskp2
 			EndIf
 		Next
 		rtskp2:
@@ -136,7 +136,7 @@ End NEWTYPE
 	Print "X:		 Y:		"
 	arrmult 0
 	skp:
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If ev=8 AND EventWindow=0 AND maxshapes<>0
 			hotspotx=-(SMouseX-width/2)
@@ -154,7 +154,7 @@ End NEWTYPE
 							localstat 3,0,0,width,50,$1000,"Sys Request",1,2
 							Print "How Many Shapes ":maxshapes=Edit(4)
 							Free localstat 3
-							If maxshapes>##[$80C4] MidHandle-1 Then maxshape=##[$80C4] MidHandle-1
+							If maxshapes>Maximum MidHandle-1 Then maxshape=Maximum MidHandle-1
 							Use localstat 0
 							LoadShapes 0,fn$
 							currentshape=0
@@ -173,7 +173,7 @@ End NEWTYPE
 						Case 3
 							Gosub animation
 						Case 4
-							##[$80BE] ##[$80BB]
+							Pop Repeat
 							Free localstat 0:Free localstat 1
 							Free GadgetJam 0
 							Goto setup
@@ -239,29 +239,29 @@ End NEWTYPE
 				End Select
 				Gosub blitall
 		EndIf
-	##[$80C7]
+	Forever
 	End
 
 .linedown
 	Use localstat 0
-	##[$80BB]
+	Repeat
 		WLine 0,ref,width,ref,0
 		ref+1
 		If ref>height Then ref=height
 		WLine 0,ref,width,ref,1
 		VWait
-	##[$80BC] Joyb(0)=0
+	Until Joyb(0)=0
 	Return
 
 .lineup
 	Use localstat 0
-	##[$80BB]
+	Repeat
 		WLine 0,ref,width,ref,0
 		ref-1
 		If ref<12 Then ref=12
 		WLine 0,ref,width,ref,1
 		VWait
-	##[$80BC] Joyb(0)=0
+	Until Joyb(0)=0
 	Return
 
 .blitall
@@ -302,7 +302,7 @@ End NEWTYPE
 	WLocate 92,6:Print "To:"
 	WLocate 166,6:Print "Mode:"
 	WLocate 1,20:Print "Speed:"
-	##[$80BB]
+	Repeat
 		ev=WaitEvent
 		If ev=64
 			Select GadgetHit
@@ -314,10 +314,10 @@ End NEWTYPE
 					Free GadgetJam 1
 					Free lmaxlen 1
 					Free allocst 1
-					##[$80BE] ##[$80BB]:Goto skp
+					Pop Repeat:Goto skp
 			End Select
 		EndIf
-	##[$80C7]
+	Forever
 	Return
 
 .animate
@@ -327,7 +327,7 @@ End NEWTYPE
 	speed.w=Val(GadgetPens(1,4))
 	Use localstat 3
 	aaa=ShapeHeight(frm)
-	##[$80BB]
+	Repeat
 		If mde<>3
 			For t=frm To dest
 				VWait speed
@@ -348,5 +348,5 @@ End NEWTYPE
 				longdiv t,width/2,aaa
 			Next
 		EndIf
-	##[$80BC] Joyb(0)<>0
+	Until Joyb(0)<>0
 	Return

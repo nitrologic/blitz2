@@ -6,7 +6,7 @@
 snd.w=On:med.w=On
 
 pg$=""
-##[$80C3]
+WBStartup
 #bars=Off
 #errs=Off
 #collisions=On
@@ -235,7 +235,7 @@ Return
 
 	Dim pracbuf.b(4096):pcst.w=0:pcnd.w=0
 	Dim qsin(31),qcos(31)	 :; look up table for car motion
-	For cnt.w=0 To 31:qcos(cnt)=HCos(cnt/16*##[$80BA]):qsin(cnt)=HSin(cnt/16*##[$80BA]):Next
+	For cnt.w=0 To 31:qcos(cnt)=HCos(cnt/16*Pi):qsin(cnt)=HSin(cnt/16*Pi):Next
 	Dim sqlup.w(2048):sqlu.l=&sqlup(0)
 	For ii.f=0 To 2048:v.f=Tan(ii/4096)*65535:sqlup(ii)=v:Next
 
@@ -276,7 +276,7 @@ Return
 	#maxcols=11
 	Dim cols.carcol(#maxcols)
 
-	##[$80C8] ColMeIn
+	Restore ColMeIn
 	For i.w=0 To #maxcols
 		Read cols(i)\col[1]
 		Read cols(i)\col[2]
@@ -304,25 +304,25 @@ Return
 	For pl=0 To 3 :*p=Pl.car(pl)
 		\sprnum1=pl	:GetaSprite \sprnum1,0
 		\sprnum2=pl+4:GetaSprite \sprnum2,0
-		\spr1=Peek.l(##[$80B8] Sprite(\sprnum1))
-		\spr2=Peek.l(##[$80B8] Sprite(\sprnum2))
+		\spr1=Peek.l(Addr Sprite(\sprnum1))
+		\spr2=Peek.l(Addr Sprite(\sprnum2))
 	Next
 	Free MidHandle 0
 
 	LoadShape 47,g$+"flag.iff"
 
 	StopCycle 7,0,0,0,0:StopCycle 7,1,15,15,15
-	lmaxlen 7,1312,8,1:bmc.l=Peek.l(##[$80B8] lmaxlen(7)+8)
+	lmaxlen 7,1312,8,1:bmc.l=Peek.l(Addr lmaxlen(7)+8)
 	BitMapOutput 7:Locate 0,0:Colour 1,0
 	For c=32 To 32+#shapewid:Print Chr$(c):Next
-	GetaShape 99,0,0,#shapewid*8,8:shc.l=Peek.l (##[$80B8] MidHandle(99)+14)
+	GetaShape 99,0,0,#shapewid*8,8:shc.l=Peek.l (Addr MidHandle(99)+14)
 	Boxf 0,0,1312,8,0	;chat line
 	xxoff.w=64:narrow.w=0
 
 	If snd
 		LoadSound	3,g$+"Motor.IFF"
 		LoadSound	4,g$+"Beep.IFF"
-		sndper.w=Peek.w (##[$80B8] Sound(4) +4)
+		sndper.w=Peek.w (Addr Sound(4) +4)
 		LoadSound 10,g$+"Crash1.IFF"
 		LoadSound 11,g$+"Crash2.IFF"
 		LoadSound 12,g$+"Crash3.IFF"
@@ -437,11 +437,11 @@ CNIF #errs:##[$80D2]:CEND
 		If i AND $01 Then signl(e+7)=$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(##[$80B8] lmaxlen(signbmap)+8)
+	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
 	LoadShape signshape,g$+"sign.iff"
 	CopyShape signshape,signshape+1:XFlip signshape
-	dsign(0)=Peek.l(##[$80B8] MidHandle(signshape)+14)
-	dsign(1)=Peek.l(##[$80B8] MidHandle(signshape+1)+14)
+	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)
+	dsign(1)=Peek.l(Addr MidHandle(signshape+1)+14)
 Return
 
 
@@ -1195,7 +1195,7 @@ Return
 
 	If med Then StopMed
 	ClrInt 5:If twin Then ClrInt 11
-	##[$80BB]:##[$80BC] NOT RawStatus($45)
+	Repeat:Until NOT RawStatus($45)
 	BlitzKeys Off
 
 Return
@@ -1350,7 +1350,7 @@ Statement bounce{result.w,first.l,second.l}
 	here.w=Off ; in case we crash more than once?
 
 	result+16
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				here+bouncenew{*e,*par}
@@ -1361,7 +1361,7 @@ Statement bounce{result.w,first.l,second.l}
 		result ASR 1
 		*e+#hquad
 		*par\norm+16
-	##[$80BC] (result=1) ; OR (here=On)
+	Until (result=1) ; OR (here=On)
 	*par\norm=*par\norm AND 31
 	*par\boom=(here<0)
 End Statement	;end of bounce
@@ -1369,7 +1369,7 @@ End Statement	;end of bounce
 Statement Damage{result.w,first.l,second.l}
 	*e.quadratic=first:*par.parse=second
 
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				deli=*par\fi-*e\lc
@@ -1390,7 +1390,7 @@ Statement Damage{result.w,first.l,second.l}
 		EndIf	 ;noimpact
 		result ASR 1
 		*e+#hquad
-	##[$80BC] (result=0)
+	Until (result=0)
 End Statement	;end of Damage
 
 Statement pprint{bmc.l,shc.l,c.w}
@@ -1586,14 +1586,14 @@ Return
 		EndIf
 		newer=On
 	EndIf
-	##[$80BB]:##[$80BC] NOT RawStatus($45)
+	Repeat:Until NOT RawStatus($45)
 
 	wid.w=(#defx+84+64+40) AND $fff0
 	htg=#defy+50+16:hth.w=htg+72
 
 	Use lmaxlen 0:BitMapOutput 0
 	Use lmaxlen 4:BlockScroll:hymax.w=0
-	##[$80C8] Cred
+	Restore Cred
 
 	Use lmaxlen 0
 	chat.w=10:narrow.w=16
@@ -1613,7 +1613,7 @@ Return
 
 	VWait
 
-	##[$80BB]:##[$80BC] VPos>50
+	Repeat:Until VPos>50
 
 	MOVE.w #$e000,$dff106
 
@@ -1644,7 +1644,7 @@ Return
 	Use lmaxlen 0:selmen.w=0:Gosub ReDispMen
 
 	##[$80CA] *p:hymax=-50:level=14
-	##[$80BB]
+	Repeat
 		CNIF #bars
 			MOVE.w #$0f00,$dff180:For silly.w=0 To 2:Next:MOVE.w #$0444,$dff180
 		CEND
@@ -1746,7 +1746,7 @@ Return
 			button=Off
 		EndIf
 
-	##[$80BC] level<>14
+	Until level<>14
 	UnBuffer 0:UnBuffer 1:UnBuffer 2
 
 	connect.w=oplyrs>-1:twin=connect
@@ -1814,13 +1814,13 @@ Return
 		Locate 0,1
 		If quik<500
 			If quik>0
-				Print " ",Int(quik*0.02),".",(quik*0.2) ##[$80B9] 10
+				Print " ",Int(quik*0.02),".",(quik*0.2) MOD 10
 			Else
 				Print "--.-"
 			EndIf
 		Else
 			If quik<3000
-				Print Int(quik*0.02),".", (quik*0.2) ##[$80B9] 10
+				Print Int(quik*0.02),".", (quik*0.2) MOD 10
 			Else
 				Print "SLOW"
 			EndIf
@@ -1947,8 +1947,8 @@ End Statement
 			Else
 				Read top$
 			EndIf
-			If top$="-1" Then ##[$80C8] Cred:Read top$
-			qprint{&top$,##[$80B8] lmaxlen (4),##[$80B8] lmaxlen(24)}
+			If top$="-1" Then Restore Cred:Read top$
+			qprint{&top$,Addr lmaxlen (4),Addr lmaxlen(24)}
 			hymax.w=Len(top$) ASL 3
 		EndIf
 		Use lmaxlen signbmap:Scroll hy,0,32,16,0,0,4
@@ -2123,8 +2123,8 @@ End Macro
 
 .
 .Race
-hymax=0:##[$80C8] Cred
-##[$80BB]
+hymax=0:Restore Cred
+Repeat
 	CNIF #bars
 		MOVE.w #$0f00,$dff180:For silly.w=0 To 2:Next:MOVE.w #$0444,$dff180
 	CEND
@@ -2165,12 +2165,12 @@ hymax=0:##[$80C8] Cred
 				Case 2:top$="hijk"
 				Case 3:top$="defg"
 			End Select
-			qprint{&top$,##[$80B8] lmaxlen (4),##[$80B8] lmaxlen(24)}
+			qprint{&top$,Addr lmaxlen (4),Addr lmaxlen(24)}
 			Use lmaxlen signbmap
 			Scroll 32,0,32,16,0,0,4
-			If dum=3 Then Poke.w (##[$80B8] Sound(4) +4) , sndper ASL 1
+			If dum=3 Then Poke.w (Addr Sound(4) +4) , sndper ASL 1
 			If dum=0
-				Poke.w (##[$80B8] Sound(4) +4) , sndper
+				Poke.w (Addr Sound(4) +4) , sndper
 				*p0\idle=On:*p1\idle=On:*p2\idle=On:*p3\idle=On
 				*p0\drop=On:*p1\drop=On:*p2\drop=On:*p3\drop=On
 				*p0\cdn=-50:*p1\cdn=-50:*p2\cdn=-50:*p3\cdn=-50
@@ -2347,7 +2347,7 @@ hymax=0:##[$80C8] Cred
 	EndIf
 	Use lmaxlen 0
 
-##[$80BC] done
+Until done
 Volume 15,0,0,0,0
 If connect Then ClrInt 5
 Gosub DispTime
@@ -2679,13 +2679,13 @@ CEND
 		Locate 0,1
 		If quik<500
 			If quik>0
-				Print " ",Int(quik*0.02),".",(quik*0.2) ##[$80B9] 10
+				Print " ",Int(quik*0.02),".",(quik*0.2) MOD 10
 			Else
 				Print "--.-"
 			EndIf
 		Else
 			If quik<3000
-				Print Int(quik*0.02),".", (quik*0.2) ##[$80B9] 10
+				Print Int(quik*0.02),".", (quik*0.2) MOD 10
 			Else
 				Print "SLOW"
 			EndIf
@@ -2804,7 +2804,7 @@ Return
 		EndIf
 	EndIf
 
-	##[$80C9] \spr1,\spr2:##[$80C9] \sprnum1,\sprnum2
+	Exchange \spr1,\spr2:Exchange \sprnum1,\sprnum2
 	\dir+\rot:\head AND 31	:;	NB! \head.w=upper word of \dir.q
 	\qc=qcos(\head):\qs=qsin(\head)
 
@@ -2833,7 +2833,7 @@ Return
 	For pl=0 To 3
 		*p=Pl(pl)
 		\head=24 :\roll=2:\pitch=2
-		##[$80C9] \spr1,\spr2:##[$80C9] \sprnum1,\sprnum2
+		Exchange \spr1,\spr2:Exchange \sprnum1,\sprnum2
 		\qc=qcos(\head):\qs=qsin(\head)
 		\fr=\roll*160+\pitch ASL 5+\head
 
@@ -2867,15 +2867,15 @@ Return
 SetMod
 	Gosub InstSer:SetInt 5:tim.w+1:End SetInt			:; timeout for modem!
 	cop.w=tim.w+120
-	##[$80BB]
+	Repeat
 		VWait:writeser{$3f}
 		If cop<tim Then sr.w=$3f:done=On
-	##[$80BC] (sr=$70) OR (sr=$3f)
+	Until (sr=$70) OR (sr=$3f)
 	If NOT done
 		VWait 5:tv=$70:writeser{tv}:cop.w=tim.w+60
-		##[$80BB]
+		Repeat
 			If cop<tim Then sr=$70:done=On
-		##[$80BC] sr=$70
+		Until sr=$70
 	EndIf
 	If done Then connect=Off:twin=Off:ClrInt 5:done=On
 
@@ -2978,11 +2978,11 @@ Return
 .Pause
 
 	VWait 7:sr=-1
-	##[$80BB]
+	Repeat
 		VWait 3:cop-3
-		If cop<0 Then connect=Off:##[$80BE] Gosub:Goto Damage
+		If cop<0 Then connect=Off:Pop Gosub:Goto Damage
 		writesafer{29}
-	##[$80BC] (sr=29):sr=-1
+	Until (sr=29):sr=-1
 	VWait 7
 Return
 
@@ -2991,9 +2991,9 @@ Statement flash{col.q,bol.q}
 End Statement
 
 Damage
-##[$80BB]
+Repeat
 	flash{Rnd(32768),Rnd}
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 VWait 20:End ;unbelievably rude!
 
 

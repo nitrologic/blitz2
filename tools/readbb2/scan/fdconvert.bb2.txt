@@ -38,7 +38,7 @@ Shared bestlibnr.w
 		infoadr.l=##[$FE97](260,0)
 		If infoadr
 			ok=##[$FE0D](lock,infoadr)
-			##[$80BB]
+			Repeat
 				ok=##[$FE0E](lock,infoadr)
 				If ok AND Peek.l(infoadr+4)=-3 AND Instr(UCase$(Peek$(infoadr+8)),".INFO")=0
 						rfile$=dev$+Peek$(infoadr+8)
@@ -52,7 +52,7 @@ Shared bestlibnr.w
 							##[$FE02] fh
 						EndIf
 				EndIf
-			##[$80BC] ok=0
+			Until ok=0
 			##[$FE99] infoadr,260
 		EndIf
 		##[$FE0B](lock)
@@ -63,11 +63,11 @@ Shared bestlibnr.w
 	EndIf
 End Statement
 
-##[$80B4]
+SetErr
 	err
 	NPrint "USAGE: FDINFO filename [command suffix]"
 	MouseWait:End
-End ##[$80B4]
+End SetErr
 
 If NumPars<>1 AND NumPars<>2 Then Goto err
 
@@ -151,7 +151,7 @@ If nn=128
 	li+1
 	If ReadMem(0,dest$+li2$+Str$(li))=0
 		NPrint "Error creating File : ",li$+Str$(li)
-		##[$80BE] For:Return
+		Pop For:Return
 	EndIf
 	;
 	co$=Mkl$(0)+Mki$(ln(li))+String$(Chr$(0),20)

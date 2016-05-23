@@ -7,7 +7,7 @@ SWAP d1
 DIVU #103,d1
 LSR #1,d1
 AND.l #$ffff,d1
-##[$80BD] d1,a
+PutReg d1,a
 
 NPrint a
 

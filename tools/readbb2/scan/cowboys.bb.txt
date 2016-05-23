@@ -192,7 +192,7 @@ Statement startscreen{}
 	Wend
 End Statement
 ;-------------------------------------------
-##[$80BB]
+Repeat
 Colour 5,11
 startscreen{}
 FlushBuffer 0
@@ -210,7 +210,7 @@ fired2 = 0
 score1=0 : score2 = 0
 done = 0
 
-	##[$80BB]
+	Repeat
 		detectcoll{}
 		getinput{}
 		moveman{}
@@ -234,7 +234,7 @@ done = 0
 			b2x-8
 			If b2x <=2 Then fired2 = 0
 		EndIf
-	##[$80BC] done = 1
+	Until done = 1
 	ShapesBitMap db,1-db
-##[$80C7]
+Forever
 ;----------------------------------------------------------

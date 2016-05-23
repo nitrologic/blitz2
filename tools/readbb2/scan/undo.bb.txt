@@ -25,7 +25,7 @@ Next
 End
 
 swapblu:
-	ch.l=Peek.l(##[$80B8] ##[$A401](1))
+	ch.l=Peek.l(Addr ##[$A401](1))
 	For i.l=0 To 319
 		##[$FEDB] ch,Bank(0),1280
 		##[$FEDB] ch+1280*2,ch,1280

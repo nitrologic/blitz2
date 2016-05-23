@@ -53,7 +53,7 @@ Gosub ICOS
 Gosub blok
 Gosub mirr
 ;
-##[$80C8] cdat
+Restore cdat
 For lop=0 To 7
 		Read A,B,C
 		Green lop,A,B,C

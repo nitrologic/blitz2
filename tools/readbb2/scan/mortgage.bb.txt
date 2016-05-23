@@ -40,7 +40,7 @@
 
 
 ##[$80CC]
-##[$80C3]
+WBStartup
 ##[$FFB5]
 freest 0
 
@@ -65,19 +65,19 @@ remline 0,font$,fontsize:Use IntuiFont 0
 
 a$="Interest Rate (%)"							;THIS JUST TELLS ME HOW MANY
 text\IText=&a$											;PIXELS a$ IS SO I CAN ADJUST
-text\ITextFont=##[$80B8] IntuiFont(0)		;THE SIZE OF THE WINDOW AND
+text\ITextFont=Addr IntuiFont(0)		;THE SIZE OF THE WINDOW AND
 fxsize.l=##[$FFB3](text)-119 ;MOVE THE GADGETS TO TO RT
 
 
-##[$80B4]																;I USE THIS ERROR ROUTINE
-	 ##[$80BD] d0,err.l										;BECAUSE THE DEBUGGER DOES
+SetErr																;I USE THIS ERROR ROUTINE
+	 PutReg d0,err.l										;BECAUSE THE DEBUGGER DOES
 	 title$="ERROR:"										;NOT YET SUPPORT 31khz
 	 gadget$="OK"											 ;DISPLAYS
 	 req\es_Title=&title$,err,&gadget$
 	 ##[$FFDD] 0,req,0,0
 	 ##[$FFD2] 0,*wbscreen
 	 End
-End ##[$80B4]
+End SetErr
 
 ;MAKE SURE WORKBENCH IS TALL ENOUGH FOR OUR WINDOW (INCLUDING
 ;THEIR SCREEN FONT). IF IT IS NOT THEN SHOW REQUESTER AND

@@ -179,7 +179,7 @@ Dim bump.b(40,32)
 ; Startup Code (In AMIGA mode)
 ;----------------------------------------------------------------------
 
-##[$80C3]
+WBStartup
 ##[$80CC]
 
 AbsMouse 639,511
@@ -261,7 +261,7 @@ Statement FadeOff{rate}
 ;Fades all current colour registers to black in steps every "rate"
 ;v-syncs, stops as soon as all registers are black
 
-	##[$80BB]
+	Repeat
 		faded=True
 		VWait rate
 		For reg=0 To 15
@@ -270,7 +270,7 @@ Statement FadeOff{rate}
 			vblu=PalRGB(reg):If vblu Then vblu-1:faded=False
 			Green reg,vred,vgrn,vblu
 		Next reg
-	##[$80BC] faded
+	Until faded
 End Statement
 
 
@@ -315,10 +315,10 @@ Statement DoFadeUp{fade_bits,rate}
 Shared fader, maxfade
 
 fader=0
-	##[$80BB]
+	Repeat
 		VWait rate
 		FadeUp{fade_bits}
-	##[$80BC] fader>maxfade
+	Until fader>maxfade
 End Statement
 
 
@@ -347,10 +347,10 @@ Statement DoFadeDown{fade_bits,rate}
 Shared fader, maxfade
 
 fader=maxfade+1
-	##[$80BB]
+	Repeat
 		VWait rate
 		FadeDown{fade_bits}
-	##[$80BC] fader=0
+	Until fader=0
 End Statement
 
 
@@ -479,10 +479,10 @@ End Statement
 	;Err/Int code is NOT included if debug on as it messes up the debugger
 	CNIF #DEBUG=0
 
-		##[$80B4]
+		SetErr
 			ClrInt 5
-			##[$80B7]
-		End ##[$80B4]
+			ErrFail
+		End SetErr
 
 		SetInt 5
 			PlayMed
@@ -493,10 +493,10 @@ End Statement
 
 
 	Gosub Initialise
-	##[$80BB]
+	Repeat
 		Gosub Titles
 		If option=#START Then Gosub PlayGame
-	##[$80BC] option=#QUIT
+	Until option=#QUIT
 
 	ClrInt 5
 
@@ -574,7 +574,7 @@ Titles:
 	StartMedModule 0
 
 	option=0
-	##[$80BB]
+	Repeat
 		VWait
 		If delay
 			delay-1
@@ -794,7 +794,7 @@ Titles:
 
 		If waiting Then waiting-1 Else waiting=5:option=CheckStatus{}
 
-	##[$80BC] option>0
+	Until option>0
 
 	FadeOff{1}
 	DisplayOff
@@ -1550,9 +1550,9 @@ Return
 ;----------------------------------------------------------------------
 
 LevelOver:
-	##[$80BB]
+	Repeat
 		broom=Rnd(#NUM_BROOMS)
-	##[$80BC] broom<#NUM_BROOMS ;Just in case rnd goes funny !
+	Until broom<#NUM_BROOMS ;Just in case rnd goes funny !
 	*bonus=?bonus_data+broom*#SZ_BONUS
 
 	BlockScroll

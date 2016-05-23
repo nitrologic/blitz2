@@ -54,7 +54,7 @@ hi=304
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
 	blok2.l=Bank(1)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,f$+".iff",0
 	StopCycle 0,0,0,0,0
 	Use SetCycle 0

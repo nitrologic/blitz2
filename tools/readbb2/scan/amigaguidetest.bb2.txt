@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/Amigaguidetest.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/Amigaguidetest.bb2
-##[$80B4]
+SetErr
 	NPrint "somethings gone wrong"
 	MouseWait
-End ##[$80B4]
+End SetErr
 
 Include "amigaguide.i"
 

@@ -17,7 +17,7 @@ End SetInt
 Mouse On
 MouseArea 0,0,4096-320,256
 
-co=##[$80BA]*2/(256*3)
+co=Pi*2/(256*3)
 
 Green 1,10,10,10
 Green 2,0,0,0
@@ -56,9 +56,9 @@ more1
 If pl=0 AND pr>0	;left edge
 	;
 	x2=x:w=0
-	##[$80BB]
+	Repeat
 		x2+1 AND 4095:w+1
-	##[$80BC] Cls(x2,y)=0
+	Until Cls(x2,y)=0
 	;
 	w=Int(w LSR 1)
 	;
@@ -80,9 +80,9 @@ more2
 If pl>0 AND pr=0	;rite edge
 	;
 	x2=x:w=0
-	##[$80BB]
+	Repeat
 		x2-1 AND 4095:w+1
-	##[$80BC] Cls(x2,y)=0
+	Until Cls(x2,y)=0
 	;
 	w=Int(w LSR 1)
 	;

@@ -36,5 +36,5 @@ NPrint "Close me to exit!"
 
 ;wait for a 'close window' event...
 ;
-##[$80BB]
-##[$80BC] WaitEvent=512
+Repeat
+Until WaitEvent=512

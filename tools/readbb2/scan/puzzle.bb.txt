@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/PUZZLE/puzzle.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/PUZZLE/puzzle.bb
-##[$80C3]
+WBStartup
 
 .set_defaults
 
@@ -80,7 +80,7 @@ Next
 
 Gosub draw_default_cells
 move_number=0
-##[$80BB]
+Repeat
 	event_capture=WaitEvent
 	Use localstat EventWindow
 	Select event_capture
@@ -102,7 +102,7 @@ move_number=0
 
 	End Select
 
-##[$80BC] EventWindow=0 AND event_capture=$100	AND MenuHit=0	AND ItemHit=2
+Until EventWindow=0 AND event_capture=$100	AND MenuHit=0	AND ItemHit=2
 
 
 End

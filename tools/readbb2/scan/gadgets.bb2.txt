@@ -62,7 +62,7 @@ Use localstat 0
 
 ;our main loop...
 ;
-##[$80BB]
+Repeat
 
 	;wait for something to happen
 	;
@@ -80,4 +80,4 @@ Use localstat 0
 	Case 512	;close window
 		Free localstat EventWindow
 	End Select
-##[$80C7]
+Forever

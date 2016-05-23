@@ -3,7 +3,7 @@
 ; Nigels	Hookes Law Example ;
 ;============================;
 
-##[$80C3]
+WBStartup
 ##[$80CC]
 AutoCookie On
 
@@ -27,7 +27,7 @@ DEFTYPE.Object	Mass
 G.f=0.0010
 
 ;Used to convert rad to deg
-HPi.f=##[$80BA]/180.0
+HPi.f=Pi/180.0
 
 ;inertia ratio
 inertia.f=1.03
@@ -69,7 +69,7 @@ CreateDisplay 0
 DisplayBitMap 0,0
 DisplayPalette 0,0
 
-##[$80BB]
+Repeat
 	VWait
 
 	;Clear things
@@ -181,7 +181,7 @@ DisplayPalette 0,0
 	Mass\y+Mass\vy
 
 
-##[$80BC] Joyb(0)
+Until Joyb(0)
 
 AMIGA
 End

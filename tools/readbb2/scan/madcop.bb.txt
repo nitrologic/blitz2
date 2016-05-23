@@ -3,7 +3,7 @@
 BLITZ
 lmaxlen 0,640,200,2
 
-*mybm.bitmap=##[$80B8] lmaxlen(0)
+*mybm.bitmap=Addr lmaxlen(0)
 lbmptr0.l=*mybm\_data[0]
 lbmptr1.l=*mybm\_data[1]
 

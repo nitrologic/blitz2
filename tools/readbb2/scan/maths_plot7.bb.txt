@@ -37,7 +37,7 @@ dxdiff=udx-ldx:dydiff=udy-ldy
 dxstep=Sgn(dxdiff):dystep=Sgn(dydiff)
 
 l3:FlushEvents:Green 0,0,0,0:Green 1,11,0,0:Green 2,15,15,15
-##[$80BB]:##[$80BC] WaitEvent=$100
+Repeat:Until WaitEvent=$100
 mh.l=MenuHit:mi.l=ItemHit
 If mh=0
 	If mi=0
@@ -72,7 +72,7 @@ Goto l3
 l1:Green 0,0,0,0:For i=16 To 31:Green i,31-i,31-i,31-i:Next
 Use lmaxlen 0
 For i=ldx To udx Step dxstep:x.f=lx+(xdiff*(i-ldx))/dxdiff
-	If Joyb(1)<>0 Then ##[$80BE] For:Goto l3
+	If Joyb(1)<>0 Then Pop For:Goto l3
 	For j=ldy To udy Step dystep:y.f=uy-(ydiff*(j-ldy))/dydiff
 ;-------------------------------------------------------
 ;Insert any sort of weird function or algorithm here.
@@ -95,11 +95,11 @@ zoom:
 	FlushEvents
 	MouseWait
 	mx=WMouseX:my=WMouseY
-	##[$80BB]
+	Repeat
 		mx2=WMouseX:my2=WMouseY
 		Box mx,my,mx2,my2,-1
 		Box mx,my,mx2,my2,-1
-	##[$80BC] Joyb(0)=0
+	Until Joyb(0)=0
 	If MenuList(0,1,6):Box mx,my,mx2,my2,1:EndIf
 	If mx=mx2 OR my=my2 Then Return
 	newlx.f=lx+xdiff*(mx-ldx)/dxdiff
@@ -115,11 +115,11 @@ area:
 	FlushEvents
 	MouseWait
 	mx=WMouseX:my=WMouseY
-	##[$80BB]
+	Repeat
 		mx2=WMouseX:my2=WMouseY
 		Box mx,my,mx2,my2,-1
 		Box mx,my,mx2,my2,-1
-	##[$80BC] Joyb(0)=0
+	Until Joyb(0)=0
 	If MenuList(0,1,6):Box mx,my,mx2,my2,1:EndIf
 	If mx=mx2 OR my=my2 Then Return
 	ldx=mx:udx=mx2:ldy=my:udy=my2

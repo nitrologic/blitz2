@@ -430,7 +430,7 @@ If *broker_mp
 		EndIf
 
 		;Main loop
-		##[$80BB]
+		Repeat
 
 			;Wait for all signals (break, Commodity, Window)
 			sigrcvd=##[$FEAB](#SIGBREAKF_CTRL_C|cxsigflag|winsigflag)
@@ -439,7 +439,7 @@ If *broker_mp
 			If sigrcvd AND winsigflag
 
 				;Get all window-messages
-				##[$80BB]
+				Repeat
 
 					;Use GadTools-GetMsg here because we have GadTools-gadgets
 					*imsg=##[$F608](*mywindow\UserPort)
@@ -690,11 +690,11 @@ If *broker_mp
 					EndIf
 
 					;Loop until all window-messages processed
-				##[$80BC] *imsg=0
+				Until *imsg=0
 			EndIf
 
 			;Get all Commodity-messages
-			##[$80BB]
+			Repeat
 
 				; Get message from Commodity`s messageport
 				*msg=##[$FEB4](*broker_mp)
@@ -822,10 +822,10 @@ If *broker_mp
 				EndIf
 
 				;Loop until all message processed
-			##[$80BC] *msg=0
+			Until *msg=0
 
 			;Loop until no one wants to terminate us
-		##[$80BC] result=0
+		Until result=0
 
 		;Close window, terminate blanker, kill Commodity, free Nodes-RAM,
 		;free busypointerdata, free spritedata, free List-RAM
@@ -965,13 +965,13 @@ If blank=0
 
 			;Wait max. 5 sec for module`s port
 
-			##[$80BB]
+			Repeat
 				##[$FE1B] 10
 				##[$FE8C]
 				*port=##[$FEB7](&port$)
 				##[$FE8D]
 				cp+1
-			##[$80BC] cp=25 OR *port
+			Until cp=25 OR *port
 			##[$FE1B] 15
 			;Module`s port not found?
 			If *port=0
@@ -1196,23 +1196,23 @@ Return
 
 ;This routine clears the Commodity`s messageport
 .clearcxport
-##[$80BB]
+Repeat
 	*msg=##[$FEB4](*broker_mp)
 	If *msg
 		##[$FEB5] *msg
 	EndIf
-##[$80BC] *msg=0
+Until *msg=0
 Return
 
 ;This routine clears the window`s messageport
 .clearwinport
 If winsigflag
-	##[$80BB]
+	Repeat
 		*imsg=##[$F608](*mywindow\UserPort)
 		If *imsg
 			##[$F609] *imsg
 		EndIf
-	##[$80BC] *imsg=0
+	Until *imsg=0
 EndIf
 Return
 
@@ -1466,9 +1466,9 @@ If fh
 	If fh1
 		While ##[$FE32](fh,&buf$,70)
 			If UnLeft$(Peek$(&buf$),1)="*** BlitzBlank ***"
-				##[$80BB]
+				Repeat
 					e=##[$FE32](fh,&buf$,70)
-				##[$80BC] e=0 OR Left$(buf$,3)="***"
+				Until e=0 OR Left$(buf$,3)="***"
 				If e Then ##[$FE33] fh1,&buf$
 			Else
 				##[$FE33] fh1,&buf$

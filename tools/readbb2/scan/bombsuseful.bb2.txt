@@ -17,7 +17,7 @@ Shared theArrow.selectarrowtype()
 
 ; Initialize
 		For i.b=0 To 9
-				If i ##[$80B9] 2=0
+				If i MOD 2=0
 						theArrow(i)\xpos = 190
 				Else
 						theArrow(i)\xpos = 244
@@ -47,7 +47,7 @@ Shared theArrow.selectarrowtype()
 ; Now follows a simple event loop
 		*biptr\ev = 0
 		keep.b=True
-		##[$80BB]
+		Repeat
 				Gosub DrawArrows
 				Gosub MinWidth
 				Gosub MaxWidth
@@ -80,7 +80,7 @@ Shared theArrow.selectarrowtype()
 					Default
 						Goto SettingsEvents
 				End Select
-		##[$80BC] NOT keep
+		Until NOT keep
 
 ; Get out of here
 		Free localstat 2
@@ -159,7 +159,7 @@ DrawArrows
 				Else
 						WBox \xpos,\ypos, \xpos+9,\ypos+9, 0
 				End If
-				If i ##[$80B9] 2=0
+				If i MOD 2=0
 						WBlit 22, \xpos,\ypos
 				Else
 						WBlit 27, \xpos,\ypos
@@ -316,13 +316,13 @@ Statement PlaceBombs{ *bombptr.gameVars}
 		\totalBombs = \totalSquares * \percentageBombs / 100
 ; Place the bombs
 		i = 0
-		##[$80BB]
+		Repeat
 				rndnum = !Random{ 1, \totalSquares+1}
 				If \square[rndnum]\hasBomb=0
 						\square[rndnum]\hasBomb = \bombs\typenr
 						i=i+1
 				End If
-		##[$80BC] i=\totalBombs
+		Until i=\totalBombs
 End Statement	; PlaceBombs
 
 ; =======================================
@@ -334,7 +334,7 @@ Function.b CheckTopLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the top-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1) AND (num>\wide)
+		If (num MOD \wide<>1) AND (num>\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num-1-\wide]\hasBomb<0 Then Function Return 1
@@ -374,7 +374,7 @@ Function.b CheckTopRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the top-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0) AND (num>\wide)
+		If (num MOD \wide<>0) AND (num>\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num+1-\wide]\hasBomb<0 Then Function Return 1
@@ -394,7 +394,7 @@ Function CheckLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1)
+		If (num MOD \wide<>1)
 				Select mode
 					Case #peekBomb
 						If \square[num-1]\hasBomb<0 Then Function Return 1
@@ -414,7 +414,7 @@ Function CheckRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0)
+		If (num MOD \wide<>0)
 				Select mode
 					Case #peekBomb
 						If \square[num+1]\hasBomb<0 Then Function Return 1
@@ -434,7 +434,7 @@ Function CheckBottomLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the bottom-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1) AND (num<=\totalSquares-\wide)
+		If (num MOD \wide<>1) AND (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num-1+\wide]\hasBomb<0 Then Function Return 1
@@ -474,7 +474,7 @@ Function CheckBottomRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the bottom-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0) AND (num<\totalSquares-\wide)
+		If (num MOD \wide<>0) AND (num<\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num+1+\wide]\hasBomb<0 Then Function Return 1
@@ -604,7 +604,7 @@ UpdateTime
 		If \gameInProgress=1
 				VWait
 				\timeInProgress = \timeInProgress + 1
-				If \timeInProgress ##[$80B9] #oneSecDelay=0
+				If \timeInProgress MOD #oneSecDelay=0
 ; Time to display another second lapsed
 						timeStr$ = Str$(\timeInProgress/#oneSecDelay)
 						length.w = Len(timeStr$)
@@ -632,9 +632,9 @@ ShowAllBombs
 		For i.l=1 To \totalSquares
 				If \square[i]\hasBomb<0
 						If \square[i]\state=0 Then \square[i]\state = 2
-						xpos = \displayXCoord+(((i-1) ##[$80B9] \wide)-\leftWide)*10
+						xpos = \displayXCoord+(((i-1) MOD \wide)-\leftWide)*10
 						ypos = \displayYCoord+(i/\wide-\leftHigh)*10
-						If i ##[$80B9] \wide=0 Then ypos = ypos - 10
+						If i MOD \wide=0 Then ypos = ypos - 10
 						If \square[i]\state=4
 								\square[i]\hasBomb = 13
 								\square[i]\state = 2
@@ -955,9 +955,9 @@ SquareChecks
 						If (\square[i]\hasBomb<0) AND (\square[i]\state=0)
 								\square[i]\state = 4
 								\markedBombs = \markedBombs + 1
-								xpos = \displayXCoord+(((i-1) ##[$80B9] \wide)-\leftWide)*10
+								xpos = \displayXCoord+(((i-1) MOD \wide)-\leftWide)*10
 								ypos = \displayYCoord+(i/\wide-\leftHigh)*10
-								If i ##[$80B9] \wide=0 Then ypos = ypos - 10
+								If i MOD \wide=0 Then ypos = ypos - 10
 								DrawSquare{ *bombptr, 11, xpos, ypos}
 						End If
 				Next i
@@ -995,9 +995,9 @@ FloodGrid
 		hold(1)\num = num
 		hold(1)\hasBomb = 0
 ; CHANGE THE \xpos AND \ypos TO COORDINATES OF THE SQUARE RATHER THAN THE MOUSE-CLICK
-		hold(1)\xpos = \displayXCoord+(((num-1) ##[$80B9] \wide)-\leftWide)*10
+		hold(1)\xpos = \displayXCoord+(((num-1) MOD \wide)-\leftWide)*10
 		hold(1)\ypos = \displayYCoord+(num/\wide-\leftHigh)*10
-		If num ##[$80B9] \wide=0 Then hold(1)\ypos = hold(1)\ypos - 10
+		If num MOD \wide=0 Then hold(1)\ypos = hold(1)\ypos - 10
 		\openedSquares = \openedSquares + 1
 		\square[hold(1)\num]\state = 2
 		DrawSquare{ *bombptr, $EF, hold(1)\xpos, hold(1)\ypos}
@@ -1669,10 +1669,10 @@ Statement TheGame{ *bombptr.gameVars, *biptr.OSInput}
 		Menus Off
 		keep.b=True
 		FlushEvents
-		##[$80BB]
+		Repeat
 				GetGameInput{ *biptr}
 				Gosub GameEvents
-		##[$80BC] NOT keep
+		Until NOT keep
 		Menus On
 		FreeupDisplay{ *bombptr}
 		Statement Return

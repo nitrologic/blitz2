@@ -36,9 +36,9 @@ DisplayPalette 0,0
 DisplayBitMap 0,0
 CreateDisplay 0
 
-##[$80BB]
+Repeat
 r=0:sc=0
-##[$80BB]
+Repeat
 	For deh=0 To 720 Step 24
 		For sup=0 To 21 Step 3
 		VWait
@@ -54,8 +54,8 @@ r=0:sc=0
 	 sc=0
 	Next deh
 r=r+16
-##[$80BC] r>720
-##[$80BC] Joyb(0)=1
+Until r>720
+Until Joyb(0)=1
 AMIGA
 End
 makeshape:

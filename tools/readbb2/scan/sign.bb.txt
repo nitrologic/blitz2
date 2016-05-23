@@ -81,9 +81,9 @@ initsign:
 		If i AND $01 Then signl(e+7)=$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(##[$80B8] lmaxlen(signbmap)+8)
+	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
 	LoadShape signshape,"sign.iff"
 	CopyShape signshape,signshape+1:XFlip signshape
-	dsign(0)=Peek.l(##[$80B8] MidHandle(signshape)+14)
-	dsign(1)=Peek.l(##[$80B8] MidHandle(signshape+1)+14)
+	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)
+	dsign(1)=Peek.l(Addr MidHandle(signshape+1)+14)
 	Return

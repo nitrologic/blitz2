@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/blackboard/Blackboard.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/blackboard/Blackboard.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/blackboard/Blackboard.bb2
-##[$80B4]:End:End ##[$80B4]
+SetErr:End:End SetErr
 
-##[$80C3]
+WBStartup
 
 ##[$80CC]
 
@@ -91,7 +91,7 @@ arrmult 0
 WinXsrt=WindowX : WinYsrt=WindowY
 WinXstp=WinXsrt+InnerWidth : WinYstp=WinYsrt+InnerHeight
 
-##[$80BB]
+Repeat
 
 While Active = False
  WEvent.l = WaitEvent
@@ -280,7 +280,7 @@ EndIf
 
 BitMaptoWindow 0,0
 
-##[$80BC] WEvent = $200
+Until WEvent = $200
 
 Free localstat 0
 Free lmaxlen 0

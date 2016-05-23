@@ -184,7 +184,7 @@ Shared d_e()
 ##[$FE8C]
 If AddLast(d_e())
 	d_e()\t=t
-	MOVE bufferput(pc),d0:SUBQ #4,d0:AND #buffand,d0:##[$80BD] d0,d_e()\i
+	MOVE bufferput(pc),d0:SUBQ #4,d0:AND #buffand,d0:PutReg d0,d_e()\i
 	d_e()\s=s$
 EndIf
 ##[$FE8D]
@@ -215,12 +215,12 @@ ADDQ #4,bufferput:ANDI #buffand,bufferput
 MOVE.l statego_(pc),a1:TST (a1):RTS
 
 d_superhandler
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 Gosub stopit:add_event{0,Peek$(sa)}
 RTS
 
 d_userhandler
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 Gosub stopit:add_event{1,Peek$(sa)}
 RTS
 
@@ -238,7 +238,7 @@ RTS
 
 d_evalhandler
 ;
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 add_event{2,Peek$(sa)}
 RTS
 
@@ -260,7 +260,7 @@ CNIF #test=0
 d_sethandler{}
 CEND
 
-##[$80BB]
+Repeat
 Gosub getevent
 Select ev
 Case 2	;newsize
@@ -328,7 +328,7 @@ Case 1024
 		EndIf
 	End Select
 End Select
-##[$80C7]
+Forever
 
 .backoff
 If pb
@@ -391,7 +391,7 @@ MOVE.l d_dadd(pc),a1:!d_call{3}:SUB.l d_dadd(pc),a1:SUBQ #1,a1
 MOVE.l d_dadd(pc),a0:MOVE.l a1,-(a0)
 ;
 If i2=cil
-	GetReg a0,i2+9:GetReg d0,cio:!d_call{7}:##[$80BD] d0,cio2
+	GetReg a0,i2+9:GetReg d0,cio:!d_call{7}:PutReg d0,cio2
 	d_d$=Left$(d_d$,cio2)+" "+Mid$(d_d$,cio2+1)
 EndIf
 ;
@@ -417,14 +417,14 @@ Return
 .initgads
 StringText$ 2,2:SetString 2,1
 gx=4:gn=1
-##[$80BB]
+Repeat
 	Read t$
 	If t$<>""
 		gf=0:If gn=10 Then gf=1
 		workstart 0,gx,11,gf,gn,t$:gx+Len(t$)LSL 3+4
 		gn+1
 	EndIf
-##[$80BC] t$=""
+Until t$=""
 StringText$ Off
 StringGadget 1,8,12,8,1,256,-16
 Return
@@ -433,7 +433,7 @@ Data$ "BRK","STP","SKP","TRC","RUN","<<",">>","EXC","EVL"
 Data$ ""
 
 findsc
-FindScreen 0:s0=Peek.l(##[$80B8] allocst(0))
+FindScreen 0:s0=Peek.l(Addr allocst(0))
 sw=Peek.w(s0+12):sh=Peek.w(s0+14)
 Return
 
@@ -451,14 +451,14 @@ GadgetList 1,1
 localstat 1,x,y,w,h,$1000,t$,1,0,1
 ClearString 1,1
 ;
-##[$80BB]
+Repeat
 	ev2.l=WaitEvent
-##[$80BC] ev2=64 AND EventWindow=1
+Until ev2=64 AND EventWindow=1
 ;
 Free localstat 1:Use localstat 0:t$=GadgetPens(1,1):Return
 
 .openwindow
-localstat 0,wx,wy,ww,wh,$f,"Blitz 2 DBUG",1,0,0:w0=Peek.l(##[$80B8] localstat(0))
+localstat 0,wx,wy,ww,wh,$f,"Blitz 2 DBUG",1,0,0:w0=Peek.l(Addr localstat(0))
 .newsize
 ix=WLeftOff:iy=WTopOff+12:iw=InnerWidth:ih=InnerHeight-20
 cw=iw LSR 3:ch=ih LSR 3
@@ -471,7 +471,7 @@ prtcode=-1:stepcnt=0:dstatus=2:statego=-1
 Return
 
 .getevent
-##[$80BB]
+Repeat
 	While locfree(d_e())
 		Select d_e()\t
 		Case 0	;supervisor mode error!
@@ -489,7 +489,7 @@ Return
 		MaxLen d_e()\s=0:freelast d_e()
 	Wend
 	ev=Event:If ev=0 Then ##[$FF29]
-##[$80BC] ev
+Until ev
 Return
 
 .goterr:

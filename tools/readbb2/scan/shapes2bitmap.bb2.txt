@@ -1,12 +1,12 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Other_Stuff/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/Shapes2Bitmap.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Other_Stuff/Shapes2Bitmap.bb2
 LoadShapes 0,"DH1:Deadly/FONT.SHAPES"
 casestrcomp 0,"Dh1:Deadly/Graficos/LETRAS"
-First_Shape.w=0: End_Shape.w=##[$80C4] MidHandle-1
+First_Shape.w=0: End_Shape.w=Maximum MidHandle-1
 
 Start:
 	s.w=First_Shape: s0.w=s: x.w=1: Bitmap_Height.w=2
 	While s<=End_Shape
-		*My_Shape.shape=##[$80B8] MidHandle(s)
+		*My_Shape.shape=Addr MidHandle(s)
 		Shape_Width.w=*My_Shape\_pixwidth
 		If Shape_Width
 			Shape_Width+1: *My_Shape\_xhandle=0: *My_Shape\_yhandle=0
@@ -25,7 +25,7 @@ Start:
 IncBmpH:
 	YMax.w=0
 	For i.w=s0 To s-1
-		*My_Shape.shape=##[$80B8] MidHandle(i)
+		*My_Shape.shape=Addr MidHandle(i)
 		If *My_Shape\_pixwidth
 			If *My_Shape\_pixheight>YMax Then YMax=*My_Shape\_pixheight
 		EndIf

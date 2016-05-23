@@ -51,13 +51,13 @@ End Statement
 
 	##[$CD10] 0,8,8,4
 	CludgeBitMap 0,1:Use lmaxlen 1:Boxf 0,0,7,7,2:MakeCookie 0:Use lmaxlen 0
-	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 main:
 	BLITZ
 	BlockScroll 1
 	CreateDisplay 0
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 
 	Mouse On
 	MouseArea 0,0,767,383
@@ -173,7 +173,7 @@ End Function
 
 .blockout:
 
-##[$80C8] fix
+Restore fix
 Read trak
 While trak<>0
 	t$="rod/track.fix"+Str$(trak)
@@ -203,7 +203,7 @@ LoadBitMap 0,t$,0
 InitBank 0,64,0
 InitBank 1,8192*32,65536
 n.w=0:nn.w=0
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 
 Dim wind.w(95,47)
 Dim first.w(95,47)
@@ -381,8 +381,8 @@ Dim circx.q(20),circy.q(20) ;for Linef{}
 
 scalfac=.75
 For temp.q=0 To 14
-	circx(temp)=HSin(temp*##[$80BA]/30)*3*scalfac
-	circy(temp)=HCos(temp*##[$80BA]/30)*1.5*scalfac
+	circx(temp)=HSin(temp*Pi/30)*3*scalfac
+	circy(temp)=HCos(temp*Pi/30)*1.5*scalfac
 Next
 
 dt.w=0:shap.b=0:sx=100:sy=100:fi=10:fj=10:origh=100
@@ -493,7 +493,7 @@ Return
 
 .Main
 	jstp=1/16/.75
-	myscal=2/##[$80BA]
+	myscal=2/Pi
 	Use lmaxlen 1 ;only 6 bitplane plotting
 
 		For delj=32 To -32 Step -jstp
@@ -509,7 +509,7 @@ Return
 			If miny<0 Then miny=0
 
 
-			##[$80BB]
+			Repeat
 				jj=ii+delj
 				y=MapY(ii,jj)*.75
 
@@ -532,7 +532,7 @@ Return
 
 				ii+istp
 
-			##[$80BC] (miny>bigy) OR (ii>63.5) OR (jj>63.5)
+			Until (miny>bigy) OR (ii>63.5) OR (jj>63.5)
 			If Joyb(0)<>0 Then End
 		Next
 Return

@@ -66,13 +66,13 @@ End Function
 allocst 0,1
 ScreensBitMap 0,0
 BlockScroll 1
-bm.l=Peek.l(##[$80B8] lmaxlen(0)+8)+320
+bm.l=Peek.l(Addr lmaxlen(0)+8)+320
 BitMapOutput 0:Locate 20,0
 
-##[$80BB]
-	ang=SMouseX/320*##[$80BA]
+Repeat
+	ang=SMouseX/320*Pi
 	For mine.w=0 To 3
-		angplus=ang+mine*##[$80BA]/2;1.5
+		angplus=ang+mine*Pi/2;1.5
 ;		temp=
 		Poke.w ?mypoly+mine*4	,(HSin(angplus)+1.5)*8
 		Poke.w ?mypoly+mine*4+2,(-HCos(angplus)+1.5)*8
@@ -86,7 +86,7 @@ BitMapOutput 0:Locate 20,0
 ;	Polyf 4,?mypoly,1
 ;	VWait
 
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 MouseWait
 End
 

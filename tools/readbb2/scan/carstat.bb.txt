@@ -10,7 +10,7 @@ gearrat=2.66
 erpm=1000
 
 
-wheelcir=##[$80BA]*wheeldia
+wheelcir=Pi*wheeldia
 
 wheelrpm=1/(gearrat/erpm)
 

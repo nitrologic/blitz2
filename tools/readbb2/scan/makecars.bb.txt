@@ -32,7 +32,7 @@ Goto dostart
 	allocst 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,"billboard.iff",0
 	Use SetCycle 0
 
@@ -56,7 +56,7 @@ Goto dostart
 	allocst 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,"animsprites.iff",0
 	Use SetCycle 0
 	ReMap 2,0
@@ -87,7 +87,7 @@ Goto dostart
 	allocst 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,"tags.iff",0
 	Use SetCycle 0
 
@@ -139,7 +139,7 @@ End Statement
 	allocst 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadShapes 0,"cars.shapes"
 	casestrcomp 0,"cars.iff"
 	Use SetCycle 0

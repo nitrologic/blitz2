@@ -30,7 +30,7 @@ Green 1,15,15,15
 Green 2,8,8,8
 Green 3,13,13,13
 ;
-##[$80C8] copcol
+Restore copcol
 YCOP=15
 For LOP=0 To 46
 Read a,b,c

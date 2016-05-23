@@ -57,7 +57,7 @@ builddisplay:
 	Box 0,0,319,255,1
 	Box 0,2,#chw*2.5+2,#chh*2+3,1
 	InitCopList 0,44,256,$13007,8,256,#chh*#chc
-	cp.l=##[$80B8] CopList(0):buildcopper{cp}
+	cp.l=Addr CopList(0):buildcopper{cp}
 
 ;	For y=0 To #chh-1:For x=0 To #chw-1:cplot {cp,x,y,Rnd(4096)}:Next:Next
 
@@ -71,7 +71,7 @@ goforit:
 	 For i=1 To 800; Step 4
 		 f$="porsche.pix/"+Right$(Str$(10000+i),4)
 		 ##[$A404] 0,f$:##[$A40B] 0,1,120:##[$A40A] 1,0,92
-		 showchunky{cp,##[$80B8] ##[$A401](0)}
+		 showchunky{cp,Addr ##[$A401](0)}
 		 If Joyb(0)<>0 Then End
 	 Next
 

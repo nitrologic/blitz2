@@ -42,13 +42,13 @@ For I=1 To NUMLINES
 Next
 
 .REDO
-##[$80C8] PATDATA
+Restore PATDATA
 .NUPAT
 Read XI,YI,XI2,YI2,X2,Y2,X,Y
 If XI=999 Then Goto REDO
 T=0
 
-##[$80BB]
+Repeat
 	VWait
 	Show DB
 	DB=1-DB
@@ -67,7 +67,7 @@ T=0
 	T=T+1
 
 	If Joyb(0)>0 Then End
-##[$80BC] T=time
+Until T=time
 
 Use lmaxlen 0 : BlockScroll
 Use lmaxlen 1 : BlockScroll

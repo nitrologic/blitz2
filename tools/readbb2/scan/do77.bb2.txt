@@ -4,7 +4,7 @@
 ; Based on the classic arcade game Mr. Do
 ;
 
-##[$80C3]
+WBStartup
 ##[$80CC]
 ##[$80CB]
 
@@ -242,8 +242,8 @@ Data$	"Hew","Pew","Barney McGrew","Cuthbert"
 Data$	"Dibble","Offenbach"
 
 .RealStart
-##[$80C8] ScoreTable:For i=0 To 9:Read	HighScore(i):Next
-##[$80C8] ScoreName :For i=0 To 9:Read	HighName$(i):Next
+Restore ScoreTable:For i=0 To 9:Read	HighScore(i):Next
+Restore ScoreName :For i=0 To 9:Read	HighName$(i):Next
 Gosub SortScore
 
 NoOfPlayers=0
@@ -293,7 +293,7 @@ While NOT EndGame
 	Use lmaxlen 0
 	longdiv 206,160,20
 
-	If EndGame : ##[$80BE] While : Goto ImOutaHere : EndIf
+	If EndGame : Pop While : Goto ImOutaHere : EndIf
 
 	For i=0 To 9
 		Locate 6,6+i*2
@@ -1957,17 +1957,17 @@ While globfree(Ump())
 			Case 1:
 				If *U\ImList=UPshLft OR *U\ImList=UPshRgt
 					If NOT SpritesHit(II,XX,YY,49,*A\x,*A\y)
-						##[$80BE] Select
+						Pop Select
 						Goto AUover
 					 EndIf
 				Else
 					If NOT PColl(XX,YY,16,16,*A\x,*A\y,16,16)
-						##[$80BE] Select
+						Pop Select
 						Goto AUover
 					EndIf
 				EndIf
 
-				If(Ump()\CurDir AND $C)=0:##[$80BE] Select : Goto AUover :EndIf
+				If(Ump()\CurDir AND $C)=0:Pop Select : Goto AUover :EndIf
 
 				Select(App()\CurDir)
 					Case 4
@@ -1978,7 +1978,7 @@ While globfree(Ump())
 							*U\x =*A\x+DX*10
 							Ump()\Action=5
 							Ump()\OldAction=5
-							##[$80BE] Select:##[$80BE] Select:Goto Uover
+							Pop Select:Pop Select:Goto Uover
 						EndIf
 						*U\ImList=UPshRgt:DX=-1:CM=2:OM=3
 					 Case 8
@@ -1989,7 +1989,7 @@ While globfree(Ump())
 							*U\x =*A\x+DX*10
 							Ump()\Action=5
 							Ump()\OldAction=5
-							##[$80BE] Select:##[$80BE] Select:Goto Uover
+							Pop Select:Pop Select:Goto Uover
 						EndIf
 						*U\ImList=UPshLft:DX= 1:CM=3:OM=2
 				End Select
@@ -2026,7 +2026,7 @@ While globfree(Ump())
 
 			Default:
 				If NOT SpritesHit(II,XX,YY,49,*A\x,*A\y)
-					##[$80BE] Select
+					Pop Select
 					Goto AUover
 				EndIf
 				##[$80CA] *U
@@ -2374,7 +2374,7 @@ While globfree(App())
 		Case 1
 
 			If NOT	PColl(*A\x-8,*A\y-8,16,16,MrDo\S\x-8,MrDo\S\y-8,16,16)
-				##[$80BE] Select
+				Pop Select
 				Goto DoOver
 			EndIf
 
@@ -2402,7 +2402,7 @@ While globfree(App())
 						EndIf
 					EndIf
 				EndIf
-				##[$80BE] Select
+				Pop Select
 				Goto DoOver
 			EndIf
 
@@ -2555,7 +2555,7 @@ Select(Joy)
 			End Select
 		EndIf
 		SCount=0
-		##[$80BE] Select
+		Pop Select
 		Return
 End Select
 
@@ -3119,11 +3119,11 @@ Return
 ;************************************************
 
 Select MPNO
-	Case 0:##[$80C8] MAP0	:	Case 1:##[$80C8] MAP1
-	Case 2:##[$80C8] MAP2	:	Case 3:##[$80C8] MAP3
-	Case 4:##[$80C8] MAP4	:	Case 5:##[$80C8] MAP5
-	Case 6:##[$80C8] MAP6	:	Case 7:##[$80C8] MAP7
-	Case 8:##[$80C8] MAP8	:	Case 9:##[$80C8] MAP9
+	Case 0:Restore MAP0	:	Case 1:Restore MAP1
+	Case 2:Restore MAP2	:	Case 3:Restore MAP3
+	Case 4:Restore MAP4	:	Case 5:Restore MAP5
+	Case 6:Restore MAP6	:	Case 7:Restore MAP7
+	Case 8:Restore MAP8	:	Case 9:Restore MAP9
  End Select
 
 Return

@@ -17,14 +17,14 @@ Function.q catan{a.q,b.q}
 	Select Sgn(b)
 	Case 0
 		If a>0
-			ang=##[$80BA]/2
+			ang=Pi/2
 		Else
-			ang=-##[$80BA]/2
+			ang=-Pi/2
 		EndIf
 	Case 1
 		ang=Cos(a/b)
 	Case -1
-		ang=Cos(a/b)+##[$80BA]
+		ang=Cos(a/b)+Pi
 	End Select
 
 
@@ -166,12 +166,12 @@ Next
 c(0,0)=1:c(1,1)=1:c(2,2)=1
 
 
-scalfac=128/##[$80BA]
+scalfac=128/Pi
 convfac=1/scalfac
 
-pass1=(QWrap(num1,0,2*##[$80BA])*scalfac)
-pass2=(QWrap(num2,0,2*##[$80BA])*scalfac)
-pass3=(QWrap(num3,0,2*##[$80BA])*scalfac)
+pass1=(QWrap(num1,0,2*Pi)*scalfac)
+pass2=(QWrap(num2,0,2*Pi)*scalfac)
+pass3=(QWrap(num3,0,2*Pi)*scalfac)
 pass1&255
 pass2&255
 pass3&255
@@ -283,7 +283,7 @@ Statement order{}	;call me before attempting to draw anything
 
 	For cnt.w=0 To edge
 		*e.edge=edge(cnt)
-		If *e\a>*e\b Then ##[$80C9] *e\a,*e\b
+		If *e\a>*e\b Then Exchange *e\a,*e\b
 	Next
 
 	DEFTYPE .pnts vec1,vec2,vec3
@@ -294,14 +294,14 @@ Statement order{}	;call me before attempting to draw anything
 		*e2.edge=edge(*f\b)
 		*e3.edge=edge(*f\c)
 
-		If *e1\b>*e2\b Then ##[$80C9] *e1,*e2:##[$80C9] *f\a,*f\b
-		If *e1\a>*e2\a Then ##[$80C9] *e1,*e2:##[$80C9] *f\a,*f\b
+		If *e1\b>*e2\b Then Exchange *e1,*e2:Exchange *f\a,*f\b
+		If *e1\a>*e2\a Then Exchange *e1,*e2:Exchange *f\a,*f\b
 
-		If *e1\b>*e3\b Then ##[$80C9] *e1,*e3:##[$80C9] *f\a,*f\c
-		If *e1\a>*e3\a Then ##[$80C9] *e1,*e3:##[$80C9] *f\a,*f\c
+		If *e1\b>*e3\b Then Exchange *e1,*e3:Exchange *f\a,*f\c
+		If *e1\a>*e3\a Then Exchange *e1,*e3:Exchange *f\a,*f\c
 
-		If *e2\b>*e3\b Then ##[$80C9] *e2,*e3:##[$80C9] *f\b,*f\c
-		If *e2\a>*e3\a Then ##[$80C9] *e2,*e3:##[$80C9] *f\b,*f\c
+		If *e2\b>*e3\b Then Exchange *e2,*e3:Exchange *f\b,*f\c
+		If *e2\a>*e3\a Then Exchange *e2,*e3:Exchange *f\b,*f\c
 
 CNIF #solid
 		minus{&vec1.pnts,&pnts(*e1\a),&pnts(*e1\b)}

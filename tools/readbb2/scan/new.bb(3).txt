@@ -99,7 +99,7 @@ Statement Safe{}
 	CEND
 	CNIF #c=#a
 		For cnt.w=0 To 15
-			VWait:##[$80BB]:##[$80BC] VPos>50:Poke.w $dff180,cnt
+			VWait:Repeat:Until VPos>50:Poke.w $dff180,cnt
 		Next
 		MouseWait
 	CEND
@@ -178,7 +178,7 @@ Gosub InitMem
 Gosub InitVars
 
 CNIF #title
-	##[$80BB]
+	Repeat
 		Gosub SetUpTitle
 		Gosub DoTitle
 		If count.w>30000
@@ -189,7 +189,7 @@ CNIF #title
 		Else
 			Gosub DoAttract
 		EndIf
-	##[$80BC] 1=0
+	Until 1=0
 CEND
 
 
@@ -202,7 +202,7 @@ CELSE
 
 	lapdir.w=-1
 	bigdone.w=Off
-	##[$80BB]
+	Repeat
 		Gosub GetNewTrack
 
 		Gosub SetUpWorld
@@ -210,7 +210,7 @@ CELSE
 		Gosub SkidMain
 		mytrk.w=mytrk.w+1
 		If mytrk=24 Then mytrk=0
-	##[$80BC] bigdone
+	Until bigdone
 
 ;	End
 CEND
@@ -712,20 +712,20 @@ End Function
 
 Function.l GetMem32{size.l}
 	CNIF #c=#j
-		MOVEQ #0,d1:ADD.l #16,d0:##[$80C2] $c002
+		MOVEQ #0,d1:ADD.l #16,d0:SysJsr $c002
 
 		ADD.l #31,d0
 		AND #$ffe0,d0
 		AsmExit
 	CELSE
-		MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+		MOVEQ #0,d1:SysJsr $c002:AsmExit
 	CEND
 End Function
 
 
 
 Function.l GetMem{size.l}
-	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
 End Function
 
 
@@ -1343,11 +1343,11 @@ Statement remapstring{id1.w,l.w,id2.w}
 	Shared charb(),nxlink
 
 	done.w=0:insert=-1
-	##[$80BB]
+	Repeat
 		insert+1
 		If charb(insert)\id=id1 Then done=1
 		If insert=nxlink Then done=2
-	##[$80BC] done<>0
+	Until done<>0
 
 	If done=1
 		For i=0 To l-1
@@ -1373,11 +1373,11 @@ Statement addstring{id.w,charbase.l,l.w,col.w}
 	Shared chara(),charb(),fsize.l,nxlink.w,rsd.q
 
 	done.w=0:insert=-1
-	##[$80BB]
+	Repeat
 		insert+1
 		If charb(insert)\id=id Then done=1
 		If insert=nxlink Then done=2
-	##[$80BC] done<>0
+	Until done<>0
 
 	x.q=0:y.q=0
 	sn.w=((col AND 6) ASL 12) + $8182
@@ -1677,7 +1677,7 @@ End Macro
 
 	.DoFront
 
-		##[$80BB]
+		Repeat
 
 
 			movechars{}
@@ -1725,7 +1725,7 @@ End Macro
 
 			EndIf
 
-		##[$80BC] 1=0
+		Until 1=0
 	Return
 
 
@@ -1813,16 +1813,16 @@ End Macro
 			If moved<0
 				nu.w=##[$C384](itemsel+delta,0,maxit(menu))
 				If nu<>itemsel
-					##[$80C9] itemsel.w,nu.w
+					Exchange itemsel.w,nu.w
 					moved=del
 					del=#delay2
 					Draw{nu}
 					Draw{itemsel}
 				Else
 					If temp&$70 ;highlite
-						##[$80BB]
+						Repeat
 							temp.l=##[$C484](trx{0})
-						##[$80BC] temp&$70=0
+						Until temp&$70=0
 						Gosub hitbutton
 					EndIf
 
@@ -2248,7 +2248,7 @@ Return
 
 
 		count.w=-50*#loadtime
-		##[$80BB]
+		Repeat
 			!MyVWait{}
 
 			MOVE.l #cp,a1:MOVE.l#vd,a2
@@ -2261,7 +2261,7 @@ Return
 
 			squiggle{##[$C386](count,0,300)}:count+#animtime
 
-		##[$80BC] count>300
+		Until count>300
 
 		count=0
 
@@ -2330,7 +2330,7 @@ Return
 		Next
 
 
-		##[$80BB]
+		Repeat
 			fps+1
 
 			If count>20
@@ -2383,7 +2383,7 @@ Return
 			If ##[$C484](trx{0})&255<>0 Then count=32000
 
 ;			If count>100 Then count=-50
-		##[$80BC] count>#titletime
+		Until count>#titletime
 
 
 
@@ -2488,8 +2488,8 @@ CEND
 	Next
 
 	If screenmode=1	;HAHAHAHHA
-		##[$80C9] Pl(1)\newp,Pl(2)\newp
-		##[$80C9] Pl(1)\control,Pl(2)\control
+		Exchange Pl(1)\newp,Pl(2)\newp
+		Exchange Pl(1)\control,Pl(2)\control
 		newp(Pl(1)\newp)\pl=1
 		newp(Pl(2)\newp)\pl=2
 	EndIf
@@ -2823,7 +2823,7 @@ CNIF #race
 	*newleader.car=*p0:*oldleader.car=*p0:lead.w=0
 
 	fps.w=0:endrace.w=30000-50:nureduce.w=#uscar ;HAHAH
-	##[$80BB]
+	Repeat
 
 
 		CNIF #c=#s
@@ -2911,7 +2911,7 @@ CNIF #race
 			If ##[$C484](trx{0})&128>0
 				done=On
 
-				##[$80BB]:##[$80BC] ##[$C484](trx{0})&128=0
+				Repeat:Until ##[$C484](trx{0})&128=0
 			EndIf
 
 			If ##[$C484](trx{0})&64<>0
@@ -2924,8 +2924,8 @@ CNIF #race
 				Pl(3)\carnum=Pl(3)\carnum+1:Pl(3)\upd=3
 				If Pl(3)\carnum=6 Then Pl(3)\carnum=0
 
-				##[$80BB]
-				##[$80BC] ##[$C484](trx{0})&64=0
+				Repeat
+				Until ##[$C484](trx{0})&64=0
 
 			EndIf
 		CEND
@@ -3046,7 +3046,7 @@ CNIF #race
 			If Joyb(0)<>0 Then done=On:bigdone=On
 		CEND
 
-	##[$80BC] done
+	Until done
 
 	CNIF #c=#s
 		!setreg{0,$04} ;disable vert int
@@ -3251,8 +3251,8 @@ CNIF (#c=#s) AND #race
 
 		doSortSprites{&cptr(0)}
 ;		doSegaSprites{&cptr(0),*nv0,buffa1+32}
-		##[$80C9] buffa1,buffa2
-		##[$80C9] buffb1,buffb2
+		Exchange buffa1,buffa2
+		Exchange buffb1,buffb2
 		If (screenmode&1)=0
 			dodoSegaSprites{&cptr(0),*nv0,buffa1+32}
 		Else
@@ -3488,11 +3488,11 @@ CEND
 
 CNIF #c=#j
 
-	##[$80BB]
+	Repeat
 
 		!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
 
-		##[$80C9] *bmr1.jbmap,*bmr2.jbmap
+		Exchange *bmr1.jbmap,*bmr2.jbmap
 		MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
 
 		*bmr=*bmr1
@@ -3517,7 +3517,7 @@ CNIF #c=#j
 
 			If t<2 Then t+pts
 ;			If t>pts2 Then t-pts
-			##[$80C9] mapa.l,mapb.l
+			Exchange mapa.l,mapb.l
 			map.l=mapa
 			Gosub RotObj
 
@@ -3539,7 +3539,7 @@ CNIF #c=#j
 
 		GetJoy{&jox.l,&joy.l,&butt.l}
 
-	##[$80BC] 1=0
+	Until 1=0
 CEND
 Return
 
@@ -3548,9 +3548,9 @@ CNIF #c=#a
 	.DoMainA
 
 
-		##[$80BB]
+		Repeat
 			VWait
-		##[$80BC] Joyb(0)<>0
+		Until Joyb(0)<>0
 
 
 	Return
@@ -3899,7 +3899,7 @@ CNIF #c=#a
 	x2=bez\k:y2=bez\l
 
 	done.w=Off
-	##[$80BB]
+	Repeat
 		Line x1 ASL #sc, y1 ASL #sc, x2 ASL #sc, y2 ASL #sc,5
 
 		mminl=vert(curl)\t
@@ -3939,7 +3939,7 @@ CNIF #c=#a
 		Else
 			done.w=On
 		EndIf
-	##[$80BC] done
+	Until done
 
 CEND
 
@@ -4289,7 +4289,7 @@ Statement bounce{result.w,*e.quadratic,*par.parse}
 	here.w=Off ; in case we crash more than once?
 
 	result+16
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				here+FixHitLine(*e,*par)
@@ -4300,7 +4300,7 @@ Statement bounce{result.w,*e.quadratic,*par.parse}
 		result ASR 1
 		*e+#hquad
 		*par\norm+32
-	##[$80BC] (result=1) ; OR (here=On)
+	Until (result=1) ; OR (here=On)
 	*par\norm AND 63
 	*par\boom=(here<0)
 End Statement	;end of bounce
@@ -4308,7 +4308,7 @@ End Statement	;end of bounce
 
 
 Statement Damage{result.w,*e.quadratic,*par.parse}
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				deli=*par\fi-*e\lc
@@ -4326,7 +4326,7 @@ Statement Damage{result.w,*e.quadratic,*par.parse}
 		EndIf	 ;noimpact
 		result ASR 1
 		*e+#hquad
-	##[$80BC] (result=0)
+	Until (result=0)
 End Statement	;end of Damage
 
 
@@ -4430,7 +4430,7 @@ CEND
 						desti=*rg\li:destj=*rg\lj:joy=cmpacc7
 					EndIf
 				Else
-					##[$80C9] *lg,*guide
+					Exchange *lg,*guide
 
 					difi=*guide\li-ni:normi=*guide\li-*lg\li
 					difj=*guide\lj-nj:normj=*guide\lj-*lg\lj
@@ -5596,10 +5596,10 @@ CEND
 
 CNIF 1=0
 		MOVE #$8709,$c00004
-		##[$80BB]
+		Repeat
 
 			cnt.w=(Peek.w($c00008)LSR 8)&255
-		##[$80BC] cnt>174
+		Until cnt>174
 		MOVE #$8703,$c00004
 ;		wwb:CMP.w #$7700,$c00008:BCS wwb
 CEND
@@ -5663,7 +5663,7 @@ CEND
 		Gosub Rot
 		Gosub Draw
 
-	 ##[$80BC] Joyb(0)<>0
+	 Until Joyb(0)<>0
 	End
 	CEND
 

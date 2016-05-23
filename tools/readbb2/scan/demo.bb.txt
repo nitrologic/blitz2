@@ -176,7 +176,7 @@ viewer:
 	Return
 
 .setuppalette
-	##[$80C8] rgbcols
+	Restore rgbcols
 	For i=0 To 7
 		Read rr.w,gg.w,bb.w:StopCycle 0,i,rr,gg,bb
 	Next

@@ -99,11 +99,11 @@ Poke.l user+8,s1:Poke.l ?sig,s2
 
 ;CELSE
 
-##[$80BB]
+Repeat
 	sg.l=##[$FEAB](-1)
 	If sg&s1 Then End
 	If sg&s2 Then Gosub refscope
-##[$80C7]
+Forever
 
 .refscope
 ;

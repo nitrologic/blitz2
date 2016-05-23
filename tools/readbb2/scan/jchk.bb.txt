@@ -6,4 +6,4 @@ top
 	ADDQ #1,d0
 BRA top
 
-##[$80C9] a.w,b.w
+Exchange a.w,b.w

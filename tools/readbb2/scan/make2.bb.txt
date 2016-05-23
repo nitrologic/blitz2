@@ -30,7 +30,7 @@ If ReadMem(0,f$+".doc")			;wowowow
 			a$=Edit$(128)
 			a$=Replace$(a$,"	",t$)		;replace double spaces with tabs
 			j=1
-			##[$80BB]
+			Repeat
 				j=Instr(a$,b$,j)
 				If j<>0
 					s$+Mki$(j-1)+Mki$($5502)+Mkl$(0)	 ;go bold
@@ -41,7 +41,7 @@ If ReadMem(0,f$+".doc")			;wowowow
 						a$=Left$(a$,j-1)+Mid$(a$,j+5)			;remove normal
 					EndIf
 				EndIf
-			##[$80BC] j=0
+			Until j=0
 			j=Instr(a$,";")
 			If j<>0
 				s$+Mki$(j)+Mki$($5504)+Mkl$(0)		;go normal

@@ -196,7 +196,7 @@ Shared cvh(),np()
 	temp.w=##[$80D1] lmaxlen
 	Use lmaxlen 11:BlockScroll
 	If *car\name<>""
-		##[$FEDB] &*car\pic,Peek.l(##[$80B8] lmaxlen(11)+8),64*32/4
+		##[$FEDB] &*car\pic,Peek.l(Addr lmaxlen(11)+8),64*32/4
 	EndIf
 	ReMap 1,4:ReMap 2,5:ReMap 3,6+x
 
@@ -237,7 +237,7 @@ n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]
 
 .Main
 ;Blit 5,0,0
-##[$80BB]
+Repeat
 	VWait
 	ev.w=##[$BA92]
 	chg.w=0
@@ -245,7 +245,7 @@ n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]
 	a=BlitzKey
 	If (a=27) AND (n<>0) Then m=0:chg=-1:Gosub handleit
 	If a=65 Then done=On
-##[$80BC] done; a=65 ;cpaital a
+Until done; a=65 ;cpaital a
 
 End
 
@@ -283,9 +283,9 @@ End Statement
 				playnam$(curpl)=##[$BA8D](tt):np(curpl)\p=curpl
 				If ##[$BA8B](tt+1)=6
 					cur=0:numplyr+1
-					##[$80BB]
+					Repeat
 						cur=QWrap(cur+1,0,7)
-					##[$80BC] Valid{cur,curpl}
+					Until Valid{cur,curpl}
 					##[$BA8A] tt+1,cur:##[$BA86] tt+1
 				EndIf
 				SetPlayer{curpl}
@@ -294,9 +294,9 @@ End Statement
 			If dif=1
 				cur=##[$BA8B](tt+1)-1
 				If cur=-1 Then numplyr+1:np(curpl)\p=curpl:SetPlayer{curpl}
-				##[$80BB]
+				Repeat
 					cur=QWrap(cur+1,0,7)
-				##[$80BC] Valid{cur,curpl}
+				Until Valid{cur,curpl}
 				##[$BA8A] tt+1,cur
 				If cur=6 Then np(curpl)\p=-1:SetPlayer{curpl}:numplyr-1
 				##[$BA86] tt+1
@@ -315,7 +315,7 @@ End Statement
 	If n=5 ;carselect
 		If (m>3) AND (m<28)
 			nxcar=Int((m-4)/3)
-			dif=(m-4) ##[$80B9] 3
+			dif=(m-4) MOD 3
 			If dif=1	;car?
 				exempt=QWrap(np(nxcar)\car+1,0,maxcar+1)
 				np(nxcar)\car=exempt
@@ -439,9 +439,9 @@ Return
 
 			cvh(killer)\ndd=0
 			dest.w=killer
-			##[$80BB]
+			Repeat
 				dest.w=QWrap(dest.w+1,0,maxcar+1)
-			##[$80BC] cvh(dest)\ndd>0
+			Until cvh(dest)\ndd>0
 			For roll.w=0 To maxpl
 				If np(roll)\car=killer Then np(roll)\car=dest
 			Next
@@ -665,7 +665,7 @@ readtrackdisk:
 	Next
 	##[$D007] 1,640,#ys*2,4,*thisone
 	For y=0 To 1:For x=0 To 2
-		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{##[$80B8] MidHandle(0)} ;:Scale 0,100/123,28/32
+		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
 		MakeCookie 0
 		Use lmaxlen 0:ClipBlit 0,1+x*101+y*303,85
 	Next:Next

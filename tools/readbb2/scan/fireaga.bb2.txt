@@ -29,7 +29,7 @@
 
 
 
-##[$80C3]
+WBStartup
 ##[$80CB]
 ##[$80CC]
 
@@ -334,7 +334,7 @@ Gosub SetDefaults ;--- Should kill these
 Gosub UpdateAllGT ;		one day!					---
 
 .Main
-##[$80BB]
+Repeat
 	WindowInput #W1
 	whatnow\ev=WaitEvent
 	If whatnow\ev=$40 Then Gosub GetGadget
@@ -360,7 +360,7 @@ Gosub UpdateAllGT ;		one day!					---
 		End Select
 	EndIf
 	If whatnow\ev=$200 Then Gosub ExitFire
-##[$80C7]
+Forever
 
 End
 
@@ -563,7 +563,7 @@ Return
 	fireanim\frame=16, 4, 1, 1
 	rendscreen\width=320, 256, 8
 	misc\savetype=2
-	##[$80C8] MatrixData
+	Restore MatrixData
 	fire\matrix=0
 	For y=0 To 2
 		For x=0 To 2
@@ -597,7 +597,7 @@ Return
 
 	fire\percinc=100/((fire\height * 3)-2)
  ; If misc\savetype<>1 Then ShowScreen 1
-	##[$80BB]
+	Repeat
 		fire\percent=0
 		Progress{fire\percent,0,""}
 		fireanim\current=fireanim\current+1
@@ -620,7 +620,7 @@ Return
 			Progress{((fireanim\current+1)/fireanim\begin)*100,1,s$}
 		EndIf
 		If fireanim\current=fireanim\frame+fireanim\begin Then exitrender=On
-	##[$80BC] exitrender
+	Until exitrender
 	Format ""
 	VWait 50
 	##[$9B0D] #W1,winlock
@@ -637,7 +637,7 @@ Data.b -1, -1, -1
 
 .EndStuff
 Event
-##[$80BF] ""
+INCDIR ""
 Event
 
 pal_data: IncBin "fire.pal"

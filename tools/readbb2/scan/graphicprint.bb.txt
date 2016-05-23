@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/GraphicPrint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicPrint.bb
 ##[$80CC]
-##[$80C3]
+WBStartup
 freest 0
 ##[$FFB5]
-##[$80BB]
+Repeat
 	MaxLen pa$ = 160
 	MaxLen fi$ = 64
 	pa$ = "Work:RushPrograms/Quiz/pics/"
@@ -30,7 +30,7 @@ freest 0
 	WLocate 2,3
 	Print "Please Wait"
 	Gosub HardCopy
-##[$80C7]
+Forever
 HardCopy:
 		pio.l = ##[$FE97](100,65536)
 		pport.l = pio + 62

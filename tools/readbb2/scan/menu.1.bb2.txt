@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/menu.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/menu.1.bb2
-##[$80B4]
+SetErr
 	NPrint "Fatal Error !"
 	End
-End ##[$80B4]
-##[$80C3];:NoCli
+End SetErr
+WBStartup;:NoCli
 freest 0;:WBenchToFront_
 
 NPrint Centre$("Terry Jewell's Disk No. 2",58)
@@ -54,7 +54,7 @@ text$+"To load a program just press the apropreate F key and the rest will "
 text$+"take care of it's self ...... Bye for now ...... Signed THE MASTER '94"
 text$+String$(" ",28)
 
-##[$80BB]
+Repeat
 
 	WLocate 0,1:WColour 0,30: Print Mid$(text$,pos,28)
 	VWait 5
@@ -72,7 +72,7 @@ text$+String$(" ",28)
 		progname$=""
 	EndIf
 
-##[$80BC] progname$<>""
+Until progname$<>""
 
 CloseWindow 0
 CloseScreen 1

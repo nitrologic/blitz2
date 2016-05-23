@@ -12,7 +12,7 @@ Dim List bob.object(50)
 DEFTYPE .object *me
 
 Dim qsin(255),qcos(255)
-For r=0 To 255:qsin(r)=HSin(##[$80BA]*r/128):qcos(r)=HCos(##[$80BA]*r/128):Next
+For r=0 To 255:qsin(r)=HSin(Pi*r/128):qcos(r)=HCos(Pi*r/128):Next
 
 Dim map.w(20,20)
 

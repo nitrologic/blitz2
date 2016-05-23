@@ -63,7 +63,7 @@ BBlitMode $f3a	;when doing buffer blits invert colors
 
 ; MAIN LOOP IS HERE, HANDLES MENUS, MOUSE BUTTONS AND MOVEMENTS
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	Select ev
 		Case $100
@@ -82,7 +82,7 @@ BBlitMode $f3a	;when doing buffer blits invert colors
 		Case $10
 			Gosub isocursor
  End Select
-##[$80C7]
+Forever
 
 .group:
 	Gosub getxyzxyz	;get two points when user drags mouse
@@ -102,13 +102,13 @@ BBlitMode $f3a	;when doing buffer blits invert colors
 
 .getxyzxyz
 	Gosub findblock:x1=x:y1=y:z1=z	;let user drag select two points
-	##[$80BB]
+	Repeat
 		Line !pp{x1,y1,z1}-12,!pp{x,y,z}-12,-1:ev.l=WaitEvent
 		Line !pp{x1,y1,z1}-12,!pp{x,y,z}-12,-1:Gosub findblock
-	##[$80BC] ev<>$10
+	Until ev<>$10
 	UnBuffer 0
-	If x1<x Then ##[$80C9] x1,x
-	If y1<y Then ##[$80C9] y1,y
+	If x1<x Then Exchange x1,x
+	If y1<y Then Exchange y1,y
 	Return
 
 .isocursor
@@ -121,11 +121,11 @@ BBlitMode $f3a	;when doing buffer blits invert colors
 	##[$80CA] map(x,y)
 	If \btype>-1					;if block is on bitmap
 		cy=!py{x,y,0}			 ;get current height
-		##[$80BB]							;then let user adjust height
+		Repeat							;then let user adjust height
 			ev.l=WaitEvent
 			z=QLimit((cy-SMouseY)/4,0,16)
 			UnBuffer 0:BBlit 0,cb,!px{x,y,z},!py{x,y,z}
-		##[$80BC] ev<>$10
+		Until ev<>$10
 		UnBuffer 0:\btype=cb,z
 		For i=1 To z:longdiv \btype,!px{x,y,i},!py{x,y,i}:Next
 	EndIf
@@ -133,24 +133,24 @@ BBlitMode $f3a	;when doing buffer blits invert colors
 
 .colorblock
 	UnBuffer 0
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent				;let user paint blocks willy nilly
 		Gosub findblock			 ;which block are they pointing to
 		If map(x,y)\btype>-1	;is it a legal block
 			map(x,y)\btype=cb	 ;yes then set and draw
 			longdiv cb,!px{x,y,z},!py{x,y,z}
 		EndIf
-	##[$80BC] ev<>$10
+	Until ev<>$10
 	Return
 
 .findblock
 	z=16:sx=SMouseX:sy=SMouseY+16+z*4
-	##[$80BB]																;loop up from below
+	Repeat																;loop up from below
 		x=Int((sx+sy+sy-0) ASR 5)					 ;solve the isometric equation
 		y=Int((sy+sy-sx+640) ASR 5)				 ;calulating x,y
 		If map(x,y)\bheight=z Then Return	 ;has below got right height?
 		z-1:sy-4														;no then loop up
-	##[$80BC] z=-1
+	Until z=-1
 	x=0:y=0
 	Return
 

@@ -13,7 +13,7 @@
 
 initialize
 
-##[$80C3]
+WBStartup
 LoadSound 0,"HIT"
 LoadSound 1,"HESCORES"
 LoadSound 2,"collide"

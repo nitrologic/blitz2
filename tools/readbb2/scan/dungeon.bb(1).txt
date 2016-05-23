@@ -27,11 +27,11 @@ Dim c$(4):c$(0)=Chr$(32):c$(1)="*":c$(2)="O":c$(3)="M":c$(4)="B"
 	Gosub setupmap
 	Gosub setupmonsters
 	Gosub setupgame
-	##[$80BB]										;main loop
+	Repeat										;main loop
 		Gosub drawmap
 		Gosub yourmove
 		Gosub monstermove
-	##[$80BC] gameover=True
+	Until gameover=True
 	Print "PLAY AGAIN? (Y/N)"
 	If UCase$(Edit$(1))="Y" Then Goto maingame
 	End

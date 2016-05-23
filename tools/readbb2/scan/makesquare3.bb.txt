@@ -49,17 +49,17 @@ Dim lt.d(big,big)
 
 	Gosub GruntDraw
 VWait 30
-##[$80BB]
+Repeat
 	Gosub GruntDraw
 	cnt=0
-	##[$80BB]
+	Repeat
 		cnt+1
 		VWait
 		If Joyb(0)<>0 Then End
-	##[$80BC] cnt>5
+	Until cnt>5
 
 	ang+0.15
-##[$80BC] 1=0
+Until 1=0
 
 
 For ii=0 To big
@@ -70,7 +70,7 @@ For ii=0 To big
 
 		x=(i-0.5)
 ;		y=0
-		y=HSin(jj/mass*##[$80BA] /2)*HCos(ii/mass*##[$80BA]/2)
+		y=HSin(jj/mass*Pi /2)*HCos(ii/mass*Pi/2)
 		y=0
 		ev(ii,jj)=(y+1)*64
 		y=y *-0.1
@@ -245,7 +245,7 @@ For ii=0 To big
 
 
 		x=(i-0.5)
-		y=HSin(jj/mass*##[$80BA] )*HCos(ii/mass*##[$80BA])
+		y=HSin(jj/mass*Pi )*HCos(ii/mass*Pi)
 		y=0
 		y=y *-0.5
 		z=(j-0.5)
@@ -301,12 +301,12 @@ EndIf
 	jj=0:fj=big-1
 
 	If qs<0
-		##[$80C9] ii,fi
+		Exchange ii,fi
 	EndIf
 
 
 	If qc<0
-		##[$80C9] jj,fj
+		Exchange jj,fj
 	EndIf
 
 
@@ -323,7 +323,7 @@ col=1
 
 duh.w=1
 stpp=big*big
-##[$80BB]
+Repeat
 ;While (Int(ii)<> fi) OR (Int(jj)<>fj)
 
 	ii+xadd
@@ -337,7 +337,7 @@ stpp=big*big
 	stpp-1
 ;	If col=0 Then col+13
 
-##[$80BC] stpp<0;(Int(ii)= fi) AND (Int(jj)=fj)
+Until stpp<0;(Int(ii)= fi) AND (Int(jj)=fj)
 
 
 

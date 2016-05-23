@@ -226,15 +226,15 @@ End If
 
 ; ---------------------------------------
 
-##[$80C3]
+WBStartup
 ##[$80CB]
 ##[$80CC]
 
 ; ---------------------------------------
 
-##[$80B4]
+SetErr
 		End
-End ##[$80B4]
+End SetErr
 
 ; =======================================
 ; =======================================
@@ -363,10 +363,10 @@ XInclude "BombsGamePlay.bb2"
 		Gosub InitialiseAll
 		Gosub InitialiseVars
 		keep.b=True
-		##[$80BB]
+		Repeat
 				GetUserInput{ *biptr}
 				Gosub Events
-		##[$80BC] NOT keep
+		Until NOT keep
 		CleanExit{ *bombptr}
 End
 
@@ -533,7 +533,7 @@ AMIGA
 						CloseFile 1
 				End If
 		Else
-				##[$80C8] DefaultRatings
+				Restore DefaultRatings
 				For i=1 To 10
 						Read abcde$, edcba$
 						\ratings[i]\name = abcde$
@@ -553,7 +553,7 @@ Return
 		Gosub WriteMenu
 		helpPage.b = 0
 		keepHelp.b = True
-		##[$80BB]
+		Repeat
 		GetUserInput{ *biptr}
 		Select \ev
 			Case $8
@@ -564,7 +564,7 @@ Return
 			Case $200
 				keepHelp = False
 		End Select
-		##[$80BC] NOT keepHelp
+		Until NOT keepHelp
 		Free localstat 4
 Return
 
@@ -574,7 +574,7 @@ Return
 		Select GadgetHit
 			Case #nextGad
 				helpPage = helpPage + 1
-				If helpPage=1 Then ##[$80C8] GamePlayLabel
+				If helpPage=1 Then Restore GamePlayLabel
 				If helpPage<8 Then !ReadLines Else helpPage=0:Gosub WriteMenu
 			Case #menuGad
 				helpPage = 0
@@ -599,43 +599,43 @@ Return
 .SelectHelp
 		If (\iMouseY>29) AND (\iMouseY<40)
 				helpPage = 1
-				##[$80C8] GamePlayLabel
+				Restore GamePlayLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>49) AND (\iMouseY<60)
 				helpPage = 2
-				##[$80C8] OptionsLabel
+				Restore OptionsLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>69) AND (\iMouseY<80)
 				helpPage = 3
-				##[$80C8] ScoresLabel
+				Restore ScoresLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>89) AND (\iMouseY<100)
 				helpPage = 4
-				##[$80C8] GadgetsLabel
+				Restore GadgetsLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>109) AND (\iMouseY<120)
 				helpPage = 5
-				##[$80C8] StrategyLabel
+				Restore StrategyLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>129) AND (\iMouseY<140)
 				helpPage = 6
-				##[$80C8] AboutLabel
+				Restore AboutLabel
 				!ReadLines
 		End If
 
 		If (\iMouseY>149) AND (\iMouseY<160)
 				helpPage = 7
-				##[$80C8] MiscelanyLabel
+				Restore MiscelanyLabel
 				!ReadLines
 		End If
 

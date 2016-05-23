@@ -86,20 +86,20 @@ poka
 ;	Until vp<10
 
 	vp.w=Peek.w($c00008)
-	##[$80BB]
+	Repeat
 		vp.w=Peek.w($c00008):vp=(vp LSR 8)
 		Poke.w $c00004,$8700+(dummy AND 15):dummy+1
-	##[$80BC] vp>9
+	Until vp>9
 	Poke.w $c00004,$8702
 
-	##[$80BB]
+	Repeat
 		vp.w=Peek.w($c00008):vp=vp LSR 8
-	##[$80BC] vp>0
+	Until vp>0
 	Poke.w $c00004,$8703
 
-	##[$80BB]
+	Repeat
 		vp.w=Peek.w($c00008):vp=vp LSR 8
-	##[$80BC] vp>22
+	Until vp>22
 
 ;	For i=10 To 200
 ;		Repeat
@@ -108,10 +108,10 @@ poka
 
 
 ;	Poke.w $c00004,$8700
-	##[$80BB]
+	Repeat
 		vp.w=Peek.w($c00008):vp=vp LSR 8
 		If vp>8 AND vp<63 Then Poke.w $c00004,$8700+(vp AND 15)
-	##[$80BC] vp>100
+	Until vp>100
 
 ;	Next
 

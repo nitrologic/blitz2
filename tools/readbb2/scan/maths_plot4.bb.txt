@@ -1,16 +1,16 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot4.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot4.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot4.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot4.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot4.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot4.bb
 ;Two examples of how to achieve polar symmetry.
-##[$80C3]
+WBStartup
 lmaxlen 0,320,256,5
 allocst 0,0,0,320,256,5,0,"",2,0,0
 Green 0,0,0,0
 For i=16 To 31:Green i,31-i,i-16,i-16:Next
-ShowScreen 0:p2.f=2*##[$80BA]:p22.f=p2*p2
+ShowScreen 0:p2.f=2*Pi:p22.f=p2*p2
 BitMapOutput 0
 Use lmaxlen 0:BlockScroll 0
 For k=0 To 160 Step 160
 	For i=0 To 150
-		If Joyb(1)<>0:##[$80BE] For:Goto l1:EndIf
+		If Joyb(1)<>0:Pop For:Goto l1:EndIf
 ;----------------------------------------------------------------
 ;If the plotting area is not a square you can compensate for
 ;it in the calculation of x and y.
@@ -25,12 +25,12 @@ For k=0 To 160 Step 160
 ;functions it may be necessary
 ;to treat each quadrant separately, as I have done here.
 			If r>0
-				If y=0:If x>0:a.f=0:Else:a=##[$80BA]:EndIf:Goto l2:EndIf
-				If x=0:If y>0:a=##[$80BA]/2:Else:a=(3*##[$80BA])/2:EndIf:Goto l2:EndIf
+				If y=0:If x>0:a.f=0:Else:a=Pi:EndIf:Goto l2:EndIf
+				If x=0:If y>0:a=Pi/2:Else:a=(3*Pi)/2:EndIf:Goto l2:EndIf
 				If x>0
 					If y>0:a.f=ASin(x/r):Else:a=p2-ASin(x/r):EndIf
 				Else
-					If y<0:a=##[$80BA]+ASin(-x/r):Else:a=##[$80BA]-ASin(-x/r):EndIf
+					If y<0:a=Pi+ASin(-x/r):Else:a=Pi-ASin(-x/r):EndIf
 				EndIf
 				l2:
 ;----------------------------------------------------------------

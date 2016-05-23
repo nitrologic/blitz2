@@ -5,5 +5,5 @@ freest 0:AddIDCMP $10+$400000
 		GTScroller 1,2,98,8,200,12,"Degrees: ",$201,1,360,360
 		localstat 1,176,56,328,60,4102,"Rotate",1,2:AttachGTList 1,1
 		ResetString 16,15,296,20
-##[$80BB]:VWait:##[$80BC] Event=$40 AND GadgetHit=0
+Repeat:VWait:Until Event=$40 AND GadgetHit=0
 		CloseWindow 1:Use localstat 0

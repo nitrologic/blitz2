@@ -90,7 +90,7 @@ Line x,y,x+15,y,0
 Next
 For t=by-1 To my Step -1
 mv+1
-##[$80C9] p(bx+t*5),p(bx+t*5+5)
+Exchange p(bx+t*5),p(bx+t*5+5)
 Next
 by=my
 Goto lk
@@ -106,7 +106,7 @@ Line x,y+h,x+15,y+h,0
 Next
 For t=by To my-1
 mv+1
-##[$80C9] p(bx+t*5),p(bx+t*5+5)
+Exchange p(bx+t*5),p(bx+t*5+5)
 Next
 by=my
 Goto lk
@@ -122,7 +122,7 @@ Line x,y,x,y+15,0
 Next
 For t=bx-1 To mx Step -1
 mv+1
-##[$80C9] p(t+by*5),p(t+by*5+1)
+Exchange p(t+by*5),p(t+by*5+1)
 Next
 bx=mx
 Goto lk
@@ -138,7 +138,7 @@ Line x+w,y,x+w,y+15,0
 Next
 For t=bx To mx-1
 mv+1
-##[$80C9] p(t+by*5),p(t+by*5+1)
+Exchange p(t+by*5),p(t+by*5+1)
 Next
 bx=mx
 Goto lk
@@ -152,8 +152,8 @@ b1=Rnd(1)*19
 b2=Rnd(1)*19
 b3=Rnd(1)*19
 If b1=b2 OR b2=b3 OR b3=b1 Then Goto oops
-##[$80C9] p(b1),p(b2)
-##[$80C9] p(b1),p(b3)
+Exchange p(b1),p(b2)
+Exchange p(b1),p(b3)
 Next
 CludgeBitMap 1,2
 Use lmaxlen 0

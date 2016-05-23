@@ -183,7 +183,7 @@ inst$(4)="			SELECT FUNCTION FROM RIGHT THEN SELECT OK		"
 inst$(5)="							 SELECT NEW BATSMAN									"
 
 Function.s nth{n.w}
-	a$=Str$(n):If n>20 Then n=n ##[$80B9] 10
+	a$=Str$(n):If n>20 Then n=n MOD 10
 	Select n
 		Case 1:a$+"st"
 		Case 2:a$+"nd"
@@ -209,7 +209,7 @@ End Function
 
 .main
 	;
-	##[$80BB]
+	Repeat
 		;
 		Gosub displayevent
 		ev.l=WaitEvent
@@ -263,7 +263,7 @@ End Function
 				If id=100 Then bowl=\bowler:Gosub bowlerok
 				;
 			Case 4:
-				If id=107 Then ##[$80C9] \batter,\partner
+				If id=107 Then Exchange \batter,\partner
 				If id>49 AND id<59				 ;1..9
 					\shot=id-49:Activate 1
 					If \shot=7 OR \shot=9 Then If runs=4 Then runs=6 Else runs=4
@@ -286,7 +286,7 @@ End Function
 				;
 		End Select
 		;
-	##[$80C7]
+	Forever
 
 .tobatok:
 	##[$80CA] entry(cmess)
@@ -319,22 +319,22 @@ End Function
 .bowlerok:
 	##[$80CA] team(1-batting)
 	If bowl=lastbowler Then BeepScreen 0:Return
-	i=-1:##[$80BB]:i+1:##[$80BC] \bo[i]=bowl:j=i
+	i=-1:Repeat:i+1:Until \bo[i]=bowl:j=i
 	If i>0
-		##[$80BB]
+		Repeat
 			i-1
 			If \bowl[\bo[i]]\overs=0 AND \bowl[\bo[i]]\balls=0
-				##[$80C9] \bo[i],\bo[j]:j=i
+				Exchange \bo[i],\bo[j]:j=i
 			Else
 				i=0
 			EndIf
-		##[$80BC] i=0
+		Until i=0
 	EndIf
 	##[$80CA] entry(cmess)
 	Gosub listplayers
 	Gosub initnextevent
 	\id=4:\ball=1:\over+1
-	##[$80C9] \batter,\partner
+	Exchange \batter,\partner
 	Gosub backup
 	lastbowler=bowl
 	Return
@@ -349,7 +349,7 @@ End Function
 	Gosub initnextevent
 	If shot<10
 		If shot<>3 AND shot<>4 AND shot<>8 AND shot<>9 Then \ball+1
-		If odd Then ##[$80C9] \batter,\partner
+		If odd Then Exchange \batter,\partner
 		If \ball=7 Then \id=3:\ball=0:\whichend=1-\whichend Else \id=4
 	Else
 		\id=5:\newbatter=-1:\batterout=batterout
@@ -448,7 +448,7 @@ End Function
 	##[$80CA] entry(cmess)
 	bat=id-1
 	If bat=\batter OR bat=\partner
-		##[$80C9] \batter,\partner
+		Exchange \batter,\partner
 	Else
 		\batter=\partner:\partner=bat
 	EndIf
@@ -510,13 +510,13 @@ End Function
 
 movehim:
 	##[$80CA] team(batting)
-	i=-1:##[$80BB]:i+1:##[$80BC] \ba[i]=ba:j=i
+	i=-1:Repeat:i+1:Until \ba[i]=ba:j=i
 	If i>0
-		##[$80BB]
+		Repeat
 			i-1
-			If \bat[\ba[i]]\status=0 Then ##[$80C9] \ba[i],\ba[j]:j=i Else i=0
+			If \bat[\ba[i]]\status=0 Then Exchange \ba[i],\ba[j]:j=i Else i=0
 								;was \ballsfaced=0
-		##[$80BC] i=0
+		Until i=0
 	EndIf
 	Return
 
@@ -547,7 +547,7 @@ movehim:
 		Next
 	Next
 	;
-	##[$80C8] funcs:id=50
+	Restore funcs:id=50
 	For x=0 To 1
 		For i=0 To 9
 			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
@@ -632,7 +632,7 @@ movehim:
 	Return
 
 .initevents:
-	##[$80C8] header
+	Restore header
 	For i=0 To 7:Read entry(i)\message:Next
 	nxmess=9:cmess=8:Return
 

@@ -5,7 +5,7 @@ d=256
 
 nd=4096
 
-co.f=##[$80BA]*2/nd
+co.f=Pi*2/nd
 
 a.q=Cos(1/d)/co
 

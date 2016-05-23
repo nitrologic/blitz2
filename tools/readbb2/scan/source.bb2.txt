@@ -37,7 +37,7 @@ immune=0
 	Gosub dimensions
 	Gosub files
 	Gosub go_blitz
-	##[$80BB]
+	Repeat
 		Gosub variables
 		Gosub setup
 		DisplayOn
@@ -48,7 +48,7 @@ immune=0
 		Gosub mainloop
 		DisplayOff
 		nd=0
-	##[$80C7]
+	Forever
 End
 
 .setup
@@ -73,7 +73,7 @@ Return
 	Use Slice 1
 	Use lmaxlen 2
 	Use SetCycle 0
-	##[$80C8] banding
+	Restore banding
 	For q=3 To 11
 		Read q1
 		ColSplit 30,q1,q1,0,q
@@ -87,7 +87,7 @@ Return
 	BitMapOutput 2
 	Use Slice 0
 	Show 0 : qt=0 : qd=0
-	##[$80BB]
+	Repeat
 		If bosst<>12
 			qt=qt+1
 			If qt=400 Then qd=qd+1 : qt=0
@@ -97,7 +97,7 @@ Return
 		EndIf
 		VWait
 		If Joyb(0)=1 Then End
-	##[$80BC] Joyb(1)=1
+	Until Joyb(1)=1
 	bosst=0
 	Free lmaxlen 0
 	Free lmaxlen 1
@@ -176,7 +176,7 @@ Return
 	Show 0,32,sy
 	InFront 2
 	BlitzKeys On
-	##[$80BB]
+	Repeat
 		ev=ev+1
 		If ev=1000 Then ev=1
 		VWait
@@ -194,7 +194,7 @@ Return
 		If dead=1 Then Gosub deadloop
 		If Joyb(0)=1 Then nd=1
 		If bosst=12 Then nd=1
-	##[$80BC] nd=1
+	Until nd=1
 Return
 
 .deadloop
@@ -595,9 +595,9 @@ Return
 	If dri=8
 		If snownd<4 AND snowdc<19
 			snowc=-1
-			##[$80BB]
+			Repeat
 				snowc=snowc+1
-			##[$80BC] drs(snowc)=0
+			Until drs(snowc)=0
 			drx(snowc)=Rnd(320)+32
 			dry(snowc)=sy-16
 			qx=x-drx(snowc) : qy=y-dry(snowc)
@@ -794,25 +794,25 @@ Return
 
 .pause
 	VWait 10
-	##[$80BB]
+	Repeat
 		a$=Inkey$
-	##[$80BC] a$="p"
+	Until a$="p"
 Return
 
 .instruction
-	##[$80C8] icode
+	Restore icode
 	q1=0 : q2=0
-	##[$80BB]
+	Repeat
 		Read q
 		If q<>9999
-			##[$80BB]
+			Repeat
 				i(q1,q2)=q
 				q2=q2+1
 				Read q
-			##[$80BC] q=999
+			Until q=999
 		EndIf
 		q1=q1+1 : q2=0
-	##[$80BC] q=9999
+	Until q=9999
 	i(0,0)=32
 Return
 

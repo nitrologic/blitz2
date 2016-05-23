@@ -9,11 +9,11 @@
 ; |								rest of the code to approx 2.5 hours to write.					|
 ; []----------------------------------------------------------------------[]
 
-##[$80C3]
+WBStartup
 
-##[$80B4]
+SetErr
 	End
-End ##[$80B4]
+End SetErr
 
 
 #GADGETS	= 35
@@ -77,17 +77,17 @@ main:
 	Mode			= #MODE_DEC
 	HexDigits = "0123456789ABCDEF"
 
-	##[$80C8] KeyBIN
+	Restore KeyBIN
 	For ModeNo = 0 To #MODES-1
 		For GadgetNo = 0 To #GADGETS-1
 			Read GadgetToChar(ModeNo,GadgetNo)
 		Next GadgetNo
 	Next ModeNo
-	##[$80C8] Modes
+	Restore Modes
 	For ModeNo = 0 To #MODES-1
 		Read ModeStr(ModeNo)
 	Next ModeNo
-	##[$80C8] DisplaySizes
+	Restore DisplaySizes
 	For ModeNo = 0 To #MODES-1
 		Read DisplaySize(ModeNo)
 	Next ModeNo
@@ -137,7 +137,7 @@ main:
 	Gosub ShowResult
 
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		Select EventType
 			Case $00000200
@@ -243,7 +243,7 @@ main:
 					End Select
 				EndIf
 		End Select
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 0
 	CloseScreen 0
 	Free GTList 0
@@ -267,7 +267,7 @@ main:
 		Case $2E	: If Mode = #MODE_DEC AND Instr(Display,".") = 0
 									Display+"."
 								EndIf
-		Case $FF	: ##[$80BE] Select:Return
+		Case $FF	: Pop Select:Return
 		Default	 : If Mid$(Display,1) = "0"
 									Display=Chr$(Character)
 								Else

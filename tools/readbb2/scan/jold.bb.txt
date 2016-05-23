@@ -89,7 +89,7 @@ End Statement
 
 
 Function.l GetMem{size.l}
-	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
 End Function
 
 Statement HeadBmap{*bmap1.jbmap}
@@ -438,7 +438,7 @@ MOVE #$6c7,$f00028	 ;RGB!
 
 
 .mainloop
-##[$80BB]
+Repeat
 
 ;	!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
 
@@ -474,7 +474,7 @@ MOVE #$6c7,$f00028	 ;RGB!
 	;!rungpu{1}
 
 
-##[$80BC] 1=0
+Until 1=0
 
 
 

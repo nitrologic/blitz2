@@ -9,7 +9,7 @@
 ; needs header file
 ; header: Name | Designer | Settings | BitMap
 
-##[$80C3]
+WBStartup
 
 i$="SkidMarks.imp/"
 p$="Vehicles/"
@@ -115,14 +115,14 @@ thresh=120
 	;
 	#ysc=3:#xsc=4:#scal=5
 	Dim qsin(31),qcos(31)	 :; look up table for car motion
-	For cnt.w=0 To 31:qcos(cnt)=HCos(cnt/16*##[$80BA]):qsin(cnt)=HSin(cnt/16*##[$80BA]):Next
+	For cnt.w=0 To 31:qcos(cnt)=HCos(cnt/16*Pi):qsin(cnt)=HSin(cnt/16*Pi):Next
 	NEWTYPE .quad	:rx0.w:ry0:rx1:ry1:rx2:ry2:rx3:ry3:End NEWTYPE
 	DEFTYPE .quad q
 	;
 	WLocate 20,232:Print Centre$("SELECT CAR TO CONVERT",74)
 
 .main
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If ev=$40
 			Select GadgetHit
@@ -180,7 +180,7 @@ thresh=120
 					EndIf
 			End Select
 		EndIf
-	##[$80C7]
+	Forever
 
 .carsettings:
 	;
@@ -212,12 +212,12 @@ thresh=120
 		fr.l=frame-1
 		fr=(fr AND $ffe0)+((23-fr)AND31)
 		SpriteMode 2:GetaSprite 0,0
-		##[$FEDB] Peek.l(##[$80B8] Sprite(0)),BankLoc(0)+fr*512,512
+		##[$FEDB] Peek.l(Addr Sprite(0)),BankLoc(0)+fr*512,512
 		SpriteMode 0:GetaSprite 0,1
-		##[$FEDB] Peek.l(##[$80B8] Sprite(0))		,BankLoc(1)		+fr*256,128;256
-		##[$FEDB] Peek.l(##[$80B8] Sprite(0))+132 ,BankLoc(1)+128+fr*256,128;256
+		##[$FEDB] Peek.l(Addr Sprite(0))		,BankLoc(1)		+fr*256,128;256
+		##[$FEDB] Peek.l(Addr Sprite(0))+132 ,BankLoc(1)+128+fr*256,128;256
 		xx.f=frame*596/800:WLine 18+xx,231,18+xx,240,3
-		If Event=8 Then ##[$80BE] For:Goto can
+		If Event=8 Then Pop For:Goto can
 	Next
 	SaveBank 0,p$+v$+".aga"
 	SaveBank 1,p$+v$+".ecs"
@@ -230,7 +230,7 @@ thresh=120
 	If ReadMem(0,p$+v$+".set")
 		FileOutput 0:NPrint v$:NPrint s$
 		Exists 0,&car\settings,SizeOf .handling
-		Exists 0,Peek.l(##[$80B8] lmaxlen(0)+8),64*32/4
+		Exists 0,Peek.l(Addr lmaxlen(0)+8),64*32/4
 		CloseFile 0
 	EndIf
 	WindowOutput 0
@@ -277,7 +277,7 @@ doframe:
 	ox=a(6):oy=a(7)
 	ff$=f$+"pic."+Right$(Str$(10000+frame),4)
 	If ##[$BE15](ff$)=0 Then Gosub fileerr:Return
-	##[$A404] 0,ff$:m.l=##[$80B8] ##[$A401](0):Use lmaxlen 0
+	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use lmaxlen 0
 	For y=0 To 31:For x=0 To 63
 		c=pickcolor{m,x+ox,y+oy,&a(0),0}
 		If c<>0
@@ -298,7 +298,7 @@ doframe:
 	If ##[$BE15](f$)>0
 		##[$A404] 0,f$
 		If ##[$A410](0)
-			fw=Peek.w(##[$80B8] ##[$A401](0)+16):fh=Peek.w(##[$80B8] ##[$A401](0)+18)
+			fw=Peek.w(Addr ##[$A401](0)+16):fh=Peek.w(Addr ##[$A401](0)+18)
 			f$=UnLeft$(f$,8)
 			Gosub checkdef:Gosub carsettings
 			c$=f$+"	("+Str$(fw)+"x"+Str$(fh)+")"

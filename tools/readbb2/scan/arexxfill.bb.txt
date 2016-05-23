@@ -14,7 +14,7 @@ localstat 0,300,0,300,200,$143F,"TESt window",0,1
 FillRexxMsg msg,&F
 SendRexxCommand msg,"",#RXFUNC|#RXFF_RESULT|2
 
-##[$80BB]
+Repeat
 		Wait:Rmsg.l=RexxEvent(Port):ev.l=Event
 		If ev = $200 End:EndIf
 		If IsRexxMsg(Rmsg) Gosub HandleRexx
@@ -22,7 +22,7 @@ SendRexxCommand msg,"",#RXFUNC|#RXFF_RESULT|2
 		NPrint "-------------------------"
 		VWait 5
 		MouseWait
-##[$80C7]
+Forever
 
 HandleRexx:
 		WLocate 0,0

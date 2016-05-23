@@ -23,9 +23,9 @@ Box 15,15,15+33,15+41,1	 ;shape must fit inside this frame
 GetaShape 0,16,15,32,1		;for clipping height
 
 For r=0 To 15
-	##[$80C8] myshape:f=16+r:Gosub makeframe:longdiv f,r*40+16,104
-	##[$80C8] mozzy:f=32+r:Gosub makeframe:longdiv f,r*40+16,144
-	##[$80C8] blade:f=48+r:Gosub makeframe:longdiv f,r*40+16,184
+	Restore myshape:f=16+r:Gosub makeframe:longdiv f,r*40+16,104
+	Restore mozzy:f=32+r:Gosub makeframe:longdiv f,r*40+16,144
+	Restore blade:f=48+r:Gosub makeframe:longdiv f,r*40+16,184
 Next
 
 SaveShapes 16,f,"isoshapes" ;save all shapes generated
@@ -38,8 +38,8 @@ End
 
 .makeframe:
 	Read n						;how many balls follow?
-	rsin=HSin(r*##[$80BA]/8)	;needed for the 2D rotation that follows
-	rcos=HCos(r*##[$80BA]/8)
+	rsin=HSin(r*Pi/8)	;needed for the 2D rotation that follows
+	rcos=HCos(r*Pi/8)
 	ClearList ball()	;empty our work list of all items
 	##[$80CA] ball()		;save typing ball() 50 times!
 

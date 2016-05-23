@@ -1,13 +1,13 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/clock/CharmClock2.4.bb2
 ;Noe som ble en klokke!
 
-##[$80B4]:Gosub Error:End:End ##[$80B4]
+SetErr:Gosub Error:End:End SetErr
 
 ##[$80CB]
 
 ##[$80CC]
 
-##[$80C3]
+WBStartup
 
 If WBDepth < 2
 	Gosub SorryMac
@@ -30,7 +30,7 @@ FindScreen 0
 
 InitSound 0,640
 	For i = 0 To 639
-		If i ##[$80B9] 16 < 8
+		If i MOD 16 < 8
 			SoundData 0,i,127
 		Else
 			SoundData 0,i,-128
@@ -70,8 +70,8 @@ Start = False
 
 AlSMin = AlarmMinute + 5
 If AlSMin > 59 Then AlSHour = AlarmHour + 1
-AlSMin = AlSMin ##[$80B9] 60
-AlSHour = AlSHour ##[$80B9] 24
+AlSMin = AlSMin MOD 60
+AlSHour = AlSHour MOD 24
 
 ;************************ Check for illegal sizes!
 
@@ -125,8 +125,8 @@ Dim y2.f(59)
 
 For i = 0 To 59
 
-x(i)=(HSin ((##[$80BA])-((i/30)*##[$80BA])))
-y(i)=(HCos ((##[$80BA])-((i/30)*##[$80BA])))
+x(i)=(HSin ((Pi)-((i/30)*Pi)))
+y(i)=(HCos ((Pi)-((i/30)*Pi)))
 
 Next i
 
@@ -148,9 +148,9 @@ Gosub Refresh
 
 .Main:
 
-##[$80BB]
+Repeat
 
-	h = 5 * (Hours ##[$80B9] 12)
+	h = 5 * (Hours MOD 12)
 	m = Mins
 	s = Secs
 	Pause = 10
@@ -183,14 +183,14 @@ Gosub Refresh
 		EndIf
 	EndIf
 
-	If ((((AlarmHour + 1) ##[$80B9] 24) = Hours) AND AlarmMinute = m)
+	If ((((AlarmHour + 1) MOD 24) = Hours) AND AlarmMinute = m)
 		Alarm = False
 		Gosub InitMenu
 	EndIf
 
 	##[$FE1B] Pause
 
-##[$80BC] Running = False
+Until Running = False
 
 Free lmaxlen 0
 Free lmaxlen 1
@@ -581,7 +581,7 @@ If WinEvent = 256
 			EndIf
 			If SubHit = 1
 				WinSecounds = False
-				WinBackPenm = WinBackPen ##[$80B9] WinCols
+				WinBackPenm = WinBackPen MOD WinCols
 				Line WinWidth/2,WinHeight/2,(WinWidth/2)+(x(OS)*((WinWidth/2)-9)),(WinHeight/2)+(y(OS)*((WinHeight/2)-11)),WinBackPenm
 			EndIf
 		EndIf
@@ -728,22 +728,22 @@ If WinEvent = 256
 	WinHeight = InnerHeight
 	WinWidth = InnerWidth
 
-	Boxf 0,0,WinWidth,WinHeight,WinBackgPen ##[$80B9] WinCols
+	Boxf 0,0,WinWidth,WinHeight,WinBackgPen MOD WinCols
 
-	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-Md,(WinHeight/2)-Mde,WinOutLPen ##[$80B9] WinCols
-	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-5,(WinHeight/2)-6,WinBackPen ##[$80B9] WinCols
+	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-Md,(WinHeight/2)-Mde,WinOutLPen MOD WinCols
+	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-5,(WinHeight/2)-6,WinBackPen MOD WinCols
 
 	If WinHeight >= 70 AND WinWidth >=85 Then x = 1 Else x = 5
 
 	For a = 0 To 59 Step x
 		xp=(WinWidth/2)+(x(a)*((WinWidth/2)-7))
 		yp=(WinHeight/2)+(y(a)*((WinHeight/2)-(8)))
-		Point xp,yp,WinPipsPen ##[$80B9] WinCols
-		If a ##[$80B9] 5 = 0
-			Point xp-1,yp,WinPipsPen ##[$80B9] WinCols
-			Point xp+1,yp,WinPipsPen ##[$80B9] WinCols
-			Point xp,yp-1,WinPipsPen ##[$80B9] WinCols
-			Point xp,yp+1,WinPipsPen ##[$80B9] WinCols
+		Point xp,yp,WinPipsPen MOD WinCols
+		If a MOD 5 = 0
+			Point xp-1,yp,WinPipsPen MOD WinCols
+			Point xp+1,yp,WinPipsPen MOD WinCols
+			Point xp,yp-1,WinPipsPen MOD WinCols
+			Point xp,yp+1,WinPipsPen MOD WinCols
 		EndIf
 	Next a
 
@@ -753,7 +753,7 @@ If WinEvent = 256
 
 	Delete:
 
-	WinBackPenm = WinBackPen ##[$80B9] WinCols
+	WinBackPenm = WinBackPen MOD WinCols
 	xrad = WinWidth/2
 	yrad = WinHeight/2
 
@@ -766,8 +766,8 @@ If WinEvent = 256
 
 	Hour.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
 
-	Polyf 4,Hour,WinBackPen ##[$80B9] WinCols
-	Poly	4,Hour,WinBackPen ##[$80B9] WinCols
+	Polyf 4,Hour,WinBackPen MOD WinCols
+	Poly	4,Hour,WinBackPen MOD WinCols
 
 	xp1=xrad+(x1(OM)*(WinWidth/5))
 	yp1=yrad+(y1(OM)*(WinHeight/5))
@@ -778,8 +778,8 @@ If WinEvent = 256
 
 	Minute.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
 
-	Polyf 4,Minute,WinBackPen ##[$80B9] WinCols
-	Poly	4,Minute,WinBackPen ##[$80B9] WinCols
+	Polyf 4,Minute,WinBackPen MOD WinCols
+	Poly	4,Minute,WinBackPen MOD WinCols
 
 	If WinSecounds = True
 		Line xrad,yrad,xrad+(x(OS)*(xrad-10)),yrad+(y(OS)*(yrad-11)),WinBackPenm
@@ -790,10 +790,10 @@ If WinEvent = 256
 		longdiv 0,(WinWidth/2)-20,(WinHeight*5/8)
 		longdiv 1,(WinWidth-26),(WinHeight/2)-4
 		If Alarm = True
-			If (((AlarmHour = Hours) AND (AlarmMinute <= m)) OR ((((AlarmHour + 1) ##[$80B9] 24) = Hours) AND AlarmMinute > m))
+			If (((AlarmHour = Hours) AND (AlarmMinute <= m)) OR ((((AlarmHour + 1) MOD 24) = Hours) AND AlarmMinute > m))
 				OS = s AND 1
 				If OS = 0
-					Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen ##[$80B9] WinCols
+					Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
 				Else
 					longdiv 2,(WinWidth/2)-20,(WinHeight*0.31)
 				EndIf
@@ -801,14 +801,14 @@ If WinEvent = 256
 				longdiv 2,(WinWidth/2)-20,(WinHeight*0.31)
 			EndIf
 		Else
-			Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen ##[$80B9] WinCols
+			Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
 		EndIf
 	EndIf
 
 	Draw:
 
-	WinHandPenm = WinHandPen ##[$80B9] WinCols
-	WinSecsPenm = WinSecsPen ##[$80B9] WinCols
+	WinHandPenm = WinHandPen MOD WinCols
+	WinSecsPenm = WinSecsPen MOD WinCols
 
 	xp1=xrad+(x1(h)*(WinWidth/5))
 	yp1=yrad+(y1(h)*(WinHeight/5))
@@ -875,7 +875,7 @@ If WinEvent = 256
 	WLocate 164,24:Print "Minutes"
 	WLocate 10,42:Print "Alarm Time:"
 
-	##[$80BB]
+	Repeat
 		ev.l = Event
 		WLocate 104,42
 		TempHour.b = 24*HPropPot(0,1)
@@ -884,7 +884,7 @@ If WinEvent = 256
 		TempMinute.b = 60*HPropPot(0,2)
 		If TempMinute < 10 Then Print "0"
 		Print TempMinute
-	##[$80BC] ev = $200 OR (ev = $40 AND GadgetHit >=3)
+	Until ev = $200 OR (ev = $40 AND GadgetHit >=3)
 		If ev = $40 AND GadgetHit = 3
 			AlarmHour = TempHour
 			AlarmMinute = TempMinute
@@ -897,8 +897,8 @@ If WinEvent = 256
 
 	AlSMin = AlarmMinute + 5
 	If AlSMin > 59 Then AlSHour = AlarmHour + 1
-	AlSMin = AlSMin ##[$80B9] 60
-	AlSHour = AlSHour ##[$80B9] 24
+	AlSMin = AlSMin MOD 60
+	AlSHour = AlSHour MOD 24
 
 	Free localstat 1
 	Use localstat 0
@@ -917,14 +917,14 @@ If WinEvent = 256
 
 	localstat 2,WinX,WinY,WinOWidth,WinOHeight,$100b,"Move/Size Me!",0,1
 
-	##[$80BB]
+	Repeat
 
 	WX = WindowX
 	WY = WindowY
 	WW = WindowWidth
 	WH = WindowHeight
 
-	##[$80BC] Event = $200
+	Until Event = $200
 
 	If WW > 249 Then WinOWidth = 249 Else WinOWidth = WW
 	If WH > 249 Then WinOHeight = 249 Else WinOHeight = WH
@@ -1033,8 +1033,8 @@ If WinEvent = 256
 
 	AlSMin = AlarmMinute + 5
 	If AlSMin > 59 Then AlSHour = AlarmHour + 1
-	AlSMin = AlSMin ##[$80B9] 60
-	AlSHour = AlSHour ##[$80B9] 24
+	AlSMin = AlSMin MOD 60
+	AlSHour = AlSHour MOD 24
 
 	Return
 
@@ -1223,7 +1223,7 @@ Return
 	Use lmaxlen 1
 	BitMapOutput 1
 	Locate 0,0
-	Colour WinTextPen ##[$80B9] WinCols, WinBackPen ##[$80B9] WinCols
+	Colour WinTextPen MOD WinCols, WinBackPen MOD WinCols
 	Print "Charm"
 	GetaShape 0,0,0,40,8
 	Boxf 0,0,40,8,0
@@ -1241,18 +1241,18 @@ Return
 	da$=Date$(SystemDate)
 
 	If Days < 10
-		Colour WinDatePen ##[$80B9] WinCols,WinDateBackPen ##[$80B9] WinCols
+		Colour WinDatePen MOD WinCols,WinDateBackPen MOD WinCols
 		Locate 0,1
 		Print " ",Days
 	EndIf
 
 	If Days >=10
-		Colour WinDatePen ##[$80B9] WinCols,WinDateBackPen ##[$80B9] WinCols
+		Colour WinDatePen MOD WinCols,WinDateBackPen MOD WinCols
 		Locate 0,1
 		Print Days
 	EndIf
 
-	Line 0,7,16,7,WinDateBackPen ##[$80B9] WinCols
+	Line 0,7,16,7,WinDateBackPen MOD WinCols
 
 	GetaShape 1,0,7,16,9
 	Use lmaxlen 0

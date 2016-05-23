@@ -6,7 +6,7 @@
 								 ;;													 ;;
 								 ;;***************************;;
 
-##[$80C3]:##[$80CB]:##[$80CC]:##[$80B4]:End:End ##[$80B4]
+WBStartup:##[$80CB]:##[$80CC]:SetErr:End:End SetErr
 
 If Processor>=2 Then maxscrn=51 Else maxscrn=10
 
@@ -162,7 +162,7 @@ Gosub setupw
 										;;			MAIN LOOP			;;
 										;;*********************;;
 
-##[$80BB]
+Repeat
 	;
 	ev.l=WaitEvent
 	ew.l=EventWindow
@@ -190,19 +190,19 @@ Gosub setupw
 					;
 					If start=0
 						;
-						If px ##[$80B9] 16<>0
-							left=px ##[$80B9] 16
-							##[$80BB]
+						If px MOD 16<>0
+							left=px MOD 16
+							Repeat
 								If left>=8 Then px+1 Else px-1
-							##[$80BC] px ##[$80B9] 16=0
+							Until px MOD 16=0
 						EndIf
 						;
 						If jsy=fpy
-							If py ##[$80B9] 16<>0
-								up=py ##[$80B9] 16
-								##[$80BB]
+							If py MOD 16<>0
+								up=py MOD 16
+								Repeat
 									If up>=8 Then py+1 Else py-1
-								##[$80BC] py ##[$80B9] 16=0
+								Until py MOD 16=0
 							EndIf
 							py=QLimit(py,112,176)
 							jwd=QLimit((py/16)-6,1,5)
@@ -267,11 +267,11 @@ Gosub setupw
 				If WMouseY>jsy+1 Then AbsMouse px*2,jsy*2
 				px=QLimit(WMouseX,spx+8,320)
 				py=QLimit(WMouseY,jtl,jsy)
-				If px ##[$80B9] 16<>0
-					left=px ##[$80B9] 16
-					##[$80BB]
+				If px MOD 16<>0
+					left=px MOD 16
+					Repeat
 						If left>=8 Then px+1 Else px-1
-					##[$80BC] px ##[$80B9] 16=0
+					Until px MOD 16=0
 				EndIf
 			EndIf
 			;
@@ -294,7 +294,7 @@ Gosub setupw
 					Else
 						newmem level()
 						While globfree(level())
-							If level()\n=scn Then ##[$80BE] While:Goto foundl
+							If level()\n=scn Then Pop While:Goto foundl
 						Wend
 						foundl:
 						If level()\n<>scn
@@ -419,7 +419,7 @@ Gosub setupw
 	WLocate 26,11:Print scn
 	Use localstat 0
 	;
-##[$80C7]
+Forever
 
 
 											;;********************;;
@@ -495,7 +495,7 @@ Return
 	Use lmaxlen 0:Boxf 0,96,320,176,9
 	;
 	For n=0 To 99
-		If level()\a[n]\x0=level()\a[n]\x1 Then ##[$80BE] For:Goto done
+		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done
 		##[$80CA] level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\y2,\x3,\y3
 		##[$80CA] level()\b[n]
@@ -533,7 +533,7 @@ Return
 		WLine gr,178,gr,180,5
 	Next
 	For n=0 To 99
-		If level()\a[n]\x0=level()\a[n]\x1 Then ##[$80BE] For:Goto done2
+		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done2
 		##[$80CA] level()\a[n]
 		For ln=0 To \jwd
 			WLine \x0,\y0-ln*16,\x1,\y1-ln*16,15
@@ -569,7 +569,7 @@ Return
 	 Next
 	Next
 	;
-	##[$80BB]
+	Repeat
 		VWait
 		If shpx>32 AND shpx<=352
 		BitMaptoWindow 2,0,oshpx-16,oshpy-16,oshpx-48,oshpy-16,32,32
@@ -587,9 +587,9 @@ Return
 		shpx=QWrap(shpx+speed,-16,384)
 		If shpx>32 AND shpx<=352
 			xp=QWrap(xp+speed,0,320):pt=Int(xp ASR 4)
-			adj1=shpx ##[$80B9] 16
-			adj2=shpx+3 ##[$80B9] 16
-			adj3=shpx+10 ##[$80B9] 16
+			adj1=shpx MOD 16
+			adj2=shpx+3 MOD 16
+			adj3=shpx+10 MOD 16
 			hgt=adj1*gt(pt,ln)\grad
 			If pt<19 Then fwh=adj2*gt(pt,ln)\grad
 			If pt>0 Then bwh=adj3*gt(pt-1,ln)\grad
@@ -627,15 +627,15 @@ Return
 		If ev.l=$20
 			Green 1,0,0,0:Green 3,0,0,0
 			FlushEvents
-			##[$80BB]
+			Repeat
 				ev.l=Event
-			##[$80BC] ev.l<>$0
+			Until ev.l<>$0
 			FadePalette 0
 		EndIf
 		If ev.l=$80000 Then Activate 0
 		Use localstat 1:WLocate 26,50:Print fwh," ",bwh," ",shpn
 		Use localstat 0
-	##[$80BC] ev.l=$40
+	Until ev.l=$40
 	;
 	For n=0 To 5
 		If n<>3
@@ -799,7 +799,7 @@ Return
 	Use lmaxlen 5:BlockScroll:Use SetCycle 1
 	Boxf 0,96,320,176,1
 	For n=0 To 99
-		If level()\a[n]\x0=level()\a[n]\x1 Then ##[$80BE] For:Goto done3
+		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done3
 		##[$80CA] level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\y2,\x3,\y3
 		##[$80CA] level()\b[n]
@@ -858,12 +858,12 @@ Return
 					Next
 					For xx=0 To 15
 						For yy=0 To 15
-							If pix2(xx,yy)<>pix(xx,yy) Then ##[$80BE] For:##[$80BE] For:Goto nxt
+							If pix2(xx,yy)<>pix(xx,yy) Then Pop For:Pop For:Goto nxt
 						Next
 					Next
 					shpexist=1
 					level()\c[blckn]\shpn=32+n
-					##[$80BE] For:##[$80BE] If:Goto there
+					Pop For:Pop If:Goto there
 					nxt:
 				Next
 			EndIf

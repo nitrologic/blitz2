@@ -18,7 +18,7 @@ WindowOutput 0:WindowInput 0
 
 If OpenSerial("serial.device",0,2400,0)=0 Then End
 
-##[$80BB]
+Repeat
 	ev.l=Event:If ev=256 Then End
 	WLocate x*8,y*8:WBox x*8,y*8,x*8+8,y*8+7,3	;cursor on
 	a$=Inkey$
@@ -39,4 +39,4 @@ If OpenSerial("serial.device",0,2400,0)=0 Then End
 			Default:Print Chr$(b):x+1
 		End Select
 	EndIf
-##[$80C7]
+Forever

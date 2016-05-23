@@ -2,7 +2,7 @@
 
 Dim qs(256),qc(256)
 
-co.f=##[$80BA]*2/256
+co.f=Pi*2/256
 For k=0 To 255
 qs(k)=HSin(k*co):qc(k)=HCos(k*co)
 Next
@@ -19,7 +19,7 @@ Shared qs(),qc()
 ;
 qs=qs(rot):qc=qc(rot)
 ;
-##[$80BB]
+Repeat
 	c=*sh\c:If c=-2 Then Statement Return
 	x2=*sh\x
 	y2=*sh\y
@@ -30,7 +30,7 @@ qs=qs(rot):qc=qc(rot)
 	EndIf
 	x2*sc+x:y2*sc+y:If c Then Line x,y,x2,y2,c
 	x=x2:y=y2:*sh+SizeOf.sh
-##[$80C7]
+Forever
 ;
 End Statement
 

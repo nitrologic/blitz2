@@ -9,7 +9,7 @@ Dim x(1023),y(1023)
 For k=0 To 1023
 again:x=Int(Rnd(32)):y=Int(Rnd(32))
 For j=0 To k-1
-If x=x(j) AND y=y(j) Then ##[$80BE] For:Goto again
+If x=x(j) AND y=y(j) Then Pop For:Goto again
 Next
 x(k)=x:y(k)=y
 Next

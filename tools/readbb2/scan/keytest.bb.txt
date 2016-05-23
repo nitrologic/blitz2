@@ -18,12 +18,12 @@ DisplayBitMap 0,0
 
 BlitzKeys On
 
-##[$80BB]
+Repeat
 ;	VWait
 	For x=0 To 7
 		For y=0 To 15
 			Boxf x*40,y*16,x*40+39,y*16+15,1+RawStatus(x+y*8)
 		Next
 	Next
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 End

@@ -5,7 +5,7 @@ Green 0,0,0,0
 
 nd=64
 nd2=nd-1
-co=##[$80BA]*2/nd
+co=Pi*2/nd
 
 x=0:y=64
 px=0:py=16
@@ -17,7 +17,7 @@ Next
 
 cr=nd/2
 
-##[$80BB]
+Repeat
 	VWait:BlockScroll
 	If Joyb(0) Then End
 	y+Joyy(1) LSL 3
@@ -36,7 +36,7 @@ cr=nd/2
 	Gosub drawobj
 	;Next
 	VWait
-##[$80C7]
+Forever
 
 End
 

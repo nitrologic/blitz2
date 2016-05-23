@@ -8,18 +8,18 @@ Include asm.table.bb2
 
 If ReadMem(0,"asm.bin")
 	FileOutput 0
-	##[$80BB]
+	Repeat
 		Read mn$:Print UCase$(mn$),Chr$(0)
 		If FileSeek(0) & 1 Then Print Chr$(0)
 		If mn$>""
 			mn+1
-			##[$80BB]
+			Repeat
 				md+1
 				Read k
 				Print Mki$(k)
-			##[$80BC] k=-1
+			Until k=-1
 		EndIf
-	##[$80BC] mn$=""
+	Until mn$=""
 	CloseFile 0:DefaultOutput
 	NPrint mn," ",md," DONE...Click mouse":MouseWait
 Else

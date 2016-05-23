@@ -82,11 +82,11 @@ GTSetAttrs 2,6,#GTMX_Active,1
 
 GTSetAttrs 2,11,#GTTX_Text,"FAR OUT BOOGY BOY"
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=$20
 		NPrint ev,"	",GadgetHit,"	",EventCode,"	",EventQualifier
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 
 End

@@ -6,7 +6,7 @@ If NumPars<>1 Then End
 
 pg=##[$FEC9]("potgo.resource")
 
-GetReg a6,pg:MOVE #$c000,d0:JSR -6(a6):##[$80BD] d0,a ;reserve bits!
+GetReg a6,pg:MOVE #$c000,d0:JSR -6(a6):PutReg d0,a ;reserve bits!
 
 If a<>$c000 Then NPrint "Can't allocate pot bits!":MouseWait:End
 
@@ -44,22 +44,22 @@ EndIf
 End Function
 
 Statement bitout{n}		;send a bit!
-##[$80BB]
-##[$80BC] tin{}=0
+Repeat
+Until tin{}=0
 dout{n}	;set data line...
 tout{1}	;set timing
-##[$80BB]
-##[$80BC] tin{}
+Repeat
+Until tin{}
 tout{0}
 End Statement
 
 Function.l bitin{}
-##[$80BB]
-##[$80BC] tin{}
+Repeat
+Until tin{}
 d=din{}
 tout{1}
-##[$80BB]
-##[$80BC] tin{}=0
+Repeat
+Until tin{}=0
 tout{0}
 Function Return d
 End Function
@@ -74,8 +74,8 @@ MOVE #0,$dff180
 End Statement
 
 Function.w bytein{}
-##[$80BB]
-##[$80BC] tin{}
+Repeat
+Until tin{}
 MOVE #$f00,$dff180
 For k=1 To 8
 d = d LSL 1+bitin{}
@@ -90,7 +90,7 @@ tout{0}:dout{0}				 ;timer and data to 0!
 allocst 0,0,0,320,256,3,0,"",1,0
 localstat 0,0,0,320,256,$100f,Par$(1),1,0
 
-##[$80BB]
+Repeat
 	If Left$(LCase$(Par$(1)),1)="i"
 		Gosub input
 		If Event=512 Then Goto cleanup
@@ -98,7 +98,7 @@ localstat 0,0,0,320,256,$100f,Par$(1),1,0
 		ev.l=WaitEvent:If ev=512 Then Goto cleanup
 		If ev=1024 Then i$=Inkey$:Gosub outputchar
 	EndIf
-##[$80C7]
+Forever
 
 cleanup
 GetReg a6,pg:MOVE #$c000,d0:JSR -12(a6)

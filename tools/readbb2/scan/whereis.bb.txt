@@ -55,7 +55,7 @@ Function$ date{j.l}
 	If j>366										 ;not a leap year
 		j-366											;so remove leapyr days
 		yr+1+Int(j/365)						;got year
-		j ##[$80B9] 365									;number of days into year
+		j MOD 365									;number of days into year
 		If j>(31+27) Then j+1			;if after feb add dummy
 	EndIf
 	mth=1:While j+1>month(mth+1):mth+1:Wend ;find month
@@ -80,7 +80,7 @@ Shared month$()
 
 		While ##[$FE0E](lock,fib)<>0
 
-				If Joyb(0)<>0 Then ##[$80BE] While:Goto qqq
+				If Joyb(0)<>0 Then Pop While:Goto qqq
 
 				n$=Peek$(fib+8):n$=LCase$(n$)
 				t=Peek.l(fib+4)
@@ -129,7 +129,7 @@ Shared month$()
 						cc.l=GetFiles{p$,ff$}
 				EndIf
 
-				If Joyb(0)<>0 Then ##[$80BE] While:Goto qqq
+				If Joyb(0)<>0 Then Pop While:Goto qqq
 
 		Wend
 qqq:

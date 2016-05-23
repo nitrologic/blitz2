@@ -4,13 +4,13 @@
 ;
 
 
-##[$80C3]
+WBStartup
 
 DEFTYPE.l
 
 Gosub init
 
-##[$80BB]
+Repeat
 
 	WBox 4,12,494,98,0
 	Read ansf:Read nl:Read na
@@ -31,7 +31,7 @@ Gosub init
 	End Select
 
 
-##[$80BC] quit=1
+Until quit=1
 
 	FileOutput 1
 	NPrint "***	 END OF RESULTS	 ***"

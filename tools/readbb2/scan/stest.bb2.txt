@@ -12,11 +12,11 @@ Next
 
 Use SetCycle 0
 
-##[$80BB]:VWait:##[$80BC] Joyb(0)=2
+Repeat:VWait:Until Joyb(0)=2
 
 Free allocst 0
 
-p.l=##[$80B8] SetCycle(0):p=Peek.l(p)
+p.l=Addr SetCycle(0):p=Peek.l(p)
 For k=0 To 23:NPrint Hex$(Peek.l(p)):p+4:Next
 
 MouseWait

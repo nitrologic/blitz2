@@ -20,7 +20,7 @@ DEFTYPE.q vi,vj,curi,curj
 DEFTYPE.w ci,cj,i,j,ii,jj
 
 
-theta=##[$80BA]/7
+theta=Pi/7
 qc=HCos(theta):qs=HSin(theta)
 For i=0 To #side
 	ii=i-#dots
@@ -46,8 +46,8 @@ Next
 
 Dim qsin.w(255),qcos.w(255)
 For fac.q=0 To 255
-	h.q=50*HSin(fac*##[$80BA]/128):qsin(fac)=h
-	h.q=50*HCos(fac*##[$80BA]/128):qcos(fac)=h
+	h.q=50*HSin(fac*Pi/128):qsin(fac)=h
+	h.q=50*HCos(fac*Pi/128):qcos(fac)=h
 Next
 
 
@@ -66,7 +66,7 @@ Next
 
 
 Mouse On
-##[$80BB]
+Repeat
 	VWait:Show db:db=1-db:Use lmaxlen db	 ; double buffered
 	Boxf 0,0,319,255,0
 	vi=(vi+MouseXSpeed)*0.92:curi+vi:ci=curi	;damping...
@@ -79,7 +79,7 @@ Mouse On
 			Point *p\sx,*p\sy+grnd(ii,jj),1
 		Next
 	Next
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 End
 
 

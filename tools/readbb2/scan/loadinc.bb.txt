@@ -199,7 +199,7 @@ CNIF #freq
 		sel=-1:choice.w=Off
 		DisplayOn:QAMIGA
 
-		##[$80BB]
+		Repeat
 			VWait 3
 
 			For idx.w=maxpath.w To 1 Step -1
@@ -209,7 +209,7 @@ CNIF #freq
 
 						If WriteMem(0,path$(idx)+"Maps/Maps.Here")
 							FileInput 0
-							##[$80BB]
+							Repeat
 								fi$=Edit$("",79)
 								If fi$<>"-1"
 									cnt=QLimit(Instr(fi$," ")-1,0,79)
@@ -223,7 +223,7 @@ CNIF #freq
 									choice=On
 
 								EndIf
-							##[$80BC] fi$="-1"
+							Until fi$="-1"
 							CloseFile 0:DefaultInput
 						EndIf
 					EndIf
@@ -266,7 +266,7 @@ CNIF #freq
 				If (Joyb(0)<>0) Then done=On
 			Next
 			Mouse Off:QAMIGA
-		##[$80BC] done
+		Until done
 
 		Poke.l Peek.l(Peek.l(4)+276)+184,olderr.l		:; turn errors on!
 		If sel>0
@@ -283,7 +283,7 @@ CNIF #freq
 
 	.slurp
 		choice.w=Off:blurb=-1
-		##[$80BB]
+		Repeat
 			blurb+1
 			If nam=req(blurb)\nam Then choice=On
 			If hightrack=blurb
@@ -291,7 +291,7 @@ CNIF #freq
 				hightrack=blurb+1
 				choice=On
 			EndIf
-		##[$80BC] choice
+		Until choice
 		req(blurb)\nam=nam.s
 		If idx=0
 			If req(blurb)\com<>"" Then req(blurb)\com="Serial"
@@ -340,13 +340,13 @@ Shared m$,t$
 		Print Centre$("Please Insert a Track Disk",80)
 
 		m$="":t$=""
-		##[$80BB]
+		Repeat
 			VWait
 			nu$="maps:"		:Gosub slurp
 			nu$="df2:maps/":Gosub slurp
 			nu$="df1:maps/":Gosub slurp
 			nu$="df0:maps/":Gosub slurp
-		##[$80BC] m$<>""
+		Until m$<>""
 
 		BLITZ
 
@@ -359,7 +359,7 @@ Shared m$,t$
 		Mouse On:BlitzKeys On:sel=-1
 		BitPlanesBitMap 0,8,4:Use lmaxlen 8
 
-		##[$80BB]
+		Repeat
 ;			ShowSprite 19,MouseX,MouseY,0
 			DisplaySprite 9,19,MouseX,MouseY,0
 			cnt=Int((MouseY)ASR 3)-5
@@ -376,7 +376,7 @@ Shared m$,t$
 				If (-1<cnt) AND (cnt< (hightrack)) Then done=On
 			EndIf
 			If RawStatus($45) Then QAMIGA:Function Return Off:BLITZ
-		##[$80BC] done
+		Until done
 		Mouse Off:BlitzKeys Off:t$=nam(sel):QAMIGA
 ;	CELSE
 		m$="Maps/":t$="Blob"
@@ -388,7 +388,7 @@ Shared m$,t$
 			If WriteMem(0,nu$+"Maps.Here")
 				FileInput 0
 				hightrack.w=0:m$=nu$
-				##[$80BB]
+				Repeat
 					fi$=Edit$("",79)
 					If fi$<>"-1"
 						cnt=QLimit(Instr(fi$," ")-1,0,79)
@@ -400,7 +400,7 @@ Shared m$,t$
 						EndIf
 						hightrack+1
 					EndIf
-				##[$80BC] fi$="-1"
+				Until fi$="-1"
 				CloseFile 0:DefaultInput
 			EndIf
 		EndIf

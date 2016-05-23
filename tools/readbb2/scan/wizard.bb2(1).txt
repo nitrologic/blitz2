@@ -3,7 +3,7 @@
 
 ;End SetErr
 ##[$ED11] 1
-##[$80C3]
+WBStartup
 FindScreen(0)
 ;Screen 1,11
 i$="arg0":##[$C090] lv1.List,"test"
@@ -25,7 +25,7 @@ End If
 ##[$C090] lv1,"test2",15
 ##[$C08D] "lst1",10,lv1,10
 ##[$C099] "togg1",1
-##[$80BB]:
+Repeat:
 ev.l=##[$C0A1]
 Use localstat EventWindow
 WLocate 10,12
@@ -55,7 +55,7 @@ Select EventWindow
 	Case 2:
  End Select
  ##[$C08D] "argg1",i$,sl,##[$C09B]
-##[$80BC] exit=1
+Until exit=1
 ##[$C083] 1
 End
 SurfaceData: IncBin "A_Wizard:test.Wizard"

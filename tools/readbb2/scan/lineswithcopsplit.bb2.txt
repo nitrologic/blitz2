@@ -32,7 +32,7 @@ For tm=1 To 2
 If tm=1 Then n=0
 If tm=2 Then n=360
 For k=0 To 1 Step .0027777
-	CX(n)=HCos(##[$80BA]*2*k)*125
+	CX(n)=HCos(Pi*2*k)*125
 	n=n+1
 Next k,tm
 
@@ -44,13 +44,13 @@ For I=1 To NUMLINES
 Next
 
 .REDO
-##[$80C8] PATDATA
+Restore PATDATA
 .NUPAT
 Read XI,YI,XI2,YI2,X2,Y2,X,Y
 If XI=999 Then Goto REDO
 T=0
 
-##[$80BB]
+Repeat
 	VWait
 	Show DB
 	DB=1-DB
@@ -69,7 +69,7 @@ T=0
 	T=T+1
 
 	If Joyb(0)>0 Then End
-##[$80BC] T=600
+Until T=600
 
 Use lmaxlen 0 : BlockScroll
 Use lmaxlen 1 : BlockScroll

@@ -18,7 +18,7 @@ Gosub setupwindow
 Gosub newfiend
 col=2:wid=42:hi=9:Gosub printset
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=$40 Then gh=GadgetHit Else gh=-1
 	Select gh
@@ -37,7 +37,7 @@ col=2:wid=42:hi=9:Gosub printset
 		Case 33:test=1:Gosub doprintout
 	End Select
 	If gh>9 AND gh<18 Then i=gh-10:Gosub updatefield
-##[$80BC] ev=$200
+Until ev=$200
 End
 
 .printset
@@ -52,7 +52,7 @@ End
 .nxsearch
 	While globfree(u())									 ;loop through looking
 		For i=0 To 7
-			If Instr(UCase$(u()\t[i]),srch$) Then ##[$80BE] For:Goto drawfiend
+			If Instr(UCase$(u()\t[i]),srch$) Then Pop For:Goto drawfiend
 		Next
 	Wend
 	Return
@@ -117,7 +117,7 @@ End
 	Return
 
 .setupwindow
-	##[$80C8] gads
+	Restore gads
 	For i=0 To 6
 		Read a$:a$=Centre$(a$,6):workstart 0,8+i*58,16,0,i,a$
 	Next

@@ -52,7 +52,7 @@ co$+Mki$(#bplmod2)+Mki$(-122)
 CustomCop co$,185+34
 
 .REDO
-##[$80C8] PATDATA
+Restore PATDATA
 .NUPAT
 Read XI,YI,XI2,YI2,X2,Y2,X,Y,GAP,NLINES	 ; NLINES NO LONGER
 If XI=999 Then Goto REDO									; THAN 32!!!!
@@ -64,7 +64,7 @@ For I=1 To NLINES
 	PY2(I)=I*8+GAP
 Next
 
-##[$80BB]
+Repeat
 	VWait
 	Show DB
 	DB=1-DB
@@ -84,7 +84,7 @@ Next
 	T=T+1
 
 	If Joyb(0)>0 Then End
-##[$80BC] T=300
+Until T=300
 Use lmaxlen 0 : BlockScroll
 Use lmaxlen 1 : BlockScroll
 Goto NUPAT

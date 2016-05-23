@@ -29,7 +29,7 @@ End Function
 
 	InitBank 0,65536,0
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 
 	For i=0 To 77:a(i)=ShapeWidth(i):Next
 

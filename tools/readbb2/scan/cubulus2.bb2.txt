@@ -103,7 +103,7 @@ ScreensBitMap 3,3
 Use allocst 0
 Use SetCycle 1
 ScreensBitMap 0,0
-Poke.l ?bm,Peek.l (##[$80B8] lmaxlen(0)+8)
+Poke.l ?bm,Peek.l (Addr lmaxlen(0)+8)
 .interupt:
 SetInt 5
 CMP.w	 #0,cnt
@@ -175,7 +175,7 @@ longdiv t+r*(ms+1)+ss,t*x1+250,r*x1+xo
 Next:Next
 Gosub random
 ShowMap{0,3}
-t=##[$FFA6](Peek.l(##[$80B8] allocst(0)))
+t=##[$FFA6](Peek.l(Addr allocst(0)))
 .lp:
 Poke.l	?cnt,0
 GetReg	d0,ms
@@ -221,20 +221,20 @@ Goto lp
 MOVE.w	#-1,cnt
 Use lmaxlen 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+t=##[$FFA6](Peek.l(Addr allocst(3)))
 Use lmaxlen 1
 BlockScroll 0
 longdiv 80,0,0
 ShowMap{1,3}
 MouseWait
 ShowMap{0,3}
-t=##[$FFA6](Peek.l(##[$80B8] allocst(0)))
+t=##[$FFA6](Peek.l(Addr allocst(0)))
 Goto	lp
 nwlvl:
 Poke.w	?cnt,-1
 Use lmaxlen 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+t=##[$FFA6](Peek.l(Addr allocst(3)))
 Use lmaxlen 0
 ms=ms+1:If ms=5 Then ms=2
 CloseWindow 0
@@ -292,7 +292,7 @@ Poke.w	?cnt,-1
 
 Use lmaxlen 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(##[$80B8] allocst(3)))
+t=##[$FFA6](Peek.l(Addr allocst(3)))
 
 Use lmaxlen 1
 BlockScroll 0

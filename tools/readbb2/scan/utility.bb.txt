@@ -7,7 +7,7 @@
 
 ;************File:date.h
 
-##[$80BF] "include/"
+INCDIR "include/"
 XInclude exec.bb
 
 NEWTYPE.ClockData

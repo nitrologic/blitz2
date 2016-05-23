@@ -26,13 +26,13 @@ Gosub refreshsuper
 Gosub makeshapes
 Gosub drawmountains
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=2 Then Gosub dosize
 	If ev=8 Then Gosub editmount
 	If ev=$20 Then Gosub domove
 	If ev=$100 Then Gosub domenu
-##[$80BC] ev=$200
+Until ev=$200
 End
 
 domenu:
@@ -56,24 +56,24 @@ editmount:
 		x=WMouseX+posx ;event pos + bitmap offset
 		y=WMouseY+posy
 		If PColl(x,y,1,1,mount(i)\x-4,mount(i)\y-4,9,9)
-			##[$80BE] For:Goto gotpt
+			Pop For:Goto gotpt
 		EndIf
 		WPlot x,y,1
 	Next
 	Return
 gotpt:
-	##[$80BB]
+	Repeat
 		WBox x-4,y-4,x+4,y+4,0
 		x=WMouseX+posx					 ;event pos + bitmap offset
 		y=WMouseY+posy
 		mount(i)\x=x,y
 		WBlit 0,x,y
-	##[$80BC] WaitEvent<>$10
+	Until WaitEvent<>$10
 	Gosub drawmountains
 	Return
 
 domove:
-	##[$80BB]:Gosub refreshsuper:##[$80BC] WaitEvent<>$10:Return
+	Repeat:Gosub refreshsuper:Until WaitEvent<>$10:Return
 
 dosize:
 	SetHProp 0,1,posx/width,InnerWidth/width

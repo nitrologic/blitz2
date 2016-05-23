@@ -5,7 +5,7 @@
 ; developed by Simon Armstrong
 ;
 
-##[$80C3]
+WBStartup
 FindScreen 0
 ##[$FFB5]
 
@@ -14,7 +14,7 @@ fdate.l=SystemDate
 birth.l=0
 ClearString 0,0
 
-##[$80BB]
+Repeat
 	ButtonId 0,0,Date$(birth):Redraw 0,0
 	ButtonId 0,1,Date$(fdate):Redraw 0,1
 	Gosub drawgraph
@@ -24,7 +24,7 @@ ClearString 0,0
 		birth.l=NumDays(GadgetPens(0,0))
 		fdate.l=NumDays(GadgetPens(0,1))
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 End
 
 .drawgraph
@@ -41,9 +41,9 @@ End
 			Case 3:dcycle=33	;intellectual
 		End Select
 		For x=-19 To 18
-			tot.l=(fdate-birth+x) ##[$80B9] dcycle	;days since birth
+			tot.l=(fdate-birth+x) MOD dcycle	;days since birth
 			For f=0 To 1 Step .25						 ;tween bits for sin
-				y=HSin((tot+f)*2*##[$80BA]/dcycle)*33
+				y=HSin((tot+f)*2*Pi/dcycle)*33
 				WPlot 156+(x+f)*8,36-y,i
 			Next
 		Next

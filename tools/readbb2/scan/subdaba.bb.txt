@@ -72,7 +72,7 @@
 
 
 ##[$80CC]
-##[$80C3]
+WBStartup
 DateFormat 1
 CaseSense Off
 
@@ -95,8 +95,8 @@ wh.w=*wbscreen\Height			 ;	 8
 ;UnlockPubScreen BEFORE YOU END !!!!
 
 
-##[$80B4]
-	 ##[$80BD] d0,err.l
+SetErr
+	 PutReg d0,err.l
 	 title$="ERROR:"+Chr$(0)
 	 gadget$="OK"+Chr$(0)
 	 req\es_Title=&title$,err,&gadget$
@@ -104,7 +104,7 @@ wh.w=*wbscreen\Height			 ;	 8
 	 ##[$FFDD] 0,req,0,0
 	 ##[$FFD2] 0,*wbscreen
 	 End
-End ##[$80B4]
+End SetErr
 
 ;MAKE SURE WORKBENCH IS TALL ENOUGH FOR OUR WINDOW (INCLUDING
 ;THEIR SCREEN FONT). IF IT IS NOT THEN SHOW REQUESTER AND
@@ -708,7 +708,7 @@ Return
 			GTSetAttrs 1,24+i,#tag+15,printwhat(i,1)
 	 Next
 
-	 ##[$80BB]
+	 Repeat
 			ev.l=WaitEvent
 			gh.l=GadgetHit
 			code.l=EventCode
@@ -761,7 +761,7 @@ Return
 						EndIf
 			End Select
 
-	 ##[$80BC] ev=#GADGETUP AND gh=1
+	 Until ev=#GADGETUP AND gh=1
 	 CloseWindow 1
 Return
 
@@ -773,7 +773,7 @@ If ReadMem(0,printfile$)
 	 PushItem people()
 	 newmem people()
 
-	 ##[$80BB]
+	 Repeat
 			If globfree(people())
 				 numprinted+1
 				 printentry=False
@@ -837,7 +837,7 @@ If ReadMem(0,printfile$)
 
 			EndIf
 
-	 ##[$80BC] numprinted>lastentry
+	 Until numprinted>lastentry
 	 CloseFile 0
 	 WindowOutput 0
 	 PopItem people()

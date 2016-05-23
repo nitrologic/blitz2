@@ -7,14 +7,14 @@ Function$ input{a$,b$}							 ;uses window and gadgetlist 4
 	StringGadget 4,6,12,0,0,64,300
 	localstat 4,160,100,320,27,$1008,a$,1,2,4
 	ButtonId 4,0,b$:ClearString 4,0
-	##[$80BB]
+	Repeat
 		ev.l=WaitEvent
 		If EventWindow=4 AND ev=$40 OR ev=$200
-			##[$80BE] ##[$80BB]:r$=GadgetPens(4,0)
+			Pop Repeat:r$=GadgetPens(4,0)
 			Free localstat 4:Free GadgetJam 4
 			Function Return r$
 		EndIf
-	##[$80C7]
+	Forever
 End Function
 
 FindScreen 0

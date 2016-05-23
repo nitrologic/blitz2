@@ -20,7 +20,7 @@ For i.l=0 To 799
 		;
 		j=0
 		;
-		##[$80BB]
+		Repeat
 			If Peek.l(src)=0
 				rp.w=0
 				While Peek.l(src)=0 AND j<72:rp-1:src+4:j+1:Wend
@@ -35,7 +35,7 @@ For i.l=0 To 799
 				Wend
 				Poke.w dest+ofd,rp
 			EndIf
-		##[$80BC] j=72
+		Until j=72
 	Next
 	;
 	Poke.w dest+ofs,$8000:ofs+2

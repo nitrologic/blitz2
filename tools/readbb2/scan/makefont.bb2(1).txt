@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makefont.bb2
 allocst 0,1:ScreensBitMap 0,0:LoadBitMap 0,"font.iff"
 
-b.l=Peek.l(##[$80B8] lmaxlen(0)+8)
+b.l=Peek.l(Addr lmaxlen(0)+8)
 
 If ReadMem(0,"font.bin")
 	FileOutput 0

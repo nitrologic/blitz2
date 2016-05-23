@@ -4,11 +4,11 @@ If NumPars<>2 Then ##[$FF8C] 0
 
 If ReadMem(0,Par$(2))=0 Then ##[$FF8C] 0:End
 
-##[$80B4]:##[$FF8C] 0:End:End ##[$80B4]
+SetErr:##[$FF8C] 0:End:End SetErr
 
 LoadSound 0,Par$(1)
 
-s.l=##[$80B8] Sound(0)
+s.l=Addr Sound(0)
 
 Exists 0,s+4,4
 

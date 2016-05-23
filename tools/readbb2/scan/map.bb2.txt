@@ -197,7 +197,7 @@ Gosub loadusers:If er Then ##[$FF8C] 0:End
 
 Dim qs(256),qc(256)
 
-co.f=##[$80BA]*2/256
+co.f=Pi*2/256
 For k=0 To 255
 qs(k)=HSin(k*co):qc(k)=HCos(k*co)
 Next
@@ -215,7 +215,7 @@ Shared xy(),nxy,qs(),qc(),col,sh_x,sh_y
 ;
 qs=qs(rot):qc=qc(rot):nxy=0
 ;
-##[$80BB]
+Repeat
 	c=*sh\c:If c=-2 Then sh_x=x:sh_y=y:Statement Return
 	If c>1 Then xy(nxy)\x=x,y:nxy+1
 	If col Then If c Then c=col ;override colour!
@@ -231,7 +231,7 @@ qs=qs(rot):qc=qc(rot):nxy=0
 		Line x,y,x2,y2,c
 	EndIf
 	x=x2:y=y2:*sh+SizeOf.sh
-##[$80C7]
+Forever
 ;
 End Statement
 
@@ -282,7 +282,7 @@ oldout.w=*gate\out
 v1=pa(*gate\p)\info\calcout
 v2=*gate\in
 ;
-GetReg a0,v1:GetReg d0,v2:GetReg d1,time:JSR (a0):##[$80BD] d0,v3
+GetReg a0,v1:GetReg d0,v2:GetReg d1,time:JSR (a0):PutReg d0,v3
 ;
 out.w=v3
 ;
@@ -343,8 +343,8 @@ remline 0,"microscopic.font",5
 
 gf=0:x=280:y=-1:bg=1:gp=1
 
-n=1:##[$80C8] gaddata
-##[$80BB]
+n=1:Restore gaddata
+Repeat
 	Read t$
 	Select t$
 	Case ""
@@ -358,7 +358,7 @@ n=1:##[$80C8] gaddata
 		workstart 0,x,y,gf,n,Centre$(t$,8)
 		n+1:y+9
 	End Select
-##[$80BC] t$=""
+Until t$=""
 
 StringText$ Off:y+2
 
@@ -432,7 +432,7 @@ Poke.l ?sig,1 LSL sig
 
 .main
 
-##[$80BB]
+Repeat
 	;
 	Gosub refmap
 	;
@@ -651,7 +651,7 @@ Poke.l ?sig,1 LSL sig
 			map_sc/2:Gosub newscale:ref=-1
 		End Select
 	End Select
-##[$80C7]
+Forever
 
 .killcons
 ;
@@ -902,7 +902,7 @@ If f$
 			;look for part!
 			;
 			For p=0 To np-1
-				If pa(p)\t=t$ Then ga()\p=p:##[$80BE] For:Goto partok
+				If pa(p)\t=t$ Then ga()\p=p:Pop For:Goto partok
 			Next
 			;
 			;part not found!
@@ -1080,9 +1080,9 @@ Return
 
 waitev
 omx=mx:omy=my
-##[$80BB]
+Repeat
 	VWait:Gosub getev
-##[$80BC] mx<>omx OR my<>omy OR ev<>0
+Until mx<>omx OR my<>omy OR ev<>0
 Return
 
 .new
@@ -1793,7 +1793,7 @@ While ##[$FE0E](l,b)
 	;
 	;OK, FOUND PART!
 	;
-	##[$80BD] a0,info.l
+	PutReg a0,info.l
 	;
 	##[$FEDB] info,&pa(np)\info,SizeOf.info
 	;
@@ -1834,21 +1834,21 @@ If map_gs*map_sc>=2
 	map_dx=Int(map_x/map_gs)*map_gs ;mod
 	map_dy=Int(map_y/map_gs)*map_gs
 	;
-	##[$80BB]
+	Repeat
 		map_x=map_dx:Gosub map_xtoscreen
 		If map_x<map_vw
 			Line map_x,0,map_x,map_vh-1,map_gc
 		EndIf
 		map_dx+map_gs
-	##[$80BC] map_x>=map_vw
+	Until map_x>=map_vw
 	;
-	##[$80BB]
+	Repeat
 		map_y=map_dy:Gosub map_ytoscreen
 		If map_y<map_vh
 			Line 0,map_y,map_vw-1,map_y,map_gc
 		EndIf
 		map_dy+map_gs
-	##[$80BC] map_y>=map_vh
+	Until map_y>=map_vh
 	;
 Else
 	;

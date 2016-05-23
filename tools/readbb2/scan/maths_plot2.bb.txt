@@ -8,7 +8,7 @@
 ;on exactly what sort of formula is involved.
 ;--------------------------------------------------------
 ;Create a pseudo trig function
-##[$80C3]
+WBStartup
 Dim c.l(1024)
 Function.l zcos{x.l}
 	Shared c()
@@ -18,7 +18,7 @@ Function.l zcos{x.l}
 	Function Return z
 End Function
 
-For i.l=0 To 1023:c(i)=500*HCos(i*##[$80BA]/512):Next
+For i.l=0 To 1023:c(i)=500*HCos(i*Pi/512):Next
 
 lmaxlen 0,320,256,5
 VWait 250
@@ -31,7 +31,7 @@ For i=0 To 15:Green i,i,i,i:Next
 ;--------------------------------------------------------
 ;No conversion of pixel positions in this case.
 For x.l=-160 To 160
-	If Joyb(1)<>0:##[$80BE] For:Goto l1:EndIf
+	If Joyb(1)<>0:Pop For:Goto l1:EndIf
 	x2.l=x*x
 	For y.l=-128 To 128
 	z.l=x2+y*y-x*y

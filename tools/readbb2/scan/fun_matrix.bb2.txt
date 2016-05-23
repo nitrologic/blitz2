@@ -200,7 +200,7 @@ End Statement
 ;--------------------------------;
 
 Statement build_rotation_matrix{rtype.b,*M.Matrix_Type,theta.f}
-	thi.f=theta*(##[$80BA]/180.0)
+	thi.f=theta*(Pi/180.0)
 	Select rtype
 		Case #ABOUT_Z
 			*M\Column[0]\x=HCos(thi),HSin(thi),0,0
@@ -223,9 +223,9 @@ Statement build_rotation_matrix{rtype.b,*M.Matrix_Type,theta.f}
 End Statement
 
 Statement build_all_rotate_matrix{*M.Matrix_Type,x.f,y.f,z.f}
- x=x*(##[$80BA]/180)
- y=y*(##[$80BA]/180)
- z=z*(##[$80BA]/180)
+ x=x*(Pi/180)
+ y=y*(Pi/180)
+ z=z*(Pi/180)
 
  *M\Column[0]\x=HCos(y)*HCos(z),HSin(x)*HSin(y)*HCos(z),(0-HCos(x)*HSin(y)*HCos(z))+(HSin(x)*HSin(z)),0
  *M\Column[1]\x=0-HCos(y)*HSin(z),(0-HSin(x)*HSin(y)*HSin(z))+(HCos(x)*HCos(z)),HCos(x)*HSin(y)*HSin(z)+HSin(x)*HCos(z),0

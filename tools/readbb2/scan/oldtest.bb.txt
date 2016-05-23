@@ -76,7 +76,7 @@ Statement loadcar{name$,car}
 	If WriteMem(0,"vehicles/truck.def")
 		FileInput 0:car\name=Edit$(80):car\designer=Edit$(80)
 		##[$BE14] 0,&car\settings,SizeOf .handling
-		##[$BE14] 0,Peek.l(##[$80B8] lmaxlen(2)+8),64*32/4
+		##[$BE14] 0,Peek.l(Addr lmaxlen(2)+8),64*32/4
 		Use lmaxlen 2:ReMap 1,4:ReMap 2,5:ReMap 3,6+n
 		MakeCookie 2
 		CloseFile 0
@@ -105,17 +105,17 @@ Gosub setupui
 
 n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]
 
-##[$80BB]
+Repeat
 	VWait
 	ev.w=##[$BA92]
 	If ev=-1 Then Gosub handleit
 	a=BlitzKey				 ;:Locate 0,0:Print a,"	"
 	;BoxPrint 0,Chr$(Rnd(128))+Chr$(Rnd(128))
-##[$80BC] a=27
+Until a=27
 
 End
 
-##[$80BB]
+Repeat
 	a=Asc(Inkey$)
 	If mo=On Then ##[$BA87] 0,MouseX,MouseY
 	If a=28 OR Joyx(1)=-1 Then ##[$BA87] 0,-1
@@ -124,7 +124,7 @@ End
 	If a=31 Then ##[$BA87] -1,0
 	If a=13 Then ##[$BA89]:Gosub handleit
 	If a=-1 AND flag Then ##[$BA88]:flag=0
-##[$80BC] a=27
+Until a=27
 
 End
 
@@ -355,7 +355,7 @@ readtrackdisk:
 	Next
 	##[$D007] 1,640,#ys*2,4,*thisone
 	For y=0 To 1:For x=0 To 2
-		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{##[$80B8] MidHandle(0)} ;:Scale 0,100/123,28/32
+		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
 		MakeCookie 0
 		Use lmaxlen 0:ClipBlit 0,1+x*101+y*303,85
 	Next:Next

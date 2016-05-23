@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example1.bb2
-##[$80BF]	"FUN_Math:"
+INCDIR	"FUN_Math:"
 Include "FUN_Matrix.bb2"
 
 DEFTYPE.Matrix_Type M1

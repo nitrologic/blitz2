@@ -13,7 +13,7 @@
 
 #num=2300
 
-##[$80C3]
+WBStartup
 
 DEFTYPE.w
 DEFTYPE.l h
@@ -153,11 +153,11 @@ Green 2,15,0,0
 
 dbuffer=0
 Use lmaxlen 0 : BitMapOutput 0
-##[$80BB]
+Repeat
 	VWait
 	Show dbuffer
 	dbuffer=1-dbuffer
-	assembler_cls{Peek.l(##[$80B8] lmaxlen(dbuffer)+8)}
-	Drawfield{&plots(0),##[$80B8] lmaxlen(dbuffer),-1,0}
-##[$80BC] Joyb(0)
+	assembler_cls{Peek.l(Addr lmaxlen(dbuffer)+8)}
+	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,0}
+Until Joyb(0)
 End

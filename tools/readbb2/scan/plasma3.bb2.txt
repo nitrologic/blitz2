@@ -11,8 +11,8 @@
 ;
 ;--------------------------------------------------------------------
 
-##[$80CC] : ##[$80C3]
-##[$80B4] : End : End ##[$80B4]
+##[$80CC] : WBStartup
+SetErr : End : End SetErr
 
 ;--------------------------------------------------------------------
 ._Gadget_List
@@ -41,7 +41,7 @@ localstat 0,0,0,320,256,$1400,"Plasma Playground				 jilt'94",0,1,1
 Green 0,0,0,0 : Green 1,15,15,15 : Green 2,5,5,5 : Green 3,10,10,10
 
 Dim SS(360)
-For f.f = 0 To 360 : SS(f)=HSin(f/180*##[$80BA]) : Next
+For f.f = 0 To 360 : SS(f)=HSin(f/180*Pi) : Next
 
 Use lmaxlen 0
 Circlef 150,50,30,30,2
@@ -55,7 +55,7 @@ Gosub _Update_Info
 ;--------------------------------------------------------------------
 ._Main_Loop
 
-##[$80BB]
+Repeat
 
 	ev.l = Event
 	If ev=$40
@@ -87,19 +87,19 @@ Gosub _Update_Info
 	End If
 
 	For y=20 To 80 Step res1
-		ANG= (ang1+y*wave1) ##[$80B9] 360
+		ANG= (ang1+y*wave1) MOD 360
 		Scroll 110+rad1*SS(ANG),y,90,res1,20,100+y
 	Next
 	ang1= ang1 + swing1 : If ang1 > 360 Then ang1= ang1 - 360
 
 	For x=20 To 120 Step res2
-		ANG= (ang2+x*wave2) ##[$80B9] 360
+		ANG= (ang2+x*wave2) MOD 360
 		Scroll x,100+rad2*SS(ANG),res2,120,150+x,100
 	Next
 	ang2= ang2 + swing2 : If ang2 > 360 Then ang2= ang2 - 360
 
 
-##[$80BC] Inkey$<>""
+Until Inkey$<>""
 
 ;--------------------------------------------------------------------
 ._End

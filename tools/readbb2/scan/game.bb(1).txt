@@ -9,7 +9,7 @@ End NEWTYPE
 
 #devo=0
 
-##[$80C3]
+WBStartup
 ##[$80CB]
 ##[$80CC]
 Dim map.b(17152)
@@ -72,9 +72,9 @@ BLITZ
 Gosub slate
 
 Gosub initplat
-##[$80BB]
+Repeat
 Gosub game
-##[$80BC] 0
+Until 0
 Free lmaxlen0:Free lmaxlen 1:Free lmaxlen 2
 End
 
@@ -146,7 +146,7 @@ For i=0 To 5
  FlushBuffer db:UnBuffer 1-db:Use lmaxlen 1-db:Scroll 0,0,304,240,0,0,db
 Next
 ms$=""
-##[$80BB]
+Repeat
  Use Slice 1
  Use lmaxlen 4
  If Len(ms$)>1
@@ -162,20 +162,20 @@ ms$=""
 	If i=0 Then Scroll 8,0,264,16,0,0
 	ShowF 4,i,0,0:ShowB 3,0,0,i
  Next
-##[$80BC] Joyb(1)<>0
+Until Joyb(1)<>0
 For i=1 To 4:zkarma(i)=16:Next
 For i=0 To 7:swset(i)=0:Next
 lives=4
-##[$80BB]
+Repeat
 friend=0:lives-1
 nzcx=5:nzcy=19
 nlev=1:lev=0
 body=0:bodyflag=1:spell=0
-##[$80BB]
+Repeat
 olev=lev:If lev<>nlev Then lev=nlev:a$=n$(lev):Gosub levload:If bodyflag=0 Then Gosub bodyload
 On lev Gosub tzc,hel,hel,hel,rem,anx,cjk
-##[$80BC] pips(0)=0 OR pips(1)=0 OR spell=3
-##[$80BC] lives=0
+Until pips(0)=0 OR pips(1)=0 OR spell=3
+Until lives=0
 Return
 
 Statement noise{ch,smp,dist}
@@ -209,7 +209,7 @@ If lives=0
 EndIf
 za0=372:zu=0:zv=-2
 Use Slice 0:Green 9,15,15,8:Green 10,15,10,0
-##[$80BB]
+Repeat
 If Joyr(1)=8
  zu=QLimit(zu+2*Sgn(zu),-6,6)
  zv=QLimit(zv+2*Sgn(zv),-6,6)
@@ -228,7 +228,7 @@ If map(zadr)&15=2
  If map(zadr+1)&15=2 AND zx(db)>7 Then gate=-1
  If map(zadr-1)&15=2 AND zx(db)<8 Then gate=-1
 EndIf
-##[$80BC] gate=-1
+Until gate=-1
 gate=0:magic=0
 zu=0:zv=0:Gosub display:UnBuffer db:Gosub display:UnBuffer db
 body=map(zadr)ASR 5:If body=0 Then body=4
@@ -257,7 +257,7 @@ Next
 ntoken=15:ttime=32
 zdir=298:If zu<0 Then zdir=320:zu=2*Sgn(zu):zv=-8
 Sound 6,1,63
-##[$80BB]
+Repeat
 If pips(0)>0 AND pips(1)>0
 Select spell
 Case 0
@@ -273,7 +273,7 @@ Gosub fxevo
 Gosub generic
 Gosub display
 If zadr=216 AND air=0 AND zx(db)=0 Then Gosub omega
-##[$80BC] gate<>0
+Until gate<>0
 Return
 
 Statement write{x,y,a$,hflag}
@@ -312,16 +312,16 @@ Use lmaxlen 2:Boxf 48+bx,16+by,207+bx,143+by,0
 For k=0 To 1:db=1-db
 Use lmaxlen db:UnBuffer db:Boxf 80,48,207,143,0:BlitColl 199,128,128:BlitColl 215,144,128:BBlit db,za0,144,128
 VWait:ShowF db,16,16,bx:Next
-##[$80C8] omega
+Restore omega
 For i=1 To 4:Read men$(i):Next
 Data$"WHO IS MR.ZEN?","DREAM TRACK","WHEEL OF THINGS","EXIT"
 zenu=4
-##[$80BB]
+Repeat
  For i=1 To 4
 	hflag=0:If zenu=i Then hflag=1
 	write{1,i*2-1,men$(i),hflag}
  Next
- ##[$80BB]
+ Repeat
 	If Joyy(1)<>0
 	 ozenu=zenu:zenu=QLimit(zenu+Joyy(1),1,4)
 	 write{1,ozenu*2-1,men$(ozenu),0}
@@ -329,7 +329,7 @@ zenu=4
 	 VWait 25
 	EndIf
 	db=1-db:Use lmaxlen db:UnBuffer db:BBlit db,za0+Joyx(1),144,128:VWait:ShowF db,16,16,bx
- ##[$80BC] Joyx(1)=-1
+ Until Joyx(1)=-1
  Use lmaxlen 2:Boxf 48+bx,16+by,207+bx,143+by,0
  Select zenu
 	Case 1
@@ -414,7 +414,7 @@ zenu=4
 	 text{"INDIVIDUAL......"}
 	 clrom{11}
  End Select
-##[$80BC] zenu=4
+Until zenu=4
 For k=0 To 1:db=1-db
 Use lmaxlen db:UnBuffer db:Boxf 80,48,207,143,7:BlitColl 167,128,128:BlitColl 183,144,128:BBlit db,za0,144,128
 VWait:ShowF db,16,16,bx:Next
@@ -444,7 +444,7 @@ ga0(16)=400:gspd(16)=6:sbul=15;bullet
 ga0(18)=407:ga0(19)=411;explosions
 For i=0 To 15:CopyShape gtile(i),i*16+4:Next:gun(5)=16
 For i=0 To 8:CopyShape 416+i,425+i:XFlip 425+i
-Handle 425+i,ShapeWidth(416+i)-Peek.w(##[$80B8] MidHandle(416+i)+10),Peek.w(##[$80B8] MidHandle(416+i)+12):Next
+Handle 425+i,ShapeWidth(416+i)-Peek.w(Addr MidHandle(416+i)+10),Peek.w(Addr MidHandle(416+i)+12):Next
 Data.w 10;switches
 Data.w 31,28,12,35,1,1:Data.b 8
 Data.w 62,4,42,39,3,3:Data.b 0,0,43,0,43,176,43,176,0
@@ -473,7 +473,7 @@ If olev<>4
 EndIf
 If friend>0 Then fmx=nzcx ASL 4:fmy=nzcy ASL 4
 Gosub veil_of_maya:m$="FIND THE HEART OF THE DREAM...........................WATCH OUT FOR THE HEATED VATS!"
-##[$80BB]
+Repeat
 If pips(0)>0 AND pips(1)>0
 Select spell
 Case 0
@@ -493,7 +493,7 @@ Gosub generic
 Gosub friend
 Gosub display
 Gosub gcoll
-##[$80BC] gate<>0
+Until gate<>0
 Return
 
 .rem
@@ -507,7 +507,7 @@ monadr=-1:bu0=326:dam=64:dtype=1:fa0=400
 fmx=Rnd(384)+64:fmy=Rnd(768)+64:fuu=2
 If friend>0 Then fmx=nzcx ASL 4:fmy=nzcy ASL 4
 zvv=0:zvu=-2:If zdir=298 Then zvu=2:za=298
-For i=0 To 2:CopyShape i+303,i+298:xh(i)=Peek.w(##[$80B8] MidHandle(298+i)+10):yh(i)=Peek.w(##[$80B8] MidHandle(298+i)+12):Next
+For i=0 To 2:CopyShape i+303,i+298:xh(i)=Peek.w(Addr MidHandle(298+i)+10):yh(i)=Peek.w(Addr MidHandle(298+i)+12):Next
 For j=6 To 18 Step 6:For i=0 To 2:CopyShape 298+i,298+i+j:Next:Next
 For j=0 To 18 Step 6
 xmet.q=1.225:If j=6 OR j=18 Then xmet=0.816
@@ -520,7 +520,7 @@ Next
 For i=0 To 3
  For j=0 To 3
 	sh=400+i*8+j
-	xh=Peek.w(##[$80B8] MidHandle(sh)+10):yh=Peek.w(##[$80B8] MidHandle(sh)+12)
+	xh=Peek.w(Addr MidHandle(sh)+10):yh=Peek.w(Addr MidHandle(sh)+12)
 	CopyShape sh,sh+4:XFlip sh+4:Handle sh+4,ShapeWidth(i+4)-xh,yh
  Next
 Next
@@ -534,9 +534,9 @@ For i=385 To 390:DecodeShapes i:Next
 zadr=nzcx+nzcy ASL fsh
 monadr=-1:bodyflag=0
 Gosub veil_of_maya:m$="W O W		TRIPPY!"
-##[$80C8] rem
+Restore rem
 For i=0 To 11:Read sine(0):Next:For i=0 To 15:Read sine(i):Next
-##[$80BB]
+Repeat
 If pips(0)>0 AND pips(1)>0
 ;platform
 If Joyx(1)<>0 Then zvu=2*Joyx(1)
@@ -722,7 +722,7 @@ If fscrx>=16 AND fscrx<=288 AND fscry>=32 AND fscry<=240;on screen
 EndIf
 Gosub display
 Gosub gcoll
-##[$80BC] gate<>0
+Until gate<>0
 Return
 
 .anx
@@ -736,7 +736,7 @@ Data.w 504,976,4,4,5
 Data.w 232,336,10,255,7
 For i=0 To 3:CopyShape i+376,i+380:XFlip i+380:Next
 For i=0 To 3:CopyShape i+384,i+388:XFlip i+384
-Handle i+384,ShapeWidth(i+388)-Peek.w(##[$80B8] MidHandle(i+388)+10),Peek.w(##[$80B8] MidHandle(i+388)+12):Next
+Handle i+384,ShapeWidth(i+388)-Peek.w(Addr MidHandle(i+388)+10),Peek.w(Addr MidHandle(i+388)+12):Next
 For i=0 To 3:CopyShape i+392,i+396:Next
 ga0(0)=372:ghits(0)=10:gtile(0)=55:gspd(0)=0:gbul(0)=2;computer
 ga0(4)=376:ghits(4)=2:gtile(4)=16:gspd(4)=4:gbul(4)=0;tea lady
@@ -752,7 +752,7 @@ bmc(1)=$cce:bmc(2)=$aae:bmc(3)=$000
 monadr=-1:dtype=0:fa0=423
 For i=0 To 15:CopyShape gtile(i),i*16+4:Next
 For i=0 To 8:CopyShape 423+i,432+i:XFlip 432+i
-Handle 432+i,ShapeWidth(423+i)-Peek.w(##[$80B8] MidHandle(423+i)+10),Peek.w(##[$80B8] MidHandle(423+i)+12):Next
+Handle 432+i,ShapeWidth(423+i)-Peek.w(Addr MidHandle(423+i)+10),Peek.w(Addr MidHandle(423+i)+12):Next
 If olev<>6
  rand.w=Rnd(4):Select rand
  Case0:fmx=26:fmy=55:Case 1:fmx=61:fmy=43:Case 2:fmx=13:fmy=47:Case 3:fmx=44:fmy=31:Default:fmx=19:fmy=23
@@ -761,7 +761,7 @@ If olev<>6
 EndIf
 If friend>0 Then fmx=nzcx ASL 4:fmy=nzcy ASL 4
 Gosub veil_of_maya:m$="ITS 5 PAST 9.....WHERE ARE MY TROUSERS?......OH GOD,MY BOSS IS GOING TO KILL ME!"
-##[$80BB]
+Repeat
 If pips(0)>0 AND pips(1)>0
 Select spell
 Case 0
@@ -780,7 +780,7 @@ Gosub generic
 Gosub friend
 Gosub display
 Gosub gcoll
-##[$80BC] gate<>0
+Until gate<>0
 Return
 
 .cjk
@@ -804,7 +804,7 @@ If olev<>7
 EndIf
 CopyShape 414,427:XFlip 427:fa0=428
 For i=0 To 8:CopyShape 428+i,437+i:XFlip 437+i
-Handle 437+i,ShapeWidth(428+i)-Peek.w(##[$80B8] MidHandle(428+i)+10),Peek.w(##[$80B8] MidHandle(428+i)+12):Next
+Handle 437+i,ShapeWidth(428+i)-Peek.w(Addr MidHandle(428+i)+10),Peek.w(Addr MidHandle(428+i)+12):Next
 ga0(0)=372:ghits(0)=4:gtile(0)=82:gspd(0)=3:gbul(0)=0;shark infested custard
 ga0(1)=376:ghits(1)=2:gtile(1)=0:gspd(1)=0:gbul(1)=2;electric buzzer
 ga0(4)=380:ghits(4)=3:gtile(4)=0:gspd(4)=2:gbul(4)=0;my dog
@@ -827,7 +827,7 @@ If olev<>7
 EndIf
 If friend>0 Then fmx=nzcx ASL 4:fmy=nzcy ASL 4
 Gosub veil_of_maya:m$="MY DOGS GOT NO NOSE!.........................WHATS YELLOW AND DANGEROUS?.................."
-##[$80BB]
+Repeat
 If pips(0)>0 AND pips(1)>0
 Select spell
 Case 0
@@ -854,7 +854,7 @@ If zadr=269 AND spell<>3
  m$+" TO THE FUNDAMENTAL LIBRARY AND INFORMATION ZERO, AND FROM THERE OUT INTO THE WHEEL OF"
  m$+" THINGS! THE FULL MR.ZEN SHOULD BE READY BY THE END OF 1994, WATCH THIS SPACE!"
 EndIf
-##[$80BC] gate<>0
+Until gate<>0
 Return
 CEND
 
@@ -1366,7 +1366,7 @@ For k=0 To nswitch
 If zadr=swpos(k)
  src=0
  For j=0 To swh(k)-1:For i=0 To sww(k)-1
-	adr=swadr(k)+i+j*fw:##[$80C9] map(adr),swinf(k,src):src+1
+	adr=swadr(k)+i+j*fw:Exchange map(adr),swinf(k,src):src+1
  Next:Next
  swatch=2:swicon=-32*(swset(lev) ##[$80CD] k):map(zadr-fw)=swicon:map(zadr)=25-(swicon ASR 1)
  swset(lev) ##[$80D0] k
@@ -1622,7 +1622,7 @@ LoadShapes 294,371,"Movement/"+b$+".shp"
 For i=0 To 21
 CopyShape 298+i,320+i
 XFlip 320+i
-x0=Peek.w(##[$80B8] MidHandle(320+i)+10):y0=Peek.w(##[$80B8] MidHandle(320+i)+12)
+x0=Peek.w(Addr MidHandle(320+i)+10):y0=Peek.w(Addr MidHandle(320+i)+12)
 Handle 320+i,ShapeWidth(320+i)-x0,y0
 Next
 zdir=298:grav=2:acc=2:zbv=-32:zjv=-14:speed=4
@@ -1633,7 +1633,7 @@ If body=3
 egrav=2:eu=6:ev=4:ev0=-8:p0(1)=3:p0(0)=4:sfxt=32:sfx1=1:sfx2=3:sfx3=7
 For i=361 To 365
 CopyShape i,i+5:XFlip i+5
-Handle i+5,ShapeWidth(i)-Peek.w(##[$80B8] MidHandle(i)+10),Peek.w(##[$80B8] MidHandle(i)+12)
+Handle i+5,ShapeWidth(i)-Peek.w(Addr MidHandle(i)+10),Peek.w(Addr MidHandle(i)+12)
 Next
 EndIf
 If body=4 Then speed=2:p0(1)=3:p0(0)=6:sfx1=2:sfx2=13:sfx3=7
@@ -1667,11 +1667,11 @@ If WriteMem(0,"Form/"+a$+".geo")
  CloseFile 0
 EndIf
 For i=0 To 244
-If Peek.w(##[$80B8] MidHandle(i))<>0 Then Free MidHandle i
+If Peek.w(Addr MidHandle(i))<>0 Then Free MidHandle i
 Next
 LoadShapes 0,239,"Movement/"+a$+".shp"
 For i=372 To 450
-If Peek.w(##[$80B8] MidHandle(i))<>0 Then Free MidHandle i
+If Peek.w(Addr MidHandle(i))<>0 Then Free MidHandle i
 Next
 LoadShapes 372,"Movement/"+a$+".bob"
 If (lev>3 AND lev<8) OR (lev>11 AND lev<15) OR lev=16 Then For i=0 To 15:CopyShape gtile(i),i*16+4:Next
@@ -1686,12 +1686,12 @@ For i=0 To 15:gun(i)=0:Next
 dimflag=0
 Use Slice 0
 Select lev
-Case 1:##[$80C8] tzc
-Case 4:##[$80C8] hel
-Case 5:##[$80C8] rem
+Case 1:Restore tzc
+Case 4:Restore hel
+Case 5:Restore rem
 For i=4 To 52 Step 16:CopyShape 0,i:Next:For i=16 To 48 Step 16:CopyShape 0,i:Next
-Case 6:##[$80C8] anx
-Case 7:##[$80C8] cjk
+Case 6:Restore anx
+Case 7:Restore cjk
 End Select
 Read nswitch
 For i=0 To nswitch
@@ -1699,7 +1699,7 @@ For i=0 To nswitch
  For j=0 To sww(i)*swh(i)-1:Read swinf(i,j):Next
  If (swset(lev) ##[$80CD] i)
 	src=0:For j0=0 To swh(i)-1:For i0=0 To sww(i)-1
-	 adr=swadr(i)+i0+j0*fw:##[$80C9] map(adr),swinf(i,src):src+1
+	 adr=swadr(i)+i0+j0*fw:Exchange map(adr),swinf(i,src):src+1
 	Next:Next
  map(swpos(i)-fw)=0:map(swpos(i))=25
  EndIf
@@ -1751,7 +1751,7 @@ For j=0 To 11:BlitColl 255,112,j*16:BlitColl 255,128,j*16:Next
 VWait:ShowF 1-db,0,0,16
 Use lmaxlen db:Scroll 0,0,256,192,0,0,1-db
 tx=64:ty=0
-##[$80C8] veil_of_maya
+Restore veil_of_maya
 For i=0 To 15:Read sine(i):Next
 Data.w 0,50,91,118,128,118,91,50,0,-50,-91,-118,-128,-118,-91,-50
 Use lmaxlen db

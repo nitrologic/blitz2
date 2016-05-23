@@ -75,13 +75,13 @@ d_statehandler
 MOVE.l a0,lastinfo:MOVE.l statego_(pc),a0:TST (a0):RTS
 
 d_superhandler
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 Gosub stopit
 add_event{0,Peek.l(?lastinfo),Peek$(sa)}
 RTS
 
 d_userhandler
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 Gosub stopit
 add_event{1,Peek.l(?lastinfo),Peek$(sa)}
 RTS
@@ -103,7 +103,7 @@ RTS
 
 d_evalhandler
 ;
-!d_basic:##[$80BD] a0,sa
+!d_basic:PutReg a0,sa
 add_event{2,0,Peek$(sa)}
 RTS
 
@@ -172,7 +172,7 @@ checkbig
 If wm<>2 Then Goto openbig Else Return
 
 getevent
-##[$80BB]
+Repeat
 	If Peek.l(ib)<>s0
 		Free localstat 0:Gosub findsc
 		On wm+1 Gosub opentiny,opensmall,openbig
@@ -196,13 +196,13 @@ getevent
 		MaxLen d_e()\s=0:freelast d_e()
 	Wend
 	ev=Event:If ev=0 Then ##[$FF29]
-##[$80BC] ev
+Until ev
 Return
 
 findsc	;find front screen!
 ;
 FindScreen 0
-s0.l=Peek.l(##[$80B8] allocst(0))
+s0.l=Peek.l(Addr allocst(0))
 sw=Peek.w(s0+12)	;width
 sh=Peek.w(s0+14)	;height
 Return
@@ -234,16 +234,16 @@ wm=2
 Return
 
 .makegads
-Free localstat 0:Free GadgetJam 0:##[$80C8] gads
+Free localstat 0:Free GadgetJam 0:Restore gads
 gx=4:gn=0
-##[$80BB]
+Repeat
 	Read t$
 	If t$<>"" AND gx+8<w
 		l=Instr(t$,"|"):If l=0 Then l=Len(t$) Else l-1
 		gn+1:workstart 0,gx,gy,0,gn,t$
 		gx+l LSL 3+10
 	EndIf
-##[$80BC] t$=""
+Until t$=""
 If gx+8<w
 	gn+1:StringGadget 0,gx,gy,0,gn,128,w-gx-14
 EndIf

@@ -44,7 +44,7 @@ If style=3 Then style$="ranch" ;LoadShapes 16,"people/ranch.shapes"
 casestrcomp 0,"overlays/"+style$+".palette"
 casestrcomp 0,"overlays/shapes.iff",16
 
-pa.l=Peek.l(##[$80B8] SetCycle(0))+4
+pa.l=Peek.l(Addr SetCycle(0))+4
 ##[$FEDB] pa+12*12,pa+19*12,12
 ##[$FEDB] pa+13*12,pa+18*12,12
 ##[$FEDB] pa+15*12,pa+17*12,12
@@ -60,7 +60,7 @@ LoadShapes 470,"overlays/sprites.shapes"
 
 For np=0 To 7:ab(np)\n=16+np*8,8,1,1:Next
 For np=8 To 55:ab(np)\n=16+64+np-8+style*48,1,1,2:Next
-While Peek.w(##[$80B8] MidHandle(16+64+192-56+np))>0
+While Peek.w(Addr MidHandle(16+64+192-56+np))>0
 	w=ShapeWidth(16+64+192-56+np) LSR 3
 	h=ShapeHeight(16+64+192-56+np) LSR 3
 	ab(np)\n=16+64+192-56+np,1,w,h
@@ -257,7 +257,7 @@ End Statement
 
 	##[$CD10] 0,8,8,4:CludgeBitMap 0,0
 	Use lmaxlen 0:Boxf 0,0,7,7,2:MakeCookie 0
-	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 	##[$CD10] 3,8,8,4:CludgeBitMap 3,0
 	Use lmaxlen 0:Boxf 1,0,7,7,2:MakeCookie 3
@@ -275,8 +275,8 @@ End Statement
 	BitPlanesBitMap 4,5,15		 ;5 = front playfield
 	BitPlanesBitMap 6,7,32		 ;7 = dither
 
-	bmf.l=##[$80B8] lmaxlen(5)
-	bmb.l=##[$80B8] lmaxlen(0)
+	bmf.l=Addr lmaxlen(5)
+	bmb.l=Addr lmaxlen(0)
 
 	Use lmaxlen 7
 	For x=0 To 767 Step 32
@@ -294,7 +294,7 @@ End Statement
 
 .readtrack
 
-	LoadBitMap 1,"tracks/iff/track.fix"+Str$(tr):bm.l=##[$80B8] lmaxlen(1)
+	LoadBitMap 1,"tracks/iff/track.fix"+Str$(tr):bm.l=Addr lmaxlen(1)
 
 	d$="tracks/track."+Str$(tr)
 	e$="tracks/data."+Str$(tr)
@@ -322,8 +322,8 @@ End Statement
 	;
 	If WriteMem(0,e$)
 		##[$BE14] 0,&corner(0),16
-		##[$80BB]:globalloc ppl():##[$BE14] 0,&ppl(),6:##[$80BC] ppl()\x=-1
-		##[$80BB]:globalloc sp():##[$BE14] 0,&sp(),6:##[$80BC] sp()\x=-1
+		Repeat:globalloc ppl():##[$BE14] 0,&ppl(),6:Until ppl()\x=-1
+		Repeat:globalloc sp():##[$BE14] 0,&sp(),6:Until sp()\x=-1
 		freelast sp():freelast ppl():CloseFile 0
 	EndIf
 
@@ -373,7 +373,7 @@ End Statement
 	Gosub refreshoverlay
 	BitMapOutput 3
 
-	##[$80BB]
+	Repeat
 		VWait
 		a$=Inkey$:If a$<>"" Then a=Asc(a$) Else a=0
 
@@ -448,11 +448,11 @@ End Statement
 		Use lmaxlen 3
 		Box ppx(bp)-1,ppy(bp)-1,ppx(bp)+ab(bp)\w*8,ppy(bp)+ab(bp)\h*8,1
 
-	##[$80BC] a=27
+	Until a=27
 
 ;	End
 
-	pal.l=Peek.l(##[$80B8] SetCycle(0))+4
+	pal.l=Peek.l(Addr SetCycle(0))+4
 	For i=0 To 31
 		r.w=(Peek.b(pal) AND 255) LSR 4:pal+4
 		g.w=(Peek.b(pal) AND 255) LSR 4:pal+4
@@ -596,7 +596,7 @@ DEFTYPE .w n
 	For y=0 To 47					;standard blocks (c2)
 		For x=0 To 95
 			If mm(x,y)<0
-				getblock{Bank(0),##[$80B8] lmaxlen(2),x ASL 3,y ASL 3}
+				getblock{Bank(0),Addr lmaxlen(2),x ASL 3,y ASL 3}
 				mm(x,y)=chkblock{Bank(0),Bank(1)}+$e080
 			EndIf
 		Next
@@ -613,12 +613,12 @@ DEFTYPE .w n
 	newmem sp()
 	While globfree(sp())
 		newmem sue()
-		##[$80BB]
+		Repeat
 			If NOT globfree(sue())
 				globalloc sue():sue()=sp()\t:suen+1
 				c3+spri(sp()\t)\blocks
 			EndIf
-		##[$80BC] sue()=sp()\t
+		Until sue()=sp()\t
 	Wend
 
 	Gosub refreshoverlay
@@ -672,7 +672,7 @@ DEFTYPE .w n
 			##[$80CA] ppl()
 			If ab(\t)\f>1
 				Boxf \x,\y,\x+7,\y+7,0
-				longdiv ab(\t)\n+(fr ##[$80B9] ab(\t)\f),\x,\y
+				longdiv ab(\t)\n+(fr MOD ab(\t)\f),\x,\y
 			EndIf
 		Wend
 	EndIf
@@ -855,7 +855,7 @@ drawconcrete:
 
 	limit=6
 
-	##[$80BB]
+	Repeat
 		Dim List cb.cbok(4608)
 		hits=0:Gosub scancount
 		SortList cb(),SizeOf .cbok\diff
@@ -873,7 +873,7 @@ drawconcrete:
 			EndIf
 		Next
 		limit+2
-	##[$80BC] hits=0
+	Until hits=0
 	Return
 
 .scancount:
@@ -974,7 +974,7 @@ If ReadMem(0,"ram:tracks.bin")
 		;
 		j=0
 		;
-		##[$80BB]
+		Repeat
 			If bsize>8192 Then bsiz=8192 Else bsiz=bsize
 			th(i-1)\blocks[j]=ptr:j+1
 			*mine\Src=bsrc,bsiz,Bank(2)+14,BankSize(2)
@@ -982,7 +982,7 @@ If ReadMem(0,"ram:tracks.bin")
 			Exists 0,Bank(2),*mine\CrunLen+14
 			ptr+*mine\CrunLen+14
 			bsize-bsiz:bsrc+bsiz
-		##[$80BC] bsize=0
+		Until bsize=0
 		;
 		th(i-1)\info=ptr
 		FreeBank 0:LoadBank 0,"tracks/info."+Str$(i)

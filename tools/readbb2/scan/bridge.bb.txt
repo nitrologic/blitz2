@@ -37,7 +37,7 @@ Next
 
 sp=0:sb=0
 
-##[$80BB]
+Repeat
 	;
 	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
 	;
@@ -78,6 +78,6 @@ sp=0:sb=0
 	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
 	Locate 0,22:Print key,"	"
 
-##[$80BC] key=27
+Until key=27
 
 End

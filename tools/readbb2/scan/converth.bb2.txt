@@ -30,12 +30,12 @@ Function$ getline{}
 		a$=Edit$(128)
 		If Instr(a$,"*/")=0
 		 NPrint ";",a$
-		 ##[$80BE] If
+		 Pop If
 		 Goto blockloop
 		End If
 	 a$=Replace$(a$,"*/","**")
 	 NPrint ";",a$
-	 ##[$80BE] If:##[$80BE] If
+	 Pop If:Pop If
 	 Goto poo
 	End If
  End If
@@ -152,12 +152,12 @@ nxline:
 	 u-1
 	Else
 	 NPrint "End NewType"
-	 ##[$80BE] Select
+	 Pop Select
 	 Return
 	EndIf
 
  Case "UNION"
-	u=2:##[$80BE] Select:Goto nxline
+	u=2:Pop Select:Goto nxline
 
 	Case "UWORD":t$=".w"
 	Case "WORD":t$=".w"

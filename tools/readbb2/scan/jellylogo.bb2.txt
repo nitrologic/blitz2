@@ -16,20 +16,20 @@ destx=10 : desty=50
 wid=293	: hi=78
 Dim x(12),y(12)
 
-##[$80C8] strdat
+Restore strdat
 For i=1 To 12
 	Read x(i),y(i)
 Next i
 
 t=1 : db=1
-##[$80BB]
+Repeat
 	VWait
 	db=3-db
 	Use lmaxlen db
 	Scroll x(t),y(t),wid,hi,destx,desty,0
 	Show db
 	t=t+1 : If t=13 Then t=1
-##[$80BC] Joyb(0)=1
+Until Joyb(0)=1
 
 .strdat
 Data 1,1

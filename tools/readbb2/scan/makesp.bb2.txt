@@ -2,14 +2,14 @@
 If NumPars<>2 Then End
 
 LoadShape 0,Par$(1),0
-While Peek.w(##[$80B8] MidHandle(s))
+While Peek.w(Addr MidHandle(s))
 	s+1
 Wend
 
 For k=0 To s-1
 GetaSprite k,k
 h$+Mkl$(Len(f$)+s*4)
-*sp.sprite=##[$80B8] SpriteMode(k):d.l=*sp\_data
+*sp.sprite=Addr SpriteMode(k):d.l=*sp\_data
 f$+Mki$(*sp\_height-1)+Mki$(*sp\_nextoff+4)
 For l=1 To *sp\_channels
 f$+Mkl$(0)

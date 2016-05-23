@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/analyzer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/analyzer.bb
-##[$80C3]
+WBStartup
 AMIGA
 DEFTYPE.l
 lmaxlen 0,160,128,1
@@ -22,7 +22,7 @@ Poke.w $bfd200,%100	 ;Oh my god !
 
 vumtipe=0
 
-##[$80BB]
+Repeat
 ev=Event
 If ev=256
 	If MenuHit=0
@@ -39,7 +39,7 @@ BlockScroll
 	If	vumtipe=1 Then Gosub vumetre2
 VWait
 BitMaptoWindow 0,0,0,0,20,11,140,64
-##[$80BC] ev=$200
+Until ev=$200
 End
 
 name:
@@ -63,7 +63,7 @@ name:
 	NPrint "						 62720 RETY"
 	NPrint "							 FRANCE"
 
-##[$80BB]
+Repeat
 ev=Event
 Use lmaxlen 0
 BlockScroll
@@ -71,7 +71,7 @@ BlockScroll
 	If	vumtipe=1 Then Gosub vumetre2
 VWait
 BitMaptoWindow 0,0,0,0,20,11,140,64
-##[$80BC] ev=64 AND GadgetHit=0
+Until ev=64 AND GadgetHit=0
 	CloseWindow 1
 Return
 

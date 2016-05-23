@@ -4,11 +4,11 @@
 ;
 ;incscan INPUTFILE [OUTPUTFILE [COPY]]
 ;
-##[$80B4]
+SetErr
 	err
 	NPrint "Usage: INCSCAN inputfile [outputfile [copy]]"
 	End
-End ##[$80B4]
+End SetErr
 
 If NumPars<1 OR NumPars>3 Then Goto err
 

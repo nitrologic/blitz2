@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/cck/cck.bb2
-##[$80C3]:##[$80CC]:##[$80CB]
+WBStartup:##[$80CC]:##[$80CB]
 ;
 ;Marks Computer Construction Kit.
 ;
@@ -227,7 +227,7 @@ Case 256	;menupick
 			If nx>=0 AND nx<80 AND ny>=0 AND ny<40
 				bf=board(nx,ny)\flags
 				If bf>2 AND bf<12 AND bf<>9
-					##[$80BE] For:##[$80BE] For:BlitMode EraseMode
+					Pop For:Pop For:BlitMode EraseMode
 					For xa2=0 To 2:For ya2=-1 To 1
 					mx=nx+xa2:my=ny+ya2
 					longdiv 1,mx LSL 2,my LSL 2
@@ -551,9 +551,9 @@ If a=64
 		stp=-1
 	Case 3	;pause
 		a=0:While a<>64 Then a=WaitEvent
-		##[$80BE] Select:Goto handgad
+		Pop Select:Goto handgad
 	Case 4	;step
-		##[$80BE] Select:ste=-1:Goto switches
+		Pop Select:ste=-1:Goto switches
 	Case 5	;zap!
 		zap=0
 	End Select

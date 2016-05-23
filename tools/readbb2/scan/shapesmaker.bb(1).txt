@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/tools/shapesmaker.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/tools/shapesmaker.bb
-##[$80C3]
+WBStartup
 ;
 ;Marks shape gatherer prog.
 ;
@@ -81,10 +81,10 @@ If a=256	;menu picked
 			f$=FileRequest$("ILBM File?",pa$,fi$)
 			If f$
 				;
-				##[$80B4]
+				SetErr
 					error{"Can't suss IFF file!"}
 					Goto here2
-				End ##[$80B4]
+				End SetErr
 				;
 				ILBMDepth f$
 				fw=ILBMViewMode:fh=DecodeILBM:fd=##[$D087]
@@ -121,17 +121,17 @@ If a=256	;menu picked
 					MenusOn
 					If nsh>=0
 						If msh
-							##[$80B4]
+							SetErr
 								error{"Can't save shapes!"}
 								Goto here2
-							End ##[$80B4]
+							End SetErr
 							SaveShapes 0,nsh,o$
 						End If
 						If msp
-							##[$80B4]
+							SetErr
 								error{"Can't save sprites!"}
 								Goto here2
-							End ##[$80B4]
+							End SetErr
 							SaveSprites 0,nsh,o$
 						End If
 					End If
@@ -153,10 +153,10 @@ If a=256	;menu picked
 			Print "Colour to remove:"
 			ClearString 1,1
 			ex=0
-			##[$80BB]
-				##[$80BB]
+			Repeat
+				Repeat
 					a=WaitEvent
-				##[$80BC] EventWindow=1
+				Until EventWindow=1
 				If a=64
 					If GadgetHit=3	;cancel
 						ButtonId 1,1,os$
@@ -165,7 +165,7 @@ If a=256	;menu picked
 					EndIf
 					ex=-1
 				EndIf
-			##[$80BC] ex
+			Until ex
 			Free localstat 1:Use localstat 0
 		EndIf
 	End Select
@@ -175,10 +175,10 @@ Goto here2
 doconvert
 ;
 BitMapOutput 0:Locate 0,1.5:Print "Shape:	 "
-For k=0 To ##[$80C4] MidHandle-1
+For k=0 To Maximum MidHandle-1
 Free MidHandle k
 Next
-For k=0 To ##[$80C4] SpriteMode-1
+For k=0 To Maximum SpriteMode-1
 Free SpriteMode k
 Next
 ;

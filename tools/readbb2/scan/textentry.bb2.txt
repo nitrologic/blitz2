@@ -120,7 +120,7 @@ Statement TextEntryUpdate{Full}
 ; improvements.
 Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 ##[$80CA] TextEntryInfo
-	*W.Window=Peek.l(##[$80B8] localstat(\inwindow))
+	*W.Window=Peek.l(Addr localstat(\inwindow))
 	*F.TextFont=*W\IFont
 	FONTWIDTH=*F\tf_XSize
 	FONTHEIGHT=*F\tf_YSize
@@ -183,7 +183,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 	If \Winx+\Winw>##[$B79D] Then \Winx=##[$B79D]-\Winw
 	If \Winy+\Winh>##[$B79E] Then \Winy=##[$B79E]-\Winh
 	localstat n,\Winx,\Winy,\Winw,\Winh,$1000|$1|$2|$8|$400,Titl$,1,2,\GList
-	*W.Window=Peek.l(##[$80B8] localstat(n))
+	*W.Window=Peek.l(Addr localstat(n))
 	*F.TextFont=*W\IFont
 	FONTWIDTH=*F\tf_XSize
 	FONTHEIGHT=*F\tf_YSize
@@ -201,7 +201,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 	TextEntryInfo\items=Int(Len(ot$)/\w)+1
 	TextEntryInfo\pos=1
 	TextEntryUpdate{True}
-	##[$80BB]
+	Repeat
 		Ev.l=WaitEvent
 		Win.l=EventWindow
 		Select Win
@@ -252,23 +252,23 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 				Case $20
 					Select GadgetHit
 						Case 4
-							##[$80BB]
+							Repeat
 								VWait
 								If \items>\h
 									op=\pos
 									\pos=(VPropPot(\GList,4))*(\items-\h+1)+1
 									If \pos<>op Then TextEntryUpdate{True}
 								EndIf
-							##[$80BC] Event=64
+							Until Event=64
 						Case 5
-							##[$80BB]
+							Repeat
 								TextEntry_op=\pos
 								If \pos>1 Then \pos-1
 								If TextEntry_op<>\pos Then TextEntryUpdate{True}
 								If nippy Then VWait 1 Else VWait 10: nippy=True
-							##[$80BC] Event=64
+							Until Event=64
 						Case 6
-							##[$80BB]
+							Repeat
 								TextEntry_op=\pos
 								If \pos<\items-\h+1 Then \pos+1
 								If TextEntry_op<>\pos Then TextEntryUpdate{True}
@@ -278,7 +278,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 									VWait 10
 									nippy=True
 								EndIf
-							##[$80BC] Event=64
+							Until Event=64
 					End Select
 				Case $400
 					k$=Inkey$
@@ -316,13 +316,13 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 					If TextEntry_op=\pos Then TextEntryUpdate{False} Else TextEntryUpdate{True}
 				Case $80000
 					Activate \inwindow
-					##[$FFB0](Peek.l(##[$80B8] localstat(\inwindow)))
+					##[$FFB0](Peek.l(Addr localstat(\inwindow)))
 			End Select
 		Default
 			Activate \inwindow
-			##[$FFB0](Peek.l(##[$80B8] localstat(\inwindow)))
+			##[$FFB0](Peek.l(Addr localstat(\inwindow)))
 		End Select
-	##[$80BC] fin
+	Until fin
 	\Winx=WindowX
 	\Winy=WindowY
 	\Winw=WindowWidth

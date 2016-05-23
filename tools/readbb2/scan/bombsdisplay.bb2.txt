@@ -77,7 +77,7 @@ Statement UpdateTime{ *bombptr.gameVars}
 		If \gameInProgress=1
 				VWait
 				\timeInProgress = \timeInProgress + 1
-				If \timeInProgress ##[$80B9] #oneSecDelay=0
+				If \timeInProgress MOD #oneSecDelay=0
 ; Time to display another second lapsed
 						timeStr$ = Str$(\timeInProgress/#oneSecDelay)
 						length.w = Len(timeStr$)
@@ -89,7 +89,7 @@ Statement UpdateTime{ *bombptr.gameVars}
 						If theRating>\rating Then \rating = \rating+3 Else \rating = theRating
 						WLocate 200,7:Print Str$(\rating)
 				End If
-				If \timeInProgress ##[$80B9] (#oneSecDelay/2)=0
+				If \timeInProgress MOD (#oneSecDelay/2)=0
 						UpdateProgressBar{ *bombptr}
 				End If
 		End If
@@ -105,15 +105,15 @@ Statement ShowAllBombs{ *bombptr.gameVars, num.l}
 		\gameInProgress = 3
 		\rating = 0
 ; play the explosion and the animation
-		xpos = \displayXCoord+(((num-1) ##[$80B9] \wide)-\leftWide)*10
+		xpos = \displayXCoord+(((num-1) MOD \wide)-\leftWide)*10
 		ypos = \displayYCoord+(num/\wide-\leftHigh)*10
-		If num ##[$80B9] \wide=0 Then ypos = ypos-10
+		If num MOD \wide=0 Then ypos = ypos-10
 		j.l=0
 		StartMedModule 1
 		For i.l=1 To 60
 				VWait
 				PlayMed
-				If i ##[$80B9] 3=0 Then WBlit 52+j, xpos,ypos:j=j+1
+				If i MOD 3=0 Then WBlit 52+j, xpos,ypos:j=j+1
 		Next i
 		For i=64 To 0 Step -1
 				VWait
@@ -124,9 +124,9 @@ Statement ShowAllBombs{ *bombptr.gameVars, num.l}
 		For i=1 To \totalSquares
 				If \square[i]\hasBomb<0
 						If \square[i]\state=0 Then \square[i]\state = 2
-						xpos = \displayXCoord+(((i-1) ##[$80B9] \wide)-\leftWide)*10
+						xpos = \displayXCoord+(((i-1) MOD \wide)-\leftWide)*10
 						ypos = \displayYCoord+(i/\wide-\leftHigh)*10
-						If i ##[$80B9] \wide=0 Then ypos = ypos - 10
+						If i MOD \wide=0 Then ypos = ypos - 10
 						If \square[i]\state=4
 								\square[i]\hasBomb = 13
 								\square[i]\state = 2

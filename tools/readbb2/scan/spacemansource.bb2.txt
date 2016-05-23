@@ -137,8 +137,8 @@
 ;			Ok!	* The aliens images shows after an explosion
 ;
 ;			Ok!	* Dont let switches explode
-##[$80C3]:
-##[$80B4]:End:End ##[$80B4]
+WBStartup:
+SetErr:End:End SetErr
 BLITZ
 DisplayOff			;Shut down display
 MOVE #0,$dff180 ;Make display black
@@ -201,8 +201,8 @@ Dim oldobjlist(#maxrobj)
 Dim animlist(#nrofanims,#nrofframes)
 Dim levelnames$(#nroflevels)
 
-stoffs.w=Int(2*##[$80BA]/0.1)	;Used for generating a list for the
-Dim staroffs.w(2*##[$80BA]/0.1);Scrolling stars
+stoffs.w=Int(2*Pi/0.1)	;Used for generating a list for the
+Dim staroffs.w(2*Pi/0.1);Scrolling stars
 
 Statement drawstars{bmap.l,dx.w,dy.w,drawflag}
 	UNLK	a4
@@ -623,7 +623,7 @@ While RawStatus($45)=0 AND RawStatus($10)=0
 		Next
 		If gameover=True
 			goy.q+0.2
-			If goy>2*##[$80BA] Then goy=0
+			If goy>2*Pi Then goy=0
 			BBlit db,gameovershapebase,92,64+20*HSin(goy)
 		EndIf
 		;MOVE.w #$50,$dff180
@@ -736,7 +736,7 @@ While RawStatus($45)=0 AND RawStatus($10)=0
 				pause=True
 				Use SetCycle 4
 			EndIf
-			##[$80BB]:##[$80BC] RawStatus($19)=0
+			Repeat:Until RawStatus($19)=0
 		EndIf
 	EndIf
 Wend
@@ -1006,7 +1006,7 @@ shcont0:
 	DBRA d1,shloop0		;Go through all objects
 	MOVE.w 2(a1),d2		;Return object in turn to draw
 	MOVE.w #-1,(a1)				 ;Reset position so its not included
-	##[$80BD] d2,b				;again
+	PutReg d2,b				;again
 Return
 
 .makedrawlist
@@ -2016,7 +2016,7 @@ c16:
 	CMP.l	 #stack,a2	 ;Check if stack is empty
 	BGE		 checkeast	 ;If not, continue.
 c17:
-	##[$80BD]	d2,nroftimes
+	PutReg	d2,nroftimes
 Return
 
 
@@ -2040,7 +2040,7 @@ stack:
 	Return
 
 .initspaceman
-	##[$80C8] spdata
+	Restore spdata
 	Read sp\mapx,sp\mapy
 
 	For a=0 To 3
@@ -2252,7 +2252,7 @@ spdata:
 	Return
 
 .initanimlists
-	##[$80C8] animlists
+	Restore animlists
 	For a=1 To #nrofanims
 		For b=0 To #nrofframes
 			Read animlist(a,b)
@@ -2442,7 +2442,7 @@ EndIf
 Return
 
 .readlevelnames
-	##[$80C8] levels
+	Restore levels
 	For a=1 To #nroflevels
 		Read levelnames$(a)
 	Next
@@ -2463,11 +2463,11 @@ Return
 ;Find and store the bitplan pointers fo the two bitmaps
 ;Init bitplane pointers
 For a=0 To #depth-1
-	bplptr.l=Peek.l(##[$80B8] lmaxlen(0)+8+a*4)
+	bplptr.l=Peek.l(Addr lmaxlen(0)+8+a*4)
 	Poke.l ?bplbase0+a*4,bplptr
 Next
 For a=0 To #depth-1
-	bplptr.l=Peek.l(##[$80B8] lmaxlen(1)+8+a*4)
+	bplptr.l=Peek.l(Addr lmaxlen(1)+8+a*4)
 	Poke.l ?bplbase1+a*4,bplptr
 Next
 ;Calculate the positions and velocities for the stars
@@ -2487,7 +2487,7 @@ v=Int (Rnd(3))+1
  Poke.w ?starbase1+a*8+6,0
 Next
 b=0
-For lg.f=0 To 2*##[$80BA] Step 0.1
+For lg.f=0 To 2*Pi Step 0.1
 	staroffs.w(b)=Int(3*HSin(lg))
 	b=b+1
 Next

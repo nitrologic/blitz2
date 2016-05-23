@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/HopalongAD/HopalongAD.BB2
-##[$80C3]:##[$80CC]
+WBStartup:##[$80CC]
 ;SetErr:End:End SetErr
 
 FindScreen 0,"Workbench Screen"
@@ -52,7 +52,7 @@ cspeed=250
 Gosub showparams
 InnerCls 1
 
-##[$80BB]
+Repeat
 	col2=col+1
 	For it=0 To cspeed
 		Select kind
@@ -91,7 +91,7 @@ InnerCls 1
 		EndIf
 	EndIf
 	col=QWrap(col+1,0,255)
-##[$80C7]
+Forever
 
 .iplot
 xx=wid*2+gx*x

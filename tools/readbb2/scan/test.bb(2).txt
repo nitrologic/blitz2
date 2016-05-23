@@ -77,17 +77,17 @@ Dim f.face(60)
 			If a$="AXIS"
 				##[$BE14] 0,&p(0),6:i=1:j=1:a$=Inkey$(4)
 				If a$="PNTS"
-					##[$80BB]
+					Repeat
 						ff.l=&p(i):##[$BE14] 0,ff,4:a$=Peeks$(ff,4)
 						If a$<>"FACE"
 							##[$BE14] 0,ff+4,2
 							p(i)\x-p(0)\x:p(i)\y-p(0)\y:p(i)\z-p(0)\z:i+1
 						EndIf
-					##[$80BC] a$="FACE"
-					##[$80BB]
+					Until a$="FACE"
+					Repeat
 						ff.l=&f(j):##[$BE14] 0,ff,4:a$=Peeks$(ff,4)
 						If a$<>"AXIS" Then ##[$BE14] 0,ff+4,6:j+1
-					##[$80BC] a$="AXIS" OR DosBuffLen(0)
+					Until a$="AXIS" OR DosBuffLen(0)
 				EndIf
 				If *robot=0
 					If globalloc(shapes())
@@ -286,8 +286,8 @@ End NEWTYPE
 
 .initui
 	Dim List b.button(32)
-	##[$80C8] topui:id=10:c=3:Gosub addbuttons
-	##[$80C8] mainui:id=0:c=7:Gosub addbuttons
+	Restore topui:id=10:c=3:Gosub addbuttons
+	Restore mainui:id=0:c=7:Gosub addbuttons
 	Return
 
 topui:
@@ -344,7 +344,7 @@ mainui:
 	While globfree(b())
 		##[$80CA] b()
 		If PColl(px,py,1,1,\x,\y,\w,\h)
-			id=\id:##[$80BE] While:Return
+			id=\id:Pop While:Return
 		EndIf
 	Wend
 	Return
@@ -378,7 +378,7 @@ addviewer:
 	Return
 
 .palettergb
-	##[$80C8] rgbcols
+	Restore rgbcols
 ;	For i=0 To 7:Read rr.w,gg.w,bb.w:PalRGB 0,i,rr,gg,bb:Next
 	DisplayPalette 0,0
 	Return
@@ -387,7 +387,7 @@ rgbcols:
 	Data.w 8,8,8,13,9,0,8,10,14,12,3,2
 
 .paletterb
-	##[$80C8] rbcols
+	Restore rbcols
 	For i=0 To 15:Read rr.w,gg.w,bb.w:StopCycle 0,i,rr,gg,bb:Next
 	DisplayPalette 0,0
 	Return

@@ -3,7 +3,7 @@
 ; WB Starfield hack by Iain Catterick
 ;
 
-##[$80C3]:freest 0:ScreensBitMap 0,0
+WBStartup:freest 0:ScreensBitMap 0,0
 
 NEWTYPE .STAR
 	X.q
@@ -23,7 +23,7 @@ localstat 0,0,0,100,11,$E,"STARS",2,1
 
 ##[$80CA] MYSTAR()
 
-##[$80BB]
+Repeat
 
 If globalloc(MYSTAR())
 	\X=WBWidth;-Int(Rnd(40))
@@ -39,7 +39,7 @@ Gosub DRAWSTARS
 
 EV.l=Event
 
-##[$80BC] EV=$200
+Until EV=$200
 
 End
 

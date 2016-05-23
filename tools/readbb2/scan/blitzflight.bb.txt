@@ -4,7 +4,7 @@
 
 ;INCLUDE "debug.bb"
 .progtop
-##[$80C3]
+WBStartup
 
 NEWTYPE .var						;this structure is passed to flight
 

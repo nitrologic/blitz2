@@ -27,7 +27,7 @@ For i=0 To 31
 Next
 
 sh=224+32:x=0:y=120:oh=ShapeHeight(sh)
-While Peek.w(##[$80B8] MidHandle(sh))>0
+While Peek.w(Addr MidHandle(sh))>0
 	w=ShapeWidth(sh)
 	h=ShapeHeight(sh)
 	If h<>oh OR x+ShapeWidth(sh)>320

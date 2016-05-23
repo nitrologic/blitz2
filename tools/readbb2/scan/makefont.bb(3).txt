@@ -13,7 +13,7 @@ If ReadMem(0,"font8.bb")
 	FileOutput 0
 	NPrint "hifont:"
 	For i=0 To 35
-		Use lmaxlen 0:GetaShape 1,i*8,0,8,5:CludgeBitMap 1,1:a.l=Peek.l(##[$80B8] lmaxlen(1)+8)
+		Use lmaxlen 0:GetaShape 1,i*8,0,8,5:CludgeBitMap 1,1:a.l=Peek.l(Addr lmaxlen(1)+8)
 		Print "	dc.b	"
 		For j.l=0 To 4
 			Print "$"+Right$(Hex$(Peek.w(a+j+j) ASR 8),2)
@@ -34,7 +34,7 @@ If ReadMem(0,"font4.bb")
 	FileOutput 0
 	NPrint "lofont:"
 	For i=0 To 35
-		Use lmaxlen 0:GetaShape 1,i*4,0,4,5:CludgeBitMap 1,1:a.l=Peek.l(##[$80B8] lmaxlen(1)+8)
+		Use lmaxlen 0:GetaShape 1,i*4,0,4,5:CludgeBitMap 1,1:a.l=Peek.l(Addr lmaxlen(1)+8)
 		Print "	dc.b	"
 		For j.l=0 To 4
 			Print "$"+Right$(Hex$(Peek.w(a+j+j) ASR 12),1)

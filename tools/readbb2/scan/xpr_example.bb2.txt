@@ -293,7 +293,7 @@ End NEWTYPE
 ; Main program starts here
 .MAIN_PROGRAM
 
-##[$80C3]
+WBStartup
 freest 0
 
 remline 0,"topaz.font",8
@@ -468,7 +468,7 @@ End
 	MOVE.l d3,a0
 	JSR (a1)
 	JSR RestoreBlitz
-	##[$80BD] d0,Config\XPRResult
+	PutReg d0,Config\XPRResult
 	CloseWindow 0
 	Config\XPRWindowOpen = False
 	Return
@@ -517,8 +517,8 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a1,accessmode.l
-	##[$80BD] a0,fname.l
+	PutReg a1,accessmode.l
+	PutReg a0,fname.l
 	fname$= Peek$(fname)
 	result.l = 0
 	Select UCase$(Peek$(accessmode))
@@ -556,7 +556,7 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,fnum.l
+	PutReg a0,fnum.l
 	##[$FE02](fnum)
 	JSR SaveBlitz
 	MOVEQ.l #0,d0
@@ -569,10 +569,10 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,buff.l
-	##[$80BD] d0,size.l
-	##[$80BD] d1,counter.l
-	##[$80BD] a1,fnum.l
+	PutReg a0,buff.l
+	PutReg d0,size.l
+	PutReg d1,counter.l
+	PutReg a1,fnum.l
 	GetReg d0,(##[$FE04](fnum,buff,counter*size) / size)
 	JSR SaveBlitz
 	MOVEM.l (a7)+,d2-d7/a2-a6
@@ -584,10 +584,10 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,buff.l
-	##[$80BD] d0,size.l
-	##[$80BD] d1,counter.l
-	##[$80BD] a1,fnum.l
+	PutReg a0,buff.l
+	PutReg d0,size.l
+	PutReg d1,counter.l
+	PutReg a1,fnum.l
 	GetReg d0,(##[$FE03](fnum,buff,counter*size) / size)
 	JSR SaveBlitz
 	MOVEM.l (a7)+,d2-d7/a2-a6
@@ -599,9 +599,9 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,fnum.l
-	##[$80BD] d1,origin.l
-	##[$80BD] d0,offset.l
+	PutReg a0,fnum.l
+	PutReg d1,origin.l
+	PutReg d0,offset.l
 	result.l = 0
 	Select origin
 		Case 0
@@ -624,8 +624,8 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,fname.l
-	##[$80BD] d0,typeofinfo.l
+	PutReg a0,fname.l
+	PutReg d0,typeofinfo.l
 	fname$=Peek$(fname)
 	Select typeofinfo
 		Case 1
@@ -646,9 +646,9 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,buff.l
-	##[$80BD] d1,timeout.l
-	##[$80BD] d0,size.l
+	PutReg a0,buff.l
+	PutReg d1,timeout.l
+	PutReg d0,size.l
 	If CheckCarrier{}
 		If timeout.l = 0
 			; read all available characters in buffer
@@ -671,7 +671,7 @@ Return
 
 			*TimerIO\tr_node\io_Command = #TR_ADDREQUEST
 			*TimerIO\tr_time\tv_secs	= timeout/1000000
-			*TimerIO\tr_time\tv_micro = timeout ##[$80B9] 1000000
+			*TimerIO\tr_time\tv_micro = timeout MOD 1000000
 
 			*SerialIO\IOSer\io_Command = #CMD_READ
 			*SerialIO\IOSer\io_Length = size.l
@@ -742,8 +742,8 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,buff.l
-	##[$80BD] a1,fname.l
+	PutReg a0,buff.l
+	PutReg a1,fname.l
 
 	If globfree(Send$())
 		Poke$ buff, Send$()
@@ -764,8 +764,8 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,buff.l
-	##[$80BD] d0,size.l
+	PutReg a0,buff.l
+	PutReg d0,size.l
 	If CheckCarrier{}
 		*SerialIO\IOSer\io_Command = #CMD_WRITE
 		*SerialIO\IOSer\io_Length = size.l
@@ -799,7 +799,7 @@ Return
 
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,fname.l
+	PutReg a0,fname.l
 	KillFile Peek$(fname)
 	MOVEQ.l #0,d0						; always return successful
 	JSR SaveBlitz
@@ -862,7 +862,7 @@ a6store:
 .xlib_update
 	MOVEM.l d2-d7/a2-a6,-(a7)
 	JSR RestoreBlitz
-	##[$80BD] a0,*updatestruct.XPR_UPDATE
+	PutReg a0,*updatestruct.XPR_UPDATE
 
 	If NOT Config\XPRWindowOpen
 		; Window not open,	Open transfer window

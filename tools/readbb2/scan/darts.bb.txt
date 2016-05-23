@@ -131,8 +131,8 @@ Dim List bang.object(10)
 
 Dim rots.w(2049):rt.l=&rots(0)
 For i=0 To 2048 Step 2
-	rots(i)=HSin(i*2*##[$80BA]/2048)*32766
-	rots(i+1)=HCos(i*2*##[$80BA]/2048)*32766
+	rots(i)=HSin(i*2*Pi/2048)*32766
+	rots(i+1)=HCos(i*2*Pi/2048)*32766
 Next
 
 ;setup display
@@ -152,11 +152,11 @@ Mouse On:MouseArea -150,-150,120,120:BlitzKeys On
 
 .mainloop
 
-##[$80BB]
+Repeat
 	VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db	;double buffer
-	 mycls{Peek.l (##[$80B8] lmaxlen(db)+8)}
-	 mycls{Peek.l (##[$80B8] lmaxlen(db)+12)}
-	 mycls{Peek.l (##[$80B8] lmaxlen(db)+16)}
+	 mycls{Peek.l (Addr lmaxlen(db)+8)}
+	 mycls{Peek.l (Addr lmaxlen(db)+12)}
+	 mycls{Peek.l (Addr lmaxlen(db)+16)}
 ;do you
 	x=MouseX:y=MouseY
 	Line x+155,y+128,x+165,y+128,1:Line x+160,y+123,x+160,y+133,1
@@ -166,7 +166,7 @@ Mouse On:MouseArea -150,-150,120,120:BlitzKeys On
 	Gosub addnme
 	Gosub movenme
 	Gosub dobang
-##[$80BC] RawStatus($45)
+Until RawStatus($45)
 
 End
 

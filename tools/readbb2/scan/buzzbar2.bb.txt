@@ -199,10 +199,10 @@ sdb=3
 	ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
 	Use lmaxlen 1-db:BlockScroll:Use lmaxlen db:BlockScroll
 	cc=0:ci=0:l=0:db=0
-	##[$80BB]
+	Repeat
 		VWait
 		ShowF db:db=1-db:BitMapOutput db:Colour 1,0
-		Poke ##[$80B8] lmaxlen(db)+4,1
+		Poke Addr lmaxlen(db)+4,1
 		Use lmaxlen db:Scroll 0,4,320,224,0,0,1-db:##[$FF22]
 		If db=0
 			Locate 1,27:Print a$(l):l+1:If l>numl Then l=1
@@ -218,11 +218,11 @@ sdb=3
 			End Select
 			ci+1:If ci=4 Then ci=0
 		EndIf
-		Poke ##[$80B8] lmaxlen(db)+4,3
+		Poke Addr lmaxlen(db)+4,3
 		If (RawStatus($50) OR Joyx(1)=-1) Then nump=1:Gosub playgame
 		If (RawStatus($51) OR Joyx(1)=1) Then nump=2:Gosub playgame
 		If RawStatus($59) Then End
-	##[$80C7]
+	Forever
 
 .playgame
 	Use SetCycle 1
@@ -255,7 +255,7 @@ sdb=3
 	LoopSound 4,4:Volume 4,0
 
 .mainloop
-	##[$80BB]
+	Repeat
 		If RawStatus($45) Then End
 		VWait
 		ShowF db,32,32
@@ -275,7 +275,7 @@ sdb=3
 		upd+1:If upd>#upd Then upd=0
 		*p\ptimer+1
 		If (*p\ptimer AND 7)=0 Then ct3+1:If ct3=3 Then ct3=0
-	##[$80BC] *p\status=-1 AND numexp=0
+	Until *p\status=-1 AND numexp=0
 	ClearList nme()
 	ClearList bul()
 	ClearList fire()
@@ -626,14 +626,14 @@ sdb=3
 
 .setupsincos
 	For i=0 To 1023
-		rad.f=i*##[$80BA]/512
+		rad.f=i*Pi/512
 		qsin(i)=HSin(rad)
 		qcos(i)=HCos(rad)
 	Next
 	Return
 
 .setuppalette
-	##[$80C8] scanpalette
+	Restore scanpalette
 	For i=0 To 7:Read r,g,b:StopCycle 0,i,r,g,b:Next
 	r=14:g=12:b=12:Gosub planetcolor
 	Return
@@ -665,7 +665,7 @@ sdb=3
 	Return
 
 .setuppcols
-	##[$80C8] pcolors
+	Restore pcolors
 	For i=0 To 4:Read r,g,b:pcols(i)\r=r,g,b:Next
 	Return
 
@@ -680,22 +680,22 @@ pcolors:
 	##[$80CA] patern(i)
 	d=-1:n=6						 ;num aliens per wave=n
 	For i=1 To 199
-		prpt=i ##[$80B9] 5
+		prpt=i MOD 5
 		If prpt=1
-			##[$80C8] patdata
+			Restore patdata
 			If d<7 Then d+1 Else n+1					;increase difficulty
 		EndIf
 		\pcol=prpt
 		Read acode
 		\numhumes=acode
 		j=0
-		##[$80BB]
+		Repeat
 			Read acode
 			If acode>-1
 				\waves[j]\nme=alien(acode+d),0,3,500,n,1,0
 				j+1
 			EndIf
-		##[$80BC] acode=-1
+		Until acode=-1
 		\waves[j]\nme=0
 	Next
 	Return

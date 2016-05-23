@@ -31,7 +31,7 @@ LoadBitMap 0,"track.iff",0
 
 ##[$CD10] 2,64,128,5
 CludgeBitMap 2,2
-shapetosprite{##[$80B8] MidHandle(2),##[$80B8] Sprite(0)}
+shapetosprite{Addr MidHandle(2),Addr Sprite(0)}
 Use lmaxlen 2:ReMap 1,17:ReMap 2,18:ReMap 3,19
 MakeCookie 2:longdiv 2,10,10
 

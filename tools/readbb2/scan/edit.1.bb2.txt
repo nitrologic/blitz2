@@ -12,9 +12,9 @@ Format "##"
 ;	NPrint k,":"
 ;Next
 
-##[$80BB]
+Repeat
 
-	##[$80BB]
+	Repeat
 		ev.l=Event
 		Select ev
 			Case $8
@@ -22,7 +22,7 @@ Format "##"
 				y=QLimit(Int(WMouseY/8),0,20)
 				WTitle Str$(x)+","+Str$(y),""
 		End Select
-	##[$80BC] ev=0
+	Until ev=0
 
 	WLocate 0,y*8+2
 	EditFrom x
@@ -45,7 +45,7 @@ Format "##"
 			If y<20 Then y+1
 	End Select
 
-##[$80BC] EditExit=27
+Until EditExit=27
 
 End
 

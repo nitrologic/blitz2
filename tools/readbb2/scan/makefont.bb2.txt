@@ -8,7 +8,7 @@ EndIf
 
 allocst 0,9:ScreensBitMap 0,0:BlockScroll:LoadBitMap 0,Par$(1)
 
-bp=Peek.l(##[$80B8] lmaxlen(0)+8)
+bp=Peek.l(Addr lmaxlen(0)+8)
 
 If ReadMem(0,"chars8.b")
 	For y=1 To 8

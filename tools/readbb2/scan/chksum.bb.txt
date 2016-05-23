@@ -12,14 +12,14 @@ End Function
 If ReadMem(0,"checksums")
 	FileOutput 0
 	Read f$
-	##[$80BB]
+	Repeat
 		FreeBank 0
 		LoadBank 0,f$
 		size.l=BankSize(0) LSR 2
 		chek.l=chksum{Bank(0),size}
 		NPrint "dc.l ",size,",",chek
 		Read f$
-	##[$80BC] f$="*"
+	Until f$="*"
 	CloseFile 0
 EndIf
 End

@@ -69,7 +69,7 @@ DisplayPalette 0,0
 CreateDisplay 0
 
 For h=0 To 359
-	a=(h*##[$80BA])/180
+	a=(h*Pi)/180
 	sn(h)=HSin(a)
 	sn(h+360)=sn(h)
 Next h
@@ -86,12 +86,12 @@ Next h
 
 dbuffer=0
 
-bitaddress(0)=##[$80B8] lmaxlen(0)
-bitaddress(1)=##[$80B8] lmaxlen(1)
+bitaddress(0)=Addr lmaxlen(0)
+bitaddress(1)=Addr lmaxlen(1)
 
 startangl=0
 
-##[$80BB]
+Repeat
 	VWait
 	DisplayBitMap 0,dbuffer
 	dbuffer=1-dbuffer
@@ -99,7 +99,7 @@ startangl=0
 	assembler_cls{bitaddress(dbuffer)}
 
 	ang=startangl
-	startangl+15 : If startangl>359 Then startangl=startangl ##[$80B9] 360
+	startangl+15 : If startangl>359 Then startangl=startangl MOD 360
 	For sta=0 To #num_layers
 		dist=startx(sta)
 		x.w=dist : ya.w=starty(sta)
@@ -139,7 +139,7 @@ startangl=0
 		Next h
 	Next sta
 
-##[$80BC] Joyb(0)
+Until Joyb(0)
 FreeSlices
 QAMIGA
 End

@@ -54,7 +54,7 @@ If Cls(x+x2,y+y2)
 		xo(s)=xo(ssz):yo(s)=yo(ssz):s(s)=sss
 		Next
 	EndIf
-	##[$80BE] For:##[$80BE] For:Goto out
+	Pop For:Pop For:Goto out
 EndIf
 Next y2,x2
 out
@@ -67,7 +67,7 @@ If ReadMem(0,Par$(2))
 	For k=1 To s
 	Print Mki$(xo(k)),Mki$(yo(k))
 	Print Mkq$(x(k)*scl),Mkq$(y(k)*scl)
-	*sh.shape=##[$80B8] MidHandle(s(k)):d.l=*sh\_data
+	*sh.shape=Addr MidHandle(s(k)):d.l=*sh\_data
 	Print Mki$(Peek.w(d)),Mki$(Peek.w(d+4)),Mki$(Peek.w(d+8))
 	d+2
 	Print Mki$(Peek.w(d)),Mki$(Peek.w(d+4)),Mki$(Peek.w(d+8))

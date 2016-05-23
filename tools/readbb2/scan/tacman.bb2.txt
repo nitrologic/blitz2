@@ -47,7 +47,7 @@
 ;SetErr :End :End SetErr
 #test=0	; * * * * * * * * * * * * *
 
-DEFTYPE .w :##[$80C3]
+DEFTYPE .w :WBStartup
 db=0 :xtiles=21 :ytiles=17 :lives=0 :score.l=0 :lev=0 :bonlev=0
 xsize=16 : ysize=xsize :dat$="" :dots=0 :bonuslev=False
 size=xtiles*ytiles : xtiles-1 : ytiles-1 :clever=False
@@ -95,15 +95,15 @@ CNIF #test<>1
 	LoadModule 1,"Ears/gameover.score"
 	LoadModule 0,"Ears/maintitle.score"
 	LoadModule 2,"Ears/hiscores.score"
-	LoadSound 0,"Ears/eatdot.snd"		:Poke.w ##[$80B8] Sound(0)+4,236
-	LoadSound 1,"Ears/eatpill.snd"	 :Poke.w ##[$80B8] Sound(1)+4,350
-	LoadSound 2,"Ears/died.snd"			:Poke.w ##[$80B8] Sound(2)+4,510
-	LoadSound 3,"Ears/fin.snd"			 :Poke.w ##[$80B8] Sound(3)+4,460
-	LoadSound 4,"Ears/eatghost.snd"	:Poke.w ##[$80B8] Sound(4)+4,380
-	LoadSound 5,"Ears/bonus.snd"		 :Poke.w ##[$80B8] Sound(5)+4,260
-	LoadSound 6,"Ears/turbo.snd"		 :Poke.w ##[$80B8] Sound(6)+4,600
-	LoadSound 7,"Ears/collect.snd"	 :Poke.w ##[$80B8] Sound(7)+4,264
-	LoadSound 8,"Ears/tick.snd"			:Poke.w ##[$80B8] Sound(8)+4,264
+	LoadSound 0,"Ears/eatdot.snd"		:Poke.w Addr Sound(0)+4,236
+	LoadSound 1,"Ears/eatpill.snd"	 :Poke.w Addr Sound(1)+4,350
+	LoadSound 2,"Ears/died.snd"			:Poke.w Addr Sound(2)+4,510
+	LoadSound 3,"Ears/fin.snd"			 :Poke.w Addr Sound(3)+4,460
+	LoadSound 4,"Ears/eatghost.snd"	:Poke.w Addr Sound(4)+4,380
+	LoadSound 5,"Ears/bonus.snd"		 :Poke.w Addr Sound(5)+4,260
+	LoadSound 6,"Ears/turbo.snd"		 :Poke.w Addr Sound(6)+4,600
+	LoadSound 7,"Ears/collect.snd"	 :Poke.w Addr Sound(7)+4,264
+	LoadSound 8,"Ears/tick.snd"			:Poke.w Addr Sound(8)+4,264
 CEND
 
 Gosub ClearLevel
@@ -156,13 +156,13 @@ Statement text{TXT$,Y,F,B}					; Show text on screen
 End Statement
 
 Statement JoyClear{}
-	##[$80BB] :##[$80BC] Joyb(1)=0
+	Repeat :Until Joyb(1)=0
 End Statement
 
 Statement JoyDown{}
-	##[$80BB]
+	Repeat
 		If Joyb(0)<>0 Then VWait :BlockScroll 0 :End
-	##[$80BC] Joyb(1)<>0
+	Until Joyb(1)<>0
 End Statement
 
 ; ============= BEGIN AGAIN FROM TITLE PAGE ==================
@@ -176,18 +176,18 @@ EndIf
 Gosub DrawShortMap
 BlitColl 45,32,232 :BlitColl 45,272,232
 Y=0 :sel=1 :Gosub hilite :JoyClear{} :DisplayOn
-##[$80BB]
+Repeat
 	Y=Joyy(1)
 	If Y<>0 Then VWait 2 :Gosub hilite
 	If Joyb(1)<>0
 		Select sel
-			Case 1 :##[$80BE] Select :##[$80BE] If :##[$80BE] ##[$80BB] :Goto StartPlay
-			Case 2 :Gosub HelpPage :##[$80BE] Select :##[$80BE] If :##[$80BE] ##[$80BB] :Goto Restart
-			Case 3 :Gosub ShowHiScores :##[$80BE] Select :##[$80BE] If :##[$80BE] ##[$80BB] :Goto Restart
-			Case 4 :##[$80BE] Select :##[$80BE] If :##[$80BE] ##[$80BB] :End
+			Case 1 :Pop Select :Pop If :Pop Repeat :Goto StartPlay
+			Case 2 :Gosub HelpPage :Pop Select :Pop If :Pop Repeat :Goto Restart
+			Case 3 :Gosub ShowHiScores :Pop Select :Pop If :Pop Repeat :Goto Restart
+			Case 4 :Pop Select :Pop If :Pop Repeat :End
 		End Select
 	EndIf
-##[$80C7]
+Forever
 
 hilite:
 sel=QWrap(sel+Y,1,5)
@@ -195,7 +195,7 @@ For d=1 To 4
 text{hi$(d+10),25+(d*2),4,0}
 Next d
 text{hi$(sel+10),25+(sel*2),1,15}
-##[$80BB] :##[$80BC] Joyr(1)=8
+Repeat :Until Joyr(1)=8
 Return
 
 ; ================= BEGIN THE GAME ========================
@@ -238,7 +238,7 @@ If dots=0
 		text{" You Scored > "+t$+" ",30,14,0}
 		VWait 200 :fl$="" :StopModule
 		If score>hi(10) Then Gosub EnterName
-		##[$80BE] If :Goto Restart
+		Pop If :Goto Restart
 	EndIf
 	Gosub Retrieve
 EndIf
@@ -252,7 +252,7 @@ If lives=0
 	text{" You Scored > "+t$+" ",30,14,0}
 	VWait 200 :fl$="" :StopModule
 	If score>hi(10) Then Gosub EnterName
-	##[$80BE] If :Goto Restart
+	Pop If :Goto Restart
 EndIf
 
 ;	----------- Stick down buffer blits ----------
@@ -269,8 +269,8 @@ If bonuslev=False
 EndIf
 Show 0 :db=1 :Gosub Panel :DisplayOn
 If bonuslev=True Then dots=1
-##[$80BB] :##[$80BC] Joyr(1)=8
-##[$80BB] :Gosub CheckMoose :##[$80BC] Joyr(1)<>8
+Repeat :Until Joyr(1)=8
+Repeat :Gosub CheckMoose :Until Joyr(1)<>8
 
 If #test=1 Then End
 eaten=0 :twice=0 :n=0 :db=1 :Show 0 :Use lmaxlen 1
@@ -278,7 +278,7 @@ eaten=0 :twice=0 :n=0 :db=1 :Show 0 :Use lmaxlen 1
 ; =================== MAIN GAME LOOP =====================
 
 .MAINLOOP
-##[$80BB]
+Repeat
 
 ; If tac is exactly on a map tile.........
 If tx=(tacx ASL 4) AND ty=(tacy ASL 4)
@@ -326,12 +326,12 @@ EndIf
 tx+tacdx :ty+tacdy
 If tx=(tx ASR 4) ASL 4 Then tacx=tx ASR 4
 If ty=(ty ASR 4) ASL 4 Then tacy=ty ASR 4
-If cnt ##[$80B9] 4=0 Then anm=QWrap(anm+1,0,3)
+If cnt MOD 4=0 Then anm=QWrap(anm+1,0,3)
 BBlit db,frm+anm,tx,ty
 
 cnt+1
-If cnt ##[$80B9] 8=0 Then Score{}
-If cnt ##[$80B9] 25=0
+If cnt MOD 8=0 Then Score{}
+If cnt MOD 25=0
 	gametime-1 :Sound 8,8 :DBval{gametime,"00",29}
 	For d=1 To ng(lev)
 		ghost(d)\vun-(1 AND ghost(d)\vun>0)
@@ -339,11 +339,11 @@ If cnt ##[$80B9] 25=0
 EndIf
 VWait :Show db :db=1-db :Use lmaxlen db
 
-If dots=0 AND bonuslev=False Then ##[$80BE] ##[$80BB] :firstgame=False :Goto Setup
+If dots=0 AND bonuslev=False Then Pop Repeat :firstgame=False :Goto Setup
 If bonusbits=0 AND bonuslev=True Then Gosub SuperBonus
-If gametime=0 Then outoftime=True :dots=0 :##[$80BE] ##[$80BB] :Goto Setup
+If gametime=0 Then outoftime=True :dots=0 :Pop Repeat :Goto Setup
 
-##[$80BC] Joyb(0)=1
+Until Joyb(0)=1
 
 VWait :wipe{} :End
 
@@ -423,42 +423,42 @@ Return
 If dx<>0						; If moving	<	 >	 ( LEFT / RIGHT )
 	If clever=True
 		If dty=0
-			If dtx<>dx Then dx=-dx :dy=0 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If dtx<>dx Then dx=-dx :dy=0 :Pop If :Pop If :Pop If :Return
 		EndIf
 		If dty<>0
-			If map(gx,gy+dty)<>wall Then dx=0 :dy=dty :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx,gy+dty)<>wall Then dx=0 :dy=dty :Pop If :Pop If :Pop If :Return
 		EndIf
 	EndIf
 	If map(gx+dx,gy)=wall
 		If dty<>0
-			If map(gx,gy+(-dty))<>wall Then dx=0 :dy=-dty :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx,gy+(-dty))<>wall Then dx=0 :dy=-dty :Pop If :Pop If :Pop If :Return
 		EndIf
 		If dty=0
-			If map(gx,gy-1)<>wall Then dx=0 :dy=-1 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
-			If map(gx,gy+1)<>wall Then dx=0 :dy=1 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx,gy-1)<>wall Then dx=0 :dy=-1 :Pop If :Pop If :Pop If :Return
+			If map(gx,gy+1)<>wall Then dx=0 :dy=1 :Pop If :Pop If :Pop If :Return
 		EndIf
-		dx=-dx :dy=0 :##[$80BE] If :##[$80BE] If :Return
+		dx=-dx :dy=0 :Pop If :Pop If :Return
 	EndIf
 EndIf
 
 If dy<>0						; If moving	/\	\/	( UP / DOWN )
 	If clever=True
 		If dtx=0
-			If dty<>dy Then dy=-dy :dx=0 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If dty<>dy Then dy=-dy :dx=0 :Pop If :Pop If :Pop If :Return
 		EndIf
 		If dtx<>0
-			If map(gx+dtx,gy)<>wall Then dy=0 :dx=dtx :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx+dtx,gy)<>wall Then dy=0 :dx=dtx :Pop If :Pop If :Pop If :Return
 		EndIf
 	EndIf
 	If map(gx,gy+dy)=wall
 		If dtx<>0
-			If map(gx+(-dtx),gy)<>wall Then dy=0 :dx=-dtx :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx+(-dtx),gy)<>wall Then dy=0 :dx=-dtx :Pop If :Pop If :Pop If :Return
 		EndIf
 		If dtx=0
-			If map(gx-1,gy)<>wall Then dy=0 :dx=-1 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
-			If map(gx+1,gy)<>wall Then dy=0 :dx=1 :##[$80BE] If :##[$80BE] If :##[$80BE] If :Return
+			If map(gx-1,gy)<>wall Then dy=0 :dx=-1 :Pop If :Pop If :Pop If :Return
+			If map(gx+1,gy)<>wall Then dy=0 :dx=1 :Pop If :Pop If :Pop If :Return
 		EndIf
-		dy=-dy :dx=0 :##[$80BE] If :##[$80BE] If :Return
+		dy=-dy :dx=0 :Pop If :Pop If :Return
 	EndIf
 EndIf
 
@@ -476,7 +476,7 @@ If ghost(d)\status=1
 		VWait 1 :BlitColl d,tx,ty
 		Use SetCycle 0 :VWait 2
 	Next d :UnBuffer db :lives-1 :DBval{lives,"0",21} :VWait 80
-	##[$80BE] Gosub :##[$80BE] If :##[$80BE] If :Goto Setup
+	Pop Gosub :Pop If :Pop If :Goto Setup
 EndIf
 Return
 
@@ -496,7 +496,7 @@ Return
 X=Int(Rnd(xtiles)) :Y=Int(Rnd(ytiles))
 If tacx=X AND tacy=Y Then Return
 For d=1 To ng(lev)
-	If ghost(d)\x ASR 4=X AND ghost(d)\y ASR 4=Y Then ##[$80BE] For :Return
+	If ghost(d)\x ASR 4=X AND ghost(d)\y ASR 4=Y Then Pop For :Return
 Next d
 goodie=Int(Rnd(8))+35 :ic=map(X,Y)
 If ic<>0 Then Return
@@ -513,12 +513,12 @@ Return
 Use SetCycle 0
 For d=1 To gametime
 Green 5,15,8,14 :VWait 2
-Poke.w ##[$80B8] Sound(5)+4,420-(d ASL 2)
+Poke.w Addr Sound(5)+4,420-(d ASL 2)
 Sound 5,3 :score+1000 :gametime-1
 Score{} :DBval{gametime,"00",29}
 Use SetCycle 0:VWait 3
 Next d :VWait 25
-Poke.w ##[$80B8] Sound(5)+4,260
+Poke.w Addr Sound(5)+4,260
 gametime=0
 Return
 
@@ -542,7 +542,7 @@ Return
 ; ========= INITIALISE THE HIGH SCORE TABLE ===============
 
 .Init_Hiscore
-##[$80C8] hsdata
+Restore hsdata
 For d=1 To 10
 	Read t$
 	hi$(d)=Left$(t$,12)
@@ -578,7 +578,7 @@ text{"Score > "+Str$(score),28,14,0}
 d=1 :sel=0 :Colour 5,0 :Locate 14,22
 Print "------------"	 :Gosub dostrip
 
-##[$80BB]
+Repeat
 	X=Joyx(1)
 	If X=-1 Then d-1 :Gosub dostrip
 	If X=1	Then d+1 :Gosub dostrip
@@ -596,7 +596,7 @@ Print "------------"	 :Gosub dostrip
 		Gosub dostrip
 	EndIf
 Gosub CheckMoose
-##[$80BC] sel=35
+Until sel=35
 
 JoyClear{}
 t$+"							 " :t$=Left$(t$,12)
@@ -608,7 +608,7 @@ For d=1 To 10
 				hi$(X)=hi$(X-1) :hi(X)=hi(X-1)
 			Next X
 		EndIf
-		hi$(d)=t$ :hi(d)=score :##[$80BE] If :##[$80BE] For :Goto sorted
+		hi$(d)=t$ :hi(d)=score :Pop If :Pop For :Goto sorted
 	EndIf
 Next d
 sorted:
@@ -661,7 +661,7 @@ Return
 ; ================== HELP PAGE===================
 
 .HelpPage
-DisplayOff :BlockScroll 0 :##[$80C8] about
+DisplayOff :BlockScroll 0 :Restore about
 For d=1 To 8
 	paste{2,d*2,34+d}
 Next d

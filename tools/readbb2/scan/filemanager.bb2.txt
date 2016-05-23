@@ -8,7 +8,7 @@ Function$ GETSTRING{TITLE$,MAXCHRS}
 	workstart 1,15,27,0,1,"OK":workstart 1,187,27,0,0,"Cancle"
 	SetString 1,2:StringGadget 1,8,13,0,2,MAXCHRS,236
 	localstat 1,190,106,260,44,$1006,TITLE$,2,1,1:ClearString 1,2
-	##[$80BB]:VWait:##[$80BC] WaitEvent=$40 AND GadgetHit<2
+	Repeat:VWait:Until WaitEvent=$40 AND GadgetHit<2
 	If GadgetHit=0
 		RET$=""
 	Else
@@ -72,7 +72,7 @@ Redraw #W1,0
 ;GTListView #W1,0,4,12,152,96,"",0,DIR()
 ;Window #W1,104,45,255,152,4622,"GE FileManager",1,2:AttachGTList #W1,#W1
 
-##[$80BB]
+Repeat
 
 EV.l=WaitEvent
 
@@ -83,7 +83,7 @@ Select EV
 
 End Select
 
-##[$80BC] EV=$200 : End
+Until EV=$200 : End
 
 .GADGETPRESS:
 ;Print GadgetHit

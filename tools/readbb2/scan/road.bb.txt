@@ -7,8 +7,8 @@ For i=1 To 2048
 Next
 
 For i=0 To 255
-	qsin(i)=HSin((i-128)*##[$80BA]/128)*32767
-	qcos(i)=HCos((i-128)*##[$80BA]/128)*32767
+	qsin(i)=HSin((i-128)*Pi/128)*32767
+	qcos(i)=HCos((i-128)*Pi/128)*32767
 Next
 
 NEWTYPE .rseg

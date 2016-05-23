@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/editmap.bb
 
-k.f=##[$80BA]/180
+k.f=Pi/180
 
-##[$80C3]
+WBStartup
 
 PropGadget 9,15,21,128,1,9,79
 SetVProp 9,1,0,.0667
@@ -136,7 +136,7 @@ ggaa:
 				If gadgets(l)\yes=1
 						If mx>gadgets(l)\x AND mx<gadgets(l)\x+gadgets(l)\w
 								If my>gadgets(l)\y AND my<gadgets(l)\y+gadgets(l)\h
-										zz=l:##[$80BE] For:Goto eff
+										zz=l:Pop For:Goto eff
 								EndIf
 						EndIf
 				EndIf
@@ -152,7 +152,7 @@ eff:
 		Print gadgets(zz)\t
 		Colour 18,back
 
-		##[$80BB]:VWait:##[$80BC] Joyb(0)=0
+		Repeat:VWait:Until Joyb(0)=0
 
 		Colour 16,mid
 		Locate Int((x+1)/8),Int((y+2)/8)
@@ -180,7 +180,7 @@ Shared gadgets(),mid,lo,hi,back
 						If gadgets(l)\yes=1
 								If mx>gadgets(l)\x AND mx<gadgets(l)\x+gadgets(l)\w
 										If my>gadgets(l)\y AND my<gadgets(l)\y+gadgets(l)\h
-												zz=l:##[$80BE] For:Goto effg
+												zz=l:Pop For:Goto effg
 										EndIf
 								EndIf
 						EndIf
@@ -197,7 +197,7 @@ effg:
 		Print gadgets(zz)\t
 		Colour 18,back
 
-		##[$80BB]:VWait:##[$80BC] Joyb(0)=0
+		Repeat:VWait:Until Joyb(0)=0
 
 		Colour 16,mid
 		Locate Int((x+1)/8),Int((y+2)/8)
@@ -443,7 +443,7 @@ For s=0 To my
 		Boxf ssx,ssy,ssx+15,ssy+15,1
 		ssx+16:If ssx>319 Then ssx=0:ssy+16
 		topblock+1
-		If topblock=1000 Then ##[$80BE] For:Goto qqqz
+		If topblock=1000 Then Pop For:Goto qqqz
 Next
 qqqz:
 ##[$80D2]
@@ -756,14 +756,14 @@ If Joyb(0)=2
 				bex=bsx:bey=bsy
 				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
 				Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
-				##[$80BB]
+				Repeat
 						VWait
 						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
 						mx=SMouseX
 						my=SMouseY
 						bex=Int(mx/16):bey=Int(my/16)
 						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
-				##[$80BC] Joyb(0)<>2
+				Until Joyb(0)<>2
 				bex=SMouseX:bey=SMouseY
 				bex=Int(bex/16):bey=Int(bey/16)
 
@@ -1016,19 +1016,19 @@ If Joyb(0)=2
 		bsx=zx:bsy=zy
 		bex=bsx:bey=bsy
 		Box bsx,bsy,bex,bey,-1
-		##[$80BB]
+		Repeat
 				VWait
 				Box bsx,bsy,bex,bey,-1
 				mx=SMouseX
 				my=SMouseY:If my>199 Then my=199
 				bex=mx:bey=my
 				Box bsx,bsy,bex,bey,-1
-		##[$80BC] Joyb(0)<>2
+		Until Joyb(0)<>2
 		Box bsx,bsy,bex,bey,-1
 		bex=SMouseX:bey=SMouseY:If bey>199 Then bey=199
 
-		If bex<bsx Then ##[$80C9] bex,bsx
-		If bey<bsy Then ##[$80C9] bey,bsy
+		If bex<bsx Then Exchange bex,bsx
+		If bey<bsy Then Exchange bey,bsy
 
 		rectw=(bex-bsx)+1
 		recth=(bey-bsy)+1
@@ -1646,14 +1646,14 @@ If Joyb(0)=2
 				bex=bsx:bey=bsy
 				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
 				Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
-				##[$80BB]
+				Repeat
 						VWait
 						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
 						mx=SMouseX
 						my=SMouseY
 						bex=Int(mx/16):bey=Int(my/16)
 						Box bsx*16,bsy*16,bex*16+15,bey*16+15,-1
-				##[$80BC] Joyb(0)<>2
+				Until Joyb(0)<>2
 				bex=SMouseX:bey=SMouseY
 				bex=Int(bex/16):bey=Int(bey/16)
 
@@ -1952,7 +1952,7 @@ If Joyb(0)=2
 				Redraw 9,3
 				Redraw 9,4
 
-				##[$80BB]
+				Repeat
 
 						rrr=15-Int( (VPropPot(9,1)) *16)
 						ggg=15-Int( (VPropPot(9,2)) *16)
@@ -1965,7 +1965,7 @@ If Joyb(0)=2
 
 						Green mx,rrr,ggg,bbb
 
-				##[$80BC] Event=64 AND GadgetHit=4
+				Until Event=64 AND GadgetHit=4
 
 				WindowInput 0
 				Use lmaxlen 0

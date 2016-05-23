@@ -141,7 +141,7 @@ For k=96 To 99:DecodeShapes k:Next
 SaveShapes 0,199,"shapes"
 SaveSprites 0,5,"sprites"
 If ReadMem(0,"palettes")
-	Exists 0,##[$80B8] SetCycle(0),1024*9
+	Exists 0,Addr SetCycle(0),1024*9
 	CloseFile 0
 EndIf
 CEND
@@ -175,7 +175,7 @@ ass=1				 ;alien speed shift
 as=1 LSL ass	;alien speed
 as2=as+as
 
-co.q=##[$80BA]*2/nr
+co.q=Pi*2/nr
 For k=0 To nr2
 xa(k)=HCos((k-nr3)*co):ya(k)=HSin((k-nr3)*co)
 Next
@@ -251,15 +251,15 @@ db=1:Gosub makehiscores
 db=0:Use lmaxlen db:BlockScroll:DisplayOn
 
 die=-1:sa=-4
-##[$80BB]
-	##[$80C8] itext:y=64:Green 2,10,9,15:Green 3,7,6,10
-	##[$80BB]
+Repeat
+	Restore itext:y=64:Green 2,10,9,15:Green 3,7,6,10
+	Repeat
 		VWait:Read k$,d:Gosub printit:y+16:FlushQueue db
-		For k=1 To QAbs(d):VWait:If Joyb(1) Then ##[$80BE] For:Goto newgame Else Next
-	##[$80BC] d<0:Green 2,0,12,14:Green 3,0,9,10:db=1
-	For k=1 To 250:VWait:If Joyb(1) Then ##[$80BE] For:Goto newgame Else Next
+		For k=1 To QAbs(d):VWait:If Joyb(1) Then Pop For:Goto newgame Else Next
+	Until d<0:Green 2,0,12,14:Green 3,0,9,10:db=1
+	For k=1 To 250:VWait:If Joyb(1) Then Pop For:Goto newgame Else Next
 	BlockScroll:db=0
-##[$80C7]
+Forever
 
 .newgame
 sc=0:scf=2000:drpf=0
@@ -267,7 +267,7 @@ sd=0:For k=0 To 4:bo(k)=0:Next:bo(5)=2
 BlockScroll:Use lmaxlen 1:BlockScroll
 Use lmaxlen 5:BlockScroll:For k=1 To 5:Gosub updatescore:Next:Gosub drawbonuss
 Use SetCycle 0
-##[$80C8] pattern1
+Restore pattern1
 wa=0
 ya=2				;2-3	your x speed
 ys=0:df=0	 ;0,0	double fire flag -> 1,-1
@@ -286,7 +286,7 @@ Gosub initship
 .newwave
 ;
 wa+1:If wa&7=0 Then sa=-sa
-Read chw:If chw<0 Then ##[$80C8] pattern1:Read chw
+Read chw:If chw<0 Then Restore pattern1:Read chw
 glw=0:If chw=2 Then glw=-1:chw=0
 If fch>.95 Then fch-.002
 ;
@@ -324,7 +324,7 @@ If glw Then k$="flashback{":Gosub printit
 Sound 7,2,32
 ;
 naw=1:f=0:p=0 ;put position...
-##[$80BB]
+Repeat
 	Read j
 	If j>=0
 		naw+1:f+1:f(f)=p
@@ -357,7 +357,7 @@ naw=1:f=0:p=0 ;put position...
 		Next
 		For k=1 To 8:px(p)=0:p+1:Next
 	EndIf
-##[$80BC] j<0
+Until j<0
 
 If p>5000 Then End
 
@@ -398,7 +398,7 @@ Else
 	fya=0:If chw=0 Then Read atw:naw-atw
 EndIf
 ;
-##[$80BB]:##[$80BC] vf>150:UnQueue db:Use SetCycle pln
+Repeat:Until vf>150:UnQueue db:Use SetCycle pln
 ;
 .main:aok=-1:vf=0
 While aok
@@ -532,10 +532,10 @@ End
 .getjoy
 j=0:For k=1 To 25
 VWait
-If Joyb(1) Then ##[$80BB]:VWait:##[$80BC] Joyb(1)=0:j=5
+If Joyb(1) Then Repeat:VWait:Until Joyb(1)=0:j=5
 If Joyx(1)<0 Then j=3 Else If Joyx(1)>0 Then j=4
 If Joyy(1)<0 Then j=1 Else If Joyy(1)>0 Then j=2
-If j Then ##[$80BE] For:Return
+If j Then Pop For:Return
 Next:Return
 
 .makehiscores
@@ -631,7 +631,7 @@ If vf=0
 	If sfx4 Then sfx4=0:Sound 4,8,16
 	If vf=0
 		Gosub updatescore
-		##[$80BB]:##[$80BC] vf
+		Repeat:Until vf
 	EndIf
 EndIf
 ;
@@ -701,18 +701,18 @@ Else
 	Case 0
 		Read scy,sch:scy LSL 4:sch LSL 4
 	Case 1
-		f=-1:Gosub readalien:##[$80BE] Select:Return
+		f=-1:Gosub readalien:Pop Select:Return
 	Case 2
 		f=-1:Gosub readalien
 	Case 3
-		awd=-1:##[$80BE] Select:Return
+		awd=-1:Pop Select:Return
 	Case 4
-		f=0:Gosub readalien:##[$80BE] Select:Return
+		f=0:Gosub readalien:Pop Select:Return
 	Case 5
 		f=0:Gosub readalien
 	Case 999
 		ta-1:If ta=0 Then aok=0
-		aaa=-1:##[$80BE] Select:Return
+		aaa=-1:Pop Select:Return
 	End Select
 	Goto iloop
 EndIf
@@ -771,7 +771,7 @@ While globfree(a())
 			freelast a():ta-1:If ta=0 Then aok=0
 			nrf=0:Gosub killflyer
 		Else
-			##[$80BB]:p-1:##[$80BC] px(p)
+			Repeat:p-1:Until px(p)
 			x=px(p)+\xo:y=py(p)+\yo:If \m Then x=w2-x
 			px=\px:py=\py:s=\s
 			freelast a():globalloc a2()

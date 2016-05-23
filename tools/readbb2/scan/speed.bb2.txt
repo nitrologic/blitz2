@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/afold/speed/speed.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/speed/speed.bb2
-##[$80C3]:##[$80CC]:##[$80CB]
+WBStartup:##[$80CC]:##[$80CB]
 ;
 If WriteMem(0,"speed.readme")
 	freest 0:##[$FFB5]
@@ -12,8 +12,8 @@ If WriteMem(0,"speed.readme")
 		If y>152 OR DosBuffLen(0)
 			WLocate 4,y+16
 			Print "Click mouse for more..."
-			##[$80BB]
-			##[$80BC] WaitEvent=8 AND MButtons=1
+			Repeat
+			Until WaitEvent=8 AND MButtons=1
 			InnerCls:y=-4
 		EndIf
 	Wend
@@ -142,13 +142,13 @@ Locate 6,18.5:Print "***** CONGRATULATIONS!! *****"
 Locate 14,20.5:Print "YOU HAVE WON!"
 For k=1 To fc*5
 VWait
-If Joyb(0) Then ##[$80BE] For:Goto popped
+If Joyb(0) Then Pop For:Goto popped
 Next
 popped
 For fl=1 To 12
 If lot<lot(fl) OR lot(fl)=0
 		;insert name before here!
-		##[$80BE] For
+		Pop For
 		;
 		For k=11 To fl Step -1
 		lon$(k+1)=lon$(k)
@@ -177,7 +177,7 @@ Locate 10,6.5:Print "***** OH DEAR!! *****"
 Locate 10,8.5:Print "THE COMPUTER HAS WON!"
 For k=1 To fc*5
 VWait
-If Joyb(0) Then ##[$80BE] For:Goto main
+If Joyb(0) Then Pop For:Goto main
 Next
 Goto main
 
@@ -193,13 +193,13 @@ If j
 		cup2=QWrap(j+1,1,14)
 		cup1=QWrap(j-1,1,14)
 		If cup1=up1 OR cup2=up1 ;can throw onto left hand pile!
-				##[$80BE] For:Return
+				Pop For:Return
 		EndIf
 		If cup1=up2 OR cup2=up2 ;can throw onto right hand pile!
-				##[$80BE] For:Return
+				Pop For:Return
 		EndIf
 Else
-		If ndown(1) Then ##[$80BE] For:Return
+		If ndown(1) Then Pop For:Return
 EndIf
 Next
 ;
@@ -224,10 +224,10 @@ If j
 		cup2=QWrap(j+1,1,14)
 		cup1=QWrap(j-1,1,14)
 		If cup1=up1 OR cup2=up1 ;can throw onto left hand pile!
-				p=0:##[$80BE] For:Goto compput
+				p=0:Pop For:Goto compput
 		EndIf
 		If cup1=up2 OR cup2=up2 ;can throw onto right hand pile!
-				p=1:##[$80BE] For:Goto compput
+				p=1:Pop For:Goto compput
 		EndIf
 EndIf
 Next
@@ -373,19 +373,19 @@ x=160:y=96
 If lsf Then longdiv 14,x,y:Gosub animon
 ;
 dy=32:For dx=16 To 304 Step 24
-If Joyb(0) AND lsf Then ##[$80BE] For:Return
+If Joyb(0) AND lsf Then Pop For:Return
 Gosub locard:Next
 ;
 dx=304:For dy=64 To 176 Step 32
-If Joyb(0) AND lsf Then ##[$80BE] For:Return
+If Joyb(0) AND lsf Then Pop For:Return
 Gosub locard:Next
 ;
 dy=192:For dx=304 To 16 Step -24
-If Joyb(0) AND lsf Then ##[$80BE] For:Return
+If Joyb(0) AND lsf Then Pop For:Return
 Gosub locard:Next
 ;
 dx=16:For dy=64 To 176 Step 32
-If Joyb(0) AND lsf Then ##[$80BE] For:Return
+If Joyb(0) AND lsf Then Pop For:Return
 Gosub locard:Next
 ;
 If lsf Then Gosub adderase
@@ -408,7 +408,7 @@ Format ""
 If lsf
 		For k=1 To fc*10
 		VWait
-		If Joyb(0) Then ##[$80BE] For:Return
+		If Joyb(0) Then Pop For:Return
 		Next
 Else
 		Return
@@ -445,20 +445,20 @@ Locate 34,17:Print "EASY"
 Gosub animon
 ;
 sl=0
-##[$80BB]
+Repeat
 		VWait
 		If Joyb(0)
 				For k=1 To 8
 				x=k*36-2-12:y=112-16
 				If MouseX>=x AND MouseX<x+24
 						If MouseY>=y AND MouseY<y+32
-								sl=k:##[$80BE] For:Goto undo
+								sl=k:Pop For:Goto undo
 						EndIf
 				EndIf
 				Next
 		EndIf
 		undo
-##[$80BC] sl
+Until sl
 ;
 x=sl*36-2:y=112:dx=x:dy=y:Gosub homein
 Gosub addcard2
@@ -497,7 +497,7 @@ x=160:y=208:c=1
 longdiv 14,x,y
 Gosub animon
 For k=1 To nt
-If Joyb(0)>0 Then ##[$80BE] For:Return
+If Joyb(0)>0 Then Pop For:Return
 VWait 3
 dx=x(k)+4:dy=y(k)+16:Gosub homein
 Gosub addcard2
@@ -507,14 +507,14 @@ Next
 ;
 VWait 20
 For k=nt To 1 Step -1
-If Joyb(0)>0 Then ##[$80BE] For:Return
+If Joyb(0)>0 Then Pop For:Return
 VWait:Use lmaxlen 2
 BlitMode SolidMode:longdiv 14,x(k)+4,y(k)+16:BlitMode CookieMode
 Next
 ;
 For k=1 To fc*10
 VWait
-If Joyb(0) Then ##[$80BE] For:Return
+If Joyb(0) Then Pop For:Return
 Next
 ;
 stf=0:Return
@@ -621,7 +621,7 @@ pack(j*13+k)=k
 Next k,j
 ;
 For k=1 To 52
-##[$80C9] pack(k),pack(Rnd(52)+1)
+Exchange pack(k),pack(Rnd(52)+1)
 Next
 ;
 cat=1	 ;card at.
@@ -673,7 +673,7 @@ Return
 .picknew		;pick up a new card from 'down'
 ;
 For fs=1 To 5
-If hand(fs,p)=0 Then ##[$80BE] For:Goto found
+If hand(fs,p)=0 Then Pop For:Goto found
 Next
 ;
 found

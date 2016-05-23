@@ -13,7 +13,7 @@
 
 #num=1500
 
-##[$80C3]
+WBStartup
 
 DEFTYPE.w
 DEFTYPE.l h
@@ -305,11 +305,11 @@ Next h
 
 Use SetCycle 0
 
-##[$80BB]
+Repeat
 	VWait
 	Show dbuffer
 	dbuffer=1-dbuffer
 	##[$A08C] dbuffer
-	Drawfield{&plots(0),##[$80B8] lmaxlen(dbuffer),-1,0}
-##[$80BC] Joyb(0)
+	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,0}
+Until Joyb(0)
 End

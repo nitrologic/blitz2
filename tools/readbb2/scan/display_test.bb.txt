@@ -18,11 +18,11 @@
 	bp=1:fetch=0:spres=0:res=0
 	ham=0:ehb=0:dp=0:smooth=0:mc=0
 	AttachGTList #w0,#w0
-	##[$80BB]
+	Repeat
 		Gosub displayflags
 		ev.l=WaitEvent
 		If ev=$20 OR ev=$40 Then Gosub readui
-	##[$80BC] GadgetHit=#exit
+	Until GadgetHit=#exit
 	Return
 
 .readui:
@@ -89,7 +89,7 @@
 	NPrint " Blit modes such as BBlit and QBlit.				 "
 	NPrint ""
 	NPrint "Maybe add sprites and overscan stuff?				"
-	##[$80BB]:##[$80BC] WaitEvent=$200
+	Repeat:Until WaitEvent=$200
 	CloseWindow 1
 	Return
 

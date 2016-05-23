@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/acommodity.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/acommodity.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/acommodity.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/acommodity.bb2
 ##[$80CB]
-##[$80C3]
+WBStartup
 
 XInclude commodities.bb2
 
@@ -85,7 +85,7 @@ If *broker_mp<>0
 		result=1
 
 		;Main loop
-		##[$80BB]
+		Repeat
 
 			;Waiting for CTRL-C, or CX-message or window-message
 			sigrcvd=##[$FEAB](#SIGBREAKF_CTRL_C|cxsigflag|winsigflag)
@@ -106,7 +106,7 @@ If *broker_mp<>0
 			EndIf
 
 			;Get messages from cx-port loop
-			##[$80BB]
+			Repeat
 
 				;Get message from cx-port
 				*msg=##[$FEB4](*broker_mp)
@@ -186,20 +186,20 @@ If *broker_mp<>0
 					result=0
 				EndIf
 
-			##[$80BC] *msg=0
+			Until *msg=0
 
-		##[$80BC] result=0
+		Until result=0
 
 		;Kill CX-Broker
 		##[$F805](*broker)
 
 		;Clear CX-port
-		##[$80BB]
+		Repeat
 			*msg=##[$FEB4](*broker_mp)
 			If *msg
 				##[$FEB5] *msg
 			EndIf
-		##[$80BC] *msg=0
+		Until *msg=0
 
 	EndIf
 

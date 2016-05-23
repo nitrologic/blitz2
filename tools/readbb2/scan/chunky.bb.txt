@@ -19,8 +19,8 @@ BLITZ
 Dim qsin.q(511),qcos.q(511)
 
 For i=0 To 511
-	qsin(i)=HSin(i*##[$80BA]/128)
-	qcos(i)=HCos(i*##[$80BA]/128)
+	qsin(i)=HSin(i*Pi/128)
+	qcos(i)=HCos(i*Pi/128)
 Next
 
 NEWTYPE .tri:x0.w:y0.w:x1.w:y1.w:x2.w:y2.w:End NEWTYPE

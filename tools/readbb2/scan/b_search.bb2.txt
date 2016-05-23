@@ -14,7 +14,7 @@ While (Asc(Inkey$)<>10)
 		Loc 0,(Eof(0)-2)
 	Else
 		If Eof(0)=1
-			Loc 0,0:##[$80BE] If :##[$80BE] While:Goto grab
+			Loc 0,0:Pop If :Pop While:Goto grab
 		EndIf
 	EndIf
 Wend
@@ -80,10 +80,10 @@ Shared poss,search_to.l,search_from.l
 
 poss=0 : last_get.l=-1
 
-##[$80BB]
+Repeat
 	If poss=last_get
 		nomatches.b=True
-		##[$80BE] ##[$80BB]
+		Pop Repeat
 		Goto finish
 	Else
 		Loc 0,(low+high)/2
@@ -93,7 +93,7 @@ poss=0 : last_get.l=-1
 	If rep_check{n_word$,word$}
 		middle.l=poss
 		mid_len.w=gl
-		##[$80BE] ##[$80BB]
+		Pop Repeat
 		Goto low
 	Else
 		If n_word$>word$
@@ -102,20 +102,20 @@ poss=0 : last_get.l=-1
 			low=poss+gl+1
 		EndIf
 	EndIf
-##[$80C7]
+Forever
 
 .low:
 highest.l=high : high=middle.l
 wonce.b=0
 last_get=-1
-##[$80BB]
+Repeat
 	If poss=last_get
 		If wonce
-			##[$80BE] ##[$80BB]
+			Pop Repeat
 			Goto high
 		Else
 			search_from.l=middle
-			##[$80BE] ##[$80BB]
+			Pop Repeat
 			Goto high
 		EndIf
 	Else
@@ -130,7 +130,7 @@ last_get=-1
 	Else
 		low=poss+gl+1
 	EndIf
-##[$80C7]
+Forever
 
 .high:
 wonce=0
@@ -138,13 +138,13 @@ last_get=-1
 low=middle+mid_len
 high=highest
 
-##[$80BB]
+Repeat
 	If poss=last_get
 		If wonce
 		Else
 			search_to.l=middle
 		EndIf
-		##[$80BE] ##[$80BB]
+		Pop Repeat
 		Goto finish
 	Else
 		Loc 0,(low+high)/2
@@ -159,7 +159,7 @@ high=highest
 	Else
 		high=poss
 	EndIf
-##[$80C7]
+Forever
 
 .finish:
 If nomatches
@@ -205,9 +205,9 @@ NPrint "Binary Searcher 1.0 by Perry Mowbray"
 		If B_Search{0,FileSeek(0),pat$}=True
 			NPrint ""
 			Loc 0,search_from
-			##[$80BB]
+			Repeat
 				NPrint "	",Edit$(256)
-			##[$80BC] Eof(0)>search_to
+			Until Eof(0)>search_to
 		Else
 			NPrint ""
 			NPrint "	No matches"

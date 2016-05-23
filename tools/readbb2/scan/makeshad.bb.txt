@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makeshad.bb
 	Dim qsin(63),qcos(63)	 :; look up table for car motion
-	For cnt.w=0 To 63:qcos(cnt)=HCos(cnt/32*##[$80BA]):qsin(cnt)=HSin(cnt/32*##[$80BA]):Next
+	For cnt.w=0 To 63:qcos(cnt)=HCos(cnt/32*Pi):qsin(cnt)=HSin(cnt/32*Pi):Next
 
 NEWTYPE .ShadPt
 	ri0.q:rj0:ri1:rj1:ri2:rj2:ri3:rj3:ri4:rj4:ri5:rj5

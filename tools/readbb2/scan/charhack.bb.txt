@@ -23,7 +23,7 @@ EndIf
 
 p.l=Instr(ted$,srch$)
 
-Poke$ Peek.l (##[$80B8] lmaxlen(1)+8),srch$
+Poke$ Peek.l (Addr lmaxlen(1)+8),srch$
 Use lmaxlen 0:Scroll 0,0,128,64,0,0,1	;german chars
 
 For y=2 To 7
@@ -38,7 +38,7 @@ Use lmaxlen 1:Scroll 0,0,128,64,0,0,0
 If ReadMem(0,"blitz2:ted2")
 	FileOutput 0
 	Print Left$(ted$,p-1)
-	Exists 0,Peek.l(##[$80B8] lmaxlen(1)+8),1024
+	Exists 0,Peek.l(Addr lmaxlen(1)+8),1024
 	Print Mid$(ted$,p+1024)
 	CloseFile 0
 EndIf

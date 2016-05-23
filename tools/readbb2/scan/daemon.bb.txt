@@ -139,7 +139,7 @@ WindowOutput 0
 	EndIf
 	##[$FE0B] lock
 
-##[$80BB]
+Repeat
 	VWait 30
 	ev.l=Event
 	If WriteMem(0,f$)
@@ -203,7 +203,7 @@ WindowOutput 0
 
 
 
-##[$80BC] ev=$200
+Until ev=$200
 
 
 

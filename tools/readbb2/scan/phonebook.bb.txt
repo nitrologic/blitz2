@@ -17,10 +17,10 @@ Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
 		WLocate 266,26:Print tex4
 	EndIf
 
-	##[$80BB]
-		##[$80BB]
+	Repeat
+		Repeat
 			wev.l=WaitEvent
-		##[$80BC] EventWindow=1
+		Until EventWindow=1
 
 		If wev=64
 			If GadgetHit=1 Then Goto endfunc
@@ -31,7 +31,7 @@ Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
 			If i$=Chr$(13) Then Goto endfunc
 		EndIf
 
-	##[$80C7]
+	Forever
 
 endfunc
 	Free localstat 1:Use localstat 0
@@ -118,7 +118,7 @@ refresh:
 	Next
 
 	ClearString 0,1:VWait 5
-	##[$80BB]
+	Repeat
 		Wait
 		rmsg.l = RexxEvent(port):ev.l=Event
 		If IsRexxMsg(rmsg) Then Gosub handlerexx
@@ -153,11 +153,11 @@ refresh:
 					Gosub update:If LastItem(people()) Then ref = 1
 				Case 15
 				 Gosub update
-				 comdata$="":secdat$="":##[$80C8] mydata
+				 comdata$="":secdat$="":Restore mydata
 				 Gosub dorexx
 			End Select
 		EndIf
-	##[$80BC] ref = 1
+	Until ref = 1
 
 Gosub refresh
 

@@ -42,9 +42,9 @@ doio{io,3,&k$,Len(k$)}
 End Statement
 
 allocst 0,0,0,640,200,2,$8000,"",1,2
-s=Peek.l(##[$80B8] allocst(0))
+s=Peek.l(Addr allocst(0))
 Poke.l ?scrn,s
-w=##[$FF9E](?newwindow):Poke.l ##[$80B8] localstat(0),w:Use localstat 0
+w=##[$FF9E](?newwindow):Poke.l Addr localstat(0),w:Use localstat 0
 ;LoadFont 0,"diamond.font",8:WindowFont 0
 
 io=opencon{w}:iow=io ;AllocMem_(128,$10001)
@@ -71,7 +71,7 @@ ioprint{iow,"To "}
 ioprint{iow,c$+"32;40;0m"}
 ioprint{iow,"1000"}
 
-##[$80BB]
+Repeat
 	cx=Peek.w(cu+62)
 	;WLocate 0,0:Print Peek.w(cu+62),"	",Peek.w(cu+64),"	"
 	;Print Peek.w(cu+42),"	",Peek.w(cu+44),"	"
@@ -87,10 +87,10 @@ ioprint{iow,"1000"}
 		ioprint{iow,c$+"P"}
 	Case c$
 		co$=c$
-		##[$80BB]
+		Repeat
 			doio{io,2,&t$,1}
 			co$+t$
-		##[$80BC] t$>="@"
+		Until t$>="@"
 		Select t$
 		Case "|"	;raw key report
 		Select Val(Mid$(co$,2)) ;event type
@@ -113,9 +113,9 @@ ioprint{iow,"1000"}
 			doio{iow,3,&l$,1}
 		EndIf
 	End Select
-##[$80BC] l$=Chr$(27)
+Until l$=Chr$(27)
 
-Poke.l ##[$80B8] localstat(0),0
+Poke.l Addr localstat(0),0
 ;FreeMem_ iow,128
 closecon{io}
 ##[$FF88] w
@@ -125,10 +125,10 @@ askcursxy ;ask for xy pos of cursx
 ;
 ioprint{iow,c$+"6n"}
 co$=""
-##[$80BB]
+Repeat
 	doio{io,2,&t$,1}
 	co$+t$
-##[$80BC] t$="R"
+Until t$="R"
 ;
 cy=Val(Mid$(co$,2))-1
 cx=Instr(co$,";")
@@ -142,10 +142,10 @@ askwindwh ;ask for wh size of window
 ;
 ioprint{iow,c$+" q"}
 co$=""
-##[$80BB]
+Repeat
 	doio{io,2,&t$,1}
 	co$+t$
-##[$80BC] t$="r"
+Until t$="r"
 ;
 ww=Instr(co$,";"):co$=Mid$(co$,ww+1)
 ww=Instr(co$,";"):co$=Mid$(co$,ww+1)

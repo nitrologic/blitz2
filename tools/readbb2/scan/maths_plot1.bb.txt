@@ -4,7 +4,7 @@
 ;------------------------------------------------------
 ;Set up bitmaps and/or screens in the usual way
 ;i.e. give yourself something to draw on.
-##[$80C3]
+WBStartup
 lmaxlen 0,320,256,5
 allocst 0,0,0,320,256,5,0,"",1,2,0
 ;------------------------------------------------------
@@ -24,7 +24,7 @@ ShowScreen 0:Use lmaxlen 0:BlockScroll 0
 For i=0 To 320
 ;------------------------------------------------------
 ;Give yourself a way to cancel if you don't fancy the result.
-	If Joyb(1)<>0:##[$80BE] For:Goto l1:EndIf
+	If Joyb(1)<>0:Pop For:Goto l1:EndIf
 ;------------------------------------------------------
 ;This calculates the x coordinate from the pixel position. -3 to 3
 ;are good bounds to begin with.

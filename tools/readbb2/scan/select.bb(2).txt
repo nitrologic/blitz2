@@ -54,7 +54,7 @@ top
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
 	blok2.l=Bank(1)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,"select4.iff",0
 	Use SetCycle 0
 
@@ -104,7 +104,7 @@ top
 	allocst 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadShapes 0,"cars.shapes"
 	casestrcomp 0,"cars.iff"
 	Use SetCycle 0

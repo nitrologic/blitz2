@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/Scroll.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/Scroll.bb2
-##[$80B4]
+SetErr
 	NPrint "Fatal Error !"
 	End
-End ##[$80B4]
-##[$80C3]:##[$80CC]
+End SetErr
+WBStartup:##[$80CC]
 freest 0;:WBenchToFront_
 
 ;fontname$="topaz.font"
@@ -79,12 +79,12 @@ EndIf
 
 pos=1
 
-##[$80BB]
+Repeat
 	WLocate 0,1:Print Mid$(text$,pos,80)
 	VWait 5
 	If pos>=Len(text$)-80 Then pos=1 Else pos+1
 	If Inkey$=Chr$(27) Then End
-##[$80C7]
+Forever
 
 Dc.b "$VER: WBScroll V1.0 By Iain Catterick (21/1/94)",0
 Event

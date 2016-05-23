@@ -5,7 +5,7 @@
 									;;														;;
 									;;****************************;;
 
-##[$80C3]:##[$80CB]:##[$80CC]:##[$80B4]:End:End ##[$80B4]
+WBStartup:##[$80CB]:##[$80CC]:SetErr:End:End SetErr
 
 If Processor>=2 Then numbikes=4 Else numbikes=2
 
@@ -221,7 +221,7 @@ co$=Mki$($19e)+Mki$($666)
 DisplayUser 1,99,co$,3
 ;****************************************************************;
 .gameloop
-##[$80BB]
+Repeat
 	VWait
 	DisplayBitMap 1,db,32,32,2,0,0
 	DisplaySprite 1,1,spx1,70+by1,4
@@ -263,7 +263,7 @@ DisplayUser 1,99,co$,3
 	xpos(15)=bsx1
 	xpos(95)=bsx1
 
-	count=bsx2 ##[$80B9] 16								 ; position of me on track
+	count=bsx2 MOD 16								 ; position of me on track
 
 	If *p\sy<80 OR bv1=-1						 ; background y scroll routine
 		bv1=-Sgn(*p\yacel):bv2=bv1
@@ -290,7 +290,7 @@ DisplayUser 1,99,co$,3
 		EndIf
 	Wend
 ;	Poke.w $dff180,$fff
-##[$80BC] RawStatus($45)
+Until RawStatus($45)
 End
 ;****************************************************************;
 
@@ -382,9 +382,9 @@ End
 	\y=QLimit(\y,149,220)
 	\x=QLimit(\x,maxl,maxr)
 	;
-	adj1=count+\x ##[$80B9] 16				 ; for gradient calculations
-	adj2=adj1+8 ##[$80B9] 16					 ; which should be a nice fast
-	adj3=adj1-8 ##[$80B9] 16					 ; assembly routine but isn't yet
+	adj1=count+\x MOD 16				 ; for gradient calculations
+	adj2=adj1+8 MOD 16					 ; which should be a nice fast
+	adj3=adj1-8 MOD 16					 ; assembly routine but isn't yet
 	;
 	gpt=x2+(\x LSR 4):If gpt>1024 Then gpt=1
 	lnp=(\y LSR 4)-9:If lnp>4 Then lnp=4
@@ -472,9 +472,9 @@ Return
 			lnp=(\y LSR4)-9:If lnp>4 Then lnp=4
 			gpt=x2+(\x LSR 4):If gpt>1024 Then gpt=1
 			;
-			adj1=count+\x ##[$80B9] 16
-			adj2=adj1+8 ##[$80B9] 16
-			adj3=adj1-8 ##[$80B9] 16
+			adj1=count+\x MOD 16
+			adj2=adj1+8 MOD 16
+			adj3=adj1-8 MOD 16
 			;
 			gr=g(gpt,lnp)\grad
 			fgr=g(gpt+1,lnp)\grad

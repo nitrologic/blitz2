@@ -543,7 +543,7 @@ End NEWTYPE
 
 ;/* pub screen modes */
 #SHANGHAI=$0001;/* Put workbench windows On pub allocst */
-#POPPUBSCREEN=$0002;/* ##[$80BE] pub allocst To front when visitor opens */
+#POPPUBSCREEN=$0002;/* Pop pub allocst To front when visitor opens */
 
 ;/* New for V39:	Intuition has new screen depth-arrangement and movement
 ; * functions called ScreenDepth() and ScreenPosition() respectively.

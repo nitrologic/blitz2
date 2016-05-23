@@ -7,7 +7,7 @@
 ;
 ;*****************************
 
-##[$80C3]:##[$80CC]
+WBStartup:##[$80CC]
 LoadModule 0,"modules/mod.sheam"						; Load the module
 LoadShapes 0,"shapes/sensor_stuff.shapes"	 ; Get Font & Logo
 VWait 20
@@ -18,7 +18,7 @@ BLITZ																											; Blitz rules!
 PlayModule 0																							 ; Play some music
 lmaxlen 0,384,250,4																				 ; Define a bitmap
 
-##[$80C8] cdat																							 ;
+Restore cdat																							 ;
 For tel=0 To 15																						; Read the colors
 	Read ri,rr,rg,rb																				 ; from the data
 	StopCycle 0,ri,rr,rg,rb																		 ; lines
@@ -61,7 +61,7 @@ lengte=Len(text$)
 teller=1
 ypos=0
 x=320
-##[$80BB]
+Repeat
 	find$=Mid$(text$,teller,1)
 	ftel=Instr(controle$,find$)-1
 	teller=QWrap(teller+1,1,lengte)
@@ -73,7 +73,7 @@ x=320
 		VWait
 		If Joyb(0)=1 Then Goto eruit
 	Next tel
-##[$80BC] False
+Until False
 
 eruit:
 ;

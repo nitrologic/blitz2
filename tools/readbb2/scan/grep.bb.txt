@@ -75,7 +75,7 @@ For p=1 To NumPars
 						k$=Par$(p)
 				Else
 						If f$<>""
-								##[$80BE] For
+								Pop For
 								NPrint "Error: Too Many Parameters."
 								NPrint "? for help"
 								End

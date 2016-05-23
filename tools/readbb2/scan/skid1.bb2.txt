@@ -5,7 +5,7 @@
 
 Dim r$(30)
 
-##[$80C3]
+WBStartup
 
 FindScreen 0
 
@@ -86,7 +86,7 @@ Else
 	status{"OPEN SERIAL FAILED"}:sop=False
 EndIf
 
-##[$80BB]
+Repeat
 	Wait
 	If SerialEvent(0)=1 Then charin{ReadSerialString(0)}
 	ev.l=WaitEvent
@@ -107,7 +107,7 @@ EndIf
 		a=Asc(Inkey$(1)):If a=138 Then Goto startgame
 		If a>128 AND a<137 Then sendserial{r$(16+a-129)} Else sendserial{Chr$(a)}
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 
 startgame
 

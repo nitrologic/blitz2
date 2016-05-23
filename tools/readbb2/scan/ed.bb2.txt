@@ -130,7 +130,7 @@ DEFTYPE.part *cpa,*pa
 DEFTYPE.object ob,*ob
 
 Statement wtofront{wn}
-##[$FFB0] Peek.l(##[$80B8] localstat(wn))
+##[$FFB0] Peek.l(Addr localstat(wn))
 End Statement
 
 Macro mspc
@@ -200,9 +200,9 @@ MenuItem 0,0,2,5,"	CREATE...	"
 ;
 popts$="WIREFRAM| SOLID	| GOURAD |TEXTMAP "
 
-sizeofb=##[$80B8] lmaxlen(1)-##[$80B8] lmaxlen(0)
-sizeofw=##[$80B8] localstat(1)-##[$80B8] localstat(0)
-sizeofg=##[$80B8] GadgetJam(1)-##[$80B8] GadgetJam(0)
+sizeofb=Addr lmaxlen(1)-Addr lmaxlen(0)
+sizeofw=Addr localstat(1)-Addr localstat(0)
+sizeofg=Addr GadgetJam(1)-Addr GadgetJam(0)
 ;
 StringText$ 0,0:StringText$ Off:SelectMode 3,0
 LoadShape 0,"gadget.iff"
@@ -211,7 +211,7 @@ LoadShape 2,"centre.iff":DecodeShapes 2
 ScreenPens 2,1,2,0,1,0,0
 SizeLimits #width/3,32,#width,#hite:AddIDCMP 16
 allocst 0,0,0,#width,#hite,#depth,#vmode,"Another ****ing 3D Editor",0,2
-layerinfo=Peek.l(##[$80B8] allocst(0))+224
+layerinfo=Peek.l(Addr allocst(0))+224
 ScreensBitMap 0,0
 Green 0,2,4,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,15,12,0
 Green 4,8,8,8:Green 5,4,4,4:Green 6,8,6,0:Green 7,10,10,10
@@ -253,7 +253,7 @@ Case -1 ;my raw key handler!
 	For op=1 To 4
 	If raw=rk(op) ;this one?
 		Gosub activatewindow:If wn Then op+2:Gosub handleop
-		##[$80BE] For:Goto rfout
+		Pop For:Goto rfout
 	EndIf
 	Next
 	rfout
@@ -319,9 +319,9 @@ layer.l=##[$F412](layerinfo,mx,my)
 ;
 If layer
 	For wn=1 To nw
-	wadd=Peek.l(##[$80B8] localstat(wn))
+	wadd=Peek.l(Addr localstat(wn))
 	If Peek.l(wadd+124)=layer
-		Use localstat wn:##[$80BE] For:Return
+		Use localstat wn:Pop For:Return
 	EndIf
 	Next
 EndIf
@@ -334,11 +334,11 @@ Activate wn:Return
 Select gh
 Case 6	;zoomer?
 	rf=-1
-	##[$80BB]
+	Repeat
 		VWait:lx=mx:ly=my:mx=SMouseX:my=SMouseY
 		If mx<>lx OR my<>ly Then Gosub calczoom
 		FlushEvents 16:Gosub read_event
-	##[$80BC] ev=64
+	Until ev=64
 	rf=-1:Gosub calczoom:Gosub checkcommon
 End Select
 Return
@@ -399,9 +399,9 @@ Return
 
 .wait_event
 Gosub read_event:If ev Then Return
-##[$80BB]
+Repeat
 	##[$FEAB] -1:Gosub read_event
-##[$80BC] ev
+Until ev
 Return
 
 .read_event
@@ -418,7 +418,7 @@ If ev
 	End Select
 	Return
 EndIf
-JSR getraw:##[$80BD] d0,raw:If raw Then ev=-1
+JSR getraw:PutReg d0,raw:If raw Then ev=-1
 Return
 
 .checkopdone
@@ -447,7 +447,7 @@ Gosub checkborder
 If bo
 	x=w(wn)\x:y=w(wn)\y:w=w(wn)\w:h=w(wn)\h
 	Gosub invbox
-	##[$80BB]
+	Repeat
 		VWait:lx=mx:ly=my:mx=SMouseX:my=SMouseY
 		If mx<>lx OR my<>ly
 			Gosub invbox
@@ -457,7 +457,7 @@ If bo
 			Gosub invbox
 		EndIf
 		Gosub checkopdone
-	##[$80BC] fl
+	Until fl
 	Gosub invbox:w(wn)\x=x,y:WMove x,y
 	wtofront{wn}
 Else
@@ -569,7 +569,7 @@ wn=own:If rf Then Goto rerender Else Return
 ;
 Gosub getviinfo:rf=-1
 ;
-##[$80BB]
+Repeat
 	VWait:lx=mx:ly=my:mx=SMouseX:my=SMouseY
 	If mx<>lx OR my<>ly
 		w(wn)\wp[dix]-(mx-lx)/scx
@@ -577,7 +577,7 @@ Gosub getviinfo:rf=-1
 		Gosub rerender
 	EndIf
 	Gosub checkopdone
-##[$80BC] fl
+Until fl
 ;
 rf=-1:Goto checkcommon
 
@@ -780,14 +780,14 @@ Free localstat wn:Free GadgetJam wn:Free lmaxlen wn:nw-1
 ##[$FE8C]
 For k=wn To nw
 ##[$FEDB] &w(k+1),&w(k),SizeOf.window
-##[$FEDB] ##[$80B8] lmaxlen(k+1),##[$80B8] lmaxlen(k),sizeofb
-##[$FEDB] ##[$80B8] localstat(k+1),##[$80B8] localstat(k),sizeofw
-##[$FEDB] ##[$80B8] GadgetJam(k+1),##[$80B8] GadgetJam(k),sizeofg
-Poke.w Peek.l(##[$80B8] localstat(k))+120,k
+##[$FEDB] Addr lmaxlen(k+1),Addr lmaxlen(k),sizeofb
+##[$FEDB] Addr localstat(k+1),Addr localstat(k),sizeofw
+##[$FEDB] Addr GadgetJam(k+1),Addr GadgetJam(k),sizeofg
+Poke.w Peek.l(Addr localstat(k))+120,k
 Next
-For j=0 To sizeofb-1 Step 4:Poke.l ##[$80B8] lmaxlen(k)+j,0:Next
-For j=0 To sizeofg-1 Step 4:Poke.l ##[$80B8] GadgetJam(k)+j,0:Next
-For j=0 To sizeofw-1 Step 4:Poke.l ##[$80B8] localstat(k)+j,0:Next
+For j=0 To sizeofb-1 Step 4:Poke.l Addr lmaxlen(k)+j,0:Next
+For j=0 To sizeofg-1 Step 4:Poke.l Addr GadgetJam(k)+j,0:Next
+For j=0 To sizeofw-1 Step 4:Poke.l Addr localstat(k)+j,0:Next
 ##[$FE8D]
 ;
 Return
@@ -805,7 +805,7 @@ rf=-1:Gosub render
 ;
 .showrender ;wblit bitmap across!
 ;
-##[$FF61] ##[$80B8] lmaxlen(wn),0,0,RastPort(wn),w(wn)\bx,w(wn)\by,w(wn)\bw,w(wn)\bh,$c0
+##[$FF61] Addr lmaxlen(wn),0,0,RastPort(wn),w(wn)\bx,w(wn)\by,w(wn)\bw,w(wn)\bh,$c0
 Return
 
 rerenderall
@@ -894,7 +894,7 @@ gsy=QAbs(gs*scy)
 ;
 If gsx>4 AND gsy>2 Then BlockScroll 4 Else BlockScroll 7:Return
 ;
-x2=(-wpx ##[$80B9] gs)*scx+cx
+x2=(-wpx MOD gs)*scx+cx
 ;
 x=x2
 While x>=0
@@ -902,12 +902,12 @@ While x>=0
 	x-gsx
 Wend
 x=x2
-##[$80BB]
+Repeat
 	x+gsx
 	If x<w Then Line x,0,x,h-1,7
-##[$80BC] x>=w
+Until x>=w
 ;
-y2=(-wpy ##[$80B9] gs)*scy+cy
+y2=(-wpy MOD gs)*scy+cy
 ;
 y=y2
 While y>=0
@@ -915,10 +915,10 @@ While y>=0
 	y-gsy
 Wend
 y=y2
-##[$80BB]
+Repeat
 	y+gsy
 	If y<h Then Line 0,y,w-1,y,7
-##[$80BC] y>=h
+Until y>=h
 ;
 Return
 

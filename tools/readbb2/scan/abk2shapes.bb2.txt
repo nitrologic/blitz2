@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2
-##[$80C3]: ##[$80CB]: ##[$80CC]: freest 0 ; Program Startup
+WBStartup: ##[$80CB]: ##[$80CC]: freest 0 ; Program Startup
 NPrint "Abk2Shapes v1.0.- Convert Amos Sprite Banks to Blitz2 Shape files"
 NPrint "Written by Francisco Javier Di"+Chr$(233)+"guez, Spain. November 1993."
 np.b=NumPars
@@ -41,7 +41,7 @@ Else
 					; The conversion takes place here
 					lmaxlen 0,X_Size*16+1,Y_Size+1,5
 					GetaShape i,0,0,X_Size*16,Y_Size
-					*s.shape=##[$80B8] MidHandle(i)
+					*s.shape=Addr MidHandle(i)
 					*s\_xhandle=X_Hot_Spot ;no flipping flags on disk
 					*s\_yhandle=Y_Hot_Spot
 					##[$BE14] 0,*s\_data,2*X_Size*Y_Size*Number_Of_Planes
@@ -53,10 +53,10 @@ Else
 			If a$=""
 				NPrint "Nothing Saved"
 			Else
-				##[$80B4]: NPrint "Couldn't save file": ##[$80BE] If: End ##[$80B4]
+				SetErr: NPrint "Couldn't save file": Pop If: End SetErr
 				SaveShapes 1,Number_Of_Objects,a$
 				NPrint "Operation successful"
-				##[$80B5]
+				ClrErr
 			EndIf
 		EndIf		 ; file type test
 	EndIf			 ; file opening test

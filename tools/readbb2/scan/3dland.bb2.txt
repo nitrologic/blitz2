@@ -9,7 +9,7 @@ BLITZ
 InitCopList 0,44,256,$0002,0,4,0
 CreateDisplay 0
 
-Dim qsin(512),qcos(512),quot(512):c=2*##[$80BA]/512
+Dim qsin(512),qcos(512),quot(512):c=2*Pi/512
 For cnt.w=0 To 512
 	rr=cnt*c
 	qsin(cnt)=HSin(rr)
@@ -51,11 +51,11 @@ DEFTYPE.f xx1,yy1,xx2,yy2
 
 #size=8
 For ii.w=-#size To #size
-	ang1=2*##[$80BA]/#size*ii
+	ang1=2*Pi/#size*ii
 	xx1=HSin(ang1)*r1+a1
 	yy1=HCos(ang1)*r1+b1
 	For jj.w=-#size To #size
-		ang2=2*##[$80BA]/#size*jj
+		ang2=2*Pi/#size*jj
 		xx2=HSin(ang2)*r2+a2
 		yy2=HCos(ang2)*r2+b2
 
@@ -148,7 +148,7 @@ R.xyz\x=-0.3,0,-4:R\sx=150,100
 B.xyz\x= 0.3,0,-4:B\sx=170,100
 
 theta=Rnd :Mouse On:MouseArea 0,0,320,300
-##[$80BB]
+Repeat
 ;	MOVE #0,$dff180
 	VWait:DisplayBitMap 0,db
 :db=1-db:Use lmaxlen db:BlockScroll
@@ -165,7 +165,7 @@ theta=Rnd :Mouse On:MouseArea 0,0,320,300
 
 	Position{&R}:Use lmaxlen db+8:Draw{}
 	Position{&B}:Use lmaxlen db+4:Draw{}
-##[$80BC] Joyb(0)<>0
+Until Joyb(0)<>0
 End
 
 

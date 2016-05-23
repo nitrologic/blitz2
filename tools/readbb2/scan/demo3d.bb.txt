@@ -117,7 +117,7 @@ missem
 	Return
 
 .palettergb
-	##[$80C8] rgbcols
+	Restore rgbcols
 	For i=0 To 7:Read rr.w,gg.w,bb.w:Green i,rr,gg,bb:Next
 	Return
 rgbcols:
@@ -125,7 +125,7 @@ rgbcols:
 	Data.w 8,8,8,13,9,0,8,10,14,12,3,2
 
 .paletterb
-	##[$80C8] rbcols
+	Restore rbcols
 	For i=0 To 15:Read rr.w,gg.w,bb.w:Green i,rr,gg,bb:Next
 	Return
 rbcols:

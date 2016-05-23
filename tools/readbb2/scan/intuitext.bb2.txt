@@ -39,13 +39,13 @@ text\drawmode=0
 text\kludgefill=0
 text\leftedge=10
 text\upedge=0
-text\ifont=##[$80B8] IntuiFont(0)
+text\ifont=Addr IntuiFont(0)
 text\itext=&a$
 text\inext=0
 
 a=##[$FFA0](rp,&text,0,30)
 
-text\ifont=##[$80B8] IntuiFont(1)
+text\ifont=Addr IntuiFont(1)
 a=##[$FFA0](rp,&text,0,60)
 MouseWait
 End

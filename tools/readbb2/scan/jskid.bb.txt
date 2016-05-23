@@ -293,7 +293,7 @@ End Function
 
 
 Function.l GetMem32{size.l}
-	MOVEQ #0,d1:ADD.l #16,d0:##[$80C2] $c002
+	MOVEQ #0,d1:ADD.l #16,d0:SysJsr $c002
 
 	ADD.l #31,d0
 	AND #$ffe0,d0
@@ -302,7 +302,7 @@ End Function
 
 
 Function.l GetMem{size.l}
-	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
 End Function
 
 
@@ -1079,14 +1079,14 @@ myang=64
 ;Gosub initjunk
 myfr.w=0
 
-##[$80BB]
+Repeat
 
 
 	!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
 
 
-	##[$80C9] *bmr1,*bmr2
-	##[$80C9] *bmb1,*bmb2
+	Exchange *bmr1,*bmr2
+	Exchange *bmb1,*bmb2
 
 	myfr+1
 	MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
@@ -1190,7 +1190,7 @@ CEND
 
 
 
-##[$80BC] 1=0
+Until 1=0
 
 
 
@@ -1574,7 +1574,7 @@ Statement bounce{result.w,*e.quadratic,*par.parse}
 	here.w=Off ; in case we crash more than once?
 
 	result+16
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				here+FixHitLine(*e,*par)
@@ -1585,13 +1585,13 @@ Statement bounce{result.w,*e.quadratic,*par.parse}
 		result ASR 1
 		*e+#hquad
 		*par\norm+32
-	##[$80BC] (result=1) ; OR (here=On)
+	Until (result=1) ; OR (here=On)
 	*par\norm AND 63
 	*par\boom=(here<0)
 End Statement	;end of bounce
 
 Statement Damage{result.w,*e.quadratic,*par.parse}
-	##[$80BB]
+	Repeat
 		If ( (result & 1)=1)
 			If *e\lstraight
 				deli=*par\fi-*e\lc
@@ -1609,7 +1609,7 @@ Statement Damage{result.w,*e.quadratic,*par.parse}
 		EndIf	 ;noimpact
 		result ASR 1
 		*e+#hquad
-	##[$80BC] (result=0)
+	Until (result=0)
 End Statement	;end of Damage
 
 
@@ -1774,7 +1774,7 @@ For *p=*p0 To *p3 Step SizeOf.car
 Next
 *p=*p0
 
-##[$80BB]
+Repeat
 ;	VWait
 
 ;CNIF 1=0
@@ -1782,7 +1782,7 @@ Next
 
 
 
-	##[$80C9] *bmr1,*bmr2
+	Exchange *bmr1,*bmr2
 	MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
 
 	*bmr=*bmr1:*bmb=*bmb1
@@ -1962,7 +1962,7 @@ safe{}
 
 	Gosub CheckWallLatent
 
-##[$80BC] done
+Until done
 
 ;Gosub DispTime
 Return
@@ -2110,7 +2110,7 @@ Return
 						desti=*rg\li:destj=*rg\lj:joy=cmpacc7
 					EndIf
 				Else
-					##[$80C9] *lg,*guide
+					Exchange *lg,*guide
 
 
 					difi=*guide\li-ni:normi=*guide\li-*lg\li
@@ -2499,7 +2499,7 @@ Return
 
 
 .DrawShadow
-	##[$80C9] \spr1,\spr2:##[$80C9] \sprnum1,\sprnum2
+	Exchange \spr1,\spr2:Exchange \sprnum1,\sprnum2
 ;	*s=\q
 ;	*sha=BankLoc(\bnk)+SizeOf.ShadPt*\head
 ;	!FindScr{0}:!FindScr{1}:!FindScr{2}:!FindScr{3}

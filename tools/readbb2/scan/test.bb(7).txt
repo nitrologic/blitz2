@@ -149,7 +149,7 @@ End Statement
 	##[$CD10] 0,8,8,4
 	CludgeBitMap 0,0
 	Use lmaxlen 0:Boxf 0,0,7,7,2:MakeCookie 0
-	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 	LoadShape 1,"mouse.iff":GetaSprite 0,1
 
@@ -170,9 +170,9 @@ End Statement
 
 .readtrack
 
-	LoadBitMap 1,"rod/old/track.fix"+Str$(tr),0:bm.l=##[$80B8] lmaxlen(1)
+	LoadBitMap 1,"rod/old/track.fix"+Str$(tr),0:bm.l=Addr lmaxlen(1)
 
-	pa.l=Peek.l(##[$80B8] SetCycle(0))+4
+	pa.l=Peek.l(Addr SetCycle(0))+4
 	##[$FEDB] pa+13*12,pa+18*12,12
 	##[$FEDB] pa+12*12,pa+19*12,12
 
@@ -248,7 +248,7 @@ main:
 	Gosub refreshoverlay
 	BitMapOutput 3
 
-	##[$80BB]
+	Repeat
 		VWait
 		a$=Inkey$:If a$<>"" Then a=Asc(a$) Else a=0
 
@@ -281,9 +281,9 @@ main:
 
 		Gosub animateoverlay
 
-	##[$80BC] a=27
+	Until a=27
 
-	pal.l=Peek.l(##[$80B8] SetCycle(0))+4
+	pal.l=Peek.l(Addr SetCycle(0))+4
 	For i=0 To 15
 		r.w=(Peek.b(pal) AND 255) LSR 4:pal+4
 		g.w=(Peek.b(pal) AND 255) LSR 4:pal+4
@@ -342,7 +342,7 @@ DEFTYPE .w n
 		newmem ppl()
 		While globfree(ppl())
 			##[$80CA] ppl()
-			longdiv ab(\t)\n+16+(fr ##[$80B9] ab(\t)\f),\x,\y
+			longdiv ab(\t)\n+16+(fr MOD ab(\t)\f),\x,\y
 		Wend
 	EndIf
 	Return
@@ -483,7 +483,7 @@ count:Dc.w0
 
 	limit=6
 
-	##[$80BB]
+	Repeat
 		Dim List cb.cbok(4608)
 		hits=0:Gosub scancount
 		SortList cb(),SizeOf .cbok\diff
@@ -501,7 +501,7 @@ count:Dc.w0
 			EndIf
 		Next
 		limit+2
-	##[$80BC] hits=0
+	Until hits=0
 	Return
 
 .scancount:
@@ -600,7 +600,7 @@ If ReadMem(0,"ram:tracks.bin")
 		;
 		j=0
 		;
-		##[$80BB]
+		Repeat
 			If bsize>8192 Then bsiz=8192 Else bsiz=bsize
 			th(i-1)\blocks[j]=ptr:j+1
 			*mine\Src=bsrc,bsiz,Bank(2)+14,BankSize(2)
@@ -608,7 +608,7 @@ If ReadMem(0,"ram:tracks.bin")
 			Exists 0,Bank(2),*mine\CrunLen+14
 			ptr+*mine\CrunLen+14
 			bsize-bsiz:bsrc+bsiz
-		##[$80BC] bsize=0
+		Until bsize=0
 		NPrint "!"
 	Next
 	CloseFile 0

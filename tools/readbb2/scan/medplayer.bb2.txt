@@ -11,7 +11,7 @@
 ; |								structure.																							|
 ; []----------------------------------------------------------------------[]
 
-##[$80C3]
+WBStartup
 
 DEFTYPE .s FileName,FilePath,FullName
 DEFTYPE .w ModuleLoaded,UseRequester,MEDVolume
@@ -55,7 +55,7 @@ main:
 	AttachGTList	0,0
 
 	CloseWin = False
-	##[$80BB]
+	Repeat
 		EventType.l = WaitEvent
 		Select EventType
 			Case $00000200
@@ -94,7 +94,7 @@ main:
 					Case 6 : CloseWin = True
 				End Select
 		End Select
-	##[$80BC] CloseWin
+	Until CloseWin
 	CloseWindow 0
 	CloseScreen 0
 	Free GTList	 0
@@ -113,16 +113,16 @@ OpenModule:
 			Gosub StopPlayer
 			ModuleLoaded = False
 		EndIf
-		##[$80B4]
+		SetErr
 			GTSetString 0,2,"Not a MED module !"
 			Return
-		End ##[$80B4]
+		End SetErr
 		LoadMedModule 0,FullName
 		GTSetString 0,2,FullName
 		ModuleLoaded = True
 		Gosub StartPlayer
 	EndIf
-	##[$80B5]
+	ClrErr
 	Return
 
 

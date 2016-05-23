@@ -24,7 +24,7 @@ For lop=0 To 14
 		ColSplit 9,0,0,14-lop,242+lop
 Next
 ;
-##[$80C8] copper
+Restore copper
 For lop=1 To 46
 		Read a,b,c
 		For pos=1 To 4

@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example4.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example4.bb2
 ##[$80CC]
-##[$80C3]
+WBStartup
 
-##[$80BF]	"FUN_Math:"
+INCDIR	"FUN_Math:"
 Include "FUN_Matrix.bb2"
 
 NEWTYPE.Facet_Type
@@ -28,7 +28,7 @@ DEFTYPE.Vector_Type VTemp1
 DEFTYPE.Vector_Type VTemp2
 DEFTYPE.Vector_Type Normal
 
-##[$80C8] Cube_Data
+Restore Cube_Data
 For points.b=0 To 7
 	Read	vertex_list(points)\x
 	Read	vertex_list(points)\y
@@ -68,7 +68,7 @@ zrot.w=0 ;194
 sby.q=2
 sdelta.q=0.03
 
-##[$80BB]
+Repeat
  xrot+2 : If xrot>359 Then xrot=360-xrot
  yrot+2 : If yrot>359 Then yrot=360-yrot
  zrot+1 : If zrot>359 Then zrot=360-zrot
@@ -115,7 +115,7 @@ sdelta.q=0.03
  EndIf
  DisplayBitMap 0,physical
  Use lmaxlen logical
-##[$80BC] Joyb(1)
+Until Joyb(1)
 
 End
 

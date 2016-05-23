@@ -5,7 +5,7 @@ If NumPars<>2
 EndIf
 
 LoadSound 0,Par$(1)
-*s.sound=##[$80B8] Sound(0)
+*s.sound=Addr Sound(0)
 If ReadMem(0,Par$(2))
 	FileOutput 0
 	Print Mki$(*s\_period)

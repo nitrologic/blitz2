@@ -6,19 +6,19 @@ lmaxlen 0,640,320,2
 For i=1 To 4
 	LoadBitMap 0,"w2:cars/blank/"+a$+Str$(i)+".4"
 	y=0:x=0
-	##[$80BB]
-		gfr=Int(fr/32)*32+31-((fr+40) ##[$80B9] 32)
+	Repeat
+		gfr=Int(fr/32)*32+31-((fr+40) MOD 32)
 		NPrint gfr
 		GetaShape 0,x,y,32,32
 		GetaSprite gfr,0
 		fr+1
 		x+32:If x=640 Then y+32:x=0
-	##[$80BC] y=320
+	Until y=320
 Next
 
 If ReadMem(0,"ram:"+a$+".spc")
 	For i=0 To 799
-		Exists 0,Peek.l(##[$80B8] SpriteMode(i)),256
+		Exists 0,Peek.l(Addr SpriteMode(i)),256
 	Next
 	CloseFile 0
 EndIf

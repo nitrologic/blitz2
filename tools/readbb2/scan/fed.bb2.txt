@@ -58,7 +58,7 @@ Case 256
 					##[$BE14] 0,p(k,j),SizeOf.point
 					Next j,k
 					CloseFile 0:Use localstat 0
-					##[$80BE] Select:##[$80BE] Select:Goto new
+					Pop Select:Pop Select:Goto new
 				Else
 					##[$FF8C] 0
 				EndIf
@@ -89,7 +89,7 @@ Case 256
 			While p2
 				p2-1:If p(c,p2)\x=0 Then p=p2:p2=0
 			Wend
-			np(c)=p:##[$80BE] Select:##[$80BE] Select:Goto new
+			np(c)=p:Pop Select:Pop Select:Goto new
 		Case 4	;quit
 			End
 		End Select
@@ -97,11 +97,11 @@ Case 256
 Case 1024
 	i$=Inkey$
 	If i$=Chr$(27)
-		np(c)=0:##[$80BE] Select:Goto new
+		np(c)=0:Pop Select:Goto new
 	EndIf
 	If Asc(i$)>31 AND Asc(i$)<128
 		If fx=0
-			np(c)=p:c=Asc(i$):##[$80BE] Select:Goto new
+			np(c)=p:c=Asc(i$):Pop Select:Goto new
 		Else
 			##[$FF8C] 0
 		EndIf
@@ -112,7 +112,7 @@ Case 8
 		If lx Then Line lx,ly,mx,my,2
 		If mx=fx AND my=fy
 			p+1:p(c,p)\x=0:np(c)=p
-			##[$80BE] Select:Goto new
+			Pop Select:Goto new
 		EndIf
 		If lx=0 Then fx=mx:fy=my
 		p+1:p(c,p)\x=mx,my:lx=mx:ly=my:Boxf lx,ly,lx+3,ly+3,2
@@ -143,7 +143,7 @@ f$=FileRequest$("File to create",cpa$,cfi$)
 			yy=(p(k,j)\y-128)*ysc
 			For l=1 To nv
 			If xx=v(l)\x AND yy=v(l)\y
-				##[$80BE] For:Goto outofit
+				Pop For:Goto outofit
 			EndIf
 			Next
 			nv+1:v(nv)\x=xx,yy
@@ -175,7 +175,7 @@ f$=FileRequest$("File to create",cpa$,cfi$)
 			If xx=v(vn)\x AND yy=v(vn)\y
 				If v$ Then v$+","
 				v$+Str$(vn-1)
-				##[$80BE] For:Goto outofit2
+				Pop For:Goto outofit2
 			EndIf
 			Next
 			outofit2

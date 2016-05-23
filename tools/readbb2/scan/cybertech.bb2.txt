@@ -10,12 +10,12 @@
 ; |	 Wed 05.01.94	Amiga Format release completed.												|
 ; []----------------------------------------------------------------------[]
 
-##[$80C3]:##[$80CC]
-##[$80B4]
+WBStartup:##[$80CC]
+SetErr
 	End
-End ##[$80B4]
+End SetErr
 
-##[$80BF]	"BSource:Include/"
+INCDIR	"BSource:Include/"
 Include "Scale.bbi"
 Include "Copper.bbi"
 Include "Palette.bbi"
@@ -668,7 +668,7 @@ Statement FadeInPal24 {Pal.w, StartReg.w, EndReg.w, Delay.w}
 	DEFTYPE .PaletteData *PalData
 	DEFTYPE .RgbComp *RgbComp
 
-	*PalPtr	= ##[$80B8] SetCycle (Pal)
+	*PalPtr	= Addr SetCycle (Pal)
 	*PalData = *PalPtr\_PalData
 	*RgbComp = *PalData\_Rgbs[0]
 	For ColReg = 0 To 255
@@ -798,16 +798,16 @@ End Statement
 		EndIf
 	Next HiScoreNo
 
-	##[$80C8] JtoPData
+	Restore JtoPData
 	For y = 0 To 2
 		For x = 0 To 2:Read JtoP.b(x, y):Next x
 	Next y
-	##[$80C8] JtoAData
+	Restore JtoAData
 	For y = 0 To 2
 		For x = 0 To 2:Read JtoA.b(x, y):Next x
 	Next y
 
-	##[$80C8] ComputerKeys
+	Restore ComputerKeys
 	For KeyNo = 0 To #CompKeys-1
 		Read Keys(KeyNo)\X, Keys(KeyNo)\Y, Keys(KeyNo)\ShapeNo, Keys(KeyNo)\RawCode, Keys(KeyNo)\Legend
 		Keys(KeyNo)\ShapeNo+#ShapeCompKey
@@ -924,7 +924,7 @@ BLITZ ; The point of no return !
 ; []----------------------------------------------------------------------[]
 Statement WaitKeyOrJoy {RawKeyCode.w}
 	Exit = False
-	##[$80BB]
+	Repeat
 		If RawStatus (RawKeyCode)
 			While RawStatus (RawKeyCode):Wend
 			Exit = True
@@ -933,7 +933,7 @@ Statement WaitKeyOrJoy {RawKeyCode.w}
 			While Joyb(1):Wend
 			Exit = True
 		EndIf
-	##[$80BC] Exit = True
+	Until Exit = True
 End Statement
 
 ; [ GetColour ]-----------------------------------------------------------[]
@@ -955,7 +955,7 @@ Function.w GetColour {Pal.w, Reg.w, Component.w}
 	DEFTYPE .RgbComp *RgbComp
 	DEFTYPE .l ColourVal
 
-	*PalPtr	= ##[$80B8] SetCycle (Pal)
+	*PalPtr	= Addr SetCycle (Pal)
 	*PalData = *PalPtr\_PalData
 	*RgbComp = *PalData\_Rgbs[Reg]
 	Select Component
@@ -986,7 +986,7 @@ Statement FadeToPal {Pal1.w, Pal2.w, StartReg.w, EndReg.w, Delay.w}
 	DEFTYPE .RgbComp *RgbComp, *RgbComp1, *RgbComp2
 
 	If Pal1 <> #PALTmp
-		*PalPtr	 = ##[$80B8] SetCycle (Pal1)
+		*PalPtr	 = Addr SetCycle (Pal1)
 		*PalData1 = *PalPtr\_PalData
 		*RgbComp = *PalData1\_Rgbs[0]
 		##[$80CA] *RgbComp
@@ -996,7 +996,7 @@ Statement FadeToPal {Pal1.w, Pal2.w, StartReg.w, EndReg.w, Delay.w}
 		Next ColReg
 	EndIf
 
-	*PalPtr	 = ##[$80B8] SetCycle (Pal2)
+	*PalPtr	 = Addr SetCycle (Pal2)
 	*PalData2 = *PalPtr\_PalData
 
 	Use SetCycle #PALTmp
@@ -1088,7 +1088,7 @@ End Statement
 Function.w GetCompKey {}
 	Shared Keys()
 
-	##[$80BB]
+	Repeat
 		For KeyNo = 0 To #CompKeys-1
 			If RawStatus (Keys(KeyNo)\RawCode)
 				KeyX = Keys(KeyNo)\X
@@ -1122,7 +1122,7 @@ Function.w GetCompKey {}
 			VWait:longdiv ShapeNo, KeyX, KeyY
 			Function Return Keys(KeyNo)\Legend
 		EndIf
-	##[$80C7]
+	Forever
 End Function
 
 ; [ WriteCompDigits ]-----------------------------------------------------[]
@@ -1245,7 +1245,7 @@ Function.w GetMenuSelection {*First.CMenuItem, Items.w, DefItem.w, Redisplay.w}
 
 	ItemSelected = False
 	*MenuPtr = *First+(DefItem*SizeOf.CMenuItem)
-	##[$80BB]
+	Repeat
 		Legend = GetCompKey {}
 		WriteCompText {\X, \Y,	Left$(\Text, 3), 5, 0, #TextNormal}
 		WriteCompText {\X+3, \Y, Mid$(\Text, 4), 4, 0, #TextNormal}
@@ -1267,7 +1267,7 @@ Function.w GetMenuSelection {*First.CMenuItem, Items.w, DefItem.w, Redisplay.w}
 		End Select
 		*MenuPtr = *First+(DefItem*SizeOf.CMenuItem)
 		WriteCompText {\X, \Y, \Text, 2, 4, #TextNormal}
-	##[$80BC] ItemSelected = True
+	Until ItemSelected = True
 
 	Function Return DefItem
 End Function
@@ -1951,7 +1951,7 @@ End Function
 	longmult 1, 20
 
 	Gosub FindDiskData
-	##[$80BB]
+	Repeat
 		Gosub Intro
 		Gosub NewGame
 		While EndOfGame = False AND LevelNo <> Levels
@@ -1960,7 +1960,7 @@ End Function
 		Wend
 		Gosub GameOver
 		Gosub EndGame
-	##[$80C7]
+	Forever
 	End
 
 
@@ -2048,7 +2048,7 @@ End Function
 
 	LevelNo	 = 0
 	LoopCount = 0
-	##[$80BB]
+	Repeat
 		DisplayOff
 		FreeSlices
 		Slice 0, 44, #ScrWidth, #ScrHeight, #LORES, 4, 8, 16, #ScrWidth, #ScrWidth
@@ -2064,7 +2064,7 @@ End Function
 				Jb = Joyb(1)
 				If Jb OR RawStatus (#RawKey_ESC)
 					FadeOutPal {0, 15, 15, 4}
-					##[$80BE] For
+					Pop For
 					If Jb Then Goto ExitIntro Else Goto ExitGame
 				EndIf
 				Delay-1:VWait
@@ -2108,7 +2108,7 @@ End Function
 			If Jb OR RawStatus (#RawKey_ESC)
 				Use lmaxlen #BMPIntroB0:BlockScroll
 				FadeOutPal {15, 31, 15, 2}
-				##[$80BE] For
+				Pop For
 				If Jb Then Goto ExitIntro Else Goto ExitGame
 			EndIf
 		Next LineNo
@@ -2120,7 +2120,7 @@ End Function
 			Goto ExitIntro
 		EndIf
 		LoopCount+1
-	##[$80C7]
+	Forever
 
 ExitIntro:
 	Gosub StopSoundtrack
@@ -3179,7 +3179,7 @@ ExitGame:
 		Seconds = \Counter/#TimerRes
 		If Seconds <= 90
 			QBlit *Scr\FBitmap, #ShapeTimer+(Seconds/10),		 #Timer1DigitX, #TimerDigitY
-			QBlit *Scr\FBitmap, #ShapeTimer+(Seconds ##[$80B9] 10), #Timer2DigitX, #TimerDigitY
+			QBlit *Scr\FBitmap, #ShapeTimer+(Seconds MOD 10), #Timer2DigitX, #TimerDigitY
 		EndIf
 	EndIf
 	Return
@@ -3289,8 +3289,8 @@ ExitGame:
 			*Scr\FBitmap = 1-*Scr\FBitmap
 			UnQueue *Scr\FBitmap
 			If Joyb(1)
-				##[$80BE] While
-				##[$80BE] For
+				Pop While
+				Pop For
 				Goto HiScores
 			EndIf
 		Wend
@@ -3317,8 +3317,8 @@ ExitGame:
 			*Scr\FBitmap = 1-*Scr\FBitmap
 			UnQueue *Scr\FBitmap
 			If Joyb(1)
-				##[$80BE] While
-				##[$80BE] For
+				Pop While
+				Pop For
 				Goto HiScores
 			EndIf
 		Wend
@@ -3326,8 +3326,8 @@ ExitGame:
 		Delay = #NiceDelay
 		While Delay > 0
 			If Joyb(1)
-				##[$80BE] While
-				##[$80BE] For
+				Pop While
+				Pop For
 				Goto HiScores
 			Else
 				Delay-1
@@ -3363,7 +3363,7 @@ HiScores:
 				CompBgr = True:CompPage = #CompHiScrPage
 				Gosub Computer
 			EndIf
-			##[$80BE] While:Return
+			Pop While:Return
 		EndIf
 		ScoreNo+1
 	Wend
@@ -3484,7 +3484,7 @@ HiScores:
 	\bsa_XSrcFactor	= #BlockSize, #BlockSize
 	\bsa_DestX			 = #FGNDOff, #FGNDOff
 	\bsa_XDestFactor = ScanSize, ScanSize
-	\bsa_SrcBitMap	 = ##[$80B8] lmaxlen (#BMPBgnd), ##[$80B8] lmaxlen (*Scr\FBitmap)
+	\bsa_SrcBitMap	 = Addr lmaxlen (#BMPBgnd), Addr lmaxlen (*Scr\FBitmap)
 	##[$FF6D] (&BitMapScaleStruct)
 	Return
 
@@ -3539,7 +3539,7 @@ HiScores:
 	WriteCompDigits {"READY", True}
 
 	##[$80CA] *Player
-	##[$80BB]
+	Repeat
 		Clear = 0
 		If CompPage = 0
 			CMenuItem = GetMenuSelection {&CMenu1(0), 7, CMenuItem, 0}
@@ -3547,7 +3547,7 @@ HiScores:
 		Select CMenuItem
 			Case 0
 				SubMenuItem = 0
-				##[$80BB]
+				Repeat
 					WriteCompDigits {"CR "+Str$(\Credits), True}
 					SubMenuItem = GetMenuSelection {&CMenu2(0), 5, SubMenuItem, Clear}
 					Clear+1
@@ -3611,10 +3611,10 @@ HiScores:
 							EndIf
 					End Select
 					*MisData = MData(\MissileNo)
-				##[$80BC] SubMenuItem = 4
+				Until SubMenuItem = 4
 			Case 1
 				SubMenuItem = 0
-				##[$80BB]
+				Repeat
 					WriteCompDigits {"CR "+Str$(\Credits), True}
 					SubMenuItem = GetMenuSelection {&CMenu3(0), 5, SubMenuItem, Clear}
 					Clear+1
@@ -3652,7 +3652,7 @@ HiScores:
 								ComputerMessage {NoDoughMsg$}
 							EndIf
 					End Select
-				##[$80BC] SubMenuItem = 4
+				Until SubMenuItem = 4
 			Case 2
 				Gosub ShowMissionStats
 			Case 3
@@ -3666,7 +3666,7 @@ HiScores:
 			Case 8
 				Gosub GetHiScore
 		End Select
-	##[$80BC] ExitComputer = True
+	Until ExitComputer = True
 
 	ClearCompScreen {0}
 	Gosub StopCompBGR
@@ -3874,7 +3874,7 @@ HiScores:
 	NPos = 0
 	Accepted = False
 	##[$80CA] *NewHiScore
-	##[$80BB]
+	Repeat
 		If XOff <> OXOff OR YOff <> OYOff
 			If OXOff >= 0
 				WriteCompText {XPos+(OXOff ASL 1), YPos+(OYOff ASL 1), Mid$(HiScChar$,(OYOff*9)+OXOff+1,1), 4, 0, #TextNormal}
@@ -3906,7 +3906,7 @@ HiScores:
 				NPos = QLimit(NPos+1, 0, 7)
 				WriteCompText {ScoreX, ScoreY, \Name, 2, 0, #TextNormal}
 		End Select
-	##[$80BC] Accepted = True
+	Until Accepted = True
 	Return
 
 

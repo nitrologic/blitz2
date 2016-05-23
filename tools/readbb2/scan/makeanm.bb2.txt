@@ -21,7 +21,7 @@ flg.l=Val(Par$(4))
 ;
 LoadShape 0,Par$(1)
 ;
-While Peek.w(##[$80B8] MidHandle(s))
+While Peek.w(Addr MidHandle(s))
 	s+1
 Wend
 ;
@@ -57,7 +57,7 @@ For n=0 To su-1
 	h$+Mkl$(Len(f$)+s LSL 2+10)
 	w=ShapeWidth(n):h=ShapeHeight(n):h2=h+h
 	f$+Mki$(w)+Mki$(h)+Mki$(h*64*3+2)
-	*sh.shape=##[$80B8] MidHandle(n):d.l=*sh\_data
+	*sh.shape=Addr MidHandle(n):d.l=*sh\_data
 	For k=1 To h
 	d2.l=d
 	For b=1 To 3

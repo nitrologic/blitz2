@@ -134,20 +134,20 @@ End Function
 
 Function.l GetMem32{size.l}
 	CNIF #c=#j
-		MOVEQ #0,d1:ADD.l #16,d0:##[$80C2] $c002
+		MOVEQ #0,d1:ADD.l #16,d0:SysJsr $c002
 
 		ADD.l #31,d0
 		AND #$ffe0,d0
 		AsmExit
 	CELSE
-		MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+		MOVEQ #0,d1:SysJsr $c002:AsmExit
 	CEND
 End Function
 
 
 
 Function.l GetMem{size.l}
-	MOVEQ #0,d1:##[$80C2] $c002:AsmExit
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
 End Function
 
 
@@ -411,7 +411,7 @@ Return
 .DoMain
 
 
-	##[$80BB]
+	Repeat
 
 
 ;		!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
@@ -426,7 +426,7 @@ Return
 ;		HeadBmap{*bmr1}
 
 		Muntit{mycopshow}
-		##[$80C9] mycopshowa,mycopshowb
+		Exchange mycopshowa,mycopshowb
 		mycopshow=mycopshowa
 
 		For cnt.w=0 To 1
@@ -459,7 +459,7 @@ Return
 
 ;		GetJoy{&jox.w,&joy.w,&butt.w}
 
-	##[$80BC] 1=0
+	Until 1=0
 
 Return
 
@@ -729,7 +729,7 @@ Return
 		Gosub Rot
 		Gosub Draw
 
-	 ##[$80BC] Joyb(0)<>0
+	 Until Joyb(0)<>0
 	End
 	CEND
 

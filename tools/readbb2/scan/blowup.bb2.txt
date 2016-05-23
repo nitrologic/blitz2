@@ -12,7 +12,7 @@ End NEWTYPE
 
 Dim b.z(192)
 
-co.f=##[$80BA]*2/n
+co.f=Pi*2/n
 
 s=0
 

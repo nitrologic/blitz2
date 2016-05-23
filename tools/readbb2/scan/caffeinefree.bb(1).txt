@@ -7,7 +7,7 @@
 ;Note: to recompile this game, you'll need the files in the
 ;			'inc' directory, and more than 1 meg memory (sorry)
 
-##[$80C3] ;run from an icon
+WBStartup ;run from an icon
 
 ##[$80CB]:##[$80CC] ;free up ted and cli for low mem developers
 
@@ -284,7 +284,7 @@ Statement WaitForClick{timeout.w}
 	count=0
 	time=0
 
-	##[$80BB]
+	Repeat
 
 		VWait
 		time=time+1
@@ -304,7 +304,7 @@ Statement WaitForClick{timeout.w}
 				If state=Off Then count=count+1
 		End Select
 
-	##[$80BC] time=timeout OR count=2
+	Until time=timeout OR count=2
 
 End Statement
 
@@ -432,7 +432,7 @@ Statement InitLevel{}
 
 	xcoarse=0
 
-	##[$80BB]
+	Repeat
 		VWait															 ;new frame
 		Show phys,xfine+16,16							 ;show physical bitmap
 
@@ -443,7 +443,7 @@ Statement InitLevel{}
 		EndIf
 
 		;update bitmap pointers if needed
-		*bm=##[$80B8] lmaxlen(logi)
+		*bm=Addr lmaxlen(logi)
 		*bm\_data[0]=oldplanes(logi,0)+(xcoarse*2)
 		*bm\_data[1]=oldplanes(logi,1)+(xcoarse*2)
 		*bm\_data[2]=oldplanes(logi,2)+(xcoarse*2)
@@ -463,7 +463,7 @@ Statement InitLevel{}
 		;swap physical and logical bitmaps
 		phys=logi
 		logi=1-logi
-	##[$80BC] xcoarse>=20				 ;done a whole screen?
+	Until xcoarse>=20				 ;done a whole screen?
 End Statement
 
 
@@ -495,10 +495,10 @@ Function.w FindFreeDude{}
 	DEFTYPE.w i,d
 	d=-1
 	i=0
-	##[$80BB]
+	Repeat
 		If dudes(i)\state=0 Then d=i
 		i=i+1
-	##[$80BC] i=#NUMOFDUDES OR d<>-1
+	Until i=#NUMOFDUDES OR d<>-1
 	Function Return d
 End Function
 
@@ -1459,7 +1459,7 @@ Statement RestoreBitmaps{}
 	;restore bitmaps (which are hacked about by the scrolling)
 
 	For i=0 To 1												;bitmap loop
-		*bm = ##[$80B8] lmaxlen(i)
+		*bm = Addr lmaxlen(i)
 		For j=0 To 3											;plane loop
 			*bm\_data[j]=oldplanes(i,j)
 		Next
@@ -1552,7 +1552,7 @@ Function.s EnterName{}
 
 	DisplayOn
 
-	##[$80BB]
+	Repeat
 		b = ConvertChar{Asc( Mid$( chargrid$,(y*7)+x+1,1 ) ) }
 		VWait
 		timer=timer+1
@@ -1618,9 +1618,9 @@ Function.s EnterName{}
 		a$=""
 		If (Joyb(1) AND keymode=Off) OR (RawStatus($40) AND keymode)
 			If keymode=On
-				##[$80BB] : ##[$80BC] RawStatus($40)=Off
+				Repeat : Until RawStatus($40)=Off
 			Else
-				##[$80BB] : ##[$80BC] Joyb(1)=Off
+				Repeat : Until Joyb(1)=Off
 			EndIf
 
 				Sound 1,15
@@ -1648,7 +1648,7 @@ Function.s EnterName{}
 				End Select
 		EndIf
 
-	##[$80BC] a$="#"
+	Until a$="#"
 
 
 
@@ -1670,10 +1670,10 @@ Statement MaybeNewHigh{}
 
 	slot=-1
 	i=0
-	##[$80BB]
+	Repeat
 		If plrscore>=hiscores(i)\score Then slot=i
 		i=i+1
-	##[$80BC] i=8 OR slot<>-1
+	Until i=8 OR slot<>-1
 
 	If slot<>-1 Then InsertScore{slot,EnterName{},plrscore}
 End Statement
@@ -1744,7 +1744,7 @@ Function.w Title{}
 	tstate=0
 	delay=0
 
-	##[$80BB]
+	Repeat
 		VWait
 		delay=delay-1
 		If delay<0
@@ -1844,7 +1844,7 @@ Function.w Title{}
 		If RawStatus($40) Then keymode=On : startflag=On
 		If Joyb(1) Then keymode=Off :startflag=On
 
-	##[$80BC] startflag OR esc
+	Until startflag OR esc
 
 	DisplayOff
 	FreeSlices
@@ -1880,7 +1880,7 @@ chargrid$="abcdefghijklmnopqrstuvwxyz0123456789.-! @#"
 
 ;save out bitplane pointers in the oldplanes array
 For i=0 To 1												;bitmap loop
-	*bm = ##[$80B8] lmaxlen(i)
+	*bm = Addr lmaxlen(i)
 	For j=0 To 3											;plane loop
 		oldplanes(i,j)=*bm\_data[j]
 	Next
@@ -1888,7 +1888,7 @@ Next
 
 ;setup sine lookup table
 For i=0 To 360
-	sinlt(i)=HSin(i*(##[$80BA]/180))*127 *32
+	sinlt(i)=HSin(i*(Pi/180))*127 *32
 Next
 
 ;set up level structures
@@ -1937,13 +1937,13 @@ While Title{}=Off							 ;do title and check for exit
 	Next
 
 	;level loop starts here
-	##[$80BB]
+	Repeat
 
 		InitLevel{}
 
 		.MAINLOOP
 
-		##[$80BB]
+		Repeat
 
 			;wait for start of new frame
 			VWait
@@ -1973,7 +1973,7 @@ While Title{}=Off							 ;do title and check for exit
 			EndIf
 
 			;update bitmap pointers if needed
-			*bm=##[$80B8] lmaxlen(logi)
+			*bm=Addr lmaxlen(logi)
 			*bm\_data[0]=oldplanes(logi,0)+(xcoarse*2)
 			*bm\_data[1]=oldplanes(logi,1)+(xcoarse*2)
 			*bm\_data[2]=oldplanes(logi,2)+(xcoarse*2)
@@ -2043,7 +2043,7 @@ While Title{}=Off							 ;do title and check for exit
 			phys=logi
 			logi=1-logi
 
-		##[$80BC] (gamestatus=12) OR (gamestatus=4)	 ; OR Joyb(0)
+		Until (gamestatus=12) OR (gamestatus=4)	 ; OR Joyb(0)
 
 		DisplayOff
 		FlushBuffer 0
@@ -2054,7 +2054,7 @@ While Title{}=Off							 ;do title and check for exit
 		If gamestatus=4 Then level=level+1
 
 		FreeSlices
-	##[$80BC] gamestatus=12 OR level=#NUMOFLEVELS		 ; OR Joyb(0)
+	Until gamestatus=12 OR level=#NUMOFLEVELS		 ; OR Joyb(0)
 
 	If level=#NUMOFLEVELS Then Wibble{}
 	MaybeNewHigh{}							;check for new highscore

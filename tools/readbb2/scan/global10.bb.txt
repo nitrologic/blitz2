@@ -297,16 +297,16 @@ End Function
 Function.w AddPost{}
 	Shared peg()
 	cnt.w=0
-	##[$80BB]
+	Repeat
 		If peg(cnt)\active=0
 			For cot=0 To 11
 				peg(cnt)\edge[cot]=-1
 				peg(cnt)\dest[cot]=-1
 			Next
-			peg(cnt)\active=1:##[$80BE] ##[$80BB]:Function Return cnt
+			peg(cnt)\active=1:Pop Repeat:Function Return cnt
 		EndIf
 		cnt+1
-	##[$80BC] cnt=#maxpost
+	Until cnt=#maxpost
 	Sound 0,1
 	Function Return -1
 End Function
@@ -314,15 +314,15 @@ End Function
 Function.w AddNgon{}
 	Shared peg(),bound(),area()
 	cnt.w=0
-	##[$80BB]
+	Repeat
 		If area(cnt)\active=0
 			For cot=0 To 11
 				area(cnt)\edge[cot]=-1
 			Next
-			area(cnt)\active=1:##[$80BE] ##[$80BB]:Function Return cnt
+			area(cnt)\active=1:Pop Repeat:Function Return cnt
 		EndIf
 		cnt+1
-	##[$80BC] cnt=#maxngon
+	Until cnt=#maxngon
 	Sound 0,1
 	Function Return -1
 End Function
@@ -361,16 +361,16 @@ Function AddEdge{stt,fin}
 
 ;	If NOT ok Then Stop
 	cnt=0:adstt.w=-1:adfin.w=-1:nuedge.w=-1
-	##[$80BB]
+	Repeat
 		If *spost\edge[cnt]=-1 Then adstt=cnt
 		If *fpost\edge[cnt]=-1 Then adfin=cnt
 		cnt+1
-	##[$80BC] cnt=11
+	Until cnt=11
 	cnt=-1
-	##[$80BB]
+	Repeat
 		cnt+1
 		If bound(cnt)\stt=-1 Then nuedge=cnt:cnt=#maxedge
-	##[$80BC] cnt=#maxedge
+	Until cnt=#maxedge
 	If (nuedge=-1) OR (adfin=-1) OR (addstt=-1) Then ok=Off
 ;	If NOT ok Then Stop
 	yippe
@@ -476,7 +476,7 @@ Gosub GetExo
 selected=3
 CNIF 1=0
 For cnt.w=0 To 14
-	gr(cnt)\i= (cnt ##[$80B9] 3)*5 + 25
+	gr(cnt)\i= (cnt MOD 3)*5 + 25
 	gr(cnt)\j=(Int(cnt/3))*3 + 20
 	gr(cnt)\k=102;!qhite{gr(cnt)\i,gr(cnt)\j}
 	gr(cnt)\sx=mapx{gr(cnt)\i,gr(cnt)\j}
@@ -498,67 +498,67 @@ Gosub Redisplay:Goto Main
 		If job =1
 			tmy=my
 			impact=-1:cnt=0
-			##[$80BB]
+			Repeat
 				*tgon=area(cnt)
 				If *tgon\active>0
 					If (mx-*tgon\sx)=QLimit(mx-*tgon\sx,-8,8)
 						If (my-*tgon\sy)=QLimit(my-*tgon\sy,-8,8)
 							impact=cnt:imptype=#ngon
-							##[$80BE] ##[$80BB]:Goto out
+							Pop Repeat:Goto out
 						EndIf
 					EndIf
 				EndIf
 				cnt+1
-			##[$80BC] cnt=#maxngon
+			Until cnt=#maxngon
 
 			If mode.w<>1	;purple
 				cnt=1			;funny case..
-				##[$80BB]
+				Repeat
 					If (mx-con(cnt)\lsx)=QLimit(mx-con(cnt)\lsx,-8,8)
 						If (my-con(cnt)\lsy)=QLimit(my-con(cnt)\lsy,-8,8)
 							impact=cnt:imptype=#lcon:con(impact)\go=On
-							##[$80BE] ##[$80BB]:Goto out
+							Pop Repeat:Goto out
 						EndIf
 					EndIf
 					If (mx-con(cnt)\rsx)=QLimit(mx-con(cnt)\rsx,-8,8)
 						If (my-con(cnt)\rsy)=QLimit(my-con(cnt)\rsy,-8,8)
 							impact=cnt:imptype=#rcon:con(impact)\go=On
 
-							##[$80BE] ##[$80BB]:Goto out
+							Pop Repeat:Goto out
 						EndIf
 					EndIf
 					cnt+1
-				##[$80BC] cnt=(pts.w+2)
+				Until cnt=(pts.w+2)
 
 
 				cnt=0
-				##[$80BB]
+				Repeat
 					*tpost=peg(cnt)
 					If *tpost\active>0
 						If (mx-*tpost\sx)=QLimit(mx-*tpost\sx,-8,8)
 							If (my-*tpost\sy)=QLimit(my-*tpost\sy,-8,8)
 								impact=cnt:imptype=#post
 								If *tpost\active=5 Then imptype=#bdd
-								##[$80BE] ##[$80BB]:Goto out
+								Pop Repeat:Goto out
 							EndIf
 						EndIf
 					EndIf
 					cnt+1
-				##[$80BC] cnt=#maxpost
+				Until cnt=#maxpost
 
 				cnt=0
-				##[$80BB]
+				Repeat
 					If bound(cnt)\stt>-1
 						*tedge=bound(cnt)
 						If (mx-*tedge\sx)=QLimit(mx-*tedge\sx,-8,8)
 							If (my-*tedge\sy)=QLimit(my-*tedge\sy,-8,8)
 								impact=cnt:imptype=#edge
-								##[$80BE] ##[$80BB]:Goto out
+								Pop Repeat:Goto out
 							EndIf
 						EndIf
 					EndIf
 					cnt+1
-				##[$80BC] cnt=#maxedge
+				Until cnt=#maxedge
 			Else ;purple
 				impact=-1
 				For cnt.w=0 To 14
@@ -625,7 +625,7 @@ Gosub Redisplay:Goto Main
 					Gosub DrawVert		 ;erase old
 					If direct=0
 						cnt=0
-						##[$80BB]												;if moved onto another
+						Repeat												;if moved onto another
 							If NOT cnt=impact
 								*npost=peg(cnt)
 								If *npost\active=1	 :; don't include 5 = the track..
@@ -640,7 +640,7 @@ Gosub Redisplay:Goto Main
 								EndIf
 							EndIf
 							cnt+1
-						##[$80BC] cnt=#maxpost
+						Until cnt=#maxpost
 
 						*tpost=peg(impact)
 						parta=(mx-*tpost\sx) ASR 5
@@ -670,7 +670,7 @@ Gosub Redisplay:Goto Main
 					Gosub DrawVert		 ;erase old
 					If direct=0
 						cnt=0
-						##[$80BB]												;if moved onto another
+						Repeat												;if moved onto another
 							If NOT cnt=impact
 								*npost=peg(cnt)
 								If *npost\active=1	 :; don't include 5 = the track..
@@ -689,7 +689,7 @@ Gosub Redisplay:Goto Main
 								EndIf
 							EndIf
 							cnt+1
-						##[$80BC] cnt=#maxpost
+						Until cnt=#maxpost
 					EndIf
 					If direct=1 OR direct=2
 						follow=On;ff
@@ -751,7 +751,7 @@ Gosub Redisplay:Goto Main
 
 					If direct=0
 						cnt=0
-						##[$80BB]												;if moved onto another
+						Repeat												;if moved onto another
 							*npost=peg(cnt)
 							If *npost\active>0
 								If (mx-*npost\sx)=QLimit(mx-*npost\sx,-8,8)
@@ -759,12 +759,12 @@ Gosub Redisplay:Goto Main
 	;									 oh dear, moved onto a Point
 										area(impact)\active=0
 										impact=cnt:imptype=#post
-										##[$80BE] ##[$80BB]:Goto damn
+										Pop Repeat:Goto damn
 									EndIf
 								EndIf
 							EndIf
 							cnt+1
-						##[$80BC] cnt=#maxpost
+						Until cnt=#maxpost
 
 						*tgon=area(impact)
 						parta=(mx-*tgon\sx) ASR 5
@@ -878,14 +878,14 @@ DoMen
 		Colour 1,0
 		For cnt=1 To 12:Gosub DispOpt:Next
 		sel.w=-1
-		##[$80BB]
+		Repeat
 			If mx>plax AND mx<plbx :nsel.w=(my-play+1)ASR 3:Else:nsel=-1:EndIf
 			If nsel<>sel
 				cnt=sel:Colour 1,0:Gosub DispOpt
 				sel=nsel
 				Colour 0,2:cnt=sel:Gosub DispOpt
 			EndIf
-		##[$80BC] Joyb(0)=0
+		Until Joyb(0)=0
 		down=0:job=0
 		BlitColl 0,plax,play
 		scrl=On
@@ -894,7 +894,7 @@ DoMen
 	If down=3
 		If (impact>-1) AND (imptype=#post) AND (job=3)
 			cnt=0
-			##[$80BB]												;if moved onto another
+			Repeat												;if moved onto another
 				If NOT cnt=impact					 ;add a line
 					*npost=peg(cnt)
 					If *npost\active>0
@@ -911,7 +911,7 @@ DoMen
 					EndIf
 				EndIf
 				cnt+1
-			##[$80BC] cnt=#maxpost
+			Until cnt=#maxpost
 		EndIf
 	EndIf
 	down=job
@@ -1049,18 +1049,18 @@ Return
 	If in$="f"
 		*tgon=area(sec)
 		cnt=0
-		##[$80BB]
+		Repeat
 			*tgon=area(cnt)
 			If *tgon\active>0
 				If (mx-*tgon\sx)=QLimit(mx-*tgon\sx,-8,8)
 					If (my-*tgon\sy)=QLimit(my-*tgon\sy,-8,8)
 						sec=cnt
-						##[$80BE] ##[$80BB]:Goto gotone
+						Pop Repeat:Goto gotone
 					EndIf
 				EndIf
 			EndIf
 			cnt+1
-		##[$80BC] cnt=#maxngon
+		Until cnt=#maxngon
 		Sound 0,1:Goto ciao
 		.gotone
 		*tgon=area(sec)
@@ -1100,7 +1100,7 @@ Return
 
 .Main
 done.b=Off:hit.w=Off
-##[$80BB]
+Repeat
 ;	dth.w=pts3.w+0.5+hudif
 ;	If dth>pts3 Then dth-pts
 ;	If dth<2 Then dth+pts
@@ -1186,7 +1186,7 @@ done.b=Off:hit.w=Off
 		EndIf
 	If last.w<>first.w Then Gosub Munt
 	If RawStatus($45) Then done=On
-##[$80BC] done
+Until done
 End
 
 .Redisplay
@@ -1287,7 +1287,7 @@ BLITZ
 	done=Off:BitMapOutput 0:Use lmaxlen 0
 	Poke.l Peek.l(Peek.l(4)+276)+184,-1		:; turn errors off!
 
-	##[$80BB]
+	Repeat
 		If WriteMem (0,"df0:Disk.ID")
 			dname$="":trackid.w=0
 			FileInput 0
@@ -1315,14 +1315,14 @@ BLITZ
 			Locate 3,3:Print "Please Insert a Track Disk!"
 			Locate 3,20:Print "press Fire to continue"
 
-			##[$80BB]
-			##[$80BC] (Joyb(0)<>0) OR (Joyb(0)<>0)
+			Repeat
+			Until (Joyb(0)<>0) OR (Joyb(0)<>0)
 		EndIf
-	##[$80BC] done=On
+	Until done=On
 	If WriteMem(0,m$+"Maps.Here")
 		FileInput 0
 		hightrack=0
-		##[$80BB]
+		Repeat
 			fi$=Edit$("",79)
 			If fi$<>"-1"
 				cnt=QLimit(Instr(fi$," ")-1,0,79)
@@ -1334,7 +1334,7 @@ BLITZ
 				EndIf
 				hightrack+1
 			EndIf
-		##[$80BC] fi$="-1"
+		Until fi$="-1"
 		CloseFile 0
 		DefaultInput
 	Else
@@ -1352,7 +1352,7 @@ BLITZ
 		Locate 20,5+cnt:Print com.s(cnt)
 	Next
 	Mouse On:BlitzKeys On:sel=-1:BitPlanesBitMap 0,3,4
-	##[$80BB]
+	Repeat
 		Use lmaxlen 3
 		ShowSprite 0,MouseX,MouseY,0
 		cnt=Int((MouseY)ASR 3)-5
@@ -1370,7 +1370,7 @@ BLITZ
 		EndIf
 		If RawStatus($45) Then Goto exit
 		Use lmaxlen 0
-	##[$80BC] done
+	Until done
 	Mouse Off:BlitzKeys Off
 	BLITZ
 	FreeSlices
@@ -2002,18 +2002,18 @@ Return
 .InSide
 
 			cnt=0
-			##[$80BB]
+			Repeat
 				*tgon=area(cnt)
 				If *tgon\active>0
 					If (mx-*tgon\sx)=QLimit(mx-*tgon\sx,-8,8)
 						If (my-*tgon\sy)=QLimit(my-*tgon\sy,-8,8)
 							sec=cnt
-							##[$80BE] ##[$80BB]:Goto woosh
+							Pop Repeat:Goto woosh
 						EndIf
 					EndIf
 				EndIf
 				cnt+1
-			##[$80BC] cnt=#maxngon
+			Until cnt=#maxngon
 	Return
 	woosh
 
@@ -2030,7 +2030,7 @@ Return
 			SetIt{*tgon\i+1,*tgon\j	}
 			SetIt{*tgon\i+1,*tgon\j+1}
 			SetIt{*tgon\i	,*tgon\j+1}
-			##[$80BB]
+			Repeat
 				changed.b=0
 				For di=0 To 63:For dj=0 To 63
 
@@ -2041,11 +2041,11 @@ Return
 						dtj=(dj-*tgon\j)
 						If (dti<>0) OR (dtj<>0)
 							If RawStatus($21)
-								##[$80BE] For:##[$80BE] For:##[$80BE] For			;FIX ME
+								Pop For:Pop For:Pop For			;FIX ME
 								Goto Bye										 ;Kludge :-)
 							EndIf
 							cnt=0:drawn.b=Off
-							##[$80BB]
+							Repeat
 								side=*tgon\edge[cnt]
 								If side>-1
 
@@ -2077,7 +2077,7 @@ Return
 									EndIf
 								EndIf
 								cnt+1
-							##[$80BC] cnt=11 OR drawn
+							Until cnt=11 OR drawn
 							If drawn
 								SetIt{di+1,dj+1}
 								SetIt{di	,dj+1}
@@ -2092,7 +2092,7 @@ Return
 						changed(di,dj)=1
 					EndIf
 				Next:Next
-			##[$80BC] changed.b=0
+			Until changed.b=0
 		EndIf
 	Bye
 Return
@@ -2126,7 +2126,7 @@ End Function
 	For cnt=0 To 14	;sel.w=selected To selected+3
 ;		gr(cnt)\sx=mapx{gr(cnt)\i,gr(cnt)\j},mapy{gr(cnt)\i,gr(cnt)\j}
 		k=!qhite{gr(cnt)\i,gr(cnt)\j}
-		Select cnt ##[$80B9] 6
+		Select cnt MOD 6
 			Case 0:k+con(sel)\lb
 			Case 1:k+con(sel)\mb
 			Case 2:k+con(sel)\rb
@@ -2153,7 +2153,7 @@ Return
 	For cnt=0 To 14	;sel.w=selected To selected+3
 ;		gr(cnt)\sx=mapx{gr(cnt)\i,gr(cnt)\j},mapy{gr(cnt)\i,gr(cnt)\j}
 		k=gr(cnt)\k-!qhite{gr(cnt)\i,gr(cnt)\j}
-		Select cnt ##[$80B9] 6
+		Select cnt MOD 6
 			Case 0:con(sel)\lb=k
 			Case 1:con(sel)\mb=k
 			Case 2:con(sel)\rb=k
@@ -2180,14 +2180,14 @@ Return
 	changed(gr( 4)\i,gr( 4)\j)=2
 	changed(gr(10)\i,gr(10)\j)=2
 
-	##[$80BB]
+	Repeat
 		changed.b=1
 		For i.w=0 To 63
 			For j.w=0 To 63
 				If changed(i,j)=2 Then Gosub GoFish
 			Next
 		Next
-	##[$80BC] changed.b=1
+	Until changed.b=1
 
 Return
 
@@ -2210,14 +2210,14 @@ Return
 
 		changed(ti,tj)=2
 
-		##[$80BB]
+		Repeat
 			changed.b=1
 			For i=0 To 63
 				For j=0 To 63
 					If changed(i,j)=2 Then Gosub GoBait
 				Next
 			Next
-		##[$80BC] changed.b=1
+		Until changed.b=1
 	Next
 
 	changed.b=0
@@ -2431,14 +2431,14 @@ Return
 	If NOT happy Then stdstb=-1
 
 
-	##[$80BB]
+	Repeat
 		changed.b=1
 		For i.w=1 To 62
 			For j.w=1 To 62
 				If changed(i,j)=2 Then Gosub Mutilate
 			Next
 		Next
-	##[$80BC] changed.b=1 OR Joyb(0)<>0
+	Until changed.b=1 OR Joyb(0)<>0
 Return
 
 
@@ -2669,7 +2669,7 @@ Return
 		Else
 ;			MOVE #$f0f,$dff180
 		EndIf
-		If RawStatus($45) Then ##[$80BE] While:Goto exit
+		If RawStatus($45) Then Pop While:Goto exit
 	Wend
 	changed.b=2
 Return

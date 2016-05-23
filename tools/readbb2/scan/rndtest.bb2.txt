@@ -35,7 +35,7 @@ RTS
 getrnd
 MOVE d0,-(a7)
 BSR rndw ;:MOVE d0,-(a7):BSR rndw:ADD (a7)+,d0
-MULU (a7)+,d0:CLR d0:SWAP d0:##[$80BD] d0,n
+MULU (a7)+,d0:CLR d0:SWAP d0:PutReg d0,n
 RTS
 
 rndw
@@ -61,7 +61,7 @@ seedrnd2 ;seed number in d0.w
 getrnd2
 MOVE d0,-(a7)
 BSR rndw2
-MULU (a7)+,d0:CLR d0:SWAP d0:##[$80BD] d0,n
+MULU (a7)+,d0:CLR d0:SWAP d0:PutReg d0,n
 RTS
 
 rndtable2:Ds.w	55

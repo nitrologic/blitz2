@@ -25,7 +25,7 @@ Statement half{bmap.l}
 	;
 End Statement
 
-half{##[$80B8] lmaxlen(0)}
+half{Addr lmaxlen(0)}
 
 CreateDisplay 0
 MouseWait

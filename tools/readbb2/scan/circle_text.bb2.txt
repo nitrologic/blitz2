@@ -34,7 +34,7 @@ For LOP=1 To TL
 Next
 TL=TL-20
 ;
-##[$80C8] copcol1
+Restore copcol1
  YCOP=15
 	For LOP=0 To 46
 	 Read a,b,c
@@ -44,7 +44,7 @@ TL=TL-20
  YCOP+5
 Next
 ;
-##[$80C8] copcol2
+Restore copcol2
 For lop=0 To 10
 		Read a
 		ColSplit 0,0,0,a,lop

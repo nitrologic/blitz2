@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKERATIOS.BB
 
-##[$80C8] ratios
+Restore ratios
 Print "dc.l",Chr$(9)
 For l=0 To 6
 		Read rat.q
@@ -11,7 +11,7 @@ For l=0 To 6
 Next
 NPrint ""
 
-##[$80C8] ratios
+Restore ratios
 Print "dc.l",Chr$(9)
 For l=0 To 6
 		Read rat.q

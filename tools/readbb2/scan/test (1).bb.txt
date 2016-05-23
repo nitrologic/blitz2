@@ -38,16 +38,16 @@ Gosub setupui
 
 n=0:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
 
-##[$80BB]
+Repeat
 	VWait
 	ev.w=##[$BA92]
 	If ev=-1 Then Gosub handleit
 	a=BlitzKey				 ;:Locate 0,0:Print a,"	"
-##[$80BC] a=27
+Until a=27
 
 End
 
-##[$80BB]
+Repeat
 	a=Asc(Inkey$)
 	If mo=On Then ##[$BA87] 0,MouseX,MouseY
 	If a=28 OR Joyx(1)=-1 Then ##[$BA87] 0,-1
@@ -56,7 +56,7 @@ End
 	If a=31 Then ##[$BA87] -1,0
 	If a=13 Then ##[$BA89]:Gosub handleit
 	If a=-1 AND flag Then ##[$BA88]:flag=0
-##[$80BC] a=27
+Until a=27
 
 End
 

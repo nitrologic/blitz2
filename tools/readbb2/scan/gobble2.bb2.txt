@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Gobble2/Gobble2/GOBBLE2.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Gobble2/Gobble2/GOBBLE2.BB2
-##[$80C3]
+WBStartup
 
 #FIELDX=40
 #FIELDY=28
@@ -41,7 +41,7 @@ Gosub INTRO
 Gosub INITFIELD
 Gosub DRAWFIELD
 
-##[$80BB]
+Repeat
 
 Gosub MYMOVE
 Gosub COLIDE
@@ -54,7 +54,7 @@ EndIf
 VWait DELAY
 TIME+1
 
-##[$80BC] LIFE<0 OR RawKey=$45
+Until LIFE<0 OR RawKey=$45
 
 Goto START
 
@@ -211,12 +211,12 @@ LoadScreen 0,"DATA/BACKGROUND.IFF"
 
 WLocate 0,224: Print Centre$("Today's Highest Score: "+Str$(HI),40)
 FlushEvents
-##[$80BB]
+Repeat
 VWait
 I$=Inkey$
 If UCase$(I$)="Q" Then End
 If UCase$(I$)="O" Then Gosub SETUP
-##[$80BC] Joyb(1)=1 OR Inkey$=" "
+Until Joyb(1)=1 OR Inkey$=" "
 
 SCORE=0
 TIME=0
@@ -243,12 +243,12 @@ WLocate 2,26:Print "ENERGY:"
 WLocate 2,46:Print "LIVES :"
 WLocate 2,66:Print "SOUND :"
 
-##[$80BB]
+Repeat
 ;WLocate 0,0
 ;Print Int(HPropPot(1,5)*20+1)
 ;Print " , "
 ;Print Int(HPropPot(1,4)*40+1)
-VWait:##[$80BC] WaitEvent=$40 AND GadgetHit=6
+VWait:Until WaitEvent=$40 AND GadgetHit=6
 
 SETDELAY=Int(HPropPot(1,5)*20+1)
 SETENERGY=Int(HPropPot(1,4)*40+1)

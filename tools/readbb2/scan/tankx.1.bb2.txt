@@ -20,10 +20,10 @@ V=POWER/100
 W=WIND/100
 G=GRAVITY
 
-HS=V*HSin(A*(##[$80BA]/180))
-VS=V*HCos(A*(##[$80BA]/180))
+HS=V*HSin(A*(Pi/180))
+VS=V*HCos(A*(Pi/180))
 
-##[$80BB]
+Repeat
 
 OX=NX:OY=NY:OVS=VS:OHS=HS
 
@@ -34,13 +34,13 @@ NY=OY-((OVS+VS)/2)*0.01
 
 Point NX*150+16,NY*40+100,3
 
-##[$80BC] NY*40+100>100 OR NX*150+16>640 OR Event=$8
+Until NY*40+100>100 OR NX*150+16>640 OR Event=$8
 
 Dim Y(9000)
 FLAG=2
 NEWY=Int(Rnd(128))
 
-##[$80BB]
+Repeat
 
 OLDY=NEWY
 
@@ -78,7 +78,7 @@ Else
 
 EndIf
 
-##[$80BC] X>640
+Until X>640
 
 For X=0 To 640
 	Point X,254-Y(X),1

@@ -55,7 +55,7 @@ cy=-128
 
 While Joyb(0)=0
 	;
-	##[$80BB]:VWait:##[$80BC] fc>2:fc=0
+	Repeat:VWait:Until fc>2:fc=0
 	Show db:db=1-db:Use lmaxlen db ;:Cls
 	;
 ;	czr+64:cxr+113

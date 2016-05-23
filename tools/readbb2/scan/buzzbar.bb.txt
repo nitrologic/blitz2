@@ -199,7 +199,7 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 
 .setupsincos
 	For i=0 To 1023
-		r.f=i*##[$80BA]/512
+		r.f=i*Pi/512
 		qsin(i)=HSin(r)
 		qcos(i)=HCos(r)
 	Next

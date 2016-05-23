@@ -236,7 +236,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=2
 						If blocksopen=0 Then Gosub openblocks:Goto MAINLOOP
 						If blocksopen=1
-								win.l=Peek.l(##[$80B8] localstat(1))
+								win.l=Peek.l(Addr localstat(1))
 								##[$FFB0](win)
 								Activate 1:Goto MAINLOOP
 						EndIf
@@ -244,7 +244,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=5
 						If mapopen=0 Then Gosub openmap:Goto MAINLOOP
 						If mapopen=1
-								win.l=Peek.l(##[$80B8] localstat(2))
+								win.l=Peek.l(Addr localstat(2))
 								##[$FFB0](win)
 								Activate 2:Goto MAINLOOP
 						EndIf
@@ -252,7 +252,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=6
 						If viewopen=0 Then Gosub openview:Goto MAINLOOP
 						If viewopen=1
-								win.l=Peek.l(##[$80B8] localstat(3))
+								win.l=Peek.l(Addr localstat(3))
 								##[$FFB0](win)
 								Activate 3:Goto MAINLOOP
 						EndIf
@@ -294,7 +294,7 @@ If ew=1		 ;THE BLOCKS WINDOW
 								shp=my*20+mx		;new current shape!!
 								CopyShape shp,901
 								Scale 901,.5,.5
-								##[$FEDB] Peek.l(##[$80B8] MidHandle(901)+14),Peek.l(##[$80B8] MidHandle(900)+14),2*8*5
+								##[$FEDB] Peek.l(Addr MidHandle(901)+14),Peek.l(Addr MidHandle(900)+14),2*8*5
 								Redraw 1,3
 								Borders 1,3,On
 								Borders 1,3,Off
@@ -552,9 +552,9 @@ Redraw 1,1:Redraw 1,2
 Goto drawblocksuper
 ;----------------------------------------------------------------------------
 .doblockmove
-##[$80BB]
+Repeat
 		Gosub drawblocksuper
-##[$80BC] WaitEvent<>$10
+Until WaitEvent<>$10
 Return
 ;----------------------------------------------------------------------------
 .drawblocksuper
@@ -611,9 +611,9 @@ Redraw 2,1:Redraw 2,2
 Goto drawmapsuper
 ;----------------------------------------------------------------------------
 .domapmove
-##[$80BB]
+Repeat
 		Gosub drawmapsuper
-##[$80BC] WaitEvent<>$10
+Until WaitEvent<>$10
 Return
 ;----------------------------------------------------------------------------
 .drawmapsuper
@@ -681,9 +681,9 @@ Redraw 3,1:Redraw 3,2
 Goto drawviewsuper
 ;----------------------------------------------------------------------------
 .doviewmove
-##[$80BB]
+Repeat
 		Gosub drawviewsuper
-##[$80BC] WaitEvent<>$10
+Until WaitEvent<>$10
 Return
 ;----------------------------------------------------------------------------
 .drawviewsuper

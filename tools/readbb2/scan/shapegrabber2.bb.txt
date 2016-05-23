@@ -146,7 +146,7 @@ Print m1,"	",m2,"		"
 Goto lop
 .gdsz:
 Gosub crhrf
-Wnd.l=Peek.l(##[$80B8] localstat(0))
+Wnd.l=Peek.l(Addr localstat(0))
 t.l=##[$FF95](Wnd,$18)
 pmouse:
 FlushEvents $10
@@ -231,8 +231,8 @@ WLine x2,y1,x2,y2,3
 
 Return
 fsp:
-If x1>x2 Then ##[$80C9] x1,x2
-If y1>y2 Then ##[$80C9] y1,y2
+If x1>x2 Then Exchange x1,x2
+If y1>y2 Then Exchange y1,y2
 If	NOT MenuList (0,1,2) Then x1+1
 If	NOT MenuList (0,1,4) Then y1+1
 If	NOT MenuList (0,1,3) Then x2-1
@@ -386,7 +386,7 @@ Gosub snum
 If op>=shp Then Goto dodsp
 CopyShape op,en
 CopyShape 55,op
-##[$80C9] sd(en),sd(op)
+Exchange sd(en),sd(op)
 Goto dodsp
 mov:
 tt$="	MOVE	"

@@ -18,18 +18,18 @@ setup:
 	#wb=$80000047:#hi=$80000024:#top=$80000022:#wid=$80000023:#dp=$80000025
 	ScreenTags #sc,"DEBUGGER SCREEN",#wb,1,#top,WBHeight-104,#wid,640,#hi,104,#dp,2
 	ScreensBitMap #sc,#bm:Box 0,52,639,62,3
-	MOVE.l #dumpmap,a0:MOVE.l #dumpchar,a1:MOVE.l #dumpscroll,a2:##[$80C2] $d502
+	MOVE.l #dumpmap,a0:MOVE.l #dumpchar,a1:MOVE.l #dumpscroll,a2:SysJsr $d502
 	Goto progtop
 
 	##[$80D3]
 dumpmap:
 	MOVEM.l d0-d7/a0-a6,-(a7):TokeJsr $5204:MOVE.l d0,-(a7)
-	##[$80BD] a4,a.l:BitMapOutput #bm:Locate 0,1.5
+	PutReg a4,a.l:BitMapOutput #bm:Locate 0,1.5
 	For i=0 To 4:NPrint Peeks$ (a+i*128,80):Next
 	MOVE.l (a7)+,a0:TokeJsr $5204:MOVEM.l (a7)+,d0-d7/a0-a6:RTS
 dumpchar:
 	MOVEM.l d0-d7/a0-a6,-(a7):##[$FE8A]
-	##[$80BD] d0,a.l:##[$80BD] d1,x.l:##[$80BD] d2,y.l
+	PutReg d0,a.l:PutReg d1,x.l:PutReg d2,y.l
 	TokeJsr $5204:MOVE.l d0,-(a7)
 	BitMapOutput #bm:Locate x,y/8+1.5:Print Chr$(a)
 	MOVE.l (a7)+,a0:TokeJsr $5204

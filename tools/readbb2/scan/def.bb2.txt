@@ -111,7 +111,7 @@ Data$ "ZAP"
 Data.l 1000
 Data$ "POW"
 ;
-##[$80BB]
+Repeat
 	Read a$
 	If a$
 		Read ei(a)\s
@@ -128,7 +128,7 @@ Data$ "POW"
 		EndIf
 		a+1
 	EndIf
-##[$80BC] a$=""
+Until a$=""
 
 Data$ hume
 Data.w 0
@@ -315,7 +315,7 @@ SetInt 5
 	Gosub choosej_p
 End SetInt
 ;
-##[$80C8] warpins
+Restore warpins
 For j=1 To 6
 Gosub alloff
 Read x,y,s,xs,n$
@@ -324,7 +324,7 @@ AddLast a()
 \s=s:\e=j
 Gosub blowin
 Gosub allon
-##[$80BB]
+Repeat
 	VWait
 	CNIF #cd32<>0
 		If j_p>=0 Then If Gameb(j_p)&1 Then Goto newgame
@@ -333,7 +333,7 @@ Gosub allon
 	If k=129 Then npl=0:Goto newgame
 	If k=130 Then npl=1:Goto newgame
 	CEND
-##[$80BC] acd=0
+Until acd=0
 Locate x LSR 3-4,y LSR 3
 Print Centre$(n$,11)
 Next
@@ -367,7 +367,7 @@ CEND
 ;
 introwait
 j2=350
-##[$80BB]
+Repeat
 VWait:j2-1
 CNIF #cd32<>0
 	;
@@ -384,27 +384,27 @@ CELSE
 i$=Inkey$
 Select Asc(i$)
 Case 129
-	npl=0:##[$80BE] Select:Goto newgame
+	npl=0:Pop Select:Goto newgame
 Case 130
-	npl=1:##[$80BE] Select:Goto newgame
+	npl=1:Pop Select:Goto newgame
 Case 131
-	pmode=3-pmode:##[$80BE] Select:Goto pstats
+	pmode=3-pmode:Pop Select:Goto pstats
 Case 132
-	pmode2=3-pmode2:##[$80BE] Select:Goto pstats
+	pmode2=3-pmode2:Pop Select:Goto pstats
 Case 133
 	paln=1-paln
 	For k=1 To 6
 	Green k,Blue(k),PalRGB(k),Palette(k)
-	Next:##[$80BE] Select:Goto introwait
+	Next:Pop Select:Goto introwait
 End Select
 CEND
-##[$80BC] j2=0
+Until j2=0
 ;
 ;blurb...
 ;
 Gosub introsetup
-##[$80C8] blurb:Locate 0,1:Colour 4,0:Use lmaxlen 0
-##[$80BB]
+Restore blurb:Locate 0,1:Colour 4,0:Use lmaxlen 0
+Repeat
 Read i$
 If Len(i$)<3
 	Select i$
@@ -419,7 +419,7 @@ If Len(i$)<3
 Else
 	Print i$
 EndIf
-##[$80BC] i$="!"
+Until i$="!"
 ;
 DisplayOn
 ;
@@ -543,9 +543,9 @@ Data$ "!"
 .newgame	;npl=number of players (1 or 0)
 ;
 CNIF #cd32<>0
-##[$80BB]
+Repeat
 	VWait
-##[$80BC] Gameb(j_p)=0
+Until Gameb(j_p)=0
 cmode=3:cmode2=3
 CELSE
 cmode=pmode:cmode2=pmode2
@@ -578,7 +578,7 @@ Gosub shutup:Gosub gameon
 ;
 pat+1
 ;
-If pat=1 OR pat ##[$80B9] 5=0 Then nhum=10:spc=0
+If pat=1 OR pat MOD 5=0 Then nhum=10:spc=0
 ;
 wlan=25:If pat<5 Then wlan=20:If pat=1 Then wlan=15
 nmut=0
@@ -702,10 +702,10 @@ EndIf
 DisplayOn:g_b=0:Gosub animon
 
 .main
-##[$80BB]
+Repeat
 	;
-	##[$80BB]
-	##[$80BC] frame<>oframe
+	Repeat
+	Until frame<>oframe
 	oframe=frame
 	;
 	newmem a()
@@ -781,8 +781,8 @@ DisplayOn:g_b=0:Gosub animon
 						;
 						;mean fire time!
 						;
-						##[$80C9] \otb,\lander\otb2
-						##[$80C9] \otr,\lander\otr2
+						Exchange \otb,\lander\otb2
+						Exchange \otr,\lander\otr2
 						;
 						;move me to front of list - I don't want
 						;to warp out!
@@ -795,7 +795,7 @@ DisplayOn:g_b=0:Gosub animon
 						freelast a():PushItem a():AddFirst a():PopItem a()
 						;
 						MOVE #$c020,$dff09a
-						##[$80BE] Select:Goto isdone
+						Pop Select:Goto isdone
 						;
 					Else
 						\s=QWrap(\s+.25,4,8)
@@ -820,8 +820,8 @@ DisplayOn:g_b=0:Gosub animon
 				*hume.obj=\lander\hume
 				;
 				If *hume\f<>1		 ;hume still groovy?
-					##[$80C9] \otb,\lander\otb2
-					##[$80C9] \otr,\lander\otr2
+					Exchange \otb,\lander\otb2
+					Exchange \otr,\lander\otr2
 					\f=2:\xs=\xs2:Gosub findhume
 				Else
 					If \y<*hume\y-14	;still above hume?
@@ -861,7 +861,7 @@ DisplayOn:g_b=0:Gosub animon
 						\f=0:act-1:freelast a():wlan+1
 					EndIf
 					nlan-1:If nlan=0 Then lanc=0
-					##[$80BE] Select:Goto isdone
+					Pop Select:Goto isdone
 				Else
 					Gosub fire
 				EndIf
@@ -870,7 +870,7 @@ DisplayOn:g_b=0:Gosub animon
 				;
 				If \y>=y(mo+\x-12 AND 2047)+136
 					If \y-\ys2>64
-						Gosub blowup:##[$80BE] Select:Goto isdone
+						Gosub blowup:Pop Select:Goto isdone
 					Else
 						If hsnd=0 Then hsnd=12
 						\f=1:k=45:sca+250:Gosub addbonus
@@ -879,7 +879,7 @@ DisplayOn:g_b=0:Gosub animon
 				;
 			Case 7	;suicide humanoid!
 				;
-				Gosub blowup:##[$80BE] Select:Goto isdone
+				Gosub blowup:Pop Select:Goto isdone
 				;
 			Case 8	;mutant
 				;
@@ -969,7 +969,7 @@ DisplayOn:g_b=0:Gosub animon
 			Case -1 ;bullet/bomb
 				If \t<0 OR \y<8
 					\f=0:act-1:freelast a()
-					##[$80BE] Select:Goto isdone
+					Pop Select:Goto isdone
 				Else
 					If RectsHit(24,\x,\y,s,xp,yp)
 						die=-1
@@ -978,7 +978,7 @@ DisplayOn:g_b=0:Gosub animon
 			Case -2 ;bonus
 				If \t<0
 					\f=0:act-1:freelast a()
-					##[$80BE] Select:Goto isdone
+					Pop Select:Goto isdone
 				Else
 					If \s<45 Then \s=QWrap(\s+.125,41,45)
 				EndIf
@@ -1027,7 +1027,7 @@ DisplayOn:g_b=0:Gosub animon
 		;
 		Sound 14,15
 		;
-		##[$80BB]
+		Repeat
 			If moud
 				moud-1
 			Else
@@ -1052,10 +1052,10 @@ DisplayOn:g_b=0:Gosub animon
 				Next
 				mox2+4
 			EndIf
-		##[$80BC] mox2>=324
+		Until mox2>=324
 		;
-		##[$80BB]
-		##[$80BC] NOT locfree(b())
+		Repeat
+		Until NOT locfree(b())
 		;
 		Gosub alloff
 		spc=-1:nhum=-1:cmode&3:Gosub makemounts
@@ -1092,7 +1092,7 @@ DisplayOn:g_b=0:Gosub animon
 		Next
 		;
 		Gosub allon:Sound 15,15
-		##[$80BB]:##[$80BC] acd=0
+		Repeat:Until acd=0
 		Gosub animoff
 		cmode=ocmode
 		;
@@ -1134,12 +1134,12 @@ DisplayOn:g_b=0:Gosub animon
 			n$="":x=0:Colour 2,0
 			;
 			CNIF #cd32=0
-			##[$80BB]:##[$80BC] Inkey$=""	;flush keyboard queue!
+			Repeat:Until Inkey$=""	;flush keyboard queue!
 			CEND
 			;
 			Gosub acursor:i_k=65
 			;
-			##[$80BB]
+			Repeat
 				VWait
 				Green 1,g(0)\c[0],g(0)\c[1],g(0)\c[2]
 				Gosub cycleplayer
@@ -1150,9 +1150,9 @@ DisplayOn:g_b=0:Gosub animon
 					i_k=QWrap(i_k-Joyy(j_p)ASR 2,65,91)
 					Locate 21+x,16:Print Chr$(i_k)
 					If g_b & 32
-						##[$80BB]
+						Repeat
 							VWait
-						##[$80BC] Gameb(j_p) & 32=0
+						Until Gameb(j_p) & 32=0
 						i$=Chr$(i_k)
 					Else
 						i$=""
@@ -1178,12 +1178,12 @@ DisplayOn:g_b=0:Gosub animon
 					EndIf
 					Locate 21+x,16:Print " "
 			 EndIf
-			##[$80BC] i$=Chr$(13)
+			Until i$=Chr$(13)
 			For x=9 To k Step -1
 			hs(x+1)=hs(x):hs$(x+1)=hs$(x)
 			Next
 			hs(k)=sco:hs$(k)=n$:x2=-1
-			##[$80BE] For:Goto onedone
+			Pop For:Goto onedone
 		EndIf
 		Next
 		onedone:Gosub swapplayer:Gosub allstats
@@ -1223,7 +1223,7 @@ DisplayOn:g_b=0:Gosub animon
 			pdd-1
 		Else
 			;
-			##[$80BB]:##[$80BC] smb=0:Gosub shutup
+			Repeat:Until smb=0:Gosub shutup
 			;
 			Gosub animoff
 			;
@@ -1393,9 +1393,9 @@ DisplayOn:g_b=0:Gosub animon
 	EndIf
 	;
 CNIF #cd32<>0
-##[$80C7]
+Forever
 CELSE
-##[$80BC] Joyb(0)
+Until Joyb(0)
 CEND
 
 End
@@ -1510,26 +1510,26 @@ Return
 If npl
 	ply=1-ply
 	;
-	##[$80C9] sco,sco2
-	##[$80C9] lsco,lsco2
-	##[$80C9] nliv,nliv2
-	##[$80C9] nsmt,nsmt2
-	##[$80C9] pat,pat2
-	##[$80C9] spc,spc2
-	##[$80C9] cmode,cmode2
+	Exchange sco,sco2
+	Exchange lsco,lsco2
+	Exchange nliv,nliv2
+	Exchange nsmt,nsmt2
+	Exchange pat,pat2
+	Exchange spc,spc2
+	Exchange cmode,cmode2
 	;
-	##[$80C9] wlan,wlan2
-	##[$80C9] nlan,nlan2
-	##[$80C9] nhum,nhum2
-	##[$80C9] nmut,nmut2
-	##[$80C9] npod,npod2
-	##[$80C9] nswa,nswa2
-	##[$80C9] nbom,nbom2
-	##[$80C9] land,land2
-	##[$80C9] lanc,lanc2
+	Exchange wlan,wlan2
+	Exchange nlan,nlan2
+	Exchange nhum,nhum2
+	Exchange nmut,nmut2
+	Exchange npod,npod2
+	Exchange nswa,nswa2
+	Exchange nbom,nbom2
+	Exchange land,land2
+	Exchange lanc,lanc2
 	;
-	##[$80C9] baic,baic2
-	##[$80C9] baid,baid2
+	Exchange baic,baic2
+	Exchange baid,baid2
 	;
 EndIf
 ;
@@ -1644,9 +1644,9 @@ sgoangry
 \swarmer\mo=-1:esnd=10
 ;
 swarmswap
-##[$80C9] \otb,\swarmer\otb2
-##[$80C9] \otr,\swarmer\otr2
-##[$80C9] \xs,\swarmer\xs
+Exchange \otb,\swarmer\otb2
+Exchange \otr,\swarmer\otr2
+Exchange \xs,\swarmer\xs
 ;
 rndfire
 \t=Rnd(\otr)+\otb
@@ -2105,7 +2105,7 @@ scancolour
 ;
 Use Slice 0:Use lmaxlen 2
 ;
-k=pat ##[$80B9] 6+2
+k=pat MOD 6+2
 ;
 Green 25,Blue(k),Palette(k),PalRGB(k)
 Green 29,Blue(k),Palette(k),PalRGB(k)
@@ -2396,12 +2396,12 @@ While act2
 			;
 			;Poke.w $dff180,$f00
 			;
-			##[$80BB]
+			Repeat
 				If \x>=0 AND \x<336
 					\x=QWrap(\x+1024,0,2048)
 					Goto animout
 				EndIf
-			##[$80BC] NOT globfree(a())
+			Until NOT globfree(a())
 			;
 			Goto animout
 			;
@@ -2422,7 +2422,7 @@ animout
 ##[$80CA] b()
 ;
 If locfree(b())
-	##[$80BB]
+	Repeat
 		;
 		\x=QWrap(\x+\xs-xa,0,2048)
 		\y=\y+\ys
@@ -2444,7 +2444,7 @@ If locfree(b())
 			EndIf
 			freelast b()
 		EndIf
-	##[$80BC] NOT globfree(b())
+	Until NOT globfree(b())
 Else
 	act+aaa:aaa=0
 EndIf

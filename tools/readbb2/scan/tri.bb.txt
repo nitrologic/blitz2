@@ -17,7 +17,7 @@
 
 
 
-##[$80C3]			 ;start from wb if you want
+WBStartup			 ;start from wb if you want
 XInclude "tri.inc"	;include functions and structures
 
 
@@ -25,7 +25,7 @@ XInclude "tri.inc"	;include functions and structures
 ;				and a NECCESSITY if the debugger is off :-)
 
 .errhandler
-	 ##[$80B4]
+	 SetErr
 			DefaultOutput
 			NPrint "An Unknown Error has occured - Possible Causes are :-"
 			NPrint ""
@@ -41,7 +41,7 @@ XInclude "tri.inc"	;include functions and structures
 			NPrint ""
 			NPrint "- Happy Training	:)"
 			End
-	 End ##[$80B4]
+	 End SetErr
 
 .fileio
 	 remline 0,"CGTriumvirate.font",32
@@ -137,7 +137,7 @@ XInclude "tri.inc"	;include functions and structures
 	 EndIf
 
 .handlemaingads								 ;begin main programme loop
-	 ##[$80BB]
+	 Repeat
 	 ev.l=WaitEvent
 	 Select ev
 			Case $40									;get gadgetup event
@@ -232,7 +232,7 @@ XInclude "tri.inc"	;include functions and structures
 
 			End Select
 	 End Select
-	 ##[$80C7]						;end main programme loop
+	 Forever						;end main programme loop
 
 
 ;********* SUB ROO TEENS *******
@@ -482,7 +482,7 @@ XInclude "tri.inc"	;include functions and structures
 	 ResetString 628,14,8,dh-46
 	 cl=1:Gosub refresh
 	ocl=0
-	 ##[$80BB]
+	 Repeat
 			ev.l=WaitEvent
 			If ev=32
 				 Select GadgetHit
@@ -507,9 +507,9 @@ XInclude "tri.inc"	;include functions and structures
 						Wend
 						ocl=cl
 				 Case 3
-				 ##[$80BB]
+				 Repeat
 						Gosub propref
-				 ##[$80BC] WaitEvent=64
+				 Until WaitEvent=64
 				 End Select
 			EndIf
 			If ev=64
@@ -525,13 +525,13 @@ XInclude "tri.inc"	;include functions and structures
 							 Use allocst 0
 							 Activate 0
 							 Use localstat 0
-				 ##[$80BE] Select
+				 Pop Select
 	 Return
 				 Default
 						cl=l(GadgetHit-5):Gosub refresh:Gosub showprop
 				 End Select
 			EndIf
-	 ##[$80C7]
+	 Forever
 
 propref
 	 cl=Int(VPropPot(3,3)*(l-vl+1)+1)

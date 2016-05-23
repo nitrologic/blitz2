@@ -3,7 +3,7 @@
 ; workbench clock program
 ;
 
-##[$80C3]:FindScreen 0	 ;open window on workbench
+WBStartup:FindScreen 0	 ;open window on workbench
 
 localstat 0,100,20,160,104,$100E,"BLITZ CLOCK",1,2
 
@@ -12,17 +12,17 @@ WEllipse 80,50,70,35,1	 ;draw clock
 NEWTYPE .xy:x.w:y.w:End NEWTYPE ;coordinates for hands
 Dim h.xy(59)
 For i=0 To 59
-	h(i)\x=68*HSin(i*##[$80BA]/30),-32*HCos(i*##[$80BA]/30)
+	h(i)\x=68*HSin(i*Pi/30),-32*HCos(i*Pi/30)
 Next
 
-##[$80BB]
+Repeat
 	WLine 80,50,80+h(Secs)\x,50+h(Secs)\y,0
 	WLine 80,50,80+h(Mins)\x,50+h(Mins)\y,0
 	WLine 80,50,80+h(hr)\x/2,50+h(hr)\y/2,0
 	WLocate 40,80:NPrint Date$(SystemDate)
-	hr=5*(Hours ##[$80B9] 12)
+	hr=5*(Hours MOD 12)
 	WLine 80,50,80+h(hr)\x/2,50+h(hr)\y/2,1
 	WLine 80,50,80+h(Mins)\x,50+h(Mins)\y,1
 	WLine 80,50,80+h(Secs)\x,50+h(Secs)\y,2
 	##[$FE1B] 50		;goto sleep for 1 second
-##[$80BC] Event=$200
+Until Event=$200

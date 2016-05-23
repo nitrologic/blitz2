@@ -51,7 +51,7 @@ End Function
 	;
 	allocst 0,4:ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,f$+".iff",0
 	StopCycle 0,0,0,0,0
 	Use SetCycle 0
@@ -78,7 +78,7 @@ End Function
 	;
 	allocst 0,4:ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 	LoadBitMap 0,f$+".iff",0
 	StopCycle 0,0,0,0,0
 	Use SetCycle 0

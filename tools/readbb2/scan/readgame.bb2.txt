@@ -5,17 +5,17 @@ DEFTYPE.l
 p=##[$FEC9]("potgo.resource")
 NPrint p
 
-GetReg a6,p:MOVE.l #-1,d0:JSR -6(a6):##[$80BD] d0,b
+GetReg a6,p:MOVE.l #-1,d0:JSR -6(a6):PutReg d0,b
 NPrint Hex$(b)
 
 While Joyb(0)=0
 	GetReg a6,p
 	BSR Game1Lck
-	##[$80BD] d0,t
+	PutReg d0,t
 	NPrint Hex$(t)
 Wend
 
-GetReg a6,p:MOVE.l #-1,d0:JSR -12(a6):##[$80BD] d0,b
+GetReg a6,p:MOVE.l #-1,d0:JSR -12(a6):PutReg d0,b
 
 End
 

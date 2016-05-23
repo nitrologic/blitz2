@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/Blitzeroids.BB2
-##[$80C3]:##[$80CC]
-##[$80B4]:End:End ##[$80B4]
+WBStartup:##[$80CC]
+SetErr:End:End SetErr
 MaxLen gdir$=28
 MaxLen sdir$=26
 MaxLen m$=374
@@ -65,10 +65,10 @@ Dim qsin.q(35)
 Dim tcos.q(35)
 Dim tsin.q(35)
 For n=0 To 35
-	qcos(n)=(Int((-HCos((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/5000
-	qsin(n)=(Int((HSin((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/5000
-	tcos(n)=(Int((-HCos((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/145
-	tsin(n)=(Int((HSin((n*##[$80BA]*2)/36-##[$80BA]/2))*1000))/145
+	qcos(n)=(Int((-HCos((n*Pi*2)/36-Pi/2))*1000))/5000
+	qsin(n)=(Int((HSin((n*Pi*2)/36-Pi/2))*1000))/5000
+	tcos(n)=(Int((-HCos((n*Pi*2)/36-Pi/2))*1000))/145
+	tsin(n)=(Int((HSin((n*Pi*2)/36-Pi/2))*1000))/145
 Next
 
 Dim xs.q(20,1)
@@ -136,7 +136,7 @@ Use lmaxlen 1
 BlockScroll 0
 Show 1,32,32
 
-If (level ##[$80B9] 7)=0
+If (level MOD 7)=0
 	lifes+1
 	Mex {-1,135,"		BONUS LIFE"}
 	VWait 60
@@ -181,16 +181,16 @@ BlitzKeys On
 
 bonus {0}
 
-##[$80BB]
+Repeat
 	i$=Inkey$
 	If i$<>""
 		If i$="p"
 			Use lmaxlen 0
 			Show 0,32,32
 			Mex {-1,155,"		PAUSED"}
-			##[$80BB]
+			Repeat
 				i$=Inkey$
-			##[$80BC] i$="p" OR Joyb(1)<>0
+			Until i$="p" OR Joyb(1)<>0
 			BlockScroll 0
 		EndIf
 		If i$=" " AND Joyy(1)=1
@@ -447,7 +447,7 @@ EndIf
 						End Select
 						EndIf
 						ff(n)=0
-						##[$80BE] For
+						Pop For
 						Goto ProxSparo
 					EndIf
 				EndIf
@@ -556,7 +556,7 @@ EndIf
 		fr=QWrap(fr+1,0,30)
 	EndIf
 	ojf=jf
-##[$80BC] i$="q"
+Until i$="q"
 End
 
 .Takegraph
@@ -581,7 +581,7 @@ BLITZ
 Return
 
 .Init
-kind=((level-1) ##[$80B9] 3)+1
+kind=((level-1) MOD 3)+1
 Select kind.b
 Case 1
 	meteors=QLimit(level/5+1,1,3)
@@ -661,7 +661,7 @@ BlockScroll 0
 FlushQueue 0
 FlushQueue 1
 dd=0
-##[$80BB]
+Repeat
 	Select keymode
 	Case 0
 		a$="USING JOYSTICK"
@@ -782,7 +782,7 @@ EndIf
 		EndIf
 		Gosub CheckKeyMode
 	Next
-##[$80C7]
+Forever
 
 .Gameover
 	Use lmaxlen 1-db

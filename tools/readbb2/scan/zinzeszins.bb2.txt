@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/zinzeszins.bb2
 	FindScreen 0
 	##[$C082] 1,?wzdata,20
-	##[$80BB]
+	Repeat
 		 ev.l=WaitEvent
 		 Use localstat EventWindow
 		 Select EventWindow
@@ -22,7 +22,7 @@
 									Gosub calculate
 						 End Select
 			End Select
-		 ##[$80BC] exit=1
+		 Until exit=1
 		 exit=0
 	##[$C083] 1
 	End

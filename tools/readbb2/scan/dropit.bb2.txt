@@ -12,7 +12,7 @@
 
 XInclude "mystructs.bb"
 
-##[$80C3]
+WBStartup
 ##[$80CC]
 ##[$80CB]
 
@@ -383,7 +383,7 @@ End NEWTYPE
 ; A window message?
 ;----------------------------------
 		If signal & winPortSig
-			##[$80BB]
+			Repeat
 				ev.l=Event
 				Select ev
 					Case #IDCMP_CLOSEWINDOW:Gosub CloseConfigWin
@@ -494,7 +494,7 @@ End NEWTYPE
 								Gosub MakeELV
 						End Select
 				End Select
-			##[$80BC] ev=0
+			Until ev=0
 		EndIf
 	Wend
 .EndIt
@@ -560,7 +560,7 @@ Return
 			t$=Peek$(&*fib\fib_FileName)
 
 ; Make the entire pathname for the file
-			##[$80BB]
+			Repeat
 				lock=##[$FE1D](lock)
 				If lock
 					gotLock=1
@@ -570,7 +570,7 @@ Return
 						t$=Peek$(&*fib\fib_FileName)
 					EndIf
 				EndIf
-			##[$80BC] lock=0
+			Until lock=0
 
 		t$=t$+":"+name$
 
@@ -606,13 +606,13 @@ Return
 
 		If *cEntry\flags ##[$80CD] #FB_SIGFIRST
 ; Need to check the signature first
-			If CheckSig{?patTokenBuf,?sigBuff} Then ##[$80BE] While:Goto jjj
+			If CheckSig{?patTokenBuf,?sigBuff} Then Pop While:Goto jjj
 ; Check to see if name matches
-			If ##[$FC98](?patTokenBuf,t$)>0 Then ##[$80BE] While:Goto jjj
+			If ##[$FC98](?patTokenBuf,t$)>0 Then Pop While:Goto jjj
 		Else
 ; Check to see if name matches
-			If ##[$FC98](?patTokenBuf,t$)>0 Then ##[$80BE] While:Goto jjj
-			If CheckSig{?patTokenBuf,?sigBuff}=1 Then ##[$80BE] While:Goto jjj
+			If ##[$FC98](?patTokenBuf,t$)>0 Then Pop While:Goto jjj
+			If CheckSig{?patTokenBuf,?sigBuff}=1 Then Pop While:Goto jjj
 		EndIf
 		*cEntry=*cEntry\nextEntry
 	Wend
@@ -633,13 +633,13 @@ Return
 		If l>sw-10 Then l=sw-10
 		w.w=0
 CNIF #FINAL
-		##[$80B4]:Goto blob:End ##[$80B4]
+		SetErr:Goto blob:End SetErr
 CEND
 		localstat 0,(sw-l)/2,(sh-30)/2,l,*s\BarHeight,#WFLG_DRAGBAR,a$,0,1
 		w=1
 blob:
 CNIF #FINAL
-		##[$80B4]:Goto EndIt:End ##[$80B4]
+		SetErr:Goto EndIt:End SetErr
 CEND
 		DefaultOutput
 	EndIf
@@ -687,7 +687,7 @@ Return
 					op$+Left$(a$,i-1)
 				Else
 					Message{"Illegal execute string! ("+a$+")"}
-					##[$80BE] For:Return
+					Pop For:Return
 				EndIf
 			EndIf
 		Next
@@ -770,7 +770,7 @@ Return
 .GetWBInfo
 ;	FindScreen 0
 	freest 0
-	*s.Screen=Peek.l(##[$80B8] allocst(0))
+	*s.Screen=Peek.l(Addr allocst(0))
 	sh.w=*s\Height
 	sw.w=*s\Width
 Return
@@ -788,7 +788,7 @@ Return
 	Gosub InitGadTools
 
 CNIF #FINAL
-	##[$80B4]:Return:End ##[$80B4]
+	SetErr:Return:End SetErr
 CEND
 	AddIDCMP #IDCMP_INTUITICKS|#IDCMP_MOUSEMOVE
 	screenTitleHeight.w=*s\BarHeight
@@ -800,9 +800,9 @@ CEND
 	AttachGTList 0,1
 
 CNIF #FINAL
-	##[$80B4]:Goto EndIt:End ##[$80B4]
+	SetErr:Goto EndIt:End SetErr
 CEND
-	*win=Peek.l(##[$80B8] localstat(1))
+	*win=Peek.l(Addr localstat(1))
 	winPortSig=1 LSL *win\UserPort\mp_SigBit
 
 Return
@@ -980,7 +980,7 @@ Return
 			lv()\l=Peek$(&*cEntry\simpName)
 			*cEntry=*cEntry\nextEntry
 		Else
-			##[$80BE] While:Goto JumpOut
+			Pop While:Goto JumpOut
 		EndIf
 	Wend
 JumpOut
@@ -1031,7 +1031,7 @@ Return
 ; Open the file for writing..........
 	If ReadMem(0,"envarc:dropit/dropit.config")
 CNIF #FINAL
-	##[$80B4]:CloseFile 0:Goto BADWRITE:End ##[$80B4]
+	SetErr:CloseFile 0:Goto BADWRITE:End SetErr
 CEND
 		FileOutput 0
 		*cEntry=*fEntry
@@ -1067,7 +1067,7 @@ BADWRITE:
 	EndIf
 
 CNIF #FINAL
-	##[$80B4]:Goto EndIt:End ##[$80B4]
+	SetErr:Goto EndIt:End SetErr
 CEND
 Return
 
@@ -1100,7 +1100,7 @@ Return
 					*cEntry\execFlags[t-1]=Edit(20)
 					If SetExec{*cEntry,t-1,&a$}=0
 						Message{"Can't load entire config!"}
-						##[$80BE] For:##[$80BE] While
+						Pop For:Pop While
 						*cEntry\numExec=t-1
 						Goto EndReadConfig
 ;						Goto EndIt
@@ -1284,7 +1284,7 @@ Return
 
 .InitGadTools
 CNIF #FINAL
-	##[$80B4]:Return:End ##[$80B4]
+	SetErr:Return:End SetErr
 CEND
 
 GTListView 0,#GTG_LV,#LV_X,5,#LV_WIDTH,#LV_HEIGHT,"",0,lv()
@@ -1325,7 +1325,7 @@ GTButton 0,#GTG_EADD,#ELV_X,#EAD_Y,#EAD_WIDTH,#EAD_HEIGHT,"Add",16
 GTButton 0,#GTG_EDEL,#ELV_X+#EAD_GAP,#EAD_Y,#EAD_WIDTH,#EAD_HEIGHT,"Del",16
 
 CNIF #FINAL
-	##[$80B4]:Goto EndIt:End ##[$80B4]
+	SetErr:Goto EndIt:End SetErr
 CEND
 
 Return

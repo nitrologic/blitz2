@@ -5,16 +5,16 @@ lmaxlen 1,320,256,2
 Slice 0,44,2
 
 ox=320/2: oy=256/2		 ;centro de la pantalla de proyeccion
-theta=60*##[$80BA]/180
-phi=20*##[$80BA]/180
-angleinc=##[$80BA]/60				 ;r indica la distancia del ojo al objeto
+theta=60*Pi/180
+phi=20*Pi/180
+angleinc=Pi/60				 ;r indica la distancia del ojo al objeto
 r=8: d=250						 ;d es la distancia del ojo a la pantalla
 
 NEWTYPE .vertice
 x.b: y: z
 End NEWTYPE
 
-##[$80C8] vertices
+Restore vertices
 Read nverts
 nverts-1
 Dim List ver.vertice(nverts)
@@ -27,7 +27,7 @@ NEWTYPE .arista
 p1.b: p2
 End NEWTYPE
 
-##[$80C8] aristas
+Restore aristas
 Read nar
 nar-1
 Dim List ar.arista(nar)
@@ -35,7 +35,7 @@ For c.b=0 To nar
 	If globalloc(ar()) Then Read a,b: ar()\p1=a-1,b-1
 Next
 
-##[$80BB]
+Repeat
 
 	VWait: Show db: db=1-db: Use lmaxlen db: BlockScroll
 	s1=HSin(theta): c1=HCos(theta): s2=HSin(phi): c2=HCos(phi)
@@ -63,10 +63,10 @@ Next
 		EndIf
 	Wend
 
-	theta=QWrap(theta+angleinc/4,0,2*##[$80BA])
-	phi=QWrap(phi+angleinc,0,2*##[$80BA])
+	theta=QWrap(theta+angleinc/4,0,2*Pi)
+	phi=QWrap(phi+angleinc,0,2*Pi)
 
-##[$80BC] Joyb(0)
+Until Joyb(0)
 
 .vertices
 Data 12

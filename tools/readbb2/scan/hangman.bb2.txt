@@ -3,7 +3,7 @@
 ; Hangman v1.05 by SD2
 ver$ = " v1.05"; last update 20.1.1994
 
-##[$80C3]
+WBStartup
 MaxLen pa$=192
 MaxLen fil$=192
 fil$="Hangman.hdb":db$=fil$
@@ -56,7 +56,7 @@ tothitr=0:totrak=0:turns=0:new=1:allt=0
 Gosub init_section
 
 .huvud_section
-##[$80BB]
+Repeat
 	If new=0
 		CloseFile 0
 		z=OpenFile(0,db$)
@@ -136,7 +136,7 @@ Gosub init_section
 		If MenuHit = 1 AND ItemHit = 0 Then Gosub dbed
 	End Select
 
-##[$80BC] msg = $200 OR ex=0
+Until msg = $200 OR ex=0
 Sound 6,1,64
 ##[$FE1B](120)
 End
@@ -227,7 +227,7 @@ ResetString 107,22,114,10
 Gosub init2:
 Gosub hamtaord:
 
-##[$80BB]
+Repeat
 	msb.l=WaitEvent
 	Select msb
 	Case $40
@@ -278,9 +278,9 @@ Gosub hamtaord:
 			ButtonId 1,7,Str$(ordnr)
 			WLocate 236,41:Print Str$(sistaord),"	 "
 			Redraw 1,7
-			##[$80BB]
+			Repeat
 				msa.l=WaitEvent
-			##[$80BC] msa = $40 AND GadgetHit = 3
+			Until msa = $40 AND GadgetHit = 3
 			ButtonId 1,3,Replace$(UCase$(StripTrail$(GadgetPens(1,3),32))," ","X")
 			If GadgetPens(1,3) = ""
 				sistaord-1:ordnr=sistaord
@@ -295,7 +295,7 @@ Gosub hamtaord:
 		ex = 0
 End Select
 
-##[$80BC] ex = 0
+Until ex = 0
 CloseWindow 1:ex=1:CloseFile 2
 Use localstat 0
 Activate 0
@@ -360,9 +360,9 @@ WLine 126,30,181,30,2
 WLocate 16,30:Print " By Patrik Wikstrm & Thomas Holm"
 WLocate 12,40:Print "			 Developed in one week"
 WLocate 14,50:Print "					14-21 Jan 1994"
-##[$80BB]
+Repeat
 	mse.l=WaitEvent
-##[$80BC] mse = $40 AND GadgetHit = 0 OR mse = $400
+Until mse = $40 AND GadgetHit = 0 OR mse = $400
 CloseWindow 2
 Use localstat 0
 Activate 0

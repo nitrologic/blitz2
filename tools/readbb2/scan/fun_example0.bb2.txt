@@ -116,6 +116,6 @@ RZ\Column[3]\x="t","x","8","4"
 concatenate_matrix{&RX,&RZ,Rxy}
 print_matrix{&Rxy}
 
-##[$80BB] : ##[$80BC] Joyb(1)
+Repeat : Until Joyb(1)
 
 End

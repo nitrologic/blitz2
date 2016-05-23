@@ -11,9 +11,9 @@ LoadShape 0,"acid.iff",0
 
 allocst 0,3:ScreensBitMap 0,0:BlockScroll
 
-b0.l=Peek.l(##[$80B8] lmaxlen(0)+08)
-b1.l=Peek.l(##[$80B8] lmaxlen(0)+12)
-b2.l=Peek.l(##[$80B8] lmaxlen(0)+16)
+b0.l=Peek.l(Addr lmaxlen(0)+08)
+b1.l=Peek.l(Addr lmaxlen(0)+12)
+b2.l=Peek.l(Addr lmaxlen(0)+16)
 
 If ReadMem(0,"acid.bin")=0 Then End
 FileOutput 0

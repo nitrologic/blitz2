@@ -34,12 +34,12 @@ L=1:SELquit.b=0:SELECTED=-1
 	OL=L:WBox 0,12,649,256,0
 	WLocate 0,4:For t=0 To 29:NPrint LL$(L+t):Next
 
-##[$80BB]
+Repeat
 	ev=WaitEvent
 	If ev=32
 		Select GadgetHit
 		Case 1
-			##[$80BB]
+			Repeat
 				L=Int(VPropPot(2,1)*EL)+1
 				If L<>OL
 					OL=L
@@ -47,7 +47,7 @@ L=1:SELquit.b=0:SELECTED=-1
 					WLocate 0,4
 					For t=0 To 29:NPrint LL$(L+t):Next
 				EndIf
-			##[$80BC] Event=64
+			Until Event=64
 		Case 2
 			While Event<>64 AND L>1
 				VWait
@@ -82,7 +82,7 @@ L=1:SELquit.b=0:SELECTED=-1
 		End If
 	End If
 
-##[$80BC] ev=$200 OR SELquit=1
+Until ev=$200 OR SELquit=1
 
 ;Free Window 2
 ;Use Window 0

@@ -35,10 +35,10 @@ Print Centre$(tex3$,57)
 If ti$="ARexx Error"
 	WLocate 266,26:Print tex4
 EndIf
-##[$80BB]
-	##[$80BB]
+Repeat
+	Repeat
 		wev.l=WaitEvent
-	##[$80BC] EventWindow=1
+	Until EventWindow=1
 	If wev=64
 		If GadgetHit=1 Then Goto endfunc
 	EndIf
@@ -46,7 +46,7 @@ EndIf
 		i$=Inkey$
 		If i$=Chr$(13) Then Goto endfunc
 	EndIf
-##[$80C7]
+Forever
 
 endfunc
 Free localstat 1:Use localstat 0
@@ -92,12 +92,12 @@ port.l=CreateMsgPort("BPAINT2")									;Open our message port
 msgptr.l=CreateRexxMsg(port,"rexx","BPAINT2")		;Create our rexxmsg structure
 SendRexxCommand msgptr,"roger2",#RXCOMM|#RXFF_RESULT
 
-##[$80BB]
+Repeat
 	Wait:ev.l=Event
 	rmsg.l=##[$FEBA](port)
 	If IsRexxMsg(rmsg) Then Gosub handlerexx
 	If ev = $8:While Event = NULL:WPlot WMouseX,WMouseY,1:Wend:EndIf
-##[$80BC] ev = $200
+Until ev = $200
 End
 
 handlerexx

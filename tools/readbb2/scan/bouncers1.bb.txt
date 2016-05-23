@@ -21,12 +21,12 @@
 
 
 ##[$80CC]							 ; Don't open a CLI window
-##[$80C3]					 ; Don't crash when I open you on Work Bench
+WBStartup					 ; Don't crash when I open you on Work Bench
 ##[$FFB5]			; Bring WB screen to front (Intuition call)
 
-##[$80B4]							; Set ERROR HANDLER as follows ...
+SetErr							; Set ERROR HANDLER as follows ...
 	End							 ;	 End, Wow, complex stuff
-End ##[$80B4]					; That's all for the Error Handler
+End SetErr					; That's all for the Error Handler
 
 ;--------------------------------------------------------------------
 .Variables
@@ -104,7 +104,7 @@ Redraw 0,2						 ; Update it on screen ; Win 0, Button 2
 .Mainloop
 
 
-##[$80BB]											 ; A good place to start
+Repeat											 ; A good place to start
 
 	ev.l = Event							 ; "Long" variable	ev	is set to
 														 ; indicate the next queued "Event"
@@ -124,7 +124,7 @@ Redraw 0,2						 ; Update it on screen ; Win 0, Button 2
 
 	Gosub _Update_Balls				; Do the drawing bit
 
- ##[$80BC] ev= $200							; Loop until $200 (Window Close)
+ Until ev= $200							; Loop until $200 (Window Close)
 
 ;--------------------------------------------------------------------
 .Close

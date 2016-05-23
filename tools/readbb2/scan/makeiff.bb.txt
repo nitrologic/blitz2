@@ -25,10 +25,10 @@ Dim test.w(800)
 		 If ff<4 OR ff>20
 			 ;
 			 ff=(8-ff)AND31
-			 roll.w=(n ASR 5) ##[$80B9] 5
+			 roll.w=(n ASR 5) MOD 5
 			 pitch.w=Int(n/160)
 			 ;
-			 ##[$80C9] roll,pitch
+			 Exchange roll,pitch
 			 roll=4-roll
 			 pitch=4-pitch
 			 ;

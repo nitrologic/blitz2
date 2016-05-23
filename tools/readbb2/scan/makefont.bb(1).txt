@@ -28,7 +28,7 @@ Use lmaxlen 0
 InitBank 0,32768,0
 
 blok.l=Bank(0)
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 
 LoadBitMap 0,"font.iff"
 Gosub getfont
@@ -58,7 +58,7 @@ getfence:
 	Use lmaxlen 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 
 	h=4:yy=5
 	For y=0 To 3

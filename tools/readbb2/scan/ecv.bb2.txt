@@ -2,7 +2,7 @@
 ;
 ; Electronic CV - Ted Bailey Feb/Mar 1995
 ;
-##[$80B4]:End:End ##[$80B4]
+SetErr:End:End SetErr
 
 Select Processor
 	Case 0
@@ -115,7 +115,7 @@ BitPlanesBitMap 10,14,$02:BitPlanesBitMap 11,15,$02
 BitPlanesBitMap 10,16,$04:BitPlanesBitMap 11,17,$04
 BitPlanesBitMap 10,18,$03:BitPlanesBitMap 11,19,$03
 
-DecodePalette 0,32:DecodePalette 1,16:p0a.l=Peek.l(##[$80B8] SetCycle(0))
+DecodePalette 0,32:DecodePalette 1,16:p0a.l=Peek.l(Addr SetCycle(0))
 DecodePalette 2,16:DecodePalette 3,16
 DecodePalette 4,16:DecodePalette 5,16
 DecodePalette 6,16:DecodePalette 7,16
@@ -417,7 +417,7 @@ End Statement
 ;////////////////////////////////////////////////////////////////;
 .cvtitle
 Gosub inittitle:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:cnt.w+1
 	DisplayBitMap 0,db,16,16,db,17,17
 	db=1-db:Use lmaxlen 2+db:UnQueue db
@@ -437,7 +437,7 @@ Gosub inittitle:ClrInt 5
 	s.q+sv.q:If s.q>31 Then s.q=0
 	PlayMed
 ;	Poke.w $dff180,$0ff
-##[$80BC] cnt.w=815 OR Joyb(1)<>0 OR RawStatus($44)
+Until cnt.w=815 OR Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplayOff
 Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
@@ -445,7 +445,7 @@ Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
 os.b=Rnd(4):sy.w=36
 .options
 Gosub initoptns:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:tim.w=QWrap(tim.w+4,0,359)
 	DisplayBitMap 0,db,fx.q,fy.q,db,bx.q,by.q
 	DisplaySprite 0,#opsprnum+1+s.q,100,sy.w,2
@@ -478,7 +478,7 @@ Gosub initoptns:ClrInt 5
 	EndIf
 	PlayMed
 ;	Poke $dff180,$f0f
-##[$80BC] (Joyb(1)<>0 OR RawStatus($44)) AND mv=False
+Until (Joyb(1)<>0 OR RawStatus($44)) AND mv=False
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 0,#opsprnum,0,-100,2
 DisplaySprite 0,#opsprnum,0,-100,3
@@ -493,13 +493,13 @@ End Select
 ;////////////////////////////////////////////////////////////////;
 .option1
 Gosub initoptn1:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:tim.w=QWrap(tim.w+ti.b,0,359):If tim.w=180 Then act=True
 	DisplayBitMap 0,db,fx.q,fy.q,db,bx.q,by.q
 	DisplaySprite 0,#blsprnum+sprit\sh,sprit\x,sprit\y,2
 	If swt0.b AND txt=True
 		sc.b+1:If sc.b>7 Then sc.b=1
-		updatecols1{p0a.l,Peek.l(##[$80B8] SetCycle(sc.b))}
+		updatecols1{p0a.l,Peek.l(Addr SetCycle(sc.b))}
 		DisplayPalette 0,0:swt0.b=0
 	EndIf
 	If swt1.b
@@ -540,7 +540,7 @@ Gosub initoptn1:ClrInt 5
 	If GetMedInstr(0)=5 Then swt0=-1
 	If GetMedInstr(1)=3 Then swt1=-1
 ;	Poke $dff180,$ff0
-##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 0,#blsprnum,0,-50,2
 DisplayOff
@@ -550,14 +550,14 @@ Goto options
 ;////////////////////////////////////////////////////////////////;
 .option2
 Gosub initoptn2:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:tim.w=QWrap(tim.w+ti.b,0,359)
 	If tim=180 Then act=True:gap.w=10+Rnd(50)
 	DisplayBitMap 1,0,fx.q,0,10+db,0,0
 	DisplaySprite 1,#blsprnum+sprit\sh,sprit\x,sprit\y,2
 	If swt0.b AND txt=True
 		sc.b+1:If sc.b>7 Then sc.b=1
-		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+		updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
 		DisplayPalette 1,0:swt0.b=0
 	EndIf
 	If swt1.b
@@ -579,9 +579,9 @@ Gosub initoptn2:ClrInt 5
 	EndIf
 
 	db=1-db:Use lmaxlen 12+db
-	qcls2{Peek.l(##[$80B8] lmaxlen(12+db)+8)}
-	qcls2{Peek.l(##[$80B8] lmaxlen(14+db)+8)}
-	qcls2{Peek.l(##[$80B8] lmaxlen(16+db)+8)}
+	qcls2{Peek.l(Addr lmaxlen(12+db)+8)}
+	qcls2{Peek.l(Addr lmaxlen(14+db)+8)}
+	qcls2{Peek.l(Addr lmaxlen(16+db)+8)}
 
 	xof.w=120+scrtch1(tim):yof.w=68+scrtch2(tim)
 	ran.w=Int(Rnd(10))
@@ -601,7 +601,7 @@ Gosub initoptn2:ClrInt 5
 	If GetMedInstr(0)=5 Then swt0.b=-1
 	If GetMedInstr(1)=3 Then swt1.b=-1
 ;	Poke.w $dff180,$00f
-##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 1,#blsprnum,0,-50,2
 DisplayOff
@@ -609,18 +609,18 @@ Goto options
 ;////////////////////////////////////////////////////////////////;
 .option3
 Gosub initoptn3:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:tim.w=QWrap(tim.w+ti.b,0,359)
 	If tim.w=180 Then act=True
 	DisplayBitMap 1,10,0,8,db,120,0
 	DisplaySprite 1,#blsprnum+sprit\sh,sprit\x,sprit\y,2
 	If oswt1.b<>swt1.b
 		pl.b+1:If pl.b>6 Then pl.b=0
-		updatecols2{p0a,Peek.l(##[$80B8] SetCycle(16+pl.b))}
+		updatecols2{p0a,Peek.l(Addr SetCycle(16+pl.b))}
 	EndIf
 	If swt0 AND txt=True
 		sc.b+1:If sc.b>7 Then sc.b=1
-		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}:swt0.b=0
+		updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}:swt0.b=0
 	EndIf
 	DisplayPalette 1,0
 	Select swt1.b
@@ -655,7 +655,7 @@ Gosub initoptn3:ClrInt 5
 	If GetMedInstr(0)=5 Then swt0.b=-1
 	If GetMedInstr(1)=3 Then swt1.b+1:If swt1.b>3 Then swt1.b=0
 ;	Poke.w $dff180,$0f0
-##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 1,#blsprnum,0,-50,2
 DisplayOff
@@ -664,7 +664,7 @@ Goto options
 ;////////////////////////////////////////////////////////////////;
 .option4
 Gosub initoptn4:ClrInt 5
-##[$80BB]
+Repeat
 	VWait:tim.w+4:If tim.w>359 Then tim.w=0
 	If tim.w=180 Then act=True
 	cnt.w+1:If cnt.w>400 Then cnt.w=0:gap.w+gv.b
@@ -673,7 +673,7 @@ Gosub initoptn4:ClrInt 5
 	DisplaySprite 0,#blsprnum+sprit\sh,sprit\x,sprit\y,2
 	If swt0.b AND txt=True
 		sc.b+1:If sc.b>7 Then sc.b=1
-		updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+		updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
 		DisplayPalette 0,0:swt0.b=0
 	EndIf
 	If swt1.b AND txt=True
@@ -685,7 +685,7 @@ Gosub initoptn4:ClrInt 5
 	bx.q=8+scrtch1(tim):by.q=8+scrtch2(tim)
 
 	updatedots1{ld3,sc3,sc4,tim,gap}
-	db=1-db:Use lmaxlen 2+db:qcls1{Peek.l (##[$80B8] lmaxlen(2+db)+8)}
+	db=1-db:Use lmaxlen 2+db:qcls1{Peek.l (Addr lmaxlen(2+db)+8)}
 	##[$80CA] dots1()
 	newmem dots1()
 	While globfree(dots1())
@@ -712,7 +712,7 @@ Gosub initoptn4:ClrInt 5
 	If GetMedInstr(0)=5 Then swt0.b=-1
 	If GetMedInstr(1)=3 Then swt1.b=-1
 ;	Poke.w $dff180,$f00
-##[$80BC] Joyb(1)<>0 OR RawStatus($44)
+Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 0,#blsprnum,0,-50,2
 DisplayOff
@@ -845,7 +845,7 @@ Return
 
 	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,fx.q,fy.q,0,bx.q,by.q
 	initsprits{0}:sc.b=1+Int(Rnd(6))
-	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
 	DisplayPalette 0,0
 	Select Int(Rnd(6))
 		Case 0
@@ -912,7 +912,7 @@ Return
 
 	DisplayOn:CreateDisplay 1:DisplayBitMap 1,0,fx.q,0,10,0,0
 	initsprits{1}:sc.b=1+Int(Rnd(6))
-	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
 	DisplayPalette 1,0
 	DisplayRainbow 1,9,8,0
 	DisplayRainbow 1,10,9+Rnd(6),1
@@ -962,8 +962,8 @@ Return
 
 	DisplayOn:CreateDisplay 1:DisplayBitMap 1,10,0,8,0,120,0
 	initsprits{1}:sc.b=1+Int(Rnd(6)):bc.b=16+Int(Rnd(6))
-	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
-	updatecols2{p0a,Peek.l(##[$80B8] SetCycle(bc.b))}
+	updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
+	updatecols2{p0a,Peek.l(Addr SetCycle(bc.b))}
 	DisplayPalette 1,0
 	DisplayRainbow 1,10,8,3
 	co$=Mki$($180)+Mki$(0)
@@ -1007,7 +1007,7 @@ Return
 
 	DisplayOn:CreateDisplay 0:DisplayBitMap 0,0,8,8,0,bx.q,by.q
 	initsprits{0}:sc.b=1+Int(Rnd(6))
-	updatecols1{p0a,Peek.l(##[$80B8] SetCycle(sc.b))}
+	updatecols1{p0a,Peek.l(Addr SetCycle(sc.b))}
 	DisplayPalette 0,0
 	DisplayRainbow 0,1,8+Rnd(2),0
 	DisplayRainbow 0,2,11,1
@@ -1074,9 +1074,9 @@ Return
 ;////////////////////////////////////////////////////////////////;
 .initsincos
 	For n=0 To 720
-		ang1.f=n*##[$80BA]/90
-		ang2.f=n*##[$80BA]/180
-		ang3.f=n*##[$80BA]/45
+		ang1.f=n*Pi/90
+		ang2.f=n*Pi/180
+		ang3.f=n*Pi/45
 		coslup1(n)=HCos(ang1)
 		sinlup1(n)=HSin(ang1)
 		coslup2(n)=HCos(ang2)

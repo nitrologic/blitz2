@@ -7,7 +7,7 @@
 ;hit joystick button to quit...
 ;
 
-##[$80B4]:End:End ##[$80B4]
+SetErr:End:End SetErr
 
 lmaxlen 0,256,12,1
 LoadBitMap 0,"data/map"

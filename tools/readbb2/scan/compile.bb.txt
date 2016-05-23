@@ -85,7 +85,7 @@ If ReadMem(0,"ram:tracks.bin")
 		;
 		j=0
 		;
-		##[$80BB]
+		Repeat
 			If bsize>16384 Then bsiz=16384 Else bsiz=bsize
 			th(i-1)\blocks[j]=ptr:j+1
 			*mine\Src=bsrc,bsiz,Bank(2)+14,BankSize(2)
@@ -93,7 +93,7 @@ If ReadMem(0,"ram:tracks.bin")
 			Exists 0,Bank(2),*mine\CrunLen+14
 			ptr+*mine\CrunLen+14
 			bsize-bsiz:bsrc+bsiz
-		##[$80BC] bsize=0
+		Until bsize=0
 		;
 		th(i-1)\info=ptr
 		FreeBank 0:LoadBank 0,"tracks/info."+Str$(i)

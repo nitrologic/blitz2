@@ -7,7 +7,7 @@
 ;If the calculation were based on the number of iterations
 ;required to reach a certain domain I suppose a fractal
 ;would result. I don't know this - I'm just guessing.
-##[$80C3]
+WBStartup
 ##[$ED11] 3					;change to 1 to switch fpu off
 lmaxlen 0,320,256,5
 allocst 0,0,0,320,256,5,0,"",1,2,0
@@ -19,7 +19,7 @@ For ib=0 To 1:For ia=0 To 2
 	k+2
 	For i=0 To 100
 		ip=i+109*ia
-		If Joyb(1)<>0:##[$80BE] For:##[$80BE] For:##[$80BE] For:Goto l1:EndIf
+		If Joyb(1)<>0:Pop For:Pop For:Pop For:Goto l1:EndIf
 		x.f=-2+(4*i)/100
 		For j=0 To 100
 			jp=j+128*ib

@@ -68,15 +68,15 @@ If ReadMem(0,"ram:blitzdoc")
 		FileInput 1
 		;
 		Print p0$
-		##[$80BB]
+		Repeat
 			a$=Edit$(2048);:Print text{a$}
-		##[$80BC] a$="HITME"
+		Until a$="HITME"
 		;
 		While NOT DosBuffLen(1)
-			##[$80BB]:a$=Edit$(2048):##[$80BC] a$<>""
+			Repeat:a$=Edit$(2048):Until a$<>""
 			Print p0$,text{l0$},text{a$},text{l0$}
 			Print p1$
-			##[$80BB]
+			Repeat
 				a$=Edit$(2048)
 				If a$="Commands:"
 					Print p4$
@@ -86,8 +86,8 @@ If ReadMem(0,"ram:blitzdoc")
 					a$=Replace$(a$,"Blitz2","Blitz")
 					Print text{a$}
 				EndIf
-			##[$80BC] a$="Commands:"
-			##[$80BB]:a$=Edit$(2048):##[$80BC] a$<>""
+			Until a$="Commands:"
+			Repeat:a$=Edit$(2048):Until a$<>""
 			While a$<>""
 				f$=a$:Gosub dostatement
 				FileInput 1:a$=Edit$(2048)
@@ -116,7 +116,7 @@ dostatement:
 				Print "FSCC"+Mkl$(Len(h$))+h$
 				Print p3$
 			EndIf
-			If a$="See Also:" Then ##[$80BE] While:Goto dun
+			If a$="See Also:" Then Pop While:Goto dun
 			If a$<>""
 				s=Instr(a$," ")-1:If s<1 Then s=Len(a$)
 				If Mid$(a$,s,1)<>":"

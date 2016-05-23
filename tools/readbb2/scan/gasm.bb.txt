@@ -118,7 +118,7 @@ EndIf
 pc+n
 End Statement
 
-##[$80B4]
+SetErr
 	err
 ;	Stop
 
@@ -129,7 +129,7 @@ End Statement
 	NPrint "Usage: GASM inputfile outputfile [listfile]"
 
 	End
-End ##[$80B4]
+End SetErr
 
 If NumPars<2 OR NumPars>3 Then Goto err
 
@@ -284,9 +284,9 @@ If Left$(l$,1)<>" "	;a label?
 		For k=0 To la
 		If la$=la(k)\la
 			If la(k)\macl=0
-				err2{"Duplicate label:",la$}:##[$80BE] For:Return
+				err2{"Duplicate label:",la$}:Pop For:Return
 			Else
-				##[$80BE] For:llab=k:Goto labout
+				Pop For:llab=k:Goto labout
 			EndIf
 		EndIf
 		Next
@@ -307,7 +307,7 @@ EndIf
 ;
 For k=0 To no
 If op$=op(k)\op
-	o=op(k)\o:s=op(k)\s:d=op(k)\d:##[$80BE] For:Goto opfound
+	o=op(k)\o:s=op(k)\s:d=op(k)\d:Pop For:Goto opfound
 EndIf
 Next
 ;
@@ -338,7 +338,7 @@ If o>127	;assembler directive?
 	Case 133	;dsp
 		Gosub eval:skip{r LSL 3}
 	Case 134	;dl
-		##[$80BB]
+		Repeat
 			temp.w=Instr(l$,",",0)
 
 			If temp>0
@@ -350,7 +350,7 @@ If o>127	;assembler directive?
 
 			Gosub eval:pokeld{r}
 
-		##[$80BC] temp<1
+		Until temp<1
 
 	Case 135			;mac!
 		If llab<0
@@ -456,7 +456,7 @@ Case 0	;rn?
 		operr
 		err2{"Error in operand:",o$}
 		operr2
-		##[$80BE] Select:##[$80BE] Gosub:Return
+		Pop Select:Pop Gosub:Return
 	EndIf
 	;
 	o2$=Mid$(o$,2):op=Val(o2$)
@@ -473,7 +473,7 @@ Case 1	;immediate (1...32)?
 Case 2	;condition code?
 	;
 	For k=0 To nc
-	If o$=cc(k)\cc Then op=cc(k)\n:##[$80BE] For:Goto ccout
+	If o$=cc(k)\cc Then op=cc(k)\n:Pop For:Goto ccout
 	Next
 	err2{"Illegal condition code:",o$}:Goto operr2
 	ccout
@@ -565,7 +565,7 @@ Case 10	;immediate (1...32)? sub from 32 if so (for shl)
 	EndIf
 	;
 Default
-	err{"Internal Error!"}:##[$80BE] Gosub
+	err{"Internal Error!"}:Pop Gosub
 End Select
 Return
 
@@ -612,7 +612,7 @@ While e$
 	Case "|"
 		r | r_
 	Default
-		err{"Expression error"+cc$}:##[$80BE] Select:Goto exout
+		err{"Expression error"+cc$}:Pop Select:Goto exout
 	End Select
 
 Wend
@@ -640,25 +640,25 @@ If c$="$" ;hex?
 EndIf
 ;
 If c$>="0" AND c$<="9"	;decimal?
-	##[$80BB]
+	Repeat
 		e$=Mid$(e$,2)
 		r_*10+Asc(c$)-48
 		c$=Left$(e$,1)
-	##[$80BC] c$<"0" OR c$>"9"
+	Until c$<"0" OR c$>"9"
 	Return
 EndIf
 ;
 If c$>="a" AND c$<="z"	;label?
 	lb$=""
-	##[$80BB]
+	Repeat
 		e$=Mid$(e$,2)
 		lb$+c$
 		c$=Left$(e$,1)
-	##[$80BC] (c$<"0" OR c$>"z") OR (c$>"9" AND c$<"a") AND c$<>"_"
+	Until (c$<"0" OR c$>"z") OR (c$>"9" AND c$<"a") AND c$<>"_"
 	If pass
 		For k=0 To la
 		If lb$=la(k)\la
-			r_=la(k)\pc:##[$80BE] For:Return
+			r_=la(k)\pc:Pop For:Return
 		EndIf
 		Next
 		err{"Label not found"}:Return

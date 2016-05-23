@@ -43,9 +43,9 @@ For i=-512 To 512 Step 8
 Next
 
 ##[$CD10] 2,736,536,1:CludgeBitMap 2,1:Use lmaxlen 1
-Line !p{HSin(i*##[$80BA]/128)*128,HCos(i*##[$80BA]/128)*140,0},!p{HSin(i*##[$80BA]/128)*128,HCos(i*##[$80BA]/128)*140,0},1
+Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},!p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},1
 For i=0 To 256 Step .8
-	Line !p{HSin(i*##[$80BA]/128)*128,HCos(i*##[$80BA]/128)*140,0},1
+	Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},1
 Next
 FloodFill 368,283,1
 MakeCookie 2

@@ -14,7 +14,7 @@ Gosub renderbitmap
 
 f$="window"
 
-##[$80CC]:FindScreen 0:*s.Screen=Peek.l(##[$80B8] allocst(0))
+##[$80CC]:FindScreen 0:*s.Screen=Peek.l(Addr allocst(0))
 
 ww.w=*s\Width&$fff0 ;windowwidth
 wh.w=*s\Height/2		;windowheight
@@ -50,17 +50,17 @@ Gosub readhelp
 WCls 2
 ;Gosub reprint
 
-##[$80BB]
+Repeat
 	WindowInput 0
 	ev.l=WaitEvent
 	If ev=2 Then Gosub sizewindow:Gosub reprint
 	If ev=$20
 		If GadgetHit=1
-			##[$80BB]
+			Repeat
 				y=VPropPot(0,1)*l/2:
 				BitMaptoWindow 0,0,0,y,1,1,512,WindowHeight-27
 				;Gosub reprint:
-			##[$80BC] WaitEvent<>$10
+			Until WaitEvent<>$10
 		EndIf
 	EndIf
 	If ev=$400
@@ -69,7 +69,7 @@ WCls 2
 		If RawKey=$4d Then y+1:Gosub reprint
 		If RawKey=$45 Then End
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 
 End
 
@@ -141,14 +141,14 @@ readhelp:
 		FileInput 0:l=0
 		While NOT(DosBuffLen(0))
 			a$(l)=Edit$(1024)
-			##[$80BB]
+			Repeat
 				ll=Len(a$(l))
 				If ll>w
 					j=w:While Mid$(a$(l),j,1)<>" ":j-1:Wend
 					a$(l+1)=Mid$(a$(l),j+1)
 					a$(l)=Left$(a$(l),j):l+1
 				EndIf
-			##[$80BC] ll<=w
+			Until ll<=w
 			l+1
 		Wend
 	EndIf

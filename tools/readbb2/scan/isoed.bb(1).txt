@@ -80,8 +80,8 @@ Dim srcimage.xy(256,256)
 
 Dim qsin(256),qcos(256)
 For i=0 To 255
-	qsin(i)=HSin(i*##[$80BA]/128)
-	qcos(i)=HCos(i*##[$80BA]/128)
+	qsin(i)=HSin(i*Pi/128)
+	qcos(i)=HCos(i*Pi/128)
 Next
 
 ;-----------------------------------------------------------
@@ -353,7 +353,7 @@ DisplayBitMap 0,0
 ##[$CD10] 32,128,92,8
 CludgeBitMap 32,2
 Use lmaxlen 2:BlockScroll1:MakeCookie 32:Use lmaxlen 0
-Poke.w ##[$80B8] MidHandle(32)+4,7
+Poke.w Addr MidHandle(32)+4,7
 ##[$A402] 0,128,92,2
 
 ;-----------------------------------------------------------
@@ -386,13 +386,13 @@ SetInt 5
 				For ty=32 To 1 Step -1
 					vy=ty:vx=((ix+iy+vy+vy) ASR 1):vz=vx-ix
 					If PColl(vz,vx,1,1,1,1,32,32)
-						If b(vx,vy-1,vz)\t AND 4 AND vy<33 Then sp=19:##[$80BE] For:Goto toot
+						If b(vx,vy-1,vz)\t AND 4 AND vy<33 Then sp=19:Pop For:Goto toot
 						vz=Int(vz):vx=ix+vz:vy=(vx+vz-iy) ASR 1
 						If PColl(vz,vx,1,1,1,1,32,32)
-							If b(vx,vy,vz-1)\t AND 2 AND vz<33 Then sp=18:##[$80BE] For:Goto toot
+							If b(vx,vy,vz-1)\t AND 2 AND vz<33 Then sp=18:Pop For:Goto toot
 							vx=Int(vx):vz=vx-ix:vy=(vx+vz-iy) ASR 1
 							If PColl(vz,vy,1,1,1,1,32,32)
-								If b(vx-1,vy,vz)\t AND 1 AND vx<33 Then sp=17:##[$80BE] For:Goto toot
+								If b(vx-1,vy,vz)\t AND 1 AND vx<33 Then sp=17:Pop For:Goto toot
 							EndIf
 						EndIf
 					EndIf
@@ -444,7 +444,7 @@ Gosub drawpix
 ;-----------------------------------------------------------
 
 .mainloop
-	##[$80BB]
+	Repeat
 		If rt>0 Then rt-1:If rt=0 Then Gosub drawcar
 
 		VWait
@@ -498,7 +498,7 @@ Gosub drawpix
 		If be<0
 			If bs>15 AND bs<48 Then ##[$BA9B] 16+cc:##[$BA86] cc+16
 		EndIf
-	##[$80BC] RawStatus($45)			;Joyb(0)<>0
+	Until RawStatus($45)			;Joyb(0)<>0
 	;
 	Gosub savestuff
 	;
@@ -608,7 +608,7 @@ scan:
 	Return
 
 scanz:
-	##[$80BB]
+	Repeat
 		f=0
 		If b(x,y,z+1)\t AND 4												;top
 			z+1:*p.brick=b(x,y,z)
@@ -627,12 +627,12 @@ scanz:
 			EndIf
 			y-1:f=1:ff=1
 		EndIf
-	##[$80BC] f=0
+	Until f=0
 	Return
 
 scanx:
 	If x>0
-		##[$80BB]
+		Repeat
 			fg=0
 			If b(x+1,y,z)\t AND 4
 				x+1:*p.brick=b(x,y,z)
@@ -642,7 +642,7 @@ scanx:
 				d(n)=-b(x,y,z)\c[0]:b(x,y,z)\t AND $fffe OR 8
 				n+1:fg=1:y-1
 			EndIf
-		##[$80BC] fg=0
+		Until fg=0
 	Else
 		x=-x
 		While b(x+1,y,z)\t AND 2
@@ -768,7 +768,7 @@ End Statement
 		v\zy=\xb*qx+\yb*qy+\zb*qz
 		v\yx=\xc*px+\yc*py+\zc*pz
 		v\yy=\xc*qx+\yc*qy+\zc*qz
-		mycar{Bank(2),basefr,&v,##[$80B8] ##[$A401](0)}		 ;,46*128+64}
+		mycar{Bank(2),basefr,&v,Addr ##[$A401](0)}		 ;,46*128+64}
 		##[$A412] 0,2
 		VWait
 		longdiv 32,542,102
@@ -850,13 +850,13 @@ End Statement
 
 
 .paintbit
-	##[$80BB]
+	Repeat
 		x=vx:y=vy:z=vz
 		If sp=17 Then x-1:b(x,y,z)\c[0]=cc:longdiv 1,!e{x,y,z},cc
 		If sp=18 Then z-1:b(x,y,z)\c[1]=cc:longdiv 2,!e{x,y,z},cc
 		If sp=19 Then y-1:b(x,y,z)\c[2]=cc:longdiv 3,!e{x,y,z},cc
 		VWait
-	##[$80BC] Joyb(0)=0
+	Until Joyb(0)=0
 	rt=20
 	Return
 
@@ -901,9 +901,9 @@ End Statement
 
 .docube:
 	If ox>-1 AND oox>-1
-		If ox>oox Then ##[$80C9] ox,oox
-		If oy>ooy Then ##[$80C9] oy,ooy
-		If oz>ooz Then ##[$80C9] oz,ooz
+		If ox>oox Then Exchange ox,oox
+		If oy>ooy Then Exchange oy,ooy
+		If oz>ooz Then Exchange oz,ooz
 		For x=ox To oox
 			For y=oy To ooy
 				For z=oz To ooz
@@ -949,7 +949,7 @@ End Statement
 			##[$80CA] aa()
 			\z=(i-2)*7.5
 			For j=0 To np-1
-				\xy[j]\x=HCos(j*##[$80BA]/np)*8,HSin(j*##[$80BA]/np)*8
+				\xy[j]\x=HCos(j*Pi/np)*8,HSin(j*Pi/np)*8
 			Next
 		EndIf
 	Next
@@ -969,12 +969,12 @@ End Statement
 		mxx=x ASR 3 + mzz
 		myy=(mzz+mxx-(y ASR 1)) ASR 1
 		j=0
-		##[$80BB]
+		Repeat
 			If PColl(*cc\xy[j]\x,*cc\xy[j]\y,2,2,mxx,myy,2,2)
 				Gosub editpt:j=np:LastItem aa()
 			EndIf
 			j+1
-		##[$80BC] j>=np
+		Until j>=np
 	Wend
 	Return
 
@@ -1084,7 +1084,7 @@ editpt
 
 .setuppalette
 	##[$80CA] col(i)
-	##[$80C8] cols
+	Restore cols
 	For i=1 To 31:Read \r,\g,\b:Next
 	For cc=1 To 31:Gosub setcol:Next
 	DisplayPalette 0,0
@@ -1284,7 +1284,7 @@ cols:
 	VWait 5
 	;
 	For i=1 To 7
-		MakeCookie i:Poke.w ##[$80B8] MidHandle(i)+4,2
+		MakeCookie i:Poke.w Addr MidHandle(i)+4,2
 	Next
 	;
 	Use lmaxlen 1:BlockScroll
@@ -1296,9 +1296,9 @@ cols:
 		Next
 		GetaShape 8+i,160-8,128-4,16,8
 		Handle 8+i,8,4
-		Poke.w ##[$80B8] MidHandle(8+i)+4,4
+		Poke.w Addr MidHandle(8+i)+4,4
 		GetaSprite i+2,8+i
-		Poke.w ##[$80B8] MidHandle(8+i)+4,2
+		Poke.w Addr MidHandle(8+i)+4,2
 		BlockScroll
 	Next
 	;
@@ -1354,9 +1354,9 @@ cols:
 			Else
 				nx=vx:ny=vy:nz=vz
 				If (ox<>nx) OR (oy<>ny) OR (oz<>nz)
-					If ox>nx Then ##[$80C9] ox,nx
-					If oy>ny Then ##[$80C9] oy,ny
-					If oz>nz Then ##[$80C9] oz,nz
+					If ox>nx Then Exchange ox,nx
+					If oy>ny Then Exchange oy,ny
+					If oz>nz Then Exchange oz,nz
 					tt=1:If Joyb(0)=2 Then tt=0
 					For x=ox To nx
 						For y=oy To ny
@@ -1393,7 +1393,7 @@ cols:
 						Case 2:b(vx,vy,vz)\c[0]=cc
 						Case 3:b(vx,vy,vz)\c[4]=cc
 					End Select
-					Gosub drawbrick:##[$80BE] For:Goto popit
+					Gosub drawbrick:Pop For:Goto popit
 				EndIf
 			EndIf
 		Next

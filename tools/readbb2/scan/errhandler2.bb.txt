@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/errhandler2.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/errhandler2.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/errhandler2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/errhandler2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/errhandler2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/errhandler2.bb
-##[$80B4]
-	##[$80BD] d0,err.l:err$=Mki$(40)+Chr$(12)+Peek$(err)+Mki$(0)
+SetErr
+	PutReg d0,err.l:err$=Mki$(40)+Chr$(12)+Peek$(err)+Mki$(0)
 	##[$FF8B] 0,&err$,20:End
-End ##[$80B4]
+End SetErr
 
 Dim a(10)
 a(11)=12

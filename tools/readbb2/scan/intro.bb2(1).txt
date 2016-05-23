@@ -9,10 +9,10 @@ again
 If WriteMem(0,"guardianpic.bin")=0 Then ##[$FF8C] 0:End
 If WriteMem(1,"guardianpal.bin")=0 Then ##[$FF8C] 0:End
 lmaxlen 0,640,512,8:allocst 0,0,0,640,512,8,$8804,"",0,0,0
-b=Peek.l(##[$80B8] lmaxlen(0)+8)
+b=Peek.l(Addr lmaxlen(0)+8)
 ##[$BE14] 0,b,80*512*8:CloseFile 0
 For k=0 To 63:AGAGreen 0,k,0,0,0:Next
-b=Peek.l(##[$80B8] SetCycle(0))
+b=Peek.l(Addr SetCycle(0))
 ##[$BE14] 1,b,12*64+8:CloseFile 1
 Use SetCycle 0
 Gosub dispon

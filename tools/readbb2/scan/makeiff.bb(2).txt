@@ -140,7 +140,7 @@ Return
 
 .Main
 	jstp=1/16/1.5
-	myscal=2/##[$80BA]
+	myscal=2/Pi
 	Colour 127
 	Locate 0,0:Print MapX(0,32)
 
@@ -151,7 +151,7 @@ Return
 			If miny<0 Then miny=0
 
 
-			##[$80BB]
+			Repeat
 				jj=ii+delj
 				y=MapY(ii,jj)*1.5
 				If y<(miny-34) Then ii+1:istp=0.5
@@ -174,7 +174,7 @@ Return
 
 				ii+istp
 
-			##[$80BC] (miny>bigy) OR (ii>63.5) OR (jj>63.5)
+			Until (miny>bigy) OR (ii>63.5) OR (jj>63.5)
 			If Joyb(0)<>0 Then End
 		Next
 Return

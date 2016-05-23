@@ -105,10 +105,10 @@ EndIf
 
 a=0
 mi=##[$FF76](-1)
-##[$80BB]
+Repeat
 	a+1
 	mi=##[$FF76](mi)
-##[$80BC] mi=-1
+Until mi=-1
 
 s=-1
 
@@ -123,7 +123,7 @@ Dim scrd.l(a)
 *scrlist\lh_TailPred=&*scrlist\lh_Head
 mi=##[$FF76](-1)
 i=-1
-##[$80BB]
+Repeat
 	##[$FF77] 0,screendisp,SizeOf.DisplayInfo,#DTAG_DISP,mi
 	avail=screendisp\NotAvailable
 	prop=screendisp\PropertyFlags
@@ -150,7 +150,7 @@ i=-1
 		EndIf
 	EndIf
 	mi=##[$FF76](mi)
-##[$80BC] mi=-1
+Until mi=-1
 a=i
 
 *glist=0
@@ -206,7 +206,7 @@ newwindow\FirstGadget=*glist,0,&title$,0,0,-1,-1,-1,-1,#WBENCHSCREEN
 If *mywindow
 	##[$F60A] *mywindow,0
 	result=1
-	##[$80BB]
+	Repeat
 		##[$FEB6] *mywindow\UserPort
 		*imsg=##[$F608](*mywindow\UserPort)
 		If *imsg
@@ -306,7 +306,7 @@ If *mywindow
 				##[$F603] *gad2,*mywindow,0,tags
 			EndIf
 		EndIf
-	##[$80BC] result=0
+	Until result=0
 	##[$FF88] *mywindow
 	##[$F602] *glist
 	##[$F612] *vi

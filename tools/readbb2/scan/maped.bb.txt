@@ -36,13 +36,13 @@ setup:
 
 	##[$CD10] 0,8,8,4
 	CludgeBitMap 0,1:Use lmaxlen 1:Boxf 0,0,7,7,2:MakeCookie 0:Use lmaxlen 0
-	brush.l=Peek.l(##[$80B8] MidHandle(0)+14)
+	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 main:
 	BLITZ
 	BlockScroll 1
 	CreateDisplay 0
-	bm.l=##[$80B8] lmaxlen(0)
+	bm.l=Addr lmaxlen(0)
 
 	For y=0 To 31
 		For x=0 To 39

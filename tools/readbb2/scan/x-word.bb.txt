@@ -72,7 +72,7 @@ Gosub	 SetupWords
 ;mainloop
 
 .main
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 
 	If ev = #GADGETUP
@@ -84,7 +84,7 @@ Gosub	 SetupWords
 		End Select
 	EndIf
 
-##[$80BC] ev=$200			 ; close window
+Until ev=$200			 ; close window
 
 End
 ;-----------------------------------------------------------------

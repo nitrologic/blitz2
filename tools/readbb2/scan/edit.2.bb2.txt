@@ -12,7 +12,7 @@ Format "##"
 ;	NPrint k,":"
 ;Next
 
-##[$80BB]
+Repeat
 
 ;	Repeat
 ;		ev.l=Event
@@ -99,4 +99,4 @@ If ev=$400
 
 EndIf
 
-##[$80BC] ev=$200
+Until ev=$200

@@ -19,13 +19,13 @@ Gosub PrintBlocks
 
 
 .MainRoutine
-##[$80BB]
+Repeat
 	Gosub Joystick
 	Gosub KeyRead
 	Gosub BlockHits
 	Gosub MoveSprite
 	Gosub BlitIt
-##[$80BC] RawStatus (69)
+Until RawStatus (69)
 End
 
 .InitVariables:
@@ -443,7 +443,7 @@ Data 25,26,27,28,29,30,61,62,63,64,52,53,54,56,55,57,58,59,60,31,32,33,34,35,36
 Data 37,38,39,40,41,42,43,44,45,46,47,48,49,50,51
 
 .PrintBlocks:
-##[$80C8] blockdata
+Restore blockdata
 For xw=0 To 4
 	Read bl
 	longdiv bl,xw ASL 4+232,108

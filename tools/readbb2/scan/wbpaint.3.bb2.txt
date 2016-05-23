@@ -50,7 +50,7 @@ VER$="V3.5"
 ;*																									 *
 ;*****************************************************
 
-##[$80C3]:##[$80CC]
+WBStartup:##[$80CC]
 ##[$FFB5]:freest 0:ScreensBitMap 0,0
 
 Include "data/myfunctions.i"
@@ -149,10 +149,10 @@ ZSCALE=5
 ;--------------------------------------------------
 
 .SHAPES
-##[$80B4]
+SetErr
 	MYREQUEST{"Error","Couldn't access data file","","Exit",""}
 	End
-End ##[$80B4]
+End SetErr
 
 ;0 = LOAD/SAVE
 ;1-4 = SPARE
@@ -177,7 +177,7 @@ Handle 29,-7,-6
 OTHERBUFF=35
 CBRUSHNUM=36 ;CUSTOM BRUSH ON LAST SHAPE SLOT
 
-##[$80B5]
+ClrErr
 
 ;--------------------------------------------------
 ; SETS UP ALL THE WINDOWS GADGETS
@@ -337,13 +337,13 @@ SAVED=True
 ;--------------------------------------------------
 
 .MAIN:
-##[$80BB]
+Repeat
 
 ;--DEFAULT ERROR--
-##[$80B4]
+SetErr
 	BeepScreen 0
 	End
-End ##[$80B4]
+End SetErr
 
 ;--STOP EVENT BACKLOG--
 FlushEvents $410
@@ -481,7 +481,7 @@ If REGISTERED=False
 ;WLocate 0,0:Print Str$(TIMER)+"	"
 EndIf
 ;WLocate 0,1:Print Asc(I$)
-##[$80C7]
+Forever
 
 ;--------------------------------------------------
 ; CONFIRM QUIT
@@ -575,7 +575,7 @@ GTCycle 1,1,88,13,152,12,"QUALITY :",1,"POOR|AVERAGE|GOOD|V. GOOD"
 GTCycle 1,0,88,1,152,12,"SIZE		:",1,"SMALL|MEDIUM|LARGE "
 localstat 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
 
-##[$80BB]
+Repeat
 
 EV.l=WaitEvent
 
@@ -618,7 +618,7 @@ If EV=$40
 	End Select
 EndIf
 
-##[$80BC] DONE=True:DONE=False
+Until DONE=True:DONE=False
 
 CloseWindow 1:Free GTList 1
 Use localstat 0:Activate 0
@@ -635,13 +635,13 @@ workstart 1,74,26,0,5," OK "
 
 localstat 1,255,90,180,42,$1006,"Select Brush Shape",2,1,1
 
-##[$80BB]
+Repeat
 
 EV.l=WaitEvent
 
 If EV=$40 AND GadgetHit<5 Then BRUSHAPE=GadgetHit
 
-##[$80BC] EV=$40 AND GadgetHit=5
+Until EV=$40 AND GadgetHit=5
 
 CloseWindow 1:Free GadgetJam 1
 Use localstat 0:Activate 0
@@ -803,7 +803,7 @@ If WMouseX<MAXX-8 AND WMouseY<MAXY-8
 	;--CURSOR AT MOUSE POINTER--
 	WLocate IX-2,IY-11
 
-	##[$80BB]
+	Repeat
 
 		;--GET AND PRINT TEXT--
 		;Print GETSTRING{Int((MAXX-IX)/8)}
@@ -832,7 +832,7 @@ If WMouseX<MAXX-8 AND WMouseY<MAXY-8
 			EndIf
 		EndIf
 
-	##[$80BC] Joyb(0) OR I$=Chr$(13)
+	Until Joyb(0) OR I$=Chr$(13)
 
 	;--RETURN TEXT COLOUR--
 	WColour 1,0:Print " "
@@ -1020,7 +1020,7 @@ Menus Off
 NEWZOOM=True
 
 ;--DRAWING LOOP--
-##[$80BB]
+Repeat
 
 EV.l=WaitEvent
 
@@ -1058,7 +1058,7 @@ If EV=$40 AND GadgetHit=0
 	Use localstat 1
 EndIf
 
-VWait:##[$80BC] EV=$200
+VWait:Until EV=$200
 
 ;--CLEAN UP--
 CloseWindow 1

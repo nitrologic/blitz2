@@ -21,9 +21,9 @@ Statement DrawTriangles {angg.w,radii1.w,radii2.w,col.w}
 	Shared sn(),cn(),polygon()
 	BLITZ
 	endang.w=angg+360
-	##[$80BB]
+	Repeat
 		angg+10
-		ang=angg : ang=ang ##[$80B9] 360
+		ang=angg : ang=ang MOD 360
 
 		polygon(1)\x=160+sn(ang)*radii1
 		polygon(1)\y=128+cn(ang)*radii1
@@ -37,7 +37,7 @@ Statement DrawTriangles {angg.w,radii1.w,radii2.w,col.w}
 		polygon(3)\y=128+cn(ang2)*radii2
 
 		Polyf 3,&polygon(1),col
-	##[$80BC] angg=endang
+	Until angg=endang
 End Statement
 
 .StartUp:
@@ -52,7 +52,7 @@ For h.l=1 To 5
 Next h
 
 For h=0 To 359
-	a=(h*##[$80BA])/180
+	a=(h*Pi)/180
 	sn(h)=HSin(a)
 	cn(h)=HCos(a)
 Next h
@@ -82,13 +82,13 @@ DisplayPalette 0,0
 CreateDisplay 0
 
 dbuffer=1
-##[$80BB]
+Repeat
 	dbuffer+1 : If dbuffer>5 Then dbuffer=1
 	DisplayBitMap 0,dbuffer
 	VWait 2
-##[$80BC] Joyb(0)
+Until Joyb(0)
 End
 
-##[$80BF] ""
+INCDIR ""
 circles_iff: IncBin "circles.iff"
 	NPrint "Cudd"

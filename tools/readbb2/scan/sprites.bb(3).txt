@@ -44,7 +44,7 @@ Use lmaxlen 0
 
 allocst 0,0,0,320,256,4,0,"",1,2,0
 
-bm.l=##[$80B8] lmaxlen(0)
+bm.l=Addr lmaxlen(0)
 InitBank 0,8192,0
 
 localstat 0,0,0,320,256,$1800,"",1,2
@@ -75,7 +75,7 @@ Next
 
 sp=0:sb=0
 
-##[$80BB]
+Repeat
 	;
 	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
 	;
@@ -117,7 +117,7 @@ sp=0:sb=0
 	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
 	Locate 0,22:Print key,"	"
 
-##[$80BC] key=27
+Until key=27
 
 makesprite:
 	Use lmaxlen 1:longdiv esp,0,0:Use lmaxlen 0

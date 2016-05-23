@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/diamonds/game/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/diamonds/game/Diamonds.bb2
 ##[$80CB]:##[$80CC]
 For k=1 To 100:VWait:##[$FF89]:Next
-##[$80C3]
+WBStartup
 VWait 10
 
 Dim bx(210),by(210),map(210),ptrn(10)
@@ -13,28 +13,28 @@ Dim scr.l(9),name$(9),j(22),bani(22)
 
 InitBank 0,220,2										; ---- Reserve Map Bank
 
-##[$80C8] scr_dat										 ; ---- Read Score Data
+Restore scr_dat										 ; ---- Read Score Data
 For lop=1 To 9
 		Read scr(lop)
 Next
 
-##[$80C8] nam_dat										 ; ---- Read Name Data
+Restore nam_dat										 ; ---- Read Name Data
 For lop=1 To 9
 		Read name$(lop)
 Next
 
-##[$80C8] patern_dat									; ---- Background Patern
+Restore patern_dat									; ---- Background Patern
 For lop=1 To 10
 		Read patern
 		ptrn(lop)=patern
 Next
 
-##[$80C8] ball_ani										; ---- Get Ball Anim
+Restore ball_ani										; ---- Get Ball Anim
 For lop=0 To 21
 		Read bani(lop)
 Next
 
-##[$80C8] ball_y											; ---- Get Ball Data
+Restore ball_y											; ---- Get Ball Data
 For lop=0 To 21
 		 Read j(lop)
 Next
@@ -124,7 +124,7 @@ ShowSprite walk(ANI),PX,PY,0
 Use lmaxlen 0
 BBlit 0,33,85,100
 FadeIn 0,2,0,31
-##[$80BB]:VWait:##[$80BC] Joyb(1)
+Repeat:VWait:Until Joyb(1)
 UnBuffer 0
 Colour 1,0
 ;
@@ -137,7 +137,7 @@ End SetInt
 ; ---- Main Loop
 ;
 .MAIN:
-##[$80BB]
+Repeat
 	 VWait
 	 Show db,SX,0:db=1-db:Use lmaxlen db:UnBuffer db
 
@@ -273,7 +273,7 @@ End SetInt
 
 	 Gosub BALLS
 
-##[$80BC] game_stat>0 OR PY>215
+Until game_stat>0 OR PY>215
 
 UnBuffer 0
 UnBuffer 1
@@ -297,7 +297,7 @@ If game_stat=1
 	 Format ""
 	 FadeIn 0,2,0,31
 
-	 ##[$80BB]
+	 Repeat
 		 score.l+10
 		 TIME.w-1														; ---- TIME X 10 Bonus
 		 Format "000000"
@@ -305,7 +305,7 @@ If game_stat=1
 		 Format ""
 		 Sound 1,2,63,63,63,63
 		 VWait 4
-	 ##[$80BC] TIME.w<1
+	 Until TIME.w<1
 	 level.w+1
 
 	 BitMapOutput 2
@@ -354,7 +354,7 @@ If game_stat=3
 	 Use lmaxlen 0
 	 BBlit 0,31,75,100
 	 FadeIn 0,2,31,31
-	 ##[$80BB]:VWait:##[$80BC] Joyb(1)
+	 Repeat:VWait:Until Joyb(1)
 	 FadeOut 0,2,31,31
 	 UnBuffer 0
 	 TIME=99
@@ -368,7 +368,7 @@ check:
 PlayModule 0
 longdiv 40,25,96															 ; ---- Well Done
 FadeIn 0,2,0,31
-##[$80BB]:VWait:##[$80BC] Joyb(1)
+Repeat:VWait:Until Joyb(1)
 FadeOut 0,2,0,31
 BlockScroll 0
 Goto enter
@@ -385,7 +385,7 @@ ShowSprite 0,-32,-32,0
 BlockScroll 0
 BBlit 0,32,80,100
 FadeIn 0,2,0,31
-##[$80BB]:VWait:##[$80BC] Joyb(1)
+Repeat:VWait:Until Joyb(1)
 FadeOut 0,2,0,31
 UnBuffer 0
 
@@ -399,7 +399,7 @@ If score.l<scr.l(9) Then Goto clear
 longdiv 38,89,96															; ---- ENTER NAME BLIT
 FadeIn 0,2,0,31
 n$=""
-##[$80BB]:##[$80BC] Inkey$=""
+Repeat:Until Inkey$=""
 Locate 14,14
 n$=Edit$("",9)
 FadeOut 0,2,0,31
@@ -466,21 +466,21 @@ Return
 
 
 .SET_PALETTE:
-##[$80C8] scrcolor
+Restore scrcolor
 For lop=0 To 31
 		Read s.l
-		StopCycle 0,lop,s.l/256,(s.l/16) ##[$80B9] 16,s.l ##[$80B9] 16
+		StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
 Next
 Use SetCycle 0
 Return
 
 
 .RAINBOW:
-##[$80C8] copdat
+Restore copdat
 Use lmaxlen 2
 For lop=0 To 6
 		Read s.l
-		ColSplit	1,s.l/256,(s.l/16) ##[$80B9] 16,s.l ##[$80B9] 16,lop
+		ColSplit	1,s.l/256,(s.l/16) MOD 16,s.l MOD 16,lop
 Next
 ColSplit 1,14,14,15,8
 ColSplit 1,0,0,0,15
@@ -489,7 +489,7 @@ Return
 
 
 .GET_WALK:
-##[$80C8] walk_lr
+Restore walk_lr
 For lop=0 To 33
 		Read walk(lop)
 Next
@@ -645,28 +645,28 @@ DisplayOn
 PlayModule 0
 
 loop:
- ##[$80C8] wave_col
+ Restore wave_col
  For lop=0 To 15
 		 Read s.l
-		 StopCycle 0,lop,s.l/256,(s.l/16) ##[$80B9] 16,s.l ##[$80B9] 16
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
  Next
 
  loptime=0
  FadeOut 0,2,0,15
  longdiv 0,22,30
  FadeIn 0,2,0,15
- ##[$80BB]
+ Repeat
 		VWait
 		If Joyb(1) Then Goto exit
 		loptime+1
- ##[$80BC] loptime=200
+ Until loptime=200
  FadeOut 0,2,0,15
  BlockScroll 0
 
- ##[$80C8] diam_col
+ Restore diam_col
  For lop=0 To 15
 		 Read s.l
-		 StopCycle 0,lop,s.l/256,(s.l/16) ##[$80B9] 16,s.l ##[$80B9] 16
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
  Next
  loptime=0
  FadeOut 0,2,0,15
@@ -674,18 +674,18 @@ loop:
  longdiv 2,25,70
  longdiv 3,60,150
  FadeIn 0,2,0,15
- ##[$80BB]
+ Repeat
 		VWait
 		If Joyb(1) Then Goto exit
 		loptime+1
- ##[$80BC] loptime=250
+ Until loptime=250
  FadeOut 0,2,0,15
  BlockScroll 0
 
- ##[$80C8] tops_col
+ Restore tops_col
  For lop=0 To 15
 		 Read s.l
-		 StopCycle 0,lop,s.l/256,(s.l/16) ##[$80B9] 16,s.l ##[$80B9] 16
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
  Next
  loptime=0
  pos=0
@@ -701,11 +701,11 @@ loop:
 		 pos+2
  Next
  FadeIn 0,2,0,15
- ##[$80BB]
+ Repeat
 		VWait
 		If Joyb(1) Then Goto exit
 		loptime+1
- ##[$80BC] loptime=300
+ Until loptime=300
  FadeOut 0,2,0,15
  BlockScroll 0
 Goto loop

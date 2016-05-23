@@ -12,11 +12,11 @@
 ; PD.	Lets make Blitz 2 the premier coding platform on the Amiga,
 ; and make the Amiga the premier home computer! (again)
 
-##[$80BF] "blitz2:include/"
+INCDIR "blitz2:include/"
 XInclude "devices.bb"
 XInclude "dos.bb" ;There's only two things I need from this file grrrrr
 
-##[$80CC]:##[$80C3]:freest 0
+##[$80CC]:WBStartup:freest 0
 If ExecVersion<36 Then End ;Should put up a requester...
 
 MaxLen pa$=200:MaxLen fi$=200
@@ -108,7 +108,7 @@ dummy.l=##[$FE72]("DF0:",#DOSTRUE)
 ;ALWAYS ALWAYS ALWAYS turn off the Inhibit()!!!!!!
 
 Quitting.w=False
-##[$80BB]
+Repeat
 	Start:
 	##[$C620] 1,3:##[$C61F] 1,1:##[$C61F] 1,2
 	WLocate 202,29:Print "Make Selection	 "
@@ -182,7 +182,7 @@ Quitting.w=False
 					ModLen.l=SamLength+(HiPattern*1024)+1084
 					WLocate 10,40:Print "Module length: $":Print Hex$(ModLen)
 
-					##[$80BB]:##[$80BC] WaitEvent=64 AND EventWindow=1
+					Repeat:Until WaitEvent=64 AND EventWindow=1
 					If GadgetHit = 1
 ;All this routine was originally a statement, but the ASL file requester
 ;kept crashing on me, so I've had to move this into the control statement.
@@ -201,7 +201,7 @@ Quitting.w=False
 			Quitting=True
 		End Select
 	End If
-##[$80BC] Quitting
+Until Quitting
 
 dummy.l=##[$FE72]("DF0:",#DOSFALSE)
 BailOut3:

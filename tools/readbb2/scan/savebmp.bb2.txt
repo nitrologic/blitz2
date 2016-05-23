@@ -193,7 +193,7 @@ Statement SaveBMP{ofile.s,bmpobj.w,width.w,height.w,numcol.w}
 		tsize.l = width*height+offset
 
 		;	 Number of pad bytes required for each row:
-		padbytes= 4-(width ##[$80B9] 4) : If padbytes=4 Then padbytes=0
+		padbytes= 4-(width MOD 4) : If padbytes=4 Then padbytes=0
 
 		; Create the BITMAPFILEHEADER
 		Print "BM"											; bfType				 : Identifies as a BMP

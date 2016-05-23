@@ -16,7 +16,7 @@ WLocate 2,32:Print "BINARY%"
 ;
 DEFTYPE.l value
 ;
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=$40							;gadget up
 		Select GadgetHit
@@ -46,5 +46,5 @@ DEFTYPE.l value
 		ButtonId 0,2,Right$(Bin$(value),16)
 		Redraw 0,0:Redraw 0,1:Redraw 0,2
 	EndIf
-##[$80BC] ev=$200
+Until ev=$200
 ;

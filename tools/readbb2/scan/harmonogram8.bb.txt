@@ -1,16 +1,16 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/harmonogram8.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/harmonogram8.bb
-##[$80C3]
+WBStartup
 Dim s.l(2096),c.l(2096)
 
 For i=0 To 2096
-	c(i)=Int(1023*(HCos((2*##[$80BA]*i)/1024)))
-	s(i)=Int(1023*(HSin((2*##[$80BA]*i)/1024)))
+	c(i)=Int(1023*(HCos((2*Pi*i)/1024)))
+	s(i)=Int(1023*(HSin((2*Pi*i)/1024)))
 Next
 
 For i=0 To 15:lmaxlen i,320,256,2:Next
 BLITZ
 Slice 0,44,320,256,$fff8,2,8,4,320,320
-##[$80BB]
+Repeat
 	DisplayOff
 	Green 1,Rnd(16),Rnd(16),Rnd(16)
 	Green 2,Rnd(16),Rnd(16),Rnd(16)
@@ -50,18 +50,18 @@ Slice 0,44,320,256,$fff8,2,8,4,320,320
 			Next
 		Next
 	Next
-	##[$80BB]
+	Repeat
 		For si=0 To 15
 				If Joyb(0)>0
-					If Joyb(0)=1:##[$80BE] For:##[$80BE] ##[$80BB]:Goto l1:EndIf
-					If Joyb(0)=>1:##[$80BE] For:##[$80BE] ##[$80BB]:Goto l2:EndIf
+					If Joyb(0)=1:Pop For:Pop Repeat:Goto l1:EndIf
+					If Joyb(0)=>1:Pop For:Pop Repeat:Goto l2:EndIf
 				EndIf
 				ibxarg1=QWrap(ibxarg1+xinc1,0,1024)
 				ibxarg2=QWrap(ibxarg2+xinc2,0,1024)
 				ibyarg1=QWrap(ibxarg1+yinc1,0,1024)
 				ibyarg2=QWrap(ibxarg2+yinc2,0,1024)
 				bxarg1=ibxarg1:bxarg2=ibxarg2:byarg1=ibxarg1:byarg2=ibyarg2
-			Use lmaxlen (si+15) ##[$80B9] 16:BlockScroll 0
+			Use lmaxlen (si+15) MOD 16:BlockScroll 0
 			bi=si:r=1056:cc=0:ccc=1
 			For kk=0 To 14
 				cc=QWrap(cc+1,0,4)
@@ -79,7 +79,7 @@ Slice 0,44,320,256,$fff8,2,8,4,320,320
 				Show bi
 				bi=QWrap(bi+1,0,16)
 			Next
-			bi=(si+13) ##[$80B9] 16
+			bi=(si+13) MOD 16
 			For kk=0 To 11
 				cc=QWrap(cc+1,0,4)
 				If cc=0:ccc=QWrap(ccc+1,1,4):EndIf
@@ -97,8 +97,8 @@ Slice 0,44,320,256,$fff8,2,8,4,320,320
 				bi=QWrap(bi+15,0,16)
 			Next
 		Next
-	##[$80C7]
-l1:##[$80C7]
+	Forever
+l1:Forever
 l2:AMIGA:VWait 50
 End
 

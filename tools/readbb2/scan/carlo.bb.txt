@@ -32,7 +32,7 @@ CreateDisplay 0,1
 For xx=0 To 9
 	a=xx*32
 	##[$A402] 1,64,32,1:##[$A40C] 0,1,a*2,0,64,32,0,0
-	m.l=Peek.l(##[$80B8] ##[$A401](1))
+	m.l=Peek.l(Addr ##[$A401](1))
 	Use lmaxlen 0
 	For y=0 To 31
 		For x=0 To 31

@@ -14,7 +14,7 @@ Gosub ssin
 
 ; ---- Get shape colors ----
 
-##[$80C8] color_balls
+Restore color_balls
 For lop=1 To 7
 		Read a,b,c
 		Green lop,a,b,c

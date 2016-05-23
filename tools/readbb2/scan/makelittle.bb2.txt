@@ -3,9 +3,9 @@ allocst 0,3:ScreensBitMap 0,0:BlockScroll
 LoadShape 0,"little.iff",0:Use SetCycle 0
 longdiv 0,0,0
 
-b0.l=Peek.l(##[$80B8] lmaxlen(0)+8)
-b1.l=Peek.l(##[$80B8] lmaxlen(0)+12)
-b2.l=Peek.l(##[$80B8] lmaxlen(0)+16)
+b0.l=Peek.l(Addr lmaxlen(0)+8)
+b1.l=Peek.l(Addr lmaxlen(0)+12)
+b2.l=Peek.l(Addr lmaxlen(0)+16)
 
 
 If ReadMem(0,"little.bin")

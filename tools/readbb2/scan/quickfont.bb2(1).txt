@@ -62,7 +62,7 @@ exit:
 	MOVEM.l	 (a7)+,d0-d7/a0-a6
 	AsmExit
 
-	##[$80BF] ""
+	INCDIR ""
 	Event
 font_dat:
 	IncBin "fns:8_High.FNS"
@@ -79,7 +79,7 @@ a$="Hello world"
 a$=a$+a$+a$+a$
 
 For loop.l=0 To 25
-	l.l=NiceFont {##[$80B8] lmaxlen(0),0,12+loop*8,&a$}
+	l.l=NiceFont {Addr lmaxlen(0),0,12+loop*8,&a$}
 Next loop
 MouseWait
 End

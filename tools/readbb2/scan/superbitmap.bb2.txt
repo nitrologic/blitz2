@@ -22,11 +22,11 @@ localstat 0,0,0,100,100,$1489,"HELLO",1,2,0,0
 
 Gosub drawsuper
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	If ev=2 Then Gosub dosize
 	If ev=$20 Then Gosub domove
-##[$80BC] ev=$200
+Until ev=$200
 End
 
 dosize:
@@ -35,7 +35,7 @@ dosize:
 	Redraw 0,1:Redraw 0,2:Goto drawsuper
 
 domove:
-	##[$80BB]:Gosub drawsuper:##[$80BC] WaitEvent<>$10:Return
+	Repeat:Gosub drawsuper:Until WaitEvent<>$10:Return
 
 drawsuper:
 	ww=width-InnerWidth:hh=height-InnerHeight

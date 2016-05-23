@@ -167,9 +167,9 @@ drawcar:
 getvectors:
 	myhead=myhead+.1
 	myroll=1.0791 ;QLimit(myroll+MouseXSpeed ASR 4,-Pi,Pi)
-	hpi=##[$80BA] *0.5
+	hpi=Pi *0.5
 	mypitch=-.3208 ;QLimit(mypitch+MouseYSpeed ASR 4,-hpi,hpi)
-	head=myhead+##[$80BA]/3
+	head=myhead+Pi/3
 	pitch=mypitch
 	size=1
 	vx1=size*HCos(head):vy1=size*-HSin(head) :vz1=0

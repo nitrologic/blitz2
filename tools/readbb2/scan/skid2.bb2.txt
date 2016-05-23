@@ -5,7 +5,7 @@
 
 allocst 0,10
 
-##[$80C8] names
+Restore names
 
 For g=0 To 4:StringGadget 1,8,14+g*14,0,g,32,256:Next
 
@@ -39,7 +39,7 @@ Next
 
 Dim a.w(11)	;12 buttons
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent:g=GadgetHit
 	If ev=$20 OR ev=$40
 		If g<5 AND ev=$40
@@ -49,14 +49,14 @@ Dim a.w(11)	;12 buttons
 		If g>4 AND g<29
 			gg.w=(g-4)/2
 			If g AND 1
-				##[$80BB]
+				Repeat
 					a(gg)=HPropPot(1,g)*31-15:ButtonId 1,g+1,Str$(a(gg)):Redraw 0,g+1
-				##[$80BC] Event=$40 OR ev=$40
+				Until Event=$40 OR ev=$40
 			EndIf
 		EndIf
 		If g=32 Then End
 	EndIf
-##[$80C7]
+Forever
 
 names
 	Data$ "RED","GREEN","BLUE","CONTRAST"

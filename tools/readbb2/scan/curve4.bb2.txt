@@ -50,7 +50,7 @@ Gosub recurs
 ;
 For y=0 To 255
 For x=0 To 319
-If Cls(x,y) Then Line 0,y,x,y,1:##[$80BE] For:Goto out
+If Cls(x,y) Then Line 0,y,x,y,1:Pop For:Goto out
 Next
 out
 Next

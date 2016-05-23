@@ -30,7 +30,7 @@ StopCycle 0,0,0,0,0
 StopCycle 0,1,0,15,0
 DisplayPalette 0,0
 
-##[$80BB]
+Repeat
 	BlockScroll:VWait 2:Locate 0,20:Print "Insert Disk and Press Mouse Button"
 	;
 	MouseWait
@@ -51,7 +51,7 @@ DisplayPalette 0,0
 		If Len(Peek$(?vname))<4 Then Print "????"
 	EndIf
 	VWait 100
-##[$80C7]
+Forever
 
 dbuff:Dc.l 0
 pbuff:Dc.l 0

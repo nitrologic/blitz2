@@ -18,7 +18,7 @@
 ;
 ;cya, and don't wait too long with the answer, please... :-S
 
-##[$80C3]
+WBStartup
 
 NEWTYPE .coord
 	x.f			 ; x-coord
@@ -141,7 +141,7 @@ StopCycle 0,1,15,15,15
 
 DisplayPalette 0,0
 
-##[$80BB]
+Repeat
 	xa=xa+2						 ; Angle of x
 	ya=ya+4						 ; Angle of y
 	za=za+6						 ; Angle of z
@@ -266,7 +266,7 @@ DisplayPalette 0,0
 
 ;	 x=xx * x(i) + xy * y(i) + xz * z(i)
 
-		GetReg d4,##[$80B8] lmaxlen(bmp)
+		GetReg d4,Addr lmaxlen(bmp)
 		GetReg d0,mem
 		GetReg d1,i
 
@@ -334,12 +334,12 @@ p3: CMP.w #254,d2
 		BLE p4
 		MOVE.l #254,d2
 
-p4: ##[$80BD] d0,x
-		##[$80BD] d2,y
+p4: PutReg d0,x
+		PutReg d2,y
 
 		Point x,y,1
 	Next i
-##[$80BC] Joyb(0)
+Until Joyb(0)
 
 End
 

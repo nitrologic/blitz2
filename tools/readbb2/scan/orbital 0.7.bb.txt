@@ -14,7 +14,7 @@
 
 ; --------------------------------------------------------------------
 
-##[$80C3]
+WBStartup
 VWait 250
 BLITZ
 
@@ -771,26 +771,26 @@ Statement Add_New_High_Score{}
 
 	If Game_Type = #Speed_Game
 		Counter = ~#Max_High_Scores - 1~
-		##[$80BB]
+		Repeat
 			If Speed_Game_High_Score(Counter)\Score >= Speed_Game_High_Score(Counter - 1)\Score
-				##[$80C9] Speed_Game_High_Score(Counter)\Score, Speed_Game_High_Score(Counter - 1)\Score
-				##[$80C9] Speed_Game_High_Score(Counter)\Name, Speed_Game_High_Score(Counter - 1)\Name
+				Exchange Speed_Game_High_Score(Counter)\Score, Speed_Game_High_Score(Counter - 1)\Score
+				Exchange Speed_Game_High_Score(Counter)\Name, Speed_Game_High_Score(Counter - 1)\Name
 				Counter = Counter - 1
 			Else
 				Counter = 0
 			End If
-		##[$80BC] Counter = 0
+		Until Counter = 0
 	Else
 		Counter = ~#Max_High_Scores - 1~
-		##[$80BB]
+		Repeat
 			If Logic_Game_High_Score(Counter)\Score >= Logic_Game_High_Score(Counter - 1)\Score
-				##[$80C9] Logic_Game_High_Score(Counter)\Score, Logic_Game_High_Score(Counter - 1)\Score
-				##[$80C9] Logic_Game_High_Score(Counter)\Name, Logic_Game_High_Score(Counter - 1)\Name
+				Exchange Logic_Game_High_Score(Counter)\Score, Logic_Game_High_Score(Counter - 1)\Score
+				Exchange Logic_Game_High_Score(Counter)\Name, Logic_Game_High_Score(Counter - 1)\Name
 				Counter = Counter - 1
 			Else
 				Counter = 0
 			End If
-		##[$80BC] Counter = 0
+		Until Counter = 0
 	End If
 	If Music
 		Fade_Out_Music{}
@@ -1767,7 +1767,7 @@ Statement Display_Game_Stats{}
 ; DISPLAY EXTRA TIME
 
 	Boxf 290, 200, 299, 239, 0
-	For Counter = 0 To (Extra_Time / (5 / 4)) ##[$80B9] #Permenant_Time_Meter_Height
+	For Counter = 0 To (Extra_Time / (5 / 4)) MOD #Permenant_Time_Meter_Height
 		Colour_ = Int(Counter / ~#Permenant_Time_Meter_Height / #Max_Permenant_Time_Meter_Colours~)
 		Line 290, 239 - Counter, 299, 239 - Counter, Permenant_Time_Meter_Colour(Colour_)
 	Next Counter
@@ -2204,7 +2204,7 @@ Statement Play_Game{}
 					Fade_In_Music{}
 				End If
 			End If
-			##[$80BB]
+			Repeat
 				Drop_Ball{}
 				Update_Balls{}
 				Check_Columns{}
@@ -2249,7 +2249,7 @@ Statement Play_Game{}
 					SetMedMask %0011
 					Sound #Ten_Second_Warning, %0100
 				End If
-			##[$80BC] (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
+			Until (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
 			If Balls_Left = 0
 				Score = Score + Seconds_Timer
 				Copy_Used_Bitmap_To_Current_Bitmap{}
@@ -2274,7 +2274,7 @@ Statement Play_Game{}
 					Fade_In_Music{}
 				End If
 			End If
-			##[$80BB]
+			Repeat
 				Update_Balls{}
 				If Column_Checking
 					Check_Columns{}
@@ -2308,7 +2308,7 @@ Statement Play_Game{}
 					SetMedMask %0011
 					Sound #Ten_Second_Warning, %0100
 				End If
-			##[$80BC] (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
+			Until (Finish_Level) OR (Balls_Left = 0) OR (Seconds_Timer <= -1)
 			If Balls_Left = 0
 				Score = Score + Seconds_Timer
 				Copy_Used_Bitmap_To_Current_Bitmap{}

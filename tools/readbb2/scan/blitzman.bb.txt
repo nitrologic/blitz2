@@ -69,7 +69,7 @@ MaxLen fi$=64	;set filename string variable for filerequester
 ratio=.5	;hires noninterlace pixel ratio
 
 For i=0 To 255
-	qsin(i)=HSin(i*##[$80BA]/128)*ratio:qcos(i)=HCos(i*##[$80BA]/128)
+	qsin(i)=HSin(i*Pi/128)*ratio:qcos(i)=HCos(i*Pi/128)
 Next
 
 allocst 0,10,"IF I WERE A BLITZMAN"
@@ -89,7 +89,7 @@ localstat 1,16,14,256,128,$1000,"",1,2:arrmult 0		 ;edit window
 
 SetInt 5:PlayMed:End SetInt
 
-##[$80BB]
+Repeat
 	ev.l=WaitEvent
 	Select ev
 		Case 8
@@ -101,13 +101,13 @@ SetInt 5:PlayMed:End SetInt
 			If MenuHit=0 AND ItemHit=1 Then StartMedModule 0
 			If MenuHit=0 AND ItemHit=2 Then End
 	End Select
-##[$80C7]
+Forever
 
 .selectframe		;points *myman to existing or new frame
 	gman=GadgetHit
-	gadgetx=300+(gman ##[$80B9] 5)*64:gadgety=6+Int(gman/5)*32
+	gadgetx=300+(gman MOD 5)*64:gadgety=6+Int(gman/5)*32
 	If *f(gman)=0
-		globalloc segs():*f(gman)=segs():##[$80C8] mandata:readfigure{*f(gman)}
+		globalloc segs():*f(gman)=segs():Restore mandata:readfigure{*f(gman)}
 	EndIf
 	*myman=*f(gman)
 	Gosub refreshgman

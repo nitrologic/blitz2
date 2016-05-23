@@ -55,13 +55,13 @@ Statement PlaceBombs{ *bombptr.gameVars}
 		\totalBombs = \totalSquares * \percentageBombs / 100
 ; Place the bombs
 		i = 0
-		##[$80BB]
+		Repeat
 				rndnum = !Random{ 1, \totalSquares+1}
 				If \square[rndnum]\hasBomb=0
 						\square[rndnum]\hasBomb = \bombs\typenr
 						i=i+1
 				End If
-		##[$80BC] i=\totalBombs
+		Until i=\totalBombs
 End Statement	; PlaceBombs
 
 ; =======================================
@@ -74,7 +74,7 @@ Function.b CheckTopLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckTopLeft
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1) AND (num>\wide)
+		If (num MOD \wide<>1) AND (num>\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num-1-\wide]\hasBomb<0 Then Function Return 1
@@ -116,7 +116,7 @@ Function.b CheckTopRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckTopRight
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0) AND (num>\wide)
+		If (num MOD \wide<>0) AND (num>\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num+1-\wide]\hasBomb<0 Then Function Return 1
@@ -137,7 +137,7 @@ Function CheckLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckLeft
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1)
+		If (num MOD \wide<>1)
 				Select mode
 					Case #peekBomb
 						If \square[num-1]\hasBomb<0 Then Function Return 1
@@ -158,7 +158,7 @@ Function CheckRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckRight
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0)
+		If (num MOD \wide<>0)
 				Select mode
 					Case #peekBomb
 						If \square[num+1]\hasBomb<0 Then Function Return 1
@@ -179,7 +179,7 @@ Function CheckBottomLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckBottomLeft
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>1) AND (num<=\totalSquares-\wide)
+		If (num MOD \wide<>1) AND (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num-1+\wide]\hasBomb<0 Then Function Return 1
@@ -221,7 +221,7 @@ Function CheckBottomRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 the function returns -1 no matter what the "mode" was
 .CheckBottomRight
 ##[$80CA] *bombptr
-		If (num ##[$80B9] \wide<>0) AND (num<\totalSquares-\wide)
+		If (num MOD \wide<>0) AND (num<\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
 						If \square[num+1+\wide]\hasBomb<0 Then Function Return 1

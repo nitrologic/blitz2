@@ -45,15 +45,15 @@ End
 .ScanPage
 
 .firstline
-	y=0:##[$80BB]:y+1:##[$80BC] Cls(0,y)<>0
+	y=0:Repeat:y+1:Until Cls(0,y)<>0
 	bw=1:
 
 .getshapes
-	x=0:yy=y:h=1:##[$80BB]:y+1:h+1:##[$80BC] Cls(x,y)=0
+	x=0:yy=y:h=1:Repeat:y+1:h+1:Until Cls(x,y)=0
 
 .hscan
-	xx=x:w=0:##[$80BB]:x+1:w+1:##[$80BC] Cls(x,yy)=0
-	##[$80BB]:x+1:##[$80BC] Cls(x,yy)<>0 OR x>319
+	xx=x:w=0:Repeat:x+1:w+1:Until Cls(x,yy)=0
+	Repeat:x+1:Until Cls(x,yy)<>0 OR x>319
 
 .grabem
 	ww=Int(w/(bw*8))
@@ -65,7 +65,7 @@ End
 	If x<320 Then Goto hscan
 
 .getgap:
-	h=1:##[$80BB]:y+1:h+1:##[$80BC] Cls(0,y)<>0 OR y>256
+	h=1:Repeat:y+1:h+1:Until Cls(0,y)<>0 OR y>256
 	If h>15 Then bw+1;:Line 0,y,319,y,1
 	If h>7 Then bw+1;:Line 0,y,319,y,1
 	If y<256 Then Goto getshapes

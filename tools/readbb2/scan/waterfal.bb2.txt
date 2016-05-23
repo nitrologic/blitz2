@@ -25,9 +25,9 @@ MouseWait
 Show 1													;Show Waterfall FX picture
 VWait 50
 
-*source.bitmap=##[$80B8] lmaxlen(0)
+*source.bitmap=Addr lmaxlen(0)
 saddr.l=*source\_data[0]				;Find Bitmap Addresses
-*dest.bitmap=##[$80B8] lmaxlen(1)
+*dest.bitmap=Addr lmaxlen(1)
 daddr.l=*dest\_data[0]
 
 bwidth.w=*source\_ebwidth			 ;Get Bitmap width in bytes
@@ -78,8 +78,8 @@ copy: MOVE.l a2,a0							;Next source line
 
 ;Place some debug data in a varaible from a register
 
-##[$80BD] a2,e.l
-##[$80BD] d1,f.l
+PutReg a2,e.l
+PutReg d1,f.l
 
 ;Wait for mouse click to exit and print debug info
 

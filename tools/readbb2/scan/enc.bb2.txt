@@ -147,9 +147,9 @@ EndIf
 Return
 
 .dodb				 ;do double buffering
-##[$80BB]
+Repeat
 	VWait
-##[$80BC] fc>=2
+Until fc>=2
 If fc>2 Then Green 0,15,15,0
 fc=0:ShowB db,144,0:db=1-db:UnQueue db:Use lmaxlen db
 Return

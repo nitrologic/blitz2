@@ -10,8 +10,8 @@ Dim sh.w(512)
 Print "HELLO"
 
 Statement mygetashape{n,x0,y0,x1,y1}
-	If x0>x1 Then ##[$80C9] x0,x1
-	If y0>y1 Then ##[$80C9] y0,y1
+	If x0>x1 Then Exchange x0,x1
+	If y0>y1 Then Exchange y0,y1
 	GetaShape n,x0,y0,x1-x0+1,y1-y0+1
 	Handle n,191-x0,97-y0
 End Statement
@@ -84,7 +84,7 @@ Goto main
 	Return
 
 .setuppalette
-	DecodePalette 0,256:##[$80C8] cols
+	DecodePalette 0,256:Restore cols
 	For i=0 To 6
 		Read r,g,b:StopCycle 0,i,r,g,b:StopCycle 0,128+i,r,g,b
 	Next
@@ -170,7 +170,7 @@ End NEWTYPE
 	Gosub setup3d
 	Gosub drawframe
 	;
-	##[$80BB]
+	Repeat
 		CreateDisplay db
 		VWait
 		be=##[$BA92]
@@ -185,24 +185,24 @@ End NEWTYPE
 			If ##[$BA8F]=50 Then Gosub formatshape
 		EndIf
 		Gosub draw3d
-	##[$80BC] RawStatus($45)			;Joyb(0)<>0
+	Until RawStatus($45)			;Joyb(0)<>0
 	;
 	End
 
 
 rotatex:
 	newmem v():##[$80CA] v()
-	While globfree(v()):##[$80C9] \y,\z:\z=-\z:Wend
+	While globfree(v()):Exchange \y,\z:\z=-\z:Wend
 	Gosub drawframe:Return
 
 rotatey:
 	newmem v():##[$80CA] v()
-	While globfree(v()):##[$80C9] \x,\z:\x=-\x:Wend
+	While globfree(v()):Exchange \x,\z:\x=-\x:Wend
 	Gosub drawframe:Return
 
 rotatez:
 	newmem v():##[$80CA] v()
-	While globfree(v()):##[$80C9] \x,\y:\y=-\y:Wend
+	While globfree(v()):Exchange \x,\y:\y=-\y:Wend
 	Gosub drawframe:Return
 
 ;Macro p 191+(`1-`3)*10,98+(`1+`3-`2-`2)*3:End Macro
@@ -237,7 +237,7 @@ retry:
 	newmem v():##[$80CA] v()
 	While globfree(v())
 		If \x=vx AND \y=vy AND \z=vz
-			freelast v():##[$80BE] While:Gosub drawframe:Return
+			freelast v():Pop While:Gosub drawframe:Return
 		EndIf
 	Wend
 	If globalloc(v())
@@ -530,7 +530,7 @@ makeshape:
 			scalar {&vec3,&vec1,&vec2}
 			minus{&vec1.vert,&vert(\a),&cent}
 			If mydot{&vec3,&vec1}>0
-				##[$80C9] \b,\c
+				Exchange \b,\c
 			EndIf
 
 			sh(n+0)=3
