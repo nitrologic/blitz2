@@ -59,7 +59,7 @@ Return
 
 .Loadroutine:
 AMIGA
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 LoadBitMap 0,drive$+"graphics/EditorScreen",0
 LoadShapes 0,drive$+"graphics/blokken216"
 LoadShape 120,drive$+"graphics/Cursor.Iff"
@@ -82,24 +82,24 @@ Return
 
 .BlitIt:
 VWait
-If lvl<9 Then longdiv 121,124,4 : longdiv 122+lvl,132,4
-If lvl>8 Then If lvl<19 Then longdiv 122,124,4 : longdiv 112+lvl,132,4
-If lvl>18 Then If lvl<29 Then longdiv 123,124,4 : longdiv 102+lvl,132,4
-If lvl>28 Then If lvl<39 Then longdiv 124,124,4 : longdiv 92+lvl,132,4
-If score= 5 Then longdiv 121,278,89 : longdiv 126,285,89
-If score=10 Then longdiv 122,278,89 : longdiv 121,285,89
-If score=15 Then longdiv 122,278,89 : longdiv 126,285,89
-If score=20 Then longdiv 123,278,89 : longdiv 121,285,89
-If score=25 Then longdiv 123,278,89 : longdiv 126,285,89
-If score=30 Then longdiv 124,278,89 : longdiv 121,285,89
+If lvl<9 Then Blit 121,124,4 : Blit 122+lvl,132,4
+If lvl>8 Then If lvl<19 Then Blit 122,124,4 : Blit 112+lvl,132,4
+If lvl>18 Then If lvl<29 Then Blit 123,124,4 : Blit 102+lvl,132,4
+If lvl>28 Then If lvl<39 Then Blit 124,124,4 : Blit 92+lvl,132,4
+If score= 5 Then Blit 121,278,89 : Blit 126,285,89
+If score=10 Then Blit 122,278,89 : Blit 121,285,89
+If score=15 Then Blit 122,278,89 : Blit 126,285,89
+If score=20 Then Blit 123,278,89 : Blit 121,285,89
+If score=25 Then Blit 123,278,89 : Blit 126,285,89
+If score=30 Then Blit 124,278,89 : Blit 121,285,89
 UnBuffer 0
 If btext=1 Then BBlit 0,160,45,200
 If btext=2 Then BBlit 0,161,50,202
 If btext=3 Then BBlit 0,162,15,202
-longdiv 131,195,4
-longdiv min1,180,4 : longdiv min2,188,4
-longdiv sec1,202,4 : longdiv sec2,210,4
-longdiv 121+lvbnk,72,4 : longdiv 121,64,4
+Blit 131,195,4
+Blit min1,180,4 : Blit min2,188,4
+Blit sec1,202,4 : Blit sec2,210,4
+Blit 121+lvbnk,72,4 : Blit 121,64,4
 Return
 
 
@@ -256,27 +256,27 @@ Return
 If delete
 	If level(lvl,x,y)\lr=1
 		If x AND 1
-			longdiv bckgrnd+1,x ASL 3+50,y ASL 3+67
-			longdiv bckgrnd,x ASL 3+58,y ASL 3+67
+			Blit bckgrnd+1,x ASL 3+50,y ASL 3+67
+			Blit bckgrnd,x ASL 3+58,y ASL 3+67
 		Else
-			longdiv bckgrnd,x ASL 3+50,y ASL 3+67
-			longdiv bckgrnd+1,x ASL 3+58,y ASL 3+67
+			Blit bckgrnd,x ASL 3+50,y ASL 3+67
+			Blit bckgrnd+1,x ASL 3+58,y ASL 3+67
 		EndIf
 	EndIf
 Else
 	If level(lvl,x,y)\lr=0
 		If level(lvl,x+1,y)\lr=0
 			If extrablock=0
-				longdiv drawblock,x ASL 3+50,y ASL 3+67
+				Blit drawblock,x ASL 3+50,y ASL 3+67
 			EndIf
 		EndIf
 	Else
 		If level(lvl,x,y)\lr=1 Then If level(lvl,x,y)\blocknr<>64
 			If info(lvl)\extra<maxextras
-				longdiv drawblock,x ASL 3+50,y ASL 3+67
+				Blit drawblock,x ASL 3+50,y ASL 3+67
 			Else
 				If extrablock=0
-					longdiv drawblock,x ASL 3+50,y ASL 3+67
+					Blit drawblock,x ASL 3+50,y ASL 3+67
 				EndIf
 			EndIf
 		EndIf
@@ -329,8 +329,8 @@ Return
 
 .ShowBlock
 If delete
-	longdiv bckgrnd,296,73 : longdiv bckgrnd+1,304,73
-Else longdiv drawblock,296,73
+	Blit bckgrnd,296,73 : Blit bckgrnd+1,304,73
+Else Blit drawblock,296,73
 EndIf
 Return
 
@@ -346,8 +346,8 @@ bckgrnd=info(lvl)\blocknr
 If bckgrnd=0 Then info(lvl)\blocknr=65 : bckgrnd=65
 For yz=19 To 240 Step 8
 	For xz=2 To 210 Step 16
-		longdiv bckgrnd,xz,yz
-		longdiv bckgrnd+1,xz+8,yz
+		Blit bckgrnd,xz,yz
+		Blit bckgrnd+1,xz+8,yz
 	Next xz
 Next yz
 Return
@@ -358,10 +358,10 @@ xz=0 : yz=0
 For yzs=67 To 187 Step 8
 	For xzs=50 To 170 Step 8
 		If level(lvl,xz,yz)\lr=1
-			longdiv level(lvl,xz,yz)\blocknr,xzs,yzs
+			Blit level(lvl,xz,yz)\blocknr,xzs,yzs
 			If extras
 				If level(lvl,xz,yz)\extra>0
-					longdiv level(lvl,xz,yz)\extra,xzs,yzs
+					Blit level(lvl,xz,yz)\extra,xzs,yzs
 				EndIf
 			EndIf
 			xzs+8:xz+1
@@ -446,67 +446,67 @@ Data 37,38,39,40,41,42,43,44,45,46,47,48,49,50,51
 Restore blockdata
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,108
+	Blit bl,xw ASL 4+232,108
 	BlockMap(xw,0)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,116
+	Blit bl,xw ASL 4+232,116
 	BlockMap(xw,1)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,124
+	Blit bl,xw ASL 4+232,124
 	BlockMap(xw,2)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,132
+	Blit bl,xw ASL 4+232,132
 	BlockMap(xw,3)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,140
+	Blit bl,xw ASL 4+232,140
 	BlockMap(xw,4)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,148
+	Blit bl,xw ASL 4+232,148
 	BlockMap(xw,5)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,156
+	Blit bl,xw ASL 4+232,156
 	BlockMap(xw,6)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4 +232,164
+	Blit bl,xw ASL 4 +232,164
 	BlockMap(xw,7)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,172
+	Blit bl,xw ASL 4+232,172
 	BlockMap(xw,8)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,180
+	Blit bl,xw ASL 4+232,180
 	BlockMap(xw,9)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,188
+	Blit bl,xw ASL 4+232,188
 	BlockMap(xw,10)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,196
+	Blit bl,xw ASL 4+232,196
 	BlockMap(xw,11)=bl
 Next xw
 For xw=0 To 4
 	Read bl
-	longdiv bl,xw ASL 4+232,204
+	Blit bl,xw ASL 4+232,204
 	BlockMap(xw,12)=bl
 Next xw
 Return

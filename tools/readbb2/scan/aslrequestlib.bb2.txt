@@ -123,7 +123,7 @@ Shared ASLFR_Tags.ASLFR_Tags,*ASLFR_Fr.FileRequester
 		ASLFR_Tags\g=#ASL_Pattern						; Pattern to search for
 		ASLFR_Tags\h=&Pattern$
 		ASLFR_Tags\i=#ASL_Window						 ; Pointer to a window structure on whose screen
-		ASLFR_Tags\j=Peek.l(Addr localstat(Win))	; we shall open.
+		ASLFR_Tags\j=Peek.l(Addr Window(Win))	; we shall open.
 
 		ASLFR_Tags\k=0											 ; Thats all folks!
 

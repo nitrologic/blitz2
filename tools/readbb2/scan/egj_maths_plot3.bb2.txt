@@ -9,11 +9,11 @@
 ;would result. I don't know this - I'm just guessing.
 WBStartup
 ##[$ED11] 3					;change to 1 to switch fpu off
-lmaxlen 0,320,256,5
-allocst 0,0,0,320,256,5,0,"",1,2,0
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
 Green 0,0,0,0:For i=16 To 31:Green i,i-16,i-16,i-16:Next
 k.l+4
-ShowScreen 0:Use lmaxlen 0:BlockScroll 0
+ShowScreen 0:Use BitMap 0:BlockScroll 0
 k=-2
 For ib=0 To 1:For ia=0 To 2
 	k+2

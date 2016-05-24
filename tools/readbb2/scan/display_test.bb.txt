@@ -48,7 +48,7 @@
 	Return
 
 .setupui:
-	allocst 0,0,0,640,256,2,-32768,"TEST",0,1
+	Screen 0,0,0,640,256,2,-32768,"TEST",0,1
 	GTText #w0,#msg,74,137,280,16,"MESSAGE:",1,""
 	GTText #w0,#flag,74,119,280,16,"FLAGS:",1,""
 	GTButton #w0,#exit,238,156,112,18,"EXIT",16
@@ -64,11 +64,11 @@
 	GTCheckBox #w0,#dp,5,59,26,11,"DUAL PLAYFIELD",2
 	GTCheckBox #w0,#smooth,6,45,26,11,"SMOOTH SCROLL",2
 	GTMX #w0,#res,186,45,113,28,"",2,"	LO-RES	 |	HI-RES	 |SUPER-HIRES"
-	localstat #w0,111,15,369,188,$1000,"DISPLAY DEMO",1,2
+	Window #w0,111,15,369,188,$1000,"DISPLAY DEMO",1,2
 	Return
 
 .doabout
-	localstat 1,111,15,369,188,$1008,"ABOUT DISPLAY DEMO",1,2
+	Window 1,111,15,369,188,$1008,"ABOUT DISPLAY DEMO",1,2
 	WindowOutput 1
 	NPrint ""
 	NPrint "*				BLITZ 2 DISPLAY DEMO v0.1					*"
@@ -117,7 +117,7 @@
 	EndIf
 	;
 	bwidth=width:bheight=height:If smooth Then bwidth*2:bheight*2
-	lmaxlen 0,bwidth,bheight,bp
+	BitMap 0,bwidth,bheight,bp
 	For i=0 To 100:Line Rnd(bwidth),Rnd(bheight),Rnd(cols):Next
 	Circlef 7,7,7,-1:GetaShape 0,0,0,16,16
 	;
@@ -134,7 +134,7 @@
 	CreateDisplay 0:DisplayBitMap 0,0
 	;
 	nf.l=0:nb.l=0
-	While Joyb(0)=0:longdiv 0,0,0:nb+1:Wend
+	While Joyb(0)=0:Blit 0,0,0:nb+1:Wend
 	ClrInt 5
 	VWait 20
 	AMIGA

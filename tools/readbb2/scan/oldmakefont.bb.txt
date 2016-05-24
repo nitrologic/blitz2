@@ -20,8 +20,8 @@ End Function
 .dofont:
 	Dim a.w(85)
 
-	casestrcomp 0,"cars.iff"
-	allocst 0,4
+	LoadPalette 0,"cars.iff"
+	Screen 0,4
 	FadePalette 0
 	ScreensBitMap 0,0
 	LoadShapes 0,"font3.shapes"
@@ -29,12 +29,12 @@ End Function
 
 	InitBank 0,65536,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 	For i=0 To 85:a(i)=ShapeWidth(i):Next
 
 	For i=0 To 42
-		longdiv i,x,y+16-ShapeHeight(i)
+		Blit i,x,y+16-ShapeHeight(i)
 
 		For yy=y To y+15:For xx=x To x+15
 			If Cls(xx,yy)=11 Then Point xx,yy,12-((yy-y)+((xx+yy) AND 1)*3)/5
@@ -44,7 +44,7 @@ End Function
 	Next
 
 	For i=43 To 85
-		longdiv i,x,y+8-ShapeHeight(i)
+		Blit i,x,y+8-ShapeHeight(i)
 
 		For yy=y To y+7:For xx=x To x+7
 			If Cls(xx,yy)=11 Then Point xx,yy,12-((yy-y)+((xx+yy) AND 1))/3
@@ -91,10 +91,10 @@ pickfont:
 
 	LoadBitMap 0,"font.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	LoadBitMap 0,"font.iff"
 	Gosub getfont							;3 colours
 	ReMap 1,8
@@ -152,14 +152,14 @@ pickfont:
 
 
 .getrails:
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0
 	LoadBitMap 0,"rails.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 
 	yy=3

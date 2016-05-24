@@ -2,7 +2,7 @@
 
 a$="porsche"
 
-lmaxlen 0,640,320,2
+BitMap 0,640,320,2
 For i=1 To 4
 	LoadBitMap 0,"w2:cars/blank/"+a$+Str$(i)+".4"
 	y=0:x=0

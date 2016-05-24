@@ -16,7 +16,7 @@ Dim s(1000)
 
 LoadShape 0,Par$(1),0
 
-allocst 0,3:Use SetCycle 0
+Screen 0,3:Use SetCycle 0
 ScreensBitMap 0,0:BlockScroll
 
 pw=4:ph=2
@@ -29,11 +29,11 @@ h=ShapeHeight(0):h2=h/2
 If w<17
 	xen=15
 	dsh.l=(16-ShapeWidth(0))LSR 1
-	longdiv 0,dsh,0:BitMapOutput 0
+	Blit 0,dsh,0:BitMapOutput 0
 	w2=7.5
 Else
 	xen=ShapeWidth(0)-1
-	longdiv 0,0,0
+	Blit 0,0,0
 	w2=w/2
 EndIf
 

@@ -16,7 +16,7 @@ INCDIR "blitz2:include/"
 XInclude "devices.bb"
 XInclude "dos.bb" ;There's only two things I need from this file grrrrr
 
-##[$80CC]:WBStartup:freest 0
+NoCli:WBStartup:WbToScreen 0
 If ExecVersion<36 Then End ;Should put up a requester...
 
 MaxLen pa$=200:MaxLen fi$=200
@@ -90,11 +90,11 @@ MyDiskBuffer.l=##[$FE97](#TRACK_SIZE*160,#MEMF_PUBLIC|#MEMF_CLEAR)
 If MyDiskBuffer=0 Then Goto BailOut3
 
 SetString 2,1
-workstart 1,10,80,0,1,"Start the rip..."
-workstart 1,170,80,0,2,"QUIT"
-workstart 1,235,80,0,3,"Stop ripping!!!"
+TextGadget 1,10,80,0,1,"Start the rip..."
+TextGadget 1,170,80,0,2,"QUIT"
+TextGadget 1,235,80,0,3,"Stop ripping!!!"
 
-localstat 0,30,30,380,100,$1006,"Module Ripper 1.0",2,1,1
+Window 0,30,30,380,100,$1006,"Module Ripper 1.0",2,1,1
 SetString 1,2:ResetString 205,21,150,8
 WLocate 10,10:Print "Disk buffer located at:"
 ResetString 205,40,150,8
@@ -155,9 +155,9 @@ Repeat
 ;way to say that this IS a module.
 					ModAddr.l=MemPointer-1080
 					SetString 2,1
-					workstart 2,10,65,0,1," Save Module "
-					workstart 2,150,65,0,2," Continue "
-					localstat 1,30,130,380,90,$1006,"Found Something!!!",2,1,2
+					TextGadget 2,10,65,0,1," Save Module "
+					TextGadget 2,150,65,0,2," Continue "
+					Window 1,30,130,380,90,$1006,"Found Something!!!",2,1,2
 					WLocate 10,10:Print "Possible module located at $",Hex$(ModAddr)
 					WLocate 10,20:Print "Module name: ":Print Peek$(ModAddr)
 					WLocate 10,30:Print "No. of patterns: ":Print Peek.b(ModAddr+950)
@@ -192,8 +192,8 @@ Repeat
 							CloseFile 1
 						EndIf
 					EndIf
-					Free localstat 1:Free GadgetJam 2
-					Use localstat 0:Activate 0
+					Free Window 1:Free GadgetJam 2
+					Use Window 0:Activate 0
 				End If
 			Next
 		Case 2 ;Quit

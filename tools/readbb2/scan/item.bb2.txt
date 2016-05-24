@@ -5,14 +5,14 @@ Dim List a(100)
 
 ##[$C00F] a(),0
 
-newmem a()
+ResetList a()
 
-globalloc a():a()=10
-globalloc a():a()=20
-globalloc a():a()=30
+AddItem a():a()=10
+AddItem a():a()=20
+AddItem a():a()=30
 
-newmem a()
-While globfree(a())
+ResetList a()
+While NextItem(a())
 	NPrint a()
 Wend
 

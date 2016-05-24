@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/bspread/bspread.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/bspread/bspread.bb2
 #test=0
 ;
-WBStartup:##[$80CC]:##[$80CB]
+WBStartup:NoCli:CloseEd
 ;
 ;Blitz Spread
 ;
@@ -147,12 +147,12 @@ Function Return Cvi(Inkey$(2))
 End Function
 
 MenuChecked 2
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"LOAD			 ","L"
 MenuItem 0,0,0,1,"SAVE","S"
 MenuItem 0,0,0,2,"QUIT","Q"
 ;
-newlocarr 0,1,"EDIT"
+MenuTitle 0,1,"EDIT"
 MenuItem 0,0,1,0,"INSERT ROW					","I"
 MenuItem 0,0,1,1,"INSERT COLUMN","C"
 MenuItem 0,0,1,2,"DELETE ROW","D"
@@ -160,18 +160,18 @@ MenuItem 0,0,1,3,"DELETE COLUMN","K"
 MenuItem 0,0,1,4,"DUPLICATE RIGHT","R"
 MenuItem 0,0,1,5,"DUPLICATE DOWN","Z"
 ;
-newlocarr 0,2,"CALCULATE"
+MenuTitle 0,2,"CALCULATE"
 MenuItem 0,0,2,0,"ALL		 ","A"
 MenuItem 0,0,2,1,"ROW"
 MenuItem 0,0,2,2,"COLUMN"
 
-workstart 0,8,84,0,1," OK "
-workstart 0,240,84,0,2," CANCEL "
+TextGadget 0,8,84,0,1," OK "
+TextGadget 0,240,84,0,2," CANCEL "
 
-allocst 0,0,0,640,#shite,2,$8000,"Blitz Spread",1,2
+Screen 0,0,0,640,#shite,2,$8000,"Blitz Spread",1,2
 Green 0,6,6,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,15,15,0
-localstat 0,0,12,640,#shite-12,$1900,"",0,1
-CatchDosErrs:arrmult 0
+Window 0,0,12,640,#shite-12,$1900,"",0,1
+CatchDosErrs:SetMenu 0
 
 ScreensBitMap 0,0
 MaxLen pa$=192:pa$="examples"
@@ -366,7 +366,7 @@ Return
 .dupcell	;xa=x add, ya=y add
 ;
 If cells(x+xo,y+yo)\rflags
-	localstat 1,160,50,320,100,$1000,"",1,2,0
+	Window 1,160,50,320,100,$1000,"",1,2,0
 	WLocate 8,40:Print "How Many Times:"
 	eat=0:z=1
 	eloop:EditFrom eat
@@ -379,7 +379,7 @@ If cells(x+xo,y+yo)\rflags
 		gh=GadgetHit
 	Else gh=1 ;OK
 	EndIf
-	Free localstat 1:Use localstat 0
+	Free Window 1:Use Window 0
 	If gh=1 AND z>0
 		k=x+xo:j=y+yo
 		For b=1 To z

@@ -5,9 +5,9 @@ If NumPars<>4
 	End
 EndIf
 
-allocst 0,5
+Screen 0,5
 
-casestrcomp 0,Par$(1):Use SetCycle 0
+LoadPalette 0,Par$(1):Use SetCycle 0
 
 If ReadMem(0,Par$(2))
 	FileOutput 0

@@ -21,7 +21,7 @@ n=0:v$="blitz2:help/"
 lock.l=##[$FE0A](&v$,-2)
 If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
 	While ##[$FE0E](lock,myfib)<>0			;skip through files
-		##[$80CA] myfib
+		USEPATH myfib
 		If \fib_DirEntryType=-3
 			f$=Peek$(&\fib_FileName)
 			lib=Val(Mid$(f$,4)):com=1

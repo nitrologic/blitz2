@@ -53,7 +53,7 @@ End
 .initwindow
 	StringGadget 0,54,86,0,0,12,88
 	StringGadget 0,200,86,0,1,12,88
-	localstat 0,64,64,320,114,$140e,"Blitz 2 Biorhythm Mapper",1,2,0
+	Window 0,64,64,320,114,$140e,"Blitz 2 Biorhythm Mapper",1,2,0
 	WindowOutput 0
 	WLocate 24,74:Print "-PHYSICAL"
 	WLocate 124,74:Print "-EMOTIONAL"

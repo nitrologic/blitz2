@@ -17,7 +17,7 @@ Statement TheSettings{ *bombptr.gameVars, *biptr.OSInput}
 Shared theArrow.selectarrowtype()
 ; Opens a screen and window for selecting game options
 .TheSettings
-##[$80CA] *bombptr
+USEPATH *bombptr
 
 ; Initialize
 		For i.b=0 To 9
@@ -30,9 +30,9 @@ Shared theArrow.selectarrowtype()
 				theArrow(i)\state = 0
 		Next i
 
-		allocst 2, 2, "BOMBS GAME SETTINGS"
+		Screen 2, 2, "BOMBS GAME SETTINGS"
 		DefaultIDCMP $8| $200
-		localstat 2, 0, 10, 320, DispHeight-10, $8| $1000, "SETTINGS", 0, 1
+		Window 2, 0, 10, 320, DispHeight-10, $8| $1000, "SETTINGS", 0, 1
 		WJam 1
 		FlushEvents
 
@@ -47,7 +47,7 @@ Shared theArrow.selectarrowtype()
 		WColour 1
 
 		For i=0 To 9
-##[$80CA] theArrow(i)
+USEPATH theArrow(i)
 				If i MOD 2=0
 						WBlit 22, \xpos,\ypos
 				Else
@@ -83,15 +83,15 @@ Shared theArrow.selectarrowtype()
 		Until NOT keep
 
 ; Get out of here
-		Free localstat 2
-		Free allocst 2
+		Free Window 2
+		Free Screen 2
 		Statement Return
 
 
 .HandleArrows
 ; Reset all arrows to state 0
 		For i=0 To 9
-##[$80CA] theArrow(i)
+USEPATH theArrow(i)
 				\state = 0
 ; Check for an arrow being hit
 				If (*biptr\iMouseX>=\xpos) AND (*biptr\iMouseX<\xpos+10)
@@ -111,7 +111,7 @@ Shared theArrow.selectarrowtype()
 
 .ChangeSettings
 ; Do the useful bit here
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select arrowHit
 			Case 0
 				\wide = \wide-1
@@ -151,7 +151,7 @@ Shared theArrow.selectarrowtype()
 ; No need to call them one at a time (unless you want to get confused)
 
 .DrawArrows
-##[$80CA] theArrow(arrowHit)
+USEPATH theArrow(arrowHit)
 		\state = 0
 		WBox \xpos,\ypos, \xpos+9,\ypos+9, 0
 		If arrowHit MOD 2=0
@@ -159,7 +159,7 @@ Shared theArrow.selectarrowtype()
 		Else
 				WBlit 27, \xpos,\ypos
 		End If
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Gosub MinWidth
 		Gosub MaxWidth
 		Gosub MinHeight

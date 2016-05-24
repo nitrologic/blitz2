@@ -14,7 +14,7 @@
 
 AutoCookie On
 
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 LoadBitMap 0,"Background1.iff",0
 
 LoadShapes 0,"cowboy.shps"
@@ -31,8 +31,8 @@ LoadSound 1,"ouch1.sfx"
 VWait 50
 BLITZ
 
-lmaxlen 1,320,256,4
-lmaxlen 2,320,256,4
+BitMap 1,320,256,4
+BitMap 2,320,256,4
 ShapesBitMap 0,1
 ShapesBitMap 0,2
 Buffer 0,16384
@@ -100,7 +100,7 @@ Statement playhit{n}
 		VWait 3
 		Show db
 		db = 1 -db
-		Use lmaxlen db
+		Use BitMap db
 		UnBuffer db
 		BBlit db,x,xx,yy
 		BBlit db,p1sh,x1,y1
@@ -185,7 +185,7 @@ Statement startscreen{}
 		Show db
 		db=1-db
 		UnBuffer db
-		Use lmaxlen db
+		Use BitMap db
 		BBlit db,23,sx,sy
 		BBlit db,22,22,by
 		If Joyb(0) = 1 Then End
@@ -217,7 +217,7 @@ done = 0
 		VWait
 		Show db
 		db = 1 -db
-		Use lmaxlen db
+		Use BitMap db
 		BitMapOutput db
 		UnBuffer db
 		BBlit db,p1sh,x1,y1

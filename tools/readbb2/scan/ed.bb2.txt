@@ -130,7 +130,7 @@ DEFTYPE.part *cpa,*pa
 DEFTYPE.object ob,*ob
 
 Statement wtofront{wn}
-##[$FFB0] Peek.l(Addr localstat(wn))
+##[$FFB0] Peek.l(Addr Window(wn))
 End Statement
 
 Macro mspc
@@ -145,7 +145,7 @@ End Macro
 MenuGap 1,1
 ;
 l$="":For k=1 To 12:l$+Chr$(173):Next
-newlocarr 0,0,"	PROJECT	"
+MenuTitle 0,0,"	PROJECT	"
 MenuItem 0,0,0,0,"	NEW"
 MenuItem 0,0,0,1,"	LOAD"
 MenuItem 0,0,0,2,"	SAVE"
@@ -157,7 +157,7 @@ MenuItem 0,0,0,6,"	QUIT"
 l$="":For k=1 To 29:l$+Chr$(173):Next
 s$="":For k=1 To 28:s$+Chr$(173):Next
 
-newlocarr 0,1,"	WINDOWS	"
+MenuTitle 0,1,"	WINDOWS	"
 MenuItem 0,0,1,0,"	NEW WINDOW							N"
 MenuItem 0,0,1,1,"	NEW WINDOW DEFAULTS		 W"
 MenuItem 0,3,1,2,"	WINDOW GADGETS ON ?":wof=$49
@@ -180,7 +180,7 @@ MenuItem 0,0,1,11,"	LOAD SETUP"
 MenuItem 0,0,1,12,"	SAVE SETUP"
 
 l$="":For k=1 To 29:l$+Chr$(173):Next
-newlocarr 0,2,"	VERTICES	"
+MenuTitle 0,2,"	VERTICES	"
 MenuItem 0,0,2,0,"	SELECT PART VERTICES		P"
 MenuItem 0,0,2,1,"	SELECT ALL VERTICES		 A"
 MenuItem 0,0,2,2,"	DESELECT ALL VERTICES	 D"
@@ -200,8 +200,8 @@ MenuItem 0,0,2,5,"	CREATE...	"
 ;
 popts$="WIREFRAM| SOLID	| GOURAD |TEXTMAP "
 
-sizeofb=Addr lmaxlen(1)-Addr lmaxlen(0)
-sizeofw=Addr localstat(1)-Addr localstat(0)
+sizeofb=Addr BitMap(1)-Addr BitMap(0)
+sizeofw=Addr Window(1)-Addr Window(0)
 sizeofg=Addr GadgetJam(1)-Addr GadgetJam(0)
 ;
 StringText$ 0,0:StringText$ Off:SelectMode 3,0
@@ -210,14 +210,14 @@ LoadShape 1,"pointer0.iff":Handle 1,-8,-7
 LoadShape 2,"centre.iff":DecodeShapes 2
 ScreenPens 2,1,2,0,1,0,0
 SizeLimits #width/3,32,#width,#hite:AddIDCMP 16
-allocst 0,0,0,#width,#hite,#depth,#vmode,"Another ****ing 3D Editor",0,2
-layerinfo=Peek.l(Addr allocst(0))+224
+Screen 0,0,0,#width,#hite,#depth,#vmode,"Another ****ing 3D Editor",0,2
+layerinfo=Peek.l(Addr Screen(0))+224
 ScreensBitMap 0,0
 Green 0,2,4,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,15,12,0
 Green 4,8,8,8:Green 5,4,4,4:Green 6,8,6,0:Green 7,10,10,10
 Green 17,15,15,15:Green 18,0,15,8
 
-localstat 0,0,0,#width,#hite,$0940,"Hello",1,2:WPointer 1:arrmult 0
+Window 0,0,0,#width,#hite,$0940,"Hello",1,2:WPointer 1:SetMenu 0
 w(0)\w=#width,#hite:meny=2
 
 gs=64	 ;grid size
@@ -243,7 +243,7 @@ Gosub wait_event
 If ev=-1
 	mx=SMouseX:my=SMouseY:Gosub findwindow
 Else
-	wn=EventWindow:Use localstat wn
+	wn=EventWindow:Use Window wn
 	mx=EMouseX+w(wn)\x:my=EMouseY+w(wn)\y
 EndIf
 ;
@@ -319,9 +319,9 @@ layer.l=##[$F412](layerinfo,mx,my)
 ;
 If layer
 	For wn=1 To nw
-	wadd=Peek.l(Addr localstat(wn))
+	wadd=Peek.l(Addr Window(wn))
 	If Peek.l(wadd+124)=layer
-		Use localstat wn:Pop For:Return
+		Use Window wn:Pop For:Return
 	EndIf
 	Next
 EndIf
@@ -478,9 +478,9 @@ Return
 deselvert
 ;
 ve()\s=0
-newmem sv()
-While globfree(sv())
-	If sv()\v=&ve() Then nsv-1:freelast sv()
+ResetList sv()
+While NextItem(sv())
+	If sv()\v=&ve() Then nsv-1:KillItem sv()
 Wend
 Return
 
@@ -495,11 +495,11 @@ EndIf
 Return
 
 .selectvert
-##[$80CA] ve()
+USEPATH ve()
 verr=3/w(wn)\sc
 Gosub calcvpos
-newmem ve()
-While globfree(ve())
+ResetList ve()
+While NextItem(ve())
 	If QAbs(ve()\v[dix]-vxyz\v[dix]) < verr
 		If QAbs(ve()\v[diy]-vxyz\v[diy]) < verr
 			If QAbs(ve()\v[dio]-vxyz\v[dio]) < verr
@@ -511,7 +511,7 @@ Wend
 Return
 
 .addvert
-##[$80CA] ve()
+USEPATH ve()
 Gosub calcvpos
 If AddLast(ve())
 	\x=vx,vy,vz,0
@@ -663,8 +663,8 @@ makepolygon
 If nsv>2	;at least a triangle?
 	If AddLast(po())
 		po()\c=1,0,0,nsv:k=0
-		newmem sv()
-		While globfree(sv())
+		ResetList sv()
+		While NextItem(sv())
 			k+1:po()\v[k]=sv()\v
 		Wend
 	Else
@@ -680,8 +680,8 @@ Gosub selnovertsq
 rf=-1:Goto rerenderall
 
 selnovertsq
-newmem ve()
-While globfree(ve())
+ResetList ve()
+While NextItem(ve())
 	If ve()\f=0 Then ve()\s=0
 Wend
 ClearList sv():nsv=0
@@ -703,12 +703,12 @@ subn=0
 Return
 
 .invbox
-Use lmaxlen 0:Box x,y,x+w-1,y+h-1,-1:Return
+Use BitMap 0:Box x,y,x+w-1,y+h-1,-1:Return
 
 reopenwindows
 ;
 For wn=1 To #maxw
-Free localstat wn:Free GadgetJam wn:Free lmaxlen wn
+Free Window wn:Free GadgetJam wn:Free BitMap wn
 Next
 For wn=1 To nw
 Gosub open_window
@@ -733,15 +733,15 @@ For k=1 To 4:w(wn)\gs[k]=1:Next
 ;
 open_window
 ;
-Free localstat wn:Free GadgetJam wn:Free lmaxlen wn
+Free Window wn:Free GadgetJam wn:Free BitMap wn
 ;
 w(wn)\ox=w(wn)\x,w(wn)\y,w(wn)\w,w(wn)\h
 ;
 If wof&8	;a close gadget?
-	workstart wn,22,2,0,1,"FRONT | BACK | LEFT |RIGHT | TOP	|BOTTOM"
-	workstart wn,78,2,0,2," COMMON |SEPARATE"
-	workstart wn,150,2,0,3,popts$		;polygon options
-	workstart wn,222,2,0,4,"2D|3D"	 ;persp?
+	TextGadget wn,22,2,0,1,"FRONT | BACK | LEFT |RIGHT | TOP	|BOTTOM"
+	TextGadget wn,78,2,0,2," COMMON |SEPARATE"
+	TextGadget wn,150,2,0,3,popts$		;polygon options
+	TextGadget wn,222,2,0,4,"2D|3D"	 ;persp?
 	ShapeGadget wn,-17,0,2,5,0				;enlarge
 	For k=1 To 4:##[$C621] wn,k,w(wn)\gs[k]:Next
 EndIf
@@ -764,8 +764,8 @@ If wof&1	;a sizing gadget?
 	EndIf
 EndIf
 ;
-localstat wn,w(wn)\x,w(wn)\y,w(wn)\w,w(wn)\h,wof,"",1,0,wn ;have to handle drag by hand!
-WPointer 1:arrmult 0:Activate wn:Gosub newsize
+Window wn,w(wn)\x,w(wn)\y,w(wn)\w,w(wn)\h,wof,"",1,0,wn ;have to handle drag by hand!
+WPointer 1:SetMenu 0:Activate wn:Gosub newsize
 ;
 Return
 
@@ -773,21 +773,21 @@ Return
 ;
 ;wn=window number
 ;
-Free localstat wn:Free GadgetJam wn:Free lmaxlen wn:nw-1
+Free Window wn:Free GadgetJam wn:Free BitMap wn:nw-1
 ;
 ;Okay, kludgey delete window routine...
 ;
 ##[$FE8C]
 For k=wn To nw
 ##[$FEDB] &w(k+1),&w(k),SizeOf.window
-##[$FEDB] Addr lmaxlen(k+1),Addr lmaxlen(k),sizeofb
-##[$FEDB] Addr localstat(k+1),Addr localstat(k),sizeofw
+##[$FEDB] Addr BitMap(k+1),Addr BitMap(k),sizeofb
+##[$FEDB] Addr Window(k+1),Addr Window(k),sizeofw
 ##[$FEDB] Addr GadgetJam(k+1),Addr GadgetJam(k),sizeofg
-Poke.w Peek.l(Addr localstat(k))+120,k
+Poke.w Peek.l(Addr Window(k))+120,k
 Next
-For j=0 To sizeofb-1 Step 4:Poke.l Addr lmaxlen(k)+j,0:Next
+For j=0 To sizeofb-1 Step 4:Poke.l Addr BitMap(k)+j,0:Next
 For j=0 To sizeofg-1 Step 4:Poke.l Addr GadgetJam(k)+j,0:Next
-For j=0 To sizeofw-1 Step 4:Poke.l Addr localstat(k)+j,0:Next
+For j=0 To sizeofw-1 Step 4:Poke.l Addr Window(k)+j,0:Next
 ##[$FE8D]
 ;
 Return
@@ -800,12 +800,12 @@ If w(wn)\gs[4]=2
 	bx+13:bw-14:bh-7
 EndIf
 w(wn)\bx=bx,by,bw,bh
-lmaxlen wn,w(wn)\bw,w(wn)\bh,#rdepth
+BitMap wn,w(wn)\bw,w(wn)\bh,#rdepth
 rf=-1:Gosub render
 ;
 .showrender ;wblit bitmap across!
 ;
-##[$FF61] Addr lmaxlen(wn),0,0,RastPort(wn),w(wn)\bx,w(wn)\by,w(wn)\bw,w(wn)\bh,$c0
+##[$FF61] Addr BitMap(wn),0,0,RastPort(wn),w(wn)\bx,w(wn)\by,w(wn)\bw,w(wn)\bh,$c0
 Return
 
 rerenderall
@@ -858,7 +858,7 @@ Return
 
 .render		;wn=window number, rf=render flags
 ;
-Use lmaxlen wn
+Use BitMap wn
 ;
 w=w(wn)\bw:h=w(wn)\bh
 cx=w LSR 1:cy=h LSR 1
@@ -885,7 +885,7 @@ EndIf
 ;BitMapOutput wn:Locate 0,0
 ;Print w(wn)\wp[0]," ",w(wn)\wp[1]," ",w(wn)\wp[2]
 ;
-longdiv 2,cx,cy:Return
+Blit 2,cx,cy:Return
 
 showgrid		 ;gs=grid size, sc=scale
 ;
@@ -923,9 +923,9 @@ Until y>=h
 Return
 
 showpolys
-##[$80CA] po()
-newmem po()
-While globfree(po())
+USEPATH po()
+ResetList po()
+While NextItem(po())
 	;
 	n=po()\n
 	*ve=po()\v[n]
@@ -942,9 +942,9 @@ Return
 
 showuverts	 ;show unselected vertices
 ;
-##[$80CA] ve()
-newmem ve()
-While globfree(ve())
+USEPATH ve()
+ResetList ve()
+While NextItem(ve())
 	If \s=0
 		x=!x{\v[dix]}:y=!y{\v[diy]}
 		If \f
@@ -959,9 +959,9 @@ Return
 
 showsverts	 ;show selected vertices
 ;
-##[$80CA] ve()
-newmem ve()
-While globfree(ve())
+USEPATH ve()
+ResetList ve()
+While NextItem(ve())
 	If \s
 		x=!x{\v[dix]}:y=!y{\v[diy]}
 		If \f
@@ -1020,9 +1020,9 @@ showgrid3d
 Return
 
 showpolys3d
-##[$80CA] po()
-newmem po()
-While globfree(po())
+USEPATH po()
+ResetList po()
+While NextItem(po())
 	;
 	n=po()\n
 	*ve=po()\v[n]
@@ -1078,7 +1078,7 @@ Return
 
 
 mcode
-##[$80D3]
+Runerrsoff
 
 #oldopenlibrary=-408
 #closelibrary=-414

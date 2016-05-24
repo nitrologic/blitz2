@@ -135,11 +135,11 @@ Dim qsin.q(1023),qcos(1023)	 ;look up tables
 
 me.ship\x=0,0,0,0,0,0,0
 
-lmaxlen 0,320+64,220+64,3	;doublebuffered front playfield
-lmaxlen 1,320+64,220+64,3
-lmaxlen 2,832,768,3				;background
-lmaxlen 3,320,32,3				 ;double buffered scanner
-lmaxlen 4,320,32,3
+BitMap 0,320+64,220+64,3	;doublebuffered front playfield
+BitMap 1,320+64,220+64,3
+BitMap 2,832,768,3				;background
+BitMap 3,320,32,3				 ;double buffered scanner
+BitMap 4,320,32,3
 
 If WriteMem(0,"listing")
 	FileInput 0:numl=0
@@ -163,16 +163,16 @@ LoadShapes 0,"ships.shapes"		 ;8 color
 LoadShapes 160,"bombs.shapes"		;2 color
 LoadShapes 192,"shards.shapes"	 ;4 color
 
-casestrcomp 1,"ships.iff"
+LoadPalette 1,"ships.iff"
 
 LoadBitMap 2,"moon.iff"				 ;back drop
-Use lmaxlen 2
+Use BitMap 2
 Scroll 0,0,320,512,512,0
 Scroll 0,0,832,256,0,512
-Use lmaxlen 0
+Use BitMap 0
 
-longmult 0,100
-longmult 1,100
+Queue 0,100
+Queue 1,100
 
 Gosub setuppcols
 Gosub setupsincos
@@ -191,17 +191,17 @@ sdb=3
 
 .titledisplay
 	LoopSound 7,4:Volume 4,64
-	Use lmaxlen sdb:BlockScroll:BitMapOutput sdb
-	longdiv #title,160,11
+	Use BitMap sdb:BlockScroll:BitMapOutput sdb
+	Blit #title,160,11
 	Use Slice 0:Show sdb:Use Slice 1
 	ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
-	Use lmaxlen 1-db:BlockScroll:Use lmaxlen db:BlockScroll
+	Use BitMap 1-db:BlockScroll:Use BitMap db:BlockScroll
 	cc=0:ci=0:l=0:db=0
 	Repeat
 		VWait
 		ShowF db:db=1-db:BitMapOutput db:Colour 1,0
-		Poke Addr lmaxlen(db)+4,1
-		Use lmaxlen db:Scroll 0,4,320,224,0,0,1-db:##[$FF22]
+		Poke Addr BitMap(db)+4,1
+		Use BitMap db:Scroll 0,4,320,224,0,0,1-db:##[$FF22]
 		If db=0
 			Locate 1,27:Print a$(l):l+1:If l>numl Then l=1
 		EndIf
@@ -216,7 +216,7 @@ sdb=3
 			End Select
 			ci+1:If ci=4 Then ci=0
 		EndIf
-		Poke Addr lmaxlen(db)+4,3
+		Poke Addr BitMap(db)+4,3
 		If (RawStatus($50) OR Joyx(1)=-1) Then nump=1:Gosub playgame
 		If (RawStatus($51) OR Joyx(1)=1) Then nump=2:Gosub playgame
 		If RawStatus($59) Then End
@@ -226,7 +226,7 @@ sdb=3
 	Use SetCycle 1
 	ShowF db,32,32
 	ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
-	Use lmaxlen 1-db:BlockScroll:Use lmaxlen db:BlockScroll
+	Use BitMap 1-db:BlockScroll:Use BitMap db:BlockScroll
 	player(0)\score=0,3,600,0,-1,1,0,0
 	player(1)\score=0,3,600,0,-1,23,0,0
 	If nump=1 Then player(1)\score=0,0,0,0
@@ -246,7 +246,7 @@ sdb=3
 	ShowF db,32,32
 	i=patern(*p\patern)\pcol:r=pcols(i)\r:g=pcols(i)\g:b=pcols(i)\b
 	Gosub planetcolor:Use SetCycle 1
-	Use lmaxlen db:BlockScroll:BitMapOutput db
+	Use BitMap db:BlockScroll:BitMapOutput db
 	Locate 20,15:Colour 1:Print "PLAYER ",currp+1
 	Gosub oldaliens
 	VWait 100:BlockScroll
@@ -262,7 +262,7 @@ sdb=3
 		Gosub newaliens
 		If upd=0 Then Gosub doscanner
 		db=1-db
-		Use lmaxlen db
+		Use BitMap db
 		UnQueue db
 		Gosub drawnme
 		Gosub drawfire
@@ -283,7 +283,7 @@ sdb=3
 	Return
 
 .oldaliens
-	##[$80CA] *p\nme[i]
+	USEPATH *p\nme[i]
 	i=0
 	While \nme AND i<10
 		j=0:While j<\tot:Gosub addalien:j+1:Wend
@@ -295,7 +295,7 @@ sdb=3
 .addhumes
 	i=0
 	While i<*p\tothumes
-		globalloc astro()
+		AddItem astro()
 		astro()\x=Rnd($ffff),Rnd($ffff),0
 		astro()\xv=Rnd(200)-100,Rnd(200)-100,Rnd(16384)-8192,0
 		astro()\upd=updcount
@@ -305,7 +305,7 @@ sdb=3
 	Return
 
 .newaliens
-	##[$80CA] *p\nme[i]
+	USEPATH *p\nme[i]
 	i=0
 	While \nme AND i<10
 		If *p\ptimer=\start	 ;time for a new wave
@@ -321,7 +321,7 @@ sdb=3
 	Return
 
 .addalien
-	globalloc nme()
+	AddItem nme()
 	nme()\x=me\x+Rnd($c000)+$2000
 	nme()\y=me\y+Rnd($c000)+$2000
 	nme()\rot=Rnd(65535),0,0,0,0,0,0,0,0
@@ -337,13 +337,13 @@ sdb=3
 	ClearList bul()
 	ClearList fire()
 	ClearList astro()
-	Use lmaxlen db:BitMapOutput db
+	Use BitMap db:BitMapOutput db
 	*p\patern+1:pat=*p\patern
 	Colour 1:Locate 16,15:Print "ATTACK WAVE ",pat
-	##[$80CA] patern(pat)
+	USEPATH patern(pat)
 	i=\pcol:r=pcols(i)\r:g=pcols(i)\g:b=pcols(i)\b
 	Gosub planetcolor:Use SetCycle 1
-	##[$80CA] patern(pat)\waves[i]
+	USEPATH patern(pat)\waves[i]
 	For i=0 To 9										;copy patern data to player
 		*p\nme[i]\nme=\nme,\start,\num,\apart,\count,0,0
 		*p\totwaves+\neces
@@ -356,10 +356,10 @@ sdb=3
 
 .initscanner
 	sdb=7-sdb
-	Use lmaxlen sdb:BitMapOutput sdb:BlockScroll
+	Use BitMap sdb:BitMapOutput sdb:BlockScroll
 	Box 0,0,319,31,1
 	Box 160-16,0,160+16,31,2
-	##[$80CA] player(i)
+	USEPATH player(i)
 	For i=0 To 1
 		c=2:If player(i)=*p Then c=1
 		Locate \xpos,.3:Colour c:Print i+1,"UP"
@@ -368,7 +368,7 @@ sdb=3
 		If \shield Then Boxf \xpos*8,22,\xpos*8+\shield LSR 4,28,4
 		s=1
 		While s<\lives AND s<6
-			longdiv 0,\xpos*8+s*14+50,8
+			Blit 0,\xpos*8+s*14+50,8
 			s+1
 		Wend
 	Next
@@ -377,14 +377,14 @@ sdb=3
 .doscanner
 	Use Slice 0:Show sdb:Use Slice 1
 	sdb=7-sdb
-	Use lmaxlen sdb:BitMapOutput sdb
+	Use BitMap sdb:BitMapOutput sdb
 	Boxf 160-16,0,160+16,31,0
 	Box 160-16,0,160+16,31,2
-	longdiv 164+(me\rot ASR 13 AND 7),160,16
+	Blit 164+(me\rot ASR 13 AND 7),160,16
 	Locate *p\xpos,1.5:Colour 1:Print *p\score
 	Boxf *p\xpos*8,22,*p\xpos*8+100,28,0
 	If *p\shield Then Boxf *p\xpos*8,22,*p\xpos*8+*p\shield LSR 4,28,4
-	If *p\lives>1 AND *p\lives<6 Then longdiv 0,*p\xpos*8+*p\lives*14+50-14,8
+	If *p\lives>1 AND *p\lives<6 Then Blit 0,*p\xpos*8+*p\lives*14+50-14,8
 	Return
 
 .moveship
@@ -400,7 +400,7 @@ sdb=3
 			*p\status=-1
 			Sound 3,2
 			For i=1 To 15
-				If globalloc(bng())
+				If AddItem(bng())
 					bng()\x=me\x,me\y,31
 					bng()\xv=me\xv/2+Rnd(128)-64
 					bng()\yv=me\yv/2+Rnd(128)-64
@@ -424,7 +424,7 @@ sdb=3
 	EndIf
 	If RawStatus($39) OR Joyb(0)&1 OR Joyb(1)&1			;fire
 		If rl=0 AND nb>0
-			If globalloc(bul())
+			If AddItem(bul())
 				Sound 1,1
 				bul()\x=me\x,me\y,me\rot
 				bul()\xv=!ssin{me\rot} ASL #bspeed+me\xv
@@ -448,9 +448,9 @@ sdb=3
 
 
 .moveexplosions
-	newmem bng()
-	##[$80CA] bng()
-	While globfree(bng())
+	ResetList bng()
+	USEPATH bng()
+	While NextItem(bng())
 		\rot-1
 		If \rot>-1
 			\x+\xv:\y+\yv
@@ -460,16 +460,16 @@ sdb=3
 				QBlit db,192+\rot/4,px,py
 			EndIf
 		Else
-			freelast bng()
+			KillItem bng()
 			numexp-1
 		EndIf
 	Wend
 	Return
 
 .drawnme
-	newmem nme()
-	##[$80CA] nme()
-	While globfree(nme())
+	ResetList nme()
+	USEPATH nme()
+	While NextItem(nme())
 		If \upd=upd
 			ang.w=32768-angle{me\x-\x,me\y-\y}-\rot
 			s=Sgn(ang):ang=Abs(ang)
@@ -485,9 +485,9 @@ sdb=3
 			EndIf
 			\xv-\xv ASR \nme\drag
 			\yv-\yv ASR \nme\drag
-			Use lmaxlen sdb
+			Use BitMap sdb
 			Point ((\x-me\x) ASR 11)+160,((\y-me\y) ASR 11)+16,\nme\color
-			Use lmaxlen db
+			Use BitMap db
 			\frame=(\rot LSR 12)&15+\nme\frame
 		EndIf
 		\x+\xv																 ;speed
@@ -508,14 +508,14 @@ sdb=3
 	Return
 
 .astromen
-	newmem astro()
-	##[$80CA] astro()
-	While globfree(astro())
+	ResetList astro()
+	USEPATH astro()
+	While NextItem(astro())
 		If \upd=upd
 			\rot+\rv
-			Use lmaxlen sdb
+			Use BitMap sdb
 			Point ((\x-me\x) ASR 11)+160,((\y-me\y) ASR 11)+16,1
-			Use lmaxlen db
+			Use BitMap db
 			\frame=(\rot LSR 12)&15+#hume
 		EndIf
 		\x+\xv:\y+\yv
@@ -523,10 +523,10 @@ sdb=3
 		\py=((\y-me\y) ASR 6)+#ycntr
 		If !onscreen{\px,\py}
 			If ##[$CB09] (\frame,\px,\py)
-				freelast astro():*p\tothumes-1
+				KillItem astro():*p\tothumes-1
 			Else
 				If SpritesHit(\frame,\px,\py,0,#xcntr,#ycntr)
-					freelast astro():*p\tothumes-1
+					KillItem astro():*p\tothumes-1
 					oldscore.l=*p\score
 					*p\score+1000:Sound 5,2
 					If Int(*p\score/10000)>Int(oldscore/10000)
@@ -541,8 +541,8 @@ sdb=3
 	Return
 
 .nmefire
-	##[$80CA] nme()
-	If globalloc(fire())
+	USEPATH nme()
+	If AddItem(fire())
 		Sound 0,1
 		fire()\x=\x,\y,\rot
 		fire()\xv=!ssin{\rot} ASL 7+\xv
@@ -552,9 +552,9 @@ sdb=3
 	Return
 
 .drawfire
-	newmem fire()
-	##[$80CA] fire()
-	While globfree(fire())
+	ResetList fire()
+	USEPATH fire()
+	While NextItem(fire())
 		\x+\xv																 ;speed
 		\y+\yv
 		px=((\x-me\x) ASR 6)+#xcntr
@@ -562,15 +562,15 @@ sdb=3
 		If !onscreen{px,py}
 			QBlit db,161,px,py
 		Else
-			freelast fire()
+			KillItem fire()
 		EndIf
 	Wend
 	Return
 
 .drawbullets
-	newmem bul()
-	##[$80CA] bul()
-	While globfree(bul())
+	ResetList bul()
+	USEPATH bul()
+	While NextItem(bul())
 		\x+\xv																 ;speed
 		\y+\yv
 		px=((\x-me\x) ASR 6)+#xcntr
@@ -579,15 +579,15 @@ sdb=3
 			If ##[$CB09](64,px,py) Then sh=64:Gosub checknme
 			QBlit db,160,px,py
 		Else
-			freelast bul()
+			KillItem bul()
 		EndIf
 	Wend
 	Return
 
 .checknme:
-	newmem nme()
-	##[$80CA] nme()
-	While globfree(nme())
+	ResetList nme()
+	USEPATH nme()
+	While NextItem(nme())
 		If SpritesHit(\frame,\px,\py,sh,px,py)
 			Sound 2,2
 			oldscore.l=*p\score
@@ -596,14 +596,14 @@ sdb=3
 				*p\lives+1:*p\shield+200:Sound 6,2
 			EndIf
 			For i=1 To 4
-				If globalloc(bng())
+				If AddItem(bng())
 					bng()\x=\x,\y,31
 					bng()\xv=\xv/2+Rnd(64)-32
 					bng()\yv=\yv/2+Rnd(64)-32
 					numexp+1
 				EndIf
 			Next
-			##[$80CA] nme()\parent
+			USEPATH nme()\parent
 			\tot-1
 			If \tot=0
 				If \start>0
@@ -612,7 +612,7 @@ sdb=3
 					*p\totwaves-1
 				EndIf
 			EndIf
-			freelast nme()
+			KillItem nme()
 		EndIf
 	Wend
 	Return
@@ -670,7 +670,7 @@ pcolors:
 	Data 9,9,7
 
 .setuppaterns
-	##[$80CA] patern(i)
+	USEPATH patern(i)
 	d=-1:n=2
 	For i=1 To 199
 		prpt=i MOD 5

@@ -23,15 +23,15 @@ LoadSprites 9,"puck.sprite"
 LoadShapes 0,7,"HOCKEY.SHAPES"
 Dim speedx.q(5), speedy.q(5),posx.q(5),posy.q(5)
 Dim goaliex(3):Dim goaliey(3)
-lmaxlen 0,320,200,6
+BitMap 0,320,200,6
 LoadBitMap 0,"rink",1
 
 VWait 100
 BLITZ
 
-Use lmaxlen 0
-lmaxlen 1,320,10,2
-lmaxlen 2,320,10,2
+Use BitMap 0
+BitMap 1,320,10,2
+BitMap 2,320,10,2
 
 ;Make the shapes into sprites
 For a = 0 To 7
@@ -47,11 +47,11 @@ Slice 0,56,320,200,$fff8,6,8,32,320,320				;set up the slices
 Slice 1,44,320,10,$fff8,2,0,4,320,320
 
 
-Use lmaxlen 1:Use Slice 1:BlockScroll 1:Show 1
+Use BitMap 1:Use Slice 1:BlockScroll 1:Show 1
 Colour 0,1:BitMapOutput 1:Locate 0,.2
 Print" Los Angelos						Montreal "
 Green 0,15,15,15:Green 1,0,0,0
-Use Slice 0:Use lmaxlen 0
+Use Slice 0:Use BitMap 0
 Show 0
 
 Use SetCycle 1
@@ -64,8 +64,8 @@ start:
 goaliex(0) = 0:goaliex(1) = 306			 ;
 goaliey(0) = 89:goaliey(1) = 89				;
 BlitMode CookieMode										 ;	Position and draw goalies
-longdiv 11,goaliex(0),goaliey(0)					;
-longdiv 10,goaliex(1),goaliey(1)				 ;
+Blit 11,goaliex(0),goaliey(0)					;
+Blit 10,goaliex(1),goaliey(1)				 ;
 
 posx.q(0) = 50:posy.q(0) = 90							 ;
 posx.q(1) = 320-70:posy.q(1) = 90						;	 Initial position of players
@@ -112,10 +112,10 @@ While rrr <> 21
 				gy=goaliey(a)
 				If gy+2*jy > 74 AND gy+2*jy < 104
 					BlitMode EraseMode
-					longdiv 11-a,goaliex(a),goaliey(a)
+					Blit 11-a,goaliex(a),goaliey(a)
 					goaliey(a)+2*jy
 					BlitMode CookieMode
-					longdiv 11-a,goaliex(a),goaliey(a)
+					Blit 11-a,goaliex(a),goaliey(a)
 				EndIf
 			EndIf
 
@@ -305,23 +305,23 @@ goal:
 For a = 0 To 1
 	Sound 1,15
 	BlitMode EraseMode
-	longdiv 11-a,goaliex(a),goaliey(a)
+	Blit 11-a,goaliex(a),goaliey(a)
 	goaliey(a)+2*jy
 	Locate 15,.2:Print score1:Locate 35,.2:Print score0
 Next a
 If score0=3
-	Use Slice 1:Use lmaxlen 2:BlockScroll 1:Show 2
+	Use Slice 1:Use BitMap 2:BlockScroll 1:Show 2
 	Colour 0,1:BitMapOutput 2:Locate 0,.2
 	Print"				 Montreal Wins!!!!				 ":score0=0:score1=0
-	Use lmaxlen 0:BitMapOutput 1
+	Use BitMap 0:BitMapOutput 1
 	Use Slice 0
 EndIf
 If score1=3
-	Use Slice 1:Use lmaxlen 2:BlockScroll 1:Show 2
+	Use Slice 1:Use BitMap 2:BlockScroll 1:Show 2
 	Colour 0,1:BitMapOutput 2:Locate 0,.2
 	Print"				 Los Angelos Wins!!!!				 ":score0=0:score1=0
 
-	Use lmaxlen 0:BitMapOutput 1
+	Use BitMap 0:BitMapOutput 1
 	Use Slice 0
 EndIf
 

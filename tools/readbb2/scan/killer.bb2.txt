@@ -229,7 +229,7 @@ QAMIGA
 .Loadstuff:
 path$=""
 LoadShapes 0,path$+"Killer.shapes"
-casestrcomp 0,path$+"Killer.pal"
+LoadPalette 0,path$+"Killer.pal"
 
 .Initialise:
 NEWTYPE .dotplot
@@ -255,8 +255,8 @@ For h=1 To #num
 	plots(h)\spd=Int(Rnd(7))+1
 Next h
 
-lmaxlen 0,320,256,5
-lmaxlen 1,320,256,5
+BitMap 0,320,256,5
+BitMap 1,320,256,5
 BLITZ
 InitCopList 0,$10005
 DisplayBitMap 0,0
@@ -267,13 +267,13 @@ CreateDisplay 0
 BitPlanesBitMap 0,2,%111
 BitPlanesBitMap 1,3,%111
 
-longmult 0,5
-longmult 1,5
+Queue 0,5
+Queue 1,5
 
 x=0
 ad.l=?ytable
 ad2.l=ad
-vll.w=Peek.w(Addr lmaxlen(0))
+vll.w=Peek.w(Addr BitMap(0))
 total.w=0
 For y=0 To 255
 	Poke.w ad2,total
@@ -288,8 +288,8 @@ Repeat
 	DisplayBitMap 0,dbuffer
 	dbuffer=1-dbuffer
 	UnQueue dbuffer
-	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,ad}
-	Use lmaxlen dbuffer
+	Drawfield{&plots(0),Addr BitMap(dbuffer),-1,ad}
+	Use BitMap dbuffer
 	QBlit dbuffer,shipframes(fram ASR 1),160,128
 	fram+1
 	If fram>56 Then fram=0

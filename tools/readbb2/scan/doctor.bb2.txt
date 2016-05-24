@@ -57,9 +57,9 @@ LoadShapes 0,"Shapes.shapes"
 
 
 ;Palettes
-casestrcomp 0,"DocShapes.palette"
-casestrcomp 1,"StatusPanel.palette"
-casestrcomp 2,"Title.palette"
+LoadPalette 0,"DocShapes.palette"
+LoadPalette 1,"StatusPanel.palette"
+LoadPalette 2,"Title.palette"
 
 ;Sounds
 LoadSound 0,"AxeSwing.sound"
@@ -386,51 +386,51 @@ End Statement
 
 ;Doctor Walking
 Dim List docwalkanim.l(7)
-While globalloc(docwalkanim())
+While AddItem(docwalkanim())
 	Read a
 	docwalkanim()=a
 Wend
 Data.l 0,4,3,4,2,1,3,1
-a=locfree(docwalkanim())
+a=FirstItem(docwalkanim())
 
 ;Doctor Digging
 Dim List docdiganim.l(11)
-While globalloc(docdiganim())
+While AddItem(docdiganim())
 	Read a
 	docdiganim()=a
 Wend
 Data.l 11,12,13,14,15,16
 Data.l 17,18,19,20,21,22
-a=locfree(docdiganim())
+a=FirstItem(docdiganim())
 
 ;Doctor Climbing
 Dim List docclimbanim.l(3)
-While globalloc(docclimbanim())
+While AddItem(docclimbanim())
 	Read a
 	docclimbanim()=a
 Wend
 Data.l 35,36,37,36
-a=locfree(docclimbanim())
+a=FirstItem(docclimbanim())
 
 ;Doctor Dying
 Dim List docdeathanim.l(32)
-While globalloc(docdeathanim())
+While AddItem(docdeathanim())
 	Read a
 	docdeathanim()=188+a
 Wend
 Data.l 1,3,2,1,2,4,2,1,4,3,2,4,2,1,2,4,2,4,1,2
 Data.l 5,6,7,8,9,10,10,10,10,32,33,34,35
 
-a=locfree(docdeathanim())
+a=FirstItem(docdeathanim())
 
 ;Doctor's Lift
 Dim List docliftanim.l(14)
-While globalloc(docliftanim())
+While AddItem(docliftanim())
 	Read a
 	docliftanim()=a
 Wend
 Data.l 199,200,201,202,203,204,205,206,207,208,209,210,211,212,213,214
-a=locfree(docliftanim())
+a=FirstItem(docliftanim())
 
 
 
@@ -570,7 +570,7 @@ flash=0
 ;Initialise Bitmaps and Slice for Use
 Use Slice 0
 Show dblbuffer,32,32
-Use lmaxlen dblbuffer
+Use BitMap dblbuffer
 
 Gosub LevelLayout
 Gosub MonsterSetup
@@ -617,17 +617,17 @@ Repeat
 	dblbuffer=1-dblbuffer
 
 	;Initialise Double Buffer Screen
-	Use lmaxlen dblbuffer
+	Use BitMap dblbuffer
 	UnBuffer dblbuffer
 
 
 
 	.BlockStore
 	;Calculate Monster and Doctor Block X and Y
-	##[$80CA] doctor
+	USEPATH doctor
 	\blockx=\x/16
 	\blocky=\y/16
-	##[$80CA] monster(a)
+	USEPATH monster(a)
 	For a=0 To gamespeed
 		\blockx=\x/16
 		\blocky=\y/16
@@ -650,7 +650,7 @@ Repeat
 
 	;Display and Move Monsters
 	.MonsterDisplay
-	##[$80CA] monster(a)
+	USEPATH monster(a)
 	For a=0 To gamespeed
 		If \active
 			Gosub MonsterMove
@@ -684,15 +684,15 @@ Repeat
 				b=docliftanim()
 				doctor\animcount+1
 				If doctor\animcount=\animspeed
-					If NOT globfree(docliftanim())
-						a=locfree(docliftanim())
+					If NOT NextItem(docliftanim())
+						a=FirstItem(docliftanim())
 						liftblit=2
 					EndIf
 					doctor\animcount=0
 				EndIf
 			Else
 				b=docwalkanim()+a*12
-				longdiv 214,32+doctor\x,31+doctor\y
+				Blit 214,32+doctor\x,31+doctor\y
 				liftblit-1
 				If liftblit=0
 					doclift=0
@@ -722,7 +722,7 @@ Repeat
 
 	.CollisionStore
 	;Store Doctor Collisions for Later Action
-	##[$80CA] monster(b)
+	USEPATH monster(b)
 	For b=0 To gamespeed
 		If \active=1
 			collision(b,0)=SpritesHit(18,32+doctor\x,31+doctor\y,monsteranim(\montype,\state,\animframe),32+\x,31+\y)
@@ -800,7 +800,7 @@ Repeat
 
 
 	;Set Up Path for Following Doctor Bits
-	##[$80CA] doctor
+	USEPATH doctor
 
 
 	;Doctor Dying
@@ -829,8 +829,8 @@ Repeat
 
 				;Next Animation Frame
 				If \animcount=\animspeed
-					If NOT globfree(docdiganim())
-						a=locfree(docdiganim())
+					If NOT NextItem(docdiganim())
+						a=FirstItem(docdiganim())
 						docdig=0
 					EndIf
 					\animcount=0
@@ -875,7 +875,7 @@ Repeat
 						EndIf
 
 						;Produce Bash if Monster Hit in Hole
-						##[$80CA] monster(b)
+						USEPATH monster(b)
 						For b=0 To gamespeed
 							If collision(b,0) AND \state=2 AND docflip=Sgn(collision(b,1)) AND Abs(collision(b,1))>8 AND collision(b,2)<4
 								bash=16
@@ -905,7 +905,7 @@ Repeat
 								EndIf
 							EndIf
 						Next b
-						##[$80CA] doctor
+						USEPATH doctor
 					EndIf
 
 				EndIf
@@ -920,7 +920,7 @@ Repeat
 				If Joyb(1) AND ladder=0 AND \x-docflip*16>0 AND \x-docflip*16<320
 					docdig=1
 					\animcount=0
-					a=locfree(docdiganim())
+					a=FirstItem(docdiganim())
 					Goto TimeBits
 				EndIf
 
@@ -947,7 +947,7 @@ Repeat
 						EndIf
 
 						;Make Doctor Stand Still
-						d=locfree(docwalkanim())
+						d=FirstItem(docwalkanim())
 						docmove=0
 						doclastmove=Sgn(doclastmove)*8
 
@@ -982,8 +982,8 @@ Repeat
 									;Animate Walking Doctor Strange
 									\animcount+1
 									If \animcount=\animspeed
-										If NOT globfree(docwalkanim())
-											d=locfree(docwalkanim())
+										If NOT NextItem(docwalkanim())
+											d=FirstItem(docwalkanim())
 										EndIf
 										If (docwalkanim()=2 OR docwalkanim()=0) AND nosound=0
 											Sound 15,4,50
@@ -1022,8 +1022,8 @@ Repeat
 										;Animate Climbing Doctor Strange
 										\animcount+1
 										If \animcount=\animspeed
-											If NOT globfree(docclimbanim())
-												d=locfree(docclimbanim())
+											If NOT NextItem(docclimbanim())
+												d=FirstItem(docclimbanim())
 											EndIf
 											\animcount=0
 										EndIf
@@ -1047,7 +1047,7 @@ Repeat
 
 				;Standing Still
 				If ladder=0
-					d=locfree(docwalkanim())
+					d=FirstItem(docwalkanim())
 					docmove=0
 					doclastmove=Sgn(doclastmove)*8
 				EndIf
@@ -1079,8 +1079,8 @@ Repeat
 			If docdeathanim()<193
 				Sound 28,4
 			EndIf
-			If NOT globfree(docdeathanim())
-				a=locfree(docdeathanim())
+			If NOT NextItem(docdeathanim())
+				a=FirstItem(docdeathanim())
 				lives-1
 				Colour 12,11
 				Locate 30,2
@@ -1174,7 +1174,7 @@ Repeat
 
 		.SoundTrack
 		;Play Sound track
-		##[$80CA] samples
+		USEPATH samples
 
 		If timer>\sampletime
 			;Select Position in Soundtrack
@@ -1223,9 +1223,9 @@ Repeat
 		PanelRestore{fadenum}
 		fadenum=0
 		BackFade{0,1,0}
-		Use lmaxlen 0
+		Use BitMap 0
 		BlockScroll 0
-		Use lmaxlen 1
+		Use BitMap 1
 		BlockScroll 0
 		VWait
 		If level=9
@@ -1279,8 +1279,8 @@ End
 
 
 	;Setup 2x 16 Colour Bitmap for Double Buffering
-	lmaxlen 0,384,264,4
-	lmaxlen 1,384,264,4
+	BitMap 0,384,264,4
+	BitMap 1,384,264,4
 
 
 	;Assign Bitmap
@@ -1288,14 +1288,14 @@ End
 	Show 1,32,32
 
 	;Display Startup Message
-	longdiv 231,114,72
+	Blit 231,114,72
 
 
 	;Setup Control Panel
 	Use Slice 1
-	lmaxlen 2,320,56,4
+	BitMap 2,320,56,4
 	Show 2
-	longdiv 10,0,1
+	Blit 10,0,1
 
 	;Activate Blitz Font and Bitmap for Printing
 	BitMapOutput 2
@@ -1340,13 +1340,13 @@ End
 
 	;Set Up Output Screen
 	Use Slice 0
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 	BlockScroll 0
 
 
 	;Print Titles
-	longdiv 188,104,16
+	Blit 188,104,16
 	VWait
 	Use SetCycle 2
 	Show 0,0,0
@@ -1376,13 +1376,13 @@ End
 		a+1
 		If a>e
 
-			Use lmaxlen b
+			Use BitMap b
 
 			Select c
 
 				Case -2
 					BlockScroll 0
-					longdiv 188,104,16
+					Blit 188,104,16
 					c+1
 					e=725
 
@@ -1398,22 +1398,22 @@ End
 					BitMapOutput b
 					Read a$
 					BlockScroll 0
-					longdiv 216+c,80,32
+					Blit 216+c,80,32
 					If c=0
-						longdiv 259,80,32
+						Blit 259,80,32
 					EndIf
 					If c=1
-						longdiv 260,80,32
+						Blit 260,80,32
 					EndIf
 					Box 75,27,244,111,4
 					Box 76,28,245,112,13
 					Box 77,29,246,113,13
 					Box 78,30,247,114,13
 					Box 79,31,248,115,14
-					longdiv 332,74,26
-					longdiv 333,239,26
-					longdiv 334,74,106
-					longdiv 335,239,106
+					Blit 332,74,26
+					Blit 333,239,26
+					Blit 334,74,106
+					Blit 335,239,106
 					If a$<>"" AND a$<>"END"
 						d=0
 						g=0
@@ -1470,9 +1470,9 @@ End
 
 	;Close Bits
 	BackFade{f,1,0}
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll 0
 
 
@@ -1526,10 +1526,10 @@ End
 .LevelLayout:
 
 	;Clear Screens
-	Use lmaxlen 1
+	Use BitMap 1
 	UnBuffer 1
 	BlockScroll 0
-	Use lmaxlen 0
+	Use BitMap 0
 	UnBuffer 0
 	BlockScroll 0
 
@@ -1563,7 +1563,7 @@ End
 		Sound 25,15,0,0,0,0
 		BitMapOutput 0
 		Colour 1,0
-		longdiv 230,126,64
+		Blit 230,126,64
 		Show 0,32,32
 		Colour 15,0
 		TextDisplay{7,14,"Time Bonus",1}
@@ -1641,7 +1641,7 @@ End
 		Show dblbuffer,36,10
 		BackFade{0,0,1}
 		dblbuffer=1-dblbuffer
-		Use lmaxlen dblbuffer
+		Use BitMap dblbuffer
 
 		Repeat
 			NextFrame 0
@@ -1659,7 +1659,7 @@ End
 			Show dblbuffer,36,10
 			VWait 4
 			dblbuffer=1-dblbuffer
-			Use lmaxlen dblbuffer
+			Use BitMap dblbuffer
 			a+1
 			If Joyb(1)<>0
 				a=29
@@ -1669,7 +1669,7 @@ End
 		If a=28
 			BlockScroll 0
 			VWait
-			longdiv 232+levelname-1,108,103
+			Blit 232+levelname-1,108,103
 			Show dblbuffer,32,32
 			JoyWait{150}
 			dblbuffer=1-dblbuffer
@@ -1677,10 +1677,10 @@ End
 
 		BackFade{0,1,0}
 
-		Use lmaxlen 1
+		Use BitMap 1
 		BlockScroll 0
 		VWait
-		Use lmaxlen 0
+		Use BitMap 0
 		BlockScroll 0
 		VWait
 		Show 0,32,32
@@ -1774,88 +1774,88 @@ End
 				Select a
 
 					Case -1 ;Torch
-						longdiv d+4,b,c
-						longdiv d+5,b+16,c
-						longdiv d+6,b+32,c
-						longdiv d+7,b,c+16
-						longdiv d+8,b+16,c+16
-						longdiv d+9,b+32,c+16
+						Blit d+4,b,c
+						Blit d+5,b+16,c
+						Blit d+6,b+32,c
+						Blit d+7,b,c+16
+						Blit d+8,b+16,c+16
+						Blit d+9,b+32,c+16
 
 					Case -2 ;Table
 						For e=0 To 2
-							longdiv d+10+e,b+16*e,c
+							Blit d+10+e,b+16*e,c
 						Next e
 
 					Case -3 ;Messy Table
 						For e=0 To 2
-							longdiv d+13+e,b+16*e,c
+							Blit d+13+e,b+16*e,c
 						Next e
 
 					Case -4 ;Slab
-						longdiv d+16,b,c
-						longdiv d+17,b+16,c
+						Blit d+16,b,c
+						Blit d+17,b+16,c
 
 					Case -5 ;Pillar One
-						longdiv d+18,b,c
-						longdiv d+19,b,c+16
-						longdiv d+20,b,c+32
+						Blit d+18,b,c
+						Blit d+19,b,c+16
+						Blit d+20,b,c+32
 
 					Case -6 ;Pillar Two
-						longdiv d+18,b,c
-						longdiv d+19,b,c+16
-						longdiv d+19,b,c+32
-						longdiv d+20,b,c+48
+						Blit d+18,b,c
+						Blit d+19,b,c+16
+						Blit d+19,b,c+32
+						Blit d+20,b,c+48
 
 					Case -7 ;Armour
-						longdiv d+21,b,c
-						longdiv d+22,b,c+16
+						Blit d+21,b,c
+						Blit d+22,b,c+16
 
 					Case -8 ;Clock
-						longdiv d+33,b,c
-						longdiv d+34,b,c+16
+						Blit d+33,b,c
+						Blit d+34,b,c+16
 
 					Case -9 ;Computer Short
-						longdiv d+35,b,c
-						longdiv d+36+Int(Rnd(3)),b+16,c
-						longdiv d+39,b+32,c
+						Blit d+35,b,c
+						Blit d+36+Int(Rnd(3)),b+16,c
+						Blit d+39,b+32,c
 
 					Case -10 ;Computer Long
-						longdiv d+35,b,c
-						longdiv d+36+Int(Rnd(3)),b+16,c
-						longdiv d+36+Int(Rnd(3)),b+32,c
-						longdiv d+39,b+48,c
+						Blit d+35,b,c
+						Blit d+36+Int(Rnd(3)),b+16,c
+						Blit d+36+Int(Rnd(3)),b+32,c
+						Blit d+39,b+48,c
 
 					Case -11 ;Painting
-						longdiv d+54,b,c
-						longdiv d+55,b+16,c
-						longdiv d+56,b,c+16
-						longdiv d+57,b+16,c+16
+						Blit d+54,b,c
+						Blit d+55,b+16,c
+						Blit d+56,b,c+16
+						Blit d+57,b+16,c+16
 
 					Case -12 ;Window One
-						longdiv d+1,b,c
-						longdiv d+2,b,c+16
-						longdiv d+3,b,c+32
+						Blit d+1,b,c
+						Blit d+2,b,c+16
+						Blit d+3,b,c+32
 
 					Case -13 ;Window Two
-						longdiv d+1,b,c
-						longdiv d+2,b,c+16
-						longdiv d+2,b,c+32
-						longdiv d+3,b,c+48
+						Blit d+1,b,c
+						Blit d+2,b,c+16
+						Blit d+2,b,c+32
+						Blit d+3,b,c+48
 
 					Case -14 ;Bookcase Short
-						longdiv d+23+Int(Rnd(3)),b,c
-						longdiv d+26+Int(Rnd(4)),b+16,c
-						longdiv d+30+Int(Rnd(3)),b+32,c
+						Blit d+23+Int(Rnd(3)),b,c
+						Blit d+26+Int(Rnd(4)),b+16,c
+						Blit d+30+Int(Rnd(3)),b+32,c
 
 					Case -15 ;Bookcase Long
-						longdiv d+23+Int(Rnd(3)),b,c
-						longdiv d+26+Int(Rnd(4)),b+16,c
-						longdiv d+26+Int(Rnd(4)),b+32,c
-						longdiv d+30+Int(Rnd(3)),b+48,c
+						Blit d+23+Int(Rnd(3)),b,c
+						Blit d+26+Int(Rnd(4)),b+16,c
+						Blit d+26+Int(Rnd(4)),b+32,c
+						Blit d+30+Int(Rnd(3)),b+48,c
 
 				End Select
 			Else
-				longdiv d+a,b,c
+				Blit d+a,b,c
 			EndIf
 		EndIf
 	Until a=999
@@ -2135,7 +2135,7 @@ End
 
 .MonsterSetup
 ;Set Up Monsters for Each Level
-	##[$80CA] monster(a)
+	USEPATH monster(a)
 
 	Select level
 		Case 0
@@ -2460,7 +2460,7 @@ End
 
 			;Has Monster Fallen on Another
 			If screenlayout(\blockx,\blocky+1)=6
-				##[$80CA] monster(b)
+				USEPATH monster(b)
 				For b=0 To gamespeed
 					If \blockx=monster(a)\blockx AND \blocky=monster(a)\blocky+1
 						screenlayout(\blockx,\blocky)=2
@@ -2476,7 +2476,7 @@ End
 						\falltime=0
 					EndIf
 				Next b
-				##[$80CA] monster(a)
+				USEPATH monster(a)
 			EndIf
 
 		EndIf
@@ -2817,14 +2817,14 @@ End
 	EndIf
 
 	;Set Up Score Entry
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
 	Show 0,0,0
 	Colour 1,0
 	BitMapOutput 0
 	Locate 7,2
 	Print "Please Select Your Initials"
-	longdiv 258,91,38
+	Blit 258,91,38
 
 	a$="ABCDEFGHIJKLMNOPQRSTUVWXYZ!?& <*"
 	a=0
@@ -2940,7 +2940,7 @@ End
 
 
 	;Print High Score Table
-	Use lmaxlen 1
+	Use BitMap 1
 	BitMapOutput 1
 	Gosub HighScoreTable
 
@@ -2984,7 +2984,7 @@ End
 		Show dblbuffer,32,32
 		dblbuffer=1-dblbuffer
 		f-1
-		Use lmaxlen dblbuffer
+		Use BitMap dblbuffer
 		UnBuffer dblbuffer
 
 		;Show Game Over
@@ -3021,9 +3021,9 @@ End
 
 	;Final Bits
 	BackFade{0,1,0}
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll 0
 	VWait
 
@@ -3034,7 +3034,7 @@ End
 .HighScoreTable
 	;Print High Score Table
 	BlockScroll 0
-	longdiv 258,91,38
+	Blit 258,91,38
 	d=0
 	Colour 1,3
 	Repeat

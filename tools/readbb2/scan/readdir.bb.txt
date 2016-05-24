@@ -21,7 +21,7 @@ lock.l=##[$FE0A](&v$,-2)								;lock is dos system to access files
 
 If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
 	While ##[$FE0E](lock,myfib)<>0			;skip through files
-		##[$80CA] myfib
+		USEPATH myfib
 		If \_DirEntryType<0						 ;if its not a directory
 ;			f$=LSet$(Peek$(&\_FileName),20)
 			f$=Peek$(&\_FileName)

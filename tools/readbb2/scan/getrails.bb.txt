@@ -20,15 +20,15 @@ End Function
 Goto getrails
 
 .getcheckers:
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0
 	BlockScroll
 	LoadBitMap 0,"checkers.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 	getblock{blok,bm,0,0}:blok+32
 	getblock{blok,bm,8,0}:blok+32
@@ -54,14 +54,14 @@ Goto getrails
 	End
 
 .getrails:
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0
 	LoadBitMap 0,"rails.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 	yy=4
 	For y=0 To 2

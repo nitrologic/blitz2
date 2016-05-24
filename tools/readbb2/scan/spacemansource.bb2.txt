@@ -146,7 +146,7 @@ QAMIGA
 #scrxw=320
 #scryw=240
 #depth=5
-lmaxlen 0,#scrxw,#scryw,#depth
+BitMap 0,#scrxw,#scryw,#depth
 LoadMedModule 0,"sounds/sptune1.med"
 LoadBitMap 0,"graphics/tittel_spm2.iff",2
 ;LoadBitMap 3,"graphics/spbottomscreen1.iff",2
@@ -473,16 +473,16 @@ gameovershapebase=scoreshapebase+10
 ;read in	floortiles
 ;LoadShapes nrofshapes,"shapes/sp3dfloorshapes"
 ;LoadShape nrofshapes+1,"blitz2:spacemancode/sp3danims/floor1.brush",0
-casestrcomp 0,"graphics/hero_spm2.iff"
+LoadPalette 0,"graphics/hero_spm2.iff"
 ;--- Setup screen -----------
 
 ;BitMap 0,#scrxw,#scryw,#depth
-lmaxlen 1,#scrxw,#scryw,#depth
+BitMap 1,#scrxw,#scryw,#depth
 Buffer 0,30000			;Remember to increase these if
 Buffer 1,30000			;buffer overflow occurs
 
-lmaxlen 2,#scrxw,40,#depth
-lmaxlen 3,#scrxw,40,#depth
+BitMap 2,#scrxw,40,#depth
+BitMap 3,#scrxw,40,#depth
 LoadBitMap 2,"graphics/sptopscreen1.iff",2
 LoadBitMap 3,"graphics/spbottomscreen1.iff",3
 StopCycle 3,1,$b,$8,0 ;Change colour for scoredigits
@@ -515,7 +515,7 @@ gamemode.b=#play
 db.l=0
 ;Set a vblflag every twice frame
 SetInt 5
-	flagbyte ##[$80D0] #vblflag
+	flagbyte BitChg #vblflag
 	soundupdate+1
 ;	PlayMed
 End SetInt
@@ -531,7 +531,7 @@ Slice 3,236,320,40,$fff8,5,8,32,320,320
 Use SetCycle 3
 Show 3
 
-Use lmaxlen db
+Use BitMap db
 Slice 0,44+42,#scrxw,148,$fff8,#depth,8,32,320,320
 BlitzKeys On
 Use SetCycle 0
@@ -581,10 +581,10 @@ spdead=False
 ;Exit with Escape or "Q"(uit)
 While RawStatus($45)=0 AND RawStatus($10)=0
 	VWait
-	If flagbyte ##[$80CD] #vblflag	 ;Only exit every second frame
+	If flagbyte BitTst #vblflag	 ;Only exit every second frame
 		Show db,0,#bmapyoffset
 		db=1-db
-		Use lmaxlen db
+		Use BitMap db
 		Gosub makedrawlist
 		animcount+1:If animcount>#nrofframes Then animcount=0
 		gametime+1
@@ -600,7 +600,7 @@ While RawStatus($45)=0 AND RawStatus($10)=0
 
 		;Draw all shapes on screen
 		;MOVE.w #$f,$dff180
-		##[$80CA] object(b)
+		USEPATH object(b)
 		nrofo.w=objlist(roomnr,0)+misslist(0) ;nrofo is the amount of objects
 		For a=1 To nrofo+1
 			min.w=32000		;A startvalue for comparisons in getobjnr
@@ -617,7 +617,7 @@ While RawStatus($45)=0 AND RawStatus($10)=0
 			EndIf
 			If b>=$1000
 				b-$1000
-				##[$80CA] missile(b)
+				USEPATH missile(b)
 				BBlit db,animlist(\animlist[\dir-1],animcount),\scrx-\scry+#scrdx,(\scrx+\scry)ASR1+#scrdy
 			EndIf
 		Next
@@ -748,7 +748,7 @@ End
 
 .gameover
 	BitMapOutput 1-db
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 FadeOut 0,1
 VWait 50
 	StartMedModule 0
@@ -795,15 +795,15 @@ Return
 
 .nextlevel
 	FadeOut 0,1,1,31
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	StartMedModule 0
 	BlockScroll 0
 	FadeIn 0,0
 	BitMapOutput 1-db
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	If level<=#nroflevels
-		longdiv scoreshapebase+level/10,140,100
-		longdiv scoreshapebase+level-(level/10)*10,162,100
+		Blit scoreshapebase+level/10,140,100
+		Blit scoreshapebase+level-(level/10)*10,162,100
 		level$=levelnames$(level)
 	Else
 		level=1
@@ -859,7 +859,7 @@ Return
 		End Select
 		If o>0
 			If object(o)\class=#switch
-				##[$80CA] object(o)
+				USEPATH object(o)
 				Select \dir
 					Case #north
 						\dir=#south
@@ -872,7 +872,7 @@ Return
 				End Select
 				;Remove or replace obstacle which number is in \info1
 				o1=\info1
-				##[$80CA] object(o1)
+				USEPATH object(o1)
 				If \class<>#dead
 					If \class=#removed
 						\class=#obstacle
@@ -916,19 +916,19 @@ Return
 
 displayhealth:
 	BitMapOutput 3
-	Use lmaxlen 3
+	Use BitMap 3
 	x=16:y=12
 	Boxf x,y,x+50-1,y+2,0
 	If sp\hitpoints>#maxhealth Then sp\hitpoints=#maxhealth
 	If sp\hitpoints>=2
 		Boxf x,y,x+sp\hitpoints/2-1,y+2,7
 	EndIf
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	Return
 
 displayoxygen:
 	BitMapOutput 3
-	Use lmaxlen 3
+	Use BitMap 3
 	x=16:y=30
 	Boxf x,y,x+50-1,y+2,0
 	If sp\oxygen>#maxoxygen Then sp\oxygen=#maxoxygen
@@ -937,22 +937,22 @@ displayoxygen:
 	EndIf
 ;	Locate 0,1
 ;	Print "Oxygen:",sp\oxygen," "
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	Return
 
 displaylives:
 	BitMapOutput 3
-	Use lmaxlen 3
+	Use BitMap 3
 	If sp\lives>-1 AND sp\lives<10
 		Boxf 293,15,313,32,0
-		longdiv scoreshapebase+sp\lives,293,15
+		Blit scoreshapebase+sp\lives,293,15
 	EndIf
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	Return
 
 .displayscore
 	BitMapOutput 3
-	Use lmaxlen 3
+	Use BitMap 3
 	s$=Str$(sp\score)
 	s$=LSet$("0000000",7-Len(s$))+s$
 	sp\scoredigit-1
@@ -962,7 +962,7 @@ displaylives:
 	EndIf
 	x=sp\scoredigit
 	Boxf 70+x*20,15,90+x*20,32,0
-	longdiv scoreshapebase+Val(Mid$(s$,x,1)),70+x*20,15
+	Blit scoreshapebase+Val(Mid$(s$,x,1)),70+x*20,15
 	scoreupdate=0
 Return
 
@@ -1013,7 +1013,7 @@ Return
 ;makedrawlist
 b= objlist(roomnr,0)
 If b>0
-	##[$80CA] object(c)
+	USEPATH object(c)
 	For a=1 To b
 			c=objlist(roomnr,a)		 ;b=objektnr
 			Poke.w ?objdrawlist+(a-1)*4,\totpos	 ;Put objects totpos in drawlist
@@ -1026,7 +1026,7 @@ EndIf
 	ms=b*4+4
 b= misslist(0)
 If b>0
-	##[$80CA] missile(c)
+	USEPATH missile(c)
 	For a=1 To b
 			c=misslist(a)		 ;b=objektnr
 			Poke.w ?objdrawlist+ms+(a-1)*4,\totpos	 ;Put objects totpos in drawlist
@@ -1044,7 +1044,7 @@ objdrawlist:
 	If misslist(0)<#nrofmissiles
 		misslist(0)+1
 		misslist(misslist(0))=misslist(0)
-		##[$80CA] missile(misslist(0))
+		USEPATH missile(misslist(0))
 		\tilex=(sp\tilex ASL 1)
 		\tiley=(sp\tiley ASL 1)
 		\mapx=sp\mapx
@@ -1073,7 +1073,7 @@ objdrawlist:
 	For m=1 To misslist(0)
 	If m>0
 		missnr=misslist(m)
-		##[$80CA] missile(missnr)
+		USEPATH missile(missnr)
 		If \misstype<>#whiteexplosion AND \misstype<>#explosion
 			Select \dir
 				Case #east:a=1:b=0
@@ -1083,9 +1083,9 @@ objdrawlist:
 			End Select
 			If vmap(\mapx,\mapy)>0	;Check for collission before moving
 				objnr=vmap(\mapx,\mapy)
-				##[$80CA] object(objnr)
+				USEPATH object(objnr)
 				x=\tilex:y=\tiley
-				##[$80CA] missile(missnr)
+				USEPATH missile(missnr)
 				If Abs(\tilex-x)<10
 					If Abs(\tiley-y)<10
 						Gosub objecthit
@@ -1100,9 +1100,9 @@ objdrawlist:
 					\mapx+a:\mapy+b
 					If vmap(\mapx,\mapy)>0
 						objnr=vmap(\mapx,\mapy)
-						##[$80CA] object(objnr)
+						USEPATH object(objnr)
 						x=\tilex:y=\tiley
-						##[$80CA] missile(missnr)
+						USEPATH missile(missnr)
 						If Abs(\tilex-x)<10
 							If Abs(\tiley-y)<10
 								Gosub objecthit
@@ -1117,7 +1117,7 @@ finito1
 			If (\mapx>=#mxw AND \dir=#east)OR(\mapx<=1 AND \dir=#west)OR(\mapy>=#myw AND \dir=#south)OR(\mapy<=1 AND \dir=#north)
 ;				 misslist(m)=misslist(misslist(0))
 ;				 misslist(0)-1
-				 remove ##[$80CE] m
+				 remove BitSet m
 			EndIf
 		EndIf
 		If \misstype=#whiteexplosion OR \misstype=#explosion
@@ -1125,13 +1125,13 @@ finito1
 			If \info1>=8
 ;				 misslist(m)=misslist(misslist(0))
 ;				 misslist(0)-1
-					remove ##[$80CE] m
+					remove BitSet m
 			EndIf
 		EndIf
 	EndIf
 	Next
 	For m=1 To misslist(0)
-		If remove ##[$80CD] m
+		If remove BitTst m
 			misslist(m)=misslist(misslist(0))
 			misslist(0)-1
 		EndIf
@@ -1150,7 +1150,7 @@ finito1
 			missile(missnr)\dir=1
 			missile(missnr)\info1=0
 			missile(missnr)\animlist[0]=1
-			##[$80CA] object(objnr)
+			USEPATH object(objnr)
 			If \mobile=True
 				sp\score+\score
 				\class=#score
@@ -1194,7 +1194,7 @@ Return
 .moveobjects1
 	For m=1 To objlist(roomnr,0)
 		b=objlist(roomnr,m)
-		##[$80CA] object(b)
+		USEPATH object(b)
 ;		c=\class
 ;		If c=#alien OR c=#whiteghost OR c=#blueball OR c=#blackball OR c=#moscito OR c=#slimesnake
 		 If \mobile=True
@@ -1300,7 +1300,7 @@ Return
 	Return
 
 .smartmove
-	##[$80CA] object(b)
+	USEPATH object(b)
 	\movpat=#trackmode
 	;This little routine switches the alien between two
 	;movementsmodes searchmode or lefthandmode
@@ -1401,7 +1401,7 @@ Return
 ;room. They are only updated one at a time and they
 ;are only moved by whole squares. They change direction
 ;with help of the subroutine oldchangedir
-		##[$80CA] object(b)
+		USEPATH object(b)
 		If \class=#alien
 			oldmapx=\mapx:oldmapy=\mapy
 			If \steps=0 Then \steps=5
@@ -1478,7 +1478,7 @@ Return
 	Return
 
 .killobject
-	##[$80CA] object(objnr)
+	USEPATH object(objnr)
 	\class=#dead
 	kon=objlist(\roomnr,0)
 	For koa=1 To kon
@@ -1498,7 +1498,7 @@ Return
 
 .smartchangedir
 Goto smartmove
-	##[$80CA] object(b)
+	USEPATH object(b)
 	ways=0
 	If rooms(roomnr,\mapx,\mapy-1)>0 OR vmap(\mapx,\mapy-1)>0
 		ways+1
@@ -1512,16 +1512,16 @@ Goto smartmove
 	If rooms(roomnr,\mapx+1,\mapy)>0 OR vmap(\mapx+1,\mapy)>0
 		ways+8
 	EndIf
-	If \mapx<sp\mapx AND ways ##[$80CD] 3
+	If \mapx<sp\mapx AND ways BitTst 3
 		\dir=#east
 	EndIf
-	If \mapx>sp\mapx AND ways ##[$80CD] 2
+	If \mapx>sp\mapx AND ways BitTst 2
 		\dir=#west
 	EndIf
-	If \mapy<sp\mapy AND ways ##[$80CD] 1
+	If \mapy<sp\mapy AND ways BitTst 1
 		\dir=#south
 	EndIf
-	If \mapy>sp\mapy AND ways ##[$80CD] 0
+	If \mapy>sp\mapy AND ways BitTst 0
 		\dir=#north
 	EndIf
 
@@ -1530,7 +1530,7 @@ Goto smartmove
 
 .changedir
 	Goto smartchangedir
-	##[$80CA] object(b)
+	USEPATH object(b)
 	ways=0
 	If rooms(roomnr,\mapx,\mapy-1)>0 OR vmap(\mapx,\mapy-1)>0
 		ways+1
@@ -1567,7 +1567,7 @@ Goto smartmove
 	Return
 
 .oldchangedir
-	##[$80CA] object(b)
+	USEPATH object(b)
 	ways=0
 	If rooms(oldroomnr,\mapx,\mapy-1)>0 OR oldvmap(\mapx,\mapy-1)>0
 		ways+1
@@ -1640,7 +1640,7 @@ Goto smartmove
 	If Joyr(1)=8					;No movement
 	 If sp\vel>0		 ;If not stopped start retardation
 		Select sp\dir
-		##[$80CA] sp
+		USEPATH sp
 			Case 0
 				Gosub checkupmove
 			Case 1
@@ -1722,7 +1722,7 @@ Goto smartmove
 		If rooms(roomnr,sp\mapx,sp\mapy)<0
 			If sp\tilex<0
 				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
-				##[$80CA] pass(passagenr)
+				USEPATH pass(passagenr)
 				If (roomnr=\sekt1 AND \passtype1=#west)OR(roomnr=\sekt2 AND \passtype2=#west)
 					Gosub movetonewroom
 				EndIf
@@ -1759,7 +1759,7 @@ Goto smartmove
 		If rooms(roomnr,sp\mapx,sp\mapy)<0
 			If sp\tilex>-1
 				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
-				##[$80CA] pass(passagenr)
+				USEPATH pass(passagenr)
 				If (roomnr=\sekt1 AND \passtype1=#east)OR(roomnr=\sekt2 AND \passtype2=#east)
 					Gosub movetonewroom
 				EndIf
@@ -1796,7 +1796,7 @@ Goto smartmove
 		If rooms(roomnr,sp\mapx,sp\mapy)<0
 			If sp\tiley<0
 				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
-				##[$80CA] pass(passagenr)
+				USEPATH pass(passagenr)
 				If (roomnr=\sekt1 AND \passtype1=#north)OR(roomnr=\sekt2 AND \passtype2=#north)
 					Gosub movetonewroom
 				EndIf
@@ -1833,7 +1833,7 @@ Goto smartmove
 		If rooms(roomnr,sp\mapx,sp\mapy)<0
 			If sp\tiley>-1
 				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
-				##[$80CA] pass(passagenr)
+				USEPATH pass(passagenr)
 				If (roomnr=\sekt1 AND \passtype1=#south)OR(roomnr=\sekt2 AND \passtype2=#south)
 					Gosub movetonewroom
 				EndIf
@@ -1867,7 +1867,7 @@ Goto smartmove
 	Sound #exitsound,1
 	oldroom=True
 	oldroomnr=roomnr
-	##[$80CA] pass(passagenr)
+	USEPATH pass(passagenr)
 	If roomnr=\sekt1
 		roomnr=\sekt2
 		sp\mapx=\x2
@@ -1905,7 +1905,7 @@ EndIf
 	For a=0 To objlist(roomnr,0)
 	 If a>0
 		b=objlist(roomnr,a)
-		##[$80CA] object(b)
+		USEPATH object(b)
 			vmap(\mapx,\mapy)=b	 ;put in object
 	 EndIf
 	Next
@@ -2064,7 +2064,7 @@ spdata:
 	Data.w 14,15,16,17				;Animlists
 
 .initobjects
-	##[$80CA] object(a)
+	USEPATH object(a)
 	nrofflags=0
 	For a=1 To nrofobjects
 		\totpos=!tp{\scrx,\scry}
@@ -2352,7 +2352,7 @@ objectdata:
 
 
 .drawa3droom
-	Use lmaxlen db
+	Use BitMap db
 	FlushBuffer 0:FlushBuffer 1
 	flshnr=nrofshapes+1
 	BlockScroll
@@ -2361,10 +2361,10 @@ objectdata:
 			r=rooms(roomnr,x,y)
 			If r<>0
 				If r>0
-					longdiv flshnr-1+r,#scrdx+x*16-y*16,#scrdy+y*8+x*8
+					Blit flshnr-1+r,#scrdx+x*16-y*16,#scrdy+y*8+x*8
 				Else
 					r=Abs(r)
-					##[$80CA] pass(r)
+					USEPATH pass(r)
 					If roomnr=\sekt1
 						et=\passtype1
 					Else
@@ -2380,7 +2380,7 @@ objectdata:
 						Case #west
 							exnr=flshnr+15
 					End Select
-					longdiv exnr,#scrdx+x*16-y*16,#scrdy+y*8+x*8
+					Blit exnr,#scrdx+x*16-y*16,#scrdy+y*8+x*8
 				EndIf
 			EndIf
 		Next
@@ -2389,7 +2389,7 @@ objectdata:
 	Show db,0,#bmapyoffset
 	ShapesBitMap db,1-db
 	db=1-db
-	Use lmaxlen db
+	Use BitMap db
 	Return
 
 .readroomdata
@@ -2418,7 +2418,7 @@ If WriteMem(0,f$)
 		For a=1 To nrofobjects
 			*objptr=object(a)
 			##[$BE14] 0,*objptr,((SizeOf.object) - #objstructdiff) ;This is because of
-			##[$80CA] object(a)										;a difference in objectstruct
+			USEPATH object(a)										;a difference in objectstruct
 		Next																	 ;in mapedit and here
 	EndIf
 	CloseFile 0
@@ -2463,11 +2463,11 @@ Return
 ;Find and store the bitplan pointers fo the two bitmaps
 ;Init bitplane pointers
 For a=0 To #depth-1
-	bplptr.l=Peek.l(Addr lmaxlen(0)+8+a*4)
+	bplptr.l=Peek.l(Addr BitMap(0)+8+a*4)
 	Poke.l ?bplbase0+a*4,bplptr
 Next
 For a=0 To #depth-1
-	bplptr.l=Peek.l(Addr lmaxlen(1)+8+a*4)
+	bplptr.l=Peek.l(Addr BitMap(1)+8+a*4)
 	Poke.l ?bplbase1+a*4,bplptr
 Next
 ;Calculate the positions and velocities for the stars

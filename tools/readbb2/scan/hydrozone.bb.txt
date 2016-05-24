@@ -10,16 +10,16 @@
 ; MORE THAN 1 MEG IS NEEDED TO COMPILE THIS SOURCE CODE. SORRY
 
 WBStartup
-##[$80CC]
+NoCli
 
-lmaxlen 0,320,256,3
-lmaxlen 1,320,256,3
-lmaxlen 2,120,200,3
+BitMap 0,320,256,3
+BitMap 1,320,256,3
+BitMap 2,120,200,3
 LoadModule 0,"mod.HydroZone"
 LoadSound 1,"explo1"
 LoadSound 2,"explo2"
 LoadSound 0,"Ting"
-casestrcomp 0,"Hztitle.sh"
+LoadPalette 0,"Hztitle.sh"
 LoadShapes 46,"Duck.sh"
 LoadShapes 0,"Shapes2"
 LoadShape 67,"Skull.sh"
@@ -72,7 +72,7 @@ Gosub MainTitle
 If go=1 Then Return
 If go=2 Then Gosub Shareware2
 
-Use lmaxlen db:BlockScroll
+Use BitMap db:BlockScroll
 Gosub CircleRnd
 tc=1:tud=50:Td=1
 t$="WRITTEN":Gosub FontPrint
@@ -96,16 +96,16 @@ If Rnd(10)>5
 	 Boxf 135/t,138/t,150/t,175/t,7
 	 Boxf 117/t,181/t,119/t,183/t,0
 	 Boxf 214/t,50/t,221/t,55/t,0
-	 VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	 VWait:Show db:db=1-db:Use BitMap db:BlockScroll
 	Next t
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	tud=10
 	t$="KILL PIRACY":Gosub FontPrint
 	tud=200
 	t$="NOT YOUR AMIGA":Gosub FontPrint
 	While tt<300 AND Joyb(1)=0
 	VWait
-	longdiv 67,134,44,tt
+	Blit 67,134,44,tt
 	tt=tt+1
 	Wend
 	For t=1 To 20 Step .5
@@ -115,7 +115,7 @@ If Rnd(10)>5
 	 Boxf 135/t,138/t,150/t,175/t,7
 	 Boxf 117/t,181/t,119/t,183/t,0
 	 Boxf 214/t,50/t,221/t,55/t,0
-	 VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	 VWait:Show db:db=1-db:Use BitMap db:BlockScroll
 	Next t
 
 
@@ -123,17 +123,17 @@ If Rnd(10)>5
 Else
 	Td=0:coLR=1:co=0
 	While tt<120 AND Joyb(1)=0
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
 	tud=100:tt=tt+1
 	t$="SKULL ARMY":Gosub FontPrint
 	t$="SOFTW-ARE":Gosub FontPrint
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
-	longdiv 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
+	Blit 67,Rnd(270),Rnd(180),Rnd(8)
 	co=co+coLR:Green 0,co,0,0:If co>14 OR co<1 Then coLR=-coLR
-	VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	VWait:Show db:db=1-db:Use BitMap db:BlockScroll
 	Wend
 
 EndIf
@@ -164,7 +164,7 @@ Return
 
 .AlienTalk
 
-BlockScroll:Show db:db=1-db:Use lmaxlen db:BlockScroll
+BlockScroll:Show db:db=1-db:Use BitMap db:BlockScroll
 Green 1,0,0,0
 Green 2,0,0,0
 Green 3,0,0,0
@@ -187,7 +187,7 @@ Show db:db=1-db
 For t=0 To 15:VWait 2:Green 1,t,t,t:Green 2,t,0,t:Next
 For t=0 To 13:VWait 4:Green 7,0,0,t:Next
 
-Use lmaxlen db
+Use BitMap db
 Gosub Station1
 tud=10
 
@@ -198,13 +198,13 @@ t$="OF YOUR LIFE.":Gosub FontPrint
 cou=3:Gosub waait
 Use SetCycle 0
 
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 cou=3:Gosub waait
 Return
 
 
 .GameOver
-db=1-db:Use lmaxlen db:Show db
+db=1-db:Use BitMap db:Show db
 tc=1:Td=1
 t$="GAME OVER":tud=113:Gosub FontPrint
 VWait 75
@@ -230,15 +230,15 @@ If sky2>0 Then skys2=skys2-1
 If sky2<0 Then skys2=skys2+1
 
 
-longdiv 67,130+skx,80+sky,Rnd(8)
-longdiv 67,130-skx,80-sky,Rnd(8)
+Blit 67,130+skx,80+sky,Rnd(8)
+Blit 67,130-skx,80-sky,Rnd(8)
 If Int(t)=150 Then t$="TRY HARDER":If Rnd(10)>4 Then t$="TRY AGAIN"
 tud=113-skx:Gosub FontPrint
-longdiv 67,130+skx2,80-sky2,Rnd(8)
-longdiv 67,130-skx2,80+sky2,Rnd(8)
+Blit 67,130+skx2,80-sky2,Rnd(8)
+Blit 67,130-skx2,80+sky2,Rnd(8)
 
 VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Wend
 Return
 
@@ -257,7 +257,7 @@ For t=1 To 35
 	Boxf x(t),y(t),x(t)+ys(t)*4,y(t)+ys(t)*4,c(t)
 Next
 VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Wend
 
 b=5
@@ -274,9 +274,9 @@ Boxf 160-160/b,127-127/b,160+160/b,127+127/b,1
 b=b-.25
 
 VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Wend
-db=1-db:Use lmaxlen db:BlockScroll
+db=1-db:Use BitMap db:BlockScroll
 Return
 
 .FlyBoxsVars
@@ -310,7 +310,7 @@ Return
 
 .MTitleDraw
 
-longdiv 68,20,10
+Blit 68,20,10
 
 
 Boxf 0,130,320,256,0
@@ -326,11 +326,11 @@ tc=1:Td=0:If tiy=1 Then Td=1
 t$="SHAREW-ARE":Gosub FontPrint
 tud=220:Td=0:If tiy=0 Then Td=1
 t$="ST-ART":Gosub FontPrint
-longdiv 67,271,184,7
+Blit 67,271,184,7
 Point 287,208-tiy,2:Point 298,208-tiy,2
 cou=20000
 VWait
-Show db:db=1-db:Use lmaxlen db
+Show db:db=1-db:Use BitMap db
 Return
 
 .TestLevel
@@ -369,7 +369,7 @@ tow=0:ats=-.12:brb=0:Gosub Boss1:If en<0 Then Return
 Gosub Explode
 
 tc=1:tud=80
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="WELL DONE":Gosub FontPrint
 t$="YOUVE KILLED IT":Gosub FontPrint
 t$="GET READY":Gosub FontPrint
@@ -402,7 +402,7 @@ Restore TData30:fr=22:Gosub MainLoop:If en<0 Then Return
 Restore TDataEnd2:fr=9:Gosub MainLoop:If en<0 Then Return
 
 
-Use lmaxlen 1-db
+Use BitMap 1-db
 tc=1:tud=50
 t$="O.K. ITS":Gosub FontPrint
 t$="TIME FOR A":Gosub FontPrint
@@ -412,7 +412,7 @@ t$="T-ARGETS FOR":Gosub FontPrint
 t$="EXTRA ENERGY":Gosub FontPrint
 cou=3:Gosub waait
 Gosub DuckShot
-Use lmaxlen 1-db
+Use BitMap 1-db
 tc=1:tud=50
 t$="LETS SMASH":Gosub FontPrint
 t$="THROUGH THE":Gosub FontPrint
@@ -471,7 +471,7 @@ Restore TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
 brb=0:Gosub Boss2:If en<0 Then Return
 Gosub Explode
 tud=80
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="OK. LETS":Gosub FontPrint
 t$="GET GOING":Gosub FontPrint
 cou=1:Gosub waait
@@ -512,7 +512,7 @@ Fa=1:Green 1,10,0,10
 Restore TData:fr=17:Gosub MainLoop:If en<0 Then Return
 Restore TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
 
-Use lmaxlen 1-db
+Use BitMap 1-db
 tc=1:tud=50
 t$="LETS BREAK OUT":Gosub FontPrint
 t$="TO LEVEL 3":Gosub FontPrint
@@ -522,7 +522,7 @@ t$="GAME":Gosub FontPrint
 cou=2:Gosub waait
 
 Gosub BreakOut:If en<0 Then Return
-Use lmaxlen 1-db
+Use BitMap 1-db
 tc=1:tud=50
 If tt=0
  t$="YOU LOST ALL":Gosub FontPrint
@@ -590,7 +590,7 @@ Restore TData17:fr=19:Gosub MainLoop:If en<0 Then Return
 Restore TData16:fr=22:Gosub MainLoop:If en<0 Then Return
 Restore TData:fr=5:Gosub MainLoop:If en<0 Then Return
 tud=50
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="BONUS ROUND.":Gosub FontPrint
 t$="CA-TCH THE":Gosub FontPrint
 t$="FLASHING SQUARES":Gosub FontPrint
@@ -645,7 +645,7 @@ Green 0,3,0,6
 Gosub Explode
 
 tud=80
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="WERE IN":Gosub FontPrint
 t$="THE TUNNEL":Gosub FontPrint
 t$="5 BY 5":Gosub FontPrint
@@ -676,7 +676,7 @@ Bc=1:c2=3:c3=2:c4=5:c5=4:BlockScroll Bc
 Restore TData16:fr=22:Gosub MainLoop:If en<0 Then Return
 Restore TDataEnd2:fr=9:Gosub MainLoop:If en<0 Then Return
 
-Use lmaxlen 1-db
+Use BitMap 1-db
 tud=50
 
 t$="TIME TO TOP":Gosub FontPrint
@@ -687,7 +687,7 @@ t$="T-ARGETS":Gosub FontPrint
 t$="DEAD":Gosub FontPrint
 cou=3:Gosub waait
 Gosub DuckShot
-Use lmaxlen 1-db
+Use BitMap 1-db
 tud=100
 t$="LETS GO":Gosub FontPrint
 cou=.5:Gosub waait
@@ -742,7 +742,7 @@ Restore TDataEnd:fr=9:Gosub MainLoop:If en<0 Then Return
 brb=0:Gosub Boss3:If en<0 Then Return
 Gosub Explode
 tud=90
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="GOOD":Gosub FontPrint
 t$="SHOOTING":Gosub FontPrint
 cou=.4:Gosub waait
@@ -779,7 +779,7 @@ Restore TDataEnd:fr=2:Gosub MainLoop:If en<0 Then Return
 Restore Back6:fr=5:Gosub MainLoop:If en<0 Then Return
 Bc=0:c2=3:c3=-7:c4=4:c5=7:BlockScroll Bc
 tud=80
-Use lmaxlen 1-db
+Use BitMap 1-db
 t$="CA-TCH THE":Gosub FontPrint
 t$="FLASHING SQUARES":Gosub FontPrint
 t$="FOR ENERGY.":Gosub FontPrint
@@ -820,7 +820,7 @@ Boxf 160+ 3.5*t,128+ -.5*t,160+ 4.5*t,128+ .5*t,7
 Boxf 160+ 3.5*t,128+ 1.5*t,160+ 5.5*t,128+ 2.5*t,7
 Green 7,0,0,15.9-tt*.084
 VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 
 Next
 BlockScroll
@@ -843,7 +843,7 @@ Boxf 160+4.5*t,128-1.5*t,160+5.5*t,128+1.5*t,7
 
 Green 7,0,0,15.9-tt*.084
 VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 
 Next
 
@@ -851,11 +851,11 @@ For t=0 To 222 Step 3
 Line Rnd(320),Rnd(256)+t,160,128+t,Rnd(7)+1
 Line Rnd(320),Rnd(256)+t,Rnd(7)+1
 VWait 2
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 
 Next
 
-Use lmaxlen 1-db:BlockScroll:Use lmaxlen db
+Use BitMap 1-db:BlockScroll:Use BitMap db
 For t=0 To 1000:Point Rnd(320),Rnd(200),7.1:Next
 
 Td=1:tc=0:tud=20
@@ -872,17 +872,17 @@ t$="CONQUER . . .":Gosub FontPrint
 Green 1,0,0,0
 Green 2,0,0,0
 Green 3,0,0,0
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 For t=0 To 15 Step .5:VWait:Green 1,t,t,t:Green 2,t,0,t:Next
 For t=0 To 15 Step .05:VWait:Green 7,0,0,t:Next
 Gosub CircleRnd
-longdiv 68,20,60
+Blit 68,20,60
 tc=1:tud=160
 t$="SPECIAL EDITION":Gosub FontPrint
 
 cou=2:Gosub waait
 Use SetCycle 0
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Gosub CircleRnd
 tud=90
 t$="FOR MORE INFO.":Gosub FontPrint
@@ -890,7 +890,7 @@ t$="READ THE":Gosub FontPrint
 t$="SHAREW-ARE MENU.":Gosub FontPrint
 
 cou=2:Gosub waait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 cou=1:Gosub waait
 Return
 
@@ -898,7 +898,7 @@ Return
 .TunVari
 
 co=3:coLR=1
-Use lmaxlen db:BlockScroll 1:Use lmaxlen db
+Use BitMap db:BlockScroll 1:Use BitMap db
 x1=-160:x2=160:x3=-160:x4=160:x5=-160
 xx1=-150:xx2=150:xx3=-150:xx4=150:xx5=-150
 y1=-127:y2=-127:y3=-127:y4=-127:y5=-127
@@ -944,7 +944,7 @@ Boxf 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 Next
 
 If -lr>x1-20 AND -lr<xx1+20 AND -ud>y1-20 AND -ud<yy1+20 Then Sound 1,15,3:Show db:VWait:BlockScroll 2:VWait 2:en=en-10:VWait 5
@@ -1005,7 +1005,7 @@ Boxf 160+(Boss1X(S)-40+lr)/at,127+(Boss1Y(S)+20+ud)/at,160+(Boss1X(S)+40+lr)/at,
 If ft<=at AND fg Then Gosub FireBoss
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 expt=at:exx=Boss1X(S):exy=Boss1Y(S)
@@ -1067,7 +1067,7 @@ If aft<.3
  aft=4:aflr=0:afud=0:fslr=-lr/10:fsud=-ud/10
 EndIf
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 expt=4:exx=0:exy=-10
@@ -1128,7 +1128,7 @@ If aft>.1 AND aft<=ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,7
 Boxf 1,1,en,10,4
 If aft<.3
  If PColl(aflr,afud,40,40,-lr,-ud,40,40)
-	Sound 1,15,3:Show db:db=1-db:Use lmaxlen db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
+	Sound 1,15,3:Show db:db=1-db:Use BitMap db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
  EndIf
  adb=1-adb
  If adb=1 Then aflr=Boss1X(sp1):afud=Boss1Y(sp1)
@@ -1138,7 +1138,7 @@ If aft<.3
 EndIf
 
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 expt=3:exx=0:exy=-10
@@ -1180,7 +1180,7 @@ If aft>.1 AND aft<=ft Then Circlef 160+(aflr+lr)/aft,127+(afud+ud)/aft,20/aft,1+
 Boxf 0,0,en,10,4
 If aft<.3
  If PColl(aflr,afud,40,40,-lr,-ud,40,40)
-	Sound 1,15,3:Show db:db=1-db:Use lmaxlen db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
+	Sound 1,15,3:Show db:db=1-db:Use BitMap db:VWait:BlockScroll 3:Show db:db=1-db:VWait 6:en=en-10
  EndIf
  aft=3:fslr=-Rnd(20):fsud=-Rnd(20):aflr=ax:afud=ay
  If ax>-lr Then fslr=Rnd(2)
@@ -1188,7 +1188,7 @@ If aft<.3
 EndIf
 
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 expt=3:exx=ax:exy=ay
@@ -1228,7 +1228,7 @@ Boxf 160+(Boss1X(S)-40+lr)/at,127+(Boss1Y(S)+20+ud)/at,160+(Boss1X(S)+40+lr)/at,
 If ft<=at AND fg Then Gosub FireBoss
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Next
 
@@ -1252,7 +1252,7 @@ yy1=yy2:yy2=yy3:yy3=yy4:yy4=yy5:yy5=yy5+re
 c1=c2:c2=c3:c3=c4:c4=c5:c5=2+Rnd(6)
 
 For t=0 To 1.8 Step .2
-If Joyb(0)=1 Then tud=100:Use lmaxlen 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use lmaxlen db:cou=32568:Gosub waait
+If Joyb(0)=1 Then tud=100:Use BitMap 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use BitMap db:cou=32568:Gosub waait
 lri=Joyx(1)*7.5:lr=lr-lri
 udi=Joyy(1)*pil:ud=ud-udi
 pt=pt-.1
@@ -1267,7 +1267,7 @@ Box 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c1
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Next
 
 If -lr<x1+20 OR -lr>xx1-20 OR -ud<y1+20 OR -ud>yy1-20 Then Sound 1,11,3:Show db:VWait:BlockScroll 2:VWait 2:en=en-10:VWait 5
@@ -1295,7 +1295,7 @@ Gosub Lines
 If Joyb(1) AND NOT fg Then Sound 2,11,13:fg=1:ft=.2:flr=-lr-20:fud=-ud-20
 Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
 dlr=dlr+dlrs:dud=dud+duds:dlrs=dlrs+dlra:duds=duds+duda:If dlr>130 OR dlr<-158 OR dud>99 OR dud<-125 Then Gosub DuckVar
-longdiv sh+shp,160+(dlr+lr)/4,127+(dud+ud)/4
+Blit sh+shp,160+(dlr+lr)/4,127+(dud+ud)/4
 Boxf 160+(140+lr)/2,127+(128+ud)/2,160+(160+lr)/2,127+(time+ud)/2,4
 Boxf 160+(-160+lr)/2.2,127+(-128+ud)/2.2,160+(-140+lr)/2.2,127+(time+ud)/2.2,4
 Line 160+(-140+lr)/2.2,127+(time+ud)/2.2,160+(140+lr)/2,127+(time+ud)/2,4
@@ -1306,7 +1306,7 @@ If fg Then Gosub FireDuck
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 If en>150 Then en=150
@@ -1362,7 +1362,7 @@ Boxf 160+(x1+lr)/(2-t),127+(y1+ud)/(2-t),160+(xx1+lr)/(2-t),127+(yy1+ud)/(2-t),c
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 Next
 
 If -lr>x1-20 AND -lr<xx1+20 AND -ud>y1-20 AND -ud<yy1+20
@@ -1390,13 +1390,13 @@ Line 160,127,lr,ud,3
 Line 160,127,320+lr,ud,3
 Line 160,127,lr,256+ud,2
 Line 160,127,320+lr,256+ud,2
-If Joyb(0)=1 Then tud=100:Use lmaxlen 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use lmaxlen db:cou=32568:Gosub waait
+If Joyb(0)=1 Then tud=100:Use BitMap 1-db:t$="PAUSE":Gosub FontPrint:Show 1-db:Use BitMap db:cou=32568:Gosub waait
 Return
 
 .BreakOut
 BrCo=0:ox=0:oxs=0:oy=0:oys=0:ot=.3:otud=0:start=1:Dim bd(7,7),bd2(7,7)
 
-Use lmaxlen 2
+Use BitMap 2
 BlockScroll
 For vv2=0 To 250 Step 40
  For vv1=0 To 315 Step 67
@@ -1416,7 +1416,7 @@ Next
 v2=v2-17:v1=v1-15
 GetaShape 66,0,120,v1/3.5,v2/3.5
 
-Use lmaxlen db
+Use BitMap db
 tt=5
 While en>-.1 AND BrCo<70 AND tt>0
 
@@ -1430,9 +1430,9 @@ If (ot>3.45 AND ot<3.55) OR (ot>2.45 AND ot<2.55) Then Gosub BreakBrick
 Boxf 160+(-160+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
 
 If ot>3.4 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
-longdiv 66,160+(-160+lr)/3.5,127+(-127+ud)/3.5
+Blit 66,160+(-160+lr)/3.5,127+(-127+ud)/3.5
 If ot>2.4 AND ot<3.5 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
-longdiv 65,160+(-160+lr)/2.5,127+(-127+ud)/2.5
+Blit 65,160+(-160+lr)/2.5,127+(-127+ud)/2.5
 
 
 If ot<2.5 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
@@ -1440,7 +1440,7 @@ If ot<2.5 Then Circlef 160+(ox+lr)/ot,127+(oy+ud)/ot,10/ot,7
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Wend
 
@@ -1462,11 +1462,11 @@ ot=2.5
 otud=-otud
 bd(Int((ox+165)/67),Int((oy+132)/40))=1
 
-Use lmaxlen 2
+Use BitMap 2
 
 Boxf Int((ox+165)/67)*67/2.5,Int((oy+132)/40)*40/2.5,(60+Int((ox+165)/67)*67)/2.5,(20+Int((oy+132)/40)*40)/2.5,0
 GetaShape 65,0,0,vv1/2.5,vv2/2.5
-Use lmaxlen db
+Use BitMap db
 BrCo=BrCo+1:If en<150 Then en=en+1
 Sound 0,11
 EndIf
@@ -1476,11 +1476,11 @@ ot=3.5
 otud=-otud
 bd2(Int((ox+165)/67),Int((oy+132)/40))=1
 
-Use lmaxlen 2
+Use BitMap 2
 
 Boxf Int((ox+165)/67)*67/3.5,120+Int((oy+132)/40)*40/3.5,(60+Int((ox+165)/67)*67)/3.5,120+(20+Int((oy+132)/40)*40)/3.5,0
 GetaShape 66,0,120,v1/3.5,v2/3.5
-Use lmaxlen db
+Use BitMap db
 BrCo=BrCo+1:If en<150 Then en=en+1
 Sound 0,11
 EndIf
@@ -1498,7 +1498,7 @@ Circlef 160+(exx+lr)/expt,127+(exy+ud)/expt,Rnd(t)/expt,-Rnd(8)
 For tt=0 To 5:Point 160+(-Rnd(t)+Rnd(t)+exx+lr)/expt,127+(-Rnd(t)+Rnd(t)+exy+ud)/expt,Rnd(7):Next
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Next
 Return
@@ -1516,7 +1516,7 @@ Boxf 160+(x4+lr)/6,127+(y4+ud)/6,160+(xx4+lr)/6,127+(yy4+ud)/6,c4
 Boxf 160+(t+lr)/4,127+(-128+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
 Boxf 0,0,en,10,4
 If m=0 Then VWait 2
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Next
 Return
@@ -1536,7 +1536,7 @@ Boxf 160+(-t+lr)/4,127+(-128+ud)/4,160+(-160+lr)/4,127+(128+ud)/4,6
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Next
 
@@ -1558,7 +1558,7 @@ Boxf 160+(t*1.25+lr)/4,127+(t+ud)/4,160+(160+lr)/4,127+(128+ud)/4,6
 
 Boxf 0,0,en,10,4
 If m=0 Then VWait
-Show db:db=1-db:Use lmaxlen db:BlockScroll Bc
+Show db:db=1-db:Use BitMap db:BlockScroll Bc
 
 Next
 Return
@@ -1580,7 +1580,7 @@ Return
 .Shareware
 
 TD=1:tc=1:tud=10
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 Green 1,0,0,0
 Green 2,0,0,0
 Green 3,0,0,0
@@ -1598,7 +1598,7 @@ t$="CODE, READ":Gosub FontPrint
 t$="THE SHAREW-ARE":Gosub FontPrint
 t$="MENU.":Gosub FontPrint
 
-Show db:db=1-db:Use lmaxlen db:BlockScroll
+Show db:db=1-db:Use BitMap db:BlockScroll
 For t=0 To 15:VWait 2:Green 1,t,t,t:Green 2,t,0,t:Next
 For t=0 To 15:VWait 7:Green 7,0,0,t:Next
 
@@ -1607,7 +1607,7 @@ cou=1.5:Gosub waait
 Return
 .Shareware2
 tc=1:tud=0
-Use lmaxlen db:BlockScroll
+Use BitMap db:BlockScroll
 Gosub CircleRnd
 Td=1:t$="SHAREW-ARE":Gosub FontPrint
 tc=0:Td=0:tud=tud+5
@@ -1701,10 +1701,10 @@ For T=1 To le
 If soy(T)<>44 AND soy(T)<>45
  If Td
 	;BlitMode SolidMode
-	longdiv soy(T),lrt-(lrt-160)/50,tud-(tud-127)/50,2:longdiv soy(T),lrt-(lrt-160)/100,tud-(tud-127)/100,2
+	Blit soy(T),lrt-(lrt-160)/50,tud-(tud-127)/50,2:Blit soy(T),lrt-(lrt-160)/100,tud-(tud-127)/100,2
 	;BlitMode CookieMode
  EndIf
- longdiv soy(T),lrt,tud
+ Blit soy(T),lrt,tud
 EndIf
 lrt=lrt+wi(soy(T))
 Next
@@ -1739,7 +1739,7 @@ Return
 cou=.01:Gosub waait
 tt=0:ttt=0:pat=0
 Show 1-db
-Use lmaxlen 1-db:BlockScroll
+Use BitMap 1-db:BlockScroll
 While Joyb(0)=0
 
  Line 160,127,160,127,0
@@ -1750,13 +1750,13 @@ While Joyb(0)=0
 	Line 160+HSin(tt)*pat,127+HCos(tt)*pat,pat
  Wend
 VWait
-Show db:db=1-db:Use lmaxlen db:If PAT=0 Then BlockScroll
+Show db:db=1-db:Use BitMap db:If PAT=0 Then BlockScroll
 
 Wend
 
 cou=.01:Gosub waait
 Show 1
-Use lmaxlen 1:BlockScroll
+Use BitMap 1:BlockScroll
 While Joyb(0)=0
  Gosub CircleRnd
  Line 160,127,160,127,0

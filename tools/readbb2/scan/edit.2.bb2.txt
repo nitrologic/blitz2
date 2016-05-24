@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/edit.2.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/edit.2.bb2
 Dim chat$(77,20)
 
-freest 0; ,0,0,320,172,2,0,"test",1,2
+WbToScreen 0; ,0,0,320,172,2,0,"test",1,2
 
-localstat 0,0,0,640,200,$143f,"",2,1
+Window 0,0,0,640,200,$143f,"",2,1
 y=0
 WLocate 0,0
 Format "##"

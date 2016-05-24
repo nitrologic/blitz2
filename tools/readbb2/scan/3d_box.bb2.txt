@@ -4,11 +4,11 @@
 ;
 
 BLITZ
-lmaxlen 0,320,256,1
-lmaxlen 1,320,256,1
+BitMap 0,320,256,1
+BitMap 1,320,256,1
 Slice 0,44,320,256,$fff8,1,8,32,320,320
 Show 0
-Use lmaxlen 0
+Use BitMap 0
 Green 1,15,15,15
 
 DIST=300 : ZOM=900
@@ -19,7 +19,7 @@ ZD=100
 Mouse On
 While Joyb(0)=0
 			VWait
-			Show db:db=1-db:Use lmaxlen db:BlockScroll 0
+			Show db:db=1-db:Use BitMap db:BlockScroll 0
 			PHI+.02
 			ZOM=200
 			;

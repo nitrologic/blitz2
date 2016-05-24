@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/GraphicPrint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicPrint.bb
-##[$80CC]
+NoCli
 WBStartup
-freest 0
+WbToScreen 0
 ##[$FFB5]
 Repeat
 	MaxLen pa$ = 160
@@ -11,8 +11,8 @@ Repeat
 	##[$FFB4]
 	If pic$ <> ""
 		ILBMDepth pic$
-		allocst 0,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",1,2
-		localstat 0,0,0,ILBMViewMode,DecodeILBM,$0800,"",0,1
+		Screen 0,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",1,2
+		Window 0,0,0,ILBMViewMode,DecodeILBM,$0800,"",0,1
 		cols = 2^##[$D087]
 		For i = 0 To cols - 1
 		 Green i,0,0,0
@@ -26,7 +26,7 @@ Repeat
 	ypos.w = 0
 	wid.w = ILBMViewMode
 	ht.w = DecodeILBM
-	localstat 1,ILBMViewMode/3,DecodeILBM/3,ILBMViewMode/3,DecodeILBM/8,0,"Printing",0,1
+	Window 1,ILBMViewMode/3,DecodeILBM/3,ILBMViewMode/3,DecodeILBM/8,0,"Printing",0,1
 	WLocate 2,3
 	Print "Please Wait"
 	Gosub HardCopy

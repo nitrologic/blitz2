@@ -15,8 +15,8 @@
 
 m.l=Peek.l(Addr ##[$A401](1))
 
-lmaxlen 0,640,32,8
-lmaxlen 1,640,32,3
+BitMap 0,640,32,8
+BitMap 1,640,32,3
 
 DecodePalette 0,256:For i=0 To 255:AGAGreen 0,i,i,i,i:Next
 
@@ -39,14 +39,14 @@ CreateDisplay 0,1
 For xx=0 To 9
 	a=xx*64
 	##[$A40C] 0,1,a,0,64,32,0,0
-	Use lmaxlen 0
+	Use BitMap 0
 	For y=0 To 31
 		For x=0 To 63
 			mm.l=m+x+y*192
 			r.w=Peek.b(mm)&255:g.w=Peek.b(mm+64)&255:b.w=Peek.b(mm+128)&255
 			c.w=(r+g+b)/3
-			Use lmaxlen 0:Point x+xx*64,y,c
-			Use lmaxlen 1
+			Use BitMap 0:Point x+xx*64,y,c
+			Use BitMap 1
 
 			If g=255 Then c=0:Goto doit				 ;green
 

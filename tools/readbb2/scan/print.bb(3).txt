@@ -12,9 +12,9 @@ home:
 
 Statement displaychars{vmem.l}
 	Shared chars()
-	newmem chars()
+	ResetList chars()
 	temp.l=0
-	While globfree(chars()):##[$C482] &chars(),vmem,4:vmem+8:Wend
+	While NextItem(chars()):##[$C482] &chars(),vmem,4:vmem+8:Wend
 	##[$C482] &temp,vmem,2:##[$C482] &temp,vmem+4,2
 End Statement
 
@@ -43,7 +43,7 @@ Statement addstring{charbase.l,l.w,x.w,y.w,col.w}
 		If blah<0
 			x+1+big+big
 		Else
-			If globalloc chars()
+			If AddItem chars()
 				chars()\y=y,ld,sn,x
 				x+Peek.w(fontsize+blah+blah+big*42)
 				ld+1:nxlink+1

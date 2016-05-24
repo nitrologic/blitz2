@@ -69,17 +69,17 @@ font_dat:
 
 End Statement
 
-allocst 0,0,0,640,256,2,$8000,"Hello",2,1
+Screen 0,0,0,640,256,2,$8000,"Hello",2,1
 
 ScreensBitMap 0,0
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 
 a$="Hello world"
 a$=a$+a$+a$+a$
 
 For loop.l=0 To 25
-	l.l=NiceFont {Addr lmaxlen(0),0,12+loop*8,&a$}
+	l.l=NiceFont {Addr BitMap(0),0,12+loop*8,&a$}
 Next loop
 MouseWait
 End

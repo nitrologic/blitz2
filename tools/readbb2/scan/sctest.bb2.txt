@@ -5,7 +5,7 @@ t$+"now! OR Else......"
 
 w=656
 
-lmaxlen 0,w,200,1
+BitMap 0,w,200,1
 
 BitMapOutput 0
 

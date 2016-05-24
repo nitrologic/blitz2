@@ -21,7 +21,7 @@ Dim i.info(255)
 
 Dim bp.w(32768)
 
-lmaxlen 0,4096,256,2
+BitMap 0,4096,256,2
 
 LoadBitMap 0,"mounts.iff",0
 

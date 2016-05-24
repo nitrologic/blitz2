@@ -2,7 +2,7 @@
 ; wow this is one painful demo of Australian humour, if your mouse
 ; button is broken don't run this!
 
-WBStartup:##[$80CC]
+WBStartup:NoCli
 
 NEWTYPE.TA
 	ta_Name.s

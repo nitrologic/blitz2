@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/asllib.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/asllib.bb2
-##[$80CB]
+CloseEd
 
 NEWTYPE.WBArg
 *wa_Lock.b

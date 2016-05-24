@@ -12,12 +12,12 @@ SETLIFE=LIFE
 SETDELAY=DELAY
 SETENERGY=ENERGY
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
-localstat 0,0,0,320,256,$1900,"",2,1
+Window 0,0,0,320,256,$1900,"",2,1
 
 LoadShapes 0,"DATA/OBJECT.SHAPES"
-casestrcomp 0,"DATA/BACKGROUND.IFF"
+LoadPalette 0,"DATA/BACKGROUND.IFF"
 
 FadePalette 0
 
@@ -108,8 +108,8 @@ Return
 
 .DRAWME:
 FIELD(MYX,MYY)=ME
-longdiv 0,OLDMYX*8-8,OLDMYY*8+8
-longdiv ME,MYX*8-8,MYY*8+8
+Blit 0,OLDMYX*8-8,OLDMYY*8+8
+Blit ME,MYX*8-8,MYY*8+8
 Return
 
 .LOSELIFE
@@ -146,7 +146,7 @@ Return
 For X=1 To #FIELDX
 	For Y=1 To #FIELDY
 		OBJ=FIELD(X,Y)
-		longdiv OBJ,X*8-8,Y*8+8,On
+		Blit OBJ,X*8-8,Y*8+8,On
 	Next Y
 Next X
 Return
@@ -160,14 +160,14 @@ If BONUS=1
 	OBJX=Int(Rnd(#FIELDX-3)+2)
 	OBJY=Int(Rnd(#FIELDY-3)+2)
 	FIELD(OBJX,OBJY)=3
-	longdiv 3,OBJX*8-8,OBJY*8+8
+	Blit 3,OBJX*8-8,OBJY*8+8
 EndIf
 
 If BONUS=2 OR BONUS=3
 	OBJX=Int(Rnd(#FIELDX-3)+2)
 	OBJY=Int(Rnd(#FIELDY-3)+2)
 	FIELD(OBJX,OBJY)=2
-	longdiv 2,OBJX*8-8,OBJY*8+8
+	Blit 2,OBJX*8-8,OBJY*8+8
 EndIf
 
 If BONUS>3 AND BONUS<9
@@ -180,12 +180,12 @@ If BONUS>3 AND BONUS<9
 		If DIRECT=0
 			If OBJX+BRICK<#FIELDX
 				FIELD(OBJX+BRICK,OBJY)=4
-				longdiv 4,(OBJX+BRICK)*8-8,OBJY*8+8
+				Blit 4,(OBJX+BRICK)*8-8,OBJY*8+8
 			EndIf
 		Else
 			If OBJY+BRICK<#FIELDY
 				FIELD(OBJX,OBJY+BRICK)=4
-				longdiv 4,OBJX*8-8,(OBJY+BRICK)*8+8
+				Blit 4,OBJX*8-8,(OBJY+BRICK)*8+8
 			EndIf
 		EndIf
 	Next
@@ -232,11 +232,11 @@ SETUP:
 ;Screen 0,0,0,640,256,2,-32768,"TEST",0,1
 PropGadget 1,66,16,64,5,246,12:SetHProp 1,5,SETDELAY/20,0.05
 PropGadget 1,66,36,64,4,246,12:SetHProp 1,4,SETENERGY/40,0.025
-workstart 1,66,56,0,1,"2|3|4|5"
-workstart 1,66,76,0,0,"NONE | FX	|MUSIC"
-workstart 1,266,76,0,6," OK "
+TextGadget 1,66,56,0,1,"2|3|4|5"
+TextGadget 1,66,76,0,0,"NONE | FX	|MUSIC"
+TextGadget 1,266,76,0,6," OK "
 
-localstat 1,0,40,320,96,$1004,"OPTIONS",1,2,1:Menus Off
+Window 1,0,40,320,96,$1004,"OPTIONS",1,2,1:Menus Off
 
 WLocate 2,6:Print "SPEED :"
 WLocate 2,26:Print "ENERGY:"
@@ -255,6 +255,6 @@ SETENERGY=Int(HPropPot(1,4)*40+1)
 SETLIFE=Disable(1,1)+1
 
 CloseWindow 1
-Use localstat 0:Activate 0:WindowInput 0:WindowOutput 0
+Use Window 0:Activate 0:WindowInput 0:WindowOutput 0
 
 Return

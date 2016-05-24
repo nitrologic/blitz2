@@ -8,9 +8,9 @@
 ; s933384@yallara.cs.rmit.edu.au
 ;
 
-lmaxlen 0,320,DispHeight,6
+BitMap 0,320,DispHeight,6
 
-casestrcomp 0,"Palette64.pal"
+LoadPalette 0,"Palette64.pal"
 LoadShapes 0,"Tiles.shp"				; Basic patterned tiles
 LoadShapes	5,"Ring.shp"				; 16x16 sized shape (doughnut shape)
 
@@ -26,7 +26,7 @@ CreateDisplay 0
 
 DisplayBitMap 0,0
 
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
 
 i = 0													 ; Counter for tile shape.
@@ -37,7 +37,7 @@ j = 0													 ; Counter for repeating tile blits.
 
 For y=0 To DispHeight-16 Step 16
 	For x=0 To 320-16 Step 16
-		longdiv i,x,y
+		Blit i,x,y
 		If j = 2
 			If i < 4
 				i=i+1

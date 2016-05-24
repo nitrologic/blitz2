@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/casey/Game.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/casey/Game.bb2
 WBStartup
 
-allocst 0,4
+Screen 0,4
 
 ScreensBitMap 0,0
 LoadBitMap 0,"SHAPES",0

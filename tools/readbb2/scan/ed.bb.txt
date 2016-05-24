@@ -18,7 +18,7 @@ End Statement
 
 Macro p 191+(`1-`3)*10,98+(`1+`3-`2-`2)*3:End Macro
 
-lmaxlen 1,384,180,1
+BitMap 1,384,180,1
 
 doverticy:
 	Circlef 4,3,4,3,1:GetaShape 5,0,0,13,6:Handle 5,3,2
@@ -51,7 +51,7 @@ doxyplane:
 
 ##[$CD10] 1,384,198,4
 CludgeBitMap 1,1
-Use lmaxlen 1:BlockScroll 1
+Use BitMap 1:BlockScroll 1
 
 ; hires overscan display (704x280)
 ; 86x86 chunky window
@@ -66,7 +66,7 @@ MOVE #$8400,$dff096
 
 Gosub setuppointer
 Gosub setuppalette
-lmaxlen 0,704,280,7
+BitMap 0,704,280,7
 Gosub builddisplay
 Gosub setupui
 Goto main
@@ -191,18 +191,18 @@ End NEWTYPE
 
 
 rotatex:
-	newmem v():##[$80CA] v()
-	While globfree(v()):Exchange \y,\z:\z=-\z:Wend
+	ResetList v():USEPATH v()
+	While NextItem(v()):Exchange \y,\z:\z=-\z:Wend
 	Gosub drawframe:Return
 
 rotatey:
-	newmem v():##[$80CA] v()
-	While globfree(v()):Exchange \x,\z:\x=-\x:Wend
+	ResetList v():USEPATH v()
+	While NextItem(v()):Exchange \x,\z:\x=-\x:Wend
 	Gosub drawframe:Return
 
 rotatez:
-	newmem v():##[$80CA] v()
-	While globfree(v()):Exchange \x,\y:\y=-\y:Wend
+	ResetList v():USEPATH v()
+	While NextItem(v()):Exchange \x,\y:\y=-\y:Wend
 	Gosub drawframe:Return
 
 ;Macro p 191+(`1-`3)*10,98+(`1+`3-`2-`2)*3:End Macro
@@ -212,7 +212,7 @@ DEFTYPE .w vx,vy,vz
 .inframe:
 	x.q=MouseX-320-191-4:x=x/10
 	y.q=MouseY-79-98-4:y=-y/3
-	Use lmaxlen 1:iframe=frame
+	Use BitMap 1:iframe=frame
 retry:
 	Select iframe
 		Case 0
@@ -234,13 +234,13 @@ retry:
 		If iframe<>frame Then Goto retry Else Return
 	EndIf
 	frame=iframe:##[$BA8A] 22,frame:##[$BA86] 22
-	newmem v():##[$80CA] v()
-	While globfree(v())
+	ResetList v():USEPATH v()
+	While NextItem(v())
 		If \x=vx AND \y=vy AND \z=vz
-			freelast v():Pop While:Gosub drawframe:Return
+			KillItem v():Pop While:Gosub drawframe:Return
 		EndIf
 	Wend
-	If globalloc(v())
+	If AddItem(v())
 		v()\x=vx,vy,vz
 	EndIf
 	Gosub drawframe
@@ -261,50 +261,50 @@ retry:
 	Goto drawframe
 
 .drawframe:
-	Use lmaxlen 1:BlockScroll 1:BlitMode CookieMode
+	Use BitMap 1:BlockScroll 1:BlitMode CookieMode
 	Select frame
 		Case 0
-			longdiv 3,!p{0,fpos(1),0},2
-			longdiv 4,!p{0,0,fpos(2)},2
-			longdiv 2,!p{fpos(0),0,0},1
+			Blit 3,!p{0,fpos(1),0},2
+			Blit 4,!p{0,0,fpos(2)},2
+			Blit 2,!p{fpos(0),0,0},1
 			For i=-4 To 4 Step 4
 				Line !p{fpos(0),-8,i},!p{fpos(0),8,i},2
 				Line !p{fpos(0),i,-8},!p{fpos(0),i,8},2
 			Next
 		Case 1
-			longdiv 2,!p{fpos(0),0,0},2
-			longdiv 4,!p{0,0,fpos(2)},2
-			longdiv 3,!p{0,fpos(1),0},1
+			Blit 2,!p{fpos(0),0,0},2
+			Blit 4,!p{0,0,fpos(2)},2
+			Blit 3,!p{0,fpos(1),0},1
 			For i=-4 To 4 Step 4
 				Line !p{i,fpos(1),-8},!p{i,fpos(1),8},2
 				Line !p{-8,fpos(1),i},!p{8,fpos(1),i},2
 			Next
 		Case 2
-			longdiv 2,!p{fpos(0),0,0},2
-			longdiv 3,!p{0,fpos(1),0},2
-			longdiv 4,!p{0,0,fpos(2)},1
+			Blit 2,!p{fpos(0),0,0},2
+			Blit 3,!p{0,fpos(1),0},2
+			Blit 4,!p{0,0,fpos(2)},1
 			For i=-4 To 4 Step 4
 				Line !p{i,-8,fpos(2),},!p{i,8,fpos(2)},2
 				Line !p{-8,i,fpos(2)},!p{8,i,fpos(2)},2
 			Next
 	End Select
-	newmem v():##[$80CA] v()
-	While globfree(v())
+	ResetList v():USEPATH v()
+	While NextItem(v())
 		n=1
 		If frame=0 AND \x=fpos(0) Then n=4
 		If frame=1 AND \y=fpos(1) Then n=4
 		If frame=2 AND \z=fpos(2) Then n=4
-		longdiv 5,!p{\x,\y,\z},n
+		Blit 5,!p{\x,\y,\z},n
 		Line !p{\x,\y,\z},!p{\x,fpos(1),\z},6
 ;		Line !p{\x,\y,\z},!p{fpos(0),\y,\z},6
 ;		Line !p{\x,\y,\z},!p{\x,\y,fpos(2)},6
 	Wend
 	##[$FF22]
-	Use lmaxlen 0:MOVE#-1,$dff074:BlitMode $7ca:longdiv 1,320,79
+	Use BitMap 0:MOVE#-1,$dff074:BlitMode $7ca:Blit 1,320,79
 	Return
 
 .drawpage:
-	Use lmaxlen 0:BitMapOutput 0:##[$BA85]
+	Use BitMap 0:BitMapOutput 0:##[$BA85]
 	For x=0 To ww-1:dx=x*ps*2+ox:Boxf dx,3,dx+ps*2-1,2+wh*ps,255-x:Next
 	For x=0 To 63:dx=x*ps*2+24:Boxf dx,157,dx+3,220,255-x:Next
 	;
@@ -352,13 +352,13 @@ retry:
 	Camera3D cx,cy,cz,cxr,cyr,czr
 	Horizon3D 0,0		;4,5
 	;
-	newmem o()
-	While globfree(o())
+	ResetList o()
+	While NextItem(o())
 		If o()\f
-			freelast o()
+			KillItem o()
 		Else
 			Matrix3D 0,o()\x,o()\y,o()\z,o()\xr,o()\yr,o()\zr
-			fltoqu 0,0
+			ShapeTD 0,0
 			o()\xr-40
 			o()\yr+20
 			o()\zr-30
@@ -395,9 +395,9 @@ End NEWTYPE
 	Dim vert.vert(64)
 	Dim face.face(64)
 	;
-	newmem v():##[$80CA] v()	 ;index points from editor
+	ResetList v():USEPATH v()	 ;index points from editor
 	nv=0
-	While globfree(v())
+	While NextItem(v())
 		vert(nv)\x=\x,-\y,\z:nv+1
 	Wend
 	;
@@ -431,14 +431,14 @@ Function.q mydot{*a.vert,*b.vert}
 End Statement
 
 Statement scalar{*dest.vert,*a.vert,*b.vert}
-##[$80CA] *dest
+USEPATH *dest
 	\x=*a\y**b\z-*a\z**b\y
 	\y=*a\z**b\x-*a\x**b\z
 	\z=*a\x**b\y-*a\y**b\x
 End Statement
 
 Statement minus{*dest.vert,*a.vert,*b.vert}
-	##[$80CA] *dest
+	USEPATH *dest
 	\x=*a\x-*b\x
 	\y=*a\y-*b\y
 	\z=*a\z-*b\z
@@ -510,7 +510,7 @@ makeshape:
 	;
 	n=0:sh(n)=nv+1:n+1:mu=10
 	;
-	##[$80CA] vert(i)
+	USEPATH vert(i)
 	;
 	For i=0 To nv
 		sh(n)=\x*mu:sh(n+1)=\y*mu:sh(n+2)=\z*mu:sh(n+3)=0:n+4
@@ -518,7 +518,7 @@ makeshape:
 	;
 	sh(n)=1:sh(n+1)=-1:n+2	;poly group, origin
 	;
-	##[$80CA] face(i)
+	USEPATH face(i)
 	;
 	sh(n)=nf+1:n+1:ccc=1
 	;

@@ -37,9 +37,9 @@ End NEWTYPE
 
 .setup
 	WBStartup:FindScreen 0
-	remline 0,"topaz.font",8
+	LoadFont 0,"topaz.font",8
 
-	newlocarr 0,0," Actions "
+	MenuTitle 0,0," Actions "
 	MenuChecked 0
 	MenuItem 0,0,0,0,"Load Shapes		 ","L"
 	MenuItem 0,0,0,1,"Save Shapes		 ","S"
@@ -48,14 +48,14 @@ End NEWTYPE
 	MenuItem 0,0,0,4,"Reconfig				","R"
 	MenuItem 0,0,0,5,"Quit						","Q"
 	SelectMode 1,0:SetString 2,1
-	workstart 0,136,52,0,1,"LO-RES|HI-RES"
-	workstart 0,196,52,0,2,"NOLACE| LACE "
+	TextGadget 0,136,52,0,1,"LO-RES|HI-RES"
+	TextGadget 0,196,52,0,2,"NOLACE| LACE "
 	SetString 1,2
 	StringGadget 0,320,52,0,0,2,16	:; Screen Depth
 	SetString 2,1
-	workstart 0,180,85,0,20," GO! "
+	TextGadget 0,180,85,0,20," GO! "
 	ButtonId 0,0,"5"
-	localstat 0,120,50,380,100,$100A,"Hot Spot Editor V"+ver$+" - SETUP",0,1,0
+	Window 0,120,50,380,100,$100A,"Hot Spot Editor V"+ver$+" - SETUP",0,1,0
 	WindowFont 0
 	WLocate 28,14
 	NPrint "Welcome To Hot Spot Editor By Fabio Soft."
@@ -111,33 +111,33 @@ End NEWTYPE
 	Return
 
 .mkscreen
-	allocst 0,0,0,width,height,depth,flag,"Hot Spot Editor V"+ver$,1,2
+	Screen 0,0,0,width,height,depth,flag,"Hot Spot Editor V"+ver$,1,2
 	Free GadgetJam 0
 	VWait 3
-	workstart 0,40,12,0,1," ^ "
-	workstart 0,8,24,0,2," < "
-	workstart 0,72,24,0,3," > "
-	workstart 0,40,36,0,4," v "
-	workstart 0,40,24,0,5," x "
-	workstart 0,104,12,0,6,"Top	Left"
-	workstart 0,8,12,0,7," <^"
-	workstart 0,72,12,0,8," ^>"
-	workstart 0,8,36,0,9," <v"
-	workstart 0,72,36,0,10," v>"
-	workstart 0,104,24,0,11,"Same	Hot"
-	workstart 0,104,36,0,12," << "
-	workstart 0,144,36,0,13," >> "
-	workstart 0,194,12,0,14,"-^^-"
-	workstart 0,234,12,0,15,"-vv-"
+	TextGadget 0,40,12,0,1," ^ "
+	TextGadget 0,8,24,0,2," < "
+	TextGadget 0,72,24,0,3," > "
+	TextGadget 0,40,36,0,4," v "
+	TextGadget 0,40,24,0,5," x "
+	TextGadget 0,104,12,0,6,"Top	Left"
+	TextGadget 0,8,12,0,7," <^"
+	TextGadget 0,72,12,0,8," ^>"
+	TextGadget 0,8,36,0,9," <v"
+	TextGadget 0,72,36,0,10," v>"
+	TextGadget 0,104,24,0,11,"Same	Hot"
+	TextGadget 0,104,36,0,12," << "
+	TextGadget 0,144,36,0,13," >> "
+	TextGadget 0,194,12,0,14,"-^^-"
+	TextGadget 0,234,12,0,15,"-vv-"
 	StringGadget 0,250,24,0,16,5,40
-	localstat 0,0,12,width,height-12,$0400+$0800,"",1,2
+	Window 0,0,12,width,height-12,$0400+$0800,"",1,2
 	ScreensBitMap 0,0
-	localstat 1,0,height-50,width,50,$1002," Controls ",1,2,0
+	Window 1,0,height-50,width,50,$1002," Controls ",1,2,0
 	WLocate 190,16
 	Print "Shape: "
 	WLocate 190,28
 	Print "X:		 Y:		"
-	arrmult 0
+	SetMenu 0
 	skp:
 	Repeat
 		ev.l=WaitEvent
@@ -154,11 +154,11 @@ End NEWTYPE
 						Case 0
 							rtMessage$="Get An Anim Brush File!"
 							Gosub getname
-							localstat 3,0,0,width,50,$1000,"Sys Request",1,2
+							Window 3,0,0,width,50,$1000,"Sys Request",1,2
 							Print "How Many Shapes ":maxshapes=Edit(4)
-							Free localstat 3
+							Free Window 3
 							If maxshapes>Maximum MidHandle-1 Then maxshape=Maximum MidHandle-1
-							Use localstat 0
+							Use Window 0
 							LoadShapes 0,fn$
 							currentshape=0
 							hotspotx=0
@@ -171,13 +171,13 @@ End NEWTYPE
 						Case 2
 							rtMessage$="Get A Palette File!"
 							Gosub getname
-							casestrcomp 0,fn$
+							LoadPalette 0,fn$
 							Use SetCycle 0
 						Case 3
 							Gosub animation
 						Case 4
 							Pop Repeat
-							Free localstat 0:Free localstat 1
+							Free Window 0:Free Window 1
 							Free GadgetJam 0
 							Goto setup
 						Case 5
@@ -246,7 +246,7 @@ End NEWTYPE
 	End
 
 .linedown
-	Use localstat 0
+	Use Window 0
 	Repeat
 		WLine 0,ref,width,ref,0
 		ref+1
@@ -257,7 +257,7 @@ End NEWTYPE
 	Return
 
 .lineup
-	Use localstat 0
+	Use Window 0
 	Repeat
 		WLine 0,ref,width,ref,0
 		ref-1
@@ -269,38 +269,38 @@ End NEWTYPE
 
 .blitall
 	If maxshapes=0 Then Return
-	Use localstat 1
+	Use Window 1
 	ButtonId 0,16,Str$(currentshape):Redraw 1,16
 	WLocate 204,28
 	Print Centre$(Str$(hotspotx),4)
 	WLocate 260,28
 	Print Centre$(Str$(hotspoty),4)
-	Use lmaxlen 0
-	Use localstat 0
+	Use BitMap 0
+	Use Window 0
 	InnerCls
 	Point width/2,80,1
 	Line 0,ref,width,ref,1
 	ClipBlit currentshape,width/2,80
-	Use localstat 1
+	Use Window 1
 	VWait
 	Return
 
 .animation
 ;	If maxshapes<1 Then Return
-	allocst 1,0,0,width,height,depth,flag,"Animation Screen",1,2
+	Screen 1,0,0,width,height,depth,flag,"Animation Screen",1,2
 	ScreensBitMap 1,1
 	Use SetCycle 0
 	StringGadget 1,46,14,0,1,5,40
 	StringGadget 1,120,14,0,2,5,40
-	workstart 1,210,14,0,3,"	 Loop	 | Ping-Pong |	Reverse	"
+	TextGadget 1,210,14,0,3,"	 Loop	 | Ping-Pong |	Reverse	"
 	StringGadget 1,54,28,0,4,3,32
-	workstart 1,120,28,0,5,"Start"
-	workstart 1,210,28,0,6,"	Get Back "
+	TextGadget 1,120,28,0,5,"Start"
+	TextGadget 1,210,28,0,6,"	Get Back "
 	ButtonId 1,1,Str$(currentshape)
 	ButtonId 1,2,Str$(currentshape)
 	ButtonId 1,4,"5"
-	localstat 3,0,0,width,height,$0400+$0800,"",1,2
-	localstat 2,0,height-50,width,50,0,"Animation Controls",1,2,1
+	Window 3,0,0,width,height,$0400+$0800,"",1,2
+	Window 2,0,height-50,width,50,0,"Animation Controls",1,2,1
 	WLocate 1,6:Print "From:"
 	WLocate 92,6:Print "To:"
 	WLocate 166,6:Print "Mode:"
@@ -312,11 +312,11 @@ End NEWTYPE
 				Case 5
 					Gosub animate
 				Case 6
-					Free localstat 3
-					Free localstat 2
+					Free Window 3
+					Free Window 2
 					Free GadgetJam 1
-					Free lmaxlen 1
-					Free allocst 1
+					Free BitMap 1
+					Free Screen 1
 					Pop Repeat:Goto skp
 			End Select
 		EndIf
@@ -328,27 +328,27 @@ End NEWTYPE
 	frm.w=Val(GadgetPens(1,1))
 	dest.w=Val(GadgetPens(1,2))
 	speed.w=Val(GadgetPens(1,4))
-	Use localstat 3
+	Use Window 3
 	aaa=ShapeHeight(frm)
 	Repeat
 		If mde<>3
 			For t=frm To dest
 				VWait speed
 				InnerCls
-				longdiv t,width/2,aaa
+				Blit t,width/2,aaa
 			Next
 			If mde=2
 				For t=dest-1 To frm+1 Step -1
 					VWait speed
 					InnerCls
-					longdiv t,width/2,aaa
+					Blit t,width/2,aaa
 				Next
 			EndIf
 		Else
 			For t=dest To frm Step -1
 				VWait speed
 				InnerCls
-				longdiv t,width/2,aaa
+				Blit t,width/2,aaa
 			Next
 		EndIf
 	Until Joyb(0)<>0

@@ -19,7 +19,7 @@ End NEWTYPE
 LoadBank 2,"gameinfo"
 SaveBank 2,"disk1/info"
 *a.h=Bank(2)+44
-##[$80CA] *a
+USEPATH *a
 
 num=1
 

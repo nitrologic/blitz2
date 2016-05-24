@@ -1,8 +1,8 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/surfmap.bb,/Users/simon/Google Drive/amiga/w/skid2/skidpc/surfmap.bb
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
 
-lmaxlen 1,48,28,4
+BitMap 1,48,28,4
 LoadBitMap 1,"surfmap.iff"
 delmx=1:delmy=-1
 

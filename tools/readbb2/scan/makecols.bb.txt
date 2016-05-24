@@ -2,12 +2,12 @@
 
 MaxLen p$=192
 MaxLen n$=192
-allocst 0,0,0,640,256,5,$8000,"",0,1
+Screen 0,0,0,640,256,5,$8000,"",0,1
 
 f$=ASLFileRequest$("Load BackDrop...",p$,n$,"#?.iff")
-casestrcomp 0,f$,0
+LoadPalette 0,f$,0
 f$=ASLFileRequest$("Load ForeGround...",p$,n$,"#?.iff")
-casestrcomp 0,f$,16
+LoadPalette 0,f$,16
 
 Use SetCycle 0
 

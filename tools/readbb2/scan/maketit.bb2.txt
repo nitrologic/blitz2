@@ -1,15 +1,15 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/maketit.bb2
 DEFTYPE.l
 
-allocst 0,4:ScreensBitMap 0,0:BlockScroll
-LoadShape 0,"oblivion.iff",0:Use SetCycle 0:longdiv 0,0,0
+Screen 0,4:ScreensBitMap 0,0:BlockScroll
+LoadShape 0,"oblivion.iff",0:Use SetCycle 0:Blit 0,0,0
 
 Dim b(3)
 
-b(0)=Peek.l(Addr lmaxlen(0)+8)
-b(1)=Peek.l(Addr lmaxlen(0)+12)
-b(2)=Peek.l(Addr lmaxlen(0)+16)
-b(3)=Peek.l(Addr lmaxlen(0)+20)
+b(0)=Peek.l(Addr BitMap(0)+8)
+b(1)=Peek.l(Addr BitMap(0)+12)
+b(2)=Peek.l(Addr BitMap(0)+16)
+b(3)=Peek.l(Addr BitMap(0)+20)
 
 If ReadMem(0,"oblivion.bin")
 	FileOutput 0

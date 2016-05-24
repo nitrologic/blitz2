@@ -215,9 +215,9 @@ End NEWTYPE
 .MAIN_PROGRAM
 
 WBStartup
-freest 0
+WbToScreen 0
 
-remline 0,"topaz.font",8
+LoadFont 0,"topaz.font",8
 
 
 ; This list stores names of files to be sent
@@ -229,7 +229,7 @@ Dim List Send$(100)
 ;XPR defaults
 
 DEFTYPE .XPR_IO XPRConfig
-##[$80CA] XPRConfig.XPR_IO
+USEPATH XPRConfig.XPR_IO
 
 \xpr_filename	= 0
 \xpr_fopen		 = ?xlib_fopen
@@ -341,14 +341,14 @@ If *SerialIO AND *TimerIO AND Config\XPRBase
 
 		; you could add a loop here to allow multiple files
 		; to be sent.
-		If globalloc(Send$())
+		If AddItem(Send$())
 			Send$() = ASLFileRequest$("Select file to send",pa$,fi$)
 		EndIf
 
 		Config\XPRCommand = #XProtocolSend
 		Config\XPRData = ""
 
-		newmem Send$()
+		ResetList Send$()
 		Gosub CALLXPR
 
 		NPrint "Transfer complete. Library return code: ",Config\XPRResult
@@ -666,7 +666,7 @@ Return
 	PutReg a0,buff.l
 	PutReg a1,fname.l
 
-	If globfree(Send$())
+	If NextItem(Send$())
 		Poke$ buff, Send$()
 		result.l = -1
 	Else

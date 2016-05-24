@@ -6,8 +6,8 @@
 ;NeedsBlitz2ObjTypes.res resident
 
 ;Open up a source and destination bitmap then load in the iff file
-lmaxlen 0,320,256,1
-lmaxlen 1,320,256,1
+BitMap 0,320,256,1
+BitMap 1,320,256,1
 LoadBitMap 0,"temp.iff"	 ;Load a 320*256*2 IFF
 
 ;Wait for disk activity to finish before going into BLITZ mode
@@ -25,9 +25,9 @@ MouseWait
 Show 1													;Show Waterfall FX picture
 VWait 50
 
-*source.bitmap=Addr lmaxlen(0)
+*source.bitmap=Addr BitMap(0)
 saddr.l=*source\_data[0]				;Find Bitmap Addresses
-*dest.bitmap=Addr lmaxlen(1)
+*dest.bitmap=Addr BitMap(1)
 daddr.l=*dest\_data[0]
 
 bwidth.w=*source\_ebwidth			 ;Get Bitmap width in bytes
@@ -89,8 +89,8 @@ AMIGA
 NPrint "a2=",e
 NPrint "d1=",f
 VWait 50
-Free lmaxlen 0
-Free lmaxlen 1
+Free BitMap 0
+Free BitMap 1
 End
 
 ;Data store

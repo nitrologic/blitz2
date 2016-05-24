@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/HopalongAD/HopalongAD.BB2
-WBStartup:##[$80CC]
+WBStartup:NoCli
 ;SetErr:End:End SetErr
 
 FindScreen 0,"Workbench Screen"
@@ -10,13 +10,13 @@ DEFTYPE .b n,vr,vg,vb,kind
 ver$="1.0.1"
 
 MenuGap 2,1
-newlocarr 0,0," Project "
+MenuTitle 0,0," Project "
 MenuItem 0,0,0,0,"RND Params			","N"
 MenuItem 0,16,0,1,"----------------"
 MenuItem 0,0,0,2,"About					 ","?"
 MenuItem 0,0,0,3,"Quit						","Q"
 
-newlocarr 0,1," Options "
+MenuTitle 0,1," Options "
 MenuItem 0,0,1,0,"Kind			 "+Chr$(187)
 	SubItem 0,4,1,0,0,"	Standard "
 	SubItem 0,2,1,0,1,"	Variant 1"
@@ -26,10 +26,10 @@ MenuItem 0,0,1,1,"Zoom In	 + "
 MenuItem 0,0,1,2,"Zoom Out	- "
 
 
-localstat 0,220,112,370,130,$100f,"Hopalong AGA V"+ver$+" by Andrea Doimo",1,2
-arrmult 0
-localstat 1,180,150,100,40,$6,"Params",1,2
-Use localstat 0
+Window 0,220,112,370,130,$100f,"Hopalong AGA V"+ver$+" by Andrea Doimo",1,2
+SetMenu 0
+Window 1,180,150,100,40,$6,"Params",1,2
+Use Window 0
 
 wid.w=InnerWidth
 hei.w=InnerHeight
@@ -114,7 +114,7 @@ Case 0
 	c=Rnd(800)
 	Gosub showparams
 Case 2
-	localstat 2,160,70,240,110,0,"",1,2
+	Window 2,160,70,240,110,0,"",1,2
 	Activate 2
 	WLocate 40,5
 	Print "HOPALONG AGA V"+ver$
@@ -132,8 +132,8 @@ Case 2
 	Print "CLICK MOUSE TO EXIT"
 	MouseWait
 	Activate 0
-	Free localstat 2
-	Use localstat 0
+	Free Window 2
+	Use Window 0
 Case 3
 	Gosub finish
 End Select
@@ -185,7 +185,7 @@ Return
 	End
 
 .showparams
-	Use localstat 1
+	Use Window 1
 	WindowOutput 1
 	InnerCls 0
 	WLocate 0,2
@@ -193,5 +193,5 @@ Return
 	NPrint "B:",b
 	NPrint "C:",c
 	WindowOutput 0
-	Use localstat 0
+	Use Window 0
 Return

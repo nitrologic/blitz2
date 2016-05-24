@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/nu/test.bb,/Users/simon/Google Drive/amiga/w/skid2/shit/test.bb
-lmaxlen 0,1024,560,4
+BitMap 0,1024,560,4
 LoadBitMap 0,"gfx/skidtoon.iff",0
 BLITZ
 InitCopList 0,$104

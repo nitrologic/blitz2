@@ -25,7 +25,7 @@ InitBank 0,64*SizeOf.ShadPt,0
 		For d=0 To 63
 			qs=qsin(d):qc=qcos(d)
 			*sha.ShadPt=Bank(0)+d*SizeOf.ShadPt
-			##[$80CA] *sha
+			USEPATH *sha
 			\ri3=(-xdim*qc+ydim*qs) ASR #scal:\rj3=(-xdim*qs-ydim*qc)ASR #scal
 			\ri2=(-xdim*qc-ydim*qs) ASR #scal:\rj2=(-xdim*qs+ydim*qc)ASR #scal
 			\ri1=( xdim*qc-ydim*qs) ASR #scal:\rj1=( xdim*qs+ydim*qc)ASR #scal

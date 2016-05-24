@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/keytest.bb
 
 
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 
 BLITZ
 InitCopList 0,4

@@ -25,7 +25,7 @@
 ;Feel free to change the code, but don't give anyone a copy unless
 ;it's a definite improvement and doesn't have any extra bugs.
 
-##[$80CC]
+NoCli
 WBStartup
 
 #debug=0			 ;If #debug=0, we do our
@@ -115,14 +115,14 @@ MaxLen fi$=64
 
 .err
 Statement err{a$}				;you see this if something bad happens.
-localstat 1,190,148,260,83,$1002,"",1,2,1
+Window 1,190,148,260,83,$1002,"",1,2,1
 WindowOutput 1
 WindowInput 1
 WLocate 7,14:WColour 2
 Print a$
 Repeat:Until WaitEvent&$40 AND GadgetHit=16
 CloseWindow 1
-Use localstat 0
+Use Window 0
 End Statement
 
 Statement waitup{}	 ;wait till user lets go of the mouse button
@@ -133,7 +133,7 @@ End Statement
 
 Statement pn{f}			;(re)draw a neuron
 Shared cell(),dbuff
-longdiv cell(f)\v[dbuff]|cell(f)\what,cell(f)\x,cell(f)\y
+Blit cell(f)\v[dbuff]|cell(f)\what,cell(f)\x,cell(f)\y
 End Statement
 
 .hitneur		;is the space at x,y occupied?
@@ -192,19 +192,19 @@ End Statement
 Statement moment{}
 Shared cell(),dbuff,numcells,hour
 
-nbuff=dbuff ##[$80D0] 0
+nbuff=dbuff BitChg 0
 For loop=1 To numcells
 	*current.neuron=cell(loop)
 
 											 ;don't update inputs or non-existant neurons
 	If *current\what>#whatzilch
-		newval=(cell(*current\pa[0])\v[dbuff] AND cell(*current\pa[1])\v[dbuff]) ##[$80D0]0
+		newval=(cell(*current\pa[0])\v[dbuff] AND cell(*current\pa[1])\v[dbuff]) BitChg0
 		 ;Turing's rule was value= 1-(input1 * input2)
 		 ;I use value=(input1 and input2) bitchg 0,
 		 ;because it is equivalent and hopefully faster.
 		*current\v[nbuff]=newval
 		If *current\v[dbuff]<>newval
-			longdiv *current\v[nbuff]|*current\what,*current\x,*current\y
+			Blit *current\v[nbuff]|*current\what,*current\x,*current\y
 		EndIf
 	EndIf
 Next
@@ -333,8 +333,8 @@ End Statement
 Statement flip{f}
 Shared cell()
 If f
-	cell(f)\v[0] ##[$80D0] 0
-	cell(f)\v[1] ##[$80D0] 0
+	cell(f)\v[0] BitChg 0
+	cell(f)\v[1] BitChg 0
 	pn{f}
 EndIf
 End Statement
@@ -613,7 +613,7 @@ Shared *lippy(),selline(),selneuron(),cell(),numcells,numdraw
 	While (kl<=numcells)
 		*tc.neuron=cell(kl)
 		If PColl(x,y,wx,wy,*tc\x,*tc\y,1,1) AND ((*tc\what &2)=0)
-			selneuron(kl) ##[$80D0] 0
+			selneuron(kl) BitChg 0
 			Box cell(kl)\x-10,cell(kl)\y-10,cell(kl)\x+10,cell(kl)\y+10,-1
 		EndIf
 		kl+1
@@ -624,7 +624,7 @@ Shared *lippy(),selline(),selneuron(),cell(),numcells,numdraw
 		*tl.chain=*lippy(kl)
 		n=(*tl\numlinks) ASR1+1
 		If PColl(x,y,wx,wy,*tl\p[n]\x,*tl\p[n]\y,1,1) OR PColl(x,y,wx,wy,*tl\p[n ASR1]\x,*tl\p[n ASR1]\y,1,1)
-			selline(kl) ##[$80D0] 0
+			selline(kl) BitChg 0
 			*la.chain=*lippy(kl)
 			Box *la\left,*la\top,*la\right,*la\bottom,-1
 		EndIf
@@ -814,7 +814,7 @@ End
 
 .initscreen						;set up screen, window, gadgets...
 DefaultIDCMP $578
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"NEW		 "
 MenuItem 0,0,0,1,"LOAD"
 MenuItem 0,0,0,2,"SAVE"
@@ -822,41 +822,41 @@ MenuItem 0,0,0,3,"SAVE IFF"
 MenuItem 0,0,0,4,"QUIT"
 
 
-workstart 0,455,55,0,5," START | STOP! "
-workstart 0,535,55,0,9,"STEP"
+TextGadget 0,455,55,0,5," START | STOP! "
+TextGadget 0,535,55,0,9,"STEP"
 
 PropGadget 0,455,29,64,6,172,19
 SetHProp 0,6,.9,.15
 
-workstart 0,173,24,0,#KILL,"KILL"
-workstart 0,173,55,0,#rdraw,"ReDraw"
+TextGadget 0,173,24,0,#KILL,"KILL"
+TextGadget 0,173,55,0,#rdraw,"ReDraw"
 
 Enable 1
-workstart 0,12,24,$201,0,"Place"
-workstart 0,12,55,$201,1,"Toggle"
-workstart 0,76,55,$201,2,"Draw/Join"
+TextGadget 0,12,24,$201,0,"Place"
+TextGadget 0,12,55,$201,1,"Toggle"
+TextGadget 0,76,55,$201,2,"Draw/Join"
 
-workstart 0,12,39,$201,#inpu,"INPUT"
-workstart 0,76,24,$201,#selec,"SELECT"
+TextGadget 0,12,39,$201,#inpu,"INPUT"
+TextGadget 0,76,24,$201,#selec,"SELECT"
 
 Enable 2
-workstart 0,273,55,$201,#atype,"A-type"
-workstart 0,339,55,$201,#atype+1,"B-type"
+TextGadget 0,273,55,$201,#atype,"A-type"
+TextGadget 0,339,55,$201,#atype+1,"B-type"
 
 Borders 0,0,On
 Borders 0,#atype,On
 
-allocst 0,0,0,640,512,2,-32764,"BNET												by Bruce Webster.",1,2
+Screen 0,0,0,640,512,2,-32764,"BNET												by Bruce Webster.",1,2
 Green 0,5,6,7:Green 1,9,9,10:Green 2,0,0,0:Green 3,0,10,11
 
 ;B&W palette for save-iff
 StopCycle 1,0,15,15,15:StopCycle 1,1,0,0,0:StopCycle 1,2,0,0,0:StopCycle 1,3,15,15,15
 
 ScreensBitMap 0,0
-localstat 0,0,0,640,512,$1900,"",3,2,0
+Window 0,0,0,640,512,$1900,"",3,2,0
 
 ;useful error button
-workstart 1,93,60,0,16,"How sad."
+TextGadget 1,93,60,0,16,"How sad."
 
 err=1
 LoadShapes #whati,"bnet_images"
@@ -870,21 +870,21 @@ For i=#whata To #whata |3
 DecodeShapes i
 Next
 
-freest 1
+WbToScreen 1
 
 numdraw=-1
 numcells=#cellmax:new{}
 quit=False
-arrmult 0
+SetMenu 0
 Return
 
 .getname				;use ASL filerequestor
 ##[$FFB5]	;its a bit hard to read on the interlace screen
-Use allocst 1		;(depending on your monitor) - so open on WB.
+Use Screen 1		;(depending on your monitor) - so open on WB.
 name$= ASLFileRequest$(q$+"					",pa$,fi$,("#?"+ex$))
 ##[$FFB4]
-Use allocst 0
-Use localstat 0
+Use Screen 0
+Use Window 0
 FlushEvents
 Return
 

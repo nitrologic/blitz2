@@ -9,10 +9,10 @@ End NEWTYPE
 
 Dim List ball.balltype(50)
 
-casestrcomp 0,"work.iff"
+LoadPalette 0,"work.iff"
 LoadShapes 4,"balls.shapes"
 
-allocst 0,27,"ISOMETRIC SHAPE GENERATOR"
+Screen 0,27,"ISOMETRIC SHAPE GENERATOR"
 Use SetCycle 0
 ScreensBitMap 0,0
 
@@ -22,9 +22,9 @@ Box 15,15,15+33,15+41,1	 ;shape must fit inside this frame
 
 GetaShape 0,16,15,32,1		;for clipping height
 
-For r=0 To 15:Restore myshape:f=16+r:Gosub makeframe:longdiv f,r*32+16,104:Next
-For r=0 To 15:Restore mozzy:f=32+r:Gosub makeframe:longdiv f,r*32+16,144:Next
-For r=0 To 15:Restore blade:f=48+r:Gosub makeframe:longdiv f,r*32+16,184:Next
+For r=0 To 15:Restore myshape:f=16+r:Gosub makeframe:Blit f,r*32+16,104:Next
+For r=0 To 15:Restore mozzy:f=32+r:Gosub makeframe:Blit f,r*32+16,144:Next
+For r=0 To 15:Restore blade:f=48+r:Gosub makeframe:Blit f,r*32+16,184:Next
 
 SaveShapes 16,f,"isoshapes"
 
@@ -38,19 +38,19 @@ End
 	Read n
 	rsin=HSin(r*Pi/8):rcos=HCos(r*Pi/8)
 	ClearList ball()
-	##[$80CA] ball()
+	USEPATH ball()
 	For b=0 To n-1
-		globalloc ball():Read \col,tx,ty,\z:
+		AddItem ball():Read \col,tx,ty,\z:
 		\x=tx*rsin+ty*rcos:\y=tx*rcos-ty*rsin:\depth=\x+\y
 	Next
 	Boxf 16,16,16+31,16+39,0 ;clear frame for drawing into
 	SortList ball()
-	newmem ball()
-	While globfree(ball())
-		\sx=!p{\x,\y,\z}:longdiv \col,x+\sx,y+\sy
+	ResetList ball()
+	While NextItem(ball())
+		\sx=!p{\x,\y,\z}:Blit \col,x+\sx,y+\sy
 	Wend
-	y0=16:While ##[$CB09](0,16,y0)=0:longdiv 0,16,y0:y0+1:Wend
-	y1=16+39:While ##[$CB09](0,16,y1)=0:longdiv 0,16,y1:y1-1:Wend
+	y0=16:While ##[$CB09](0,16,y0)=0:Blit 0,16,y0:y0+1:Wend
+	y1=16+39:While ##[$CB09](0,16,y1)=0:Blit 0,16,y1:y1-1:Wend
 	GetaShape f,16,y0,32,y1-y0+1:Handle f,16,36+16-y0
 	VWait 2
 	Return

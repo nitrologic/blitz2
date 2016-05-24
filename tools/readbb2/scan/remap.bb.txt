@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/old/remap.bb,/Users/simon/Google Drive/amiga/w/sega/gfx/bakup/remap.bb
-lmaxlen 0,320,256,4
-lmaxlen 1,320,256,4
+BitMap 0,320,256,4
+BitMap 1,320,256,4
 
 LoadBitMap 0,"front.end",0
-Use lmaxlen 0
+Use BitMap 0
 
 ReMap 1,7,1
 ReMap 2,6,1

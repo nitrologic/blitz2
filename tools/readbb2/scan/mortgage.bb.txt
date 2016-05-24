@@ -39,10 +39,10 @@
 
 
 
-##[$80CC]
+NoCli
 WBStartup
 ##[$FFB5]
-freest 0
+WbToScreen 0
 
 DEFTYPE.Screen *wbscreen
 DEFTYPE.Window *win
@@ -61,7 +61,7 @@ wh.w=*wbscreen\Height			 ;	 8
 font$=Peek$(*wbscreen\Font\ta_Name) ;WHAT SCREEN FONT AND SIZE DO
 fontsize.w=*wbscreen\Font\ta_YSize	;THEY USE FOR THIER WB?
 
-remline 0,font$,fontsize:Use IntuiFont 0
+LoadFont 0,font$,fontsize:Use IntuiFont 0
 
 a$="Interest Rate (%)"							;THIS JUST TELLS ME HOW MANY
 text\IText=&a$											;PIXELS a$ IS SO I CAN ADJUST
@@ -118,12 +118,12 @@ Gosub menu0
 DefaultIDCMP #IDCMP
 i=wh/2-((208+bh)/2)											 ;CENTER THE WINDOW BUT
 i=QLimit(i-i/4,0,400)										 ;PLACE IT UP A LITTLE
-localstat #win1,ww/2-((364+fxsize)/2),i,364+fxsize,115+bh*7,$2|$4|$8|$1000|$00200000|#WA_AutoAdjust,"Mortgage",1,2,0
+Window #win1,ww/2-((364+fxsize)/2),i,364+fxsize,115+bh*7,$2|$4|$8|$1000|$00200000|#WA_AutoAdjust,"Mortgage",1,2,0
 AttachGTList #win1,#win1
 
 GTBevelBox 0,4,11+bh,356+fxsize,102+bh*6,0
 
-arrmult 0
+SetMenu 0
 MenuColour 0,0,2,Off
 
 DEFTYPE .f
@@ -315,7 +315,7 @@ Return
 	 Next
 
 	 MenuGap 4,0
-	 newlocarr 0,0,"Project"
+	 MenuTitle 0,0,"Project"
 	 MenuItem 0,0,0,0,"About"
 	 MenuItem 0,0,0,1,"Help"
 	 MenuItem 0,0,0,2,a$

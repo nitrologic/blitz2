@@ -39,7 +39,7 @@ End Function
 ;		23 : blue
 ;
 
-BLITZ:lmaxlen 0,320,256,4:Slice 0,44,4:Show 0:BitMapOutput 0
+BLITZ:BitMap 0,320,256,4:Slice 0,44,4:Show 0:BitMapOutput 0
 
 While Joyb(0)=0
 	VWait

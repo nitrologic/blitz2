@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/blitzeroids/Blitzeroids.BB2
-WBStartup:##[$80CC]
+WBStartup:NoCli
 SetErr:End:End SetErr
 MaxLen gdir$=28
 MaxLen sdir$=26
@@ -15,10 +15,10 @@ DEFTYPE.w xmex,ymex,time
 DEFTYPE.l score
 DEFTYPE .q ufoshoot
 
-lmaxlen 2,320,24,5
-lmaxlen 0,320+64,256+64,5	;foreground
-lmaxlen 1,320+64,256+64,5
-longmult 0,20 : longmult 1,20
+BitMap 2,320,24,5
+BitMap 0,320+64,256+64,5	;foreground
+BitMap 1,320+64,256+64,5
+Queue 0,20 : Queue 1,20
 
 Gosub Takegraph
 
@@ -31,7 +31,7 @@ Statement Mex {xmex,ymex,a$}
 		xmex=160-(Len(a$)ASL 3)
 	EndIf
 	For mm=0 To Len(a$)-1
-		longdiv 131+Asc(Mid$(a$,mm+1)),xmex+mm ASL 4,ymex
+		Blit 131+Asc(Mid$(a$,mm+1)),xmex+mm ASL 4,ymex
 	Next
 End Statement
 
@@ -39,12 +39,12 @@ Statement bonus {bonus}
 	DEFTYPE .w
 	Shared score,db
 	Use Slice 1
-	Use lmaxlen 2
+	Use BitMap 2
 	score+bonus
 	Boxf 0,0,95,19,0
 	Mex {0,0,Str$(score)}
 	Use Slice 0
-	Use lmaxlen db
+	Use BitMap db
 End Statement
 
 
@@ -56,7 +56,7 @@ Use SetCycle 1
 
 Use Slice 0
 Show 0
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 Use SetCycle 1
 
@@ -109,9 +109,9 @@ Mouse On
 keymode=0
 
 .Newgame
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
-Use lmaxlen 1
+Use BitMap 1
 BlockScroll 0
 
 ;											 Startup Variables
@@ -125,14 +125,14 @@ Goto Intro
 .Game
 Gosub Init
 Use Slice 1
-Use lmaxlen 2
+Use BitMap 2
 BlockScroll 0
 Green 0,0,2,1
 Use Slice 0
 Green 0,0,1,0
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
-Use lmaxlen 1
+Use BitMap 1
 BlockScroll 0
 Show 1,32,32
 
@@ -155,8 +155,8 @@ End Select
 Mex {-1,150,a$}
 
 For n=1 To lifes
-	Use lmaxlen 1
-	longdiv 127,192-20-10*lifes+20*n,220
+	Use BitMap 1
+	Blit 127,192-20-10*lifes+20*n,220
 Next
 
 VWait 60
@@ -185,7 +185,7 @@ Repeat
 	i$=Inkey$
 	If i$<>""
 		If i$="p"
-			Use lmaxlen 0
+			Use BitMap 0
 			Show 0,32,32
 			Mex {-1,155,"		PAUSED"}
 			Repeat
@@ -194,7 +194,7 @@ Repeat
 			BlockScroll 0
 		EndIf
 		If i$=" " AND Joyy(1)=1
-			Use lmaxlen 0
+			Use BitMap 0
 			Show 0,32,32
 			Colour 31
 			Locate 6,5
@@ -220,7 +220,7 @@ Repeat
 	VWait
 	Show db,32,32
 	db=1-db
-	Use lmaxlen db
+	Use BitMap db
 	UnQueue db
 	;																						Stelle
 	For n=0 To 9
@@ -426,11 +426,11 @@ EndIf
 						End Select
 						If meteors=0
 							Use Slice 1
-							Use lmaxlen 2
+							Use BitMap 2
 							Boxf 100,0,351,19,0
 							Mex {160,0,"HYPERSPACE"}
 							Use Slice 0
-							Use lmaxlen db
+							Use BitMap db
 						EndIf
 						Else
 							Select mf(m)
@@ -564,7 +564,7 @@ End
 AMIGA
 LoadShapes 0,gdir$+"Shapes"
 
-casestrcomp 1,gdir$+"Meteor.PaletteN2"
+LoadPalette 1,gdir$+"Meteor.PaletteN2"
 
 LoadSound 0,sdir$+"laser"
 LoadSound 1,sdir$+"x-bla"
@@ -656,7 +656,7 @@ Return
 
 .Intro
 BlitzKeys On
-Use lmaxlen 2
+Use BitMap 2
 BlockScroll 0
 FlushQueue 0
 FlushQueue 1
@@ -672,13 +672,13 @@ Repeat
 	End Select
 	Use Slice 1
 	Green 0,0,0,2
-	Use lmaxlen 2
+	Use BitMap 2
 	BlockScroll 0
 	Mex {-1,0,a$}
 	Use Slice 0
 	Green 0,0,0,2
 	VWait
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
 	Show 0
 	Mex {-1,20,"BLITZEROIDS"}
@@ -747,7 +747,7 @@ EndIf
 		Gosub CheckKeyMode
 
 	dd=1-dd
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll 0
 	Mex {-1,10,"SCOREBOARD"}
 	Mex {100,40,"100"}
@@ -767,7 +767,7 @@ EndIf
 	For time=1 To 400
 		Show 1-db
 		db=1-db
-		Use lmaxlen db
+		Use BitMap db
 		UnQueue db
 		VWait
 		QBlit db,0+fr,180,38
@@ -785,7 +785,7 @@ EndIf
 Forever
 
 .Gameover
-	Use lmaxlen 1-db
+	Use BitMap 1-db
 	Show 1-db,32,32
 	Mex {-1,120,"		GAME OVER"}
 	Mex {-1,160,"		SCORE:"+Str$(score)}
@@ -795,14 +795,14 @@ Forever
 
 .UpdateLifes
 	Use Slice 1
-	Use lmaxlen 2
+	Use BitMap 2
 	Boxf 100,0,351,19,0
 	ll.b=QLimit(lifes,0,8)
 	For n=1 To ll
-		longdiv 127,300-20*ll+20*n,2
+		Blit 127,300-20*ll+20*n,2
 	Next
 	Use Slice 0
-	Use lmaxlen db
+	Use BitMap db
 	Return
 
 .CheckKeyMode
@@ -818,10 +818,10 @@ Forever
 			a$="USING KEYBOARD"
 		End Select
 		Use Slice 1
-		Use lmaxlen 2
+		Use BitMap 2
 		BlockScroll 0
 		Mex {-1,0,a$}
 		Use Slice 0
-		Use lmaxlen db
+		Use BitMap db
 	EndIf
 	Return

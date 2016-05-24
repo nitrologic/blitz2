@@ -3,7 +3,7 @@
 	##[$C082] 1,?wzdata,20
 	Repeat
 		 ev.l=WaitEvent
-		 Use localstat EventWindow
+		 Use Window EventWindow
 		 Select EventWindow
 			Case 1:Select ev
 							Case #IDCMP_CLOSEWINDOW:exit=1

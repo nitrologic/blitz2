@@ -5,19 +5,19 @@ MaxLen na$=192
 pa$=""
 na$=""
 
-freest 1
+WbToScreen 1
 
 f$=ASLFileRequest$("Load an IFF HAM8 640x512...",pa$,na$,"#?.iff",20,20,320,200)
 If f$="" Then End
 
 If ##[$BE15](f$)=0 Then End
 
-allocst 0,0,0,640,512,8,$9804,"",0,1					;NOT INTERLEAVED!
+Screen 0,0,0,640,512,8,$9804,"",0,1					;NOT INTERLEAVED!
 LoadScreen 0,f$,0
 Use SetCycle 0
 ScreensBitMap 0,0
 
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 
 Dim p.l(8)
 bm+8

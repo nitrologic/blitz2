@@ -2,20 +2,20 @@
 WBStartup
 AMIGA
 DEFTYPE.l
-lmaxlen 0,160,128,1
-newlocarr 0,0,"Analyzer "
+BitMap 0,160,128,1
+MenuTitle 0,0,"Analyzer "
 MenuItem 0,0,0,0,"Normal"
 MenuItem 0,0,0,1,"Circle"
 MenuItem 0,0,0,2,"Quit"
 MenuItem 0,0,0,3,"About"
 FindScreen 0
-localstat 0,20,30,450,24,$1002,"Hey dude ! Make a Choice !",1,2
+Window 0,20,30,450,24,$1002,"Hey dude ! Make a Choice !",1,2
 NPrint "Click on the screen you want Spectrum Analyzer to be !"
 MouseWait
 CloseWindow 0
 FindScreen 0
-localstat 0,60,60,200,78,$100e,"Spectrum Analyzer",1,2
-arrmult 0
+Window 0,60,60,200,78,$100e,"Spectrum Analyzer",1,2
+SetMenu 0
 Poke.w $bfe301,0			;Eh not really system Frendly !
 Poke.w $bfd000,%110	 ;Yes sir ! but Much Faster !!!
 Poke.w $bfd200,%100	 ;Oh my god !
@@ -33,7 +33,7 @@ If ev=256
 EndIf
 EndIf
 
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll
 	If	vumtipe=0 Then Gosub vumetre1
 	If	vumtipe=1 Then Gosub vumetre2
@@ -44,9 +44,9 @@ End
 
 name:
 	SetString 2,1
-	workstart 0,240,86,0,0," YEP ! "
-	localstat 1,0,11,320,104,$1002,"About Spectrum Analyzer V1.0 !",1,2,0
-	Use localstat 1
+	TextGadget 0,240,86,0,0," YEP ! "
+	Window 1,0,11,320,104,$1002,"About Spectrum Analyzer V1.0 !",1,2,0
+	Use Window 1
 	WColour 3
 	NPrint "							WARNING !"
 	WColour 2
@@ -65,7 +65,7 @@ name:
 
 Repeat
 ev=Event
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll
 	If	vumtipe=0 Then Gosub vumetre1
 	If	vumtipe=1 Then Gosub vumetre2

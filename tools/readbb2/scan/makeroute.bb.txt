@@ -6,10 +6,10 @@ k2.f=360/16
 MaxLen p$=192
 MaxLen n$=192
 
-allocst 0,0,0,320,256,4,0,"",0,1
-localstat 0,0,0,320,256,$11900,"",0,1
+Screen 0,0,0,320,256,4,0,"",0,1
+Window 0,0,0,320,256,$11900,"",0,1
 ScreensBitMap 0,0
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 BlockScroll
 
@@ -40,7 +40,7 @@ If f$="" Then End
 If ##[$BE15](f$)
 		LoadBitMap 0,f$,0
 		Use SetCycle 0
-		Use lmaxlen 0
+		Use BitMap 0
 Else
 		End
 EndIf

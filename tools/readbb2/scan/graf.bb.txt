@@ -7,16 +7,16 @@
 ; of code is here for is to show that little subprogrammes can
 ; be usefull in development
 
-allocst 0,11
+Screen 0,11
 StopCycle 0,0,15,15,15
 StopCycle 0,1,0,0,0
 StopCycle 0,2,15,15,15
 StopCycle 0,3,15,15,15
 Use SetCycle 0
-localstat 0,0,0,640,256,$12100,"",0,1
+Window 0,0,0,640,256,$12100,"",0,1
 
 WCls 0
-remline 0,"small.font",6
+LoadFont 0,"small.font",6
 Use IntuiFont 0
 WindowFont 0
 WJam 0
@@ -41,7 +41,7 @@ For i = 1 To 31
 Next i
 
 ScreensBitMap 0,0							 ;turn screen into bitmap for line draws
-Use lmaxlen 0
+Use BitMap 0
 
 Line 30,10,30,220,1					;y axis
 Line 30,220,630,220,1				;x axis

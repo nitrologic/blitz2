@@ -208,8 +208,8 @@ End Function
 Statement nurb{s,t}
 	Shared fac1(),fac2(),aa(),mxx,myy,mzz,np
 	topx=0:topy=0:topz=0:bot=0:i=0
-	newmem aa()
-	While globfree(aa())
+	ResetList aa()
+	While NextItem(aa())
 		fa=fac2(i,s)
 		If fa<>0
 			For j.w=0 To np-1
@@ -310,7 +310,7 @@ Next
 ; setup code
 ;-----------------------------------------------------------
 
-lmaxlen 0,704,280,7
+BitMap 0,704,280,7
 BitPlanesBitMap 0,1,7
 BitPlanesBitMap 0,2,3
 BitPlanesBitMap 0,3,3
@@ -352,7 +352,7 @@ DisplayBitMap 0,0
 
 ##[$CD10] 32,128,92,8
 CludgeBitMap 32,2
-Use lmaxlen 2:BlockScroll1:MakeCookie 32:Use lmaxlen 0
+Use BitMap 2:BlockScroll1:MakeCookie 32:Use BitMap 0
 Poke.w Addr MidHandle(32)+4,7
 ##[$A402] 0,128,92,2
 
@@ -586,7 +586,7 @@ scancar:
 
 scan:
 	x=xx:y=yy:z=zz:ff=0
-	globalloc vec():vec()\x=x,y,z:nn+1
+	AddItem vec():vec()\x=x,y,z:nn+1
 
 	d(n)=vec()\x-16:n+1
 	d(n)=vec()\y-16:n+1
@@ -595,12 +595,12 @@ scan:
 	If b(xx,y,zz+1)\t AND 2 Then nnn+1:z+1:vec()\z+1:vec()\x-1:d(n-1)+1:d(n-3)-1
 	Gosub scanz
 	If ff=0
-		freelast vec():n-3
+		KillItem vec():n-3
 	Else
 		d(n)=128:n+1
 		While LastItem(stack())
 			d(n)=0:n+1
-			x=stack()\x:y=stack()\y:z=stack()\z:freelast stack()
+			x=stack()\x:y=stack()\y:z=stack()\z:KillItem stack()
 			Gosub scanx
 		Wend
 		d(n)=128:n+1
@@ -761,7 +761,7 @@ End Statement
 		myrot.mat\xc=tempa
 		myrot.mat\zc=tempb
 		DEFTYPE .vec v
-		##[$80CA] myrot
+		USEPATH myrot
 		v\xx=\xa*px+\ya*py+\za*pz
 		v\xy=\xa*qx+\ya*qy+\za*qz
 		v\zx=\xb*px+\yb*py+\zb*pz
@@ -771,7 +771,7 @@ End Statement
 		mycar{Bank(2),basefr,&v,Addr ##[$A401](0)}		 ;,46*128+64}
 		##[$A412] 0,2
 		VWait
-		longdiv 32,542,102
+		Blit 32,542,102
 	Wend
 	Return
 
@@ -852,9 +852,9 @@ End Statement
 .paintbit
 	Repeat
 		x=vx:y=vy:z=vz
-		If sp=17 Then x-1:b(x,y,z)\c[0]=cc:longdiv 1,!e{x,y,z},cc
-		If sp=18 Then z-1:b(x,y,z)\c[1]=cc:longdiv 2,!e{x,y,z},cc
-		If sp=19 Then y-1:b(x,y,z)\c[2]=cc:longdiv 3,!e{x,y,z},cc
+		If sp=17 Then x-1:b(x,y,z)\c[0]=cc:Blit 1,!e{x,y,z},cc
+		If sp=18 Then z-1:b(x,y,z)\c[1]=cc:Blit 2,!e{x,y,z},cc
+		If sp=19 Then y-1:b(x,y,z)\c[2]=cc:Blit 3,!e{x,y,z},cc
 		VWait
 	Until Joyb(0)=0
 	rt=20
@@ -945,8 +945,8 @@ End Statement
 	Next
 
 	For i=0 To 4
-		If globalloc(aa())
-			##[$80CA] aa()
+		If AddItem(aa())
+			USEPATH aa()
 			\z=(i-2)*7.5
 			For j=0 To np-1
 				\xy[j]\x=HCos(j*Pi/np)*8,HSin(j*Pi/np)*8
@@ -962,8 +962,8 @@ End Statement
 .editskele
 	x=MouseX+5 -262
 	y=MouseY+2 -130
-	newmem aa()
-	While globfree(aa())
+	ResetList aa()
+	While NextItem(aa())
 		*cc.pl=aa()
 		mzz=*cc\z
 		mxx=x ASR 3 + mzz
@@ -1003,8 +1003,8 @@ editpt
 	Boxf 2,1,521,259,0
 	Line !e{0,0,-15},!e{0,0,15},1				;trunk
 
-	newmem aa():##[$80CA] aa()
-	While globfree(aa())
+	ResetList aa():USEPATH aa()
+	While NextItem(aa())
 		c=myc:If *cc=aa() Then c=2
 		oldsx=!ex{\xy[0]\x,\xy[0]\y,\z}
 		oldsy=!ey{\xy[0]\x,\xy[0]\y,\z}
@@ -1017,10 +1017,10 @@ editpt
 	Wend
 
 	For j=0 To np-1
-		newmem aa():globfree aa()
+		ResetList aa():NextItem aa()
 		oldsx=!ex{\xy[j]\x,\xy[j]\y,\z}
 		oldsy=!ey{\xy[j]\x,\xy[j]\y,\z}
-		While globfree(aa())
+		While NextItem(aa())
 			newsx=!ex{\xy[j]\x,\xy[j]\y,\z}
 			newsy=!ey{\xy[j]\x,\xy[j]\y,\z}
 			Line oldsx,oldsy,newsx,newsy,myc
@@ -1083,7 +1083,7 @@ editpt
 	Return
 
 .setuppalette
-	##[$80CA] col(i)
+	USEPATH col(i)
 	Restore cols
 	For i=1 To 31:Read \r,\g,\b:Next
 	For cc=1 To 31:Gosub setcol:Next
@@ -1096,7 +1096,7 @@ editpt
 	Return
 
 .setcol
-	##[$80CA] col(cc)
+	USEPATH col(cc)
 ;	PaletteRange 0,cc*4,cc*4+3,\r+40,\g+40,\b+40,\r-20,\g-20,\b-20
 	For j=0 To 3
 		d=(2-j)*contrast
@@ -1221,18 +1221,18 @@ cols:
 ;	Return
 
 .drawbrick
-	##[$80CA] b(x,y,z)
-	If \t AND 1 Then longdiv 1,!e{x,y,z},\c[0]
-	If \t AND 2 Then longdiv 2,!e{x,y,z},\c[2]
-	If \t AND 4 Then longdiv 3,!e{x,y,z},\c[4]
+	USEPATH b(x,y,z)
+	If \t AND 1 Then Blit 1,!e{x,y,z},\c[0]
+	If \t AND 2 Then Blit 2,!e{x,y,z},\c[2]
+	If \t AND 4 Then Blit 3,!e{x,y,z},\c[4]
 	Return
 
 .drawblock:
 	For x=1 To 32:For y=1 To 32:For z=1 To 32
 		If x=1 OR y=1 OR z=1
-			longdiv 1,262+!d{x,y,z}+130,1
-			longdiv 2,262+!d{x,y,z}+130,1
-			longdiv 3,262+!d{x,y,z}+130,1
+			Blit 1,262+!d{x,y,z}+130,1
+			Blit 2,262+!d{x,y,z}+130,1
+			Blit 3,262+!d{x,y,z}+130,1
 		EndIf
 	Next z,y,x
 	Return
@@ -1240,10 +1240,10 @@ cols:
 .
 .generategfx
 	#s=-1
-	Use lmaxlen 2:BlockScroll:Box 0,0,7,3,1
+	Use BitMap 2:BlockScroll:Box 0,0,7,3,1
 	GetaShape 1,0,0,8,4:Handle 1,-14,-4;:GetaSprite 2,1
 	;
-	Use lmaxlen 1:BitMapOrigin 1,160,128
+	Use BitMap 1:BitMapOrigin 1,160,128
 	BlockScroll
 	Line !d{0,0,0},!d{0,0,#s},4
 	Line !d{0,0,0},!d{0,#s,0},4
@@ -1287,12 +1287,12 @@ cols:
 		MakeCookie i:Poke.w Addr MidHandle(i)+4,2
 	Next
 	;
-	Use lmaxlen 1:BlockScroll
+	Use BitMap 1:BlockScroll
 	;
 	For i=0 To 7
 		For j=0 To 2
 			k=j+1:If k=3 Then k=4
-			If i AND k Then longdiv j+1,160,128
+			If i AND k Then Blit j+1,160,128
 		Next
 		GetaShape 8+i,160-8,128-4,16,8
 		Handle 8+i,8,4
@@ -1302,7 +1302,7 @@ cols:
 		BlockScroll
 	Next
 	;
-	Use lmaxlen 2:BitMapOrigin 2,160,128
+	Use BitMap 2:BitMapOrigin 2,160,128
 
 	BlockScroll:Line !dd{0,-.5,-.5},!dd{#s,-.5,-.5},1
 
@@ -1315,7 +1315,7 @@ cols:
 	BlockScroll:Line !dd{-.5,0,-.5},!dd{-.5,#s,-.5},1
 	GetaShape 19,160-6,125,17,10:Handle 19,6,3:GetaSprite 19,19
 
-	Use lmaxlen 0
+	Use BitMap 0
 	;
 	Return
 

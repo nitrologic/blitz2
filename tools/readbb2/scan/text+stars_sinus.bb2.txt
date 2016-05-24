@@ -13,12 +13,12 @@ Filter On
 PlayModule 0																	; play module nr
 Volume 15,64,64,64,64
 ;
-lmaxlen 0,320+80,256,2
-lmaxlen 1,320+80,256,2
+BitMap 0,320+80,256,2
+BitMap 1,320+80,256,2
 Slice 0,44,320,256,$fff8,2,8,32,320+80,320+80
 Show 0,32,0
 Show 1,32,0
-Use lmaxlen 0
+Use BitMap 0
 GetaShape 0,0,0,1,1
 ;
 Dim Y(240),XP(40),I(140)
@@ -59,7 +59,7 @@ DIS=18
 
 While Joyb(0)=0
 	 VWait
-	 Show db,32,0:db=1-db:Use lmaxlen db:BlockScroll 0
+	 Show db,32,0:db=1-db:Use BitMap db:BlockScroll 0
 	 ;
 	 For LOP=0 To 60
 	 Point XS(LOP),YS(LOP),CL(LOP)
@@ -75,7 +75,7 @@ While Joyb(0)=0
 	 EndIf
 	 ;
 	 For LOP=0 To 19
-	 longdiv I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
+	 Blit I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
 	 Next
 	 POS=QWrap(POS-1,0,157)
 Wend

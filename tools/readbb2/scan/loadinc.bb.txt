@@ -185,7 +185,7 @@ CNIF #freq
 		succ=On:done=Off:m$="":t$="":hightrack.w=0
 
 		InitCopList 9,44,256,4,8,0,0:CreateDisplay 9:DisplayBitMap 9,0
-		BitMapOutput 0:Use lmaxlen 0:Boxf 0,0,1024,512,0
+		BitMapOutput 0:Use BitMap 0:Boxf 0,0,1024,512,0
 		BitPlanesBitMap 0,8,4
 
 		Locate 0,30:Print Centre$("Please Insert",40)
@@ -254,7 +254,7 @@ CNIF #freq
 
 
 			BLITZ:Mouse On
-			Use lmaxlen 8:VWait:dum=MouseYSpeed
+			Use BitMap 8:VWait:dum=MouseYSpeed
 			For juice=5 To 0 Step -1
 				VWait
 				cnt.w=QLimit(sel+(MouseYSpeed+4) ASR 3,0,hightrack-1)
@@ -332,7 +332,7 @@ Shared m$,t$
 
 		QAMIGA
 		done.w=Off:BitMapOutput 0
-		Use lmaxlen 0:Boxf 0,0,32,32,0:Line 0,0,32,32,1
+		Use BitMap 0:Boxf 0,0,32,32,0:Line 0,0,32,32,1
 		GetaShape 80,0,0,32,32:GetaSprite 19,80: Free MidHandle 80
 		Boxf 0,0,1024,516,0
 		Poke.l Peek.l(Peek.l(4)+276)+184,-1		:; turn errors off!
@@ -350,14 +350,14 @@ Shared m$,t$
 
 		BLITZ
 
-		BitMapOutput 0:Use lmaxlen 0:done=Off
+		BitMapOutput 0:Use BitMap 0:done=Off
 		Boxf 0,0,1024,516,0
 		For cnt=0 To hightrack.w-1
 			Locate	3,5+cnt:Print nam.s(cnt)
 			Locate 20,5+cnt:Print com.s(cnt)
 		Next
 		Mouse On:BlitzKeys On:sel=-1
-		BitPlanesBitMap 0,8,4:Use lmaxlen 8
+		BitPlanesBitMap 0,8,4:Use BitMap 8
 
 		Repeat
 ;			ShowSprite 19,MouseX,MouseY,0

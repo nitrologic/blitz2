@@ -7,20 +7,20 @@ MaxLen pa$=160 ;set path string variable for filerequester
 MaxLen fi$=64	;set filename string variable for filerequester
 
 Enable 1
-For i=0 To 7:Read a$:workstart 0,4+i*18,14,512+32,8+i,a$:Next
+For i=0 To 7:Read a$:TextGadget 0,4+i*18,14,512+32,8+i,a$:Next
 Enable 2
-For i=0 To 7:SelectMode 0,i:workstart 0,4+i*18,32,512+32,i," ":Next
+For i=0 To 7:SelectMode 0,i:TextGadget 0,4+i*18,32,512+32,i," ":Next
 For i=0 To 2:PropGadget 0,8,50+i*10,64,16+i,134,8:Next
 funcnames:Data$ ".","o","O","f","F"," ","B","C"
 SelectMode 0,3
 currpen=1:Borders 0,1,On:currfunc=1:Borders 0,9,On
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"LOAD		 ","L"
 MenuItem 0,0,0,1,"SAVE		 ","S"
 MenuItem 0,0,0,2,"QUIT		 ","Q"
 
-allocst 0,0,0,320,256,6,0,"",1,2
+Screen 0,0,0,320,256,6,0,"",1,2
 
 ScreensBitMap 0,0
 BitPlanesBitMap 0,1,$07	;lower 3 bitplanes (hue)
@@ -28,11 +28,11 @@ BitPlanesBitMap 0,2,$38	;upper 3 bitplanes (brightness)
 
 Gosub initcolors:Use SetCycle 0
 
-localstat 0,0,0,320,256,$1800,"",1,2:arrmult 0
+Window 0,0,0,320,256,$1800,"",1,2:SetMenu 0
 
-backdrop.l=Peek.l(Addr localstat(0)) ;for direct calls to intuition library
+backdrop.l=Peek.l(Addr Window(0)) ;for direct calls to intuition library
 
-localstat 1,100,100,150,82,$2,"TOOL BOX",1,2,0:arrmult 0:Gosub setprop
+Window 1,100,100,150,82,$2,"TOOL BOX",1,2,0:SetMenu 0:Gosub setprop
 
 Repeat
 	ev.l=WaitEvent
@@ -56,7 +56,7 @@ dotoolbox:
 	Return
 
 .dofunc:
-	##[$FFB0] backdrop:Use localstat 0:x=WMouseX:y=WMouseY:Use lmaxlen 1
+	##[$FFB0] backdrop:Use Window 0:x=WMouseX:y=WMouseY:Use BitMap 1
 	If currfunc<3
 		bs=1+currfunc*2							 ;do freehand with brushsize
 		Repeat
@@ -64,11 +64,11 @@ dotoolbox:
 		Until Event=8 ;button up!
 	EndIf															;do flood
 	If currfunc=3 OR currfunc=4
-		If currfunc=4 Then Use lmaxlen 1 Else Use lmaxlen 0
+		If currfunc=4 Then Use BitMap 1 Else Use BitMap 0
 		WaitEvent:FloodFill x,y,(Cls(x,y) AND $38)+currpen
 	EndIf
 	If currfunc=6
-		Use lmaxlen 1				 ;do box
+		Use BitMap 1				 ;do box
 		Repeat
 			xx=WMouseX:yy=WMouseY
 			Boxf x,y,xx,yy,-currpen:##[$FE1B] 5:Boxf x,y,xx,yy,-currpen
@@ -79,9 +79,9 @@ dotoolbox:
 	Return
 
 .dodraw
-	Use localstat 0
+	Use Window 0
 	Repeat
-		Use lmaxlen 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
+		Use BitMap 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
 	Until MButtons=5
 	Return
 
@@ -92,9 +92,9 @@ dotoolbox:
 	If ILBMViewMode<>320 OR DecodeILBM<>256 Then Return
 	##[$FFB0] backdrop
 	If ##[$D087]=4										;16 color gray scale
-		lmaxlen 3,320,256,4:LoadBitMap 3,a$
+		BitMap 3,320,256,4:LoadBitMap 3,a$
 		For i=0 To 15:ReMap i,7-Int(i/2),2:Next
-		Free lmaxlen 3
+		Free BitMap 3
 	EndIf
 	If ##[$D087]=6 Then LoadBitMap 0,a$,0 ;halfbright picture!
 	##[$FFAF] backdrop

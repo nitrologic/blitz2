@@ -51,9 +51,9 @@ Else
 	offset.w=28
 EndIf
 
-lmaxlen 0,320,200,4
-lmaxlen 1,320,200,4
-Use lmaxlen 0
+BitMap 0,320,200,4
+BitMap 1,320,200,4
+Use BitMap 0
 BitMapOutput 0
 BlockScroll
 BLITZ
@@ -86,8 +86,8 @@ Next h
 
 dbuffer=0
 
-bitaddress(0)=Addr lmaxlen(0)
-bitaddress(1)=Addr lmaxlen(1)
+bitaddress(0)=Addr BitMap(0)
+bitaddress(1)=Addr BitMap(1)
 
 startangl=0
 
@@ -95,7 +95,7 @@ Repeat
 	VWait
 	DisplayBitMap 0,dbuffer
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	assembler_cls{bitaddress(dbuffer)}
 
 	ang=startangl

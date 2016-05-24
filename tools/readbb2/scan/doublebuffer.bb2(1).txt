@@ -47,20 +47,20 @@ BLITZ
 
 ;initialize a lor-res, 8 colour bitmap...
 ;
-lmaxlen 0,320,200,3
+BitMap 0,320,200,3
 
 ;we also need another bitmap for the double buffering:
 ;
-lmaxlen 1,320,200,3
+BitMap 1,320,200,3
 
 ;initialize a 'Queue' for the QBlit command to make use of:
 ;
-longmult 0,50
+Queue 0,50
 
 ;We will also double buffer our queue's, so we need another
 ;queue:
 ;
-longmult 1,50
+Queue 1,50
 
 ;initialize a slice, and set it's colour palette
 ;
@@ -76,7 +76,7 @@ While Joyb(0)=0
 
 	;start at first item in list
 	;
-	newmem balls()
+	ResetList balls()
 
 	;wait for vertical blank
 	;
@@ -86,7 +86,7 @@ While Joyb(0)=0
 	;the 'db=1-db' will cause the 'db' variable to switch
 	;between 0/1/0/1/0/1...
 	;
-	Show db:db=1-db:Use lmaxlen db
+	Show db:db=1-db:Use BitMap db
 
 	;unqueue items on the 'used' bitmap:
 	;
@@ -94,7 +94,7 @@ While Joyb(0)=0
 
 	;while more items to come...
 	;
-	While globfree(balls())
+	While NextItem(balls())
 
 		;update balls' position
 		;

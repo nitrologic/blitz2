@@ -7,7 +7,7 @@ BLITZ
 
 ;set up foreground bitmap...
 ;
-lmaxlen 0,640,200,3
+BitMap 0,640,200,3
 
 ;draw some randome circles on foreground bitmap
 ;
@@ -23,7 +23,7 @@ Scroll 0,0,320,200,320,0
 
 ;set up background bitmap...
 ;
-lmaxlen 1,320,200,3
+BitMap 1,320,200,3
 
 ;draw some random boxes on background bitmap
 ;

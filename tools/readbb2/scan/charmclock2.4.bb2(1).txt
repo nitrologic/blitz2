@@ -3,9 +3,9 @@
 
 SetErr:Gosub Error:End:End SetErr
 
-##[$80CB]
+CloseEd
 
-##[$80CC]
+NoCli
 
 WBStartup
 
@@ -111,8 +111,8 @@ Running = True
 
 
 SizeLimits 40,40,249,249
-lmaxlen 0,250,250,WinBitPlanes
-lmaxlen 1,48,24,WinBitPlanes
+BitMap 0,250,250,WinBitPlanes
+BitMap 1,48,24,WinBitPlanes
 BitMapOutput 0
 
 Dim x.f(59)
@@ -192,9 +192,9 @@ Repeat
 
 Until Running = False
 
-Free lmaxlen 0
-Free lmaxlen 1
-Free localstat 0
+Free BitMap 0
+Free BitMap 1
+Free Window 0
 
 End
 
@@ -718,12 +718,12 @@ If WinEvent = 256
 
 .Refresh:
 
-	Free localstat 0
+	Free Window 0
 
-	localstat 0,WinX,WinY,WinOWidth,WinOHeight,(WinFlags OR $1000),"",0,1
+	Window 0,WinX,WinY,WinOWidth,WinOHeight,(WinFlags OR $1000),"",0,1
 	BitMapOutput 0
 
-	arrmult 0
+	SetMenu 0
 
 	WinHeight = InnerHeight
 	WinWidth = InnerWidth
@@ -787,18 +787,18 @@ If WinEvent = 256
 
 	If WinHeight >= 70 AND WinWidth >=85
 
-		longdiv 0,(WinWidth/2)-20,(WinHeight*5/8)
-		longdiv 1,(WinWidth-26),(WinHeight/2)-4
+		Blit 0,(WinWidth/2)-20,(WinHeight*5/8)
+		Blit 1,(WinWidth-26),(WinHeight/2)-4
 		If Alarm = True
 			If (((AlarmHour = Hours) AND (AlarmMinute <= m)) OR ((((AlarmHour + 1) MOD 24) = Hours) AND AlarmMinute > m))
 				OS = s AND 1
 				If OS = 0
 					Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
 				Else
-					longdiv 2,(WinWidth/2)-20,(WinHeight*0.31)
+					Blit 2,(WinWidth/2)-20,(WinHeight*0.31)
 				EndIf
 			Else
-				longdiv 2,(WinWidth/2)-20,(WinHeight*0.31)
+				Blit 2,(WinWidth/2)-20,(WinHeight*0.31)
 			EndIf
 		Else
 			Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
@@ -866,11 +866,11 @@ If WinEvent = 256
 
 	PropGadget 0,10,10,$40,1,150,8
 	PropGadget 0,10,24,$40,2,150,8
-	workstart 0,10,60,0,3," SET "
-	workstart 0,150,60,0,4," CANCEL "
+	TextGadget 0,10,60,0,3," SET "
+	TextGadget 0,150,60,0,4," CANCEL "
 	SetHProp 0,1,(AlarmHour/23),(1/8)
 	SetHProp 0,2,(AlarmMinute/59),(1/14)
-	localstat 1,20,20,240,90,$142e,"Alarm Settings",0,1,0
+	Window 1,20,20,240,90,$142e,"Alarm Settings",0,1,0
 	WLocate 164,10:Print "Hours"
 	WLocate 164,24:Print "Minutes"
 	WLocate 10,42:Print "Alarm Time:"
@@ -900,9 +900,9 @@ If WinEvent = 256
 	AlSMin = AlSMin MOD 60
 	AlSHour = AlSHour MOD 24
 
-	Free localstat 1
-	Use localstat 0
-	Use lmaxlen 0
+	Free Window 1
+	Use Window 0
+	Use BitMap 0
 	BitMapOutput 0
 	Return
 
@@ -915,7 +915,7 @@ If WinEvent = 256
 
 .SizePos:
 
-	localstat 2,WinX,WinY,WinOWidth,WinOHeight,$100b,"Move/Size Me!",0,1
+	Window 2,WinX,WinY,WinOWidth,WinOHeight,$100b,"Move/Size Me!",0,1
 
 	Repeat
 
@@ -931,7 +931,7 @@ If WinEvent = 256
 	WinX = WX
 	WinY = WY
 
-	Free localstat 2
+	Free Window 2
 
 	Gosub Refresh
 	Gosub Update
@@ -951,7 +951,7 @@ If WinEvent = 256
 		Gosub WriteIt
 	EndIf
 
-	Use localstat 0
+	Use Window 0
 	BitMapOutput 0
 
 	Return
@@ -1005,7 +1005,7 @@ If WinEvent = 256
 		If WBWidth < WinX
 			WinX=WBWidth-(WinWidth+10)
 		EndIf
-		Use localstat 0
+		Use Window 0
 		BitMapOutput 0
 		Gosub Refresh
 		Gosub Update
@@ -1081,7 +1081,7 @@ If WinEvent = 256
 
 MenuChecked 0
 
-newlocarr 0,0,"Project"
+MenuTitle 0,0,"Project"
 	MenuItem 0,0,0,0,"About CharmClock"
 	MenuItem 0,0,0,1,"----------------"
 	MenuItem 0,0,0,2,"Reset To Default"
@@ -1089,7 +1089,7 @@ newlocarr 0,0,"Project"
 	MenuItem 0,0,0,4,"Save Settings	 "
 	MenuItem 0,0,0,5,"----------------"
 	MenuItem 0,0,0,6,"Quit"
-newlocarr 0,1,"Settings"
+MenuTitle 0,1,"Settings"
 	MenuItem 0,0,1,0,"Outline Pen		"+Chr$(187)
 		If WinOutLPen = 0 Then	SubItem 0,4,1,0,0,"	Pen 0" Else SubItem 0,2,1,0,0,"	Pen 0"
 		If WinOutLPen = 1 Then	SubItem 0,4,1,0,1,"	Pen 1" Else SubItem 0,2,1,0,1,"	Pen 1"
@@ -1190,12 +1190,12 @@ newlocarr 0,1,"Settings"
 	MenuItem 0,0,1,16,"Secounds hand	"+Chr$(187)
 		If WinSecounds = True Then SubItem 0,4,1,16,0,"	On" Else SubItem 0,2,1,16,0,"	On"
 		If WinSecounds = False Then SubItem 0,4,1,16,1,"	Off" Else SubItem 0,2,1,16,1,"	Off"
-newlocarr 0,2,"Alarm"
+MenuTitle 0,2,"Alarm"
 	MenuItem 0,1,2,0,"Alarm					"+Chr$(187)
 		If Alarm = True Then SubItem 0,4,2,0,0,"	On " Else SubItem 0,2,2,0,0,"	On"
 		If Alarm = False Then SubItem 0,4,2,0,1,"	Off" Else SubItem 0,2,2,0,1,"	Off"
 	MenuItem 0,0,2,1,"Set Timer..."
-newlocarr 0,3,"Task Priority"
+MenuTitle 0,3,"Task Priority"
 		If Priority = -128 Then MenuItem 0,4,3,0,"	-128" Else MenuItem 0,2,3,0,"	-128"
 		If Priority = -112 Then MenuItem 0,4,3,1,"	-112" Else MenuItem 0,2,3,1,"	-112"
 		If Priority =	-96 Then MenuItem 0,4,3,2,"	 -96" Else MenuItem 0,2,3,2,"	 -96"
@@ -1214,13 +1214,13 @@ MenuColour 0,1,13,Off
 MenuColour 0,1,15,Off
 
 If Start = False
-	arrmult 0
+	SetMenu 0
 EndIf
 
 Return
 
 .MakeCharmShape
-	Use lmaxlen 1
+	Use BitMap 1
 	BitMapOutput 1
 	Locate 0,0
 	Colour WinTextPen MOD WinCols, WinBackPen MOD WinCols
@@ -1230,12 +1230,12 @@ Return
 	Locate 0,0
 	Print "Alarm"
 	GetaShape 2,0,0,40,8
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 Return
 
 .MakeDateShape
-	Use lmaxlen 1
+	Use BitMap 1
 	BitMapOutput 1
 
 	da$=Date$(SystemDate)
@@ -1255,6 +1255,6 @@ Return
 	Line 0,7,16,7,WinDateBackPen MOD WinCols
 
 	GetaShape 1,0,7,16,9
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 Return

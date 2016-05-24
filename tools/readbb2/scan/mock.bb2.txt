@@ -9,7 +9,7 @@ so=96
 
 BLITZ
 
-lmaxlen 0,w,h,3:BitMapOutput 0
+BitMap 0,w,h,3:BitMapOutput 0
 
 Box 0,sh,w-1,h-1,1
 

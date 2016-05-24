@@ -125,10 +125,10 @@ Return
 init:
 
 
-	workstart 0,44 ,180,0,1,"	A	"
-	workstart 0,103,180,0,2,"	B	"
-	workstart 0,162,180,0,3,"	C	"
-	workstart 0,221,180,0,4,"	D	"
+	TextGadget 0,44 ,180,0,1,"	A	"
+	TextGadget 0,103,180,0,2,"	B	"
+	TextGadget 0,162,180,0,3,"	C	"
+	TextGadget 0,221,180,0,4,"	D	"
 
 	StringGadget 0,30,120,0,5,80,432
 	StringGadget 0,30,134,0,6,80,432
@@ -136,9 +136,9 @@ init:
 	StringGadget 0,30,162,0,8,80,432
 
 
-	##[$80CC]
+	NoCli
 	FindScreen 0
-	localstat 0,50,32,500,200,$100E,"RatQuest V1.0",1,2,0
+	Window 0,50,32,500,200,$100E,"RatQuest V1.0",1,2,0
 
 	f$="Ram:Ratwork"
 

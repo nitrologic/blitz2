@@ -9,9 +9,9 @@ End NEWTYPE
 
 Dim List q.quad(20)
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
-localstat 0,0,0,320,256,$1800,"",1,2
+Window 0,0,0,320,256,$1800,"",1,2
 BlockScroll
 
 WindowInput 0
@@ -59,7 +59,7 @@ Repeat
 
 		If PColl(sx,sy,1,1,0,0,160,160)
 			Box bx,by,bx+bw,by+bh,5
-			If globalloc(q())
+			If AddItem(q())
 				q()\x=bx,by,bw,bh:sp+1:sb+bw*bh/2
 			EndIf
 			While Joyb(0)<>0:VWait:Wend
@@ -69,9 +69,9 @@ Repeat
 
 	If key=127
 		If LastItem(q())
-			##[$80CA] q()
+			USEPATH q()
 			Box \x,\y,\x+\w,\y+\h,1
-			freelast q()
+			KillItem q()
 		EndIf
 	EndIf
 

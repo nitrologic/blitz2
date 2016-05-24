@@ -12,7 +12,7 @@ Function.s numero{n.w}
 End Function
 
 .drawworm:
-	remline 1,"scala.font",11
+	LoadFont 1,"scala.font",11
 	Use IntuiFont 1
 	StopCycle 1,0,8,8,8
 	StopCycle 1,1,0,0,0		 ;1=black
@@ -24,12 +24,12 @@ End Function
 	StopCycle 1,6,12,12,4	 ;6=team1 (yellow)
 	StopCycle 1,7,12,4,10	 ;7=team2 (maroon)
 
-	lmaxlen 3,736,566,4
-	allocst 1,0,0,736,566,4,$8004,"",1,2,3
-	localstat 2,0,0,736,566,$800,"",1,2
+	BitMap 3,736,566,4
+	Screen 1,0,0,736,566,4,$8004,"",1,2,3
+	Window 2,0,0,736,566,$800,"",1,2
 	Use SetCycle 1
 
-	Use lmaxlen 3
+	Use BitMap 3
 	BlockScroll
 
 	Boxf 0,0,192,423,3

@@ -2,7 +2,7 @@
 #dots=7				; CHANGE ME!!!
 
 
-lmaxlen 0,320,256,2:lmaxlen 1,320,256,2
+BitMap 0,320,256,2:BitMap 1,320,256,2
 BLITZ:Slice 0,44,2:Show 0:Green 1,15,15,15
 
 
@@ -67,7 +67,7 @@ Next
 
 Mouse On
 Repeat
-	VWait:Show db:db=1-db:Use lmaxlen db	 ; double buffered
+	VWait:Show db:db=1-db:Use BitMap db	 ; double buffered
 	Boxf 0,0,319,255,0
 	vi=(vi+MouseXSpeed)*0.92:curi+vi:ci=curi	;damping...
 	vj=(vj+MouseYSpeed)*0.92:curj+vj:cj=curj

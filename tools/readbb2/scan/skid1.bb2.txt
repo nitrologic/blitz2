@@ -14,7 +14,7 @@ For i=0 To 7			 ;32 gadgets
 	StringGadget 0,056,36+i*12,0,i+00,17,128	;name
 	StringGadget 0,194,36+i*12,0,i+08,17,128	;number
 	StringGadget 0,366,36+i*12,0,i+16,128,250	;function keys
-	SetString 2,1:workstart 0,12,36+i*12,0,30+i,"DIAL"
+	SetString 2,1:TextGadget 0,12,36+i*12,0,30+i,"DIAL"
 Next
 
 SetString 1,2
@@ -22,17 +22,17 @@ StringGadget 0,326,152,0,24,17,180
 StringGadget 0,566,152,0,25,3,32
 SetString 2,1
 
-workstart 0,10,12,0,40,Centre$("HIT F10 OR CLICK HERE TO START",76)
-workstart 0,040,138,0,41,"	 2400	|	 4800	|	 9600	|	 19200 |	 1200	"
-workstart 0,140,138,0,42,"		 ANSWER			"
-workstart 0,300,138,0,43,"		ORIGINATE		"
-workstart 0,460,138,0,44,"		 HANG UP		 "
+TextGadget 0,10,12,0,40,Centre$("HIT F10 OR CLICK HERE TO START",76)
+TextGadget 0,040,138,0,41,"	 2400	|	 4800	|	 9600	|	 19200 |	 1200	"
+TextGadget 0,140,138,0,42,"		 ANSWER			"
+TextGadget 0,300,138,0,43,"		ORIGINATE		"
+TextGadget 0,460,138,0,44,"		 HANG UP		 "
 
 Dim sp.w(5):sp(1)=2400:sp(2)=4800::sp(3)=9600:sp(4)=19200:sp(5)=1200
 
 wt$="SKIDMARKS STARTUP																	 (C)1993 ACID SOFTWARE"
 
-localstat 0,(WBWidth-640)/2,(WBHeight-200)/2,640,200,$100e,wt$,1,2,0
+Window 0,(WBWidth-640)/2,(WBHeight-200)/2,640,200,$100e,wt$,1,2,0
 
 WColour 2:For i=1 To 8:WLocate 344,16+i*12:Print "F"+Str$(i):Next:WColour 3
 

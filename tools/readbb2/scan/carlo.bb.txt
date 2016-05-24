@@ -8,8 +8,8 @@
 
 ##[$A404] 0,"w:cars/mini1.iff":thresh=130
 
-lmaxlen 0,640,32,8
-lmaxlen 1,640,32,3
+BitMap 0,640,32,8
+BitMap 1,640,32,3
 
 DecodePalette 0,256:For i=0 To 255:AGAGreen 0,i,i,i,i:Next
 
@@ -33,14 +33,14 @@ For xx=0 To 9
 	a=xx*32
 	##[$A402] 1,64,32,1:##[$A40C] 0,1,a*2,0,64,32,0,0
 	m.l=Peek.l(Addr ##[$A401](1))
-	Use lmaxlen 0
+	Use BitMap 0
 	For y=0 To 31
 		For x=0 To 31
 			mm.l=m+x+x+y*192+(y AND 1)
 			r.w=Peek.b(mm)&255:g.w=Peek.b(mm+64)&255:b.w=Peek.b(mm+128)&255
 			c.w=(r+g+b)/3
-			Use lmaxlen 0:Point x+xx*32,y,c
-			Use lmaxlen 1
+			Use BitMap 0:Point x+xx*32,y,c
+			Use BitMap 1
 			If ((x-y)AND1)=1
 				If c<60 Then c=1 Else c=2
 			Else

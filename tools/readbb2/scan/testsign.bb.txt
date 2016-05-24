@@ -55,8 +55,8 @@ Gosub initsign
 BitMapOutput signbmap:NPrint "LAP1":NPrint "23.5"
 
 ;-------------------
-lmaxlen 0,1024,516,4
-allocst 0,-32,0,1024,512,4,$0,"KickMe",1,2,0
+BitMap 0,1024,516,4
+Screen 0,-32,0,1024,512,4,$0,"KickMe",1,2,0
 
 BitPlanesBitMap 0,2,4
 
@@ -122,11 +122,11 @@ Data.s "twistie"
 drawsign:
 	signframe=(signframe+1)&3
 	dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-	Use lmaxlen 2
+	Use BitMap 2
 	If signflip
-		longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+		Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 	Else
-		longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+		Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 	EndIf
 	Return
 
@@ -143,7 +143,7 @@ initsign:
 		If i AND $01 Then signl(e+6)+$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
+	BitMap signbmap,64,16,1:ssign.l=Peek.l(Addr BitMap(signbmap)+8)
 	LoadShape signshape,"sign.iff"
 	CopyShape signshape,signshape+1
 	XFlip signshape:Handle signshape,0,0

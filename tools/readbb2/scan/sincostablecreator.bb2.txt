@@ -2,7 +2,7 @@
 ; Sin and Cos File creator for Blitz Basic II by SPECTRE
 ;
 
-allocst 0,3
+Screen 0,3
 ScreensBitMap 0,0
 Green 0,0,0,0 : Green 1,15,15,15
 Dim c(360),s(360)

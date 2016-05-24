@@ -5,7 +5,7 @@
 ; screenslib for non-blitz wacko macko control.
 ;
 
-allocst 0,3
+Screen 0,3
 vp.l=ViewPort(0)
 Gosub makecop
 MouseWait

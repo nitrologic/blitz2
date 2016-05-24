@@ -16,7 +16,7 @@ End NEWTYPE
 Dim List b.t(10)
 
 For i=1 To 20
-	If globalloc(b())
+	If AddItem(b())
 		b()\d="name"+Str$(i)
 		b()\b=Rnd(1024)
 	EndIf
@@ -24,8 +24,8 @@ Next
 
 SortList b(),SizeOf .t\b	;here we sort the list using the b field
 
-newmem b()
-While globfree(b())
+ResetList b()
+While NextItem(b())
 	NPrint b()\d," with id ",b()\b
 Wend
 

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Examples/clouds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Examples/clouds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Examples/clouds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/clouds.bb2
-##[$80CC]
+NoCli
 ;-----------------------------------------------------------------
 ; Clouds by Christopher D. Watkins
 ; Converted To the AMIGA & BLITZ BASIC 2 by Brett Cooper
@@ -126,7 +126,7 @@ End Statement
 ;-----------------------------------------------------------------
 .Start
 	choice.w = ##[$A281]("Generator"," Select a cloud style to generate.","CLOUDS|PLASMA|ELECTRICAL")
-	allocst 0,0,0,#XRes,#YRes,8,0,"",0,1
+	Screen 0,0,0,#XRes,#YRes,8,0,"",0,1
 	ScreensBitMap 0,0
 	Select choice
 	Case 1

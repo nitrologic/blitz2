@@ -13,8 +13,8 @@ Ver$ = "BlitzTris 18.7.1995 Timo Suoranta"
 SetErr:End:End SetErr								 ; Add ; to enable Debugger
 
 WBStartup														 ; A Must for WB progs
-##[$80CB]															 ; Editor run only; free mem.
-##[$80CC]																 ; Editor run only; free mem.
+CloseEd															 ; Editor run only; free mem.
+NoCli																 ; Editor run only; free mem.
 DEFTYPE .w														; Mostly sufficient & fast
 
 Gosub Variable_Init
@@ -114,7 +114,7 @@ Macro MyBlit
 	; It would be easier to change this single macro
 	; to WBlit for example than searhing-replacing all Blits.
 
-	longdiv #Blk_Sps+(`1), PFX+(`2)*#BXX,PFY+(`3)*#BYY
+	Blit #Blk_Sps+(`1), PFX+(`2)*#BXX,PFY+(`3)*#BYY
 	End Macro
 
 
@@ -159,7 +159,7 @@ Statement Digi {Value,chars,xPos,yPos}
 	For p=1 To Len(Value$)							; Loop through all chars
 		v = Asc(Mid$(Value$,p,1))				 ;	Get ASCII of p:th char from left
 		If v=32 : v = 0 Else v-47 :EndIf	;	Transfer ASCII to Digit shape #
-		longdiv #Dgt_Sps+v,xPos,yPos				 ;	Blit sigit shape
+		Blit #Dgt_Sps+v,xPos,yPos				 ;	Blit sigit shape
 		xPos + #DXX											 ;	Move graphics 'cursor' to right
 	Next																; Loop end
 End Statement
@@ -311,10 +311,10 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 
 .
 .Graphics_Init												; Set Up Graphics
-	allocst #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
-	localstat 0,0,0,SXX,SYY,$31940,Ver$,0,2
+	Screen #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
+	Window 0,0,0,SXX,SYY,$31940,Ver$,0,2
 	ScreensBitMap #GSC,#GBM
-	lmaxlen #IBM,320,256,4
+	BitMap #IBM,320,256,4
 
 	; Window Flags are explained in intuition.bb2
 	;
@@ -328,7 +328,7 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 	; Actually we need window only for console - Need to read the keyboard!
 
 	##[$A486] "Data/BlockShapes.Iff",#IBM,#GPAL
-	Use lmaxlen #IBM
+	Use BitMap #IBM
 
 	; Next we'll 'define' pieces.	They are hand-drawn on bitmap,
 	; with all their rotations.
@@ -350,9 +350,9 @@ Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
 
 	Grab {#Blocks ,#BXX,#BYY}					 ; Grab Block Shapes
 	Grab {#Digits ,#DXX,#DYY}					 ; Grab Number Digit Shapes
-	Free lmaxlen #IBM										; Free WorkBitMap
+	Free BitMap #IBM										; Free WorkBitMap
 
-	Use lmaxlen #GBM
+	Use BitMap #GBM
 	Use SetCycle #GPAL
 	Format "###"
 	Return

@@ -2,8 +2,8 @@
 xm.w=320:ym.w=256 :im=1
 cl=5:mnc=16:mxc=23
 
-allocst 0,0,0,xm,ym,cl,$00,"",0,1
-localstat 0,0,0,xm,ym,$1800,"",0,0
+Screen 0,0,0,xm,ym,cl,$00,"",0,1
+Window 0,0,0,xm,ym,$1800,"",0,0
 ScreensBitMap 0,0
 mc=2^cl
 For t=0 To mc-1

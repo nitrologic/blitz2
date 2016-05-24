@@ -8,13 +8,13 @@ LoadShapes 0,"shapes/blitzfonts-2c"
 VWait
 ;
 BLITZ
-lmaxlen 0,320,256,1
-lmaxlen 1,320,256,1
+BitMap 0,320,256,1
+BitMap 1,320,256,1
 Slice 0,44,320,256,$fff8,1,8,32,320,320
 Show 0,0,0
 Show 1,0,0
 BitMapOutput 0
-Use lmaxlen 0
+Use BitMap 0
 GetaShape 0,0,0,1,1
 ;
 ;
@@ -58,10 +58,10 @@ While Joyb(0)=0
 		For DIS=1 To 6
 		POS=QWrap(POS-1,0,6)
 		For LOP=1 To 35
-			 longdiv IM(TEX+LOP),X(POS+LOP*6+MouseX),Y(POS+LOP*6+MouseY)
+			 Blit IM(TEX+LOP),X(POS+LOP*6+MouseX),Y(POS+LOP*6+MouseY)
 		Next
 		VWait
-		Show db,0,0:db=1-db:Use lmaxlen db:BlockScroll 0
+		Show db,0,0:db=1-db:Use BitMap db:BlockScroll 0
 		Next
 Wend
 End

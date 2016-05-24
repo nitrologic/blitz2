@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/insectoids/insectoids.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/insectoids/insectoids.bb2
-WBStartup:##[$80CC]:##[$80CB]
+WBStartup:NoCli:CloseEd
 SetErr:End:End SetErr
 ;
 ;INSECTOIDS!
@@ -30,11 +30,11 @@ LoadShapes 96,"data/shapes"
 ;
 LoadSprites 0,"data/sprites"
 ;
-casestrcomp 0,"data/spritepal1",16
-casestrcomp 1,"data/spritepal2",16
-casestrcomp 2,"data/warp.blok"
+LoadPalette 0,"data/spritepal1",16
+LoadPalette 1,"data/spritepal2",16
+LoadPalette 2,"data/warp.blok"
 ;
-lmaxlen 3,320,8,4:LoadBitMap 3,"data/scorebar",3
+BitMap 3,320,8,4:LoadBitMap 3,"data/scorebar",3
 ;
 For k=0 To 7:Read n$:LoadSound k,"data/"+n$:Next
 Data$ "fire","boom","boom.alien","swoop"
@@ -194,8 +194,8 @@ End Function
 
 ShapesHit 3,4
 ;
-longmult 0,100:longmult 1,100
-For k=1 To 70:longmult k+1,1:Next
+Queue 0,100:Queue 1,100
+For k=1 To 70:Queue k+1,1:Next
 
 For j=1 To 1
 For k=1 To 4
@@ -209,10 +209,10 @@ Data -16,0,16,0,-32,0,32,0
 ;pyramid
 Data -16,0,16,0,-8,-16,8,-16
 
-lmaxlen 3,320,8,4
+BitMap 3,320,8,4
 ;
 QAMIGA
-casestrcomp 2,"data/warp.blok"
+LoadPalette 2,"data/warp.blok"
 LoadBitMap 3,"data/scorebar",3
 VWait 40:BLITZ
 Gosub titstuff
@@ -320,7 +320,7 @@ If ast=99 ;asteroid pattern?
 	;
 	Gosub dothedb:Gosub dostars
 	;
-	##[$80CA] dudes()
+	USEPATH dudes()
 	;
 	##[$B40C]:If (##[$B40B](0) OR ##[$B40B](2)) AND shf<15 Then shf=15:Sound 1,15
 	;
@@ -342,14 +342,14 @@ If ast=99 ;asteroid pattern?
 			EndIf
 		EndIf
 	EndIf
-	newmem dudes()
-	While globfree(dudes())
+	ResetList dudes()
+	While NextItem(dudes())
 		\y+\ys
 		If \y<242 AND \x>-16 AND \x<336
 			\x+\xs:\fr+\fs
 			QBlit db,\fo+\fr&31,\x+32,\y+32
 		Else
-			freelast dudes():nrox-1
+			KillItem dudes():nrox-1
 		EndIf
 	Wend
 	;
@@ -358,7 +358,7 @@ If ast=99 ;asteroid pattern?
 	If wrox
 		If nrox Then Goto rox Else Goto justdied
 	EndIf
-	newmem dudes():If globfree(dudes()) Then Goto rox
+	ResetList dudes():If NextItem(dudes()) Then Goto rox
 	;
 	Goto patdone
 	;
@@ -372,13 +372,13 @@ Repeat
 	;move all bullets.
 	;
 	mss=0:mds=0:nbs=-1
-	##[$80CA] bulls()
-	newmem bulls()
-	While globfree(bulls())
+	USEPATH bulls()
+	ResetList bulls()
+	While NextItem(bulls())
 		nbs=0
 		\x+\xs:\y-\ys:\ys+.5
 		If \y<0
-			freelast bulls()
+			KillItem bulls()
 		Else
 			QBlit db,\sh,\x+32,\y+32
 		EndIf
@@ -386,15 +386,15 @@ Repeat
 	;
 	;fire ?
 	;
-	##[$80CA] bulls()
+	USEPATH bulls()
 	If Joyb(1)	;fire button
 		If nbs AND shf<15 AND na>0
 			Sound 0,1
 			If AddLast(bulls())
 				\x=shx,206,0,6,98
 			EndIf
-			newmem capt()
-			While globfree(capt())
+			ResetList capt()
+			While NextItem(capt())
 				If AddLast(bulls())
 					\x=capt()\x,capt()\y-4,0,4,97
 				EndIf
@@ -404,9 +404,9 @@ Repeat
 	;
 	;OK, now to move captured aliens!
 	;
-	##[$80CA] capt()
-	newmem capt()
-	While globfree(capt())
+	USEPATH capt()
+	ResetList capt()
+	While NextItem(capt())
 		;
 		cx=shx+capx(\n,ctyp)
 		cy=shy+capy(\n,ctyp)
@@ -427,9 +427,9 @@ Repeat
 	;
 	;Move aliens bombs...
 	;
-	##[$80CA] bombs()
-	aadv=0:newmem bombs()
-	While globfree(bombs())
+	USEPATH bombs()
+	aadv=0:ResetList bombs()
+	While NextItem(bombs())
 		;
 		x=\x:y=\y:x+\xs:y+\ys
 		If x>-8 AND x<328 AND y>-8 AND y<234
@@ -438,24 +438,24 @@ Repeat
 			If shf<15
 				If RectsHit(98,x,y,shf,shx,shy+201)
 					Gosub killplayer
-					freelast bombs()
+					KillItem bombs()
 				Else
 					If y>160
-						newmem capt()
-						While globfree(capt())
+						ResetList capt()
+						While NextItem(capt())
 							If SpritesHit(98,x,y,capt()\fr&15,capt()\x,capt()\y)
 								;this captured alien has been zapped!
-								If globalloc(dudes())
+								If AddItem(dudes())
 									dudes()\x=capt()\x,capt()\y
 									dudes()\s=0:dudes()\fr=99:na+1
 								EndIf
 								n=capt()\n
-								freelast capt():ncap-1
-								newmem capt()
-								While globfree(capt())
+								KillItem capt():ncap-1
+								ResetList capt()
+								While NextItem(capt())
 									If capt()\n>n Then capt()\n-1
 								Wend
-								freelast bombs():Goto bombkilled
+								KillItem bombs():Goto bombkilled
 								;
 							EndIf
 						Wend
@@ -463,7 +463,7 @@ Repeat
 				EndIf
 			EndIf
 		Else
-			freelast bombs()
+			KillItem bombs()
 		EndIf
 		;
 	bombkilled
@@ -476,11 +476,11 @@ Repeat
 		foc=(foc+1)&31 ;formation counter
 	EndIf
 	;
-	##[$80CA] dudes()
+	USEPATH dudes()
 	;
-	newmem dudes()
+	ResetList dudes()
 	;
-	While globfree(dudes())
+	While NextItem(dudes())
 		x=\x:y=\y:fr=\fr
 		Select \s ;status
 		Case 3	;in formation
@@ -533,8 +533,8 @@ Repeat
 									fxa=*pa\xa:fya=*pa\ya:ffr=pathf(fpn)
 									ffs=*pa\fs
 									;
-									n=\n:PushItem dudes():newmem dudes()
-									While globfree(dudes())
+									n=\n:PushItem dudes():ResetList dudes()
+									While NextItem(dudes())
 										If \n=n AND \s=3 Then \d=1:*fsh\fc+1:nud+1
 									Wend
 									If *fsh\fc=1 Then *fsh\fc=0
@@ -547,8 +547,8 @@ Repeat
 									ffs=*pa\fs
 									;
 									n=\n:dd=\dd:d=1
-									PushItem dudes():newmem dudes()
-									While globfree(dudes())
+									PushItem dudes():ResetList dudes()
+									While NextItem(dudes())
 										If \n=n AND \s=3 Then \d=d:d+dd:nud+1
 									Wend
 									PopItem dudes()
@@ -601,7 +601,7 @@ Repeat
 				If fr<105
 					\fr=fr
 				Else
-					freelast dudes():na-1
+					KillItem dudes():na-1
 					If na<1 Then nok=-1
 				EndIf
 			Else
@@ -609,7 +609,7 @@ Repeat
 					\t-1:fr+.25:If fr>=112 Then fr-4
 					\fr=fr
 				Else
-					freelast dudes():na-1
+					KillItem dudes():na-1
 					If na<1 Then nok=-1
 				EndIf
 			EndIf
@@ -627,7 +627,7 @@ Repeat
 					ncap+1:na-1:If na<1 Then nok=-1
 					capt()\x=x,y,ncap,\fo,fr
 				EndIf
-				freelast dudes()
+				KillItem dudes()
 			EndIf
 		End Select
 	Wend
@@ -736,23 +736,23 @@ DisplayOn:Return
 
 .showlives
 ;
-Use lmaxlen 3
+Use BitMap 3
 j=sl:If j>8 Then j=8
 For k=1 To j
-longdiv 105,249+k*8,0
+Blit 105,249+k*8,0
 Next
 If k<9
 	BlitMode EraseMode
-	longdiv 105,249+k*8,0
+	Blit 105,249+k*8,0
 	BlitMode CookieMode
 EndIf
-Use lmaxlen db
+Use BitMap db
 Return
 
 .dostars
-##[$80CA] stars()
-newmem stars()
-While globfree(stars())
+USEPATH stars()
+ResetList stars()
+While NextItem(stars())
 	\y3=\y2:\y2=\y:\y=(\y+\ys)&255
 	Point \x,\y+32,\c
 	Point \x,\y3+32,0
@@ -765,14 +765,14 @@ Gosub wvbl
 ;
 ;double buffering?
 ;
-Show db,32,32:db=1-db:UnQueue db,2:Use lmaxlen db
+Show db,32,32:db=1-db:UnQueue db,2:Use BitMap db
 Return
 
 .chkdie	 ;see if I've been shot!
 ;
-##[$80CA] bulls()
-newmem bulls():di=-1
-While globfree(bulls())
+USEPATH bulls()
+ResetList bulls():di=-1
+While NextItem(bulls())
 	If SpritesHit(fr,x,y,\sh,\x,\y)
 		If dudes()\d Then nud-1
 		po=dudes()\p:dfr=99
@@ -788,14 +788,14 @@ While globfree(bulls())
 		EndIf
 		sc+po:scu=-1:mds=-1
 		dudes()\fr=dfr:dudes()\s=0:di=0
-		freelast bulls()
+		KillItem bulls()
 	EndIf
 Wend
 Return
 
 .chkbeam	;see if alien has been beam captured!
 ;
-##[$80CA] dudes()
+USEPATH dudes()
 If beamc	;beam capture flag set?
 	If x>shx-8 AND x<shx+8
 		If y>beamy-8 AND y<beamy+16
@@ -809,13 +809,13 @@ Return
 .killplayer
 ;
 shf=15:Sound 1,15
-newmem capt()
-While globfree(capt())
-	If globalloc(dudes())
+ResetList capt()
+While NextItem(capt())
+	If AddItem(dudes())
 		dudes()\x=capt()\x,capt()\y
 		dudes()\s=0:dudes()\fr=99:na+1
 	EndIf
-	freelast capt()
+	KillItem capt()
 Wend
 ;
 Return
@@ -882,9 +882,9 @@ Gosub dispoff
 QAMIGA
 LoadModule 0,"data/mod.insect":PlayModule 0
 VWait 40:BLITZ:PlayModule 0
-For k=0 To 2:Free lmaxlen k:Next
-For k=0 To 95:Free MidHandle k:Next:Free lmaxlen 4
-lmaxlen 0,320,224,5
+For k=0 To 2:Free BitMap k:Next
+For k=0 To 95:Free MidHandle k:Next:Free BitMap 4
+BitMap 0,320,224,5
 ;
 Slice 0,sli+10,320,224,$fff0,5,8,32,320,320
 Show 0:Gosub blackpal
@@ -919,7 +919,7 @@ Forever
 ;
 Gosub dispoff
 ;
-For k=0 To 2:lmaxlen k,384,290,4:Next
+For k=0 To 2:BitMap k,384,290,4:Next
 ;
 Gosub titstuff:Gosub showlives
 ;
@@ -1038,7 +1038,7 @@ dvc+.0005:If dvc>.25 Then dvc=.5
 fic+.001:If fic>.25 Then fic=.5
 bos+.125:If bos>12 Then bos=12
 
-##[$80CA] paths(k,j)
+USEPATH paths(k,j)
 ;
 For k=1 To 8 ;zooming paths.
 ;
@@ -1111,7 +1111,7 @@ z=z2:Return
 ;
 ClearList dudes():ClearList stars()
 ;
-##[$80CA] stars()
+USEPATH stars()
 If ast>98
 	While AddLast(stars())
 		\x=Rnd(320)+32:\y=Rnd(256)
@@ -1122,7 +1122,7 @@ If ast>98
 	Return
 EndIf
 ;
-##[$80CA] dudes()
+USEPATH dudes()
 ;
 ClearList bombs():ClearList bulls()
 ;
@@ -1197,16 +1197,16 @@ Next
 Return
 
 .warpcover
-VWait:Show db,32,32:Use lmaxlen db
+VWait:Show db,32,32:Use BitMap db
 For k=1 To 70
 VWait
-longdiv 106,blx(k),bly(k)
+Blit 106,blx(k),bly(k)
 QBlit k+1,107,blx(k),bly(k)
 Next
 Return
 
 .warpshow
-Use lmaxlen db
+Use BitMap db
 For k=1 To 70:VWait:UnQueue k+1,2:Next
 ShapesBitMap 2,1-db
 Return
@@ -1219,13 +1219,13 @@ For k=1 To lv-1 ;skip data to correct pattern!
 	If k<lv-1 Then Read j:If j=-2 Then Restore level1
 Next:Read ast,yoff
 ;
-For k=0 To 95:Free MidHandle k:Next:Free lmaxlen 4
+For k=0 To 95:Free MidHandle k:Next:Free BitMap 4
 ;
 QAMIGA
 ;
 If ast<99
 	LoadBitMap 2,"data/backdrop."+Str$(ast),0
-	Use lmaxlen 2:Scroll 0,0,320,224,32,32
+	Use BitMap 2:Scroll 0,0,320,224,32,32
 	k=0
 	Repeat
 		Read j
@@ -1234,12 +1234,12 @@ If ast<99
 		EndIf
 	Until j=0
 Else
-	Use lmaxlen 2:BlockScroll
+	Use BitMap 2:BlockScroll
 	If ast=100
-		lmaxlen 4,106,100,4 ;for mum ship
+		BitMap 4,106,100,4 ;for mum ship
 		LoadBitMap 4,"data/mothership",0
 	Else
-		casestrcomp 0,"data/asteroidpal":StopCycle 0,3,0,0,0
+		LoadPalette 0,"data/asteroidpal":StopCycle 0,3,0,0,0
 		LoadShapes 0,"data/asteroids1"
 		LoadShapes 32,"data/asteroids2"
 	EndIf

@@ -71,14 +71,14 @@
 
 
 
-##[$80CC]
+NoCli
 WBStartup
 DateFormat 1
 CaseSense Off
 
 
 ##[$FFB5]
-freest 0
+WbToScreen 0
 
 DEFTYPE.Screen *wbscreen
 DEFTYPE.Window *win
@@ -162,7 +162,7 @@ NEWTYPE .entry
 End NEWTYPE
 
 Dim List people.entry(200)
-##[$80CA] people()
+USEPATH people()
 
 
 ;ONE IMPORTANT THING TO REMEMBER ABOUT 'ListView' GADGETS AND
@@ -208,7 +208,7 @@ MaxLen printpath$=192:printpath$=""
 ;doprint variables
 Dim labelline$(5),row$(5)
 
-remline 1,"helvetica.font",11:Use IntuiFont 1
+LoadFont 1,"helvetica.font",11:Use IntuiFont 1
 
 ;SET UP THE GADGET AND MENU LISTS.
 Gosub menu0
@@ -219,7 +219,7 @@ Gosub gadgets1
 DefaultIDCMP #IDCMP
 i=wh/2-((208+bh)/2)											 ;CENTER THE WINDOW BUT
 i=QLimit(i-i/4,0,400)										 ;PLACE IT UP A LITTLE
-localstat 0,ww/2-250,i,500,208+bh,$2|$4|$8|$1000|$00200000,"SubDaBa by David Maziarka",2,1,0
+Window 0,ww/2-250,i,500,208+bh,$2|$4|$8|$1000|$00200000,"SubDaBa by David Maziarka",2,1,0
 AttachGTList 0,0
 
 GTBevelBox 0,4,11+bh,314,125,0
@@ -234,7 +234,7 @@ ResetString 402,165+bh,18,14	;# OF ISSUES SCROLL BAR
 d$=Left$(Date$(SystemDate),6)+Right$(Date$(SystemDate),2)
 GTSetString 0,9,d$
 
-arrmult 0
+SetMenu 0
 MenuColour 0,0,1,Off:MenuColour 0,0,3,Off
 MenuColour 0,0,6,Off:MenuColour 0,0,8,Off
 
@@ -310,8 +310,8 @@ Statement decrease{}							;DECREASES THE NUMBER OF
 	 Shared people()								;ISSUES FOR EACH ENTRY
 
 	 PushItem people()
-	 newmem people()
-	 While globfree(people())
+	 ResetList people()
+	 While NextItem(people())
 			\numleft=QLimit(\numleft-1,0,100)
 	 Wend
 	 PopItem people()
@@ -327,9 +327,9 @@ Statement search{}								;DOES A SEARCH FROM THE
 	 oldentry=currententry
 
 	 search$=GTGetString(0,18)
-	 newmem people()
+	 ResetList people()
 	 i=0
-	 While globfree(people())
+	 While NextItem(people())
 
 			If Instr(\info[0],search$)
 				 currententry=i
@@ -349,8 +349,8 @@ Statement search{}								;DOES A SEARCH FROM THE
 	 Wend
 out:
 	 currententry=oldentry
-	 locfree people()
-	 For i=1 To currententry:globfree people():Next
+	 FirstItem people()
+	 For i=1 To currententry:NextItem people():Next
 	 GTSetAttrs 0,19,#tag+5,currententry
 	 fillstrings{0,1}
 End Statement
@@ -371,9 +371,9 @@ Statement save{}
 			FileOutput 0
 
 			PushItem people()
-			newmem people()
+			ResetList people()
 			t=0
-			While globfree(people())
+			While NextItem(people())
 				 For i=0 To 8:NPrint \info[i]:Next
 				 For i=9 To 10:NPrint \info[i]:Next
 
@@ -399,7 +399,7 @@ Statement open{filename$}
 	 If OpenFile(0,filename$)
 			FileInput 0
 			ClearList people()
-			newmem people()
+			ResetList people()
 			t=0
 			While NOT DosBuffLen(0)
 				 If AddLast(people())
@@ -418,7 +418,7 @@ Statement open{filename$}
 			CloseFile 0
 			currententry=0
 			lastentry=t-1
-			locfree people()
+			FirstItem people()
 			fillstrings{1,0}
 			fillstrings{0,1}
 			GTChangeList 0,19
@@ -431,19 +431,19 @@ End Statement
 Statement sortpeople{}
 	 Shared people(),currententry
 
-	 newmem people()
+	 ResetList people()
 	 i.w=0
-	 While globfree(people())
+	 While NextItem(people())
 			\listsort=Cvl(\info[0])
 			i+1
 	 Wend
 	 pnum=i
 
 	 SortList people(),SizeOf .entry\listsort
-	 newmem people()
+	 ResetList people()
 
 	 currententry=0
-	 locfree people()
+	 FirstItem people()
 	 fillstrings{1,0}
 	 fillstrings{0,1}
 	 GTChangeList 0,19
@@ -452,8 +452,8 @@ Statement sortpeople{}
 End Statement
 
 
-newmem people()
-globalloc people()
+ResetList people()
+AddItem people()
 ClearString 0,1
 currententry=0
 lastentry=0
@@ -496,7 +496,7 @@ GTSetAttrs 0,19,#tag+54,currententry
 				 Select gh
 						Case 10					 ;first
 							 update{}
-							 If locfree(people())
+							 If FirstItem(people())
 									currententry=0
 									fillstrings{0,1}
 							 EndIf
@@ -508,7 +508,7 @@ GTSetAttrs 0,19,#tag+54,currententry
 							 EndIf
 						Case 12					 ;next
 							 update{}
-							 If globfree(people())
+							 If NextItem(people())
 									currententry+1
 									fillstrings{0,1}
 							 EndIf
@@ -536,7 +536,7 @@ GTSetAttrs 0,19,#tag+54,currententry
 							 gadget$="OK|CANCEL"+Chr$(0)
 							 req\es_Title=&title$,&reqtext$,&gadget$
 							 If ##[$FFDD](0,req,0,0)=1
-									freelast people()
+									KillItem people()
 									currententry=currententry-1
 									lastentry-1
 									GTChangeList 0,19
@@ -550,9 +550,9 @@ GTSetAttrs 0,19,#tag+54,currententry
 							 search{}
 						Case 19					 ;pick from listview
 							 update{}
-							 If locfree(people())
+							 If FirstItem(people())
 									currententry=code
-									For i=1 To currententry:globfree people():Next
+									For i=1 To currententry:NextItem people():Next
 									GTSetString 0,18,\info[0]
 									fillstrings{0,0}
 							 EndIf
@@ -573,8 +573,8 @@ GTSetAttrs 0,19,#tag+54,currententry
 							 Select mitem
 									Case 0							 ;new
 										 ClearList people()
-										 newmem people()
-										 globalloc people()
+										 ResetList people()
+										 AddItem people()
 										 ClearString 0,1
 										 currententry=0
 										 lastentry=0
@@ -660,9 +660,9 @@ Return
 	 totalperm.w=0
 
 	 PushItem people()
-	 newmem people()
+	 ResetList people()
 
-	 While globfree(people())
+	 While NextItem(people())
 			totalentry+1
 			If \numleft>1 Then totali2+1
 			If \numleft=1 Then totali1+1
@@ -687,7 +687,7 @@ Return
 	 i=wh/2-((200+bh)/2)											 ;CENTER THE WINDOW BUT
 	 i=QLimit(i-i/4,0,400)										 ;PLACE IT UP A LITTLE
 
-	 localstat 1,ww/2-150,i,300,200+bh,$2|$4|$1000|#WA_AutoAdjust,"Print",2,1,0
+	 Window 1,ww/2-150,i,300,200+bh,$2|$4|$1000|#WA_AutoAdjust,"Print",2,1,0
 	 AttachGTList 1,1
 
 	 GTBevelBox 1,4,11+bh,200,165,0
@@ -771,10 +771,10 @@ If ReadMem(0,printfile$)
 
 	 numprinted=0
 	 PushItem people()
-	 newmem people()
+	 ResetList people()
 
 	 Repeat
-			If globfree(people())
+			If NextItem(people())
 				 numprinted+1
 				 printentry=False
 
@@ -940,7 +940,7 @@ Return
 	 Next
 
 	 MenuGap 4,0
-	 newlocarr 0,0,"Project"
+	 MenuTitle 0,0,"Project"
 	 MenuItem 0,0,0,0,"New"
 	 MenuItem 0,0,0,1,a$
 	 MenuItem 0,0,0,2,"Open..."
@@ -953,7 +953,7 @@ Return
 	 MenuItem 0,0,0,9,"About"
 	 MenuItem 0,0,0,10,"Quit"
 
-	 newlocarr 0,1,"Misc"
+	 MenuTitle 0,1,"Misc"
 	 MenuItem 0,0,1,0,"Info"
 	 MenuItem 0,0,1,1,"Decrease Issues	"
 	 MenuItem 0,0,1,2,"Sort"

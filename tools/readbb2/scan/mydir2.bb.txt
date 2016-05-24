@@ -26,7 +26,7 @@ End NEWTYPE
 DEFTYPE .FileInfoBlock myfib				;myfib holds infoblock
 
 Statement listdir{dir$}
-	Shared myfib,tab:##[$80CA] myfib
+	Shared myfib,tab:USEPATH myfib
 	lock.l=##[$FE0A](&dir$,-2)									 ;lock is dos system to access files
 	If ##[$FE0D](lock,myfib)<>0							 ;if we get lock on p$
 		NPrint "DIRECTORY - ",dir$:tab+2

@@ -7,7 +7,7 @@ DEFTYPE.l
 Gosub dispoff
 
 again
-allocst 0,0,0,320,256,2,0,"",0,0:ScreensBitMap 0,0
+Screen 0,0,0,320,256,2,0,"",0,0:ScreensBitMap 0,0
 LoadScreen 0,"cdopts.iff",0:Use SetCycle 0
 Gosub dispon
 

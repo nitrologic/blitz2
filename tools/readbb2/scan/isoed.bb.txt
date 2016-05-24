@@ -23,30 +23,30 @@ Macro px 320+(`1-`2) ASL 4:End Macro
 Macro py -160+(`1+`1+`2+`2-`3) ASL 2:End Macro
 Macro pp 320+(`1-`2) ASL 4,py -160+(`1+`1+`2+`2-`3) ASL 2:End Macro
 
-lmaxlen 0,640,512,3		 ;8 color hires lace bitmap
+BitMap 0,640,512,3		 ;8 color hires lace bitmap
 
 Buffer 0,1024					;buffer to undo buffer blits
 
 LoadShapes 0,"blocks.shapes"	;tiles for the ground
-casestrcomp 0,"blocks.iff"		;palette for backrground
+LoadPalette 0,"blocks.iff"		;palette for backrground
 
-allocst 0,0,0,640,512,3,$8004,"ISO EDITOR",1,2,0
+Screen 0,0,0,640,512,3,$8004,"ISO EDITOR",1,2,0
 
 Use SetCycle 0
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"LOAD			","L"
 MenuItem 0,0,0,1,"SAVE			","S"
 MenuItem 0,0,0,2,"REDRAW		","R"
 MenuItem 0,0,0,3,"QUIT			","Q"
 
-newlocarr 0,1,"MODE"
+MenuTitle 0,1,"MODE"
 MenuItem 0,4,1,0,"	DRAW			","D"
 MenuItem 0,2,1,1,"	ADJUST		","A"
 MenuItem 0,2,1,2,"	GROUP		 ","G"
 MenuItem 0,2,1,3,"	JOIN			","J"
 
-newlocarr 0,2,"BLOCKS"
+MenuTitle 0,2,"BLOCKS"
 For i=0 To #numshapes
 	Handle i,ShapeWidth(i)/2,ShapeHeight(i)
 	ShapeItem 0,0,2,i,i
@@ -54,8 +54,8 @@ Next
 
 AddIDCMP $10	 ;tell window to report mouse movements (smelly!)
 
-localstat 0,0,0,640,512,$1800,"",1,2 ;dummy window
-arrmult 0												 ;to attach menu system to
+Window 0,0,0,640,512,$1800,"",1,2 ;dummy window
+SetMenu 0												 ;to attach menu system to
 
 Gosub clearmap:Gosub drawmap:cb=1
 
@@ -118,7 +118,7 @@ Forever
 
 .moveblock
 	Gosub findblock
-	##[$80CA] map(x,y)
+	USEPATH map(x,y)
 	If \btype>-1					;if block is on bitmap
 		cy=!py{x,y,0}			 ;get current height
 		Repeat							;then let user adjust height
@@ -127,7 +127,7 @@ Forever
 			UnBuffer 0:BBlit 0,cb,!px{x,y,z},!py{x,y,z}
 		Until ev<>$10
 		UnBuffer 0:\btype=cb,z
-		For i=1 To z:longdiv \btype,!px{x,y,i},!py{x,y,i}:Next
+		For i=1 To z:Blit \btype,!px{x,y,i},!py{x,y,i}:Next
 	EndIf
 	Return
 
@@ -138,7 +138,7 @@ Forever
 		Gosub findblock			 ;which block are they pointing to
 		If map(x,y)\btype>-1	;is it a legal block
 			map(x,y)\btype=cb	 ;yes then set and draw
-			longdiv cb,!px{x,y,z},!py{x,y,z}
+			Blit cb,!px{x,y,z},!py{x,y,z}
 		EndIf
 	Until ev<>$10
 	Return
@@ -159,7 +159,7 @@ Forever
 	For x=0 To 63:For y=0 To 63					 ;draw from back to front
 		b=map(x,y)\btype
 		If b>0
-			For z=1 To map(x,y)\bheight:longdiv b,!px{x,y,z},!py{x,y,z}:Next
+			For z=1 To map(x,y)\bheight:Blit b,!px{x,y,z},!py{x,y,z}:Next
 		EndIf
 	Next y,x
 	Return

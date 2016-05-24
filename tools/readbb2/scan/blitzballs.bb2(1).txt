@@ -24,7 +24,7 @@ Next cy
 Gosub makeshape
 BLITZ
 For d=0 To 7
-	lmaxlen d,#scw,#sh,2
+	BitMap d,#scw,#sh,2
 Next d
 Slice 0,44,2
 Use Slice 0
@@ -39,12 +39,12 @@ Repeat
 		For sup=0 To 21 Step 3
 		VWait
 		Show sc
-		Use lmaxlen sc
+		Use BitMap sc
 		sn=deh+r+sup
 		cs=deh+sup
 		dx=x(sn)+#xoff
 		dy=y(cs)+#yoff
-		longdiv 0,dx,dy
+		Blit 0,dx,dy
 		sc=sc+1
 		Next sup
 	 sc=0
@@ -55,7 +55,7 @@ Until Joyb(0)=1
 AMIGA
 End
 makeshape:
-allocst 0,2
+Screen 0,2
 ScreensBitMap 0,0
 BlockScroll
 Circlef 12,20,11,3
@@ -68,8 +68,8 @@ Circle 13,20,9,3
 GetaShape 0,0,9,24,32
 DecodeShapes 0
 BlockScroll
-Free lmaxlen 0
-Free allocst 0
+Free BitMap 0
+Free Screen 0
 Return
 
 

@@ -26,17 +26,17 @@ End
 ;		JUMPING TEXT
 ;----------------------
 jump_text
-lmaxlen 0,384,265,3
-lmaxlen 1,384,265,3
-lmaxlen 2,384,265+32,3
+BitMap 0,384,265,3
+BitMap 1,384,265,3
+BitMap 2,384,265+32,3
 Slice 0,44,320,265,$fffa,6,8,32,384,384
 ShowF 0,32,0
 ShowB 2,32,0
-longmult 0,20
-longmult 1,20
+Queue 0,20
+Queue 1,20
 Buffer 0,16384
 Buffer 1,16384
-Use lmaxlen 0
+Use BitMap 0
 GetaShape 0,0,0,1,1
 ;
 Dim Y(240),XP(40),I(240)
@@ -95,7 +95,7 @@ DisplayOn
 ;
 While Joyb(0)=0
 	 VWait
-	 ShowF db,32,0:db=1-db:Use lmaxlen db
+	 ShowF db,32,0:db=1-db:Use BitMap db
 	 UnQueue db
 	 UnBuffer db
 	 ;
@@ -139,7 +139,7 @@ Return
 ;
 ;
 blok:
-Use lmaxlen 2
+Use BitMap 2
 For BY=0 To 265+32 Step 32
 For BX=0 To 320 Step 32
 		COL=1-COL
@@ -147,8 +147,8 @@ For BX=0 To 320 Step 32
 Next
 Next
 ;
-Use lmaxlen 0:longdiv 39,65,24
-Use lmaxlen 1:longdiv 39,65,24
+Use BitMap 0:Blit 39,65,24
+Use BitMap 1:Blit 39,65,24
 VWait
 Return
 ;

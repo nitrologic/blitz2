@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/makepalette.bb
-allocst 0,4
+Screen 0,4
 ;Goto carcar
 
-casestrcomp 0,"sega.palette"
-allocst 0,4
+LoadPalette 0,"sega.palette"
+Screen 0,4
 ScreensBitMap 0,0
 BitMapOutput 0:NPrint ""
 Use SetCycle 0

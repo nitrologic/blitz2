@@ -264,7 +264,7 @@ End Function
 			If tc=3 Then End Else tc+1
 		EndIf
 		;
-		##[$80CA] entry(cmess)
+		USEPATH entry(cmess)
 		;
 		If id=102 Then Gosub dismissals
 		;
@@ -358,20 +358,20 @@ End Function
 	Forever
 
 .tobatok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	Gosub listplayers
 	Gosub initnextevent:\id=2:\batter=1:\partner=0
 	Return
 
 .newbatter:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	bat=team(batting)\ba[id-1]
 	If team(batting)\bat[bat]\status=1 OR team(batting)\bat[bat]\status>2 Then BeepScreen 0:Return
 	\newbatter=bat
 	Return
 
 .newbatterok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	shot=\oshot
 	If \batter=\batterout Then \batter=\newbatter Else \partner=\newbatter
 	Gosub sortbatters
@@ -383,7 +383,7 @@ End Function
 	Return
 
 .openingbattersok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If \batter=\partner Then BeepScreen 0:Return
 	Gosub sortbatters
 	Gosub initnextevent:\id=3:\over=0:\ball=0
@@ -392,7 +392,7 @@ End Function
 	Return
 
 .bowlerok:											 ;insert
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	If bowl=lastbowler Then BeepScreen 0:Return
 	i=-1:Repeat:i+1:Until \bo[i]=bowl:j=i:i=0
 	If i<j
@@ -418,7 +418,7 @@ End Function
 ;	EndIf
 
 
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	Gosub listplayers
 	Gosub initnextevent
 	\id=4:Exchange \batter,\partner
@@ -430,7 +430,7 @@ End Function
 	Return
 
 .ballok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If \shot=0 Then BeepScreen 0:Return								 ;notplayed shot
 	If \shot=10 OR \shot=12														 ;no fielder entered
 		If \fielder=-1 Then BeepScreen 0:Return
@@ -454,7 +454,7 @@ End Function
 	Return
 
 .initnextevent
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	;
 	*nx.entry=entry(cmess+1)
 	;
@@ -488,7 +488,7 @@ End Function
 	Return
 
 .displayevent:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	WLocate 6,87:Print inst$(\id)
 	Select \id
 		Case 0
@@ -551,7 +551,7 @@ End Function
 	Return
 
 .openingbatter:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	bat=id-1
 	If bat=\batter OR bat=\partner
 		Exchange \batter,\partner
@@ -561,9 +561,9 @@ End Function
 	Return
 
 .ovalclick:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If EMouseX<0 OR EMouseX>191 OR EMouseY<0 OR EMouseY>109 Then Return
-	Use localstat 1
+	Use Window 1
 	x=QLimit(EMouseX-4,0,184):y=QLimit(EMouseY-4,0,102)
 	If \whichend=0
 		ex=94:ey=34:\wx=x-ex:\wy=y-ey
@@ -578,11 +578,11 @@ End Function
 	If \shot<2 Then \shot=2
 	Gosub updateoval
 	Activate 1
-	Use localstat 0
+	Use Window 0
 	Return
 
 .updateoval:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	ShapesBitMap 0,1
 	If \shot>1 AND \shot<10
 		If \whichend=0
@@ -590,7 +590,7 @@ End Function
 		Else
 			ex=94:ey=34+21:x=ex+\wx:y=ey-\wy
 		EndIf
-		Use lmaxlen 1:BitMapOutput 1
+		Use BitMap 1:BitMapOutput 1
 		Line ex,ey,x,y,1:Locate x/8,y/8:Print runs
 	EndIf
 	BitMaptoWindow 1,1
@@ -599,7 +599,7 @@ End Function
 
 .drawoval:
 	ends=entry(cmess)\whichend
-	Use lmaxlen 0:BlockScroll 3
+	Use BitMap 0:BlockScroll 3
 	Circlef 95,46,80,45,4
 	Boxf 95-10,46-12,95+10,46+12,5
 	ex=94:ey=34+ends*21
@@ -608,14 +608,14 @@ End Function
 	Return
 
 .sortbatters:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	ba=\partner:Gosub movehim
 	ba=\batter:Gosub movehim
 	Gosub listplayers
 	Return
 
 movehim:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	i=-1:Repeat:i+1:Until \ba[i]=ba:j=i
 	If i>0
 		Repeat
@@ -627,12 +627,12 @@ movehim:
 	Return
 
 .listplayers
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	batting=entry(cmess)\batting:bowling=1-batting
 	For i=0 To 11
 		##[$C622] 0,i+1,LSet$(\name[\ba[i]],12):Redraw 0,i+1
 	Next
-	##[$80CA] team(bowling)
+	USEPATH team(bowling)
 	For i=0 To 11
 		##[$C622] 0,i+21,LSet$(\name[\bo[i]],12):Redraw 0,i+21
 	Next
@@ -640,15 +640,15 @@ movehim:
 
 .setupscreen
 	;
-	allocst 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
+	Screen 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
 	;
-	##[$80CA] team(x)
+	USEPATH team(x)
 	;
 	For x=0 To 1
 		t$="("+LSet$(\teamabbrev,2)+")"
-		workstart 0,6+x*56,155,0,x*20,t$
+		TextGadget 0,6+x*56,155,0,x*20,t$
 		For i=0 To 11
-			workstart 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
+			TextGadget 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
 		Next
 	Next
 	;
@@ -656,44 +656,44 @@ movehim:
 	For x=0 To 1
 		For i=0 To 9
 			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
-			workstart 0,598+x*68,3+i*12,m,id,a$:id+1
+			TextGadget 0,598+x*68,3+i*12,m,id,a$:id+1
 		Next
 	Next
 	;
-	workstart 0,544,105,0,100, " OK "				;546,106
+	TextGadget 0,544,105,0,100, " OK "				;546,106
 
-	workstart 0,464,99,0,105, " BACKUP "
-	workstart 0,464,112,0,112,"XTRABALL"		;442
+	TextGadget 0,464,99,0,105, " BACKUP "
+	TextGadget 0,464,112,0,112,"XTRABALL"		;442
 	;
-	workstart 0,6,142,0,101,"	 BEGIN	 "
+	TextGadget 0,6,142,0,101,"	 BEGIN	 "
 	;
 
 
-	workstart 0,6,227,0,104,"END INNINGS"
+	TextGadget 0,6,227,0,104,"END INNINGS"
 ;	TextGadget 0,6,226,0,105,"	BACK UP	"
 	;
-	workstart 0,398,099,0,106,"SWAPEND"
-	workstart 0,398,112,0,107,"SWAPBAT"		;442
+	TextGadget 0,398,099,0,106,"SWAPEND"
+	TextGadget 0,398,112,0,107,"SWAPBAT"		;442
 	;
 ;	TextGadget 0,470,099,0,111,"PAD BALL"
 ;	TextGadget 0,488,112,0,112,"EXTRA BALL"		;442
 	;
-	workstart 0,6,170,0,102,"DISMISSSALS"
+	TextGadget 0,6,170,0,102,"DISMISSSALS"
 	;
-	workstart 0,6,184,0,108,"WAG BATTER "
-	workstart 0,6,198,0,109,"WAG PARTNER"
-	workstart 0,6,211,0,111," DRAW WORM "
+	TextGadget 0,6,184,0,108,"WAG BATTER "
+	TextGadget 0,6,198,0,109,"WAG PARTNER"
+	TextGadget 0,6,211,0,111," DRAW WORM "
 	;
 	PropGadget 0,0,0,$80,110,12,84 ;96
 	;
-	workstart 0,6,268,0,200,"	 QUIT		"
+	TextGadget 0,6,268,0,200,"	 QUIT		"
 	;
 	StringGadget 0,6,240,0,120,4,32
 	StringGadget 0,6,254,0,121,4,32
 	;
 	AddIDCMP $400010
 	;
-	localstat 0,0,0,736,283,$1800,"",1,2,0:MenusOff
+	Window 0,0,0,736,283,$1800,"",1,2,0:MenusOff
 	;
 	ResetString 398,99,188,25		 ;436
 	;
@@ -716,12 +716,12 @@ movehim:
 	WLocate 50,243:Print "RUNS"
 	WLocate 50,257:Print "OVERS"
 	;
-	localstat 1,397,1,192,94,$800,"",1,2:MenusOff
-	lmaxlen 0,192,94,3:lmaxlen 1,192,94,3
+	Window 1,397,1,192,94,$800,"",1,2:MenusOff
+	BitMap 0,192,94,3:BitMap 1,192,94,3
 	;
-	lmaxlen 2,736,566,4
-	lmaxlen 3,736,566,4
-	lmaxlen 4,736,566,4
+	BitMap 2,736,566,4
+	BitMap 3,736,566,4
+	BitMap 4,736,566,4
 	;
 	LoadBitMap 2,"oval.iff",1
 	LoadBitMap 4,"worm.iff",2
@@ -740,7 +740,7 @@ movehim:
 .readteam
 	If WriteMem(0,"teams")
 		FileInput 0
-		##[$80CA] team(i)
+		USEPATH team(i)
 		For i=0 To 1
 			\teamname=Edit$(80)
 			\teamabbrev=Edit$(80)
@@ -758,7 +758,7 @@ movehim:
 	nxmess=9:cmess=8:Return
 
 .scrollview:
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	Repeat
 		hh=nxmess-9:If hh<0 Then hh=0
 		moff=QLimit(VPropPot(0,110)*(hh+1),0,hh)
@@ -769,7 +769,7 @@ movehim:
 
 .printevents:
 	;
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	moff=QLimit(cmess-8,0,4096)
 	SetVProp 0,110,cmess/(nxmess-1),9/nxmess:Redraw 0,110
 	If (cmess+1)<nxmess Then moff+1
@@ -813,7 +813,7 @@ printevents2:
 	Return
 
 .tryrestore
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If WriteMem(0,"backup.0")
 		FileInput 0:i=0
 		For i=0 To 1:##[$BE14] 0,&team(i)\ba[0],48:Next
@@ -838,10 +838,10 @@ Macro py 243+`1-`2/2-`3:End Macro
 
 .wagonwheel:						 ;wagonman=player
 	;
-	allocst 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 1
-	ShapesBitMap 2,3:Use lmaxlen 3
+	Screen 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 1
+	ShapesBitMap 2,3:Use BitMap 3
 	;
-	##[$80CA] entry(i)
+	USEPATH entry(i)
 	;
 	For i=0 To 1023
 		If \batting=batting
@@ -879,14 +879,14 @@ Macro py 243+`1-`2/2-`3:End Macro
 	SaveBitmap 3,"ram:waggonwheel.iff"
 	VWait 100
 	CloseScreen 1
-	Use lmaxlen 0
+	Use BitMap 0
 	Return
 
 .drawworm:
-	allocst 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 2
-	ShapesBitMap 4,3:Use lmaxlen 3
+	Screen 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 2
+	ShapesBitMap 4,3:Use BitMap 3
 	;
-	##[$80CA] entry(i)
+	USEPATH entry(i)
 	;
 	cbat=-1
 	;
@@ -920,7 +920,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	SaveBitmap 3,"ram:wormgraph.iff"
 	VWait 100
 	CloseScreen 1
-	Use lmaxlen 0
+	Use BitMap 0
 	Return
 
 .printstats
@@ -932,9 +932,9 @@ Macro py 243+`1-`2/2-`3:End Macro
 		mb2=entry(cmess)\bowler
 	EndIf
 	;
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	WColour 1:WLocate 230,129:Print "	R	 B	4	6	 M"
 	For i=0 To 11
 		j=team(batting)\ba[i]
@@ -951,7 +951,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 		WLocate 230,139+i*12:Print t$
 	Next
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	WColour 1:WLocate 492,129:Print " O	B M	 R	W	X nb	b lb	w "
 	For i=0 To 11
 		j=team(1-batting)\bo[i]
@@ -977,7 +977,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;
 	WColour 2
 	;
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	;
 	rrr.q=\runs*6
 	bbb.q=currover*6+currball
@@ -989,7 +989,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	u$=nth{currover+1}:t$+u$+" OVER ":t$+"RR="+rrr$+" ":t$+"PT="+ppp$
 	WLocate 0,99:Print LSet$(t$,49)
 	;
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	t$="("+\teamabbrev+") ":t$+Str$(\runs+\extras)+"-"+Str$(\wickets)+" "
 	t$+"COMPARISON:"+Str$(\cscore)+"-"+Str$(\cwickets)+"	"
 	WLocate 0,108:Print LSet$(t$,49)
@@ -1002,7 +1002,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 
 .dostats:							 ;set currover for
 	;
-	##[$80CA] entry(i)
+	USEPATH entry(i)
 	;
 	For i=0 To 1
 		team(i)\runs=0,0,0,0						 ;runs,extras,wickets,partnership
@@ -1167,13 +1167,13 @@ Macro py 243+`1-`2/2-`3:End Macro
 ;<<CD 270-7>>
 
 .makescoreticks:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	;
 	adjust=entry(cmess)\runs+entry(cmess)\extras
 	;
 	t1$=\teamabbrev+" "+Str$(\runs+\extras+adjust)+"-"+Str$(\wickets)
 	t2$=nth{currover+1}:t2$+" Over"
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	t3$=\teamabbrev+" "+Str$(\runs+\extras)+"-"+Str$(\wickets)
 	If ReadMem(0,"ram:scoretick1.txt")
 		FileOutput 0
@@ -1209,7 +1209,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<MORRISON>>
 	;<t><<^^3<t>2<t>^26<t>1>>
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	;
 	cubo=entry(cmess)\bowler
 	;
@@ -1235,7 +1235,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<88>>
 	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	;
 	If ReadMem(0,"ram:batsmaninbl.txt")
 		FileOutput 0
@@ -1258,7 +1258,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<88>>
 	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	;
 	If ReadMem(0,"ram:partnerbl.txt")
 		FileOutput 0
@@ -1283,7 +1283,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
 	;<<225-9>>	--- Pad score here as ^5-9^, then ^55-9, then 225-9
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	*f.side=team(1-batting)
 	;
 	If ReadMem(0,"ram:batsmanoutbl.txt")
@@ -1332,7 +1332,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<BATSMAN10>>
 	;<<BATSMAN11>>
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	*f.side=team(1-batting)
 	;
 	If ReadMem(0,"ram:batting scorecard.txt")
@@ -1421,7 +1421,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<MORRISON>>
 	;<t><<^^3<t>2<t>^26<t>1>>
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	;
 	If ReadMem(0,"ram:bowlerbl.txt")
 		FileOutput 0
@@ -1438,7 +1438,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;
 	;<<NORTHERN DISTRICTS>>
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	*b.side=team(batting)
 	*f.side=team(1-batting)
 	;
@@ -1528,7 +1528,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;<<49.5 Overs>>
 	;<t><t><t>TOTAL<t><t><<9 wkts	 ^^5>>
 	;
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	;
 	If ReadMem(0,"ram:standardscorebl.TXT")
 		FileOutput 0
@@ -1586,7 +1586,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	;
 	; need 23 runs from 2.3 overs
 	;
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	*f.side=team(1-batting)
 	;
 	If ReadMem(0,"ram:equationbl.txt")
@@ -1631,7 +1631,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	; <<30	(125*)>>
 	;												--- Awaiting definition of these elements from Sky.
 	;
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	;
 	If ReadMem(0,"ram:partnershipbl.txt")
 		FileOutput 0
@@ -1656,7 +1656,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 	Return
 
 .dismissals:
-	##[$80CA] *ba
+	USEPATH *ba
 	dis=0
 	For i=0 To 1023
 		If entry(i)\id=4 AND entry(i)\shot>9
@@ -1701,7 +1701,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 ;-------------------------------------------------------------------------------
 
 .dumpdata:
-	localstat 2,0,0,736,283,$1008,"VIEW TEXT FILES",1,2:MenusOff
+	Window 2,0,0,736,283,$1008,"VIEW TEXT FILES",1,2:MenusOff
 	For i=0 To 2
 		NPrint fi$(i)
 		If WriteMem(0,"ram:"+fi$(i))
@@ -1715,7 +1715,7 @@ Macro py 243+`1-`2/2-`3:End Macro
 		ev.l=WaitEvent
 	Until ev=$400
 	CloseWindow 2:Activate 1
-	Use localstat 0:WindowOutput 0:WindowInput 0
+	Use Window 0:WindowOutput 0:WindowInput 0
 	Return
 
 .setupdata

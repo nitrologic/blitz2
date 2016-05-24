@@ -41,11 +41,11 @@ NEWTYPE .test
  a.w:b$:c$
 End NEWTYPE
 
-Dim List a.test(20):For i= 1 To 10:globalloc a():a()\b="ITEM "+Str$(i):Next
+Dim List a.test(20):For i= 1 To 10:AddItem a():a()\b="ITEM "+Str$(i):Next
 
-remline 1,"helvetica.font",12:Use IntuiFont 1
+LoadFont 1,"helvetica.font",12:Use IntuiFont 1
 
-workstart 2,0,0,0,0,""
+TextGadget 2,0,0,0,0,""
 
 GTButton 2,1,110,0,80,15,"GT_BUTTON",0
 
@@ -70,7 +70,7 @@ GTSlider 2,10,320,120,200,20,"GTSLIDER",2,0,10
 
 GTText 2,11,320,145,200,18,"GTTEXT",1,"FUCKING HELL"
 
-localstat 0,20,0,600,220,$100f,"HELLO",1,2,2
+Window 0,20,0,600,220,$100f,"HELLO",1,2,2
 
 AttachGTList 2,0
 

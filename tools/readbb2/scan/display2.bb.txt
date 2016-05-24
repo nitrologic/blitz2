@@ -3,7 +3,7 @@
 ; 2 slices
 ;
 
-lmaxlen 0,320,256,8
+BitMap 0,320,256,8
 
 For i=0 To 255:AGAGreen 0,i,i,i,i:Next
 

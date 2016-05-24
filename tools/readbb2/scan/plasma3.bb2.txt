@@ -11,39 +11,39 @@
 ;
 ;--------------------------------------------------------------------
 
-##[$80CC] : WBStartup
+NoCli : WBStartup
 SetErr : End : End SetErr
 
 ;--------------------------------------------------------------------
 ._Gadget_List
 
-workstart 1, 2,12,0, 1,"R"
-workstart 1,20,12,0, 2,"G"
-workstart 1,38,12,0,11,"B"
-workstart 1,56,12,0,12,"#"
+TextGadget 1, 2,12,0, 1,"R"
+TextGadget 1,20,12,0, 2,"G"
+TextGadget 1,38,12,0,11,"B"
+TextGadget 1,56,12,0,12,"#"
 
-workstart 1,2,26,0, 3,"+" : workstart 1,20,26,0, 4,"-"
-workstart 1,2,36,0, 5,"+" : workstart 1,20,36,0, 6,"-"
-workstart 1,2,46,0, 7,"+" : workstart 1,20,46,0, 8,"-"
-workstart 1,2,56,0, 9,"+" : workstart 1,20,56,0,10,"-"
+TextGadget 1,2,26,0, 3,"+" : TextGadget 1,20,26,0, 4,"-"
+TextGadget 1,2,36,0, 5,"+" : TextGadget 1,20,36,0, 6,"-"
+TextGadget 1,2,46,0, 7,"+" : TextGadget 1,20,46,0, 8,"-"
+TextGadget 1,2,56,0, 9,"+" : TextGadget 1,20,56,0,10,"-"
 
-workstart 1,210,26,0,13,"+" : workstart 1,230,26,0,14,"-"
-workstart 1,210,36,0,15,"+" : workstart 1,230,36,0,16,"-"
-workstart 1,210,46,0,17,"+" : workstart 1,230,46,0,18,"-"
-workstart 1,210,56,0,19,"+" : workstart 1,230,56,0,20,"-"
+TextGadget 1,210,26,0,13,"+" : TextGadget 1,230,26,0,14,"-"
+TextGadget 1,210,36,0,15,"+" : TextGadget 1,230,36,0,16,"-"
+TextGadget 1,210,46,0,17,"+" : TextGadget 1,230,46,0,18,"-"
+TextGadget 1,210,56,0,19,"+" : TextGadget 1,230,56,0,20,"-"
 
 ;--------------------------------------------------------------------
 ._Set_Up
 
-lmaxlen 0,320,256,2
-allocst 0,0,0,320,256,2,0,"Plasma",0,1,0
-localstat 0,0,0,320,256,$1400,"Plasma Playground				 jilt'94",0,1,1
+BitMap 0,320,256,2
+Screen 0,0,0,320,256,2,0,"Plasma",0,1,0
+Window 0,0,0,320,256,$1400,"Plasma Playground				 jilt'94",0,1,1
 Green 0,0,0,0 : Green 1,15,15,15 : Green 2,5,5,5 : Green 3,10,10,10
 
 Dim SS(360)
 For f.f = 0 To 360 : SS(f)=HSin(f/180*Pi) : Next
 
-Use lmaxlen 0
+Use BitMap 0
 Circlef 150,50,30,30,2
 Circlef 150,50,27,27,3
 Circlef 150,50,24,24,1
@@ -104,8 +104,8 @@ Until Inkey$<>""
 ;--------------------------------------------------------------------
 ._End
 
-Free localstat 0
-Free allocst 0
+Free Window 0
+Free Screen 0
 End
 
 ;====================================================================

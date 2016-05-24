@@ -4,7 +4,7 @@
 Use ##[$8526] 0
 scalfac=0.75
 
-lmaxlen 0,1024*scalfac,512*scalfac,8
+BitMap 0,1024*scalfac,512*scalfac,8
 BitPlanesBitMap 0,1,3
 BitPlanesBitMap 0,2,$3f
 BitPlanesBitMap 0,4,$c0
@@ -66,7 +66,7 @@ Dim nam.s(#MaxNam), com.s(#MaxNam)
 
 *con.frend=con(0):*conc.frend=con(1):*cona.frend=con(1)
 
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 
 
 Function rely{i,j,k}
@@ -204,7 +204,7 @@ Statement FindDif {fldtp.q,flcon.l,flbez.l}
 	MOVEM.l d3-d6,(a1):RTS
 End Statement
 
-CNIF #errs:##[$80D2]:CEND
+CNIF #errs:Runerrson:CEND
 
 ;---------------------------------------
 
@@ -277,18 +277,18 @@ CEND
 ;GetExo24{m$+t$}
 GetMap{m$+t$}
 
-lmaxlen 5,32,32,2
-Use lmaxlen 5
+BitMap 5,32,32,2
+Use BitMap 5
 Circle 4,4,4,4,1
 Circle 4,4,3,3,2
 GetaShape 0,0,0,16,8:GetaSprite 1,0
-Use lmaxlen 5:BlockScroll
+Use BitMap 5:BlockScroll
 BitMapOutput 5:Locate 0,0:Print "1":GetaShape 0,0,0,16,8:GetaSprite 2,0
 BitMapOutput 5:Locate 0,0:Print "2":GetaShape 0,0,0,16,8:GetaSprite 3,0
 
 
-Free lmaxlen 5
-Use lmaxlen 1
+Free BitMap 5
+Use BitMap 1
 
 BitMapOutput 0
 
@@ -307,9 +307,9 @@ CNIF Off
 CEND
 
 
-Use lmaxlen 2
+Use BitMap 2
 ;Cls
-Use lmaxlen 1
+Use BitMap 1
 
 BLITZ
 
@@ -429,9 +429,9 @@ Repeat
 		fix=mx:fiy=my
 		If stx>fix Then Exchange stx,fix
 		If sty>fiy Then Exchange sty,fiy
-		Use lmaxlen 2
+		Use BitMap 2
 		Boxf stx,sty,fix,fiy,0
-		Use lmaxlen 0
+		Use BitMap 0
 	EndIf
 
 Until RawStatus($45)
@@ -478,7 +478,7 @@ MakeCookie 0
 
 t\tshape=gr(0),4,0,1,3,15,7
 filltri{t}
-longdiv frcol1,stx,sty
+Blit frcol1,stx,sty
 
 MouseWait
 End
@@ -493,11 +493,11 @@ End Macro
 a.w=7
 
 
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 Statement Linef{x,y,x2,y2,col}
 
 Shared circx(),circy()
-	Use lmaxlen 4
+	Use BitMap 4
 
 ;	For dx=-3.0 To 3.0
 ;		For dy=-2.0 To 2.0
@@ -517,12 +517,12 @@ Shared circx(),circy()
 ;	Use BitMap 0
 
 End Statement
-CNIF #errs:##[$80D2]:CEND
+CNIF #errs:Runerrson:CEND
 
 
 
 .PreScan
-	Use lmaxlen 2
+	Use BitMap 2
 	old.w=Off
 	shadel=2
 
@@ -549,7 +549,7 @@ Return
 
 .PreScan2
 	scalfac=.75
-	Use lmaxlen 4
+	Use BitMap 4
 	old.w=0
 	minus=6*scalfac
 
@@ -692,7 +692,7 @@ Statement dline{x1.w,y1.w,x2.w,y2.w,typ.l}
 Shared maincol,dithcol
 
 	*a.aka=typ
-	##[$80CA] *a
+	USEPATH *a
 
 	delx.w=\lastx-x1:dely.w=\lasty-y1
 
@@ -785,7 +785,7 @@ CEND
 
 
 .DraScan
-	Use lmaxlen 4
+	Use BitMap 4
 	DEFTYPE .f olsxc,olsyc,fpsx,fpsy,olsco,olsyo,dist,leng
 
 	leng=1 ; remove me! (put me at the top)
@@ -852,7 +852,7 @@ CEND
 				If pass=0
 					totdist=totdist+leng
 				Else
-					Use lmaxlen 4
+					Use BitMap 4
 					If cola<jpwid1 Then col=2 Else col=3
 					If cola>jpwid2 Then cola-jpwid2
 
@@ -906,7 +906,7 @@ CNIF 1=0
 			tri(3)\x=olsxo,olsyo
 
 
-			Use lmaxlen 2
+			Use BitMap 2
 			If cola<60
 
 				Polyf 3,ad,1
@@ -917,7 +917,7 @@ CNIF 1=0
 
 				If cola>120 Then cola-120
 			EndIf
-			Use lmaxlen 0
+			Use BitMap 0
 
 			dummy=dpsx-olsxc:the=dpsz-olsyc
 			dist=Tan(dummy*dummy+the*the)
@@ -961,7 +961,7 @@ Return ;never used?
 			tri(3)\x=olsxo,olsyo
 
 
-			Use lmaxlen 2
+			Use BitMap 2
 			If cola<40
 ;				Line olsxo,olsyo,olsxc,olsyc,0
 ;				maincol=1:dithcol=14
@@ -985,7 +985,7 @@ Return ;never used?
 
 				If cola>80 Then cola-80:		x1=-1 ;reset Dline..
 			EndIf
-			Use lmaxlen 0
+			Use BitMap 0
 
 			dummy=dpsx-olsxc:the=dpsz-olsyc
 			dist=Tan(dummy*dummy+the*the)
@@ -1001,7 +1001,7 @@ Return
 
 
 .DoCurve
-	Use lmaxlen 4
+	Use BitMap 4
 	minus=2*scalfac*2:old.w=0
 	For dtp.q=2 To pts3+0.5 Step 1 ASR 5
 		FindLo dtp.q
@@ -1062,7 +1062,7 @@ Return
 
 
 .DoStartLine
-	Use lmaxlen 4
+	Use BitMap 4
 	dtf=pts+3.5
 	FindLo dtf
 	tri(0)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
@@ -1080,4 +1080,4 @@ Return
 
 
 .exit
-QAMIGA:Free lmaxlen 0: End
+QAMIGA:Free BitMap 0: End

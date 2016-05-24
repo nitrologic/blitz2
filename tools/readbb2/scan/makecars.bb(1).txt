@@ -29,10 +29,10 @@ Goto docars
 
 .dostart:
 	InitBank 0,32768,0
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	LoadBitMap 0,"animsprites.iff",0
 	Use SetCycle 0
 	ReMap 2,0
@@ -60,10 +60,10 @@ Goto docars
 
 .dotags:
 	InitBank 0,32768,0
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	LoadBitMap 0,"tags.iff",0
 	Use SetCycle 0
 
@@ -131,20 +131,20 @@ End Statement
 
 .docars:
 	InitBank 0,32768,0
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	LoadShapes 0,"cars.shapes"
-	casestrcomp 0,"cars.iff"
+	LoadPalette 0,"cars.iff"
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	For i=0 To 6
 		XFlip i
 		If i<6
-			BlockScroll:longdiv i,(40-ShapeWidth(i))/2,24-ShapeHeight(i)
+			BlockScroll:Blit i,(40-ShapeWidth(i))/2,24-ShapeHeight(i)
 		Else
-			BlockScroll:longdiv i,0,24-ShapeHeight(i)
+			BlockScroll:Blit i,0,24-ShapeHeight(i)
 		EndIf
 
 ;		Box 0,0,40,24,1

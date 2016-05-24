@@ -253,7 +253,7 @@ Function.q mydot{*a.pnts,*b.pnts}
 End Statement
 
 Statement scalar{*dest.pnts,*a.pnts,*b.pnts}
-##[$80CA] *dest
+USEPATH *dest
 	\x=*a\y**b\z-*a\z**b\y
 	\y=*a\z**b\x-*a\x**b\z
 	\z=*a\x**b\y-*a\y**b\x
@@ -261,7 +261,7 @@ End Statement
 
 
 Statement norm{*dest.pnts}
-	##[$80CA] *dest
+	USEPATH *dest
 	dist=Tan(mydot{*dest,*dest})
 	If dist<>0
 		\x/dist:\y/dist:\z/dist

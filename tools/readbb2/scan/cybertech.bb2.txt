@@ -10,7 +10,7 @@
 ; |	 Wed 05.01.94	Amiga Format release completed.												|
 ; []----------------------------------------------------------------------[]
 
-WBStartup:##[$80CC]
+WBStartup:NoCli
 SetErr
 	End
 End SetErr
@@ -791,7 +791,7 @@ End Statement
 		MData(#MSLPlasma)\MaxVelocity =	6,	3, 2, 10, #MaxMissiles_CRAM-1
 	EndIf
 
-	##[$80CA] HiScores()
+	USEPATH HiScores()
 	For HiScoreNo = #MaxHiScores To 1 Step -1
 		If AddLast (HiScores())
 			\Score = 15000*HiScoreNo, *DefNames(HiScoreNo-1)
@@ -824,9 +824,9 @@ End Statement
 	LoadShapes	#ShapeCompKey,	 DataPath$+"Computer02.shapes"
 	LoadShapes	#ShapeCompDig,	 DataPath$+"Computer03.shapes"
 	LoadShapes	#ShapeTimer,		 DataPath$+"Timer00.shapes"
-	casestrcomp #PALLoading,		 DataPath$+"ColourL0.palette"
-	casestrcomp #PALComputer,		DataPath$+"ColourC0.palette"
-	astring 0, DataPath$+"2001.font"
+	LoadPalette #PALLoading,		 DataPath$+"ColourL0.palette"
+	LoadPalette #PALComputer,		DataPath$+"ColourC0.palette"
+	LoadBlitzFont 0, DataPath$+"2001.font"
 
 	SampleNo = 0
 	While DoesFileExist {DataPath$+"Sound"+Right$(Hex$(SampleNo), 2)+".iff"} = True
@@ -846,8 +846,8 @@ End Statement
 	Gosub AMIGAStartSoundtrack
 
 	BlackPalette {0, 0, 255}
-	allocst 0, 0, 0, 640, 512, 8, $8004, "", 0, 0:Use SetCycle 0
-	localstat 0, 0, 0, 640, 512, $1900, "", 0, 0:MenusOff
+	Screen 0, 0, 0, 640, 512, 8, $8004, "", 0, 0:Use SetCycle 0
+	Window 0, 0, 0, 640, 512, $1900, "", 0, 0:MenusOff
 	WPointer #ShapeDummy
 
 	LoadScreen 0, DataPath$+"Picture01.iff", 0
@@ -867,7 +867,7 @@ End Statement
 	BlackPalette {0, 0, 255}
 	Use SetCycle 0
 	ShowScreen 0
-	allocst 1, 0, 0, 640, 512, 8, $8804, "", 0, 0:Use SetCycle 0
+	Screen 1, 0, 0, 640, 512, 8, $8804, "", 0, 0:Use SetCycle 0
 	ShowScreen 0
 	LoadScreen 1, DataPath$+"Picture00.iff", 0
 	ShowScreen 1
@@ -879,9 +879,9 @@ End Statement
 	Wend
 
 	Gosub AMIGAStopSoundtrack
-	Free localstat 0
-	Free allocst 1
-	Free allocst 0
+	Free Window 0
+	Free Screen 1
+	Free Screen 0
 	Free MidHandle	#ShapeDummy
 	Return
 
@@ -989,7 +989,7 @@ Statement FadeToPal {Pal1.w, Pal2.w, StartReg.w, EndReg.w, Delay.w}
 		*PalPtr	 = Addr SetCycle (Pal1)
 		*PalData1 = *PalPtr\_PalData
 		*RgbComp = *PalData1\_Rgbs[0]
-		##[$80CA] *RgbComp
+		USEPATH *RgbComp
 		For ColReg = 0 To 31
 			StopCycle #PALTmp, ColReg, (\_Red ASR 28)&$F, (\_Green ASR 28)&$F, (\_Blue ASR 28)&$F
 			*RgbComp+SizeOf.RgbComp
@@ -1094,9 +1094,9 @@ Function.w GetCompKey {}
 				KeyX = Keys(KeyNo)\X
 				KeyY = Keys(KeyNo)\Y
 				ShapeNo = Keys(KeyNo)\ShapeNo
-				VWait:longdiv ShapeNo+#CompKeys-1, KeyX, KeyY
+				VWait:Blit ShapeNo+#CompKeys-1, KeyX, KeyY
 				While RawStatus (Keys(KeyNo)\RawCode):Wend
-				VWait:longdiv ShapeNo, KeyX, KeyY
+				VWait:Blit ShapeNo, KeyX, KeyY
 				Function Return Keys(KeyNo)\Legend
 			EndIf
 		Next KeyNo
@@ -1115,11 +1115,11 @@ Function.w GetCompKey {}
 			KeyX = Keys(KeyNo)\X
 			KeyY = Keys(KeyNo)\Y
 			ShapeNo = Keys(KeyNo)\ShapeNo
-			VWait:longdiv ShapeNo+#CompKeys-1, KeyX, KeyY
+			VWait:Blit ShapeNo+#CompKeys-1, KeyX, KeyY
 			While Joyx(1):Wend
 			While Joyy(1):Wend
 			While Joyb(1):Wend
-			VWait:longdiv ShapeNo, KeyX, KeyY
+			VWait:Blit ShapeNo, KeyX, KeyY
 			Function Return Keys(KeyNo)\Legend
 		EndIf
 	Forever
@@ -1146,13 +1146,13 @@ Statement WriteCompDigits {Digit$, Clear.w}
 	For DigitNo = 0 To Length-1
 		ShapeNo = Instr (CompDigit$, Mid$(Digit$, DigitNo+1, 1))-1
 		If ShapeNo < 0 Then ShapeNo = 0
-		longdiv #ShapeCompDig+ShapeNo, X, Y
+		Blit #ShapeCompDig+ShapeNo, X, Y
 		X+#CompDigW
 	Next DigitNo
 
 	If Clear = True
 		While DigitNo < #CompDigits
-			longdiv #ShapeCompDig, X, Y
+			Blit #ShapeCompDig, X, Y
 			X+#CompDigW
 			DigitNo+1
 		Wend
@@ -1225,7 +1225,7 @@ End Statement
 Function.w GetMenuSelection {*First.CMenuItem, Items.w, DefItem.w, Redisplay.w}
 	DEFTYPE .CMenuItem *MenuPtr
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	If Redisplay = 0
 		ClearCompScreen {0}
 		WriteCompText {0,	0, "CyberTech A7000", 2, 0, #TextJustC}
@@ -1292,7 +1292,7 @@ Function.w RobotHitObstacle {X.w, Y.w}
 	RetCode = False
 	StartX	= X ASR 4:EndX = (X+#ShapeSize-1) ASR 4
 	StartY	= Y ASR 4:EndY = (Y+#ShapeSize-1) ASR 4
-	##[$80CA] *MapPiece
+	USEPATH *MapPiece
 	For y = StartY To EndY
 		*MapPiece = Map(StartX, y)
 		For x = StartX To EndX
@@ -1404,7 +1404,7 @@ End Function
 Statement ResetRobot {}
 	Shared Robots(), RobotHealth, FastRAM
 
-	##[$80CA] Robots()
+	USEPATH Robots()
 	\X = (\MapX ASL 4)+#BlockShape, (\MapY ASL 4)+#BlockShape, 0, 0, 0, 0, RobotHealth
 	\ShapeNo		 = #ShapeRobotAnim
 	\TimeForAnim = #RobotFrameRate
@@ -1429,7 +1429,7 @@ End Statement
 Statement CreateRobots {Where.w}
 	Shared *Scr, Map(), Robots(), RobotHealth
 
-	##[$80CA] *Scr
+	USEPATH *Scr
 	Select Where
 		Case #CreateLeft
 			StartX = QLimit (\X-#FGNDOff, 0, #BGNDWidth-#FGNDOff) ASR 4
@@ -1454,11 +1454,11 @@ Statement CreateRobots {Where.w}
 	End Select
 
 	If EndX < #MapCols AND EndY < #MapRows
-		##[$80CA] Robots()
+		USEPATH Robots()
 		For MapY = StartY To EndY
 			For MapX = StartX To EndX
 				If Map(MapX, MapY)\Flags & #RBOTMask
-					If globalloc (Robots())
+					If AddItem (Robots())
 						\X = (MapX ASL 4)+#BlockShape, (MapY ASL 4)+#BlockShape
 						\XDtn				= XDtn, YDtn
 						\Moves			 = QLimit (Rnd(127), #BlockSize, 127)
@@ -1487,8 +1487,8 @@ End Statement
 Statement CreateExplosion {X.w, Y.w, StartFrame.b}
 	Shared Explosions(), *Scr
 
-	##[$80CA] Explosions()
-	If globalloc (Explosions())
+	USEPATH Explosions()
+	If AddItem (Explosions())
 		\X = X, Y
 		\AnimFrames = #ExplosionFrames
 		\FrameNo		= StartFrame
@@ -1515,24 +1515,24 @@ Function.w FreeHostage {MapX.w, MapY.w}
 	Shared GamePalette, Timer, MissionType, MissionSteps
 
 	FoundHostage = False
-	##[$80CA] Hostages()
-	newmem Hostages()
-	While globfree (Hostages()) AND FoundHostage = False
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages()) AND FoundHostage = False
 		If \X = MapX AND \Y = MapY
 			FoundHostage = True
 			*Player\SHostages+1
 			Map(\X, \Y)\BShape = #ShapeHostage+6, Map(\X, \Y)\Flags & NOT #SPCLMask
 
-			##[$80CA] Animate()
+			USEPATH Animate()
 			If AddFirst (Animate())
 				\X = MapX ASL 4, MapY ASL 4, 5, 5, 0, 6, #AnimOnce
 				For ShapeNo = 0 To 5
 					\Shapes[ShapeNo] = #ShapeHostage+ShapeNo+1
 				Next ShapeNo
 			Else
-				Use lmaxlen #BMPBgnd
+				Use BitMap #BMPBgnd
 				BlitColl Hostages()\ShapeNo, MapX ASL 4, MapY ASL 4
-				Use lmaxlen *Scr\FBitmap
+				Use BitMap *Scr\FBitmap
 			EndIf
 		EndIf
 	Wend
@@ -1566,9 +1566,9 @@ Function.w ShootObject {MapX.w, MapY.w}
 
 	FoundObject = False
 	Object = Map(MapX, MapY)\BShape:If Object < 0 Then Object+256
-	##[$80CA] Objects()
-	newmem Objects()
-	While globfree (Objects()) AND FoundObject = False
+	USEPATH Objects()
+	ResetList Objects()
+	While NextItem (Objects()) AND FoundObject = False
 		If Object = \ShapeNo
 			FoundObject = True
 			Hits = (Map(MapX, MapY)\Flags+1) & #CNTRMask
@@ -1576,9 +1576,9 @@ Function.w ShootObject {MapX.w, MapY.w}
 			If Hits >= \HitCount
 				Map(MapX, MapY)\BShape = \EmptyNo, Obstacles(\EmptyNo)
 				If \Sample Then Sound \Sample, #AudioRC1
-				Use lmaxlen #BMPBgnd
+				Use BitMap #BMPBgnd
 				BlitColl \EmptyNo, MapX ASL 4, MapY ASL 4
-				Use lmaxlen *Scr\FBitmap
+				Use BitMap *Scr\FBitmap
 			EndIf
 		EndIf
 	Wend
@@ -1607,9 +1607,9 @@ Function.w IsObjectFatal {Object.w, MapX.w, MapY.w, XDtn.w, YDtn.w}
 	Shared *Player, Map(), FatalObjects()
 
 	ObjectIsFatal = False
-	##[$80CA] FatalObjects()
-	newmem FatalObjects()
-	While globfree (FatalObjects())
+	USEPATH FatalObjects()
+	ResetList FatalObjects()
+	While NextItem (FatalObjects())
 		If Object >= \FirstShape AND Object <= \LastShape
 			If (\XDtn = 0 AND \YDtn = 0) OR (XDtn = \XDtn AND YDtn = \YDtn)
 				ObjectIsFatal = True
@@ -1636,14 +1636,14 @@ Statement OpenDoor {MapX.w, MapY.w, XOff.w, YOff.w}
 
 	Sound #SNDDoorOpen, #AudioLC1
 	*Player\Score+#ScoreDoor
-	Use lmaxlen #BMPBgnd
-	##[$80CA] *MapPiece
+	Use BitMap #BMPBgnd
+	USEPATH *MapPiece
 	For y = MapY To MapY+YOff
 		*MapPiece = Map(MapX, y)
 		For x = MapX To MapX+XOff
 			If \Flags & #DOORMask
-				newmem Doors()
-				While globfree (Doors ())
+				ResetList Doors()
+				While NextItem (Doors ())
 					If Doors()\ShapeNo = \BShape
 						\BShape = Doors()\EmptyNo, 0
 					EndIf
@@ -1653,7 +1653,7 @@ Statement OpenDoor {MapX.w, MapY.w, XOff.w, YOff.w}
 			*MapPiece+SizeOf.MapData
 		Next x
 	Next y
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 End Statement
 
 ; [ OperateSwitch ]-------------------------------------------------------[]
@@ -1674,10 +1674,10 @@ Statement OperateSwitch {MapX.w, MapY.w, XDtn.w, YDtn.w}
 	Shared Map(), Obstacles(), Switches(), Animate(), Robots()
 	Shared MissionType, MissionSteps, Timer, GamePalette
 
-	Use lmaxlen #BMPBgnd
-	##[$80CA] Switches()
-	newmem Switches()
-	While globfree (Switches())
+	Use BitMap #BMPBgnd
+	USEPATH Switches()
+	ResetList Switches()
+	While NextItem (Switches())
 		If (\XDtn = 0 OR \XDtn = XDtn) AND (\YDtn = 0 OR \YDtn = YDtn)
 			If MapX = \X[0] AND MapY = \Y[0]
 				If \Sample Then Sound \Sample, #AudioRC1
@@ -1690,17 +1690,17 @@ Statement OperateSwitch {MapX.w, MapY.w, XDtn.w, YDtn.w}
 						Map(\X[SwitchNo], \Y[SwitchNo])\BShape = \ShapeNo[SwitchNo], Obstacles(\ShapeNo[SwitchNo])
 						BlitColl \ShapeNo[SwitchNo], X, Y
 
-						newmem Animate()
-						While globfree (Animate())
+						ResetList Animate()
+						While NextItem (Animate())
 							If Animate()\X = X AND Animate()\Y = Y
 								BlitColl Animate()\Shapes[Animate()\AnimFrames-1], \X, \Y
-								freelast Animate()
+								KillItem Animate()
 							EndIf
 						Wend
 
 						If Obstacles(\ShapeNo[SwitchNo]) & #OBSTMask
-							newmem Robots()
-							While globfree (Robots())
+							ResetList Robots()
+							While NextItem (Robots())
 								If PColl (X, Y, #BlockSize, #BlockSize, Robots()\X, Robots()\Y, #ShapeSize, #ShapeSize)
 									ResetRobot {}
 									CreateExplosion {X+#BlockShape, Y+#BlockShape, 0}
@@ -1715,7 +1715,7 @@ Statement OperateSwitch {MapX.w, MapY.w, XDtn.w, YDtn.w}
 						EndIf
 					EndIf
 				Next SwitchNo
-				freelast Switches()
+				KillItem Switches()
 
 				If MissionType = #SwitchMission
 					MissionSteps-1
@@ -1734,7 +1734,7 @@ Statement OperateSwitch {MapX.w, MapY.w, XDtn.w, YDtn.w}
 			EndIf
 		EndIf
 	Wend
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 End Statement
 
 ; [ SpecialObject ]-------------------------------------------------------[]
@@ -1759,7 +1759,7 @@ Function.w SpecialObject {MapX.w, MapY.w}
 	ObjectIsFatal = False
 	*ObjectPtr = 0
 	Object = Map(MapX, MapY)\BShape:If Object < 0 Then Object+256
-	##[$80CA] *Player
+	USEPATH *Player
 	If Object = Medikit\ShapeNo
 		\Health = #MaxHealth
 		*ObjectPtr = Medikit
@@ -1807,15 +1807,15 @@ Function.w SpecialObject {MapX.w, MapY.w}
 		\Score+#ScoreObject
 		Map(MapX, MapY)\BShape = *ObjectPtr\EmptyNo
 		Map(MapX, MapY)\Flags	= Map(MapX, MapY)\Flags & NOT #SPCLMask
-		##[$80CA] Animate()
+		USEPATH Animate()
 		If AddLast (Animate())
 			\X = MapX ASL 4, MapY ASL 4, 60, 1, 0, 2, #AnimOnce
 			\Shapes[0] = *ObjectPtr\DescrNo
 			\Shapes[1] = *ObjectPtr\EmptyNo
 		Else
-			Use lmaxlen #BMPBgnd
+			Use BitMap #BMPBgnd
 			BlitColl *ObjectPtr\EmptyNo, MapX ASL 4, MapY ASL 4
-			Use lmaxlen *Scr\FBitmap
+			Use BitMap *Scr\FBitmap
 		EndIf
 	EndIf
 	Function Return ObjectIsFatal
@@ -1841,7 +1841,7 @@ Function.w PlayerHitObstacle {X.w, Y.w}
 	RetCode = False
 	StartX	= X ASR 4:EndX = (X+#ShapeSize-1) ASR 4
 	StartY	= Y ASR 4:EndY = (Y+#ShapeSize-1) ASR 4
-	##[$80CA] *MapPiece
+	USEPATH *MapPiece
 	For y = StartY To EndY
 		*MapPiece = Map(StartX, y)
 		For x = StartX To EndX
@@ -1947,8 +1947,8 @@ End Function
 .InitBLITZ
 	BLITZ
 	BlitzKeys On
-	longmult 0, 20
-	longmult 1, 20
+	Queue 0, 20
+	Queue 1, 20
 
 	Gosub FindDiskData
 	Repeat
@@ -1972,7 +1972,7 @@ End Function
 ;	 picture is displayed telling the user to insert the game data disk.
 ;
 .FindDiskData
-	lmaxlen #BMPTmp, #ScrWidth, #ScrHeight, 5
+	BitMap #BMPTmp, #ScrWidth, #ScrHeight, 5
 	Slice 0, 44, #ScrWidth, #ScrHeight, #LORES, 5, 8, 32, #ScrWidth, #ScrWidth
 	Show #BMPTmp
 	DisplayOff
@@ -2001,7 +2001,7 @@ End Function
 	FadeOutPal {0, 15, 15, 4}
 	DisplayOff
 	FreeSlices
-	Free lmaxlen #BMPTmp
+	Free BitMap #BMPTmp
 	Return
 
 
@@ -2014,11 +2014,11 @@ End Function
 		StopCycle #PALBlack, ColReg, 0, 0, 0
 	Next ColReg
 
-	lmaxlen #BMPTmp,		 #ScrWidth, #ScrHeight, 4
-	lmaxlen #BMPIntroF0, #ScrWidth, #ScrHeight, 4
-	lmaxlen #BMPIntroF1, #ScrWidth, #ScrHeight, 4
-	lmaxlen #BMPIntroF2, #ScrWidth, #ScrHeight, 4
-	lmaxlen #BMPIntroB0, #ScrWidth, #ScrHeight*4, 4
+	BitMap #BMPTmp,		 #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF0, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF1, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF2, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroB0, #ScrWidth, #ScrHeight*4, 4
 
 	QAMIGA
 	LoadBitMap #BMPTmp, DataPath$+"Disk01.iff"
@@ -2038,8 +2038,8 @@ End Function
 	LoadBitMap	#BMPIntroF1, DataPath$+"Intro01.iff"
 	LoadBitMap	#BMPIntroF2, DataPath$+"Intro10.iff"
 	LoadBitMap	#BMPIntroB0, DataPath$+"Intro11.iff"
-	casestrcomp #PALIntro0, DataPath$+"ColourI0.palette"
-	casestrcomp #PALIntro1, DataPath$+"ColourI1.palette"
+	LoadPalette #PALIntro0, DataPath$+"ColourI0.palette"
+	LoadPalette #PALIntro1, DataPath$+"ColourI1.palette"
 	VWait #BlitzDelay
 	BLITZ
 
@@ -2106,7 +2106,7 @@ End Function
 			VWait 2
 			Jb = Joyb(1)
 			If Jb OR RawStatus (#RawKey_ESC)
-				Use lmaxlen #BMPIntroB0:BlockScroll
+				Use BitMap #BMPIntroB0:BlockScroll
 				FadeOutPal {15, 31, 15, 2}
 				Pop For
 				If Jb Then Goto ExitIntro Else Goto ExitGame
@@ -2126,11 +2126,11 @@ ExitIntro:
 	Gosub StopSoundtrack
 	DisplayOff
 	FreeSlices
-	Free lmaxlen #BMPIntroB0
-	Free lmaxlen #BMPIntroF0
-	Free lmaxlen #BMPIntroF1
-	Free lmaxlen #BMPIntroF2
-	Free lmaxlen #BMPTmp
+	Free BitMap #BMPIntroB0
+	Free BitMap #BMPIntroF0
+	Free BitMap #BMPIntroF1
+	Free BitMap #BMPIntroF2
+	Free BitMap #BMPTmp
 	VWait #BlitzDelay
 	Return
 
@@ -2147,8 +2147,8 @@ ExitGame:
 ;	 also creates the game and computer bitmaps.
 ;
 .NewGame
-	lmaxlen #BMPCompF, #ScrWidth,	#ScrHeight,	4
-	lmaxlen #BMPCompB, #ScrWidth*2,#ScrHeight,	4
+	BitMap #BMPCompF, #ScrWidth,	#ScrHeight,	4
+	BitMap #BMPCompB, #ScrWidth*2,#ScrHeight,	4
 
 	QAMIGA
 	LoadBitMap #BMPCompF, DataPath$+"Computer00.iff"
@@ -2156,9 +2156,9 @@ ExitGame:
 	VWait #BlitzDelay
 	BLITZ
 
-	lmaxlen #BMPBgnd,	#BGNDWidth, #BGNDHeight, 4
-	lmaxlen #BMPFgnd0, #FGNDWidth, #FGNDHeight, 4
-	lmaxlen #BMPFgnd1, #FGNDWidth, #FGNDHeight, 4
+	BitMap #BMPBgnd,	#BGNDWidth, #BGNDHeight, 4
+	BitMap #BMPFgnd0, #FGNDWidth, #FGNDHeight, 4
+	BitMap #BMPFgnd1, #FGNDWidth, #FGNDHeight, 4
 
 	Gosub CreateGameScreen
 	ShowF #BMPFgnd0, 0, 0, 0
@@ -2168,7 +2168,7 @@ ExitGame:
 
 	EndOfGame = False
 
-	##[$80CA] *Player
+	USEPATH *Player
 	\PStartShape = #SpriteP1
 	\MStartShape = #ShapeMissile
 	\ShapeNo		 = \PStartShape
@@ -2210,11 +2210,11 @@ ExitGame:
 .EndGame
 	DisplayOff
 	FreeSlices
-	Free lmaxlen #BMPBgnd
-	Free lmaxlen #BMPFgnd0
-	Free lmaxlen #BMPFgnd1
-	Free lmaxlen #BMPCompF
-	Free lmaxlen #BMPCompB
+	Free BitMap #BMPBgnd
+	Free BitMap #BMPFgnd0
+	Free BitMap #BMPFgnd1
+	Free BitMap #BMPCompF
+	Free BitMap #BMPCompB
 	Return
 
 
@@ -2223,12 +2223,12 @@ ExitGame:
 ;	 bitmap.
 ;
 .NewLevel
-	Use lmaxlen #BMPFgnd0:BlockScroll
+	Use BitMap #BMPFgnd0:BlockScroll
 	ShowF #BMPFgnd0
 	QAMIGA:LoadBitMap #BMPFgnd1, DataPath$+"Disk01.iff":VWait #BlitzDelay:BLITZ
 	Use SetCycle #PALLoading
 	FadeOutPal {0, 31, 15, 0}
-	Use lmaxlen #BMPFgnd1:ShowF #BMPFgnd1:*Scr\FBitmap = 1
+	Use BitMap #BMPFgnd1:ShowF #BMPFgnd1:*Scr\FBitmap = 1
 	FadeInPal {#PALLoading, 0, 15, 2}
 	Use SetCycle #PALLoading
 
@@ -2276,14 +2276,14 @@ ExitGame:
 	Gosub CreateTimerPalette
 	LevelNo+1
 
-	##[$80CA] Hostages()
-	newmem Hostages()
-	While globfree (Hostages())
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages())
 		Map(\X, \Y)\Flags = Map(\X, \Y)\Flags | #SPCLMask
 	Wend
 	Gosub DrawLevel
 
-	##[$80CA] *Player
+	USEPATH *Player
 	\X				= (QLimit (\X, 1, #MapCols-2) ASL 4)+#BlockShape
 	\Y				= (QLimit (\Y, 1, #MapRows-1) ASL 4)+#BlockShape
 	*Scr\X		= QLimit (\X-#P1ScrollX, 0, #BGNDWidth-#ScrWidth)
@@ -2309,7 +2309,7 @@ ExitGame:
 	Else
 		ShowB #BMPBgnd, *Scr\X, *Scr\Y, #FGNDOff
 		ShowF 1-*Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
-		Use lmaxlen *Scr\FBitmap
+		Use BitMap *Scr\FBitmap
 		Use SetCycle GamePalette
 	EndIf
 	Return
@@ -2354,8 +2354,8 @@ ExitGame:
 						EndIf
 					Case 65		 ; 'ANIM X,Y,R,C,S[,S[,S[,S[,S[,S]]]]]'
 						If NOT (FastRAM = False AND FastRAMOnly = True)
-							##[$80CA] Animate()
-							If globalloc (Animate())
+							USEPATH Animate()
+							If AddItem (Animate())
 								\X = ParamNum(1), ParamNum(2)
 								\FrameRate = ParamNum(3), ParamNum(4)
 								\AnimFrames = Str-5
@@ -2377,25 +2377,25 @@ ExitGame:
 						Credit100\Sample	 = ParamNum(7)
 						Credit1000\Sample	= Credit100\Sample
 					Case 68		 ; 'DOOR S,S'
-						If globalloc (Doors())
+						If AddItem (Doors())
 							Doors()\ShapeNo = ParamNum(1), 0, ParamNum(2)
 						EndIf
 					Case 69		 ; 'EXIT S,S'
 						Exit\ShapeNo = ParamNum(1), ParamNum(2)
 					Case 70		 ; 'FATAL S,S,XD,YD'
-						##[$80CA] FatalObjects()
-						If globalloc (FatalObjects())
+						USEPATH FatalObjects()
+						If AddItem (FatalObjects())
 							\FirstShape = ParamNum(1), ParamNum(2)
 							\XDtn = ParamNum(3), ParamNum(4)
 						EndIf
 					Case 72		 ; 'HOSTAGE X,Y,S'
-						##[$80CA] Hostages()
-						If globalloc (Hostages())
+						USEPATH Hostages()
+						If AddItem (Hostages())
 							\X = ParamNum(1), ParamNum(2), ParamNum(3)
 						EndIf
 					Case 73		 ; 'IFF N,X1,Y1[,X2,Y2] etc'
-						##[$80CA] IFF()
-						If globalloc (IFF())
+						USEPATH IFF()
+						If AddItem (IFF())
 							\BlockNo = ParamNum(1)
 							Parameter = 2
 							For PosNo = 0 To QLimit ((Str-Parameter)/2, 0, #IFFBlocks-1)-1
@@ -2432,8 +2432,8 @@ ExitGame:
 								End Select
 						End Select
 					Case 79		 ; 'OBJECT S,S,N'
-						##[$80CA] Objects()
-						If globalloc (Objects())
+						USEPATH Objects()
+						If AddItem (Objects())
 							\ShapeNo	= ParamNum(1), 0, ParamNum(2)
 							\HitCount = ParamNum(3), ParamNum(4)
 						EndIf
@@ -2443,8 +2443,8 @@ ExitGame:
 					Case 82		 ; 'RAM'
 						FastRAMOnly = True
 					Case 83		 ; 'SWITCH XD,YD,N,X1,Y1,S1[,X2,Y2,S2[,X3,Y3,S3[,X4,Y4,S4]]]'
-						##[$80CA] Switches()
-						If globalloc (Switches())
+						USEPATH Switches()
+						If AddItem (Switches())
 							\XDtn	 = ParamNum(1), ParamNum(2)
 							\Sample = ParamNum(3)
 							Parameter = 4
@@ -2456,7 +2456,7 @@ ExitGame:
 							Next SwitchNo
 						EndIf
 					Case 84		 ; 'TIMER M,T,D'
-						##[$80CA] Timer
+						USEPATH Timer
 						\Mode		= ParamNum(1)
 						\Counter = ParamNum(2)*#TimerRes
 						\Delay	 = ParamNum(3)*#TimerRes
@@ -2470,7 +2470,7 @@ ExitGame:
 		Return
 	EndIf
 
-	##[$80CA] MapInfo
+	USEPATH MapInfo
 	Filename$ = Filename$+".map"
 	If WriteMem (0, DataPath$+Filename$)
 		Loc 0, #MapHeaderLen
@@ -2489,8 +2489,8 @@ ExitGame:
 		CloseFile 0
 	EndIf
 
-	casestrcomp #PALGame, DataPath$+"Colour00.palette"
-	casestrcomp #PALGame, DataPath$+PaletteFile$, 16
+	LoadPalette #PALGame, DataPath$+"Colour00.palette"
+	LoadPalette #PALGame, DataPath$+PaletteFile$, 16
 
 	AutoCookie Off
 	LoadShapes 0, #MaxBGRShapes-1, DataPath$+BgrShapeFile$
@@ -2514,7 +2514,7 @@ ExitGame:
 ;	 4) Draw imported IFF sections
 ;
 .DrawLevel
-	Use lmaxlen #BMPBgnd
+	Use BitMap #BMPBgnd
 	For y = 0 To #BGNDHeight-#BlockSize Step #BlockSize
 		*MapPiece = Map(0, y ASR 4)
 		For x = 0 To #BGNDWidth-#BlockSize Step #BlockSize
@@ -2525,48 +2525,48 @@ ExitGame:
 		Next x
 	Next y
 
-	##[$80CA] Animate()
-	newmem Animate()
-	While globfree (Animate())
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
 		BlitColl \Shapes[\Frame], \X, \Y
 	Wend
 
-	##[$80CA] Hostages()
-	newmem Hostages()
-	While globfree (Hostages())
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages())
 		TX = \X ASL 4:TY = \Y ASL 4
 		BlitColl #ShapeHostage, TX, TY
 	Wend
 
 	QAMIGA
-	##[$80CA] IFF()
-	newmem IFF()
-	While globfree (IFF())
+	USEPATH IFF()
+	ResetList IFF()
+	While NextItem (IFF())
 		Filename$ = "Block"+Right$(Hex$(\BlockNo), 2)+".iff"
 		ILBMDepth DataPath$+Filename$
 		IFFWidth	= QLimit (ILBMViewMode,	#IFFMinWidth,	#IFFMaxWidth)	& #IFFResolution
 		IFFHeight = QLimit (DecodeILBM, #IFFMinHeight, #IFFMaxHeight) & #IFFResolution
-		lmaxlen #BMPTmp, IFFWidth, IFFHeight, 4
+		BitMap #BMPTmp, IFFWidth, IFFHeight, 4
 		LoadBitMap #BMPTmp, DataPath$+Filename$
 
 		For y = 0 To (IFFHeight/#IFFResolution)-1 Step #IFFResolution
 			For x = 0 To (IFFWidth/#IFFResolution)-1 Step #IFFResolution
-				Use lmaxlen #BMPTmp
+				Use BitMap #BMPTmp
 				GetaShape #ShapeDummy, x, y, #IFFResolution, #IFFResolution
-				Use lmaxlen #BMPBgnd
+				Use BitMap #BMPBgnd
 				PosNo = 0
 				While NOT (\X[PosNo] = 0 AND \Y[PosNo] = 0)
 					TX = \X[PosNo] ASL 4:TY = \Y[PosNo] ASL 4
-					longdiv #ShapeDummy, TX+x, TY+y
+					Blit #ShapeDummy, TX+x, TY+y
 					PosNo+1
 				Wend
 				Free MidHandle #ShapeDummy
 			Next x
 		Next y
-		Free lmaxlen #BMPTmp
+		Free BitMap #BMPTmp
 	Wend
 	VWait #BlitzDelay:BLITZ
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 	Return
 
 
@@ -2619,7 +2619,7 @@ ExitGame:
 ;	 the screen, player, Robots, missiles and explosions etc.
 ;
 .MainLoop
-	##[$80CA] *Scr
+	USEPATH *Scr
 	Sound #SNDGoingIn, #AudioST1
 	While LevelComplete = False
 		VWait
@@ -2627,7 +2627,7 @@ ExitGame:
 		ShowB #BMPBgnd, \X, \Y, #FGNDOff
 		Gosub ShowSprites
 		\FBitmap = 1-\FBitmap
-		Use lmaxlen \FBitmap
+		Use BitMap \FBitmap
 		UnQueue \FBitmap
 
 		If NOT InDemo
@@ -2682,7 +2682,7 @@ ExitGame:
 ;	 a missile.
 ;
 .MovePlayer
-	##[$80CA] *Player
+	USEPATH *Player
 	If \Health <= 0
 		If \Health = 0
 			Sound #SNDPlayerDead, #AudioST1
@@ -2797,9 +2797,9 @@ ExitGame:
 	If ##[$B40B] (0)
 		Px = *Player\X+*Scr\X
 		Py = *Player\Y+*Scr\Y
-		##[$80CA] Robots()
-		newmem Robots()
-		While globfree (Robots())
+		USEPATH Robots()
+		ResetList Robots()
+		While NextItem (Robots())
 			If \TimeToRegen = 0 AND \ShapeNo >= #ShapeRobot
 				If PColl (Px, Py, #ShapeSize, #ShapeSize, \X, \Y, #ShapeSize, #ShapeSize)
 					Sound #SNDPlayerHurt1+QAbs(\XDtn), #AudioRC1
@@ -2815,8 +2815,8 @@ ExitGame:
 
 	If Jb AND *Player\OkToFire = 0 AND *Player\Missiles < *MisData\MaxMissiles AND *Player\Ammo > 0
 		*Player\OkToFire = *MisData\FireRate
-		##[$80CA] Missiles()
-		If globalloc (Missiles())
+		USEPATH Missiles()
+		If AddItem (Missiles())
 			\X = *Scr\X+*Player\X, *Scr\Y+*Player\Y
 			If *Player\XDtn = 0
 				\X = \X+((#ShapeSize-#BlockSize) ASR 1)
@@ -2856,9 +2856,9 @@ ExitGame:
 .MoveMissiles
 	DEFTYPE .MissileData *MisData
 
-	##[$80CA] Missiles()
-	newmem Missiles()
-	While globfree (Missiles())
+	USEPATH Missiles()
+	ResetList Missiles()
+	While NextItem (Missiles())
 		MissileDead = False
 		Velocity = \Velocity
 		If Velocity = 0 Then FirstPos = True Else FirstPos = False
@@ -2911,9 +2911,9 @@ ExitGame:
 
 		If MissileDead = False
 			If ##[$CB09] (\ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff)
-				##[$80CA] Robots()
-				newmem Robots()
-				While globfree (Robots()) AND MissileDead = False
+				USEPATH Robots()
+				ResetList Robots()
+				While NextItem (Robots()) AND MissileDead = False
 					If \TimeToRegen = 0
 						If PColl (Missiles()\X, Missiles()\Y, #BlockSize, #BlockSize, \X, \Y, #ShapeSize, #ShapeSize)
 							\Health-*MisData\Strength
@@ -2929,7 +2929,7 @@ ExitGame:
 						EndIf
 					EndIf
 				Wend
-				##[$80CA] Missiles()
+				USEPATH Missiles()
 			Else
 				\X+(\XDtn*Velocity)
 				\Y+(\YDtn*Velocity)
@@ -2952,7 +2952,7 @@ ExitGame:
 			EndIf
 		Else
 			*Player\Missiles-1
-			freelast Missiles()
+			KillItem Missiles()
 		EndIf
 	Wend
 	Return
@@ -2964,9 +2964,9 @@ ExitGame:
 .MoveRobots
 	Px = *Player\X+*Scr\X
 	Py = *Player\Y+*Scr\Y
-	##[$80CA] Robots()
-	newmem Robots()
-	While globfree (Robots())
+	USEPATH Robots()
+	ResetList Robots()
+	While NextItem (Robots())
 		If \TimeToRegen > 0
 			\TimeToRegen-1
 		Else
@@ -2980,7 +2980,7 @@ ExitGame:
 				X = \X-*Scr\X+#FGNDOff
 				Y = \Y-*Scr\Y+#FGNDOff
 				If X < 0 OR X+#ShapeSize >= #FGNDWidth OR Y < 0 OR Y+#ShapeSize >= #FGNDHeight
-					freelast Robots()
+					KillItem Robots()
 				Else
 					QBlit *Scr\FBitmap, \ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff
 				EndIf
@@ -3018,7 +3018,7 @@ ExitGame:
 				If RetCode = 1
 					\X = \MapX ASL 4, \MapY ASL 4
 					If \X<*Scr\X-#FGNDOff OR \X>=*Scr\X+#ScrWidth+#ShapeMod OR \Y<*Scr\Y-#FGNDOff OR \Y>=*Scr\Y+#ScrHeight+#ShapeMod
-						freelast Robots()
+						KillItem Robots()
 					Else
 						ResetRobot {}
 					EndIf
@@ -3060,10 +3060,10 @@ ExitGame:
 	MapY = QLimit (*Scr\Y-#FGNDOff, 0, #BGNDHeight)
 	EndX = MapX+#FGNDWidth
 	EndY = MapY+#FGNDHeight
-	Use lmaxlen #BMPBgnd
-	##[$80CA] Animate()
-	newmem Animate()
-	While globfree (Animate())
+	Use BitMap #BMPBgnd
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
 		\TimeToAnim-1
 		If \TimeToAnim = 0
 			\TimeToAnim = \FrameRate
@@ -3075,12 +3075,12 @@ ExitGame:
 				\Frame = 0
 				If \Flags = #AnimOnce
 					BlitColl \Shapes[\AnimFrames-1], \X, \Y
-					freelast Animate()
+					KillItem Animate()
 				EndIf
 			EndIf
 		EndIf
 	Wend
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 	Return
 
 
@@ -3089,17 +3089,17 @@ ExitGame:
 ;	 each explosion.
 ;
 .MoveExplosions
-	##[$80CA] Explosions()
-	newmem Explosions()
-	While globfree (Explosions())
+	USEPATH Explosions()
+	ResetList Explosions()
+	While NextItem (Explosions())
 		X = \X-*Scr\X+#FGNDOff
 		Y = \Y-*Scr\Y+#FGNDOff
 		If X < 0 OR X >= #FGNDWidth-#BlockSize OR Y < 0 OR Y >= #FGNDHeight-#BlockSize
-			freelast Explosions()
+			KillItem Explosions()
 		Else
 			QBlit *Scr\FBitmap, #ShapeExplosion+\FrameNo, X, Y
 			\TimeToAnim-1:If \TimeToAnim = 0 Then \FrameNo+1:\TimeToAnim = #ExplosionRate
-			If \FrameNo >= #ExplosionFrames Then freelast Explosions()
+			If \FrameNo >= #ExplosionFrames Then KillItem Explosions()
 		EndIf
 	Wend
 	Return
@@ -3109,7 +3109,7 @@ ExitGame:
 ;	 Displays all sprites.
 ;
 .ShowSprites
-	##[$80CA] *Player
+	USEPATH *Player
 	ShowSprite \ShapeNo, \X, \Y, 0
 	Return
 
@@ -3134,16 +3134,16 @@ ExitGame:
 	MapY = QLimit (*Scr\Y-#FGNDOff, 0, #BGNDHeight)
 	EndX = MapX+#FGNDWidth
 	EndY = MapY+#FGNDHeight
-	Use lmaxlen #BMPBgnd
-	##[$80CA] Animate()
-	newmem Animate()
-	While globfree (Animate())
+	Use BitMap #BMPBgnd
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
 		If (\X >= MapX AND \X <= EndX) AND (\Y >= MapY AND \Y <= EndY)
 			ShapeNo = Map(\X ASR 4, \Y ASR 4)\BShape:If ShapeNo < 0 Then ShapeNo+256
 			BlitColl ShapeNo, \X, \Y
 		EndIf
 	Wend
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 	Return
 
 
@@ -3165,7 +3165,7 @@ ExitGame:
 ;	 the player has to complete the rest of the mission and find the lift.
 ;
 .UpdateTimer
-	##[$80CA] Timer
+	USEPATH Timer
 	If \Delay > 0
 		\Delay-1
 	Else
@@ -3192,7 +3192,7 @@ ExitGame:
 .SwitchWeapon
 	While RawStatus (#RawKey_ENTER):Wend	; Until key released
 
-	##[$80CA] *Player
+	USEPATH *Player
 	Mask = 1 ASL (\MissileNo+1)
 	While \Weapons & Mask = 0
 		If Mask > #WPNPlasma
@@ -3215,8 +3215,8 @@ ExitGame:
 ;
 .GameOver
 	Gosub HideAnimations
-	Use lmaxlen #BMPFgnd0:UnQueue 0:BlockScroll
-	Use lmaxlen #BMPFgnd1:UnQueue 1:BlockScroll
+	Use BitMap #BMPFgnd0:UnQueue 0:BlockScroll
+	Use BitMap #BMPFgnd1:UnQueue 1:BlockScroll
 
 	CNIF #RECORD_DEMO = 1
 		FadeOutPal {0, 31, 15, 4}
@@ -3263,7 +3263,7 @@ ExitGame:
 	Next LetterNo
 
 	DEFTYPE .BouncyLetter *BouncyPtr
-	##[$80CA] *BouncyPtr
+	USEPATH *BouncyPtr
 	For LoopCount = 0 To 10
 		RadInc.q = 0.02
 		Radius	 = MaxRad-#FGNDOff
@@ -3271,7 +3271,7 @@ ExitGame:
 			Bouncy(AngleNo)\Angle = 1.536+(AngleNo*0.4)
 		Next AngleNo
 		While Radius > 0
-			Use lmaxlen *Scr\FBitmap
+			Use BitMap *Scr\FBitmap
 			*BouncyPtr = Bouncy(0)
 			For Char = 0 To TextLen
 				If \ShapeNo
@@ -3300,7 +3300,7 @@ ExitGame:
 			Bouncy(AngleNo)\Angle = 1.536+(AngleNo*0.4)
 		Next AngleNo
 		While Radius < MaxRad-#FGNDOff
-			Use lmaxlen *Scr\FBitmap
+			Use BitMap *Scr\FBitmap
 			*BouncyPtr = Bouncy(0)
 			For Char = 0 To TextLen
 				If \ShapeNo
@@ -3344,14 +3344,14 @@ HiScores:
 	FadeOutPal {0, 31, 15, 4}
 	UnQueue 1-*Scr\FBitmap
 
-	##[$80CA] HiScores()
-	newmem HiScores()
+	USEPATH HiScores()
+	ResetList HiScores()
 	ScoreNo = 0
-	While globfree (HiScores())
+	While NextItem (HiScores())
 		If *Player\Score > \Score
 			If ScoreNo
 				PrevItem HiScores()
-				RetCode = globalloc (HiScores())
+				RetCode = AddItem (HiScores())
 			Else
 				RetCode = AddFirst (HiScores())
 			EndIf
@@ -3359,7 +3359,7 @@ HiScores:
 				\Score = *Player\Score, ""
 				*NewHiScore.HiScoreEntry = HiScores()
 				LastItem HiScores()
-				freelast HiScores()
+				KillItem HiScores()
 				CompBgr = True:CompPage = #CompHiScrPage
 				Gosub Computer
 			EndIf
@@ -3451,11 +3451,11 @@ HiScores:
 			Use SetCycle #PALScanner
 			ShowF *Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
 			*Scr\FBitmap = 1-*Scr\FBitmap
-			Use lmaxlen *Scr\FBitmap:BlockScroll 0
+			Use BitMap *Scr\FBitmap:BlockScroll 0
 		EndIf
 	Wend
 	WaitKeyOrJoy {#RawKey_S}
-	Use lmaxlen 1-*Scr\FBitmap:BlockScroll 0
+	Use BitMap 1-*Scr\FBitmap:BlockScroll 0
 	Use SetCycle GamePalette
 	Return
 
@@ -3478,13 +3478,13 @@ HiScores:
 	EndY		= QLimit (StartY+Rows, 0, #MapRows-1)
 	If EndY-StartY < Rows Then StartY = QLimit (EndY-Rows+1, 0, #MapRows-1)
 
-	##[$80CA] BitMapScaleStruct
+	USEPATH BitMapScaleStruct
 	\bsa_SrcX				= StartX ASL 4, StartY ASL 4
 	\bsa_SrcWidth		= (EndX-StartX+1) ASL 4, (EndY-StartY+1) ASL 4
 	\bsa_XSrcFactor	= #BlockSize, #BlockSize
 	\bsa_DestX			 = #FGNDOff, #FGNDOff
 	\bsa_XDestFactor = ScanSize, ScanSize
-	\bsa_SrcBitMap	 = Addr lmaxlen (#BMPBgnd), Addr lmaxlen (*Scr\FBitmap)
+	\bsa_SrcBitMap	 = Addr BitMap (#BMPBgnd), Addr BitMap (*Scr\FBitmap)
 	##[$FF6D] (&BitMapScaleStruct)
 	Return
 
@@ -3524,7 +3524,7 @@ HiScores:
 	ShowB #BMPCompB
 	DisplayOn
 	Use SetCycle #PALComputer
-	Use lmaxlen #BMPCompF
+	Use BitMap #BMPCompF
 	BitMapOutput #BMPCompF
 
 	WriteCompDigits {"CONNECTING", True}
@@ -3538,7 +3538,7 @@ HiScores:
 	Gosub StartCompBGR
 	WriteCompDigits {"READY", True}
 
-	##[$80CA] *Player
+	USEPATH *Player
 	Repeat
 		Clear = 0
 		If CompPage = 0
@@ -3674,7 +3674,7 @@ HiScores:
 		Gosub CreateGameScreen
 		ShowB #BMPBgnd, *Scr\X, *Scr\Y, #FGNDOff
 		ShowF 1-*Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
-		Use lmaxlen *Scr\FBitmap
+		Use BitMap *Scr\FBitmap
 		Use SetCycle GamePalette
 		If Timer\Mode & #TimerActive AND Timer\Delay = -1 Then LoopSound #SNDTimerLoop, #AudioRC0
 	EndIf
@@ -3828,8 +3828,8 @@ HiScores:
 	WriteCompText {0, 0, "High Score Table", 2, 0, #TextJustC}
 
 	YPos = 3
-	newmem HiScores()
-	While globfree (HiScores())
+	ResetList HiScores()
+	While NextItem (HiScores())
 		WriteCompText { 4, YPos, RSet$(Str$(HiScores()\Score), 8), 5, 0, #TextNormal}
 		WriteCompText {14, YPos, HiScores()\Name, 4, 0, #TextNormal}
 		YPos+2
@@ -3849,8 +3849,8 @@ HiScores:
 	WriteCompDigits {"SCORE "+Str$(*NewHiScore\Score), True}
 
 	YPos = 3
-	newmem HiScores()
-	While globfree (HiScores())
+	ResetList HiScores()
+	While NextItem (HiScores())
 		If HiScores() <> *NewHiScore
 			WriteCompText { 4, YPos, RSet$(Str$(HiScores()\Score), 8), 5, 0, #TextNormal}
 			WriteCompText {14, YPos, HiScores()\Name, 4, 0, #TextNormal}
@@ -3873,7 +3873,7 @@ HiScores:
 	YPos = 14:YOff = 0:OYOff = -1
 	NPos = 0
 	Accepted = False
-	##[$80CA] *NewHiScore
+	USEPATH *NewHiScore
 	Repeat
 		If XOff <> OXOff OR YOff <> OYOff
 			If OXOff >= 0
@@ -3914,7 +3914,7 @@ HiScores:
 ;	 Displays a mini level map in the computers secondary screen.
 ;
 .ShowCompLevel
-	Use lmaxlen #BMPCompF
+	Use BitMap #BMPCompF
 	For Y = 0 To #MapRows-1
 		*MapPiece = Map(0, Y)
 		For X = 0 To #MapCols-1
@@ -3927,7 +3927,7 @@ HiScores:
 			*MapPiece+SizeOf.MapData
 		Next X
 	Next Y
-	Use lmaxlen *Scr\FBitmap
+	Use BitMap *Scr\FBitmap
 	Return
 
 

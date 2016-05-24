@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example4.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example4.bb2
-##[$80CC]
+NoCli
 WBStartup
 
 INCDIR	"FUN_Math:"
@@ -42,8 +42,8 @@ For sides.b=0 To 5
 	Next points
 Next sides
 
-lmaxlen 0,320,200,4
-lmaxlen 1,320,200,4
+BitMap 0,320,200,4
+BitMap 1,320,200,4
 
 DecodePalette 0,16
 For count.w=1 To 15
@@ -60,7 +60,7 @@ InitCopList 0,42,199,$00004,0,16,0	;$12016 <- does not work on 1200's!!!
 CreateDisplay 0
 DisplayBitMap 0,physical
 DisplayPalette 0,0
-Use lmaxlen logical
+Use BitMap logical
 
 xrot.w=0
 yrot.w=0 ;67
@@ -114,7 +114,7 @@ Repeat
 		physical=1
  EndIf
  DisplayBitMap 0,physical
- Use lmaxlen logical
+ Use BitMap logical
 Until Joyb(1)
 
 End

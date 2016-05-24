@@ -12,8 +12,8 @@ Ver$ = "Blitz Sweeper 18.7.1995 Timo Suoranta"
 SetErr:End:End SetErr								 ; Add ; to enable Debugger
 
 WBStartup														 ; A Must for WB progs
-##[$80CB]															 ; Editor run only; free mem.
-##[$80CC]																 ; Editor run only; free mem.
+CloseEd															 ; Editor run only; free mem.
+NoCli																 ; Editor run only; free mem.
 DEFTYPE .w														; Mostly sufficient, quite fast
 
 Gosub Variable_Init
@@ -125,7 +125,7 @@ Macro Globals												 ; Global vars
 
 .MyBlit
 Macro MyBlit
-	longdiv #Blk_Sps+(`1), MFX+(`2)*#BXX,MFY+(`3)*#BYY
+	Blit #Blk_Sps+(`1), MFX+(`2)*#BXX,MFY+(`3)*#BYY
 	End Macro
 
 
@@ -154,7 +154,7 @@ Statement Digi {Value$,xPos,yPos}
 			Case 32 : v = 1	: XL = #DXX
 			Default : v - 46 : XL = #DXX
 		End Select
-		longdiv #Dgt_Sps+v,xPos,yPos
+		Blit #Dgt_Sps+v,xPos,yPos
 		xPos + XL
 	Next
 End Statement
@@ -188,21 +188,21 @@ Function.b CheckMine {x,y,modf}
 .
 
 .Graphics_Init												; Set Up Graphics
-	allocst #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
+	Screen #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
 	ScreensBitMap #GSC,#GBM
-	lmaxlen #IBM,320,256,4
+	BitMap #IBM,320,256,4
 
 	##[$A486] "Data/BlockShapes.Iff",#IBM,#GPAL
-	Use lmaxlen #IBM
+	Use BitMap #IBM
 
 	GrS = 0 : GrY = 0									 ; Reset Grabber
 	Grab {#Blocks ,#BXX,#BYY}					 ; Grab Block Shapes
 	GetaShape GrS,11*#DXX,GrY,3,#DYY	: GrS + 1	; Grab comma
 	Grab {#Digits ,#DXX,#DYY}					 ; Grab Number Digit Shapes
 	Grab {#Buttons,#PXX,#PYY}					 ; Grab Panel Button Shapes
-	Free lmaxlen #IBM										; Free WorkBitMap
+	Free BitMap #IBM										; Free WorkBitMap
 
-	Use lmaxlen #GBM
+	Use BitMap #GBM
 	Use SetCycle #GPAL
 	Format "####"
 	Return

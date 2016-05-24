@@ -16,7 +16,7 @@
 Statement ResetVars{ *bombptr.gameVars}
 ; Re-initializes the game variables for a (re)start
 .ResetVars
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\xcoord = 0
 		\ycoord = 0
 		\leftWide = 0
@@ -44,7 +44,7 @@ Statement PlaceBombs{ *bombptr.gameVars}
 ; PLACES THE REQUIRED NUMBER OF BOMBS IN THE GRID
 ; Just uses bombs of typenr=-1 for now
 .PlaceBombs
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\totalSquares = \wide * \high
 ; Reset all squares to closed and bombs unknown
 		For i.l=1 To \totalSquares
@@ -73,7 +73,7 @@ Function.b CheckTopLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the top-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckTopLeft
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1) AND (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -94,7 +94,7 @@ Function.b CheckTop{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the top of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckTop
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -115,7 +115,7 @@ Function.b CheckTopRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the top-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckTopRight
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0) AND (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -136,7 +136,7 @@ Function CheckLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckLeft
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1)
 				Select mode
 					Case #peekBomb
@@ -157,7 +157,7 @@ Function CheckRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckRight
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0)
 				Select mode
 					Case #peekBomb
@@ -178,7 +178,7 @@ Function CheckBottomLeft{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the bottom-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckBottomLeft
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1) AND (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -199,7 +199,7 @@ Function CheckBottom{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the bottom of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckBottom
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -220,7 +220,7 @@ Function CheckBottomRight{ *bombptr.gameVars, num.l, mode.b}
 ; If there is no square to the bottom-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
 .CheckBottomRight
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0) AND (num<\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -256,7 +256,7 @@ Statement CheckMark{ *bombptr.gameVars, num.l}
 ; Checks to see if the newly marked square is has a bomb
 ; and increases/decreases \falseBombs accordingly
 .CheckMark
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If \square[num]\hasBomb<>\bombs\typenr
 ;		 there is no bomb here
 				Select \square[num]\state
@@ -275,7 +275,7 @@ End Statement	;CheckMark
 Function.l FindNum{ *bombptr.gameVars}
 ; Returns the number of the square that was clicked on
 .FindNum
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = ((\ycoord-\displayYCoord)/10+\leftHigh)*\wide + (\xcoord-\displayXCoord)/10+\leftWide+1
 		Function Return num
 End Function	;FindNum

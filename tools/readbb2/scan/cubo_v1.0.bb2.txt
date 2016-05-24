@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/3D/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/javier/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/3D/cubo_v1.0.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/javier/cubo_v1.0.bb2
 BLITZ
-lmaxlen 0,320,256,2
-lmaxlen 1,320,256,2
+BitMap 0,320,256,2
+BitMap 1,320,256,2
 Slice 0,44,2
 
 ox=320/2: oy=256/2		 ;centro de la pantalla de proyeccion
@@ -12,7 +12,7 @@ r=4: d=250						 ;d es la distancia del ojo a la pantalla
 
 Repeat
 
-	VWait: Show db: db=1-db: Use lmaxlen db: BlockScroll
+	VWait: Show db: db=1-db: Use BitMap db: BlockScroll
 	Restore datos
 	s1=HSin(theta): c1=HCos(theta): s2=HSin(phi): c2=HCos(phi)
 	s3=c1*s2: s4=s1*s2: s5=c1*c2: s6=s1*c2

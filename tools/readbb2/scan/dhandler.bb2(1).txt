@@ -297,7 +297,7 @@ Repeat
 	Read t$
 	If t$<>""
 		gf=0:If gn=10 Then gf=1
-		workstart 0,gx,11,gf,gn,t$:gx+Len(t$)LSL 3+4
+		TextGadget 0,gx,11,gf,gn,t$:gx+Len(t$)LSL 3+4
 		gn+1
 	EndIf
 Until t$=""
@@ -306,7 +306,7 @@ Data$ ""
 Return
 
 findsc
-FindScreen 0:s0=Peek.l(Addr allocst(0))
+FindScreen 0:s0=Peek.l(Addr Screen(0))
 sw=Peek.w(s0+12):sh=Peek.w(s0+14)
 Return
 
@@ -319,7 +319,7 @@ EndIf
 Return
 
 .openwindow
-localstat 0,wx,wy,ww,wh,$f,"Blitz 2 DBUG",1,0,0:w0=Peek.l(Addr localstat(0))
+Window 0,wx,wy,ww,wh,$f,"Blitz 2 DBUG",1,0,0:w0=Peek.l(Addr Window(0))
 .newsize
 ix=WLeftOff:iy=WTopOff+12:iw=InnerWidth:ih=InnerHeight-20
 cw=iw LSR 3:ch=ih LSR 3
@@ -333,7 +333,7 @@ Return
 
 .getevent
 Repeat
-	While locfree(d_e())
+	While FirstItem(d_e())
 		Select d_e()\t
 		Case 0	;supervisor mode error!
 			t$="(*) "+d_e()\s:Gosub wprint:##[$FF8C] 0
@@ -347,7 +347,7 @@ Repeat
 		Case 4	;outa-here
 			##[$FE99] buffmem,#bufflen:End
 		End Select
-		MaxLen d_e()\s=0:freelast d_e()
+		MaxLen d_e()\s=0:KillItem d_e()
 	Wend
 	ev=Event:If ev=0 Then ##[$FF29]
 Until ev

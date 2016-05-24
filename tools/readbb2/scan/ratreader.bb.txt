@@ -45,7 +45,7 @@ End Statement
 .INIT:
 
 	WBStartup
-	##[$80CC]
+	NoCli
 
 	Gosub LOADCONFIG
 
@@ -64,18 +64,18 @@ End Statement
 		Message{"Couldn't find "+font$}
 		Goto FINN
 	Else
-		remline	0,font$,8
+		LoadFont	0,font$,8
 	EndIf
 
 	ScreenPens 1,1,2,1,3,0
-	allocst 0,0,0,672,256,2,$8000,title$,1,2
+	Screen 0,0,0,672,256,2,$8000,title$,1,2
 	Use IntuiFont 0
 
 	Gosub INITGADS
 	Gosub INITMENU
 	Gosub INITFILES
-	localstat 0,0,12,672,244,$1900,"",1,2,0
-	WindowFont 0:arrmult 0
+	Window 0,0,12,672,244,$1900,"",1,2,0
+	WindowFont 0:SetMenu 0
 	ResetString 4,2,435,43
 	Colour 1,3:WBox 0,48,672,256,3
 
@@ -422,14 +422,14 @@ Return
 
 	SetString 2,1
 
-	workstart 0,450,4,0,1,"QUIT"
-	workstart 0,450,18,0,2,"PACK"
+	TextGadget 0,450,4,0,1,"QUIT"
+	TextGadget 0,450,18,0,2,"PACK"
 
-	workstart 0,500,4,0,3,"REPLY"
-	workstart 0,500,18,0,4,"WRITE"
+	TextGadget 0,500,4,0,3,"REPLY"
+	TextGadget 0,500,18,0,4,"WRITE"
 
-	workstart 0,630,32,0,6,"<"
-	workstart 0,650,32,0,7,">"
+	TextGadget 0,630,32,0,6,"<"
+	TextGadget 0,650,32,0,7,">"
 
 
 Return
@@ -438,9 +438,9 @@ Return
 
 .INITMENU
 
-	newlocarr 0,0," PROJECT "
+	MenuTitle 0,0," PROJECT "
 		MenuItem 0,0,0,0,"QUIT		 ","Q"
-	newlocarr 0,1," OPTIONS "
+	MenuTitle 0,1," OPTIONS "
 		MenuItem 0,0,1,0,"Save Message		"
 		MenuItem 0,0,1,1,"Tags off				"
 		MenuItem 0,0,1,2,"Tags on				 "
@@ -591,7 +591,7 @@ Return
 
 REPEXIT:
 
-	Use localstat 0
+	Use Window 0
 	ShowScreen 0
 
 	For t=0 To #replinesmax
@@ -645,22 +645,22 @@ Return
 	StringGadget 1,156,71,0,5,60,314:ButtonId 1,5,tag$
 
 
-	workstart 1,24,114,0,6,"SAVE"
-	workstart 1,73,114,0,7,"EDIT"
-	workstart 1,122,114,0,8,"CANCEL"
-	workstart 1,185,114,0,9,"TAG"
-	workstart 1,225,114,0,10,"ROT"
-	workstart 1,265,114,0,11,"MOVE"
-	workstart 1,313,114,0,16,"TO"
+	TextGadget 1,24,114,0,6,"SAVE"
+	TextGadget 1,73,114,0,7,"EDIT"
+	TextGadget 1,122,114,0,8,"CANCEL"
+	TextGadget 1,185,114,0,9,"TAG"
+	TextGadget 1,225,114,0,10,"ROT"
+	TextGadget 1,265,114,0,11,"MOVE"
+	TextGadget 1,313,114,0,16,"TO"
 
-	workstart 1,300,57,0,12,"PRIVATE"
-	workstart 1,374,57,0,13,"NOKILL"
-	workstart 1,438,57,0,14,"NONE"
+	TextGadget 1,300,57,0,12,"PRIVATE"
+	TextGadget 1,374,57,0,13,"NOKILL"
+	TextGadget 1,438,57,0,14,"NONE"
 
 	ShapeGadget 1,6,20,0,15,1
 
 
-	localstat 1,79,56,490,146,$1042,"MESSAGE HEADER EDITOR",1,2,1
+	Window 1,79,56,490,146,$1042,"MESSAGE HEADER EDITOR",1,2,1
 	Gosub RepRefresh
 
 	repquit=0:nogo=0
@@ -735,8 +735,8 @@ Return
 	EndIf
 	tag$=GadgetPens(1,5)																;		 tag:
 
-	Free localstat 1
-	Use localstat 0
+	Free Window 1
+	Use Window 0
 
 Return
 
@@ -772,10 +772,10 @@ Return
 
 	PropGadget 2,650,21,160,1,16,221
 	SetVProp 2,1,0,BOD
-	workstart 2,650,9,0,2,"^"
-	workstart 2,650,242,0,3,"v"
+	TextGadget 2,650,9,0,2,"^"
+	TextGadget 2,650,242,0,3,"v"
 	SetString 2,1
-	localstat 2,0,0,672,256,$1808,"",1,2,2
+	Window 2,0,0,672,256,$1808,"",1,2,2
 	WColour 1,0
 
 	OL=L:WBox 0,12,649,256,0
@@ -843,8 +843,8 @@ Repeat
 
 Until ev=$200 OR SELquit=1
 
-Free localstat 2
-Use localstat 1
+Free Window 2
+Use Window 1
 Gosub RepRefresh
 
 For t=0 To CL+1
@@ -866,7 +866,7 @@ Return
 .ROT3
 
 	StringGadget 3,21,54,0,1,50,313:ButtonId 3,1,""
-	localstat 3,118,62,374,91,$1008,"ROT3",1,2,3
+	Window 3,118,62,374,91,$1008,"ROT3",1,2,3
 	WLocate 107,12:WJam 0:WColour 1,0
 	Print "Enter Optional Key"
 	ClearString 3,1
@@ -885,8 +885,8 @@ Return
 		End If
 	Until keyquit=1
 
-	Free localstat 3
-	Use localstat	1
+	Free Window 3
+	Use Window	1
 	Gosub RepRefresh
 
 Return

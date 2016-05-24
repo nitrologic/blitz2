@@ -58,7 +58,7 @@ Gosub initloader
 
 SetInt 5
 	ShowBitMap db
-	db=1-db:Use lmaxlen db
+	db=1-db:Use BitMap db
 	NextFrame 0
 	PlayMed
 End SetInt
@@ -102,14 +102,14 @@ Gosub initopdots
 Gosub freeloader
 If Processor=0 Then Gosub initsincos
 
-lmaxlen 0,480,500,3
-lmaxlen 1,480,500,3
+BitMap 0,480,500,3
+BitMap 1,480,500,3
 BitPlanesBitMap 0,2,$01:BitPlanesBitMap 1,3,$01
 BitPlanesBitMap 0,4,$02:BitPlanesBitMap 1,5,$02
 BitPlanesBitMap 0,6,$04:BitPlanesBitMap 1,7,$04
 BitPlanesBitMap 0,8,$03:BitPlanesBitMap 1,9,$03
-lmaxlen 10,256,272,3
-lmaxlen 11,256,272,3
+BitMap 10,256,272,3
+BitMap 11,256,272,3
 BitPlanesBitMap 10,12,$01:BitPlanesBitMap 11,13,$01
 BitPlanesBitMap 10,14,$02:BitPlanesBitMap 11,15,$02
 BitPlanesBitMap 10,16,$04:BitPlanesBitMap 11,17,$04
@@ -133,7 +133,7 @@ InitCopList 1,46,250,$0036,8,32,-5
 DisplayAdjust 0,-8,16,-16,32,-48
 DisplayAdjust 1,-8,16,-16,32,-48:DisplayControls 1,4,0,0
 
-longmult 0,numstrs1+2:longmult 1,numstrs1+2
+Queue 0,numstrs1+2:Queue 1,numstrs1+2
 Buffer 0,576*numsmils:Buffer 1,576*numsmils
 ;////////////////////////////////////////////////////////////////;
 BLITZ:DisplayOff:Gosub initshapes:StartMedModule 1:BlitzKeys On
@@ -343,7 +343,7 @@ End Statement
 Statement initbitmps{xofst.w,yofst.w,btmap.w}
 	; draws white border lines
 	For bmp=0 To 1
-		Use lmaxlen btmap+bmp
+		Use BitMap btmap+bmp
 		BlitColl #bdshpnum,xofst,yofst
 		BlitColl #bdshpnum,xofst,yofst+248
 	Next
@@ -420,14 +420,14 @@ Gosub inittitle:ClrInt 5
 Repeat
 	VWait:cnt.w+1
 	DisplayBitMap 0,db,16,16,db,17,17
-	db=1-db:Use lmaxlen 2+db:UnQueue db
+	db=1-db:Use BitMap 2+db:UnQueue db
 	updatestrs1{ld1.l,spd.w}
-	##[$80CA] strs1()
-	newmem strs1()
-	While globfree(strs1())
+	USEPATH strs1()
+	ResetList strs1()
+	While NextItem(strs1())
 		If \fl Then QBlit db,#tishpnum+\sh,\sx,\sy
 	Wend
-	Use lmaxlen 4+db
+	Use BitMap 4+db
 	QBlit db,#t0txtnum+s.q,135,100
 	QBlit db,#t1txtnum+31-s.q,135,175
 	If cnt.w=400 Then spd.w+1:sv.q=0.6
@@ -440,7 +440,7 @@ Repeat
 Until cnt.w=815 OR Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplayOff
-Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
+Use BitMap 0:UnQueue 0:Use BitMap 1:UnQueue 1
 ;////////////////////////////////////////////////////////////////;
 os.b=Rnd(4):sy.w=36
 .options
@@ -455,7 +455,7 @@ Repeat
 	fy.q=110+sinlup1(tim)ASL4
 	bx.q=90+scrtch2(tim)
 	by.q=110+scrtch1(tim)
-	db=1-db:Use lmaxlen 4+db
+	db=1-db:Use BitMap 4+db
 	##[$B206] 16,0,288,290,64,95+scrtch3(tim),2+db
 	blx.w=fx.q AND $fff0
 	BlitColl #bdshpnum,blx.w,fy.q
@@ -510,7 +510,7 @@ Repeat
 
 	fx.q=120+scrtch3(tim):fy.q=125+scrtch2(tim)
 	bx.q=120+scrtch2(tim):by.q=125+scrtch1(tim)
-	db=1-db:Use lmaxlen 4+db:UnQueue db
+	db=1-db:Use BitMap 4+db:UnQueue db
 	QBlit db,#bdshpnum,fx.q,fy.q
 	QBlit db,#bdshpnum,fx.q,fy.q+248
 	If txt=False AND act=True
@@ -527,7 +527,7 @@ Repeat
 	QBlit db,#prtxtnum+1,fx.q+tx2.w,fy.q+ty2.w
 	QBlit db,#prtxtnum+2,fx.q+tx3.w,fy.q+ty3.w
 	QBlit db,#prtxtnum+3,fx.q+tx4.w,fy.q+ty4.w
-	Use lmaxlen 2+db:UnBuffer db
+	Use BitMap 2+db:UnBuffer db
 	For n=0 To numsmils-1
 		smlup.w=tim.w+n LSL3
 		smilx.w=fx.q+120+scrtch2(smlup)ASL1
@@ -544,8 +544,8 @@ Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 0,#blsprnum,0,-50,2
 DisplayOff
-Use lmaxlen 0:UnQueue 0:UnBuffer 0
-Use lmaxlen 1:UnQueue 1:UnBuffer 1
+Use BitMap 0:UnQueue 0:UnBuffer 0
+Use BitMap 1:UnQueue 1:UnBuffer 1
 Goto options
 ;////////////////////////////////////////////////////////////////;
 .option2
@@ -578,23 +578,23 @@ Repeat
 		EndIf
 	EndIf
 
-	db=1-db:Use lmaxlen 12+db
-	qcls2{Peek.l(Addr lmaxlen(12+db)+8)}
-	qcls2{Peek.l(Addr lmaxlen(14+db)+8)}
-	qcls2{Peek.l(Addr lmaxlen(16+db)+8)}
+	db=1-db:Use BitMap 12+db
+	qcls2{Peek.l(Addr BitMap(12+db)+8)}
+	qcls2{Peek.l(Addr BitMap(14+db)+8)}
+	qcls2{Peek.l(Addr BitMap(16+db)+8)}
 
 	xof.w=120+scrtch1(tim):yof.w=68+scrtch2(tim)
 	ran.w=Int(Rnd(10))
 	updatelins1{ld2.l,xof.w,yof.w,gap.w,12+ran.w}
-	##[$80CA] lins1()
-	newmem lins1()
-	While globfree(lins1())
+	USEPATH lins1()
+	ResetList lins1()
+	While NextItem(lins1())
 		Line \x,\y,\sx,\sy,1
 	Wend
 	xx1.w=xof-32 AND $fff0:If xx1.w<24 Then xx1.w=24
 	yy1.w=yof-32
-	Use lmaxlen 14+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w-32,yy1.w,12+db
-	Use lmaxlen 16+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w+32,yy1.w,12+db
+	Use BitMap 14+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w-32,yy1.w,12+db
+	Use BitMap 16+db:##[$B206] xx1.w,yy1.w,80,66,xx1.w+32,yy1.w,12+db
 	If txt=True Then updateball1{&sprit,-ran.w}
 
 	PlayMed
@@ -634,13 +634,13 @@ Repeat
 			CustomSprites 1,&scrtch2(tim),&scrtch4(0),0
 	End Select
 
-	db=1-db:Use lmaxlen db:UnQueue db
+	db=1-db:Use BitMap db:UnQueue db
 	For n=0 To numbars1-1
 		QBlit db,#exshpnum,235+scrtch3(tim+n LSL2),0
 	Next
 
 	If txt=False AND act=True
-		Use lmaxlen 16
+		Use BitMap 16
 		If op3.b>0
 			##[$B206] 16,ylin.w,208,2,16,ylin.w,17
 			ylin.w+2:If ylin.w>258 Then txt=True
@@ -659,7 +659,7 @@ Until Joyb(1)<>0 OR RawStatus($44)
 SetInt 5:PlayMed:End SetInt
 DisplaySprite 1,#blsprnum,0,-50,2
 DisplayOff
-Use lmaxlen 0:UnQueue 0:Use lmaxlen 1:UnQueue 1
+Use BitMap 0:UnQueue 0:Use BitMap 1:UnQueue 1
 Goto options
 ;////////////////////////////////////////////////////////////////;
 .option4
@@ -685,13 +685,13 @@ Repeat
 	bx.q=8+scrtch1(tim):by.q=8+scrtch2(tim)
 
 	updatedots1{ld3,sc3,sc4,tim,gap}
-	db=1-db:Use lmaxlen 2+db:qcls1{Peek.l (Addr lmaxlen(2+db)+8)}
-	##[$80CA] dots1()
-	newmem dots1()
-	While globfree(dots1())
+	db=1-db:Use BitMap 2+db:qcls1{Peek.l (Addr BitMap(2+db)+8)}
+	USEPATH dots1()
+	ResetList dots1()
+	While NextItem(dots1())
 		If \fl
-			longdiv #dishpnum+sh,128+\x,133+\y
-			longdiv #dishpnum+sh,128-\x,133-\y
+			Blit #dishpnum+sh,128+\x,133+\y
+			Blit #dishpnum+sh,128-\x,133-\y
 		EndIf
 	Wend
 
@@ -699,7 +699,7 @@ Repeat
 		blv.b+1:bly.w-blv.b
 		If bly.w<26 Then bly.w=26:blv.b=-6-bnc.b:bnc.b-2
 		If bnc.b<-6 Then txt=True
-		Use lmaxlen 4+db
+		Use BitMap 4+db
 		If bly.w>30 Then blo.b=21 Else blo.b=13
 		BlitColl #dishpnum+6,16,bly.w-blo.b
 		BlitColl #ditxtnum,16,bly.w
@@ -724,7 +724,7 @@ End
 .INITROUTINES
 ;////////////////////////////////////////////////////////////////;
 .inittitle
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll
 	initbitmps{0,16,4}
 
 	spd.w=67:sv.q=0.5:cnt.w=0
@@ -745,13 +745,13 @@ End
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoptns
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
-	Use lmaxlen 2
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll
+	Use BitMap 2
 	For x.b=0 To 13:For y.b=0 To 13
 		BlitColl #opshpnum+os.b,x.b LSL 5,y.b LSL 5
 	Next:Next
 	os.b+1:If os.b>4 Then os.b=0
-	Use lmaxlen 3:##[$B206] 0,0,480,500,0,0,2
+	Use BitMap 3:##[$B206] 0,0,480,500,0,0,2
 
 	op0.b=1-op0.b
 	If op0.b>0
@@ -795,13 +795,13 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoptn1
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
-	Use lmaxlen 2
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll
+	Use BitMap 2
 	For n=220 To 0 Step -4
 		cl.b=1-cl.b
 		Circlef 240,250,n,cl.b
 	Next
-	Use lmaxlen 3:##[$B206] 0,0,480,500,0,0,2
+	Use BitMap 3:##[$B206] 0,0,480,500,0,0,2
 
 	op1.b=1-op1.b
 	If op1.b>0
@@ -873,8 +873,8 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoptn2
-	Use lmaxlen 0:BlockScroll:Boxf 0,0,480,1,1:Boxf 0,248,480,250,1
-	Use lmaxlen 10:BlockScroll:Use lmaxlen 11:BlockScroll
+	Use BitMap 0:BlockScroll:Boxf 0,0,480,1,1:Boxf 0,248,480,250,1
+	Use BitMap 10:BlockScroll:Use BitMap 11:BlockScroll
 
 	op2.b=1-op2.b
 	If op2.b>0
@@ -884,7 +884,7 @@ Return
 			scrtch2(n)=Int(sinlup1(n)*32)
 			scrtch3(n)=Int(coslup2(n)*32)
 		Next
-		fx.q=0:Use lmaxlen 6:longdiv #edtxtnum,240,17
+		fx.q=0:Use BitMap 6:Blit #edtxtnum,240,17
 	Else
 		ti.b=1
 		For n=0 To 720
@@ -892,7 +892,7 @@ Return
 			scrtch2(n)=Int(sinlup1(n)*32)
 			scrtch3(n)=Int(sinlup2(n)*32)
 		Next
-		fx.q=240:Use lmaxlen 6:longdiv #edtxtnum,0,17
+		fx.q=240:Use BitMap 6:Blit #edtxtnum,0,17
 	EndIf
 	tim.w=0:swt0=0:swt1=0:act=False:txt=False
 	pl.b=9+Int(Rnd(6)):rg.b=10:gap.w=10+Rnd(50)
@@ -923,8 +923,8 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoptn3
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
-	Use lmaxlen 10:BlockScroll:Use lmaxlen 11:BlockScroll
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll
+	Use BitMap 10:BlockScroll:Use BitMap 11:BlockScroll
 	initbitmps{0,8,12}
 
 	op3.b=1-op3.b
@@ -945,7 +945,7 @@ Return
 			scrtch4(n)=-34
 		Next
 	EndIf
-	Use lmaxlen 17:longdiv #extxtnum,16,25
+	Use BitMap 17:Blit #extxtnum,16,25
 	tim.w=0:cnt.w=0:swt0=0:swt1=0:act=False:txt=False
 
 	StopCycle 0,1,11,11,12
@@ -971,7 +971,7 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoptn4
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll
 	initbitmps{8,8,4}
 
 	op4.b=1-op4.b
@@ -1021,18 +1021,18 @@ Return
 .OUTSIDE_LOOP
 ;////////////////////////////////////////////////////////////////;
 .initshapes
-	Use lmaxlen 8:BlockScroll 1
+	Use BitMap 8:BlockScroll 1
 	GetaShape #bdsprnum,0,0,16,250
 	GetaSprite 0,0
-	Use lmaxlen 2:BlockScroll 1
+	Use BitMap 2:BlockScroll 1
 	GetaShape #bdshpnum,0,0,256,2
-	Use lmaxlen 0:BlockScroll
+	Use BitMap 0:BlockScroll
 	Point 0,0,1:Point 1,0,2:Point 2,0,3
 	Point 3,0,4:Point 4,0,5:Point 5,0,6
 	Point 6,0,7:Point 7,0,6:Point 8,0,5
 	Point 9,0,4:Point 10,0,3:Point 11,0,2:Point 12,0,1
 	GetaShape #exshpnum,0,0,12,1:BlockScroll
-	Use lmaxlen 2:BlockScroll 1
+	Use BitMap 2:BlockScroll 1
 	GetaShape #dishpnum+0,0,0,1,1
 	GetaShape #dishpnum+1,0,0,2,2
 	GetaShape #dishpnum+2,0,0,3,3
@@ -1042,10 +1042,10 @@ Return
 	##[$CD10] #dishpnum+6,224,21,1
 	##[$CD10] #dishpnum+7,224,39,1
 	For n=#dishpnum To #dishpnum+5:DecodeShapes n:Next
-	Use lmaxlen 2:BlockScroll 1
+	Use BitMap 2:BlockScroll 1
 	Boxf 6,6,28,28,0
 	GetaShape #opshpnum+4,0,0,32,32
-	Use lmaxlen 0:BlockScroll
+	Use BitMap 0:BlockScroll
 Return
 ;////////////////////////////////////////////////////////////////;
 AMIGA
@@ -1053,8 +1053,8 @@ AMIGA
 	LoadAnim 0,"gfx/yyloading.animat",0
 	LoadMedModule 0,"sfx/cheesy_organ_tune.med":StartMedModule 0
 	DecodePalette 1,4:##[$CE19] 0,1
-	allocst 0,0,0,320,200,2,$0000,"",0,0:FadePalette 0
-	lmaxlen 0,320,200,2:lmaxlen 1,320,200,2
+	Screen 0,0,0,320,200,2,$0000,"",0,0:FadePalette 0
+	BitMap 0,320,200,2:BitMap 1,320,200,2
 	InitAnim 0,0
 	AbsMouse 328,216
 Return
@@ -1068,8 +1068,8 @@ Return
 	Next
 	StopMed:ClrInt 5
 	Free MedModule 0:Free Anim 0
-	For n=0 To 1:Free lmaxlen n:Free SetCycle n:Next
-	Free allocst 0
+	For n=0 To 1:Free BitMap n:Free SetCycle n:Next
+	Free Screen 0
 Return
 ;////////////////////////////////////////////////////////////////;
 .initsincos
@@ -1086,8 +1086,8 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .inittistar
-	##[$80CA] strs1()
-	While globalloc(strs1())
+	USEPATH strs1()
+	While AddItem(strs1())
 		\x=(Rnd(272)-136)*64
 		\y=(Rnd(282)-141)*64
 		\sx=136:\sy=142
@@ -1098,16 +1098,16 @@ Return
 Return
 ;////////////////////////////////////////////////////////////////;
 .initoplins
-	##[$80CA] lins1()
-	While globalloc(lins1())
+	USEPATH lins1()
+	While AddItem(lins1())
 		\x=0,0,0,0,0,0,0,0
 	Wend
 Return
 ;////////////////////////////////////////////////////////////////;
 .initopdots
 	n=0:tp.w=0
-	##[$80CA] dots1()
-	While globalloc(dots1())
+	USEPATH dots1()
+	While AddItem(dots1())
 		If n>=(numdots1/6)*1 Then tp.w=1 Else tp.w=0
 		If n>=(numdots1/6)*2 Then tp.w=2
 		If n>=(numdots1/6)*3 Then tp.w=3

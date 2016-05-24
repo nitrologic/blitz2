@@ -3,12 +3,12 @@
 ; two 16 color playfield in dualplayfield mode
 ;
 
-lmaxlen 0,640,512,4
-lmaxlen 1,640,512,4
+BitMap 0,640,512,4
+BitMap 1,640,512,4
 
 For i=0 To 100
-	Use lmaxlen 0:Box Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
-	Use lmaxlen 1:Line Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
+	Use BitMap 0:Box Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
+	Use BitMap 1:Line Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
 Next
 
 DecodePalette 0,32

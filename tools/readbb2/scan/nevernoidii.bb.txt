@@ -3,9 +3,9 @@
 ; Copyright 1987-1994
 ; A.A. van de Woestijne & R.H. Keizer
 
-##[$80CC] : ##[$80CB] : WBStartup
+NoCli : CloseEd : WBStartup
 
-lmaxlen 2,320,256,3
+BitMap 2,320,256,3
 Buffer 0,8192 : Buffer 1,8192
 drive$="sys:"
 lvlbnk.b=1 : level$="Bank" : load.b=1
@@ -21,7 +21,7 @@ Gosub GameIntro
 Goto GameStart
 
 .GameIntro
-lmaxlen 3,320,256,5 : lmaxlen 4,320,256,5
+BitMap 3,320,256,5 : BitMap 4,320,256,5
 SetMedVolume 64
 StartMedModule 0
 QAMIGA
@@ -43,7 +43,7 @@ VWait 100
 BLITZ
 FreeSlices
 Slice 0,44,5
-Use SetCycle 3 : Use lmaxlen 3
+Use SetCycle 3 : Use BitMap 3
 Show 3
 SetMedVolume 64
 StartMedModule 1
@@ -187,14 +187,14 @@ Show 2
 StartMedModule 0
 SetMedVolume 64
 Free DecodeMedModule 1
-Free lmaxlen 3
-Free lmaxlen 4
+Free BitMap 3
+Free BitMap 4
 QAMIGA
 SetInt 5
 	PlayMed
 End SetInt
 LoadShapes 0,drive$+"graphics/NeverShapes"
-lmaxlen 0,320,256,4 : lmaxlen 1,320,256,4
+BitMap 0,320,256,4 : BitMap 1,320,256,4
 LoadBitMap 0,drive$+"graphics/GameScreen",1
 LoadMedModule 1,drive$+"audio/Song nr.3"
 Gosub LoadLevel
@@ -209,7 +209,7 @@ VWait 100
 BLITZ
 DisplayOff
 FreeSlices : Slice 0,44,4
-Use SetCycle 1 : Use lmaxlen 1 : Show 1
+Use SetCycle 1 : Use BitMap 1 : Show 1
 GetaShape 227,60,160,42,9
 Gosub InitGame
 Gosub InitAfterDie
@@ -269,7 +269,7 @@ FreeSlices
 Slice 0,44,3
 Use SetCycle 2
 Show 2
-Free lmaxlen 0 : Free lmaxlen 1
+Free BitMap 0 : Free BitMap 1
 Free DecodeMedModule 1
 For ts =0 To 284
 	Free MidHandle ts
@@ -947,7 +947,7 @@ VWait
 tilth-1 : tiltv-1 : If tilth<0 Then tilth=0 : tiltv=0
 Show db,-tilth,-tiltv
 db=1-db
-Use lmaxlen db
+Use BitMap db
 UnBuffer db
 
 If extrablitscnd Then Gosub ExtraGoneScnd
@@ -956,19 +956,19 @@ If extra(toc)\time<0 Then If extra(toc)\lr>0 Then Gosub ExtraGone
 toc+1 : If toc>9 Then toc=0
 
 If jaapscnd
-	longdiv 229+score1scnd,33,12
-	longdiv 229+score10scnd,27,12
-	longdiv 229+score100scnd,21,12
-	longdiv 229+score1000scnd,15,12
-	longdiv 229+score10000scnd,9,12
-	longdiv 229+score100000scnd,3,12
+	Blit 229+score1scnd,33,12
+	Blit 229+score10scnd,27,12
+	Blit 229+score100scnd,21,12
+	Blit 229+score1000scnd,15,12
+	Blit 229+score10000scnd,9,12
+	Blit 229+score100000scnd,3,12
 	If scorepl1>hiscore.l
-		longdiv 229+score1scnd,200,248
-		longdiv 229+score10scnd,194,248
-		longdiv 229+score100scnd,188,248
-		longdiv 229+score1000scnd,182,248
-		longdiv 229+score10000scnd,176,248
-		longdiv 229+score100000scnd,170,248
+		Blit 229+score1scnd,200,248
+		Blit 229+score10scnd,194,248
+		Blit 229+score100scnd,188,248
+		Blit 229+score1000scnd,182,248
+		Blit 229+score10000scnd,176,248
+		Blit 229+score100000scnd,170,248
 		hiscore=scorepl1
 	EndIf
 	sc1p1scnd=0 : sc2p1scnd=0 : scbp1scnd=0
@@ -1019,19 +1019,19 @@ If jaap
 			EndIf
 		EndIf
 	EndIf
-	longdiv 229+score1,33,12
-	longdiv 229+score10,27,12
-	longdiv 229+score100,21,12
-	longdiv 229+score1000,15,12
-	longdiv 229+score10000,9,12
-	longdiv 229+score100000,3,12
+	Blit 229+score1,33,12
+	Blit 229+score10,27,12
+	Blit 229+score100,21,12
+	Blit 229+score1000,15,12
+	Blit 229+score10000,9,12
+	Blit 229+score100000,3,12
 	If scorepl1>hiscore
-		longdiv 229+score1,200,248
-		longdiv 229+score10,194,248
-		longdiv 229+score100,188,248
-		longdiv 229+score1000,182,248
-		longdiv 229+score10000,176,248
-		longdiv 229+score100000,170,248
+		Blit 229+score1,200,248
+		Blit 229+score10,194,248
+		Blit 229+score100,188,248
+		Blit 229+score1000,182,248
+		Blit 229+score10000,176,248
+		Blit 229+score100000,170,248
 	EndIf
 	sc1p1=0 : sc2p1=0 : scbp1=0
 	sc1p2=0 : sc2p2=0 : scbp2=0
@@ -1044,19 +1044,19 @@ If jaap
 EndIf
 
 If jaapscnd2
-	longdiv 229+score1scnd2,310,12
-	longdiv 229+score10scnd2,304,12
-	longdiv 229+score100scnd2,298,12
-	longdiv 229+score1000scnd2,292,12
-	longdiv 229+score10000scnd2,286,12
-	longdiv 229+score100000scnd2,280,12
+	Blit 229+score1scnd2,310,12
+	Blit 229+score10scnd2,304,12
+	Blit 229+score100scnd2,298,12
+	Blit 229+score1000scnd2,292,12
+	Blit 229+score10000scnd2,286,12
+	Blit 229+score100000scnd2,280,12
 	If scorepl2>hiscore
-		longdiv 229+score1scnd2,200,248
-		longdiv 229+score10scnd2,194,248
-		longdiv 229+score100scnd2,188,248
-		longdiv 229+score1000scnd2,182,248
-		longdiv 229+score10000scnd2,176,248
-		longdiv 229+score100000scnd2,170,248
+		Blit 229+score1scnd2,200,248
+		Blit 229+score10scnd2,194,248
+		Blit 229+score100scnd2,188,248
+		Blit 229+score1000scnd2,182,248
+		Blit 229+score10000scnd2,176,248
+		Blit 229+score100000scnd2,170,248
 		hiscore=scorepl2
 	EndIf
 	sc1p1scnd2=0 : sc2p1scnd2=0 : scbp1scnd2=0
@@ -1103,19 +1103,19 @@ If twoplayers
 				EndIf
 			EndIf
 		EndIf
-		longdiv 229+score12,310,12
-		longdiv 229+score102,304,12
-		longdiv 229+score1002,298,12
-		longdiv 229+score10002,292,12
-		longdiv 229+score100002,286,12
-		longdiv 229+score1000002,280,12
+		Blit 229+score12,310,12
+		Blit 229+score102,304,12
+		Blit 229+score1002,298,12
+		Blit 229+score10002,292,12
+		Blit 229+score100002,286,12
+		Blit 229+score1000002,280,12
 		If scorepl2>hiscore
-			longdiv 229+score12,200,248
-			longdiv 229+score102,194,248
-			longdiv 229+score1002,188,248
-			longdiv 229+score10002,182,248
-			longdiv 229+score100002,176,248
-			longdiv 229+score1000002,170,248
+			Blit 229+score12,200,248
+			Blit 229+score102,194,248
+			Blit 229+score1002,188,248
+			Blit 229+score10002,182,248
+			Blit 229+score100002,176,248
+			Blit 229+score1000002,170,248
 		EndIf
 		sc1p2=0 : sc2p2=0 : scbp2=0
 		score1scnd2=score12
@@ -1133,24 +1133,24 @@ Select blitblock1scnd
 	blitblock1scnd=0
 	Case 1
 		If x1ascnd AND 1
-			longdiv info(lvl)\blocknr+1,x1a9scnd,y1a6scnd
-			longdiv info(lvl)\blocknr,x1a1scnd,y1a6scnd
+			Blit info(lvl)\blocknr+1,x1a9scnd,y1a6scnd
+			Blit info(lvl)\blocknr,x1a1scnd,y1a6scnd
 		Else
-			longdiv info(lvl)\blocknr,x1a9scnd,y1a6scnd
-			longdiv info(lvl)\blocknr+1,x1a1scnd,y1a6scnd
+			Blit info(lvl)\blocknr,x1a9scnd,y1a6scnd
+			Blit info(lvl)\blocknr+1,x1a1scnd,y1a6scnd
 		EndIf
 	Case 2
 		If x1ascnd AND 1
-			longdiv info(lvl)\blocknr,x1a8scnd,y1a6scnd
-			longdiv info(lvl)\blocknr+1,x1a9scnd,y1a6scnd
+			Blit info(lvl)\blocknr,x1a8scnd,y1a6scnd
+			Blit info(lvl)\blocknr+1,x1a9scnd,y1a6scnd
 		Else
-			longdiv info(lvl)\blocknr+1,x1a8scnd,y1a6scnd
-			longdiv info(lvl)\blocknr,x1a9scnd,y1a6scnd
+			Blit info(lvl)\blocknr+1,x1a8scnd,y1a6scnd
+			Blit info(lvl)\blocknr,x1a9scnd,y1a6scnd
 		EndIf
 	Case 4
-		longdiv work(x1ascnd,y1ascnd)\blocknr,x1a9scnd,y1a6scnd
+		Blit work(x1ascnd,y1ascnd)\blocknr,x1a9scnd,y1a6scnd
 	Case 5
-		longdiv work(x1ascnd,y1ascnd)\blocknr,x1a8scnd,y1a6scnd
+		Blit work(x1ascnd,y1ascnd)\blocknr,x1a8scnd,y1a6scnd
 End Select
 
 Select blitblock2scnd
@@ -1159,24 +1159,24 @@ Select blitblock2scnd
 	blitblock2scnd=0
 	Case 1
 		If x2ascnd AND 1
-			longdiv info(lvl)\blocknr+1,x2a9scnd,y2a6scnd
-			longdiv info(lvl)\blocknr,x2a1scnd,y2a6scnd
+			Blit info(lvl)\blocknr+1,x2a9scnd,y2a6scnd
+			Blit info(lvl)\blocknr,x2a1scnd,y2a6scnd
 		Else
-			longdiv info(lvl)\blocknr,x2a9scnd,y2a6scnd
-			longdiv info(lvl)\blocknr+1,x2a1scnd,y2a6scnd
+			Blit info(lvl)\blocknr,x2a9scnd,y2a6scnd
+			Blit info(lvl)\blocknr+1,x2a1scnd,y2a6scnd
 		EndIf
 	Case 2
 		If x2ascnd AND 1
-			longdiv info(lvl)\blocknr,x2a8scnd,y2a6scnd
-			longdiv info(lvl)\blocknr+1,x2a9scnd,y2a6scnd
+			Blit info(lvl)\blocknr,x2a8scnd,y2a6scnd
+			Blit info(lvl)\blocknr+1,x2a9scnd,y2a6scnd
 		Else
-			longdiv info(lvl)\blocknr+1,x2a8scnd,y2a6scnd
-			longdiv info(lvl)\blocknr,x2a9scnd,y2a6scnd
+			Blit info(lvl)\blocknr+1,x2a8scnd,y2a6scnd
+			Blit info(lvl)\blocknr,x2a9scnd,y2a6scnd
 		EndIf
 	Case 4
-		longdiv work(x2ascnd,y2ascnd)\blocknr,x2a9scnd,y2a6scnd
+		Blit work(x2ascnd,y2ascnd)\blocknr,x2a9scnd,y2a6scnd
 	Case 5
-		longdiv work(x2ascnd,y2ascnd)\blocknr,x2a8scnd,y2a6scnd
+		Blit work(x2ascnd,y2ascnd)\blocknr,x2a8scnd,y2a6scnd
 End Select
 
 Select bullblock1scnd
@@ -1185,24 +1185,24 @@ Select bullblock1scnd
 	bullblock1scnd=0
 	Case 1
 		If bx1ascnd AND 1
-			longdiv info(lvl)\blocknr+1,bx1a9scnd,by1a6scnd
-			longdiv info(lvl)\blocknr,bx1a1scnd,by1a6scnd
+			Blit info(lvl)\blocknr+1,bx1a9scnd,by1a6scnd
+			Blit info(lvl)\blocknr,bx1a1scnd,by1a6scnd
 		Else
-			longdiv info(lvl)\blocknr,bx1a9scnd,by1a6scnd
-			longdiv info(lvl)\blocknr+1,bx1a1scnd,by1a6scnd
+			Blit info(lvl)\blocknr,bx1a9scnd,by1a6scnd
+			Blit info(lvl)\blocknr+1,bx1a1scnd,by1a6scnd
 		EndIf
 	Case 2
 		If bx1ascnd AND 1
-			longdiv info(lvl)\blocknr,bx1a8scnd,by1a6scnd
-			longdiv info(lvl)\blocknr+1,bx1a9scnd,by1a6scnd
+			Blit info(lvl)\blocknr,bx1a8scnd,by1a6scnd
+			Blit info(lvl)\blocknr+1,bx1a9scnd,by1a6scnd
 		Else
-			longdiv info(lvl)\blocknr+1,bx1a8scnd,by1a6scnd
-			longdiv info(lvl)\blocknr,bx1a9scnd,by1a6scnd
+			Blit info(lvl)\blocknr+1,bx1a8scnd,by1a6scnd
+			Blit info(lvl)\blocknr,bx1a9scnd,by1a6scnd
 		EndIf
 	Case 4
-		longdiv work(bx1ascnd,by1ascnd)\blocknr,bx1a9scnd,by1a6scnd
+		Blit work(bx1ascnd,by1ascnd)\blocknr,bx1a9scnd,by1a6scnd
 	Case 5
-		longdiv work(bx1ascnd,by1ascnd)\blocknr,bx1a8scnd,by1a6scnd
+		Blit work(bx1ascnd,by1ascnd)\blocknr,bx1a8scnd,by1a6scnd
 End Select
 
 Select blitblock1
@@ -1212,27 +1212,27 @@ Select blitblock1
 	Case 1
 		blitblock1scnd=1
 		If x1a AND 1
-			longdiv info(lvl)\blocknr+1,x1a9,y1a6
-			longdiv info(lvl)\blocknr,x1a1,y1a6
+			Blit info(lvl)\blocknr+1,x1a9,y1a6
+			Blit info(lvl)\blocknr,x1a1,y1a6
 		Else
-			longdiv info(lvl)\blocknr,x1a9,y1a6
-			longdiv info(lvl)\blocknr+1,x1a1,y1a6
+			Blit info(lvl)\blocknr,x1a9,y1a6
+			Blit info(lvl)\blocknr+1,x1a1,y1a6
 		EndIf
 	Case 2
 		blitblock1scnd=2
 		If x1a AND 1
-			longdiv info(lvl)\blocknr,x1a8,y1a6
-			longdiv info(lvl)\blocknr+1,x1a9,y1a6
+			Blit info(lvl)\blocknr,x1a8,y1a6
+			Blit info(lvl)\blocknr+1,x1a9,y1a6
 		Else
-			longdiv info(lvl)\blocknr+1,x1a8,y1a6
-			longdiv info(lvl)\blocknr,x1a9,y1a6
+			Blit info(lvl)\blocknr+1,x1a8,y1a6
+			Blit info(lvl)\blocknr,x1a9,y1a6
 		EndIf
 	Case 4
 		blitblock1scnd=4
-		longdiv work(x1a,y1a)\blocknr,x1a9,y1a6
+		Blit work(x1a,y1a)\blocknr,x1a9,y1a6
 	Case 5
 		blitblock1scnd=5
-		longdiv work(x1a,y1a)\blocknr,x1a8,y1a6
+		Blit work(x1a,y1a)\blocknr,x1a8,y1a6
 End Select
 
 Select blitblock2
@@ -1243,27 +1243,27 @@ Select blitblock2
 		blitblock2scnd=1
 		If x2a AND 1
 			blitblock2scnd=1
-			longdiv info(lvl)\blocknr+1,x2a9,y2a6
-			longdiv info(lvl)\blocknr,x2a1,y2a6
+			Blit info(lvl)\blocknr+1,x2a9,y2a6
+			Blit info(lvl)\blocknr,x2a1,y2a6
 		Else
-			longdiv info(lvl)\blocknr,x2a9,y2a6
-			longdiv info(lvl)\blocknr+1,x2a1,y2a6
+			Blit info(lvl)\blocknr,x2a9,y2a6
+			Blit info(lvl)\blocknr+1,x2a1,y2a6
 		EndIf
 	Case 2
 		blitblock2scnd=2
 		If x2a AND 1
-			longdiv info(lvl)\blocknr,x2a8,y2a6
-			longdiv info(lvl)\blocknr+1,x2a9,y2a6
+			Blit info(lvl)\blocknr,x2a8,y2a6
+			Blit info(lvl)\blocknr+1,x2a9,y2a6
 		Else
-			longdiv info(lvl)\blocknr+1,x2a8,y2a6
-			longdiv info(lvl)\blocknr,x2a9,y2a6
+			Blit info(lvl)\blocknr+1,x2a8,y2a6
+			Blit info(lvl)\blocknr,x2a9,y2a6
 		EndIf
 	Case 4
 		blitblock2scnd=4
-		longdiv work(x2a,y2a)\blocknr,x2a9,y2a6
+		Blit work(x2a,y2a)\blocknr,x2a9,y2a6
 	Case 5
 		blitblock2scnd=5
-		longdiv work(x2a,y2a)\blocknr,x2a8,y2a6
+		Blit work(x2a,y2a)\blocknr,x2a8,y2a6
 End Select
 
 Select bullblock1
@@ -1273,27 +1273,27 @@ Select bullblock1
 	Case 1
 		bullblock1scnd=1
 		If bx1a AND 1
-			longdiv info(lvl)\blocknr+1,bx1a9,by1a6
-			longdiv info(lvl)\blocknr,bx1a1,by1a6
+			Blit info(lvl)\blocknr+1,bx1a9,by1a6
+			Blit info(lvl)\blocknr,bx1a1,by1a6
 		Else
-			longdiv info(lvl)\blocknr,bx1a9,by1a6
-			longdiv info(lvl)\blocknr+1,bx1a1,by1a6
+			Blit info(lvl)\blocknr,bx1a9,by1a6
+			Blit info(lvl)\blocknr+1,bx1a1,by1a6
 		EndIf
 	Case 2
 		bullblock1scnd=2
 		If bx1a AND 1
-			longdiv info(lvl)\blocknr,bx1a8,by1a6
-			longdiv info(lvl)\blocknr+1,bx1a9,by1a6
+			Blit info(lvl)\blocknr,bx1a8,by1a6
+			Blit info(lvl)\blocknr+1,bx1a9,by1a6
 		Else
-			longdiv info(lvl)\blocknr+1,bx1a8,by1a6
-			longdiv info(lvl)\blocknr,bx1a9,by1a6
+			Blit info(lvl)\blocknr+1,bx1a8,by1a6
+			Blit info(lvl)\blocknr,bx1a9,by1a6
 		EndIf
 	Case 4
 		bullblock1scnd=4
-		longdiv work(bx1a,by1a)\blocknr,bx1a9,by1a6
+		Blit work(bx1a,by1a)\blocknr,bx1a9,by1a6
 	Case 5
 		bullblock1scnd=5
-		longdiv work(bx1a,by1a)\blocknr,bx1a8,by1a6
+		Blit work(bx1a,by1a)\blocknr,bx1a8,by1a6
 End Select
 
 If bomb
@@ -1310,10 +1310,10 @@ If movewait
 	movewait+1
 	If movewait>26 Then movewait=0 : normalbatsx=bombsp
 EndIf
-If wallchanget Then wallchanget-1 : longdiv 272-wallt,158,17
-If wallchangeb Then wallchangeb-1 : longdiv 272-wallb,159,242
-If wallchangel Then wallchangel-1 : longdiv 278-walll,46,130
-If wallchanger Then wallchanger-1 : longdiv 278-wallr,271,129
+If wallchanget Then wallchanget-1 : Blit 272-wallt,158,17
+If wallchangeb Then wallchangeb-1 : Blit 272-wallb,159,242
+If wallchangel Then wallchangel-1 : Blit 278-walll,46,130
+If wallchanger Then wallchanger-1 : Blit 278-wallr,271,129
 If ball1
 	If flash=0
 		BBlit db,ball,ball1x+5,ball1y+6
@@ -1397,12 +1397,12 @@ End Select
 Return
 
 .GameOver
-Use lmaxlen 0
+Use BitMap 0
 UnBuffer 0
 Show 0
-longdiv 240,0,78
-longdiv 284,278,78
-longdiv 328,160,115
+Blit 240,0,78
+Blit 284,278,78
+Blit 328,160,115
 ledie1=0 : Edie1=0 : animlengtht=0 : animlengthb=0 : animlengthl=0
 animlengthr=0 : animlength2=0 : batpos2=0
 batpos(0)=0 : batpos(1)=0 : batpos(2)=0 : batpos(3)=0
@@ -1531,12 +1531,12 @@ Return
 .BlitTime
 If timeblit.b
 	timeblit-1
-	longdiv 229+minpl1l,11,68
-	longdiv 229+secpl1h,20,68
-	longdiv 229+secpl1l,27,68
-	longdiv 229+minpl1l,293,68
-	longdiv 229+secpl1h,302,68
-	longdiv 229+secpl1l,309,68
+	Blit 229+minpl1l,11,68
+	Blit 229+secpl1h,20,68
+	Blit 229+secpl1l,27,68
+	Blit 229+minpl1l,293,68
+	Blit 229+secpl1h,302,68
+	Blit 229+secpl1l,309,68
 EndIf
 timewait.b+1
 If timewait>50
@@ -1585,22 +1585,22 @@ If livespl1<0
 		twoplayers=0 : livespl1=livespl2
 		muur=0
 		Exchange scorepl1,scorepl2
-		Use lmaxlen 1-db
-		longdiv 284,278,78
-		longdiv 229+score1,310,12
-		longdiv 229+score10,304,12
-		longdiv 229+score100,298,12
-		longdiv 229+score1000,292,12
-		longdiv 229+score10000,286,12
-		longdiv 229+score100000,280,12
-		Use lmaxlen db
-		longdiv 284,278,78
-		longdiv 229+score1,310,12
-		longdiv 229+score10,304,12
-		longdiv 229+score100,298,12
-		longdiv 229+score1000,292,12
-		longdiv 229+score10000,286,12
-		longdiv 229+score100000,280,12
+		Use BitMap 1-db
+		Blit 284,278,78
+		Blit 229+score1,310,12
+		Blit 229+score10,304,12
+		Blit 229+score100,298,12
+		Blit 229+score1000,292,12
+		Blit 229+score10000,286,12
+		Blit 229+score100000,280,12
+		Use BitMap db
+		Blit 284,278,78
+		Blit 229+score1,310,12
+		Blit 229+score10,304,12
+		Blit 229+score100,298,12
+		Blit 229+score1000,292,12
+		Blit 229+score10000,286,12
+		Blit 229+score100000,280,12
 		score1=score12
 		score10=score102
 		score100=score1002
@@ -1613,36 +1613,36 @@ If livespl1<0
 	EndIf
 EndIf
 If livespl1<7
-	Use lmaxlen 1-db
-	longdiv 240,0,78
+	Use BitMap 1-db
+	Blit 240,0,78
 	For l.b=1 To livespl1
-		longdiv 228,(l*5),82
+		Blit 228,(l*5),82
 	Next l
-	Use lmaxlen db
-	longdiv 240,0,78
+	Use BitMap db
+	Blit 240,0,78
 	For l=1 To livespl1
-		longdiv 228,(l*5),82
+		Blit 228,(l*5),82
 	Next l
 Else
-	Use lmaxlen 1-db : longdiv 239,34,82
-	Use lmaxlen db : longdiv 239,34,82
+	Use BitMap 1-db : Blit 239,34,82
+	Use BitMap db : Blit 239,34,82
 EndIf
 If twoplayers
 	If livespl2<0 Then twoplayers=0 : sc1p1=50
 	If livespl2<7
-		Use lmaxlen 1-db
-		longdiv 284,278,78
+		Use BitMap 1-db
+		Blit 284,278,78
 		For l=1 To livespl2
-			longdiv 228,(l*5)+280,82
+			Blit 228,(l*5)+280,82
 		Next l
-		Use lmaxlen db
-		longdiv 284,278,78
+		Use BitMap db
+		Blit 284,278,78
 		For l=1 To livespl2
-			longdiv 228,(l*5)+280,82
+			Blit 228,(l*5)+280,82
 		Next l
 	Else
-		Use lmaxlen 1-db : longdiv 239,34+280,82
-		Use lmaxlen db : longdiv 239,34+280,82
+		Use BitMap 1-db : Blit 239,34+280,82
+		Use BitMap db : Blit 239,34+280,82
 	EndIf
 EndIf
 Return
@@ -2971,22 +2971,22 @@ If extra(toc)\lr=1
 	tocx1scnd=tocx1
 	extrablitscnd=1
 	If tocx AND 1
-		longdiv info(lvl)\blocknr+1,tocx9,tocy6
-		longdiv info(lvl)\blocknr,tocx1,tocy6
+		Blit info(lvl)\blocknr+1,tocx9,tocy6
+		Blit info(lvl)\blocknr,tocx1,tocy6
 	Else
-		longdiv info(lvl)\blocknr,tocx9,tocy6
-		longdiv info(lvl)\blocknr+1,tocx1,tocy6
+		Blit info(lvl)\blocknr,tocx9,tocy6
+		Blit info(lvl)\blocknr+1,tocx1,tocy6
 	EndIf
 Else
 	tocx8=tocx ASL 3+87
 	tocx8scnd=tocx8
 	extrablitscnd=1
 	If tocx AND 1
-		longdiv info(lvl)\blocknr,tocx8,tocy6
-		longdiv info(lvl)\blocknr+1,tocx9,tocy6
+		Blit info(lvl)\blocknr,tocx8,tocy6
+		Blit info(lvl)\blocknr+1,tocx9,tocy6
 	Else
-		longdiv info(lvl)\blocknr+1,tocx8,tocy6
-		longdiv info(lvl)\blocknr,tocx9,tocy6
+		Blit info(lvl)\blocknr+1,tocx8,tocy6
+		Blit info(lvl)\blocknr,tocx9,tocy6
 	EndIf
 EndIf
 Return
@@ -2996,21 +2996,21 @@ If extra(tocscnd)\lr=1
 		work(tocxscnd,tocyscnd)\blocknr=0,0,0,0,0
 		work(tocxscnd+1,tocyscnd)\blocknr=0,0,0,0,0
 	If tocxscnd AND 1
-		longdiv info(lvl)\blocknr+1,tocx9scnd,tocy6scnd
-		longdiv info(lvl)\blocknr,tocx1scnd,tocy6scnd
+		Blit info(lvl)\blocknr+1,tocx9scnd,tocy6scnd
+		Blit info(lvl)\blocknr,tocx1scnd,tocy6scnd
 	Else
-		longdiv info(lvl)\blocknr,tocx9scnd,tocy6scnd
-		longdiv info(lvl)\blocknr+1,tocx1scnd,tocy6scnd
+		Blit info(lvl)\blocknr,tocx9scnd,tocy6scnd
+		Blit info(lvl)\blocknr+1,tocx1scnd,tocy6scnd
 	EndIf
 Else
 	work(tocxscnd,tocyscnd)\blocknr=0,0,0,0,0
 	work(tocxscnd-1,tocyscnd)\blocknr=0,0,0,0,0
 	If tocxscnd AND 1
-		longdiv info(lvl)\blocknr,tocx8scnd,tocy6scnd
-		longdiv info(lvl)\blocknr+1,tocx9scnd,tocy6scnd
+		Blit info(lvl)\blocknr,tocx8scnd,tocy6scnd
+		Blit info(lvl)\blocknr+1,tocx9scnd,tocy6scnd
 	Else
-		longdiv info(lvl)\blocknr+1,tocx8scnd,tocy6scnd
-		longdiv info(lvl)\blocknr,tocx9scnd,tocy6scnd
+		Blit info(lvl)\blocknr+1,tocx8scnd,tocy6scnd
+		Blit info(lvl)\blocknr,tocx9scnd,tocy6scnd
 	EndIf
 EndIf
 extrablitscnd=0
@@ -3037,7 +3037,7 @@ Next yz
 VWait
 UnBuffer 0
 Show 1
-Use lmaxlen 0
+Use BitMap 0
 
 ; PartyLevel!
 If info(lvl)\hits=0
@@ -3061,8 +3061,8 @@ EndIf
 bakblok=info(lvl)\blocknr
 For x=47 To 255 Step 16
 	For y=18 To 241 Step 8
-		longdiv bakblok,x,y
-		longdiv bakblok+1,x+8,y
+		Blit bakblok,x,y
+		Blit bakblok+1,x+8,y
 	Next y
 Next x
 
@@ -3070,7 +3070,7 @@ xz=0 : yz=0
 For yzs=66 To 186 Step 8
 	For xzs=95 To 215 Step 8
 		If work(xz,yz)\lr=1
-			longdiv work(xz,yz)\blocknr,xzs,yzs
+			Blit work(xz,yz)\blocknr,xzs,yzs
 			xz+1 : xzs+8
 		EndIf
 		xz+1
@@ -3078,17 +3078,17 @@ For yzs=66 To 186 Step 8
 	xz=0 : yz+1
 Next yzs
 
-longdiv 222,47,18
-longdiv 223,214,18
-longdiv 224,214,185
-longdiv 225,47,185
+Blit 222,47,18
+Blit 223,214,18
+Blit 224,214,185
+Blit 225,47,185
 
 lvlpl1h=Int((lvl+1)/10)
 lvlpl1l=(lvl+1)-(10*lvlpl1h)
-longdiv 229+lvlpl1h,18,40
-longdiv 229+lvlpl1l,24,40
-longdiv 229+lvlpl1h,296,40
-longdiv 229+lvlpl1l,302,40
+Blit 229+lvlpl1h,18,40
+Blit 229+lvlpl1l,24,40
+Blit 229+lvlpl1h,296,40
+Blit 229+lvlpl1l,302,40
 If info(lvl)\points=0 Then info(lvl)\points=12
 timepl1=info(lvl)\points
 minpl1l=Int((timepl1/6))
@@ -3097,13 +3097,13 @@ minpl1h=0
 secpl1l=0
 
 wallt=5 : wallb=5 : walll=5 : wallr=5
-longdiv 267,158,17
-longdiv 267,159,242
-longdiv 273,46,130
-longdiv 273,271,129
+Blit 267,158,17
+Blit 267,159,242
+Blit 273,46,130
+Blit 273,271,129
 
-longdiv 282,10,141
-longdiv 282,287,141
+Blit 282,10,141
+Blit 282,287,141
 
 VWait
 Show 0
@@ -3155,10 +3155,10 @@ waitED1=bob(0)\count								;delay between two frames
 If dooropen=1
 	If waitED1=0
 		If led1<bob(0)\length					 ;last frame?
-			Use lmaxlen 1-db
-			longdiv image(0,led1),66,15
-			Use lmaxlen db
-			longdiv image(0,led1),66,15
+			Use BitMap 1-db
+			Blit image(0,led1),66,15
+			Use BitMap db
+			Blit image(0,led1),66,15
 			led1+1 : bob(0)\count=bob(0)\delay
 		Else
 			dooropen=0 : enemyout=1 : n=Int(Rnd(11))+2
@@ -3176,12 +3176,12 @@ If extrawait>60
 	If doorclose=1
 		If waitED1=0
 			If led2<bob(1)\length
-				Use lmaxlen 1-db
-				longdiv image(1,led2),66,15
-				longdiv 272-wallt,158,17
-				Use lmaxlen db
-				longdiv image(1,led2),66,15
-				longdiv 272-wallt,158,17
+				Use BitMap 1-db
+				Blit image(1,led2),66,15
+				Blit 272-wallt,158,17
+				Use BitMap db
+				Blit image(1,led2),66,15
+				Blit 272-wallt,158,17
 				led2+1 : bob(1)\count=bob(1)\delay
 			Else
 				doorclose=0 : led2=0
@@ -3464,10 +3464,10 @@ Statement BlitChar{char$,xc.w,yc.w,shadow.b}
 	If char<>-1
 		If shadow
 			BlitMode EraseMode
-			longdiv char,xc+3,yc+2
+			Blit char,xc+3,yc+2
 		EndIf
 		BlitMode CookieMode
-		longdiv char,xc,yc
+		Blit char,xc,yc
 	EndIf
 End Statement
 
@@ -3500,11 +3500,11 @@ Statement BlitText{text$,xt.w,yt.w,shadow.b}
 End Statement
 
 .HiscoreList
-lmaxlen 3,320,256,3 : ShapesBitMap 2,3
+BitMap 3,320,256,3 : ShapesBitMap 2,3
 DisplayOff
 FreeSlices
 Slice 0,44,3
-Use SetCycle 2 : Use lmaxlen 3
+Use SetCycle 2 : Use BitMap 3
 Boxf 110,188,319,255,0
 For cl.b=1 To 15
 	ColSplit 1,cl,cl,10,(cl-1)*11+20
@@ -3578,7 +3578,7 @@ Repeat
 time+1
 Until Joyb(0) OR Joyb(1) OR RawStatus(69) OR time=250
 Show 2
-Free lmaxlen 0 : Free lmaxlen 1 : Free lmaxlen 3
+Free BitMap 0 : Free BitMap 1 : Free BitMap 3
 Free DecodeMedModule 1
 For t =0 To 284
 	Free MidHandle t

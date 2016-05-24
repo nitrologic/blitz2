@@ -13,9 +13,9 @@ End NEWTYPE
 Dim List ball.balltype(50)
 
 LoadShapes 4,"balls.shapes" ;make sure we're in iso drawer (use CD)
-casestrcomp 0,"balls.iff"	 ;get palette from IFF
+LoadPalette 0,"balls.iff"	 ;get palette from IFF
 
-allocst 0,27,"ISOMETRIC SHAPE GENERATOR" ;open hires lace screen
+Screen 0,27,"ISOMETRIC SHAPE GENERATOR" ;open hires lace screen
 Use SetCycle 0
 ScreensBitMap 0,0
 
@@ -23,9 +23,9 @@ Box 15,15,15+33,15+41,1	 ;shape must fit inside this frame
 GetaShape 0,16,15,32,1		;for clipping height
 
 For r=0 To 15
-	Restore myshape:f=16+r:Gosub makeframe:longdiv f,r*40+16,104
-	Restore mozzy:f=32+r:Gosub makeframe:longdiv f,r*40+16,144
-	Restore blade:f=48+r:Gosub makeframe:longdiv f,r*40+16,184
+	Restore myshape:f=16+r:Gosub makeframe:Blit f,r*40+16,104
+	Restore mozzy:f=32+r:Gosub makeframe:Blit f,r*40+16,144
+	Restore blade:f=48+r:Gosub makeframe:Blit f,r*40+16,184
 Next
 
 SaveShapes 16,f,"isoshapes" ;save all shapes generated
@@ -41,10 +41,10 @@ End
 	rsin=HSin(r*Pi/8)	;needed for the 2D rotation that follows
 	rcos=HCos(r*Pi/8)
 	ClearList ball()	;empty our work list of all items
-	##[$80CA] ball()		;save typing ball() 50 times!
+	USEPATH ball()		;save typing ball() 50 times!
 
 	For b=0 To n-1
-		globalloc ball()			;read ball into the list array
+		AddItem ball()			;read ball into the list array
 		Read \col,tx,ty,\z
 		\x=tx*rsin+ty*rcos	;rotate it through a 2D matrix
 		\y=tx*rcos-ty*rsin
@@ -53,18 +53,18 @@ End
 
 	Boxf 16,16,16+31,16+39,0	 ;clear frame for drawing into
 	SortList ball(),0					;sort from back to front
-	newmem ball()					 ;start with back ball
-	While globfree(ball())
+	ResetList ball()					 ;start with back ball
+	While NextItem(ball())
 		\sx=32+(\x-\y) ASL 4		 ;calulate screen position
 		\sy=48+(\x+\y-\z) ASL 3
-		longdiv \col,x+\sx,y+\sy		;and draw to screen
+		Blit \col,x+\sx,y+\sy		;and draw to screen
 	Wend
 
 	;the following clips the rendered shape so that smallest
 	;possible area is fetched for the destination shape
 
-	y0=16:While ##[$CB09](0,16,y0)=0:longdiv 0,16,y0:y0+1:Wend
-	y1=16+39:While ##[$CB09](0,16,y1)=0:longdiv 0,16,y1:y1-1:Wend
+	y0=16:While ##[$CB09](0,16,y0)=0:Blit 0,16,y0:y0+1:Wend
+	y1=16+39:While ##[$CB09](0,16,y1)=0:Blit 0,16,y1:y1-1:Wend
 	GetaShape f,16,y0,32,y1-y0+1
 	Handle f,16,36+16-y0
 	Return

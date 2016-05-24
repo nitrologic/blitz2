@@ -2,12 +2,12 @@
 LoadShapes 0,"shapes/balk"
 
 BLITZ
-lmaxlen 0,384,256,3
+BitMap 0,384,256,3
 Slice 0,44,320,256,$fff8,3,8,32,384,384
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 Show 0
-longmult 0,20
+Queue 0,20
 
 Dim x(400)
 Gosub ssin

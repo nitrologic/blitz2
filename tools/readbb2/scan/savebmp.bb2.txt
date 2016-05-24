@@ -182,7 +182,7 @@ End Statement
 
 Statement SaveBMP{ofile.s,bmpobj.w,width.w,height.w,numcol.w}
 	If ReadMem(#BMPFH,ofile)
-		Use lmaxlen	bmpobj
+		Use BitMap	bmpobj
 		FileOutput #BMPFH
 
 		; Perform calculations for later use:

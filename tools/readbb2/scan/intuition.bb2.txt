@@ -281,8 +281,8 @@ End NEWTYPE
 ; */
 #GFLG_RELBOTTOM=$0008;/* vert. pos. is relative To bottom edge */
 #GFLG_RELRIGHT=$0010;/* horiz. pos. is relative To right edge */
-#GFLG_RELWIDTH=$0020;/* width is relative To req/localstat */
-#GFLG_RELHEIGHT=$0040;/* height is relative To req/localstat */
+#GFLG_RELWIDTH=$0020;/* width is relative To req/Window */
+#GFLG_RELHEIGHT=$0040;/* height is relative To req/Window */
 
 ;/* New for V39: GFLG_RELSPECIAL allows custom gadget implementors to
 ; * make gadgets whose position and size depend in an arbitrary way
@@ -434,14 +434,14 @@ End NEWTYPE
 #GTYP_SYSTYPEMASK=$00F0
 
 ;/* These definitions describe system gadgets in V36 and higher: */
-#GTYP_SIZING=$0010;/* localstat sizing gadget */
-#GTYP_WDRAGGING=$0020;/* localstat drag bar */
-#GTYP_SDRAGGING=$0030;/* allocst drag bar */
-#GTYP_WDEPTH=$0040;/* localstat depth gadget */
-#GTYP_SDEPTH=$0050;/* allocst depth gadget */
-#GTYP_WZOOM=$0060;/* localstat zoom gadget */
-#GTYP_SUNUSED=$0070;/* Unused allocst gadget */
-#GTYP_CLOSE=$0080;/* localstat close gadget */
+#GTYP_SIZING=$0010;/* Window sizing gadget */
+#GTYP_WDRAGGING=$0020;/* Window drag bar */
+#GTYP_SDRAGGING=$0030;/* Screen drag bar */
+#GTYP_WDEPTH=$0040;/* Window depth gadget */
+#GTYP_SDEPTH=$0050;/* Screen depth gadget */
+#GTYP_WZOOM=$0060;/* Window zoom gadget */
+#GTYP_SUNUSED=$0070;/* Unused Screen gadget */
+#GTYP_CLOSE=$0080;/* Window close gadget */
 
 ;/* These definitions describe system gadgets prior to V36: */
 #GTYP_WUPFRONT=#GTYP_WDEPTH;/* Window to-front gadget */
@@ -843,8 +843,8 @@ End NEWTYPE
 
 ;/* --- IDCMP Codes -------------------------------------------------------- */
 ;/* This group of codes is for the IDCMP_CHANGEWINDOW message */
-#CWCODE_MOVESIZE=$0000;/* localstat was moved AND/OR sized */
-#CWCODE_DEPTH=$0001;/* localstat was depth-arranged (new For V39) */
+#CWCODE_MOVESIZE=$0000;/* Window was moved AND/OR sized */
+#CWCODE_DEPTH=$0001;/* Window was depth-arranged (new For V39) */
 
 ;/* This group of codes is for the IDCMP_MENUVERIFY message */
 #MENUHOT=$0001;/* IntuiWants verification OR MENUCANCEL		*/
@@ -855,7 +855,7 @@ End NEWTYPE
 ; * shown here as a clue.
 ; */
 #OKOK=#MENUHOT;/* guy didn't care	 */
-#OKABORT=$0004;/* localstat rendered question moot */
+#OKABORT=$0004;/* Window rendered question moot */
 #OKCANCEL=#MENUCANCEL;/* window sent cancel reply	*/
 
 ;/* This group of codes is for the IDCMP_WBENCHMESSAGE messages */

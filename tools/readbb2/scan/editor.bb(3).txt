@@ -5,8 +5,8 @@
 #NUMPTS=150
 
 
-lmaxlen 1,320,256,5
-lmaxlen 2,320,256,1
+BitMap 1,320,256,5
+BitMap 2,320,256,1
 
 #tags=$80080000
 
@@ -86,12 +86,12 @@ End NEWTYPE
 MenuChecked 3
 MenuGap 16,1
 
-newlocarr 0,0,"Project "
+MenuTitle 0,0,"Project "
 MenuItem	0,0,0,0,"About						"
 MenuItem	0,0,0,1,"Quit","Q"
 MenuItem	0,0,0,2,"Undo","U"
 
-newlocarr 0,1,"Display "
+MenuTitle 0,1,"Display "
 MenuItem	0,3,1,0,"Co-Ordinates		 "
 MenuItem	0,0,1,1,""
 MenuItem	0,3,1,2,"Grid On/Off","="
@@ -108,7 +108,7 @@ SubItem	 0,2,1,9,2,"Solid"
 SubItem	 0,2,1,9,3,"Show Orient"
 MenuItem	0,2,1,10,"Outline?"
 
-newlocarr 0,2,"Object "
+MenuTitle 0,2,"Object "
 MenuItem	0,0,2,0,"Load...					","L"
 MenuItem	0,0,2,1,"Save...","S"
 MenuItem	0,0,2,2,"Convert..."
@@ -130,7 +130,7 @@ MenuColour 0,2,7,Off
 MenuColour 0,2,9,Off
 MenuColour 0,2,10,Off
 
-newlocarr 0,3,"Mode	"
+MenuTitle 0,3,"Mode	"
 MenuItem 0,2,3,0,"Pick Groups			 ","1"
 MenuItem 0,4,3,1,"Pick Object","2"
 MenuItem 0,2,3,2,"Pick Face","5"
@@ -147,7 +147,7 @@ MenuColour 0,3,3,Off
 MenuColour 0,3,6,Off
 MenuColour 0,3,8,Off
 
-newlocarr 0,4,"Functions	"
+MenuTitle 0,4,"Functions	"
 MenuItem 0,0,4,0,"Delete						","D"
 MenuItem 0,0,4,1,"Add	"+Chr$(187)
 SubItem	0,0,4,1,0,"Axis"
@@ -162,13 +162,13 @@ MenuItem 0,0,4,5,"Join"
 
 AddIDCMP $10+$20				;mouse move+gadget down
 
-allocst 0,0,0,640,256,5,$8000,"3D Edit!	 Written by Paul Andrews (C)1994",0,1
+Screen 0,0,0,640,256,5,$8000,"3D Edit!	 Written by Paul Andrews (C)1994",0,1
 ScreensBitMap 0,0
-localstat 0,0,0,640,256,$1900,"",0,1
+Window 0,0,0,640,256,$1900,"",0,1
 WindowOutput 0
 WindowInput 0
 Activate 0
-arrmult 0
+SetMenu 0
 WPointer 0
 
 GTTags #tags+18,16			;colour offset 16
@@ -180,23 +180,23 @@ GTSlider	1,3,200,20,256,10,"R",$80,0,255,0
 GTSlider	1,4,200,40,256,10,"G",$80,0,255,0
 GTSlider	1,5,200,60,256,10,"B",$80,0,255,0
 
-localstat 1,18,11,300,116,$1800,"",0,1		 ;top view!!!
-arrmult 0
+Window 1,18,11,300,116,$1800,"",0,1		 ;top view!!!
+SetMenu 0
 WPointer 0
 
-localstat 2,18,129,300,116,$1800,"",0,1		 ;front view!!!
-arrmult 0
+Window 2,18,129,300,116,$1800,"",0,1		 ;front view!!!
+SetMenu 0
 WPointer 0
 
-localstat 3,337,129,300,116,$1800,"",0,1		 ;right view!!!
-arrmult 0
+Window 3,337,129,300,116,$1800,"",0,1		 ;right view!!!
+SetMenu 0
 WPointer 0
 
-localstat 4,337,11,300,116,$11800,"",0,1		 ;perspective
-arrmult 0
+Window 4,337,11,300,116,$11800,"",0,1		 ;perspective
+SetMenu 0
 WPointer 0
 
-Use localstat 0
+Use Window 0
 WindowOutput 0
 
 Green 0,5,5,5
@@ -322,7 +322,7 @@ Gosub redrawall
 screentitle$="3D Editor V1.8			"
 
 For l=4 To 0 Step -1
-		Use localstat l
+		Use Window l
 		WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
 Next
 
@@ -430,7 +430,7 @@ VWait
 ev.l=Event
 If ev=0 Then Goto eventloop
 
-Use localstat EventWindow
+Use Window EventWindow
 WindowInput EventWindow
 
 If eobj=-1 AND mode>1	;can't be in these modes with no object
@@ -448,7 +448,7 @@ If ev=$10	 ;mouse move
 		mx=SMouseX
 		my=SMouseY
 
-		If my<11 Then Activate 0:Use localstat 0:Goto eventloop
+		If my<11 Then Activate 0:Use Window 0:Goto eventloop
 
 		lcoor$=coor$
 
@@ -484,7 +484,7 @@ If ev=$10	 ;mouse move
 
 		If lcoor$<>coor$
 				For l=4 To 0 Step -1
-						Use localstat l
+						Use Window l
 						WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
 				Next
 		EndIf
@@ -665,7 +665,7 @@ ih=ItemHit
 sh=SubHit
 
 If mh=0 AND ih=0		;about
-		localstat 6,80,40,510,110,$100a,"About...",0,1
+		Window 6,80,40,510,110,$100a,"About...",0,1
 		WLocate 163,4
 		NPrint "Pauls Lovely 3D Editor!"
 		WLocate 180,25
@@ -696,7 +696,7 @@ fgh:
 		ev.l=WaitEvent
 		If ev<>$200 Then Goto fgh
 		CloseWindow 6
-		Use localstat 1:WindowOutput 1
+		Use Window 1:WindowOutput 1
 		Activate 1
 EndIf
 
@@ -1491,7 +1491,7 @@ For o=0 To cobj-1
 Next
 ttt=totp:fff=totf
 
-localstat 6,80,40,510,110,$100a,"Optimizing Object Source...",0,1
+Window 6,80,40,510,110,$100a,"Optimizing Object Source...",0,1
 WLocate 0,10
 NPrint "Current Object Statistics:"
 NPrint ""
@@ -1571,7 +1571,7 @@ For n=0 To fff-1
 Next
 
 WindowOutput 6
-Use localstat 6
+Use Window 6
 CloseFile(0)
 
 Gosub savepalette
@@ -1581,7 +1581,7 @@ qfgh:
 ev.l=WaitEvent
 If ev<>$200 Then Goto qfgh
 CloseWindow 6
-Use localstat 1:WindowOutput 1
+Use Window 1:WindowOutput 1
 Activate 1
 
 Return
@@ -1628,7 +1628,7 @@ SaveScreen 0,"ram:palette"
 Return
 ;----------------------------------------------------------------
 .redrawbar
-Use localstat 0
+Use Window 0
 WBox 0,246,639,255,1
 WColour 0,1
 WLocate 460,247
@@ -1656,7 +1656,7 @@ Return
 
 drawmode=0			;draw normally (1=moving/2=colour 0)
 
-Use localstat 0
+Use Window 0
 WBox 0,246,639,255,1
 WColour 8,1
 WLocate 460,247
@@ -1693,7 +1693,7 @@ cplot=0
 
 ;--------------------------------
 ;draw top view....
-Use localstat 1
+Use Window 1
 
 ;WBox 18,11,318,127,0
 WCls
@@ -1717,7 +1717,7 @@ EndIf
 
 Gosub redrawtop
 
-Use localstat 1
+Use Window 1
 linew{8,116-20,8,116-5,1}
 linew{8,116-5,15+8,116-5,1}
 WLocate 13,116-30
@@ -1725,11 +1725,11 @@ Print "z"
 WLocate 30+16+4,116-5-4
 Print "x"
 
-Use localstat 0
+Use Window 0
 
 ;--------------------------------
 ;draw front view...
-Use localstat 2
+Use Window 2
 ;WBox 18,129,318,245,0
 WCls
 
@@ -1752,7 +1752,7 @@ EndIf
 
 Gosub redrawfront
 
-Use localstat 2
+Use Window 2
 linew{8,116-20,8,116-5,1}
 linew{8,116-5,15+8,116-5,1}
 WLocate 13,116-30
@@ -1760,12 +1760,12 @@ Print "y"
 WLocate 30+16+4,116-5-4
 Print "x"
 
-Use localstat 0
+Use Window 0
 
 ;--------------------------------
 ;draw right view...
 ;WBox 337,129,637,245,0
-Use localstat 3
+Use Window 3
 WCls
 
 If grid=On AND zoom>.0001
@@ -1787,7 +1787,7 @@ EndIf
 
 Gosub redrawright
 
-Use localstat 3
+Use Window 3
 linew{8,116-20,8,116-5,1}
 linew{8,116-5,15+8,116-5,1}
 WLocate 13,116-30
@@ -1800,7 +1800,7 @@ Print "z"
 Gosub redrawpersp
 
 ;--------------------------------
-Use localstat 0
+Use Window 0
 
 Gosub redrawpicks
 
@@ -1833,7 +1833,7 @@ Return
 
 If cobj=0 Then Return
 
-Use localstat 1
+Use Window 1
 
 iww=InnerWidth
 ihh=InnerHeight
@@ -1951,7 +1951,7 @@ For o=sl To el
 		EndIf
 Next
 
-Use localstat 0
+Use Window 0
 
 If odm=>9 Then drawmode=odm
 
@@ -1961,7 +1961,7 @@ Return
 
 If cobj=0 Then Return
 
-Use localstat 2
+Use Window 2
 
 iww=InnerWidth
 ihh=InnerHeight
@@ -2077,7 +2077,7 @@ For o=sl To el
 		EndIf
 Next
 
-Use localstat 0
+Use Window 0
 If odm=>9 Then drawmode=odm
 
 Return
@@ -2086,7 +2086,7 @@ Return
 
 If cobj=0 Then Return
 
-Use localstat 3
+Use Window 3
 
 iww=InnerWidth
 ihh=InnerHeight
@@ -2203,14 +2203,14 @@ For o=sl To el
 
 Next
 
-Use localstat 0
+Use Window 0
 If odm=>9 Then drawmode=odm
 
 Return
 ;----------------------------------------------------------------
 .redrawpersp
 
-Use localstat 4
+Use Window 4
 
 iww=InnerWidth
 ihh=InnerHeight
@@ -2218,12 +2218,12 @@ ihh=InnerHeight
 If perspmode<>#SOLID
 		WCls
 Else
-		Use lmaxlen 1
+		Use BitMap 1
 		BlockScroll
 EndIf
 ClearList polysort()
-newmem polysort()
-Use localstat 4
+ResetList polysort()
+Use Window 4
 WLocate 0,0
 
 If cobj=0 Then Return
@@ -2341,7 +2341,7 @@ For o=0 To cobj-1
 						EndIf
 
 						nz=(nz1+nz2+nz3+nz4)/4
-						qqq=globalloc(polysort())
+						qqq=AddItem(polysort())
 						polysort()\nz=nz,sx1*2,sy1,sx2*2,sy2,sx3*2,sy3,sx4*2,sy4,col,o,n
 
 				Next
@@ -2350,9 +2350,9 @@ Next
 
 
 If perspmode=#SOLID
-		Use lmaxlen 1
+		Use BitMap 1
 		SortList polysort(),SizeOf .poly\nz
-		newmem polysort()
+		ResetList polysort()
 		LastItem polysort()
 		Repeat
 				coors(0)\x=polysort()\x1,polysort()\y1
@@ -2381,7 +2381,7 @@ If perspmode=#SOLID
 				EndIf
 		Until NOT PrevItem(polysort())
 		BitMaptoWindow 1,4,0,0,0,0,300,116
-		Use localstat 4
+		Use Window 4
 EndIf
 
 Return
@@ -2390,9 +2390,9 @@ Return
 
 hito=-1:hitn=-1
 hzz.l=999999
-Use lmaxlen 2
+Use BitMap 2
 SortList polysort(),SizeOf .poly\nz
-newmem polysort()
+ResetList polysort()
 LastItem polysort()
 Repeat
 		coors(0)\x=polysort()\x1,polysort()\y1
@@ -2407,7 +2407,7 @@ Repeat
 		Polyf np,&coors(0),0,0
 Until NOT PrevItem(polysort())
 
-Use localstat 4
+Use Window 4
 WindowOutput 4
 WLocate 0,0:Print hito,",",hitn,"		"
 
@@ -2456,21 +2456,21 @@ For n=0 To cpick-1
 		yyy=plots(pp)\yyy
 		zzz=plots(pp)\zzz
 
-		Use localstat 1
+		Use Window 1
 		xx1=(xxx-cvx)*zoom+75	 ;84
 		zz1=(cvz-zzz)*zoom+58	 ;69
 		plotwq{xx1,zz1,7}
 		WLocate xx1*2-10,zz1-4
 		NPrint n+1
 
-		Use localstat 2
+		Use Window 2
 		xx1=(xxx-cvx)*zoom+75	 ;84
 		yy1=(cvy-yyy)*zoom+58	 ;187
 		plotwq{xx1,yy1,7}
 		WLocate xx1*2-10,yy1-4
 		NPrint n+1
 
-		Use localstat 3
+		Use Window 3
 		zz1=(zzz-cvz)*zoom+75	 ;243
 		yy1=(cvy-yyy)*zoom+58	 ;187
 		plotwq{zz1,yy1,7}
@@ -2622,7 +2622,7 @@ cccc.l=##[$FEDB](&points(0,0),&opoints(0,0),20*500*SizeOf.p3d)
 cccc.l=##[$FEDB](&axis(0),&oaxis(0),20*SizeOf.p3d)
 
 moveit1:
-Use localstat 0
+Use Window 0
 WLocate 10,247:WColour 0,1
 NPrint "Move (All) "
 
@@ -2630,12 +2630,12 @@ Gosub redrawsome
 
 moveit2:
 ev=WaitEvent
-Use localstat EventWindow
+Use Window EventWindow
 WindowInput EventWindow
 
 a$=Inkey$
 If a$=" "
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "						"
 		Return
@@ -2644,7 +2644,7 @@ EndIf
 If a$=Chr$(27)
 		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
 		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "						 "
 		Return
@@ -2653,11 +2653,11 @@ EndIf
 If a$="l"
 		local=1-local
 		If local=0
-				Use localstat 0
+				Use Window 0
 				WLocate 10,247:WColour 0,1
 				NPrint "Move (All) "
 		Else
-				Use localstat 0
+				Use Window 0
 				WLocate 10,247:WColour 0,1
 				NPrint "Move (Axis)"
 		EndIf
@@ -2719,7 +2719,7 @@ cz$=Left$(Str$(lcz)+"			",6)
 coor$=cx$+","+cy$+","+cz$
 If lcoor$<>coor$
 		For l=4 To 0 Step -1
-				Use localstat l
+				Use Window l
 				WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
 		Next
 EndIf
@@ -2805,11 +2805,11 @@ Gosub redrawfront
 Gosub redrawright
 
 If local=0
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "Move (All) "
 Else
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "Move (Axis)"
 EndIf
@@ -2824,7 +2824,7 @@ cccc.l=##[$FEDB](&points(0,0),&opoints(0,0),20*500*SizeOf.p3d)
 cccc.l=##[$FEDB](&axis(0),&oaxis(0),20*SizeOf.p3d)
 
 scaleit1:
-Use localstat 0
+Use Window 0
 WLocate 10,247:WColour 0,1
 NPrint "Scale"
 
@@ -2832,12 +2832,12 @@ Gosub redrawsome
 
 scaleit2:
 ev=WaitEvent
-Use localstat EventWindow
+Use Window EventWindow
 WindowInput EventWindow
 
 a$=Inkey$
 If a$=" "
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "											 "
 		Return
@@ -2846,7 +2846,7 @@ EndIf
 If a$=Chr$(27)
 		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
 		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "											 "
 		Return
@@ -2869,10 +2869,10 @@ Else
 EndIf
 
 sfac.q=((smx-mx)/100)+1
-Use localstat 0
+Use Window 0
 WLocate 10,247:WColour 0,1
 NPrint "Scale Factor:",sfac
-Use localstat EventWindow
+Use Window EventWindow
 
 drawmode=2+9
 cplot=0
@@ -2953,7 +2953,7 @@ If lockx=0 Then locky=1:lockz=1
 If locky=0 Then lockx=1:lockz=1
 If lockz=0 Then locky=1:lockx=1
 Gosub redrawbar
-Use localstat 0
+Use Window 0
 WLocate 10,247:WColour 0,1
 NPrint "Rotate"
 
@@ -2961,12 +2961,12 @@ Gosub redrawsome
 
 rotateit2:
 ev=WaitEvent
-Use localstat EventWindow
+Use Window EventWindow
 WindowInput EventWindow
 
 a$=Inkey$
 If a$=" "
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "											 "
 		Return
@@ -2975,7 +2975,7 @@ EndIf
 If a$=Chr$(27)
 		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
 		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
-		Use localstat 0
+		Use Window 0
 		WLocate 10,247:WColour 0,1
 		NPrint "											 "
 		Return
@@ -3007,10 +3007,10 @@ sfac.q=QWrap(((smx-mx)/1.2),0,359)
 
 sfac=Int(sfac+.5)
 
-Use localstat 0
+Use Window 0
 WLocate 10,247:WColour 0,1
 NPrint "Rotate:",sfac,Chr$($b0)+"		 "
-Use localstat EventWindow
+Use Window EventWindow
 
 sfac=sfac*(Pi/180)
 
@@ -3101,9 +3101,9 @@ gg.w=NewPaletteMode(co+16)
 bb.w=CyclePalette(co+16)
 
 AddIDCMP $10+$20
-localstat 5,80,130,510,110,$100a,"Set Attributes",0,1
+Window 5,80,130,510,110,$100a,"Set Attributes",0,1
 AttachGTList 1,5
-Use localstat 5
+Use Window 5
 WindowOutput 5
 Activate 5
 WLocate 460,20:Print rr," "
@@ -3182,13 +3182,13 @@ If ev=16 AND eq=-16384 AND gh=>3 AND gh<=5 AND down=1
 EndIf
 
 If ev=8 AND EventWindow=4
-		Use lmaxlen 1
+		Use BitMap 1
 		cc=Cls(EMouseX,EMouseY)-16
 		If cc>-1 AND cc<16
 				co=cc
 				GTSetAttrs 1,0,#tags+17,co+16
 		EndIf
-		Use localstat 5
+		Use Window 5
 		Activate 5
 EndIf
 
@@ -3196,8 +3196,8 @@ Goto attfr
 
 
 qqq:
-Free localstat 5
-Use localstat 1
+Free Window 5
+Use Window 1
 WindowOutput 0
 Activate 1
 Gosub redrawall

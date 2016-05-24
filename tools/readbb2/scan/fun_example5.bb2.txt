@@ -1,13 +1,13 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example5.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example5.bb2
-##[$80CC]
+NoCli
 WBStartup
 
 INCDIR	"FUN_Math:"
 Include "FUN_Objects.bb2"
 
-lmaxlen 0,320,136,4
-lmaxlen 1,320,136,4
-lmaxlen 2,320,64,4
+BitMap 0,320,136,4
+BitMap 1,320,136,4
+BitMap 2,320,64,4
 
 LoadBitMap 2,"fun_math:panel.iff",0
 
@@ -22,7 +22,7 @@ CreateDisplay 0,1
 DisplayPalette 1,0
 DisplayBitMap 0,physical
 DisplayBitMap 1,2
-Use lmaxlen logical
+Use BitMap logical
 
 Repeat
  VWait
@@ -35,7 +35,7 @@ Repeat
 		physical=1
  EndIf
  DisplayBitMap 0,physical
- Use lmaxlen logical
+ Use BitMap logical
 Until Joyb(1)
 
 End

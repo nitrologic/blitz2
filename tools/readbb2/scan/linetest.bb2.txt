@@ -2,7 +2,7 @@
 ;
 BLITZ
 
-lmaxlen 0,320,256,1:Slice 0,44,1:Show 0
+BitMap 0,320,256,1:Slice 0,44,1:Show 0
 
 x1=0:y1=0:x2=160:y2=128
 Gosub bline

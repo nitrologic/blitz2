@@ -26,7 +26,7 @@
 ;--------------------------------------------------------------------
 .system
 
-WBStartup : ##[$80CC] : ##[$FFB5]
+WBStartup : NoCli : ##[$FFB5]
 SetErr : End : End SetErr
 MaxLen pa$ = 192
 MaxLen fi$ = 192
@@ -49,18 +49,18 @@ Version$ = "IFF Halver v1.07"
 .gadgetlists
 
 ; 1 : O.K. message box
-workstart 1,82,32,0,1,"	O.K.	"
+TextGadget 1,82,32,0,1,"	O.K.	"
 
 ; 2 : O.K./Cancel requester
-workstart 2,40,32,0,1,"	O.K.	"
-workstart 2,140,32,0,2," Cancel "
+TextGadget 2,40,32,0,1,"	O.K.	"
+TextGadget 2,140,32,0,2," Cancel "
 
 ;--------------------------------------------------------------------
 .menus
 
 MenuGap 4,2
 MenuChecked 2
-newlocarr 1,0,		 "File				 "
+MenuTitle 1,0,		 "File				 "
 	MenuItem 1,0,0,0,"Load IFF		 ","L"
 	MenuItem 1,0,0,1,"Save			 >>"
 		SubItem 1,0,0,1,0,"Top Left "
@@ -70,7 +70,7 @@ newlocarr 1,0,		 "File				 "
 	MenuItem 1,0,0,2,"About				","?"
 	MenuItem 1,0,0,3,"Quit				 ","Q"
 
-newlocarr 1,1,		 "Options			 "
+MenuTitle 1,1,		 "Options			 "
 	MenuItem 1,1,1,0,"	Upper Left	"
 	MenuItem 1,1,1,1,"	Upper Right "
 	MenuItem 1,1,1,2,"	Lower Left	"
@@ -82,7 +82,7 @@ newlocarr 1,1,		 "Options			 "
 	MenuItem 1,0,1,8,"--------------"
 	MenuItem 1,0,1,9,"^^ Select 4 FX"
 
-newlocarr 1,2,		 "Scan							 "
+MenuTitle 1,2,		 "Scan							 "
 	MenuItem 1,0,2,0,"View IFF					 ","I"
 	MenuItem 1,0,2,1,"View Halved				","H"
 	MenuItem 1,0,2,2,"									 "
@@ -92,11 +92,11 @@ newlocarr 1,2,		 "Scan							 "
 ;--------------------------------------------------------------------
 .screen
 
-freest 0 : ScreensBitMap 0,0
+WbToScreen 0 : ScreensBitMap 0,0
 
 WXmain = 0 : WYmain = 12
-localstat 1,WXmain,WYmain,320,80,$1002+$4+$8," "+Version$+"	jilt'94",0,1
-Use localstat 1 :Activate 1
+Window 1,WXmain,WYmain,320,80,$1002+$4+$8," "+Version$+"	jilt'94",0,1
+Use Window 1 :Activate 1
 
 WLocate 16, 8 : Print Version$,"	by	jilt	of TIP"
 WLocate 16,16 : Print "Based on a program by Nick Stacey."
@@ -104,7 +104,7 @@ WLocate 16,32 : Print "No shareware fee for this Philip !"
 WLocate 16,48 : Print "This free version was created with"
 WLocate 16,56 : Print "Blitz Basic 2	from Acid Software."
 
-arrmult 1
+SetMenu 1
 
 ;--------------------------------------------------------------------
 .mainloop
@@ -172,9 +172,9 @@ Until yorn$="Y"
 ;--------------------------------------------------------------------
 .close
 
-If Halved=True Then Free lmaxlen 3
-If fi$<>"" Then Free lmaxlen 1
-Free localstat 1
+If Halved=True Then Free BitMap 3
+If fi$<>"" Then Free BitMap 1
+Free Window 1
 ##[$FFB4]
 
 End
@@ -182,27 +182,27 @@ End
 ;====================================================================
 ._OK
 
-	localstat 3,200,64,240,48,0,ok2$,0,1,1
+	Window 3,200,64,240,48,0,ok2$,0,1,1
 	WLocate 120-(Len(ok$)*4),8 : Print ok$
 	Repeat
 		ev3.l = WaitEvent
 	Until (ev3=$40) AND (EventWindow=3)
-	Free localstat 3
-	Use localstat 1
+	Free Window 3
+	Use Window 1
 	FlushEvents
 	Return
 
 ;--------------------------------------------------------------------
 ._OK_Cancel
 
-	localstat 3,200,64,240,48,0,"Confirm",0,1,2
+	Window 3,200,64,240,48,0,"Confirm",0,1,2
 	WLocate 120-(Len(ok$)*4),8 : Print ok$
 	Repeat
 		ev3.l = WaitEvent
 	Until (ev3=$40) AND (EventWindow=3)
 	yorn$=Mid$("YN",GadgetHit,1)
-	Free localstat 3
-	Use localstat 1
+	Free Window 3
+	Use Window 1
 	FlushEvents
 	Return
 
@@ -227,20 +227,20 @@ End
 	FXx(4)=FXx(2) : FXy(4)=FXy(3)
 
 	Gosub _Update_Window
-	Use allocst 0 : localstat 3,200,64,240,48,0,"LOAD IFF ...",0,1
+	Use Screen 0 : Window 3,200,64,240,48,0,"LOAD IFF ...",0,1
 	WLocate 16,8 : Print "Loading, please wait ..."
 
-	lmaxlen 1,iffw,iffh,iffd
+	BitMap 1,iffw,iffh,iffd
 	LoadBitMap 1,fi$,1
 
-	Free localstat 3
+	Free Window 3
 
 ._Analyze_Palette
-	allocst 2,iffd : Use SetCycle 1
+	Screen 2,iffd : Use SetCycle 1
 	For c=0 To (iffc-1)
 		brightness(c) = Blue(c) + Palette(c) + PalRGB(c)
 	Next
-	Free allocst 2
+	Free Screen 2
 
 	Gosub _View_IFF
 	Gosub _UseScr0Win1
@@ -256,7 +256,7 @@ Goto _Finished_Load_IFF
 ;--------------------------------------------------------------------
 ._Update_Window
 
-	Use allocst 0 : Use localstat 1
+	Use Screen 0 : Use Window 1
 	InnerCls
 	WLocate 8,8 : Print "FileName : ",fi$
 	Format "####" : WLocate 8,16 : Print "ImageSize: ",iffw," x ",iffh
@@ -266,12 +266,12 @@ Goto _Finished_Load_IFF
 ;--------------------------------------------------------------------
 ._View_IFF
 
-	lmaxlen 2,iffw,iffh,iffd
-	allocst 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
+	BitMap 2,iffw,iffh,iffd
+	Screen 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
 	ShapesBitMap 1,2
 
 	FlushEvents : MouseWait
-	Free allocst 2 : Free lmaxlen 2
+	Free Screen 2 : Free BitMap 2
 	VWait 50
 
 	Return
@@ -279,12 +279,12 @@ Goto _Finished_Load_IFF
 ;--------------------------------------------------------------------
 ._View_Halved
 
-	lmaxlen 2,iffw,iffh,iffd
-	allocst 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
+	BitMap 2,iffw,iffh,iffd
+	Screen 2,0,0,iffw,iffh,iffd,iffv,"",0,1,2 : Use SetCycle 1
 	ShapesBitMap 3,2
 
 	FlushEvents : MouseWait
-	Free allocst 2 : Free lmaxlen 2
+	Free Screen 2 : Free BitMap 2
 	VWait 50
 
 	Return
@@ -303,15 +303,15 @@ Goto _Finished_Load_IFF
 		If MenuList(1,1,fx)=True Then FX=FX+1 : FX(FX)=fx
 	Next
 
-	Use allocst 0 : localstat 3,200,64,240,48,0,"Funky Stuff ...",0,1
+	Use Screen 0 : Window 3,200,64,240,48,0,"Funky Stuff ...",0,1
 	WLocate 16,8 : Print "Halving, please wait ..."
-	lmaxlen 3,iffw,iffh,iffd
+	BitMap 3,iffw,iffh,iffd
 
 	Format "###"
 	For y=0 To Int(iffh/2)-1
-		Use allocst 0 : Use localstat 3 : WLocate 80,22 : Print Int(y/(iffh/2-1)*100.0)," % "
+		Use Screen 0 : Use Window 3 : WLocate 80,22 : Print Int(y/(iffh/2-1)*100.0)," % "
 		For x=0 To Int(iffw/2)-1
-			Use lmaxlen 1
+			Use BitMap 1
 			xx=x*2 : yy=y*2
 			pix(1) = Cls(xx,yy)	 : pix(2) = Cls(xx+1,yy)
 			pix(3) = Cls(xx,yy+1) : pix(4) = Cls(xx+1,yy+1)
@@ -343,7 +343,7 @@ Goto _Finished_Load_IFF
 				If FX(fx)=7
 					c=Int((pix(1)+pix(2)+pix(3)+pix(4))/4+.5)
 					End If
-				Use lmaxlen 3
+				Use BitMap 3
 				Point FXx(fx)+x,FXy(fx)+y,c
 			Next
 		Next
@@ -351,7 +351,7 @@ Goto _Finished_Load_IFF
 
 	Halved = True
 
-	Free localstat 3
+	Free Window 3
 	Gosub _View_Halved
 	Gosub _UseScr0Win1
 
@@ -366,15 +366,15 @@ Goto _Finished_Funky_Stuff
 ;--------------------------------------------------------------------
 ._UseScr0Win1
 
-	Use allocst 0
-	Use localstat 1
+	Use Screen 0
+	Use Window 1
 	Activate 1
 	Return
 
 ;--------------------------------------------------------------------
 ._Save_Half
 
-	Use lmaxlen 3
+	Use BitMap 3
 	If evs=0 Then GetaShape 1,FXx(1),FXy(1),FXx(4),FXy(4)
 	If evs=1 Then GetaShape 1,FXx(2),FXy(2),FXx(4),FXy(4)
 	If evs=2 Then GetaShape 1,FXx(3),FXy(3),FXx(4),FXy(4)
@@ -398,7 +398,7 @@ Goto _Finished_Save_Half
 ;--------------------------------------------------------------------
 ._About
 
-	localstat 3,0,0,640,200,$1008,"ABOUT : "+Version$,0,1
+	Window 3,0,0,640,200,$1008,"ABOUT : "+Version$,0,1
 	Restore AboutDATA
 	Read ls.b
 	For l=1 To ls
@@ -410,7 +410,7 @@ Goto _Finished_Save_Half
 		ev3.l= WaitEvent
 	Until (ev3=$200) AND (EventWindow=3)
 
-	Free localstat 3
+	Free Window 3
 	VWait 50
 	FlushEvents
 Return

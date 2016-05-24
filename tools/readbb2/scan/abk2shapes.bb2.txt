@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2
-WBStartup: ##[$80CB]: ##[$80CC]: freest 0 ; Program Startup
+WBStartup: CloseEd: NoCli: WbToScreen 0 ; Program Startup
 NPrint "Abk2Shapes v1.0.- Convert Amos Sprite Banks to Blitz2 Shape files"
 NPrint "Written by Francisco Javier Di"+Chr$(233)+"guez, Spain. November 1993."
 np.b=NumPars
@@ -16,7 +16,7 @@ Else
 	MaxLen pa$=160 ;fix length of strings for use with Blitz2 FileRequest$
 	MaxLen fi$=64
 	If np>0 Then a$=Par$(1) Else a$=FileRequest$("Load an Amos Object Bank",pa$,fi$)
-	localstat 0,50,30,200,100,$1006,"Abk2Shapes v1.0",0,1
+	Window 0,50,30,200,100,$1006,"Abk2Shapes v1.0",0,1
 	If NOT WriteMem(0,a$)
 		WLocate 0,8: NPrint "Couldn't read file"
 	Else
@@ -39,13 +39,13 @@ Else
 				NPrint "Number of planes: ",Number_Of_Planes,"	 "
 				If X_Size>0 AND Y_Size>0 AND Number_Of_Planes>0
 					; The conversion takes place here
-					lmaxlen 0,X_Size*16+1,Y_Size+1,5
+					BitMap 0,X_Size*16+1,Y_Size+1,5
 					GetaShape i,0,0,X_Size*16,Y_Size
 					*s.shape=Addr MidHandle(i)
 					*s\_xhandle=X_Hot_Spot ;no flipping flags on disk
 					*s\_yhandle=Y_Hot_Spot
 					##[$BE14] 0,*s\_data,2*X_Size*Y_Size*Number_Of_Planes
-					Free lmaxlen 0
+					Free BitMap 0
 				EndIf
 			Next
 			CloseFile 0: WLocate 0,64

@@ -11,10 +11,10 @@ Next
 For c=0 To 31
 	ButtonGroup 1:SelectMode 0,c
 	x=c AND 7:y=Int(c/8)
-	workstart 0,x*28+72,14+y*14,32,3+c,"	"
+	TextGadget 0,x*28+72,14+y*14,32,3+c,"	"
 Next
 ;
-localstat 0,100,50,300,72,$100A,"PALETTE REQUESTER",1,2,0
+Window 0,100,50,300,72,$100A,"PALETTE REQUESTER",1,2,0
 ;
 cc=0:Borders 0,3+cc,On:Redraw 0,3+cc
 ;

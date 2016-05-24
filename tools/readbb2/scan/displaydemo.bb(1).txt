@@ -11,7 +11,7 @@
 ; displays, sorry everyone for releasing the first version with so
 ; many bugs!
 
-lmaxlen 0,320,256,8
+BitMap 0,320,256,8
 
 InitCopList 0,44,256,$10008,8,256,0
 
@@ -24,7 +24,7 @@ CreateDisplay 0
 DisplayBitMap 0,0
 DisplayPalette 0,0
 
-Use lmaxlen 0:BlockScroll 1
+Use BitMap 0:BlockScroll 1
 For i= 0 To 255
 	Circle 160,128,i,i
 Next

@@ -39,7 +39,7 @@ Buffer 0,16384
 
 ;initialize a lor-res, 8 colour bitmap...
 ;
-lmaxlen 0,320,200,3
+BitMap 0,320,200,3
 
 ;draw some stuff to it...
 ;
@@ -61,7 +61,7 @@ While Joyb(0)=0
 
 	;start at first item in list
 	;
-	newmem balls()
+	ResetList balls()
 
 	;wait for vertical blank
 	;
@@ -73,7 +73,7 @@ While Joyb(0)=0
 
 	;while more items to come...
 	;
-	While globfree(balls())
+	While NextItem(balls())
 
 		;update balls' position
 		;

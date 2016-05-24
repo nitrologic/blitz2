@@ -3,7 +3,7 @@
 ; render graphics for use in sky cricket program
 ;
 
-##[$CD10] 0,3,24,4:CludgeBitMap 0,0:Use lmaxlen 0
+##[$CD10] 0,3,24,4:CludgeBitMap 0,0:Use BitMap 0
 Boxf 0,0,2,23,11:Point 0,23,0:Point 1,23,0:Point 0,22,0
 For i=0 To 2:Boxf 0,2+i*4,3,3+i*4,12:Next
 MakeCookie 0
@@ -17,9 +17,9 @@ StopCycle 0,10,12,8,4
 StopCycle 0,11,12,12,12
 StopCycle 0,12,9,9,9
 
-lmaxlen 0,736,566,4
-allocst 0,0,0,736,566,4,$8004,"",1,2,0
-Use SetCycle 0:Use lmaxlen 0
+BitMap 0,736,566,4
+Screen 0,0,0,736,566,4,$8004,"",1,2,0
+Use SetCycle 0:Use BitMap 0
 
 BlockScroll 8
 
@@ -37,7 +37,7 @@ FloodFill 368,283,10
 
 For i=0 To 1:Line !p{-10,-28,i},!p{10,-28,i},11:Next
 
-For i=0 To 2:longdiv 0,!p{-5+i*5,-40,20}:longdiv 0,!p{-5+i*5,40,20}:Next
+For i=0 To 2:Blit 0,!p{-5+i*5,-40,20}:Blit 0,!p{-5+i*5,40,20}:Next
 
 SaveBitmap 0,"ram:oval.iff",0
 

@@ -2,7 +2,7 @@
 
 ;DEFTYPE.w
 
-allocst 0,3:ScreensBitMap 0,0:BlockScroll
+Screen 0,3:ScreensBitMap 0,0:BlockScroll
 Green 0,0,0,0:Green 1,15,15,15
 
 Dim s(1000),y(255)

@@ -48,9 +48,9 @@ End
 
 .search
 	srch$=UCase$(GadgetPens(0,20))			 ;get search string
-	newmem u()												 ;start from scratch
+	ResetList u()												 ;start from scratch
 .nxsearch
-	While globfree(u())									 ;loop through looking
+	While NextItem(u())									 ;loop through looking
 		For i=0 To 7
 			If Instr(UCase$(u()\t[i]),srch$) Then Pop For:Goto drawfiend
 		Next
@@ -58,7 +58,7 @@ End
 	Return
 
 .nextfiend
-	If NOT globfree(u()) Then locfree u()	;roll around
+	If NOT NextItem(u()) Then FirstItem u()	;roll around
 	Gosub drawfiend:Return
 
 .lastfiend
@@ -66,14 +66,14 @@ End
 	Gosub drawfiend:Return
 
 .deletefiend
-	freelast u()														 ;if last item
-	If NOT globfree(u())										 ;create a blank one
-		If NOT locfree(u()) Then Gosub newfiend
+	KillItem u()														 ;if last item
+	If NOT NextItem(u())										 ;create a blank one
+		If NOT FirstItem(u()) Then Gosub newfiend
 	EndIf
 	Gosub drawfiend:Return
 
 .newfiend
-	If globalloc(u())
+	If AddItem(u())
 		u()\t[0]="**NEW**":Gosub drawfiend
 	EndIf
 	Return
@@ -93,7 +93,7 @@ End
 		ClearList u():FileInput 0:i=0		 ;separated by blank lines
 		While NOT DosBuffLen(0)
 			a$=Edit$(128)
-			If i=0 AND a$<>"" Then globalloc u()
+			If i=0 AND a$<>"" Then AddItem u()
 			If a$<>""
 				u()\t[i]=a$:If i<7 Then i+1 Else i=0
 			Else
@@ -108,8 +108,8 @@ End
 	f$=FileRequest$("SAVE FILE",p$,f$)					;write data to disk
 	If ReadMem(0,f$)
 		FileOutput 0
-		newmem u()
-		While globfree(u())
+		ResetList u()
+		While NextItem(u())
 			For i=0 To 7:NPrint u()\t[i]:Next
 		Wend
 		CloseFile 0
@@ -119,16 +119,16 @@ End
 .setupwindow
 	Restore gads
 	For i=0 To 6
-		Read a$:a$=Centre$(a$,6):workstart 0,8+i*58,16,0,i,a$
+		Read a$:a$=Centre$(a$,6):TextGadget 0,8+i*58,16,0,i,a$
 	Next
 	For i=0 To 7:StringGadget 0,6,32+i*11,0,10+i,128,400:Next
 	StringGadget 0,140,130,0,20,32,200
-	workstart 0,360,130,0,21,"NEXT"
+	TextGadget 0,360,130,0,21,"NEXT"
 	For i=0 To 2
 		StringGadget 0,100,154+i*14,0,30+i,64,100
 	Next
-	workstart 0,240,170,0,33,"TEST PRINT	XXXXXXX"
-	localstat 0,50,0,420,200,$100e,"MY LITTLE BLUE BOOK",1,2,0
+	TextGadget 0,240,170,0,33,"TEST PRINT	XXXXXXX"
+	Window 0,50,0,420,200,$100e,"MY LITTLE BLUE BOOK",1,2,0
 	WLocate 16,121:Print "SEARCH STRING:"
 	ResetString 10,128,400,16
 	WLocate 16,145:Print "COLUMNS:"
@@ -143,11 +143,11 @@ gads:Data$ "ADD",DELETE,<=,=>,"PRINT",LOAD,SAVE
 	If ReadMem(0,"prt:")	 ;output to printer
 		FileOutput 0
 		If test=0							;if not test mode
-			newmem u()
-			While globfree(u())	;set up pointers for next n fields
+			ResetList u()
+			While NextItem(u())	;set up pointers for next n fields
 				*ptr(1)=u()
 				For i=2 To col
-					If globfree(u()) Then *ptr(i)=u()
+					If NextItem(u()) Then *ptr(i)=u()
 				Next
 				For j=0 To hi-1		;then using pointers print out stickers
 					If j<8

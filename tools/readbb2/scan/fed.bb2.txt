@@ -4,7 +4,7 @@
 ;
 ;p() data:
 
-newlocarr 0,0,"FONT"
+MenuTitle 0,0,"FONT"
 MenuItem 0,0,0,0,"LOAD			 ","L"
 MenuItem 0,0,0,1,"SAVE			 ","S"
 MenuItem 0,0,0,2,"CREATE		 ","C"
@@ -29,8 +29,8 @@ Dim v$(31)
 
 Dim po.point(255)
 
-allocst 0,3:ScreensBitMap 0,0
-AddIDCMP 16:localstat 0,0,0,320,256,$1800,"",1,2:arrmult 0
+Screen 0,3:ScreensBitMap 0,0
+AddIDCMP 16:Window 0,0,0,320,256,$1800,"",1,2:SetMenu 0
 
 xsc=2:ysc=2
 t$=Chr$(9)
@@ -57,7 +57,7 @@ Case 256
 					For j=1 To np(k)
 					##[$BE14] 0,p(k,j),SizeOf.point
 					Next j,k
-					CloseFile 0:Use localstat 0
+					CloseFile 0:Use Window 0
 					Pop Select:Pop Select:Goto new
 				Else
 					##[$FF8C] 0
@@ -74,7 +74,7 @@ Case 256
 						For j=1 To np(k)
 						Exists 0,p(k,j),SizeOf.point
 						Next j,k
-						CloseFile 0:Use localstat 0
+						CloseFile 0:Use Window 0
 					Else
 						##[$FF8C] 0
 					EndIf
@@ -199,7 +199,7 @@ f$=FileRequest$("File to create",cpa$,cfi$)
 		missall
 		Next
 		;
-		CloseFile 0:Use localstat 0
+		CloseFile 0:Use Window 0
 	Else
 		##[$FF8C] 0
 	EndIf

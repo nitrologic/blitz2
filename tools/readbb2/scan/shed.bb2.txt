@@ -41,20 +41,20 @@ Dim sh.sh(64*64)	;64 moves max!
 GadgetStatus 1
 
 SelectMode 1,0
-workstart 0,256,0,512,1, "NO DRAW"
+TextGadget 0,256,0,512,1, "NO DRAW"
 For k=1 To 7
 SelectMode 0,k
-workstart 0,256,k*14,512,1+k,"COLOR "+Str$(k)
+TextGadget 0,256,k*14,512,1+k,"COLOR "+Str$(k)
 Next
 
-workstart 0,256,128,0,100,"CLEAR"
-workstart 0,256,128+14,0,101,"UNDO"
-workstart 0,256,128+28,0,102,"NEXT"
-workstart 0,256,128+42,0,103,"PREV"
-workstart 0,256,128+56,0,104,"LOAD"
-workstart 0,256,128+70,0,105,"SAVE"
-workstart 0,256,128+84,0,106,"SAVE1"
-workstart 0,256,128+98,0,107,"QUIT"
+TextGadget 0,256,128,0,100,"CLEAR"
+TextGadget 0,256,128+14,0,101,"UNDO"
+TextGadget 0,256,128+28,0,102,"NEXT"
+TextGadget 0,256,128+42,0,103,"PREV"
+TextGadget 0,256,128+56,0,104,"LOAD"
+TextGadget 0,256,128+70,0,105,"SAVE"
+TextGadget 0,256,128+84,0,106,"SAVE1"
+TextGadget 0,256,128+98,0,107,"QUIT"
 
 Borders 0,2,On
 
@@ -63,8 +63,8 @@ MaxLen fi$=160
 ;
 ;shape editor!
 ;
-allocst 0,3:ScreensBitMap 0,0
-localstat 0,0,0,320,256,$1800,"",0,0,0:Menus Off
+Screen 0,3:ScreensBitMap 0,0
+Window 0,0,0,320,256,$1800,"",0,0,0:Menus Off
 
 Green 0,0,0,0
 Green 1,15,15,15

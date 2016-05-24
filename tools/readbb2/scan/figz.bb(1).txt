@@ -61,25 +61,25 @@ Dim radi(8,8)
 For i=0 To 255
 xpand(i)=0
 For j=0 To 7
- If (i ##[$80CD] j) Then xpand(i)|(15 ASL (j ASL 2))
+ If (i BitTst j) Then xpand(i)|(15 ASL (j ASL 2))
 Next
 Next
 
 Menus Off
-longmult 0,4
-lmaxlen 3,256,256,2
+Queue 0,4
+BitMap 3,256,256,2
 CNIF #edonly=0
-allocst 3,4:ScreensBitMap 3,6;texture mapping screen
-Use lmaxlen 6:Boxf 0,0,319,255,0
-localstat 7,72,64,64,64,$800,"",0,1
-lmaxlen 1,64,64,4:lmaxlen 2,64,64,4;texmap utility bitmaps
+Screen 3,4:ScreensBitMap 3,6;texture mapping screen
+Use BitMap 6:Boxf 0,0,319,255,0
+Window 7,72,64,64,64,$800,"",0,1
+BitMap 1,64,64,4:BitMap 2,64,64,4;texmap utility bitmaps
 CEND
-allocst 1,2;object editor screen
+Screen 1,2;object editor screen
 Green 0,0,0,0:Green 1,8,4,0:Green 2,12,7,2:Green3,15,12,6
 Gosub panel
 For i=1 To 16:supermap(i)=0:Next
-Use allocst 1
-localstat 0,0,0,256,256,$800,"",3,1;editor
+Use Screen 1
+Window 0,0,0,256,256,$800,"",3,1;editor
 CNIF #edonly=0
 For i=0 To 15:spec(i)=0:diff(i)=1:Next
 For i=0 To 31:For j=0 To 2:buff(i*3+j)=1&15:Next:Next
@@ -92,7 +92,7 @@ If WriteMem(0,"FigZ:def.col")
  Next:Next
  shadowcol(0)=buff(480):shadowcol(1)=buff(481)
  CloseFile(0)
- Use allocst 3
+ Use Screen 3
  For k=0 To 15
 	For i=0 To 11:For j=0 To 1
 	 col0=3*col(k,i,j):r0+buff(col0):b0+buff(col0+2):g0+buff(col0+1)
@@ -110,11 +110,11 @@ hx=0:hy=0:hz=0:nframe=16:dangle=360:xsize=32:ysize=42:group=1:id=0:nobj=-1
 elev=45:merid=45:rmerid=8:amerid=360:relev=1:aelev=0
 edmode=1:xlen=8:ylen=8:map0=1:supergrp=1
 For i=1 To 16:ngroup(i)=0:Next
-Use allocst 1:WindowOutput 1
+Use Screen 1:WindowOutput 1
 .selector
 ev.l=WaitEvent:evw=EventWindow
 If evw<>1 OR ev<>$40 Then Goto endselector
- Use localstat 1
+ Use Window 1
  gadg=GadgetHit
  Select gadg
 	Case 1:cama=QWrap(cama+10,0,355):On edmode Gosub draw,qwkdraw
@@ -123,41 +123,41 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	Case 4:!arrow{0,1,5,group,QLimit(group-1,1,16),unsn{group,2}}
 	 oid=id
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
 	 Next
 	Case 5:!arrow{0,1,5,group,QLimit(!vl{0,5},1,16),unsn{group,2}}
 	 oid=id
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
 	 Next
 	Case 6:!arrow{0,1,5,group,QLimit(group+1,1,16),unsn{group,2}}
 	 oid=id
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
 	 Next
 	Case 11:oid=id
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid-1 Then obj=i:id=\id:Gosub update
 	 Next
 	Case 13:oid=id
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid+1 Then obj=i:id=\id:Gosub update
 	 Next
 	Case 12:oid=!vl{0,12}
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		If \group=group AND \id=oid Then obj=i:id=\id:Gosub update
 	 Next
 	Case 57
 	 *ptr=object(obj)
 	 rotax=SetGadgetStatus(0,2)-57
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		 If !yes1 OR !yes2
 			cosa=HCos(rangle(rotax)*0.0174533):sina=HSin(rangle(rotax)*0.0174533)
 			Select rotax
@@ -190,7 +190,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	Case 50;copy
 	 nnshp=0:id0=0:If Disable(0,7)=0 Then id0=id-1
 	 For i=0 To nobj
-		##[$80CA] object(i)
+		USEPATH object(i)
 		 If !yes1 OR !yes2
 			nobj+1:nnshp+1:*ptr=object(nobj)
 			*ptr\typ=\typ,mirgrp,ngroup(mirgrp)+\id-id0,\col
@@ -198,7 +198,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 			*ptr\r1\x=\r1\x,\r1\y,\r1\z
 			*ptr\r2\x=\r2\x,\r2\y,\r2\z
 			*ptr\r3\x=\r3\x,\r3\y,\r3\z
-			##[$80CA] object(nobj)
+			USEPATH object(nobj)
 			If Disable(0,51) Then \c\x=-\c\x:\r1\x=-\r1\x:\r2\x=-\r2\x:\r3\x=-\r3\x
 			If Disable(0,52) Then \c\y=-\c\y:\r1\y=-\r1\y:\r2\y=-\r2\y:\r3\y=-\r3\y
 			If Disable(0,53) Then \c\z=32-\c\z:\r1\z=-\r1\z:\r2\z=-\r2\z:\r3\z=-\r3\z
@@ -215,11 +215,11 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	Case 46;delete
 	 nnshp=0
 	 For i=nobj To 0 Step -1
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 		 If !yes1 OR !yes2
 			*ptr=object(i):If *ptr\group=group Then nnshp+1
 			ngroup(*ptr\group)-1
-			##[$80CA] object(nobj)
+			USEPATH object(nobj)
 			*ptr\typ=\typ,\group,\id,\col
 			*ptr\c\x=\c\x,\c\y,\c\z:*ptr\bump=\bump
 			*ptr\r1\x=\r1\x,\r1\y,\r1\z
@@ -250,7 +250,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	 Next
 	 Gosub update
 	Case 45;insert
-	 ##[$80CA] object(obj)
+	 USEPATH object(obj)
 	 typ0=\typ:col0=\col
 	 r10=QLimit(Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z),1,16)
 	 r20=QLimit(Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z),1,16)
@@ -272,7 +272,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	Case 71:Gosub save
 	Case 14:qflag=1
 	Case 47:For i=0 To nobj;><
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 If !yes1 OR !yes2
 		If Disable(0,51) Then \r1\x*0.9:\r2\x*0.9:\r3\x*0.9
 		If Disable(0,52) Then \r1\y*0.9:\r2\y*0.9:\r3\y*0.9
@@ -287,7 +287,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	 Next
 	 Gosub update
 	Case 48:For i=0 To nobj;<>
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 If !yes1 OR !yes2
 		If Disable(0,51) Then \r1\x*1.11:\r2\x*1.11:\r3\x*1.11
 		If Disable(0,52) Then \r1\y*1.11:\r2\y*1.11:\r3\y*1.11
@@ -301,7 +301,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 	 EndIf
 	 Next
 	 Gosub update
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 Case 15
 		For i=0 To nobj
 		 If !yes1 OR !yes2 Then \c\x-0.25
@@ -363,7 +363,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 		iobj=obj:Gosub objtoshp:Gosub draw
 	 Case 64
 		If nobj>-1
-		 ##[$80CA] object(obj)
+		 USEPATH object(obj)
 		 Select SetGadgetStatus(0,3)
 			Case 66
 			 tmpx\x=\r2\x+\r3\x,\r2\y+\r3\y,\r2\y+\r3\y
@@ -415,7 +415,7 @@ If evw<>1 OR ev<>$40 Then Goto endselector
 		EndIf
 	 Case 65
 		If nobj>-1
-		 ##[$80CA] object(obj)
+		 USEPATH object(obj)
 		 Select SetGadgetStatus(0,3)
 			Case 66
 			 tmpx\x=\r2\x+\r3\x,\r2\y+\r3\y,\r2\y+\r3\y
@@ -472,8 +472,8 @@ If evw<>1 OR ev<>$40 Then Goto endselector
  End Select
 .endselector
 If evw=0 AND ev=$8
- Use localstat 0
- ##[$80CA] object(obj)
+ Use Window 0
+ USEPATH object(obj)
  If Joyb(0)<>0
 	Select edmode
 	 Case 1;isometric
@@ -501,7 +501,7 @@ If evw=0 AND ev=$8
 		End Select
 	End Select
  dx=nx-object(obj)\c\x:dy=ny-object(obj)\c\y:dz=nz-object(obj)\c\z
- ##[$80CA] object(i)
+ USEPATH object(i)
  For i=0 To nobj
 	If !yes1 OR !yes2 Then \c\x+dx:\c\y+dy:\c\z+dz
  Next
@@ -513,7 +513,7 @@ If qflag=0 Then Goto selector
 End
 
 .update
-##[$80CA] object(obj)
+USEPATH object(obj)
 d1=Tan(\r1\x*\r1\x+\r1\y*\r1\y+\r1\z*\r1\z)
 d2=Tan(\r2\x*\r2\x+\r2\y*\r2\y+\r2\z*\r2\z)
 d3=Tan(\r3\x*\r3\x+\r3\y*\r3\y+\r3\z*\r3\z)
@@ -550,7 +550,7 @@ End Statement
 
 Function.q best{r,g,b}
 Shared numcol
-Use allocst 4
+Use Screen 4
  dist=100
  For i=1 To numcol
 	d0=Abs(r-Blue(i))+Abs(g-Palette(i))+Abs(b-PalRGB(i))
@@ -582,10 +582,10 @@ CNIF #edonly=0
 .colours
 ButtonId 2,8,unsn{spec(rng)*100,3}:ButtonId 2,11,unsn{diff(rng)*100,3}
 ButtonId 2,24,unsn{nbpl,1}
-allocst 4,5:Use allocst 4
+Screen 4,5:Use Screen 4
 For i=0 To 31:i0=i*3:Green i,buff(i0),buff(i0+1),buff(i0+2):Next
-localstat 5,72,64,176,130,$800,"",0,3,2
-Use localstat 5
+Window 5,72,64,176,130,$800,"",0,3,2
+Use Window 5
 !setrgb{1}
 For j=0 To 11:For i=0 To 15
  blok{j,i,col(i,j,0),col(i,j,1)}
@@ -606,7 +606,7 @@ Repeat
  ev=WaitEvent
  evw=EventWindow
  If evw=5
-	Use localstat 5
+	Use Window 5
 	If ev=$40
 	 gadg=GadgetHit
 	 r0=Blue(pal0):g0=Palette(pal0):b0=PalRGB(pal0)
@@ -686,9 +686,9 @@ Repeat
 		 diff(rng)=0:spec(rng)=1:ButtonId 2,8,"100":ButtonId 2,11,"000":Redraw 5,8:Redraw 5,11
 		Case 26:qflag=1
 		Case 1;load
-		 ShowScreen 1:Use allocst 1
+		 ShowScreen 1:Use Screen 1
 		 a$=FileRequest$("Load colour info",path$,fnmcol$)
-		 ShowScreen 4:Use allocst 4
+		 ShowScreen 4:Use Screen 4
 		 If a$<>""
 		 If WriteMem(0,a$)
 			##[$BE14] 0,&buff(0),482
@@ -712,9 +712,9 @@ Repeat
 			buff(i0)=col(j,i,0):buff(i0+1)=col(j,i,1)
 		 Next:Next
 		 buff(480)=shadowcol(0):buff(481)=shadowcol(1)
-		 ShowScreen 1:Use allocst 1
+		 ShowScreen 1:Use Screen 1
 		 a$=FileRequest$("Save colour info as:",path$,fnmcol$)
-		 ShowScreen 4:Use allocst 4
+		 ShowScreen 4:Use Screen 4
 		 If a$<>""
 		 If ReadMem(0,a$)
 			Exists 0,&buff(0),482
@@ -770,15 +770,15 @@ Until qflag=1
 qflag=0
 For i=0 To 31:i0=i*3:buff(i0)=Blue(i):buff(i0+1)=Palette(i):buff(i0+2)=PalRGB(i):Next
  For k=0 To 15
-	Use allocst 4
+	Use Screen 4
 	For i=0 To 11:For j=0 To 1
 	 col0=col(k,i,j):r0+Blue(col0):b0+PalRGB(col0):g0+Palette(col0)
 	Next:Next
 	r0/24:g0/24:b0/24
-	Use allocst 3:Green k,r0,g0,b0
+	Use Screen 3:Green k,r0,g0,b0
  Next
-Free localstat 5:Use localstat 4
-Free allocst 4:Use allocst 1:ButtonId 1,2,unsn{nbpl,1}:Redraw 4,2
+Free Window 5:Use Window 4
+Free Screen 4:Use Screen 1:ButtonId 1,2,unsn{nbpl,1}:Redraw 4,2
 Return
 
 Dim xpand.l(255)
@@ -786,15 +786,15 @@ Dim xpand.l(255)
 For i=0 To 255
 xpand(i)=0
 For j=0 To 7
- If (i ##[$80CD] j) Then xpand(i)|(15 ASL (j ASL 2))
+ If (i BitTst j) Then xpand(i)|(15 ASL (j ASL 2))
 Next
 Next
 
 Statement zoom{bm0}
 Shared xpand()
 For k=0 To 3
-src.l=Peek.l(Addr lmaxlen(bm0)+8+k*4)
-dest.l=Peek.l(Addr lmaxlen(4)+8+k*4)
+src.l=Peek.l(Addr BitMap(bm0)+8+k*4)
+dest.l=Peek.l(Addr BitMap(4)+8+k*4)
 For j=0 To 63
 For i=0 To 7
 XPAND.l=xpand(Peek.b(src)&255)
@@ -808,17 +808,17 @@ End Statement
 
 .texmaps
 Borders 3,26,On: For i=27 To 35:Borders 3,i,Off:Next:ogadg=26
-allocst 4,4:ScreensBitMap 4,4
+Screen 4,4:ScreensBitMap 4,4
 If Disable(3,19)=2
- Use allocst 4:For i=0 To 15:Green i,i,i,i:Next
+ Use Screen 4:For i=0 To 15:Green i,i,i,i:Next
 Else
  For i=0 To 15
-	Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
-	Use allocst 4:Green i,r0,g0,b0
+	Use Screen 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
+	Use Screen 4:Green i,r0,g0,b0
  Next
 EndIf
-localstat 7,0,0,256,256,$800,"",0,1
-localstat 6,256,8,64,248,$800,"",0,1,3
+Window 7,0,0,256,256,$800,"",0,1
+Window 6,256,8,64,248,$800,"",0,1,3
 WLocate 1,33:Print"Gr:":WLocate 1,43:Print"SM:"
 WLocate 1,87:Print"X0:":WLocate 1,97:Print"Y0:"
 For i=0 To 15:i0=1+(i&7)ASL 3:j0=209+(i&8):WBox i0,j0,i0+5,j0+5,i:Next
@@ -828,93 +828,93 @@ zoom{1}
 Repeat
  Repeat
 	ev.l=Event
-	Use localstat 7:x0=WMouseX ASR 2:y0=WMouseY ASR 2
+	Use Window 7:x0=WMouseX ASR 2:y0=WMouseY ASR 2
 	If x0<>x1 OR y0<>y1 AND x0<64
-	 Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
+	 Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
 	 WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
 	 x1=x0:y1=y0
 	EndIf
  Until ev<>0
  evw=EventWindow
  If evw=7 AND ev=$8 AND Joyb(0)=1
-	Use localstat 7
+	Use Window 7
 	x0=EMouseX ASR 2:y0=EMouseY ASR 2
 	If x0<64
 	x0&63:y0&63
 	Select SetGadgetStatus(3,1)
-	 Case 26:Repeat:Use localstat 7:x0=WMouseX &252:y0=WMouseY &252
-		Use localstat 7:WBox x0,y0,x0+3,y0+3,pal0:Use lmaxlen 1:Point x0 ASR 2,y0 ASR 2,pal0
-		Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
+	 Case 26:Repeat:Use Window 7:x0=WMouseX &252:y0=WMouseY &252
+		Use Window 7:WBox x0,y0,x0+3,y0+3,pal0:Use BitMap 1:Point x0 ASR 2,y0 ASR 2,pal0
+		Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(x0)),2)
 		WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(y0)),2)
 		Until Joyb(0)=0
 	 Case 27
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1:Line x0,y0,x1,y1,-1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1:Line x0,y0,x1,y1,-1
 			zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
 		Until Joyb(0)=0
-		Use lmaxlen 1:Line x0,y0,x1,y1,pal0:zoom{1}
+		Use BitMap 1:Line x0,y0,x1,y1,pal0:zoom{1}
 	 Case 28
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
 		Until Joyb(0)=0
-		Use lmaxlen 1:Box x0,y0,x1,y1,pal0
+		Use BitMap 1:Box x0,y0,x1,y1,pal0
 		zoom{1}
 	 Case 29
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Boxf x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
 		Until Joyb(0)=0
-		Use lmaxlen 1:Boxf x0,y0,x1,y1,pal0
+		Use BitMap 1:Boxf x0,y0,x1,y1,pal0
 		zoom{1}
 	 Case 30
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
 		Until Joyb(0)=0
-		Use lmaxlen 1:Circle (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
+		Use BitMap 1:Circle (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
 		zoom{1}
 	 Case 31
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
 		Until Joyb(0)=0
-		Use lmaxlen 1:Circlef (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
+		Use BitMap 1:Circlef (x0+x1)ASR1,(y0+y1)ASR1,Abs(x1-x0)/2,Abs(y1-y0)/2,pal0
 		zoom{1}
-	 Case 32:Use lmaxlen 1
+	 Case 32:Use BitMap 1
 		FloodFill x0,y0,pal0
 		zoom{1}
 	 Case 33
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
@@ -923,14 +923,14 @@ Repeat
 		If x0>x1 Then Exchange x0,x1
 		If y0>y1 Then Exchange y0,y1
 		;find min and max colours in box
-		cmax=8:cmin=6:Use lmaxlen 1
+		cmax=8:cmin=6:Use BitMap 1
 		For i=x0 To x1:For j=y0 To y1
 		 p0=Cls(i,j)
 		 If p0>cmax Then cmax=p0
 		 If p0<cmin Then cmin=p0
 		Next:Next
 		ccmax=cmax-7.5:ccmin=7.5-cmin
-		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+		Use BitMap 2:Scroll 0,0,64,64,0,0,1
 		If x1-x0>=63-(xlen ASL 1)
 		 x0=0:x1=0
 		Else
@@ -945,7 +945,7 @@ Repeat
 		xx=x0
 		Repeat:yy=y0
 		 Repeat
-			Use lmaxlen 2:p0=Cls(xx,yy)
+			Use BitMap 2:p0=Cls(xx,yy)
 			If p0<>cmin AND p0<>cmax
 			dmax=1:dmin=1
 			For j=-ylen To ylen:For i=-xlen To xlen
@@ -960,18 +960,18 @@ Repeat
 			 If dmax<1 Then p0=7.5
 			EndIf
 			p0+ccmax*(1-dmax)-ccmin*(1-dmin)
-			Use lmaxlen 1:Point xx,yy,p0
-			Use lmaxlen 4:Boxf xx ASL 2,yy ASL 2,xx ASL 2 +3,yy ASL 2+3,p0
+			Use BitMap 1:Point xx,yy,p0
+			Use BitMap 4:Boxf xx ASL 2,yy ASL 2,xx ASL 2 +3,yy ASL 2+3,p0
 			EndIf
 		 yy+1:yy&63:Until yy=y1 OR Joyb(0)&2=2
 		xx+1:xx&63:Until xx=x1 OR Joyb(0)&2=2
-		If Joyb(0)&2=2 Then Use lmaxlen 1:Scroll 0,0,64,64,0,0,2:zoom{1}
+		If Joyb(0)&2=2 Then Use BitMap 1:Scroll 0,0,64,64,0,0,2:zoom{1}
 	 Case 34
-		Repeat:Use localstat 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
+		Repeat:Use Window 7:x1=WMouseX ASR 2:y1=QLimit(WMouseY ASR 2,0,63):x1&63:y1&63
 		 If x1<>ox1 OR y1<>oy1
-			Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
+			Use BitMap 2:Scroll 0,0,64,64,0,0,1
 			Box x0,y0,x1,y1,-1:zoom{2}
-			Use localstat 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
+			Use Window 6:WLocate 0,229:Print"X:"+Right$("0"+Str$(Int(1+Abs(x1-x0))),2)
 			WLocate 32,229:Print"Y:"+Right$("0"+Str$(Int(1+Abs(y1-y0))),2)
 			ox1=x1:oy1=y1
 		 EndIf
@@ -992,13 +992,13 @@ Repeat
 		If y1>24 Then x10=32
 		If y1>48 Then x10=64
 		y1=x10
-		Use lmaxlen 2:Scroll x0,y0,x1,y1,0,0,1:y0=0
+		Use BitMap 2:Scroll x0,y0,x1,y1,0,0,1:y0=0
 		Repeat:x0=0:Repeat
-		 Use lmaxlen 1:Scroll 0,0,x1,y1,x0,y0,2
+		 Use BitMap 1:Scroll 0,0,x1,y1,x0,y0,2
 		x0+x1:Until x0>63:y0+y1:Until y0>63
 		zoom{1}
 	 Case 35
-		Use lmaxlen 1:ReMap Cls(x0,y0),pal0
+		Use BitMap 1:ReMap Cls(x0,y0),pal0
 		zoom{1}
 	End Select
 	EndIf
@@ -1008,58 +1008,58 @@ Repeat
 	gadg=GadgetHit
 	Select gadg
 	 Case 6
-		ShowScreen 1:Use allocst 1
+		ShowScreen 1:Use Screen 1
 		a$=FileRequest$("Load texturemap bitmap:",path$,fnmbm2$)
-		ShowScreen 4:Use allocst 4
+		ShowScreen 4:Use Screen 4
 		If a$<>""
 		 ILBMDepth a$:If ##[$D087]<>4 Then a$=""
 		 If ##[$BE15](a$) Then LoadBitMap 6,a$
 		EndIf
 	 Case 7
-		ShowScreen 1:Use allocst 1
+		ShowScreen 1:Use Screen 1
 		a$=FileRequest$("Save texturemap bitmap:",path$,fnmbm2$)
-		ShowScreen 4:Use allocst 4
+		ShowScreen 4:Use Screen 4
 		If a$<>"" Then SaveBitmap 6,a$
 	 Case 8
 		If Disable(3,19)=2
-		 For i=0 To 15:Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
-		 Use allocst 4:Green i,r0,g0,b0:Next
+		 For i=0 To 15:Use Screen 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
+		 Use Screen 4:Green i,r0,g0,b0:Next
 		EndIf
 		ShowScreen 3
 		Repeat:Until (Joyb(0)&2)<>0
 		If Disable(3,19)=2
-		 For i=0 To 15:Use allocst 4:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
-		 Use allocst 3:Green i,r0,g0,b0:Next
+		 For i=0 To 15:Use Screen 4:r0=Blue(i):g0=Palette(i):b0=PalRGB(i):Green i,i,i,i
+		 Use Screen 3:Green i,r0,g0,b0:Next
 		EndIf
 		ShowScreen 4
 	 Case 4
-		Use lmaxlen 6:Scroll 0,0,64,64,tmx0(map0),tmy0(map0),1
+		Use BitMap 6:Scroll 0,0,64,64,tmx0(map0),tmy0(map0),1
 	 Case 5
-		Use lmaxlen 1:Scroll tmx0(map0),tmy0(map0),64,64,0,0,6
+		Use BitMap 1:Scroll tmx0(map0),tmy0(map0),64,64,0,0,6
 		zoom{1}
 	 Case 15
-		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
-		Use lmaxlen 1:Scroll xlen,0,64-xlen,64,0,0,2:Scroll 0,0,xlen,64,64-xlen,0,2
+		Use BitMap 2:Scroll 0,0,64,64,0,0,1
+		Use BitMap 1:Scroll xlen,0,64-xlen,64,0,0,2:Scroll 0,0,xlen,64,64-xlen,0,2
 		zoom{1}
 	 Case 16
-		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
-		Use lmaxlen 1:Scroll 0,ylen,64,64-ylen,0,0,2:Scroll 0,0,64,ylen,0,64-ylen,2
+		Use BitMap 2:Scroll 0,0,64,64,0,0,1
+		Use BitMap 1:Scroll 0,ylen,64,64-ylen,0,0,2:Scroll 0,0,64,ylen,0,64-ylen,2
 		zoom{1}
 	 Case 17
-		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
-		Use lmaxlen 1:Scroll 0,0,64,64-ylen,0,ylen,2:Scroll 0,64-ylen,64,ylen,0,0,2
+		Use BitMap 2:Scroll 0,0,64,64,0,0,1
+		Use BitMap 1:Scroll 0,0,64,64-ylen,0,ylen,2:Scroll 0,64-ylen,64,ylen,0,0,2
 		zoom{1}
 	 Case 18
-		Use lmaxlen 2:Scroll 0,0,64,64,0,0,1
-		Use lmaxlen 1:Scroll 0,0,64-xlen,64,xlen,0,2:Scroll 64-xlen,0,xlen,64,0,0,2
+		Use BitMap 2:Scroll 0,0,64,64,0,0,1
+		Use BitMap 1:Scroll 0,0,64-xlen,64,xlen,0,2:Scroll 64-xlen,0,xlen,64,0,0,2
 		zoom{1}
 	 Case 19
 		If Disable(3,19)=2
-		 Use allocst 4:For i=0 To 15:Green i,i,i,i:Next
+		 Use Screen 4:For i=0 To 15:Green i,i,i,i:Next
 		Else
 		 For i=0 To 15
-			Use allocst 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
-			Use allocst 4:Green i,r0,g0,b0
+			Use Screen 3:r0=Blue(i):g0=Palette(i):b0=PalRGB(i)
+			Use Screen 4:Green i,r0,g0,b0
 		 Next
 		EndIf
 	 Case 1:!arrow{3,6,2,map0,QLimit(map0-1,1,20),unsn{map0,2}}
@@ -1083,7 +1083,7 @@ Repeat
 	End Select
 	EndIf
 	If ev=$8
-	 Use localstat 6
+	 Use Window 6
 	 x0=EMouseX:y0=EMouseY
 	 If y0>207 AND y0<225
 		i0=(pal0&7)ASL 3:j0=208+(pal0&8):WLine i0,j0,i0+7,j0,i0+7,j0+7,i0,j0+7,i0,j0,0
@@ -1093,8 +1093,8 @@ Repeat
 	EndIf
  EndIf
 Until gadg=36
-Free localstat 6:Free localstat 7:Free allocst 4:Use localstat 4
-ShowScreen 1:Use allocst 1
+Free Window 6:Free Window 7:Free Screen 4:Use Window 4
+ShowScreen 1:Use Screen 1
 Return
 
 Macro showsize
@@ -1104,7 +1104,7 @@ ButtonId 1,16,unsn{ysize,3}:GadgetList 1,16:Redraw 4,16
 End Macro
 
 .rendmenu
-localstat 4,60,83,160,80,$800,"",0,1,1
+Window 4,60,83,160,80,$800,"",0,1,1
 WindowOutput 4:qflag=0
 ButtonId 1,2,unsn{nbpl,1}
 ButtonId 1,5,unsn{64+xh ASL 2,3}:ButtonId 1,8,unsn{64+yh ASL 2,3}:ButtonId 1,11,unsn{zh ASL 2,3}
@@ -1112,7 +1112,7 @@ ButtonId 1,15,unsn{xsize*Disable(1,21),3}:ButtonId 1,16,unsn{ysize,3}
 ButtonId 1,23,sn{elev,2}:ButtonId 1,26,unsn{merid,3}
 ButtonId 1,29,unsn{aelev,3}:ButtonId 1,32,unsn{relev,3}
 ButtonId 1,35,unsn{amerid,3}:ButtonId 1,38,unsn{rmerid,3}
-Use localstat 4:WColour 3,0:WCls 2:For i=1 To 42:Redraw 4,i:Next
+Use Window 4:WColour 3,0:WCls 2:For i=1 To 42:Redraw 4,i:Next
 WLocate 1,1:Print"BitPlanes"
 WLocate 1,11:Print"X":WLocate 1,21:Print"Y":WLocate 1,31:Print"Z"
 WLocate 56,11:Print"X":WLocate 56,21:Print"Y"
@@ -1122,7 +1122,7 @@ WLocate 1,61:Print"Merid:A":WLocate 105,61:Print"F"
 Repeat
  ev.l=WaitEvent:evw=EventWindow
  If ev=$40 AND evw=4
-	gadg=GadgetHit:Use localstat 4
+	gadg=GadgetHit:Use Window 4
 	Select gadg
 	 Case 1:!arrow{1,4,2,nbpl,QLimit(nbpl-1,1,5),unsn{nbpl,1}}
 	 Case 2:!arrow{1,4,2,nbpl,QLimit(!vl{1,2},1,5),unsn{nbpl,1}}
@@ -1171,13 +1171,13 @@ Repeat
  FlushEvents
 Until qflag>0
 qflag=0
-Free localstat 4:Use localstat 3
-ShowScreen 1:Use allocst 1
+Free Window 4:Use Window 3
+ShowScreen 1:Use Screen 1
 Return
 CEND
 
 .objtoshp
-##[$80CA] object(iobj)
+USEPATH object(iobj)
 Select Int(\typ/2)
  Case 0:Restore ellipsoid
  Case 1:Restore cylindroid
@@ -1225,9 +1225,9 @@ End Statement
 cosa=HCos(cama*0.0174533):sina=HSin(cama*0.0174533)
 Select edmode
  Case 1;isometric
-	Use lmaxlen 3:BlockScroll 0
+	Use BitMap 3:BlockScroll 0
 	For i=0 To nobj
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 col0=1
 	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
 	 For ll=0 To nlines(i)-1
@@ -1245,10 +1245,10 @@ Select edmode
 	Box 0,0,255,255,1
 	BitMaptoWindow 3,0,0,0,0,0,256,256
  Case 2;techie drawing
-	Use lmaxlen 3:BlockScroll 0
+	Use BitMap 3:BlockScroll 0
 	BitMaptoWindow 3,0,0,0,128,0,128,128
 	For i=0 To nobj
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 col0=1
 	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
 	 For ll=0 To nlines(i)-1
@@ -1262,10 +1262,10 @@ Select edmode
 	Next
 	Box 0,0,127,127,1
 	BitMaptoWindow 3,0,0,0,0,0,128,128
-	Use lmaxlen 3:BlockScroll0
+	Use BitMap 3:BlockScroll0
 	For i=0 To nobj
 	 col0=1
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
 	 For ll=0 To nlines(i)-1
 		For pp=0 To npts(i,ll)-1
@@ -1278,9 +1278,9 @@ Select edmode
 	Next
 	Box 0,0,127,127,1
 	BitMaptoWindow 3,0,0,0,0,128,128,128
-	Use lmaxlen 3:BlockScroll0
+	Use BitMap 3:BlockScroll0
 	For i=0 To nobj
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 col0=1
 	 If !yes1 OR !yes2 Then col0=2:If obj=i Then col0=3
 	 For ll=0 To nlines(i)-1
@@ -1297,25 +1297,25 @@ Select edmode
 End Select
 .qwkdraw
 If nobj=-1 Then Return
-If edmode=2 Then Use localstat 0:WBox 128,0,255,127,0
+If edmode=2 Then Use Window 0:WBox 128,0,255,127,0
 cosa=HCos(cama*0.0174533):sina=HSin(cama*0.0174533)
 y0=80:x0=160:If edmode=1 Then y0=224:x0=32
-Use localstat 0:WindowOutput 0
+Use Window 0:WindowOutput 0
 pntr{x0,y0,0,-14.3,"z"}:pntr{x0,y0,16*cosa,16*root5r*sina,"x"}:pntr{x0,y0,16*sina,-16*root5r*cosa,"y"}
-##[$80CA] object(obj)\r1
+USEPATH object(obj)\r1
 r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
 pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r1"}
-##[$80CA] object(obj)\r2
+USEPATH object(obj)\r2
 r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
 pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r2"}
-##[$80CA] object(obj)\r3
+USEPATH object(obj)\r3
 r0=Tan(\x*\x+\y*\y+\z*\z):x1=\x/r0:y1=\y/r0:z1=\z/r0
 pntr{224,y0,16*(x1*cosa+y1*sina),-16*root5r*(z1+z1+y1*cosa-x1*sina),"r3"}
 Return
 
 .load
 a$=FileRequest$("Object File to Load",path$,fnmobj$)
-##[$80CA] object(i)
+USEPATH object(i)
 If a$="" Then Return
 If WriteMem(0,a$)
  oflag=1
@@ -1349,7 +1349,7 @@ EndIf
 Return
 
 .panel
-Use lmaxlen 3
+Use BitMap 3
 Boxf 0,0,9,9,2:Boxf 1,3,8,6,0:Boxf 2,2,7,7,0:Boxf 3,1,6,8,0:Boxf 4,2,6,6,1:Boxf 3,3,7,5,1:Boxf 5,3,6,4,3:GetaShape 10,0,0,10,10
 Boxf0,0,9,9,2:Boxf1,3,8,7,0:Point3,8,0:Line1,2,8,2,1:Boxf3,1,6,3,1:Boxf4,3,7,7,1:Point7,7,2:Line6,4,6,8,3:GetaShape 11,0,0,10,10
 Boxf0,0,9,9,2:Boxf1,4,4,6,0:Line2,7,4,7,0:Point 4,8,0:Boxf5,4,8,6,1:Line5,7,7,7,1:Point5,8,1
@@ -1362,16 +1362,16 @@ Line3,3,3,5,0:Line2,5,2,7,0:Point1,7,0:GetaShape 14,0,0,10,10
 SelectMode 0,2
 SetString 3,1
 StringText$ 1,1
-workstart 0,0,0,0,1,"<<"
-workstart 0,46,0,0,2,">>"
+TextGadget 0,0,0,0,1,"<<"
+TextGadget 0,46,0,0,2,">>"
 StringText$ 2,1
-workstart 0,18,0,0,3,"T-D|Iso"
+TextGadget 0,18,0,0,3,"T-D|Iso"
 !make3{0,5,26,10,2,"01"}
-workstart 0,0,20,1,9,"G-"
-workstart 0,46,20,1,10,"G+"
+TextGadget 0,0,20,1,9,"G-"
+TextGadget 0,46,20,1,10,"G+"
 StringText$ 3,1
-workstart 0,18,20,1,7,"-"
-workstart 0,32,20,1,8,"+"
+TextGadget 0,18,20,1,7,"-"
+TextGadget 0,32,20,1,8,"+"
 !make3{0,12,18,30,3,"000"}
 !make3{0,16,18,40,3,"000"}
 !make3{0,19,18,50,3,"000"}
@@ -1388,44 +1388,44 @@ ShapeGadget 0,12,130,512,40,11
 ShapeGadget 0,22,130,512,41,12
 ShapeGadget 0,32,130,512,42,13
 ShapeGadget 0,42,130,512,43,14
-workstart 0,52,130,1,44,Chr$(189)
+TextGadget 0,52,130,1,44,Chr$(189)
 StringText$ 4,1
-workstart 0,0,140,0,45,"INS"
-workstart 0,32,140,0,46,"DEL"
+TextGadget 0,0,140,0,45,"INS"
+TextGadget 0,32,140,0,46,"DEL"
 StringText$ 1,1
-workstart 0,0,150,0,47,"><"
-workstart 0,46,150,0,48,"<>"
+TextGadget 0,0,150,0,47,"><"
+TextGadget 0,46,150,0,48,"<>"
 StringText$ 2,1
-workstart 0,18,150,0,49,"FIX|REL"
+TextGadget 0,18,150,0,49,"FIX|REL"
 StringText$ 1,1
-workstart 0,0,160,0,50,"COPY"
-workstart 0,34,160,1,51,"X"
-workstart 0,44,160,1,52,"Y"
-workstart 0,54,160,1,53,"Z"
+TextGadget 0,0,160,0,50,"COPY"
+TextGadget 0,34,160,1,51,"X"
+TextGadget 0,44,160,1,52,"Y"
+TextGadget 0,54,160,1,53,"Z"
 !make3{0,55,26,170,2,"02"}
 StringText$ 5,1
-workstart 0,0,180,0,57,"Rot"
+TextGadget 0,0,180,0,57,"Rot"
 StringText$ 1,1:Enable 2
-workstart 0,34,180,512,58,"X"
-workstart 0,44,180,512,59,"Y"
-workstart 0,54,180,512,60,"Z":Borders 0,60,On
+TextGadget 0,34,180,512,58,"X"
+TextGadget 0,44,180,512,59,"Y"
+TextGadget 0,54,180,512,60,"Z":Borders 0,60,On
 !make3{0,62,5,190,4,"+000"}
 StringText$ 2,1
-workstart 0,0,200,0,64,"<"
-workstart 0,52,200,0,65,">"
+TextGadget 0,0,200,0,64,"<"
+TextGadget 0,52,200,0,65,">"
 Enable 3
-workstart 0,2,210,512,66,"r1":Borders 0,66,On
-workstart 0,22,210,512,67,"r2"
-workstart 0,42,210,512,68,"r3"
-workstart 0,26,220,1,70,"+"
+TextGadget 0,2,210,512,66,"r1":Borders 0,66,On
+TextGadget 0,22,210,512,67,"r2"
+TextGadget 0,42,210,512,68,"r3"
+TextGadget 0,26,220,1,70,"+"
 StringText$ 5,1
-workstart 0,0,220,0,69,"LD"
-workstart 0,38,220,0,71,"SV"
+TextGadget 0,0,220,0,69,"LD"
+TextGadget 0,38,220,0,71,"SV"
 StringText$ 8,1
-workstart 0,0,230,0,72,"Render"
+TextGadget 0,0,230,0,72,"Render"
 StringText$ 16,1
-workstart 0,0,240,0,14,"Quit"
-localstat 1,256,6,64,250,$800,"",3,1,0;editor controls
+TextGadget 0,0,240,0,14,"Quit"
+Window 1,256,6,64,250,$800,"",3,1,0;editor controls
 WCls 2:For i=1 To 75:Redraw 1,i:Next
 WColour 1,0:Cursor 1
 WLocate 1,11:Print"Grp"
@@ -1452,92 +1452,92 @@ WLocate 12,201:Print"SHEAR"
 !make3{1,32,114,50,3,"000"}
 !make3{1,35,58,60,3,"000"}
 !make3{1,38,114,60,3,"000"}
-workstart 1,124,70,0,42,"Exit"
+TextGadget 1,124,70,0,42,"Exit"
 StringText$ 3,1
-workstart 1,0,70,0,40,"Colours"
-workstart 1,62,70,0,41,"TexMaps"
+TextGadget 1,0,70,0,40,"Colours"
+TextGadget 1,62,70,0,41,"TexMaps"
 StringText$ 1,6
-workstart 1,68,10,0,13,"<"
-workstart 1,102,10,0,14,">"
+TextGadget 1,68,10,0,13,"<"
+TextGadget 1,102,10,0,14,">"
 StringText$ 1,1
 StringGadget 1,76,10,0,15,4,24
 StringGadget 1,76,20,0,16,4,24
 StringText$ 16,1
-workstart 1,56,30,0,17,"ISO|FAC|TOP"
+TextGadget 1,56,30,0,17,"ISO|FAC|TOP"
 StringText$ 12,1
-workstart 1,112,0,0,18,"Go!"
-workstart 1,112,10,1,19,"H/Q"
+TextGadget 1,112,0,0,18,"Go!"
+TextGadget 1,112,10,1,19,"H/Q"
 StringText$ 4,1
-workstart 1,112,20,1,20,"ShadO"
-workstart 1,112,30,0,21,"LoRes|HiRes"
+TextGadget 1,112,20,1,20,"ShadO"
+TextGadget 1,112,30,0,21,"LoRes|HiRes"
 
 CNIF #edonly=0
 
 SelectMode 1,0:SetString 3,2
 StringText$ 7,1
-workstart 2,116,0,0,1,"Ld"
-workstart 2,146,0,0,2,"Sv"
+TextGadget 2,116,0,0,1,"Ld"
+TextGadget 2,146,0,0,2,"Sv"
 StringText$ 4,1
-workstart 2,116,10,0,3,"Sm"
-workstart 2,140,10,0,4,"Pl"
-workstart 2,116,20,0,6,"Mt"
-workstart 2,140,20,0,27,"Gl"
+TextGadget 2,116,10,0,3,"Sm"
+TextGadget 2,140,10,0,4,"Pl"
+TextGadget 2,116,20,0,6,"Mt"
+TextGadget 2,140,20,0,27,"Gl"
 StringText$ 2,6
-workstart 2,164,10,1,5,Chr$(189)
+TextGadget 2,164,10,1,5,Chr$(189)
 !make3{2,8,130,30,3,"100"}
 !make3{2,11,130,40,3,"000"}
 !make3{2,14,113,64,1,"0"}
 !make3{2,17,113,74,1,"0"}
 !make3{2,20,113,84,1,"0"}
 StringText$ 3,1
-workstart 2,113,94,0,22,"SPR"
+TextGadget 2,113,94,0,22,"SPR"
 !make3{2,24,113,106,1,"5"}
 StringText$ 11,1
-workstart 2,113,118,0,26,"X"
+TextGadget 2,113,118,0,26,"X"
 
 SelectMode 8,0
 SetString 15,1
 !make3{3,2,13,0,2,"01"}
 StringText$ 2,1
-workstart 3,0,10,0,4,"Put"
-workstart 3,0,20,0,5,"Get"
-workstart 3,28,10,0,6,"Load"
-workstart 3,28,20,0,7,"Save"
+TextGadget 3,0,10,0,4,"Put"
+TextGadget 3,0,20,0,5,"Get"
+TextGadget 3,28,10,0,6,"Load"
+TextGadget 3,28,20,0,7,"Save"
 !make3{3,10,26,32,2,"01"}
 !make3{3,13,26,42,2,"00"}
 StringText$ 1,1
-workstart 3,0,59,0,15,"<"
-workstart 3,10,54,0,16,"^"
-workstart 3,10,64,0,17,"V"
-workstart 3,20,59,0,18,">"
+TextGadget 3,0,59,0,15,"<"
+TextGadget 3,10,54,0,16,"^"
+TextGadget 3,10,64,0,17,"V"
+TextGadget 3,20,59,0,18,">"
 StringText$ 1,6
-workstart 3,30,54,0,8,"View"
+TextGadget 3,30,54,0,8,"View"
 StringText$ 16,1
-workstart 3,0,76,0,19,"Bump|Cols"
+TextGadget 3,0,76,0,19,"Bump|Cols"
 !make3{3,21,26,86,2,"08"}
 !make3{3,24,26,96,2,"08"}
 Enable 1
-StringText$ 12,1:workstart 3,0,108,512,26,"Point"
-StringText$ 16,1:workstart 3,0,118,512,27,"Line"
-StringText$ 20,1:workstart 3,0,128,512,28,"Box"
-StringText$ 16,1:workstart 3,0,138,512,29,"BoxF"
-StringText$ 8,1:workstart 3,0,148,512,30,"Circle"
-StringText$ 4,1:workstart 3,0,158,512,31,"CircleF"
-StringText$ 12,1:workstart 3,0,168,512,32,"Flood"
-StringText$ 8,1:workstart 3,0,178,512,33,"Smooth"
-StringText$ 16,1:workstart 3,0,188,512,34,"Tile"
-StringText$ 12,1:workstart 3,0,198,512,35,"ReMap"
-StringText$ 16,1:workstart 3,0,238,0,36,"Exit"
+StringText$ 12,1:TextGadget 3,0,108,512,26,"Point"
+StringText$ 16,1:TextGadget 3,0,118,512,27,"Line"
+StringText$ 20,1:TextGadget 3,0,128,512,28,"Box"
+StringText$ 16,1:TextGadget 3,0,138,512,29,"BoxF"
+StringText$ 8,1:TextGadget 3,0,148,512,30,"Circle"
+StringText$ 4,1:TextGadget 3,0,158,512,31,"CircleF"
+StringText$ 12,1:TextGadget 3,0,168,512,32,"Flood"
+StringText$ 8,1:TextGadget 3,0,178,512,33,"Smooth"
+StringText$ 16,1:TextGadget 3,0,188,512,34,"Tile"
+StringText$ 12,1:TextGadget 3,0,198,512,35,"ReMap"
+StringText$ 16,1:TextGadget 3,0,238,0,36,"Exit"
 
 !make3{4,2,9,0,3,"000"}
 StringText$ 8,1
-workstart 4,0,10,0,9,"Insert"
-workstart 4,0,20,0,4,"Delete"
+TextGadget 4,0,10,0,9,"Insert"
+TextGadget 4,0,20,0,4,"Delete"
 StringText$ 4,1
-workstart 4,0,30,0,6,"Save BB"
-workstart 4,0,40,0,7,"Load BB"
+TextGadget 4,0,30,0,6,"Save BB"
+TextGadget 4,0,40,0,7,"Load BB"
 StringText$ 8,1
-workstart 4,8,50,0,8,"O.K."
+TextGadget 4,8,50,0,8,"O.K."
 CEND
 Return
 
@@ -1545,13 +1545,13 @@ CNIF #edonly=0
 Statement gimme{shap0}
 Shared scrsize,nbpl
 adress.l=Addr MidHandle(shap0+343)
-Use lmaxlen 4:Boxf 64,0,scrsize-1,255,0:Boxf 0,150,63,180,0
+Use BitMap 4:Boxf 64,0,scrsize-1,255,0:Boxf 0,150,63,180,0
 If Peek.w(adress)<>0
  nplanes=Peek.w(adress+4):gw=Peek.w(adress):gh=Peek.w(adress+2):gcol=(1 ASL nplanes)-1
  If nplanes>nbpl Then Poke.w adress+4,nbpl
  xhand=Peek.w(adress+10):yhand=Peek.w(adress+12)
  xpos=QLimit(128,64+xhand,scrsize+xhand-gw):ypos=QLimit(128,yhand,255+yhand-gh)
- Use lmaxlen 4:longdiv shap0+343,xpos,ypos,0
+ Use BitMap 4:Blit shap0+343,xpos,ypos,0
  Poke.w adress+4,nplanes
  WindowOutput 8:WColour 3,0
  WLocate 4,61:NPrint unsn{gw,3},"x",unsn{gh,3}
@@ -1561,9 +1561,9 @@ EndIf
 End Statement
 
 .shapeman
-owin=##[$80D1] localstat
-Use allocst 4:ButtonId 4,2,unsn{shap0,3}:gadg=0
-Boxf 0,0,scrsize-1,255,0:localstat 8,0,90,64,90,$800,"",0,1,4
+owin=Used Window
+Use Screen 4:ButtonId 4,2,unsn{shap0,3}:gadg=0
+Boxf 0,0,scrsize-1,255,0:Window 8,0,90,64,90,$800,"",0,1,4
 gimme{shap0}
 Repeat
  ev.l=WaitEvent
@@ -1589,24 +1589,24 @@ Repeat
 		If Peek.w(Addr MidHandle(599))<>0 Then Free MidHandle 599
 		gimme{shap0}
 	 Case 6
-		ShowScreen 1:Use allocst 1
+		ShowScreen 1:Use Screen 1
 		a$=FileRequest$("Save Blitz2 shapes as:",path2$,fnmshp$)
-		ShowScreen 4:Use allocst 4
+		ShowScreen 4:Use Screen 4
 		If a$<>"" Then SaveShapes 343,599,a$
 	 Case 7
-		ShowScreen 1:Use allocst 1
+		ShowScreen 1:Use Screen 1
 		a$=FileRequest$("Load Blitz2 shapes:",path2$,fnmshp$)
-		ShowScreen 4:Use allocst 4
+		ShowScreen 4:Use Screen 4
 		If a$<>"" Then LoadShapes shap0+343,a$
 	End Select
  EndIf
 Until gadg=8
-Free localstat 8
-Use localstat owin
+Free Window 8
+Use Window owin
 Return
 
 .invert
- ##[$80CA] object(i)
+ USEPATH object(i)
  \C[1]=\r2\y*\r3\z-\r2\z*\r3\y
  \C[2]=\r2\z*\r3\x-\r2\x*\r3\z
  \C[3]=\r2\x*\r3\y-\r2\y*\r3\x
@@ -1634,14 +1634,14 @@ Return
 mode=nbpl:scrsize=320:If Disable(1,21)=2 Then mode=QLimit(mode,2,4)+8:scrsize=640
 hqflag=Abs(Disable(1,19)):numcol=(1 ASL nbpl)-1
 If hqflag=1 Then xsize*2:ysize*2
-allocst 4,mode:Use allocst 4:bpmask=(1 ASL nbpl)-1
-ScreensBitMap 4,4:Use lmaxlen 4:Boxf 0,0,scrsize-1,255,0
+Screen 4,mode:Use Screen 4:bpmask=(1 ASL nbpl)-1
+ScreensBitMap 4,4:Use BitMap 4:Boxf 0,0,scrsize-1,255,0
 For i=0 To 31:i0=i*3:Green i,buff(i0),buff(i0+1),buff(i0+2):Next
-Gosub shapeman:Use lmaxlen 4:Boxf 0,0,scrsize-1,255,0
+Gosub shapeman:Use BitMap 4:Boxf 0,0,scrsize-1,255,0
 merid0=merid*0.0174533:elev0=elev*0.0174533
 light\x=HSin(merid0)*HCos(elev0),-HCos(merid0)*HCos(elev0),HSin(elev0)
 For i=0 To nobj
- ##[$80CA] object(i)
+ USEPATH object(i)
  oldobj(i)\c\x=\c\x,\c\y,\c\z:oldobj(i)\r1\x=\r1\x,\r1\y,\r1\z
  oldobj(i)\r2\x=\r2\x,\r2\y,\r2\z:oldobj(i)\r3\x=\r3\x,\r3\y,\r3\z
 Next
@@ -1659,7 +1659,7 @@ Select view
 End Select
 drayy*drayx:drayz*drayx:shx=(16+xh)/drayx:shy/drayx:If scrsize=640 Then xsize*2:drayx/2:shx*2
 If hqflag=1
- lmaxlen 8,xsize,2,nbpl:For i=0 To 15:For j=0 To 15:For k=0 To 15:lut(i,j,k)=-1:Next:Next:Next
+ BitMap 8,xsize,2,nbpl:For i=0 To 15:For j=0 To 15:For k=0 To 15:lut(i,j,k)=-1:Next:Next:Next
  shx ASR 1:shy ASR 1
 EndIf
 ii0=0:jj0=0:cosa=HCos(ang*0.0174533):sina=HSin(ang*0.0174533)
@@ -1676,7 +1676,7 @@ Repeat
 	For i=0 To nobj
 	 nongrata(i)=0
 	Next
-	scrx=((ii-1) ASR hqflag)+ii0:scry=((jj-1) ASR hqflag)+jj0:Use lmaxlen 4:Point scrx,scry,bpmask
+	scrx=((ii-1) ASR hqflag)+ii0:scry=((jj-1) ASR hqflag)+jj0:Use BitMap 4:Point scrx,scry,bpmask
 	imask=(((ii-1) ASR hqflag)&1+((jj-1) ASR hqflag)&1)&1
  EndIf
  rayx\x=rayx0,rayy0,rayz0
@@ -1688,7 +1688,7 @@ Repeat
 	 impact\dist=255
 	 goflag=(nref<>0) OR (ii<xl1(i)) OR (ii>xl2(i)) OR (jj<yl1(i)) OR (jj>yl2(i))
 	 If i<>oproobj AND nongrata(i)=0 AND goflag=0
-		##[$80CA] object(i)
+		USEPATH object(i)
 		;Transform ray to object coordinates
 		x0=rayx\x-\c\x
 		y0=rayx\y-\c\y
@@ -1741,7 +1741,7 @@ Repeat
 	 If nref=0
 		col0=0
 		If shadow AND jj>=jjshad
-		 ##[$80CA] object(i)
+		 USEPATH object(i)
 		 yshad=-16
 		 If jjshad<>ysize Then yshad=16-32*(jjshad-jj)/(jjshad-ysize)
 		 rayx\x=rayx0,yshad,0:rayu\x=0,0,1
@@ -1821,7 +1821,7 @@ Repeat
  Until flag<>0
  Select hqflag
 	Case 0
-	 Use lmaxlen 4:Point scrx,scry,col0&bpmask
+	 Use BitMap 4:Point scrx,scry,col0&bpmask
 	 If (col0&bpmask)>0
 		If ii-1>shxr Then shxr=ii-1
 		If ii-1<shxl Then shxl=ii-1
@@ -1830,14 +1830,14 @@ Repeat
 	 EndIf
 	Case 1
 .hq
-	 Use lmaxlen 4:Point scrx,scry,col0&bpmask
-	 Use lmaxlen 8:Point ii-1,(jj-1)&1,col0&bpmask
+	 Use BitMap 4:Point scrx,scry,col0&bpmask
+	 Use BitMap 8:Point ii-1,(jj-1)&1,col0&bpmask
 	 If ii=xsize AND jj&1=0 AND new_pixel=1
 		For i=0 To (xsize ASR 1)-1
 		 r0=-30:g0=-30:b0=-30:ppflag=0
 		 For j0=0 To 1:For i0=0 To 1
-			 Use lmaxlen 8:pp=Cls((i ASL1)+i0,j0):ppflag|pp
-			 Use allocst 4:r0+Blue(pp):g0+Palette(pp):b0+PalRGB(pp)
+			 Use BitMap 8:pp=Cls((i ASL1)+i0,j0):ppflag|pp
+			 Use Screen 4:r0+Blue(pp):g0+Palette(pp):b0+PalRGB(pp)
 		 Next:Next
 		 If ppflag=0
 			col0=0
@@ -1856,7 +1856,7 @@ Repeat
 			If jjj0>shyb Then shyb=jjj0
 			If jjj0<shyt Then shyt=jjj0
 		 EndIf
-		 Use lmaxlen 4:Point ii0+i-1,scry,col0
+		 Use BitMap 4:Point ii0+i-1,scry,col0
 		Next
 	 EndIf
  End Select
@@ -1865,7 +1865,7 @@ Until (ii=xsize AND jj=Int(ysize)) OR mbflag=2
 If mbflag<>2
  If shxl<shxr AND shyb>shyt
 	shed=342+(kkk+shap0)&255
-	Use lmaxlen 4:GetaShape shed,ii0+shxl,jj0+shyt,shxr-shxl+1,shyb-shyt+1
+	Use BitMap 4:GetaShape shed,ii0+shxl,jj0+shyt,shxr-shxl+1,shyb-shyt+1
 	Handle shed,shx-shxl,shy-shyt
  EndIf
  ii0+xsize ASR hqflag:If ii0>scrsize+1-(xsize ASR hqflag) Then ii0=0:jj0+(Int(ysize)ASR hqflag)
@@ -1877,7 +1877,7 @@ If mbflag<>2
 	nkkk=0:nnkk+1
 	aang=(aelev/relev)*0.0174533:aang*nnkk:cosa=HCos(aang):sina=HSin(aang)
 	For i=0 To nobj
-	 ##[$80CA] object(i)
+	 USEPATH object(i)
 	 *ptr=oldobj(i)
 	 x1=*ptr\c\y:z1=*ptr\c\z-16
 	 \c\y=cosa*x1+sina*z1:\c\z=16+cosa*z1-sina*x1
@@ -1898,20 +1898,20 @@ EndIf
 Until kkk=nframe OR mbflag=2
  If scrsize=640 Then xsize/2
  For i=0 To nobj
-	##[$80CA] oldobj(i)
+	USEPATH oldobj(i)
 	object(i)\c\x=\c\x,\c\y,\c\z:object(i)\r1\x=\r1\x,\r1\y,\r1\z
 	object(i)\r2\x=\r2\x,\r2\y,\r2\z:object(i)\r3\x=\r3\x,\r3\y,\r3\z
  Next
  If mbflag=0 Then Gosub shapeman
  If mbflag<>0 Then Repeat:Until Joyb(0)&2=0
 FlushEvents
-If hqflag=1 Then Free lmaxlen 8:xsize/2:ysize/2
-Free allocst 4:Free lmaxlen 4:Use allocst 1:Use localstat 4
+If hqflag=1 Then Free BitMap 8:xsize/2:ysize/2
+Free Screen 4:Free BitMap 4:Use Screen 1:Use Window 4
 Return
 
 .findcol
 ;input shp00 and tmap.vec to get out col00
-##[$80CA] object(shp00)
+USEPATH object(shp00)
 grp0=\group
 If supermap(grp0)<>0;supermap present
  *ptr=object(id1(grp0))
@@ -1923,7 +1923,7 @@ If supermap(grp0)<>0;supermap present
  tmap\x=*ptr\C[1]*tmpu\x+*ptr\C[2]*tmpu\y+*ptr\C[3]*tmpu\z
  tmap\y=*ptr\C[4]*tmpu\x+*ptr\C[5]*tmpu\y+*ptr\C[6]*tmpu\z
  tmap\z=*ptr\C[7]*tmpu\x+*ptr\C[8]*tmpu\y+*ptr\C[9]*tmpu\z
- ##[$80CA] tmap
+ USEPATH tmap
  Select (*ptr\typ)/2
 	Case 1;cylindroid
 	 tmx=wrap{\y,\z}:tmy=(1+\x) ASL 5
@@ -1932,13 +1932,13 @@ If supermap(grp0)<>0;supermap present
 	Default:tmx=wrap{\y,\z}:tmy=(32+wrap{-\x,Tan(\y*\y+\z*\z)}ASL 1)
  End Select
  tm.w=supermap(grp0):tx0=tmx0(tm):ty0=tmy0(tm):tmx&63:tmy&63
- Use lmaxlen 6:col00=Cls(tx0+tmx,ty0+tmy)
+ Use BitMap 6:col00=Cls(tx0+tmx,ty0+tmy)
 EndIf
 If supermap(grp0)=0
  col00=object(shp00)\col
  If col00<0
 	;texture map
-	##[$80CA] tmap
+	USEPATH tmap
 	typ0=object(shp00)\typ
 	Select Int(typ0/2)
 	Case 0;ellipsoid
@@ -1981,7 +1981,7 @@ If supermap(grp0)=0
 	 tmx=wrap{\y,Sgn(\x)*Tan(r0*r0-\y*\y)}
 	End Select
 	tm.w=Abs(col00):tx0=tmx0(tm):ty0=tmy0(tm):tmx&63:tmy&63
-	Use lmaxlen 6:col00=Cls(tx0+tmx,ty0+tmy)
+	Use BitMap 6:col00=Cls(tx0+tmx,ty0+tmy)
  EndIf;map or no map
 EndIf;supermap/none
 Return
@@ -1993,7 +1993,7 @@ c=tmpx\x*tmpx\x+tmpx\y*tmpx\y+tmpx\z*tmpx\z-1
 d=b*b-4*c
 If d<=0 Then Return
 t=(-b-Tan(d))*0.5:If t<0 Then Return
-##[$80CA] impact
+USEPATH impact
 \x0\x=tmpx\x+t*tmpu\x:\x0\y=tmpx\y+t*tmpu\y:\x0\z=tmpx\z+t*tmpu\z
 \map\x=\x0\x,\x0\y,\x0\z:\id=i
 *ptr.obj=object(i)
@@ -2022,7 +2022,7 @@ If *ptr\bump>0
  tmx=wrap{\x0\y,\x0\z}&63
  r0=Tan(\x0\y*\x0\y+\x0\z*\x0\z):tmy=(32+wrap{-Sgn(\x0\x)*Tan(1-r0*r0),r0}ASL 1)&63
  tmx+tmx0(*ptr\bump):tmy+tmy0(*ptr\bump)
- Use lmaxlen 6
+ Use BitMap 6
  dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
  dby=(Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63)-Cls(tmx,tmy))ASR 1
  \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
@@ -2057,7 +2057,7 @@ c=tmpx\y*tmpx\y+tmpx\z*tmpx\z-1
 d=b*b-4*a*c
 If d<=0 AND c>0 Then Return
 t=(-b-Tan(d))*0.5/a:If t<0 AND (c>0 OR zz1=0) Then Return
-##[$80CA] impact
+USEPATH impact
 fflag=0
 x1=tmpx\x+t*tmpu\x
 If Abs(x1)<=1
@@ -2158,7 +2158,7 @@ Select fflag
 End Select
 If *ptr\bump>0 AND fflag<5
  tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
- Use lmaxlen 6
+ Use BitMap 6
  dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
  dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
  \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
@@ -2191,7 +2191,7 @@ Data.q 4, 1,1,0, -1,1,0, -1,1,0, 1,1,0
 Data.q 4, 1,-1,0, -1,-1,0, -1,-1,0, 1,-1,0
 
 .cuboid
-##[$80CA] impact
+USEPATH impact
 fflag=0
 If tmpx\x>1 AND tmpu\x<0; check x=1 plane
  t=(1-tmpx\x)/tmpu\x:y2=tmpx\y+t*tmpu\y:z2=tmpx\z+t*tmpu\z
@@ -2250,7 +2250,7 @@ EndIf
 If fflag=0 Then Return
 If *ptr\bump>0
  tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
- Use lmaxlen 6
+ Use BitMap 6
  dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
  dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
  \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
@@ -2279,7 +2279,7 @@ Data.q 4, 1,1,-1, 1,-1,-1, -1,-1,-1, -1,1,-1
 .pyramid
 fflag=0
 zz1=object(i)\C[0]:zz0=1-zz1
-##[$80CA] impact
+USEPATH impact
 If tmpx\z<0 AND tmpu\z>0; check z=0 plane
  t=(-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
  If Abs(x2)<1 AND Abs(y2)<1
@@ -2339,7 +2339,7 @@ If fflag=0 Then Return
 \map\x=\x0\x,\x0\y,\x0\z:\id=i
 If *ptr\bump>0
  tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
- Use lmaxlen 6
+ Use BitMap 6
  dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
  dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
  \n\x=\n\x+dbx*nmx\x+dby*nmy\x,\n\y+dbx*nmx\y+dby*nmy\y,\n\z+dbx*nmx\z+dby*nmy\z
@@ -2366,7 +2366,7 @@ Data.q 4, 1,1,1, 1,-1,1, -1,-1,1, -1,1,1
 .cone
 zz1=object(i)\C[0]:zz0=1-zz1
 fflag=0
-##[$80CA] impact
+USEPATH impact
 If tmpx\z<0 AND tmpu\z>0; check z=0 plane
  t=(-tmpx\z)/tmpu\z:x2=tmpx\x+t*tmpu\x:y2=tmpx\y+t*tmpu\y
  If (x2*x2+y2*y2)<=1
@@ -2407,7 +2407,7 @@ If fflag<>0
  If *ptr\bump>0
 	tmx=wrap{\x0\y,Sgn(\x0\x)*Tan(r0*r0-\x0\y*\x0\y)}:tmy=(1-r0) ASL 6
 	tmx&63:tmx+tmx0(*ptr\bump):tmy&63:tmy+tmy0(*ptr\bump)
-	Use lmaxlen 6
+	Use BitMap 6
 	dbx=(Cls(tmx,tmy)-Cls(tmx0(*ptr\bump)+(tmx+1)&63,tmy))ASR 1
 	dby=(Cls(tmx,tmy)-Cls(tmx,tmy0(*ptr\bump)+(tmy+1)&63))ASR 1
 	\n\x=\n\x-dbx*nmx\x+dby*nmy\x,\n\y-dbx*nmx\y+dby*nmy\y,\n\z-dbx*nmx\z+dby*nmy\z

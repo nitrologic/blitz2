@@ -18,14 +18,14 @@ nxnib:
 End Function
 
 .getflags:
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0
 	LoadBitMap 0,"flags.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	For x=0 To 7
 		For y=0 To 7
 			getblock{blok,bm,x*8,y*8}:blok+32

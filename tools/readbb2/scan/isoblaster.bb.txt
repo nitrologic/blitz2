@@ -32,15 +32,15 @@ Dim map.w(20,20) ;bit smaller than the dungeon (at present)
 
 LoadShapes 0,"blocks.shapes"	;tiles for the ground
 LoadShapes 4,"balls.shapes"	 ;balls for fx etc.
-casestrcomp 0,"balls.iff"		 ;palette for forground playfield
-casestrcomp 0,"blocks.iff",8	;palette for backrground
+LoadPalette 0,"balls.iff"		 ;palette for forground playfield
+LoadPalette 0,"blocks.iff",8	;palette for backrground
 LoadShapes 16,"isoshapes"		 ;shapes rendered by IsoRender.bb
 
-lmaxlen 0,320+64,256+80,3	;foreground A
-lmaxlen 1,320+64,256+80,3	;foreground B
-lmaxlen 2,640,512,3				;large scrolling background
+BitMap 0,320+64,256+80,3	;foreground A
+BitMap 1,320+64,256+80,3	;foreground B
+BitMap 2,640,512,3				;large scrolling background
 
-longmult 0,32:longmult 1,32		 ;two queues for double buffered blitting
+Queue 0,32:Queue 1,32		 ;two queues for double buffered blitting
 
 Macro p 320+(`1-`2)ASL 4,128+(`1+`2-`3)ASL3:End Macro			 ;back
 Macro f 320+32-sx+(`1-`2)ASL4,128+32-sy+(`1+`2-`3)ASL3:End Macro	;front
@@ -62,7 +62,7 @@ Gosub initgame	;initialise objects in the game
 
 While Joyb(0)=0
 	VWait:ShowF db,32,40,sx:ShowB 2,sx,sy,32	;position bitmaps in display
-	db=1-db:Use lmaxlen db		 ;swap buffer for double buffered drawing
+	db=1-db:Use BitMap db		 ;swap buffer for double buffered drawing
 	Gosub moveme							;move me
 	Gosub movethem						;and them
 	UnQueue db:Gosub drawbobs ;then draw everyone in new pos
@@ -76,7 +76,7 @@ End
 ;
 
 .moveme:
-	##[$80CA] *me										 ;use pointer to my object in list
+	USEPATH *me										 ;use pointer to my object in list
 	\rot=QWrap(\rot-Joyx(1)/2,0,16) ;rotate according to joystick
 	If Joyb(1)=1										;if fire
 		\vx+qsin(\rot ASL 4) ASR 6		;then thrust in direction I
@@ -92,14 +92,14 @@ End
 	\sx-sx+32:\sy-sy+32
 	\depth=\x+\y						 ;don't forget my depth variable
 	If map(\x,\y)=1					;oh and colour in block if I stand on one
-		Use lmaxlen 2:x=Int(\x):y=Int(\y):longdiv 2,!p{x,y,0}:Use lmaxlen db
+		Use BitMap 2:x=Int(\x):y=Int(\y):Blit 2,!p{x,y,0}:Use BitMap db
 	EndIf
 	Return
 
 .movethem:
-	##[$80CA] bob()					 ;simple routine that loops through
-	newmem bob()				 ;all shapes makeing /id=2 shapes
-	While globfree(bob())	 ;fly round in circles...
+	USEPATH bob()					 ;simple routine that loops through
+	ResetList bob()				 ;all shapes makeing /id=2 shapes
+	While NextItem(bob())	 ;fly round in circles...
 		If \id=2
 			\rot=QWrap(\rot+\rotv,0,16)
 			\rot2=QWrap(\rot2+1,0,16)
@@ -111,9 +111,9 @@ End
 
 .drawbobs:
 	SortList bob(),0				;sort from back to front
-	newmem bob()				 ;loop through and draw, if they
-	##[$80CA] bob()					 ;are \id=2 draw propellor as well
-	While globfree(bob())
+	ResetList bob()				 ;loop through and draw, if they
+	USEPATH bob()					 ;are \id=2 draw propellor as well
+	While NextItem(bob())
 		If PColl(\sx,\sy,1,1,16,40,320+31,256+40)
 			QBlit db,\id*16+\rot,\sx,\sy
 			If \id=2 Then QBlit db,\id*16+16+\rot2,\sx,\sy
@@ -123,10 +123,10 @@ End
 
 .initgame:
 	ClearList bob()
-	globalloc bob():*me.object=bob()
+	AddItem bob():*me.object=bob()
 	*me\id=1,.5,.5,0
 	For i=0 To 2
-		If globalloc(bob())
+		If AddItem(bob())
 			bob()\id=2,Rnd(19),Rnd(19):\rotv=(Rnd(1)-.5)ASR 2
 		EndIf
 	Next
@@ -138,10 +138,10 @@ End
 	Return
 
 .drawmap:
-	Use lmaxlen 2
+	Use BitMap 2
 	For x=0 To 19
 		For y=0 To 19
-			If map(x,y)>-1 Then longdiv map(x,y),!p{x,y,0}
+			If map(x,y)>-1 Then Blit map(x,y),!p{x,y,0}
 		Next
 	Next
 	Return

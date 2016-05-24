@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/2d.bb2
 
-allocst 0,3:ScreensBitMap 0,0:BlockScroll
+Screen 0,3:ScreensBitMap 0,0:BlockScroll
 Green 0,0,0,0
 
 nd=64

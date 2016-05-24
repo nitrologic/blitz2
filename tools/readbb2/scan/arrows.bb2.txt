@@ -56,18 +56,18 @@ r(2,3)= 0 :g(2,3)= 2 :b(2,3)= 7
 ;---------------------------------------------------------------
 ;							load files, initialise display
 
-##[$80CC] :File 2048
+NoCli :File 2048
 LoadSprites 0,"arrows.sprites"
 LoadShapes 0,"arrows.shapes"
-astring 0,"Arrow.font"
-lmaxlen 1,320,256,4 :BlockScroll 0 :LoadBitMap 1,"titlescreen.IFF"
-lmaxlen 0,320,512,4 :BlockScroll 0 :LoadBitMap 0,"dartboard.IFF",0
+LoadBlitzFont 0,"Arrow.font"
+BitMap 1,320,256,4 :BlockScroll 0 :LoadBitMap 1,"titlescreen.IFF"
+BitMap 0,320,512,4 :BlockScroll 0 :LoadBitMap 0,"dartboard.IFF",0
 LoadSound 1,"Hit1.snd" :LoadSound 2,"Hit2.snd"
 LoadSound 3,"Hit3.snd" :LoadSound 4,"hitwire.snd"
 LoadSound 5,"hitwall.snd" :LoadSound 6,"quickcheer.snd"
 LoadSound 7,"quickclap.snd" :LoadSound 8,"longclap.snd"
 LoadSound 9,"tapkey.snd"
-Use lmaxlen 0 :BitMapOutput 0 :Filter On
+Use BitMap 0 :BitMapOutput 0 :Filter On
 
 For d=1 To 9
 	Poke.w Addr Sound(d)+4,372
@@ -96,7 +96,7 @@ Statement digit{value,x,y}					 ; Do 3 digit number on panel
 	For d=1 To 3
 		value=Asc(Mid$(d$,d,1))-48
 		If value<0 OR value>9 OR flag=True Then value=10
-		longdiv value,x+(32*(d-1)),y
+		Blit value,x+(32*(d-1)),y
 	Next d
 End Statement
 
@@ -154,7 +154,7 @@ End Statement
 
 Statement customgadget{t$,cx,cy}	; Make a custom gadget
 	t$=UCase$(Left$(t$,10))
-	longdiv 31,cx*8-(((10-Len(t$))*8)/2+4),cy*8-3
+	Blit 31,cx*8-(((10-Len(t$))*8)/2+4),cy*8-3
 	Colour 1,10 :Locate cx,cy :Print t$ :Colour 1,0
 End Statement
 
@@ -222,21 +222,21 @@ Statement flashshow{}						; Copy the Mainscreen display to
 	showbottom{8}
 	MouseArea 228,182,230,184
 	VWait :MouseArea 24,24,296,238
-	longdiv 32,81,305+((gametype+doubles)*8)
+	Blit 32,81,305+((gametype+doubles)*8)
 	Select points
 		Case 101 :d=305
 		Case 301 :d=313
 		Case 501 :d=321
 		Default : points=301 :d=313
 	End Select
-	longdiv 32,225,d
+	Blit 32,225,d
 	Select numlegs
 		Case 1 :d=305
 		Case 3 :d=313
 		Case 5 :d=321
 		Default :numlegs=1 :d=305
 	End Select
-	longdiv 32,273,d
+	Blit 32,273,d
 	allcpu=True
 End Statement
 
@@ -280,8 +280,8 @@ Repeat
 		my-38
 
 		If mx>=10 AND mx<=27							; Game buttons clicked
-			longdiv 33,81,305 :longdiv 33,81,329
-			longdiv 32,81,8*(38+my)+1 :gametype=my :doubles=0
+			Blit 33,81,305 :Blit 33,81,329
+			Blit 32,81,8*(38+my)+1 :gametype=my :doubles=0
 			If gametype=1 Then gametype=0 :doubles=1
 			t=0
 			For d=1 To 16
@@ -292,20 +292,20 @@ Repeat
 		If my<3
 
 			If mx>=28 AND mx<=33	 ; Points buttons clicked
-				longdiv 33,225,305
+				Blit 33,225,305
 				Select my
-					Case 0 :points=101 :longdiv 32,225,305
-					Case 1 :points=301 :longdiv 32,225,313
-					Case 2 :points=501 :longdiv 32,225,321
+					Case 0 :points=101 :Blit 32,225,305
+					Case 1 :points=301 :Blit 32,225,313
+					Case 2 :points=501 :Blit 32,225,321
 				End Select
 			EndIf
 
 			If mx>=34 AND mx<=36	 ; Legs/Lives buttons clicked
-				longdiv 33,273,305
+				Blit 33,273,305
 				Select my
-					Case 0 :numlegs=1 :longdiv 32,273,305
-					Case 1 :numlegs=3 :longdiv 32,273,313
-					Case 2 :numlegs=5 :longdiv 32,273,321
+					Case 0 :numlegs=1 :Blit 32,273,305
+					Case 1 :numlegs=3 :Blit 32,273,313
+					Case 2 :numlegs=5 :Blit 32,273,321
 				End Select
 			EndIf
 
@@ -342,7 +342,7 @@ Repeat
 			numplayers=1 :d$="TO EDIT" :editing=True :Gosub selectplayers
 			Colour 1,0 :ct{"** player editor **",32}
 			Colour 11,0 :ct{p(pl)\name,34}
-			quit=False :longdiv 30,77,284 :flag=p(pl)\stat
+			quit=False :Blit 30,77,284 :flag=p(pl)\stat
 			customgadget{"<<",11,51} :customgadget{">>",27,51}
 			UnBuffer 0 :BBlit 0,p(pl)\fig,144,418 :rank=p(pl)\ranking
 			If p(pl)\stat=1 Then d$=" COMPUTER " Else d$="	HUMAN	 "
@@ -566,7 +566,7 @@ Case 0 ;					Standard and Doubles
 		Else
 			Colour 11,0 :ct{"WINNER OF THE MATCH IS",42}
 			Colour	1,0 :ct{p(winner)\name,44}
-			longdiv p(winner)\fig,146,396
+			Blit p(winner)\fig,146,396
 			If doubles=1
 				If p(winner)\team=0 Then d$="RED" Else d$="GREEN"
 				Colour 4,0 :ct{"FOR THE "+d$+" TEAM",50}
@@ -711,7 +711,7 @@ Case 2 ;					Killer
 							p(play(d))\wongames-1 :flashwipe{} :Colour 11,0
 							ct{p(play(d))\name,42} :Colour 1,0
 							ct{"has lost a life",44}
-							longdiv p(play(d))\fig,146,396 :hidedarts{} :showbottom{16}
+							Blit p(play(d))\fig,146,396 :hidedarts{} :showbottom{16}
 							If d=pl Then Sound 6,4
 							VWait 14 :Sound 7,1
 							If p(play(d))\wongames=0
@@ -722,7 +722,7 @@ Case 2 ;					Killer
 							Gosub update_list
 							If offs=1
 								ct{"winner is "+p(winner)\name,44} :gameover=True
-								longdiv p(winner)\fig,146,396 :Sound 8,2 :d$="C"
+								Blit p(winner)\fig,146,396 :Sound 8,2 :d$="C"
 							EndIf
 							Gosub yesno :showtop{16} :showdarts{}
 						EndIf
@@ -820,7 +820,7 @@ Case 4 ;					Hit the number
 	Until gameover=True
 	waitbutton{On} :cleanup{0}
 	flashwipe{} :ct{"END OF GAME",32}
-	longdiv p(play(pl))\fig,146,322 :Colour 11,0 :Format"##" :d=numthrows
+	Blit p(play(pl))\fig,146,322 :Colour 11,0 :Format"##" :d=numthrows
 	Locate 4,41 :Print "	 DARTS THROWN =	1 * " ,d
 	Locate 4,42 :Print "		SINGLES HIT = 10 * ",sing :d+(sing*10)
 	Locate 4,43 :Print "		DOUBLES HIT = 25 * ",doub :d+(doub*25)

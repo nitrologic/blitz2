@@ -33,7 +33,7 @@ Function.q hite{x,y}
 	Function Return t
 End Function
 
-lmaxlen 0,640,256,1:lmaxlen 1,640,256,1:Mouse On
+BitMap 0,640,256,1:BitMap 1,640,256,1:Mouse On
 
 Slice 0,44,640,256,$fff9,1,0,32,640,640:Show 0:Green 1,15,13,13
 
@@ -57,7 +57,7 @@ SetInt 5:t.l+1:End SetInt
 t.l=0:f.l=0
 
 Repeat
-	VWait:Show db:db=1-db:Use lmaxlen db:BlockScroll
+	VWait:Show db:db=1-db:Use BitMap db:BlockScroll
 	ang +0.05:If ang>(2*Pi) Then ang-(2*Pi)
 	qc=HCos(ang):qs=HSin(ang):Gosub Draw:f.l+1
 Until Joyb(0)<>0

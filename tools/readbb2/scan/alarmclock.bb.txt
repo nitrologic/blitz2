@@ -4,13 +4,13 @@
 ;
 
 WBStartup
-freest 0
+WbToScreen 0
 MaxLen LSD$=47
 If ##[$BE15] ("Alarm.Snd")
 	LoadSound 0,"Alarm.Snd"
 	Goto clclcl
 EndIf
-localstat 0,100,11,350,60,$1000,"ALARM CLOCK INFO",1,2
+Window 0,100,11,350,60,$1000,"ALARM CLOCK INFO",1,2
 WLocate 10,5
 NPrint "Sample Not found error"
 WLocate 10,15
@@ -75,29 +75,29 @@ Goto SCREENSETUP
 	atgo=0
 
 .SCREENSETUP
-workstart 0,305,15,0,0,"About"
-workstart 0,355,15,0,1,"ALARM"
-workstart 0,405,15,0,2,"QUIT"
-workstart0,380,188,0,3,"UPDATE"
+TextGadget 0,305,15,0,0,"About"
+TextGadget 0,355,15,0,1,"ALARM"
+TextGadget 0,405,15,0,2,"QUIT"
+TextGadget0,380,188,0,3,"UPDATE"
 For y=0 To 11
-	workstart 0,15,(10*y)+50,0,10+y,"<=>"
+	TextGadget 0,15,(10*y)+50,0,10+y,"<=>"
 Next y
-workstart 0,20,188,0,40,"0|1|2|3"
-workstart 0,36,188,0,41,"0|1|2|3|4|5|6|7|8|9"
-workstart 0,70,188,0,42,"JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC"
-workstart 0,122,188,0,43,"19|20"
-workstart 0,146,188,0,44,"0|1|2|3|4|5|6|7|8|9"
-workstart 0,162,188,0,45,"0|1|2|3|4|5|6|7|8|9"
-workstart 0,230,188,0,46,"00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23"
-workstart 0,272,188,0,47,"0|1|2|3|4|5"
-workstart 0,289,188,0,48,"0|1|2|3|4|5|6|7|8|9"
-workstart 0,20,202,0,51,"INFO"
-workstart 0,330,188,0,59,"CLEAR"
-workstart 0,350,202,0,50,"ONCE	 |WEEKLY |MONTHLY|YEARLY "
+TextGadget 0,20,188,0,40,"0|1|2|3"
+TextGadget 0,36,188,0,41,"0|1|2|3|4|5|6|7|8|9"
+TextGadget 0,70,188,0,42,"JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC"
+TextGadget 0,122,188,0,43,"19|20"
+TextGadget 0,146,188,0,44,"0|1|2|3|4|5|6|7|8|9"
+TextGadget 0,162,188,0,45,"0|1|2|3|4|5|6|7|8|9"
+TextGadget 0,230,188,0,46,"00|01|02|03|04|05|06|07|08|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23"
+TextGadget 0,272,188,0,47,"0|1|2|3|4|5"
+TextGadget 0,289,188,0,48,"0|1|2|3|4|5|6|7|8|9"
+TextGadget 0,20,202,0,51,"INFO"
+TextGadget 0,330,188,0,59,"CLEAR"
+TextGadget 0,350,202,0,50,"ONCE	 |WEEKLY |MONTHLY|YEARLY "
 
 
 
-localstat 0,190,11,450,184,$1004,"Alarm Clock",1,2,0
+Window 0,190,11,450,184,$1004,"Alarm Clock",1,2,0
 
 WBox 7,12,300,28,1
 WBox 8,13,299,27,0

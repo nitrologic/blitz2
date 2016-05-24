@@ -3,11 +3,11 @@
 ; render graphics for use in sky cricket program
 ;
 
-##[$CD10] 0,3,24,4:CludgeBitMap 0,0:Use lmaxlen 0
+##[$CD10] 0,3,24,4:CludgeBitMap 0,0:Use BitMap 0
 Boxf 0,0,2,23,11:Point 0,23,0:Point 1,23,0:Point 0,22,0
 For i=0 To 2:Boxf 0,2+i*4,3,3+i*4,12:Next:MakeCookie 0
 
-##[$CD10] 1,6,12,4:CludgeBitMap 1,0:Use lmaxlen 0
+##[$CD10] 1,6,12,4:CludgeBitMap 1,0:Use BitMap 0
 Boxf 2,0,3,15,12
 Boxf 0,2,5,3,12
 Boxf 0,6,5,7,12
@@ -31,9 +31,9 @@ StopCycle 0,12,9,9,9
 StopCycle 0,13,4,10,4
 StopCycle 0,14,0,0,0
 
-lmaxlen 0,736,566,4
-allocst 0,0,0,736,566,4,$8004,"",1,2,0
-Use SetCycle 0:Use lmaxlen 0
+BitMap 0,736,566,4
+Screen 0,0,0,736,566,4,$8004,"",1,2,0
+Use SetCycle 0:Use BitMap 0
 
 BlockScroll 8
 
@@ -42,7 +42,7 @@ For i=-512 To 512 Step 8
 	Line !p{i,-512,0},!p{i,512,0},14
 Next
 
-##[$CD10] 2,736,536,1:CludgeBitMap 2,1:Use lmaxlen 1
+##[$CD10] 2,736,536,1:CludgeBitMap 2,1:Use BitMap 1
 Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},!p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},1
 For i=0 To 256 Step .8
 	Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*140,0},1
@@ -50,8 +50,8 @@ Next
 FloodFill 368,283,1
 MakeCookie 2
 
-Use lmaxlen 0
-For i=1 To 16:longdiv 2,0,i,6:Next:longdiv 2,0,0,4
+Use BitMap 0
+For i=1 To 16:Blit 2,0,i,6:Next:Blit 2,0,0,4
 
 ;For i=0 To 256 Step .5
 ;	Blit 1,!p{Sin(i*Pi/128)*128,Cos(i*Pi/128)*140,12}
@@ -65,7 +65,7 @@ FloodFill 368,243,10
 
 For i=0 To 1:Line !p{-10,-28,i},!p{10,-28,i},11:Next
 
-For i=0 To 2:longdiv 0,!p{-5+i*5,-40,20}:longdiv 0,!p{-5+i*5,40,20}:Next
+For i=0 To 2:Blit 0,!p{-5+i*5,-40,20}:Blit 0,!p{-5+i*5,40,20}:Next
 
 SaveBitmap 0,"ram:oval.iff",0
 

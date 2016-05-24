@@ -3,19 +3,19 @@ SetErr:End:End SetErr
 
 WBStartup
 
-##[$80CC]
+NoCli
 
-##[$80CB]
+CloseEd
 
 .init:
 
 ##[$FEA8] ##[$FEA7](0),-128
-freest 0
+WbToScreen 0
 
 NEWTYPE .EasyStruct:es_StructSize.l:es_Flags.l:*es_Title.b:*es_TextFormat.b:*es_GadgetFormat.b:End NEWTYPE
 
 MenuChecked 0
-newlocarr 0,0,"BlackBoard"
+MenuTitle 0,0,"BlackBoard"
 MenuItem 0,0,0,0,"About		 "
 MenuItem 0,0,0,1,"----------"
 MenuItem 0,0,0,2,"Clear		 "
@@ -24,7 +24,7 @@ MenuItem 0,0,0,4,"Load...	 "
 MenuItem 0,0,0,5,"----------"
 MenuItem 0,0,0,6,"Save			"
 MenuItem 0,0,0,7,"Save As..."
-newlocarr 0,1,"Tools"
+MenuTitle 0,1,"Tools"
 MenuItem 0,3,1,0,"	AutoSave?"
 MenuColour 0,0,1,Off
 MenuColour 0,0,3,Off
@@ -33,8 +33,8 @@ MenuColour 0,0,5,Off
 AutoSave = True
 Winx=0:Winy=0
 
-lmaxlen 0,170,85,3
-lmaxlen 1,16,16,3
+BitMap 0,170,85,3
+BitMap 1,16,16,3
 If WBDepth = 2 Then Boxf 0,0,15,15,3
 If WBDepth >= 3 Then Boxf 0,0,15,15,4
 GetaShape 1,0,0,8,8
@@ -56,7 +56,7 @@ If OpenFile(0,"Env:BlackBoard.pre")
 	AutoSave =Val(Edit$(5))
 	CloseFile 0
 
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 	LoadBitMap 0,Pa$+FileName$
 Else
@@ -72,11 +72,11 @@ If WBDepth = 1 Then End
 If WBDepth = 2 Then WinCols = 4
 If WBDepth >= 3 Then WinCols = 8
 
-workstart 1,0,87,0,1,"Clear"
+TextGadget 1,0,87,0,1,"Clear"
 PropGadget 1,49,87,64,2,90,12
 SetHProp 1,2,(2/(WinCols-1)),(1/(WinCols-1))
 
-localstat 0,Winx,Winy,170,112,$142e,"BlackBoard",0,1,1
+Window 0,Winx,Winy,170,112,$142e,"BlackBoard",0,1,1
 Active = True
 
 WLine 0,85,170,85,5
@@ -86,7 +86,7 @@ WLine 139,88,170,88,1
 WLine 139,97,170,97,1
 WLine 139,98,170,98,1
 
-arrmult 0
+SetMenu 0
 
 WinXsrt=WindowX : WinYsrt=WindowY
 WinXstp=WinXsrt+InnerWidth : WinYstp=WinYsrt+InnerHeight
@@ -102,7 +102,7 @@ WEvent.l = Event
 If WEvent = $80000 Then Active = False
 If WEvent = $40 AND GadgetHit = 1 Then Gosub Clear
 
-Use localstat 0
+Use Window 0
 WindowOutput 0
 
 Pen = Int(WinCols*(HPropPot(1,2)))
@@ -114,7 +114,7 @@ Print " "
 WColour 0,1
 Print " "
 
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 If (Joyb(0)=1) AND Cur = False
 	If (x > -1) AND (y > -1)
@@ -144,7 +144,7 @@ EndIf
 
 If (DelCur = True) AND (Cur = True)
 	BlitMode InvMode
-	longdiv 1,(8*XCur)+1,(8*YCur)+2
+	Blit 1,(8*XCur)+1,(8*YCur)+2
 	Cur = False:DelCur = False
 	OldCur = False
 EndIf
@@ -244,18 +244,18 @@ If (WEvent = $400)
 	EndIf
 
 	If DoText = True
-		Use lmaxlen 1
+		Use BitMap 1
 		BitMapOutput 1
 		Boxf 0,0,15,15,0
 		Colour Pen,1
 		Locate 0,0
 		Print a$
 		GetaShape 2,0,0,8,8
-		Use lmaxlen 0
+		Use BitMap 0
 		BitMapOutput 0
 		Boxf (8*XCur)+1,(8*YCur)+2,(8*XCur)+8,(8*YCur)+9,0
 		BlitMode CookieMode
-		longdiv 2,(8*XCur)+1,(8*YCur)+2
+		Blit 2,(8*XCur)+1,(8*YCur)+2
 		XCur = XCur + 1
 		If XCur = 20
 			XCur = 0:YCur = YCur+1
@@ -269,10 +269,10 @@ EndIf
 If ((xcur<>XCur) OR (ycur<>YCur))
 	If OldCur = True
 		BlitMode InvMode
-		longdiv 1,(8*xcur)+1,(8*ycur)+2
+		Blit 1,(8*xcur)+1,(8*ycur)+2
 	EndIf
 	BlitMode InvMode
-	longdiv 1,(8*XCur)+1,(8*YCur)+2
+	Blit 1,(8*XCur)+1,(8*YCur)+2
 	xcur=XCur:ycur=YCur
 	Cur=True
 	OldCur=True
@@ -282,9 +282,9 @@ BitMaptoWindow 0,0
 
 Until WEvent = $200
 
-Free localstat 0
-Free lmaxlen 0
-Free lmaxlen 1
+Free Window 0
+Free BitMap 0
+Free BitMap 1
 Free MidHandle 1
 End
 

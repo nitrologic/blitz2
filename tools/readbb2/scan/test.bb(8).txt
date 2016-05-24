@@ -37,7 +37,7 @@ End Statement
 	t$="track6"
 	tr=10
 
-	casestrcomp 0,"rod/track.fix"+Str$(tr)		 ;"Sega.palette"
+	LoadPalette 0,"rod/track.fix"+Str$(tr)		 ;"Sega.palette"
 	LoadBank 0,"win/track."+Str$(tr)			 ;t$+".win"
 	LoadShape 0,"mouse.iff":GetaSprite 0,0
 
@@ -45,19 +45,19 @@ End Statement
 	pumpkins.l=Bank(0)+96*48*2
 
 	InitCopList 0,$13014
-	lmaxlen 0,768,384,4
+	BitMap 0,768,384,4
 	DisplayPalette 0,0
 	DisplayBitMap 0,0
 
 	##[$CD10] 0,8,8,4
-	CludgeBitMap 0,1:Use lmaxlen 1:Boxf 0,0,7,7,2:MakeCookie 0:Use lmaxlen 0
+	CludgeBitMap 0,1:Use BitMap 1:Boxf 0,0,7,7,2:MakeCookie 0:Use BitMap 0
 	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 main:
 	BLITZ
 	BlockScroll 1
 	CreateDisplay 0
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 	Mouse On
 	MouseArea 0,0,767,383
@@ -77,7 +77,7 @@ main:
 			drawblok{blok,brush}
 ;			If ind AND 2048 Then XFlip 0
 ;			If ind AND 4096 Then YFlip 0
-			longdiv 0,x*8,y*8
+			Blit 0,x*8,y*8
 		Next
 	Next
 	MouseWait
@@ -197,13 +197,13 @@ End
 fix: Data 5,0
 
 doblocks:
-lmaxlen 0,1024,512,4
+BitMap 0,1024,512,4
 LoadBitMap 0,t$,0
 
 InitBank 0,64,0
 InitBank 1,8192*32,65536
 n.w=0:nn.w=0
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 
 Dim wind.w(95,47)
 Dim first.w(95,47)
@@ -271,10 +271,10 @@ count:Dc.w0
 .dithermap
 t$="track24"
 
-casestrcomp 0,"shit/shit/sega.palette2"
+LoadPalette 0,"shit/shit/sega.palette2"
 
-lmaxlen 0,768,384,8
-lmaxlen 1,768,384,4
+BitMap 0,768,384,8
+BitMap 1,768,384,4
 
 LoadBitMap 0,"shit/maps/"+t$+".256"
 
@@ -297,7 +297,7 @@ For y=0 To 383
 	For x=0 To 767
 		If Joyb(0)<>0 Then End
 		oddx=x&1
-		Use lmaxlen 0:p=Cls(x,y)
+		Use BitMap 0:p=Cls(x,y)
 ;		p=(y)+192
 		c=0
 		If p>0	 AND p<64	Then c=0:p-0
@@ -358,7 +358,7 @@ For y=0 To 383
 ;			p=11-c*8+Int(p/2)+dith
 		EndIf
 
-		Use lmaxlen 1:Point x,y,p
+		Use BitMap 1:Point x,y,p
 	Next
 Next
 
@@ -440,12 +440,12 @@ SetIO io
 
 bigx=768:bigy=384
 
-lmaxlen 0,bigx,bigy,8
+BitMap 0,bigx,bigy,8
 BitPlanesBitMap 0,1,63
 BitPlanesBitMap 0,3,192
 
 BitMapOutput 0
-Use lmaxlen 1
+Use BitMap 1
 
 #map=On:#exo=Off:#exo24=On:#freq=Off:#pmap=Off
 Include "shit/LoadINC.bb"
@@ -455,7 +455,7 @@ For gri=24 To 24
 	m$="shit/maps/"
 	t$="track"+Str$(gri)
 	GetMap{m$+t$}									 ;loadtrack
-	Use lmaxlen 0:BlockScroll
+	Use BitMap 0:BlockScroll
 	VWait 30:BLITZ
 	Gosub OpenUp
 	Gosub Main
@@ -494,7 +494,7 @@ Return
 .Main
 	jstp=1/16/.75
 	myscal=2/Pi
-	Use lmaxlen 1 ;only 6 bitplane plotting
+	Use BitMap 1 ;only 6 bitplane plotting
 
 		For delj=32 To -32 Step -jstp
 			x=MapX(0,delj)*.75
@@ -545,7 +545,7 @@ Return
 
 .DoCurve
 
-	Use lmaxlen 3
+	Use BitMap 3
 	For dtp.q=2 To pts3+0.2 Step 1/256
 		FindLo dtp.q
 
@@ -577,7 +577,7 @@ End Statement
 
 .PreScan1
 	scalfac=.75
-	Use lmaxlen 3
+	Use BitMap 3
 	old.w=Off
 	shadel=2
 
@@ -615,7 +615,7 @@ Return
 .PreScan2
 
 	scalfac=.75
-	Use lmaxlen 3
+	Use BitMap 3
 	old.w=4
 	minus=3*scalfac
 
@@ -665,7 +665,7 @@ Return
 
 
 .DoStartLine
-	Use lmaxlen 3
+	Use BitMap 3
 	dtf=pts3+0.5
 	FindLo dtf
 	tri(0)\x=MapX(bez\i,bez\j)*scalfac,MapY(bez\i,bez\j)*scalfac
@@ -689,7 +689,7 @@ Return
 
 AMIGA
 
-lmaxlen 0,32,32,5
+BitMap 0,32,32,5
 DecodePalette 0,32
 ##[$CE18] 0,0,12,	 0,64,0,0,240,0					 ;greens = 0..12
 ##[$CE18] 0,13,25, 64,32,0,192,128,64			 ;browns = 13..25
@@ -698,7 +698,7 @@ DecodePalette 0,32
 SaveBitmap 0,"palette.999",0
 End
 
-lmaxlen 0,1024,512,8
+BitMap 0,1024,512,8
 LoadBitMap 0,"f1.aff",0
 ##[$CE18] 0,0,127,0,64,0,0,240,0
 ##[$CE18] 0,128,255,64,32,0,192,128,64
@@ -720,7 +720,7 @@ CNIF Off
 	NPrint "loaded, converting now (takes ages)"
 	##[$A411] 0,0
 	NPrint "convert worked"
-	lmaxlen 0,768,384,8
+	BitMap 0,768,384,8
 	NPrint "enuff mem.."
 
 	##[$A412] 0,0
@@ -731,7 +731,7 @@ CEND
 
 AMIGA
 
-lmaxlen 0,32,32,8
+BitMap 0,32,32,8
 DecodePalette 0,256
 ##[$CE18] 0,0,63,	 0,64,0,0,240,0						 ;greens = 0..12
 ##[$CE18] 0,64,127, 64,32,0,192,128,64				 ;browns = 13..25
@@ -740,7 +740,7 @@ DecodePalette 0,256
 SaveBitmap 0,"palette.999",0
 End
 
-lmaxlen 0,1024,512,8
+BitMap 0,1024,512,8
 LoadBitMap 0,"f1.aff",0
 ##[$CE18] 0,0,127,0,64,0,0,240,0
 ##[$CE18] 0,128,255,64,32,0,192,128,64

@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/diamonds/game/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/diamonds/game/Diamonds.bb2
-##[$80CB]:##[$80CC]
+CloseEd:NoCli
 For k=1 To 100:VWait:##[$FF89]:Next
 WBStartup
 VWait 10
@@ -62,8 +62,8 @@ CopyShape 1,0
 
 BLITZ
 NEWA:
-lmaxlen 0,960,224,5
-lmaxlen 1,960,224,5
+BitMap 0,960,224,5
+BitMap 1,960,224,5
 Slice 0,36,288,224,$fff8,5,8,32,960,960
 Show 0
 ;
@@ -71,7 +71,7 @@ Gosub GET_WALK
 Gosub SET_PALETTE
 Gosub MAKE_BACKBOX
 ;
-lmaxlen 2,320,20,1
+BitMap 2,320,20,1
 Slice 1,260,320,20,$fff8,1,8,32,320,320
 Show 2
 ;
@@ -121,7 +121,7 @@ game_stat=0
 DisplayOn
 Show 0,SX,0
 ShowSprite walk(ANI),PX,PY,0
-Use lmaxlen 0
+Use BitMap 0
 BBlit 0,33,85,100
 FadeIn 0,2,0,31
 Repeat:VWait:Until Joyb(1)
@@ -139,7 +139,7 @@ End SetInt
 .MAIN:
 Repeat
 	 VWait
-	 Show db,SX,0:db=1-db:Use lmaxlen db:UnBuffer db
+	 Show db,SX,0:db=1-db:Use BitMap db:UnBuffer db
 
 	 Poke.w $DFF106,0
 	 Poke.w $DFF1FC,0
@@ -286,10 +286,10 @@ If game_stat=1
 		ShowSprite 0,-32,-32,0
 		For lop=0 To 1
 				VWait:Show lop,0,0
-				Use lmaxlen lop
+				Use BitMap lop
 				BlockScroll 0
 	 Next
-	 longdiv 39,64,124												; ---- TIME BONUS
+	 Blit 39,64,124												; ---- TIME BONUS
 	 Colour 31,0
 	 BitMapOutput 1
 	 Format "000000"
@@ -351,7 +351,7 @@ If game_stat=3
 	 Locate 25,1:Print lives.w
 	 Format ""
 	 Show 0,0,0
-	 Use lmaxlen 0
+	 Use BitMap 0
 	 BBlit 0,31,75,100
 	 FadeIn 0,2,31,31
 	 Repeat:VWait:Until Joyb(1)
@@ -366,7 +366,7 @@ EndIf
 ;
 check:
 PlayModule 0
-longdiv 40,25,96															 ; ---- Well Done
+Blit 40,25,96															 ; ---- Well Done
 FadeIn 0,2,0,31
 Repeat:VWait:Until Joyb(1)
 FadeOut 0,2,0,31
@@ -379,7 +379,7 @@ Goto enter
 mem:
 PlayModule 0
 Show 1,0,0
-Use lmaxlen 1
+Use BitMap 1
 BitMapOutput 1
 ShowSprite 0,-32,-32,0
 BlockScroll 0
@@ -396,7 +396,7 @@ enter:
 BitMapOutput 1
 Colour 31,0
 If score.l<scr.l(9) Then Goto clear
-longdiv 38,89,96															; ---- ENTER NAME BLIT
+Blit 38,89,96															; ---- ENTER NAME BLIT
 FadeIn 0,2,0,31
 n$=""
 Repeat:Until Inkey$=""
@@ -433,9 +433,9 @@ StopModule
 DisplayOff
 FlushBuffer 0
 FlushBuffer 1
-Free lmaxlen 0
-Free lmaxlen 1
-Free lmaxlen 2
+Free BitMap 0
+Free BitMap 1
+Free BitMap 2
 FreeSlices
 Free Module 0
 For lop=0 To 4	: Free Sound	lop : Next
@@ -477,7 +477,7 @@ Return
 
 .RAINBOW:
 Restore copdat
-Use lmaxlen 2
+Use BitMap 2
 For lop=0 To 6
 		Read s.l
 		ColSplit	1,s.l/256,(s.l/16) MOD 16,s.l MOD 16,lop
@@ -531,11 +531,11 @@ VWait
 ;
 ; ---- Background + Map
 ;
-Use lmaxlen 0
+Use BitMap 0
 For lop=1 To 210
 		BlitColl ptrn(level.w),bx(lop),by(lop)
 		If map(lop)>1 AND map(lop)<28
-			 longdiv map(lop),bx(lop),by(lop)
+			 Blit map(lop),bx(lop),by(lop)
 		EndIf
 Next
 ;
@@ -633,9 +633,9 @@ VWait 120
 BLITZ
 
 DisplayOff
-lmaxlen 0,320,200,4
+BitMap 0,320,200,4
 Slice 0,44,320,200,$fff8,4,8,32,320,320
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 Show 0
 Colour 7,0
@@ -653,7 +653,7 @@ loop:
 
  loptime=0
  FadeOut 0,2,0,15
- longdiv 0,22,30
+ Blit 0,22,30
  FadeIn 0,2,0,15
  Repeat
 		VWait
@@ -670,9 +670,9 @@ loop:
  Next
  loptime=0
  FadeOut 0,2,0,15
- longdiv 1,120,10
- longdiv 2,25,70
- longdiv 3,60,150
+ Blit 1,120,10
+ Blit 2,25,70
+ Blit 3,60,150
  FadeIn 0,2,0,15
  Repeat
 		VWait
@@ -690,7 +690,7 @@ loop:
  loptime=0
  pos=0
  FadeOut 0,2,0,15
- longdiv 4,15,10
+ Blit 4,15,10
  For lop=1 To 9
 		 Locate 10,7+pos
 		 Print "0"+Str$(lop)+" "+UCase$(Left$(name$(lop),9))
@@ -722,7 +722,7 @@ Free Module 0
 DisplayOff
 For lop=0 To 4:Free MidHandle lop:Next
 FreeSlices
-Free lmaxlen 0
+Free BitMap 0
 VWait
 Return
 

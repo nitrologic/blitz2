@@ -2,7 +2,7 @@
 ;
 ;disolve table creator...
 ;
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 
 Dim x(1023),y(1023)
 

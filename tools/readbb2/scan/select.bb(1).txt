@@ -4,7 +4,7 @@ DEFTYPE.l
 	Dim LL$(1000)
 
 	ScreenPens 1,1,2,1,3,0
-	allocst 0,0,0,672,256,2,$8000,title$,1,2
+	Screen 0,0,0,672,256,2,$8000,title$,1,2
 	Gosub init :CL=200
 	Gosub SELECTION
 	WCls 0
@@ -25,10 +25,10 @@ L=1:SELquit.b=0:SELECTED=-1
 
 	PropGadget 2,650,21,160,1,16,221
 	SetVProp 2,1,0,BOD
-	workstart 2,650,9,0,2,"^"
-	workstart 2,650,242,0,3,"v"
+	TextGadget 2,650,9,0,2,"^"
+	TextGadget 2,650,242,0,3,"v"
 	SetString 2,1
-	localstat 2,0,0,672,256,$1808,"",1,2,2
+	Window 2,0,0,672,256,$1808,"",1,2,2
 	WColour 1,0
 
 	OL=L:WBox 0,12,649,256,0

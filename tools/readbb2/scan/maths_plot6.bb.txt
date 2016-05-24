@@ -4,8 +4,8 @@
 ;Animated lattices are quick and easy on memory
 ;because the whole screen is filled with the same shape.
 WBStartup
-lmaxlen 0,320,256,5
-lmaxlen 1,320,256,5
+BitMap 0,320,256,5
+BitMap 1,320,256,5
 p2.f=2*Pi
 AutoCookie Off
 VWait 250
@@ -15,7 +15,7 @@ Green 0,0,0,0:For i=16 To 31:Green i,i-16,31-i,(i-16)/2:Next
 ;----------------------------------------------------------
 ;The number of frames depends only on memory available.
 ;Good effects can still be obtained with fewer bitplanes.
-Use lmaxlen 0:Show 0
+Use BitMap 0:Show 0
 u.f=0
 For s=0 To 6
 	u+0.1
@@ -42,7 +42,7 @@ While Joyb(1)=0
 	db=1-db
 	If s=0 OR s=6:si=-si:EndIf
 	s+si
-	Use lmaxlen db
+	Use BitMap db
 	For i=0 To 256 Step 64:For j=0 To 192 Step 64
 		BlitColl s,i,j
 	Next:Next

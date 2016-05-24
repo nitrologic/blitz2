@@ -469,7 +469,7 @@ Statement Screen_Swap{}
 	Else
 		Current_Bitmap = 0
 	End If
-	Use lmaxlen Current_Bitmap
+	Use BitMap Current_Bitmap
 End Statement
 
 ; --------------------------------------------------------------------
@@ -519,7 +519,7 @@ Statement Initialise_Display{}
 	End If
 	VWait 150
 	BLITZ
-	longdiv 0, 266, 77
+	Blit 0, 266, 77
 	Use SetCycle 0
 	Screen_Swap{}
 	Copy_Used_Bitmap_To_Current_Bitmap{}
@@ -602,7 +602,7 @@ Statement Orbital_Print{String_$, Initial_X, Initial_Y, Excess_Mask}
 	; PRINT NUMBER
 
 		If (#Value_Of_Zero <= Value_Of_Character) AND (Value_Of_Character <= #Value_Of_Nine)
-			longdiv ~#Zero - #Value_Of_Zero~ + Value_Of_Character, X, Y, Excess_Mask
+			Blit ~#Zero - #Value_Of_Zero~ + Value_Of_Character, X, Y, Excess_Mask
 			X = X + #Number_Width
 		End If
 
@@ -615,7 +615,7 @@ Statement Orbital_Print{String_$, Initial_X, Initial_Y, Excess_Mask}
 	; PRINT LETTER
 
 		If (#Value_Of_A <= Value_Of_Character) AND (Value_Of_Character <= #Value_Of_Z)
-			longdiv ~#A - #Value_Of_A~ + Value_Of_Character, X, Y, Excess_Mask
+			Blit ~#A - #Value_Of_A~ + Value_Of_Character, X, Y, Excess_Mask
 			X = X + #Letter_Width
 		End If
 
@@ -712,7 +712,7 @@ Statement Add_New_High_Score{}
 			If (#Space_Gadget_Y <= Y) AND (Y <= ~#Space_Gadget_Y + (#Space_Gadget_Height * #Font_Height)~)
 				If Len(Name$) <= ~#High_Score_Name_Width - 1~
 					Name$ = Name$ + " "
-					longdiv 0, #New_Name_X, #New_Name_Y
+					Blit 0, #New_Name_X, #New_Name_Y
 					Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
 					Screen_Swap{}
 				End If
@@ -726,7 +726,7 @@ Statement Add_New_High_Score{}
 				If Len(Name$) > 0
 					Name$ = Left$(Name$, Len(Name$) - 1)
 				End If
-				longdiv 0, #New_Name_X, #New_Name_Y
+				Blit 0, #New_Name_X, #New_Name_Y
 				Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
 				Screen_Swap{}
 			End If
@@ -749,7 +749,7 @@ Statement Add_New_High_Score{}
 				Gadget_ID = (Int(Y / #Font_Height) * #Alphabet_Gadgets_Width) + Int(X / #Letter_Width)
 				If Len(Name$) <= ~#High_Score_Name_Width - 1~
 					Name$ = Name$ + Chr$(#Value_Of_A + Gadget_ID)
-					longdiv 0, #New_Name_X, #New_Name_Y
+					Blit 0, #New_Name_X, #New_Name_Y
 					Orbital_Print{Name$, #New_Name_X, #New_Name_Y, %0101}
 					Screen_Swap{}
 				End If
@@ -1692,7 +1692,7 @@ Statement Draw_Buffer_Shapes{}
 	Shared Ball()
 	For Y = #Ball_Array_Height - 1 To 0 Step -1
 		For X = 0 To #Ball_Array_Height - 1
-			longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+			Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 		Next X
 	Next Y
 End Statement
@@ -1792,17 +1792,17 @@ Statement Draw_Balls{}
 		X = Grid_To_Screen_X{Column_Selected} + #Selector_Offset
 		Y = Grid_To_Screen_Y{-1}
 		GetaShape #Bottom_Column_Selector_Buffer, X, Y, #Column_Selector_Width, #Column_Selector_Height
-		Use lmaxlen 0
-		longdiv #Bottom_Column_Selector, X, Y
-		Use lmaxlen 1
-		longdiv #Bottom_Column_Selector, X, Y
+		Use BitMap 0
+		Blit #Bottom_Column_Selector, X, Y
+		Use BitMap 1
+		Blit #Bottom_Column_Selector, X, Y
 		Y = Grid_To_Screen_Y{#Ball_Array_Height - 1} - #Column_Selector_Height
 		GetaShape #Top_Column_Selector_Buffer, X, Y, #Column_Selector_Width, #Column_Selector_Height
-		Use lmaxlen 0
-		longdiv #Top_Column_Selector, X, Y
-		Use lmaxlen 1
-		longdiv #Top_Column_Selector, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Top_Column_Selector, X, Y
+		Use BitMap 1
+		Blit #Top_Column_Selector, X, Y
+		Use BitMap Current_Bitmap
 	End If
 
 ; DRAW ROW SELECTORS
@@ -1811,11 +1811,11 @@ Statement Draw_Balls{}
 		X = Grid_To_Screen_X{0} - #Row_Selector_Width
 		Y = Grid_To_Screen_Y{Row_Selected} + #Selector_Offset
 		GetaShape #Left_Row_Selector_Buffer, X, Y, #Row_Selector_Width, #Row_Selector_Height
-		Use lmaxlen 0
-		longdiv #Left_Row_Selector, X, Y
-		Use lmaxlen 1
-		longdiv #Left_Row_Selector, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Left_Row_Selector, X, Y
+		Use BitMap 1
+		Blit #Left_Row_Selector, X, Y
+		Use BitMap Current_Bitmap
 		X = Grid_To_Screen_X{#Ball_Array_Width}
 		ShowSprite #Right_Row_Selector, X, Y, 0
 	End If
@@ -1826,11 +1826,11 @@ Statement Draw_Balls{}
 		X = Grid_To_Screen_X{0} - #Magnet_Width
 		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
 		GetaShape #Left_Magnet_Buffer, X, Y, #Magnet_Width, #Magnet_Height
-		Use lmaxlen 0
-		longdiv #Left_Magnet, X, Y
-		Use lmaxlen 1
-		longdiv #Left_Magnet, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Left_Magnet, X, Y
+		Use BitMap 1
+		Blit #Left_Magnet, X, Y
+		Use BitMap Current_Bitmap
 	End If
 
 ; DRAW RIGHT MAGNET
@@ -1867,20 +1867,20 @@ Statement Draw_Balls{}
 			; REMOVE BALL
 
 				Case #Just_No_Ball_1
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_No_Ball_2
 				Case #Just_No_Ball_2
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #No_Ball
 					Ball(X, Y)\Shape_ = #No_Shape
 
 			; STOP BALL
 
 				Case #Just_Still_Ball_1
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Still_Ball_2
 				Case #Just_Still_Ball_2
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Still_Ball
 
 			; SPIN BALL
@@ -1894,15 +1894,15 @@ Statement Draw_Balls{}
 					Case #Blue_Ball
 						Ball(X, Y)\Shape_ = #Spin_To_Red_Ball_1
 					End Select
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Spinning_Ball_2
 					Ball(X, Y)\Shape_ = Ball(X, Y)\Shape_ + 1
 				Case #Just_Spinning_Ball_2
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Spinning_Ball_3
 					Ball(X, Y)\Shape_ = Ball(X, Y)\Shape_ + 1
 				Case #Just_Spinning_Ball_3
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Stopped_Spinning_1
 					Select Ball(X, Y)\Shape_
 					Case #Spin_To_Red_Ball_3
@@ -1916,20 +1916,20 @@ Statement Draw_Balls{}
 			; STOP SPINNING BALL
 
 				Case #Just_Stopped_Spinning_1
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Stopped_Spinning_2
 				Case #Just_Stopped_Spinning_2
-					longdiv Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Still_Ball
 
 			; DRAG BALL LEFT
 
 				Case #Just_Dragged_Left_1
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} - Y_Offset, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Dragged_Left_2
 				Case #Just_Dragged_Left_2
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} - Y_Offset, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Dragged_Left
 				Case #Dragged_Left
@@ -1938,11 +1938,11 @@ Statement Draw_Balls{}
 			; DRAG BALL RIGHT
 
 				Case #Just_Dragged_Right_1
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} + Y_Offset, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Just_Dragged_Right_2
 				Case #Just_Dragged_Right_2
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X} + Y_Offset, Grid_To_Screen_Y{Y}
 					Ball(X, Y)\Motion = #Dragged_Right
 				Case #Dragged_Right
@@ -1953,11 +1953,11 @@ Statement Draw_Balls{}
 				Case #Falling_Ball
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
 				Case #Just_Falling_Ball_1
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
 					Ball(X, Y)\Motion = #Just_Falling_Ball_2
 				Case #Just_Falling_Ball_2
-					longdiv Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
+					Blit Ball(X, Y)\Buffer_Shape, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y}
 					BBlit Current_Bitmap, Ball(X, Y)\Shape_, Grid_To_Screen_X{X}, Grid_To_Screen_Y{Y} + Y_Offset
 					Ball(X, Y)\Motion = #Falling_Ball
 				End Select
@@ -1987,16 +1987,16 @@ Statement Draw_Balls{}
 	If Column_Selected >= 0
 		X = Grid_To_Screen_X{Column_Selected} + #Selector_Offset
 		Y = Grid_To_Screen_Y{-1}
-		Use lmaxlen 0
-		longdiv #Bottom_Column_Selector_Buffer, X, Y
-		Use lmaxlen 1
-		longdiv #Bottom_Column_Selector_Buffer, X, Y
+		Use BitMap 0
+		Blit #Bottom_Column_Selector_Buffer, X, Y
+		Use BitMap 1
+		Blit #Bottom_Column_Selector_Buffer, X, Y
 		Y = Grid_To_Screen_Y{#Ball_Array_Height - 1} - #Column_Selector_Height
-		Use lmaxlen 0
-		longdiv #Top_Column_Selector_Buffer, X, Y
-		Use lmaxlen 1
-		longdiv #Top_Column_Selector_Buffer, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Top_Column_Selector_Buffer, X, Y
+		Use BitMap 1
+		Blit #Top_Column_Selector_Buffer, X, Y
+		Use BitMap Current_Bitmap
 		Column_Selected = -1
 	End If
 
@@ -2005,11 +2005,11 @@ Statement Draw_Balls{}
 	If Row_Selected >= 0
 		X = Grid_To_Screen_X{0} - #Row_Selector_Width
 		Y = Grid_To_Screen_Y{Row_Selected} + #Selector_Offset
-		Use lmaxlen 0
-		longdiv #Left_Row_Selector_Buffer, X, Y
-		Use lmaxlen 1
-		longdiv #Left_Row_Selector_Buffer, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Left_Row_Selector_Buffer, X, Y
+		Use BitMap 1
+		Blit #Left_Row_Selector_Buffer, X, Y
+		Use BitMap Current_Bitmap
 		X = Grid_To_Screen_X{#Ball_Array_Width}
 		ShowSprite #Right_Row_Selector, #Slice_Width, #Slice_Height, 0
 		Row_Selected = -1
@@ -2020,11 +2020,11 @@ Statement Draw_Balls{}
 	If Left_Magnet
 		X = Grid_To_Screen_X{0} - #Magnet_Width
 		Y = Grid_To_Screen_Y{Magnetised_Row} + #Magnet_Offset
-		Use lmaxlen 0
-		longdiv #Left_Magnet_Buffer, X, Y
-		Use lmaxlen 1
-		longdiv #Left_Magnet_Buffer, X, Y
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit #Left_Magnet_Buffer, X, Y
+		Use BitMap 1
+		Blit #Left_Magnet_Buffer, X, Y
+		Use BitMap Current_Bitmap
 		Left_Magnet = Off
 	End If
 
@@ -2100,13 +2100,13 @@ Statement Display_Level_Stats{}
 	#Min_Y = 13
 	#Max_X = #Min_X + 39
 	#Max_Y = #Min_Y + 22
-	Use lmaxlen 0
+	Use BitMap 0
 	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
 	Orbital_Print{Str$(Level), #Stats_X, #Level_Y, %1111}
-	Use lmaxlen 1
+	Use BitMap 1
 	Boxf #Min_X, #Min_Y, #Max_X, #Max_Y, 0
 	Orbital_Print{Str$(Level), #Stats_X, #Level_Y, %1111}
-	Use lmaxlen Current_Bitmap
+	Use BitMap Current_Bitmap
 
 ; DISPLAY CHECKING
 
@@ -2123,11 +2123,11 @@ Statement Display_Level_Stats{}
 		End If
 		VWait 150
 		BLITZ
-		Use lmaxlen 0
-		longdiv 0, 273, 89
-		Use lmaxlen 1
-		longdiv 0, 273, 89
-		Use lmaxlen Current_Bitmap
+		Use BitMap 0
+		Blit 0, 273, 89
+		Use BitMap 1
+		Blit 0, 273, 89
+		Use BitMap Current_Bitmap
 	End If
 End Statement
 
@@ -2427,14 +2427,14 @@ Statement Initialise_All{}
 	LoadSound #Game_Over, "Sound Effects/Game Over"
 	Buffer 0, ((#Ball_Diameter / 8) * #Ball_Diameter * 5) * #Ball_Array_Width * #Ball_Array_Height
 	Buffer 1, ((#Ball_Diameter / 8) * #Ball_Diameter * 5) * #Ball_Array_Width * #Ball_Array_Height
-	lmaxlen 0, #Slice_Width, #Slice_Height, #Slice_Depth
-	lmaxlen 1, #Slice_Width, #Slice_Height, #Slice_Depth
+	BitMap 0, #Slice_Width, #Slice_Height, #Slice_Depth
+	BitMap 1, #Slice_Width, #Slice_Height, #Slice_Depth
 	VWait 150
 	BLITZ
 	Slice 0, 44, #Slice_Depth
 	Show 0
 	Current_Bitmap = 1
-	Use lmaxlen Current_Bitmap
+	Use BitMap Current_Bitmap
 	Initialise_Menus{}
 	Mouse On
 	MouseArea 0, 0, ~#Slice_Width - #Pointer_Width~, ~#Slice_Height - #Pointer_Height~
@@ -2449,8 +2449,8 @@ End Statement
 Statement Remove_All{}
 	Free_Buffer_Shapes{}
 	Free Slice 0
-	Free lmaxlen 0
-	Free lmaxlen 1
+	Free BitMap 0
+	Free BitMap 1
 End Statement
 
 ; --------------------------------------------------------------------

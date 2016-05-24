@@ -5,7 +5,7 @@
 
 WBStartup:FindScreen 0	 ;open window on workbench
 
-localstat 0,100,20,160,104,$100E,"BLITZ CLOCK",1,2
+Window 0,100,20,160,104,$100E,"BLITZ CLOCK",1,2
 
 WEllipse 80,50,70,35,1	 ;draw clock
 

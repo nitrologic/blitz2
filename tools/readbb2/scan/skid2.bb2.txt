@@ -3,7 +3,7 @@
 ; old old version of car editor for skidmarks
 ;
 
-allocst 0,10
+Screen 0,10
 
 Restore names
 
@@ -17,15 +17,15 @@ For x=0 To 2
 	Next
 Next
 
-workstart 1,8,182,0,g," NO SHADOW |	HATCH 1 |	HATCH 2 |	 SOLID	":g+1
-workstart 1,110,182,0,g," LOAD ":g+1
-workstart 1,170,182,0,g," SAVE ":g+1
-workstart 1,230,182,0,g,"EXIT":g+1
+TextGadget 1,8,182,0,g," NO SHADOW |	HATCH 1 |	HATCH 2 |	 SOLID	":g+1
+TextGadget 1,110,182,0,g," LOAD ":g+1
+TextGadget 1,170,182,0,g," SAVE ":g+1
+TextGadget 1,230,182,0,g,"EXIT":g+1
 
 Dim a.w(11)	;12 buttons
 Dim b.s(4)	;5 strings
 
-localstat 0,0,0,280,200,$1000,"BETA TESTERS CAR ADJUSTMENT EDITOR",1,2,1
+Window 0,0,0,280,200,$1000,"BETA TESTERS CAR ADJUSTMENT EDITOR",1,2,1
 
 For x=0 To 2
 	For y=0 To 3

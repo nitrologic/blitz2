@@ -19,27 +19,27 @@ lace=1
 MaxLen na$=192
 MaxLen pa$=192
 
-lmaxlen 2,640,256,5
+BitMap 2,640,256,5
 BitPlanesBitMap 2,1,%01111
 BitPlanesBitMap 2,3,%10000
 
-lmaxlen 4,640,256,5					;map bitmap
-lmaxlen 5,640,256,5					;mapview bitmap!!!
+BitMap 4,640,256,5					;map bitmap
+BitMap 5,640,256,5					;mapview bitmap!!!
 
 If lace=0
-		remline 0,"scala.font",8
+		LoadFont 0,"scala.font",8
 		style=0
 Else
-		remline 0,"helvetica.font",13,2
+		LoadFont 0,"helvetica.font",13,2
 		style=2
 EndIf
 Use IntuiFont 0
 ScreenPens 5,3,4,6,5,2,9
 sh.w=256+16:If lace=1 Then sh=512
 sfl.w=$8000:If lace=1 Then sfl=$8004
-allocst 0,0,0,640+16,sh,5,sfl,"Sexy Map Editor (c)1994 Vision.",5,5
+Screen 0,0,0,640+16,sh,5,sfl,"Sexy Map Editor (c)1994 Vision.",5,5
 ScreensBitMap 0,0
-localstat 0,0,0,640+16,sh,$11900,"",0,1
+Window 0,0,0,640+16,sh,$11900,"",0,1
 WindowFont 0,style
 WCls 1
 SelectMode 5,2
@@ -51,7 +51,7 @@ If lace=1
 		Scale 998,1,1.5
 		Scale 999,1,1.5
 EndIf
-Use localstat 0
+Use Window 0
 WBlit 997,656-ShapeWidth(997),sh-ShapeHeight(997)
 
 scalex=2
@@ -68,7 +68,7 @@ EndIf
 .initprocs
 Statement error{tt$}
 Shared style
-		localstat 9,170,80,300,60,0,"",5,2
+		Window 9,170,80,300,60,0,"",5,2
 		WindowFont 0,style
 		Activate 9
 		InnerCls 2
@@ -89,7 +89,7 @@ Shared lace,style
 		GTButton 9,1,30,30,60,14,pp$,0
 		GTButton 9,2,210,30,60,14,nn$,0
 		wh=60:If lace=1 Then wh+6
-		localstat 9,170,80,300,wh,0,"",5,2,9
+		Window 9,170,80,300,wh,0,"",5,2,9
 		WindowFont 0,style
 		InnerCls 2
 		AttachGTList 9,9
@@ -119,7 +119,7 @@ Function Return res
 End Function
 ;-----------------------
 Statement openprogress{t$}
-		localstat 10,170,80,300,42,6,t$,5,2
+		Window 10,170,80,300,42,6,t$,5,2
 		WindowFont 0,style
 		Activate 10
 		InnerCls 2
@@ -130,7 +130,7 @@ End Statement
 Statement updateprogress{percent.w}
 		mm.q=percent/100
 		wid.q=Int((279-21)*mm)
-		Use localstat 10
+		Use Window 10
 		WBox 21,21,21+wid,29,6
 End Statement
 ;-----------------------
@@ -188,7 +188,7 @@ GTButton 11,6,0,60,130,12,"View Map",0
 
 GTButton 11,20,0,100-12,130,12,"Quit",0
 wh=113:If lace=1 Then wh+6
-localstat 11,516,16,138,wh,$1006," ",5,6
+Window 11,516,16,138,wh,$1006," ",5,6
 AttachGTList 11,11
 WindowFont 0,style
 
@@ -202,7 +202,7 @@ If ew=2 AND Joyb(0)=1 Then FlushEvents:Goto domm
 ev.l=WaitEvent
 
 ew.l=EventWindow
-Use localstat ew
+Use Window ew
 
 If ew=0 AND ev=8
 		mx=WMouseX
@@ -227,7 +227,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=2
 						If blocksopen=0 Then Gosub openblocks:Goto MAINLOOP
 						If blocksopen=1
-								win.l=Peek.l(Addr localstat(1))
+								win.l=Peek.l(Addr Window(1))
 								##[$FFB0](win)
 								Activate 1:Goto MAINLOOP
 						EndIf
@@ -235,7 +235,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=5
 						If mapopen=0 Then Gosub openmap:Goto MAINLOOP
 						If mapopen=1
-								win.l=Peek.l(Addr localstat(2))
+								win.l=Peek.l(Addr Window(2))
 								##[$FFB0](win)
 								Activate 2:Goto MAINLOOP
 						EndIf
@@ -243,7 +243,7 @@ If ew=11		;MAIN MENU WINDOW
 				If gh=6
 						If viewopen=0 Then Gosub openview:Goto MAINLOOP
 						If viewopen=1
-								win.l=Peek.l(Addr localstat(3))
+								win.l=Peek.l(Addr Window(3))
 								##[$FFB0](win)
 								Activate 3:Goto MAINLOOP
 						EndIf
@@ -257,13 +257,13 @@ If ew=1		 ;THE BLOCKS WINDOW
 		If ev=$20 Then Gosub doblockmove:Goto MAINLOOP
 		If ev=$200 Then CloseWindow 1:blocksopen=0:Goto MAINLOOP
 		If ev=$10			 ;mouse move
-				Use localstat 1
+				Use Window 1
 				mx=WMouseX:my=WMouseY
 				If my>0 AND my<InnerHeight
 						If mx>0 AND mx<InnerWidth
 								mx+posx:my+posy						 ;bitmap pos...
 								mx=Int(mx/xsize):my=Int(my/ysize)
-								Use lmaxlen 3
+								Use BitMap 3
 								If lbx<>-1
 										Box lbx*xsize,lby*ysize,lbx*xsize+(xsize-1),lby*ysize+(ysize-1),-1
 								EndIf
@@ -275,13 +275,13 @@ If ew=1		 ;THE BLOCKS WINDOW
 				Goto MAINLOOP
 		EndIf
 		If ev=$8				;mouse click
-				Use localstat 1
+				Use Window 1
 				mx=WMouseX:my=WMouseY
 				If my>0 AND my<InnerHeight
 						If mx>0 AND mx<InnerWidth
 								mx+posx:my+posy						 ;bitmap pos...
 								mx=Int(mx/xsize):my=Int(my/ysize)
-								Use localstat 1
+								Use Window 1
 								shp=my*20+mx		;new current shape!!
 								CopyShape shp,901
 								Scale 901,.5,.5
@@ -298,13 +298,13 @@ EndIf
 
 domm:
 If ew=2		 ;THE MAP WINDOW
-		WindowInput 2:Use localstat 2
+		WindowInput 2:Use Window 2
 		If ev=2 Then Gosub domapsize:Goto MAINLOOP
 		If ev=$20 Then Gosub domapmove:Goto MAINLOOP
 		If ev=$200 Then CloseWindow 2:mapopen=0:Goto MAINLOOP
 
 		If Joyb(0)=1			 ;mouse click
-				Use localstat 2
+				Use Window 2
 				mx=WMouseX:my=WMouseY
 				If my>0 AND my<InnerHeight
 						If mx>0 AND mx<InnerWidth
@@ -312,13 +312,13 @@ If ew=2		 ;THE MAP WINDOW
 								mx=Int(mx/xsize):my=Int(my/ysize)
 								If map(mx+mapx,my+mapy)<>shp
 										map(mx+mapx,my+mapy)=shp
-										Use lmaxlen 4
+										Use BitMap 4
 										BlitColl shp,mx*xsize,my*ysize
 										VWait:PutSuperBitMap
 										If viewopen=1
-												Use lmaxlen 5
-												Use localstat 3
-												longdiv map(mx+mapx,my+mapy)+500,(mx+mapx)*(xsize/16),my+mapy*(ysize/16)
+												Use BitMap 5
+												Use Window 3
+												Blit map(mx+mapx,my+mapy)+500,(mx+mapx)*(xsize/16),my+mapy*(ysize/16)
 												VWait:PutSuperBitMap
 										EndIf
 								EndIf
@@ -327,13 +327,13 @@ If ew=2		 ;THE MAP WINDOW
 		EndIf
 
 		If ev=$10			 ;mouse move
-				Use localstat 2
+				Use Window 2
 				mx=WMouseX:my=WMouseY
 				If my>0 AND my<InnerHeight
 						If mx>0 AND mx<InnerWidth
 								mx+mposx:my+mposy						 ;bitmap pos...
 								mx=Int(mx/xsize):my=Int(my/ysize)
-								Use lmaxlen 4
+								Use BitMap 4
 								If mbx<>-1
 										Box lmx*xsize,lmy*ysize,lmx*xsize+(xsize-1),lmy*ysize+(ysize-1),-1
 								EndIf
@@ -353,7 +353,7 @@ If ew=2		 ;THE MAP WINDOW
 				EndIf
 				a$=Inkey$
 				a=RawKey
-				Use lmaxlen 4
+				Use BitMap 4
 				mxs=xsize*20
 				If a=76 AND mapy>0
 						mapy-1
@@ -386,7 +386,7 @@ If ew=2		 ;THE MAP WINDOW
 								BlitColl map(mapx+19,mapy+y),mxs-xsize,y*ysize
 						Next
 				EndIf
-dododo: Use localstat 2
+dododo: Use Window 2
 				VWait
 				PutSuperBitMap
 		EndIf
@@ -411,12 +411,12 @@ If f$="" Then Return
 ff$=f$+".CONV"
 
 If ##[$BE15](ff$)	;pre-converted???
-		casestrcomp 0,f$,16
+		LoadPalette 0,f$,16
 		Use SetCycle 0
 		ccc=320
 		LoadShapes 0,ff$
 		x=0:y=0
-		Use lmaxlen 2
+		Use BitMap 2
 		For l=0 To ccc-1
 				BlitColl l,x,y
 				x+xsize:If x>(xsize*20)-1 Then x=0:y+ysize
@@ -435,14 +435,14 @@ If ##[$BE15](ff$)	;pre-converted???
 EndIf
 
 If ##[$BE15](f$)
-		Use lmaxlen 3
+		Use BitMap 3
 		BlockScroll 1
 		LoadBitMap 1,f$
-		casestrcomp 0,f$,16
+		LoadPalette 0,f$,16
 		Use SetCycle 0
 		ccc=0
 		openprogress{"Converting..."}
-		Use lmaxlen 2
+		Use BitMap 2
 		For y=0 To 255 Step 16
 				For x=0 To 319 Step 16
 						GetaShape ccc,x,y,16,16
@@ -510,7 +510,7 @@ Return
 .openblocks
 
 If blocksopen=1
-		Use localstat 1
+		Use Window 1
 		VWait:PutSuperBitMap
 		Gosub doblocksize
 		Return
@@ -521,7 +521,7 @@ PropGadget 1,3,-8,$18000+4+8+64,1,-20,8
 PropGadget 1,-14,10,$11000+2+16+128,2,12,-20
 AddIDCMP $10
 SizeLimits 64,64,xsize*20+16+8,256+16
-localstat 1,6,188,316,77,$148f,"Blocks",0,1,1,2
+Window 1,6,188,316,77,$148f,"Blocks",0,1,1,2
 WindowFont 0,style
 
 blocksopen=1
@@ -546,7 +546,7 @@ Return
 ;----------------------------------------------------------------------------
 .drawblocksuper
 bsx=xsize*20
-Use localstat 1
+Use Window 1
 ww=bsx-InnerWidth
 hh=256-InnerHeight
 posx=QLimit(HPropPot(1,1)*(ww+1),0,ww)
@@ -556,7 +556,7 @@ Return
 ;----------------------------------------------------------------------------
 .openmap
 If mapopen=1
-		Use localstat 2
+		Use Window 2
 		VWait:PutSuperBitMap
 		Gosub domapsize
 		Return
@@ -568,10 +568,10 @@ AddIDCMP $10
 SizeLimits 64,64,xsize*20+20,256+16+8
 ww=510:If lace=1 Then ww=xsize*20+20
 wh=178:If lace=1 Then wh=256+16+8
-localstat 2,4,11,ww,wh,$1148f,"Map",0,1,2,4
+Window 2,4,11,ww,wh,$1148f,"Map",0,1,2,4
 WindowFont 0,style
 
-Use lmaxlen 4
+Use BitMap 4
 xx=0:yy=0
 For y=mapy To mapy+15
 		For x=mapx To mapx+19
@@ -579,7 +579,7 @@ For y=mapy To mapy+15
 				xx+xsize:If xx>(20*xsize)-1 Then xx=0:yy+ysize
 		Next
 Next
-Use localstat 2
+Use Window 2
 VWait:PutSuperBitMap
 
 mapopen=1
@@ -604,7 +604,7 @@ Until WaitEvent<>$10
 Return
 ;----------------------------------------------------------------------------
 .drawmapsuper
-Use localstat 2
+Use Window 2
 mxs=xsize*20
 ww=msx-InnerWidth
 hh=256-InnerHeight
@@ -618,7 +618,7 @@ Return
 ;----------------------------------------------------------------------------
 .openview
 If viewopen=1
-		Use localstat 3
+		Use Window 3
 		VWait:PutSuperBitMap
 		Gosub doviewsize
 		Return
@@ -632,24 +632,24 @@ vh=82:vw=304
 If lace=1
 		vh=176:vw=176
 EndIf
-localstat 3,333,182,vw,vh,$148f,"View",0,1,3,5
+Window 3,333,182,vw,vh,$148f,"View",0,1,3,5
 WindowFont 0,style
 
 openprogress{"Creating View..."}
-Use lmaxlen 5
+Use BitMap 5
 BlockScroll
 n=0
 For y=0 To 99
 		For x=0 To 159
 				xk=xsize/16:yk=ysize/16
 				If lace=1 Then xk=2:yk=2
-				longdiv map(x,y)+500,x*xk,y*yk
+				Blit map(x,y)+500,x*xk,y*yk
 				n+1
 		Next
 		pc.q=(n/(100*160))*100
 		updateprogress{pc}
 Next
-Use localstat 3
+Use Window 3
 VWait:PutSuperBitMap
 closeprogress{}
 
@@ -661,7 +661,7 @@ Gosub doviewsize
 Return
 ;----------------------------------------------------------------------------
 .doviewsize
-Use localstat 3
+Use Window 3
 SetHProp 3,1,vposx/640,InnerWidth/640
 SetVProp 3,2,vposy/256,InnerHeight/256
 Redraw 3,1:Redraw 3,2
@@ -674,7 +674,7 @@ Until WaitEvent<>$10
 Return
 ;----------------------------------------------------------------------------
 .drawviewsuper
-Use localstat 3
+Use Window 3
 ww=640-InnerWidth
 hh=256-InnerHeight
 vposx=QLimit(HPropPot(3,1)*(ww+1),0,ww)
@@ -686,7 +686,7 @@ Return
 .about
 GTButton 12,2,120,70,60,14,"Wow!",0
 wh=100:If lace=1 Then wh+6
-localstat 12,170,80,300,wh,0,"",5,2,12
+Window 12,170,80,300,wh,0,"",5,2,12
 WindowFont 0,style
 InnerCls 2
 AttachGTList 12,12

@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/sprites.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/sprites.bb
 BLITZ
 
-lmaxlen 0,320,256,2
+BitMap 0,320,256,2
 
 For i=15 To 0 Step -1:Circle 16,16,i,i:Next
 GetaShape 0,0,0,32,32

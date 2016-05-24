@@ -38,23 +38,23 @@ DEFTYPE .sp mysp
 
 Dim List q.quad(20)
 
-lmaxlen 0,320,256,4
-lmaxlen 1,320,256,4
-Use lmaxlen 0
+BitMap 0,320,256,4
+BitMap 1,320,256,4
+Use BitMap 0
 
-allocst 0,0,0,320,256,4,0,"",1,2,0
+Screen 0,0,0,320,256,4,0,"",1,2,0
 
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 InitBank 0,8192,0
 
-localstat 0,0,0,320,256,$1800,"",1,2
+Window 0,0,0,320,256,$1800,"",1,2
 BlockScroll
 
 WindowInput 0
 BitMapOutput 0
 
 LoadShapes 0,"sprites.shapes"
-casestrcomp 0,"sprites.iff"
+LoadPalette 0,"sprites.iff"
 
 FadePalette 0
 ClipBlit esp,0,0
@@ -97,7 +97,7 @@ Repeat
 
 		If PColl(sx,sy,1,1,0,0,160,160)
 			Box bx,by,bx+bw,by+bh,5
-			If globalloc(q())
+			If AddItem(q())
 				q()\x=bx,by,bw,bh:sp+1:sb+bw*bh/2
 			EndIf
 			While Joyb(0)<>0:VWait:Wend
@@ -107,9 +107,9 @@ Repeat
 
 	If key=127
 		If LastItem(q())
-			##[$80CA] q()
+			USEPATH q()
 			Box \x,\y,\x+\w,\y+\h,1
-			freelast q()
+			KillItem q()
 			sp-1 ;!!!
 		EndIf
 	EndIf
@@ -120,10 +120,10 @@ Repeat
 Until key=27
 
 makesprite:
-	Use lmaxlen 1:longdiv esp,0,0:Use lmaxlen 0
-	##[$80CA] q()
-	newmem q():nn=0:blok.l=Bank(0)
-	While globfree(q())
+	Use BitMap 1:Blit esp,0,0:Use BitMap 0
+	USEPATH q()
+	ResetList q():nn=0:blok.l=Bank(0)
+	While NextItem(q())
 		 mysp\q[nn]\x=\x/8,\y/8,\w/8,\h/8
 		 Scroll \x,\y,\w,\h,\x+160,\y,1
 		 For x=0 To mysp\q[nn]\w-1

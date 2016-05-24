@@ -13,9 +13,9 @@ BLITZ
 
 #bplmod1=$108
 #bplmod2=$10a
-lmaxlen 0,320,512,4
+BitMap 0,320,512,4
 
-longdiv 0,10,180
+Blit 0,10,180
 
 Slice 0,34,320,256,$fff8,4,8,32,320,320
 Use SetCycle 0

@@ -3,8 +3,8 @@ Include "arexxres.bb"
 
 ;****************************** functions and statements *******************************************
 Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
-	workstart 1,200,48,0,1,"THANKS!"
-	localstat 1,80,182,480,64,$1002,ti$,1,2,1
+	TextGadget 1,200,48,0,1,"THANKS!"
+	Window 1,80,182,480,64,$1002,ti$,1,2,1
 	WLocate 8,6
 	Print Centre$(tex$,57)
 	WLocate 8,16
@@ -34,7 +34,7 @@ Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
 	Forever
 
 endfunc
-	Free localstat 1:Use localstat 0
+	Free Window 1:Use Window 0
 End Statement
 ;----------------------------------------------------------------------------
 
@@ -49,15 +49,15 @@ StringGadget 0,72,59,0,4,40,239
 
 ButtonGroup 0 :SelectMode1,0
 
-workstart 0,8,75,0,10,"NEW ENTRY"
-workstart 0,97,75,0,11,"I<"
-workstart 0,129,75,0,12,"<<"
-workstart 0,161,75,0,13,">>"
-workstart 0,193,75,0,14,">I"
-workstart 0,226,75,0,15,"DIAL"
+TextGadget 0,8,75,0,10,"NEW ENTRY"
+TextGadget 0,97,75,0,11,"I<"
+TextGadget 0,129,75,0,12,"<<"
+TextGadget 0,161,75,0,13,">>"
+TextGadget 0,193,75,0,14,">I"
+TextGadget 0,226,75,0,15,"DIAL"
 
 SizeLimits 32,32,-1,-1
-localstat 0,0,24,331,91,$100e,"MY PHONE BOOK",1,2,0
+Window 0,0,24,331,91,$100e,"MY PHONE BOOK",1,2,0
 
 WLocate 2,19:WJam 0:WColour 1,0
 Print "Address"
@@ -96,19 +96,19 @@ NEWTYPE.person
 End NEWTYPE
 
 Dim List people.person(200)
-##[$80CA] people()
+USEPATH people()
 
 If WriteMem (0,"phonebook.data")
 	FileInput 0
 	While NOT DosBuffLen(0)
-		If globalloc (people())
+		If AddItem (people())
 			For i = 0 To #num-1:\info[i]=Edit$(128):Next
 		EndIf
 	Wend
 EndIf
 
-newmem people()
-If NOT globfree (people()) Then globalloc people()
+ResetList people()
+If NOT NextItem (people()) Then AddItem people()
 
 refresh:
 
@@ -127,8 +127,8 @@ refresh:
 			Gosub update
 			If ReadMem (0,"phonebook.data")
 				FileOutput 0
-				newmem people()
-				While globfree (people())
+				ResetList people()
+				While NextItem (people())
 					For i = 0 To #num-1: NPrint \info[i]:Next
 				Wend
 				CloseFile 0
@@ -142,13 +142,13 @@ refresh:
 
 			Select GadgetHit
 				Case 10
-					Gosub update: If globalloc(people()) Then ref =1
+					Gosub update: If AddItem(people()) Then ref =1
 				Case 11
-					Gosub update:If locfree(people()) Then ref = 1
+					Gosub update:If FirstItem(people()) Then ref = 1
 				Case 12
 					Gosub update:If PrevItem(people()) Then ref = 1
 				Case 13
-					Gosub update:If globfree(people()) Then ref = 1
+					Gosub update:If NextItem(people()) Then ref = 1
 				Case 14
 					Gosub update:If LastItem(people()) Then ref = 1
 				Case 15

@@ -71,7 +71,7 @@ Next
 
 x=0:y=12:w=640:hi=64
 ;
-allocst 0,0,256-hi-y,w,hi+y,2,$8000,"4 Trace Scope",1,0:ScreensBitMap 0,0
+Screen 0,0,256-hi-y,w,hi+y,2,$8000,"4 Trace Scope",1,0:ScreensBitMap 0,0
 
 Green 0,0,0,0:Green 1,15,15,15:Green 2,0,15,0:Green 3,0,0,15
 
@@ -124,7 +124,7 @@ While o<bend
 	;
 	v=v1
 	For n=0 To nt-1
-	If in ##[$80CD] n
+	If in BitTst n
 		Point h,v-vd,1:Point h,v+vd,0
 	Else
 		Point h,v+vd,1:Point h,v-vd,0
@@ -145,7 +145,7 @@ Wend
 ;
 v=v1
 For n=0 To nt-1
-If in ##[$80CD] n
+If in BitTst n
 	Line h,v-vd,x+w-1,v-vd,1:Line h,v+vd,x+w-1,v+vd,0
 Else
 	Line h,v-vd,x+w-1,v-vd,0:Line h,v+vd,x+w-1,v+vd,1

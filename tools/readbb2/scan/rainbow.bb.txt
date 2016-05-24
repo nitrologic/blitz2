@@ -9,7 +9,7 @@ InitCopList 0,44,256,$10004,8,16,-4
 DecodePalette 0,16											;use this palette for the display
 DecodePalette 1,256										 ;use this palette to hold the rainbow
 
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 
 BLITZ
 DisplayBitMap 0,0

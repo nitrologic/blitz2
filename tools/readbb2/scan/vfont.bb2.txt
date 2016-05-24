@@ -2,9 +2,9 @@
 
 DEFTYPE.l bp
 
-allocst 0,9:ScreensBitMap 0,0:BlockScroll
+Screen 0,9:ScreensBitMap 0,0:BlockScroll
 
-bp=Peek.l(Addr lmaxlen(0)+8)
+bp=Peek.l(Addr BitMap(0)+8)
 
 If WriteMem(0,"chars8.b")
 	For k=0 To 63

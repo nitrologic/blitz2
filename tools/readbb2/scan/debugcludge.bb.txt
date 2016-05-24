@@ -21,7 +21,7 @@ setup:
 	MOVE.l #dumpmap,a0:MOVE.l #dumpchar,a1:MOVE.l #dumpscroll,a2:SysJsr $d502
 	Goto progtop
 
-	##[$80D3]
+	Runerrsoff
 dumpmap:
 	MOVEM.l d0-d7/a0-a6,-(a7):TokeJsr $5204:MOVE.l d0,-(a7)
 	PutReg a4,a.l:BitMapOutput #bm:Locate 0,1.5
@@ -36,10 +36,10 @@ dumpchar:
 	##[$FE8B]:MOVEM.l (a7)+,d0-d7/a0-a6:RTS
 dumpscroll:
 	MOVEM.l d0-d7/a0-a6,-(a7)
-	a.l=##[$80D1] lmaxlen:Use lmaxlen #bm
-	Scroll 0,72,640,32,0,64:Boxf 0,96,639,103,0:Use lmaxlen a
+	a.l=Used BitMap:Use BitMap #bm
+	Scroll 0,72,640,32,0,64:Boxf 0,96,639,103,0:Use BitMap a
 	MOVEM.l (a7)+,d0-d7/a0-a6:RTS
-	##[$80D2]
+	Runerrson
 
 progtop:
 

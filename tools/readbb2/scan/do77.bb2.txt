@@ -5,8 +5,8 @@
 ;
 
 WBStartup
-##[$80CC]
-##[$80CB]
+NoCli
+CloseEd
 
 
 .Constants
@@ -192,8 +192,8 @@ DEFTYPE.b
 
 LoadShapes 0,"derring.ss1"
 
-casestrcomp 0,"derring.p1"
-casestrcomp 1,"derring.p2"
+LoadPalette 0,"derring.p1"
+LoadPalette 1,"derring.p2"
 
 LoadMedModule 0,"derring.m"
 LoadSound 0,"derring.s1"
@@ -221,8 +221,8 @@ BLITZ
 Buffer 0,8192
 Buffer 1,8192
 
-lmaxlen 0,320,266,4
-lmaxlen 1,320,266,4
+BitMap 0,320,266,4
+BitMap 1,320,266,4
 
 Slice 0,44,320,256,$fff0,4,8,32,320,320
 
@@ -266,7 +266,7 @@ While NOT EndGame
 			Gosub SB_Game
 			Gosub ClearBMs
 			Count=0
-			Use lmaxlen 0
+			Use BitMap 0
 			Use SetCycle 1
 			Box 77,93,242,106,15
 			Show 0
@@ -290,8 +290,8 @@ While NOT EndGame
 	Gosub ClearBMs
 	Show 0
 	BitMapOutput 0
-	Use lmaxlen 0
-	longdiv 206,160,20
+	Use BitMap 0
+	Blit 206,160,20
 
 	If EndGame : Pop While : Goto ImOutaHere : EndIf
 
@@ -312,8 +312,8 @@ While NOT EndGame
 	Gosub ClearBMs
 	Show 0
 	BitMapOutput 0
-	Use lmaxlen 0
-	longdiv 204,160,20
+	Use BitMap 0
+	Blit 204,160,20
 
 	Locate 0,5
 	NPrint "Programming & GFX				Nick Slaven"
@@ -380,12 +380,12 @@ If StartGame
 	For i=0 To 1
 		VWait
 		Show i
-		Use lmaxlen 1-i
+		Use BitMap 1-i
 		BlockScroll
-		longdiv 195,160,100
-		longdiv 197,157,171
-		longdiv 199,157,199
-		longdiv 205,157,227
+		Blit 195,160,100
+		Blit 197,157,171
+		Blit 199,157,199
+		Blit 205,157,227
 	Next
 	StartGame=False
 	x.w=157
@@ -398,7 +398,7 @@ EndIf
 VWait
 Show	CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 UnBuffer CBitMap
 BBlit CBitMap,196,x,y
 If Mve
@@ -452,21 +452,21 @@ OptionMenu
 For i=0 To 1
 	VWait
 	Show i
-	Use lmaxlen 1-i
+	Use BitMap 1-i
 	UnBuffer 1-i
 	BlitMode EraseMode
-	longdiv 197,157,171
-	longdiv 199,157,199
-	longdiv 205,157,227
+	Blit 197,157,171
+	Blit 199,157,199
+	Blit 205,157,227
 	BlitMode CookieMode
-	longdiv 198,82,166
+	Blit 198,82,166
 	Select(NoOfPlayers)
-		Case 0 : longdiv 201,200,166
-		Case 1 : longdiv 203,200,166
+		Case 0 : Blit 201,200,166
+		Case 1 : Blit 203,200,166
 	End Select
 	Select(GameMode)
-		Case 0 : longdiv 202,206,191
-		Case 1 : longdiv 200,183,193
+		Case 0 : Blit 202,206,191
+		Case 1 : Blit 200,183,193
 	End Select
 Next
 x.w=208
@@ -477,22 +477,22 @@ NormalMenu
 For i=0 To 1
 	VWait
 	Show i
-	Use lmaxlen 1-i
+	Use BitMap 1-i
 	UnBuffer 1-i
 	BlitMode EraseMode
-	longdiv 198,82,166
+	Blit 198,82,166
 	Select(NoOfPlayers)
-		Case 0 : longdiv 201,200,166
-		Case 1 : longdiv 203,200,166
+		Case 0 : Blit 201,200,166
+		Case 1 : Blit 203,200,166
 	End Select
 	Select(GameMode)
-		Case 0 : longdiv 202,206,191
-		Case 1 : longdiv 200,183,193
+		Case 0 : Blit 202,206,191
+		Case 1 : Blit 200,183,193
 	End Select
 	BlitMode CookieMode
-	longdiv 197,157,171
-	longdiv 199,157,199
-	longdiv 205,157,227
+	Blit 197,157,171
+	Blit 199,157,199
+	Blit 205,157,227
 Next
 x.w=157
 y.w=171
@@ -505,17 +505,17 @@ ToggleMode
 For i=0 To 1
 	VWait
 	Show i
-	Use lmaxlen 1-i
+	Use BitMap 1-i
 	UnBuffer 1-i
 	BlitMode EraseMode
 	Select(GameMode)
-		Case 0 : longdiv 202,206,191
-		Case 1 : longdiv 200,183,193
+		Case 0 : Blit 202,206,191
+		Case 1 : Blit 200,183,193
 	End Select
 	BlitMode CookieMode
 	Select(1-GameMode)
-		Case 0 : longdiv 202,206,191
-		Case 1 : longdiv 200,183,193
+		Case 0 : Blit 202,206,191
+		Case 1 : Blit 200,183,193
 	End Select
 	BBlit 1-i,196,x,y
 Next
@@ -543,17 +543,17 @@ TogglePlayers
 For i=0 To 1
 	VWait
 	Show i
-	Use lmaxlen 1-i
+	Use BitMap 1-i
 	UnBuffer 1-i
 	BlitMode EraseMode
 	Select(NoOfPlayers)
-		Case 0 : longdiv 201,200,166
-		Case 1 : longdiv 203,200,166
+		Case 0 : Blit 201,200,166
+		Case 1 : Blit 203,200,166
 	End Select
 	BlitMode CookieMode
 	Select(1-NoOfPlayers)
-		Case 0 : longdiv 201,200,166
-		Case 1 : longdiv 203,200,166
+		Case 0 : Blit 201,200,166
+		Case 1 : Blit 203,200,166
 	End Select
 	BBlit 1-i,196,x,y
 Next
@@ -569,7 +569,7 @@ ClearBMs
 For i=0 To 1
 	VWait
 	Show i
-	Use lmaxlen 1-i
+	Use BitMap 1-i
 	FlushBuffer 1-i
 	BlockScroll
 Next
@@ -601,7 +601,7 @@ CurrentPlayer=0
 While GameOn
 	Gosub SB_PlyInit
 
-	##[$80CA] *UmphBase
+	USEPATH *UmphBase
 	*UmphBase\Action=6
 
 	If Level <15
@@ -774,10 +774,10 @@ Next x
 
 If PlyLives(CurrentPlayer)=0
 	Count.w=150
-	globalloc Sco(): Sco()\x=153,107,180,Count
-	globalloc Sco(): Sco()\x=189,105,181+CurrentPlayer,Count
-	globalloc Sco(): Sco()\x=140,127,185,Count ; Game
-	globalloc Sco(): Sco()\x=191,127,186,Count ; Over
+	AddItem Sco(): Sco()\x=153,107,180,Count
+	AddItem Sco(): Sco()\x=189,105,181+CurrentPlayer,Count
+	AddItem Sco(): Sco()\x=140,127,185,Count ; Game
+	AddItem Sco(): Sco()\x=191,127,186,Count ; Over
 	While Count>0 AND Joyb(1)=0
 		VWait
 		Show CBitMap
@@ -789,8 +789,8 @@ If PlyLives(CurrentPlayer)=0
 	Wend
 EndIf
 
-newmem Sco()
-While globfree (Sco())
+ResetList Sco()
+While NextItem (Sco())
 	Sco()\o=0
 Wend
 For i=0 To 1
@@ -869,12 +869,12 @@ DiamondActive=False
 ExtraDoActive=False
 Fire=False
 
-newmem App()
-While globfree (App())
+ResetList App()
+While NextItem (App())
 	If App()\MapX=6 AND App()\MapY=12
 		App()\S\Kill=True
 		*ApMap(6,12)=0
-		freelast App()
+		KillItem App()
 	EndIf
 Wend
 
@@ -890,10 +890,10 @@ Else
 EndIf
 
 Count.w=125
-globalloc Sco(): Sco()\x=153,107,180,Count
-globalloc Sco(): Sco()\x=189,105,181+CurrentPlayer,Count
-globalloc Sco(): Sco()\x=134,127,184,Count
-globalloc Sco(): Sco()\x=182,127,183,Count
+AddItem Sco(): Sco()\x=153,107,180,Count
+AddItem Sco(): Sco()\x=189,105,181+CurrentPlayer,Count
+AddItem Sco(): Sco()\x=134,127,184,Count
+AddItem Sco(): Sco()\x=182,127,183,Count
 While Count>0 ; AND Joyb(1)=0
 	VWait
 	Show CBitMap
@@ -903,8 +903,8 @@ While Count>0 ; AND Joyb(1)=0
 Wend
 
 If Count<>0
-	newmem Sco()
-	While globfree (Sco())
+	ResetList Sco()
+	While NextItem (Sco())
 		Sco()\o=0
 	Wend
 EndIf
@@ -916,11 +916,11 @@ If Lives<7
 	For j=0 To 1
 		VWait
 		Show 1-j
-		Use lmaxlen j
+		Use BitMap j
 		If CurrentPlayer=0
-			longdiv 59,22,140+20*(Lives-1)
+			Blit 59,22,140+20*(Lives-1)
 		Else
-			longdiv 59,292,140+20*(Lives-1)
+			Blit 59,292,140+20*(Lives-1)
 		EndIf
 	Next
 	BlitMode CookieMode
@@ -943,10 +943,10 @@ Return
 ;
 ;************************************************
 
-newmem Ump()
-While globfree (Ump())
+ResetList Ump()
+While NextItem (Ump())
 	*U.AnimShape=Ump()\S
-	##[$80CA] Ump()
+	USEPATH Ump()
 	\oim=*U\ImList
 	\ovx=*U\vx
 	\ovy=*U\vy
@@ -956,20 +956,20 @@ Wend
 
 If (NoApples>2)AND(NoOfUmphs>3)
 	Tmp = NoApples
-	newmem App()
-	While globfree(App())
+	ResetList App()
+	While NextItem(App())
 		If App()\OldAction=3 : Tmp-1 : EndIf
 	Wend
-	newmem App()
-	While (Tmp>2) AND (globfree (App()))
+	ResetList App()
+	While (Tmp>2) AND (NextItem (App()))
 		If (MAP(App()\MapX,App()\MapY)<>0)AND(App()\OldAction<>3)
 			App()\Action=3
 			App()\OldAction=3
 			Tmp-1
 		EndIf
 	Wend
-	newmem App()
-	While (Tmp>2)AND(globfree (App()))
+	ResetList App()
+	While (Tmp>2)AND(NextItem (App()))
 		If App()\OldAction<>3
 			App()\Action=3
 			App()\OldAction=3
@@ -1002,9 +1002,9 @@ Return
 ; Subroutine MaraColl
 ;
 ;************************************************
-newmem Ump()
+ResetList Ump()
 
-While globfree(Ump())
+While NextItem(Ump())
 
 	If Ump()\Action=6 OR Ump()\Action=5 : Goto Uover :	EndIf
 
@@ -1014,7 +1014,7 @@ While globfree(Ump())
 	YY.w=*U\y
 
 	If Ball\Active AND (NOT Ball\Blow)
-		##[$80CA] Ump()\S
+		USEPATH Ump()\S
 		If PColl(XX-8,YY-8,16,16,Ball\sx-1,Ball\sy-1,2,2)
 			Ump()\Action=0 : Ump()\OldAction=5
 			Ball\Blow=True : Ball\dx=0 : Ball\dy=0
@@ -1030,7 +1030,7 @@ While globfree(Ump())
 	CEND
 
 	If Ump()\OldAction=5 AND Ump()\Action=0
-		globalloc Sco()
+		AddItem Sco()
 		Score+500
 		Sco()\x=*U\x
 		Sco()\y=*U\y
@@ -1045,12 +1045,12 @@ While globfree(Ump())
 			Sound 13,3
 		EndIf
 		*U\Kill=True
-		freelast Ump()
+		KillItem Ump()
 		Goto Uover
 	EndIf
 
-	newmem App()
-	While globfree(App())
+	ResetList App()
+	While NextItem(App())
 		If App()\Action =0 Then Goto MUover
 		*A.AnimShape=App()\S
 		If NOT SpritesHit(II,XX,YY,49,*A\x,*A\y) Then Goto MUover
@@ -1090,19 +1090,19 @@ Return
 ; Subroutine MaraKill
 ;
 ;************************************************
-newmem Mar()
-While globfree (Mar())
+ResetList Mar()
+While NextItem (Mar())
 	*M.AnimShape=Mar()\S
 	*M\Kill=True
-	globalloc App()
-	##[$80CA] App()
+	AddItem App()
+	USEPATH App()
 	App()\MapX=(*M\x-#XOff)/18
 	App()\MapY=(*M\y-#YOff)/18
 	App()\Action=0
 	App()\OldAction=0
 	*ApMap(\MapX,\MapY)=App()
-	globalloc Ash()
-	##[$80CA] Ash()
+	AddItem Ash()
+	USEPATH Ash()
 	\x=PosX(App()\MapX),PosY(App()\MapY),0,0,0,APNorm,App(),False
 	App()\S=Ash()
 	Ash()\C=App()
@@ -1112,19 +1112,19 @@ While globfree (Mar())
 		App()\Action=3
 	EndIf
 	Ball\Blow=True : Ball\dx=0 : Ball\dy=0
-	globalloc Sco()
+	AddItem Sco()
 	Sco()\x=*M\x
 	Sco()\y=*M\y
 	Sco()\s=167
 	Sco()\o=40
 	Score+1000
-	freelast Mar()
+	KillItem Mar()
 Wend
 
-newmem Ump()
-While globfree (Ump())
+ResetList Ump()
+While NextItem (Ump())
 	*U.AnimShape=Ump()\S
-	##[$80CA] Ump()
+	USEPATH Ump()
 	*U\ImList=\oim
 	*U\vx=\ovx
 	*U\vy=\ovy
@@ -1160,13 +1160,13 @@ Gosub SB_MaraColl
 
 If MaraOn
 	If MaraCount=0
-		MaraOn=globalloc (Mar())
+		MaraOn=AddItem (Mar())
 		If NOT MaraOn
 			If NOT LetterActive : Gosub SB_LetInit : EndIf
 			MaraCount=(10-Level)*45
 		Else
-			##[$80CA] Mar()
-			globalloc Ash()
+			USEPATH Mar()
+			AddItem Ash()
 			Mar()\Action=6,0,6,0,0,0,6,Ash()
 			Ash()\x=PosX(4),PosY(0)-18,0,0,0,MaraRight,Mar(),False
 			Ash()\vx=HashSpeed
@@ -1178,16 +1178,16 @@ EndIf
 
 If MaraCount<0:MaraDig=True:Else:MaraDig=False:MaraCount-1:EndIf
 
-newmem Mar()
+ResetList Mar()
 
-If NOT (globfree(Mar()))
+If NOT (NextItem(Mar()))
 	Gosub SB_MaraKill
 	Return
 Else
-	newmem Mar()
+	ResetList Mar()
 EndIf
 
-While globfree (Mar())
+While NextItem (Mar())
 	*M.AnimShape=Mar()\S
 	II=*M\ImList\I[ImNo]
 
@@ -1202,10 +1202,10 @@ While globfree (Mar())
 		EndIf
 	CEND
 
-	newmem App()
-	While globfree (App())
+	ResetList App()
+	While NextItem (App())
 		*A.AnimShape=App()\S
-		##[$80CA] App()
+		USEPATH App()
 		If PColl(*M\x-2,*M\y-2,4,4,*A\x-6,*A\y-6,12,12)
 			*A\Kill=True
 			*ApMap(\MapX,\MapY)=0
@@ -1219,7 +1219,7 @@ While globfree (Mar())
 			*M\ImList=MaraEat
 			Mar()\Action=2
 			Mar()\OldAction=2
-			freelast App()
+			KillItem App()
 			Goto MMover
 		EndIf
 	Wend
@@ -1227,22 +1227,22 @@ While globfree (Mar())
 	If Ball\Active AND (NOT Ball\Blow)
 		If RectsHit(II,*M\x,*M\y,0,Ball\sx,Ball\sy)
 			*M\Kill=True
-			globalloc App()
-			##[$80CA] App()
+			AddItem App()
+			USEPATH App()
 			App()\MapX=(*M\x-#XOff)/18
 			App()\MapY=(*M\y-#YOff)/18
 			App()\Action=0
 			App()\OldAction=0
 			*ApMap(\MapX,\MapY)=App()
-			globalloc Ash()
-			##[$80CA] Ash()
+			AddItem Ash()
+			USEPATH Ash()
 			\x=PosX(App()\MapX),PosY(App()\MapY),0,0,0,APNorm,App(),False
 			App()\S=Ash()
 			Ash()\C=App()
 			NoApples+1
 			Ball\Blow=True : Ball\dx=0 : Ball\dy=0
-			freelast Mar()
-			globalloc Sco()
+			KillItem Mar()
+			AddItem Sco()
 			Sco()\x=*M\x
 			Sco()\y=*M\y
 			Sco()\s=167
@@ -1253,7 +1253,7 @@ While globfree (Mar())
 		End If
 	End If
 
-	##[$80CA] Mar()
+	USEPATH Mar()
 
 	If \Action<>0 Then Goto MMover
 
@@ -1281,10 +1281,10 @@ While globfree (Mar())
 	DY=\MapY-MrDo\MapY
 	R=Rnd(10)
 
-	If(DX>0) : \CurDir ##[$80CE] 2 : End If
-	If(DX<0) : \CurDir ##[$80CE] 3 : End If
-	If(DY>0) : \CurDir ##[$80CE] 0 : End If
-	If(DY<0) : \CurDir ##[$80CE] 1 : End If
+	If(DX>0) : \CurDir BitSet 2 : End If
+	If(DX<0) : \CurDir BitSet 3 : End If
+	If(DY>0) : \CurDir BitSet 0 : End If
+	If(DY<0) : \CurDir BitSet 1 : End If
 
 	DigDir=\CurDir
 	NL = NOT(\OldDir)
@@ -1316,10 +1316,10 @@ While globfree (Mar())
 
 	\S\vx=0 : \S\vy=0 : DX=0 : DY=0
 
-	If \CurDir ##[$80CD] 0:*M\vy=-HashSpeed:DY=-1:*M\ImList=MaraUp	 :CM=0:OM=1:End If
-	If \CurDir ##[$80CD] 1:*M\vy= HashSpeed:DY= 1:*M\ImList=MaraDown :CM=1:OM=0:End If
-	If \CurDir ##[$80CD] 2:*M\vx=-HashSpeed:DX=-1:*M\ImList=MaraLeft :CM=2:OM=3:End If
-	If \CurDir ##[$80CD] 3:*M\vx= HashSpeed:DX= 1:*M\ImList=MaraRight:CM=3:OM=2:End If
+	If \CurDir BitTst 0:*M\vy=-HashSpeed:DY=-1:*M\ImList=MaraUp	 :CM=0:OM=1:End If
+	If \CurDir BitTst 1:*M\vy= HashSpeed:DY= 1:*M\ImList=MaraDown :CM=1:OM=0:End If
+	If \CurDir BitTst 2:*M\vx=-HashSpeed:DX=-1:*M\ImList=MaraLeft :CM=2:OM=3:End If
+	If \CurDir BitTst 3:*M\vx= HashSpeed:DX= 1:*M\ImList=MaraRight:CM=3:OM=2:End If
 
 	TX=\MapX+DX
 	TY=\MapY+DY
@@ -1328,19 +1328,19 @@ While globfree (Mar())
 
 	*M\Steps=HashSteps
 
-	If NOT (MAP(\MapX,\MapY) ##[$80CD] CM)
-		If Things(TX,TY) ##[$80CD] 0
-			Things(TX,TY) ##[$80CF] 0
+	If NOT (MAP(\MapX,\MapY) BitTst CM)
+		If Things(TX,TY) BitTst 0
+			Things(TX,TY) BitClr 0
 			Cherries-1
 		EndIf
-		MAP(\MapX,\MapY) ##[$80CE] CM
-		globalloc Mup()
+		MAP(\MapX,\MapY) BitSet CM
+		AddItem Mup()
 		Mup()\x=PosX(\MapX)
 		Mup()\y=PosY(\MapY)
 		Mup()\s=MAP(\MapX,\MapY)-1
 		Mup()\o=False
-		MAP(TX,TY) ##[$80CE] OM
-		globalloc Mup()
+		MAP(TX,TY) BitSet OM
+		AddItem Mup()
 		Mup()\x=PosX(TX)
 		Mup()\y=PosY(TY)
 		Mup()\s=MAP(TX,TY)-1
@@ -1375,11 +1375,11 @@ Return
 For j=0 To 1
 	VWait
 	Show 1-j
-	Use lmaxlen j
+	Use BitMap j
 	For k=0 To NoOfPlayers
 		For i=0 To PlyLives(k)-1
 			If i<6
-				longdiv 59,22+k*270,140+20*i
+				Blit 59,22+k*270,140+20*i
 			EndIf
 		Next
 	Next
@@ -1408,22 +1408,22 @@ For j=0 To 1
 	VWait
 	Show CBitMap
 	CBitMap=1-CBitMap
-	Use lmaxlen CBitMap
+	Use BitMap CBitMap
 	For i=0 To 4
-		longdiv EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
+		Blit EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
 	Next i
 	Gosub SB_UpDate
 Next j
 
-newmem Ump()
-While globfree (Ump())
+ResetList Ump()
+While NextItem (Ump())
 	If Ump()\Action=6 Then Goto Eover
 	TmpX=Ump()\S\x
 	TmpY=Ump()\S\y
 	XX.w=0
 	YY.w=0
 
-	globalloc Sco()
+	AddItem Sco()
 	Score+500
 	Sco()\x=Ump()\S\x
 	Sco()\y=Ump()\S\y
@@ -1434,7 +1434,7 @@ While globfree (Ump())
 	UmphAble=True
 	Sound 13,3
 	Ump()\S\Kill=True
-	freelast Ump()
+	KillItem Ump()
 	UpDateScore=2
 	For Tmp=0 To 30
 		VWait
@@ -1476,8 +1476,8 @@ For Tmp=0 To 100
 	BBlit CBitMap,191+ImNo,160,11
 Next
 
-globalloc Ash()
-##[$80CA] Ash()
+AddItem Ash()
+USEPATH Ash()
 \x=PosX(6),PosY(0)-18,0,0,0,DoLeft,MrDo,False
 If CurrentPlayer=0
 	\vx=-HashSpeed
@@ -1576,7 +1576,7 @@ EndIf
 
 If NOT LetterActive : Return : EndIf
 
-##[$80CA] LM
+USEPATH LM
 
 CNIF #Test=0
 	If PColl(LM\S\x-3,LM\S\y-3,6,6,MrDo\S\x-3,MrDo\S\y-3,6,6)
@@ -1591,28 +1591,28 @@ CEND
 If Ball\Active AND (NOT Ball\Blow)
 	If PColl(LM\S\x-8,LM\S\y-8,16,16,Ball\sx-1,Ball\sy-1,2,2)
 		LM\S\Kill=True
-		globalloc App()
-		##[$80CA] App()
+		AddItem App()
+		USEPATH App()
 		App()\MapX=(LM\S\x-#XOff)/18
 		App()\MapY=(LM\S\y-#YOff)/18
 		App()\Action=0
 		App()\OldAction=0
 		*ApMap(\MapX,\MapY)=App()
-		globalloc Ash()
-		##[$80CA] Ash()
+		AddItem Ash()
+		USEPATH Ash()
 		\x=PosX(App()\MapX),PosY(App()\MapY),0,0,0,APNorm,App(),False
 		App()\S=Ash()
 		Ash()\C=App()
 		NoApples+1
 		Ball\Blow=True : Ball\dx=0 : Ball\dy=0
 		LetterActive=False
-		EXTRA ##[$80CE] Letter
+		EXTRA BitSet Letter
 		Sound 14,3
 		If MaraTime
 			Gosub SB_MaraKill
 		EndIf
 		If EXTRA<>31
-			globalloc Mup()
+			AddItem Mup()
 			Mup()\x=EXTRA(Letter)\x
 			Mup()\y=EXTRA(Letter)\y
 			Mup()\o=False
@@ -1625,7 +1625,7 @@ If Ball\Active AND (NOT Ball\Blow)
 	End If
 End If
 
-##[$80CA] LM
+USEPATH LM
 
 If NOT MaraTime Then LMOut-1
 
@@ -1683,12 +1683,12 @@ If((\CurDir AND 3)<>0) AND((\CurDir AND $C)<>0)
 	End If
 End If
 
-If (\CurDir ##[$80CD] 0)AND(\CurDir ##[$80CD] 1)
-	If R<5 :\CurDir ##[$80CF] 0:Else \CurDir ##[$80CF] 1:End If
+If (\CurDir BitTst 0)AND(\CurDir BitTst 1)
+	If R<5 :\CurDir BitClr 0:Else \CurDir BitClr 1:End If
 End If
 
-If (\CurDir ##[$80CD] 2)AND(\CurDir ##[$80CD] 3)
-	If R>5 :\CurDir ##[$80CF] 3:Else \CurDir ##[$80CF] 2:End If
+If (\CurDir BitTst 2)AND(\CurDir BitTst 3)
+	If R>5 :\CurDir BitClr 3:Else \CurDir BitClr 2:End If
 End If
 
 TX=\MapX
@@ -1699,10 +1699,10 @@ TY=\MapY
 If(\CurDir AND 3) <>0:\OldDir=\OldDir AND 3	: EndIf
 If(\CurDir AND $C)<>0:\OldDir=\OldDir AND $C : EndIf
 
-If \CurDir ##[$80CD] 0:LM\S\vy=-HashSpeed:TY-1:End If
-If \CurDir ##[$80CD] 1:LM\S\vy= HashSpeed:TY+1:End If
-If \CurDir ##[$80CD] 2:LM\S\vx=-HashSpeed:TX-1:End If
-If \CurDir ##[$80CD] 3:LM\S\vx= HashSpeed:TX+1:End If
+If \CurDir BitTst 0:LM\S\vy=-HashSpeed:TY-1:End If
+If \CurDir BitTst 1:LM\S\vy= HashSpeed:TY+1:End If
+If \CurDir BitTst 2:LM\S\vx=-HashSpeed:TX-1:End If
+If \CurDir BitTst 3:LM\S\vx= HashSpeed:TX+1:End If
 
 If (TX>11)OR(TX<0)OR(TY>12)OR(TY<0) : Return :EndIf
 
@@ -1730,7 +1730,7 @@ Return
 ;
 ;************************************************
 
-##[$80CA] Ball
+USEPATH Ball
 
 If (NOT \Active)AND(NOT \Able)
 	\Count-1
@@ -1753,10 +1753,10 @@ If (NOT \Active)AND(\Able)AND(Fire)
 	\DRec=MrDo\CurDir
 	\MapX=MrDo\MapX : \MapY=MrDo\MapY
 	\Count=150
-	If \DRec ##[$80CD] 0 : \MapY-1 : \CurPos=1 : DX= 0 : DY= 9 : End If
-	If \DRec ##[$80CD] 1 : \MapY+1 : \CurPos=0 : DX= 0 : DY=-9 : End If
-	If \DRec ##[$80CD] 2 : \MapX-1 : \CurPos=3 : DX= 9 : DY= 0 : End If
-	If \DRec ##[$80CD] 3 : \MapX+1 : \CurPos=2 : DX=-9 : DY= 0 : End If
+	If \DRec BitTst 0 : \MapY-1 : \CurPos=1 : DX= 0 : DY= 9 : End If
+	If \DRec BitTst 1 : \MapY+1 : \CurPos=0 : DX= 0 : DY=-9 : End If
+	If \DRec BitTst 2 : \MapX-1 : \CurPos=3 : DX= 9 : DY= 0 : End If
+	If \DRec BitTst 3 : \MapX+1 : \CurPos=2 : DX=-9 : DY= 0 : End If
 	If(\MapX>12)OR(\MapX<0)OR(\MapY>13)OR(\MapY<0) : Return : End If
 	If MAP(\MapX,\MapY)=0 : Return : End If
 	\sx=PosX(\MapX)+DX
@@ -1805,8 +1805,8 @@ If \Steps=0
 			Else				 :\dx= 3:\dy= 3:\CurPos=1:\OldPos=0:End If
 	End Select
 	\DRec=0
-	If MAP(\MapX,\MapY) ##[$80CD] \CurPos
-		\DRec ##[$80CE] \CurPos
+	If MAP(\MapX,\MapY) BitTst \CurPos
+		\DRec BitSet \CurPos
 		Select(\CurPos)
 			Case 0 : \MapY-1
 			Case 1 : \MapY+1
@@ -1816,7 +1816,7 @@ If \Steps=0
 		\ClockWise=NOT \ClockWise
 	Else
 		BallSound=True
-		\DRec ##[$80CE] \OldPos
+		\DRec BitSet \OldPos
 	End If
 Else
 	\sx=\sx+\dx
@@ -1850,7 +1850,7 @@ Return
 ;
 ;************************************************
 
-newmem Ump()
+ResetList Ump()
 
 NoOfUmphsLeft=NoOfUmphs-NoOfUmphsOut
 
@@ -1861,7 +1861,7 @@ NoOfUmphsLeft=NoOfUmphs-NoOfUmphsOut
 If MoreUmphs AND UmphAble
 	If *UmphBase=Goodie
 		Goodie\S\Kill=True
-		globalloc Ump()
+		AddItem Ump()
 		AddFirst Ash()
 		Ump()\Action=6,0,5,6,0,0,0,Ash()
 		Ash()\x=PosX(5),PosY(6),0,0,0,UmphBaseFlash,Ump(),False
@@ -1876,7 +1876,7 @@ If MoreUmphs AND UmphAble
 	EndIf
 	If *UmphBase\Action=0
 		If NoOfUmphsLeft>0
-			MoreUmphs=globalloc (Ump())
+			MoreUmphs=AddItem (Ump())
 			If MoreUmphs
 				AddFirst Ash()
 				Ump()\Action=6,0,5,6,0,0,0,Ash()
@@ -1907,11 +1907,11 @@ If MoreUmphs AND UmphAble
 	EndIf
 EndIf
 
-newmem Ump()
+ResetList Ump()
 
 DoneOne=False
 
-While globfree(Ump())
+While NextItem(Ump())
 
 	If Ump()\Action=6 OR Ump()\Action=5 : Goto Uover :	EndIf
 
@@ -1921,7 +1921,7 @@ While globfree(Ump())
 	YY.w=*U\y
 
 	If Ball\Active AND (NOT Ball\Blow)
-		##[$80CA] Ump()\S
+		USEPATH Ump()\S
 		If PColl(XX-8,YY-8,16,16,Ball\sx-1,Ball\sy-1,2,2)
 			Ump()\Action=0 : Ump()\OldAction=5
 			Ball\Blow=True : Ball\dx=0 : Ball\dy=0
@@ -1929,7 +1929,7 @@ While globfree(Ump())
 	End If
 
 	If Ump()\OldAction=5 AND Ump()\Action=0
-		globalloc Sco()
+		AddItem Sco()
 		Score+500
 		Sco()\x=*U\x
 		Sco()\y=*U\y
@@ -1944,14 +1944,14 @@ While globfree(Ump())
 			Sound 13,3
 		EndIf
 		*U\Kill=True
-		freelast Ump()
+		KillItem Ump()
 		Goto Uover
 	EndIf
 
-	newmem App()
-	While globfree(App())
+	ResetList App()
+	While NextItem(App())
 		If App()\Action =0 :Goto AUover:EndIf
-		##[$80CA] *U
+		USEPATH *U
 		*A.AnimShape=App()\S
 		Select(App()\Action)
 			Case 1:
@@ -1994,10 +1994,10 @@ While globfree(Ump())
 						*U\ImList=UPshLft:DX= 1:CM=3:OM=2
 				End Select
 
-				##[$80CA] App()
+				USEPATH App()
 
 				Ump()\Action=1:Ump()\OldAction=1
-				If (MAP(\MapX,\MapY) ##[$80CD] CM)AND(*ApMap(\MapX+DX,\MapY)=0)
+				If (MAP(\MapX,\MapY) BitTst CM)AND(*ApMap(\MapX+DX,\MapY)=0)
 					Ump()\MapX=\MapX+DX : *U\x =*A\x+18*DX
 					*U\y =*A\y		 : Ump()\MapY=\MapY
 					*U\vx=*A\vx		: *U\Steps=*A\Steps
@@ -2015,10 +2015,10 @@ While globfree(Ump())
 						\C\Action=1						 :\C\S\Steps	 =HashSteps-*A\Steps
 						*ApMap(\MapX,\MapY)=0	 :\MapX	=\MapX-DX
 						*A\vx=-*A\vx						:\CurDir=0
-						\CurDir ##[$80CE] OM
+						\CurDir BitSet OM
 						*A\Steps=HashSteps-*A\Steps:*ApMap(\MapX,\MapY)=App()
 						Ump()\CurDir=0					:Ump()\OldDir =0
-						Ump()\CurDir ##[$80CE] OM	:Ump()\OldDir ##[$80CE] OM
+						Ump()\CurDir BitSet OM	:Ump()\OldDir BitSet OM
 						*U\x =*A\x+18*DX				:Ump()\MapX	 =\MapX+DX
 						*U\vx=*A\vx						 :*U\Steps		 =*A\Steps
 					EndIf
@@ -2029,7 +2029,7 @@ While globfree(Ump())
 					Pop Select
 					Goto AUover
 				EndIf
-				##[$80CA] *U
+				USEPATH *U
 				Ump()\Action=5		: \Steps=*A\Steps-3
 				Ump()\OldAction=5 : \vx=*A\vx
 				\ImList=UmSquashed: \vy=*A\vy
@@ -2043,7 +2043,7 @@ While globfree(Ump())
 
 	Wend
 
-	##[$80CA] Ump()
+	USEPATH Ump()
 
 	CNIF #Test=0
 		If PColl(\S\x-1,\S\y-1,2,2,MrDo\S\x-1,MrDo\S\y-1,2,2)
@@ -2074,10 +2074,10 @@ While globfree(Ump())
 		Dig=True
 		\CurDir=\OldDir
 	Else
-		If(DX>0) : \CurDir ##[$80CE] 2 : End If
-		If(DX<0) : \CurDir ##[$80CE] 3 : End If
-		If(DY>0) : \CurDir ##[$80CE] 0 : End If
-		If(DY<0) : \CurDir ##[$80CE] 1 : End If
+		If(DX>0) : \CurDir BitSet 2 : End If
+		If(DX<0) : \CurDir BitSet 3 : End If
+		If(DY>0) : \CurDir BitSet 0 : End If
+		If(DY<0) : \CurDir BitSet 1 : End If
 		DigDir=\CurDir
 		NL = NOT(\OldDir)
 		\CurDir=(\CurDir AND MAP(\MapX,\MapY)) AND NL
@@ -2099,11 +2099,11 @@ While globfree(Ump())
 		If \CurDir=0	; Rem we have found a dead End !!
 			\CurDir=\OldDir
 		End If
-		If (\CurDir ##[$80CD] 0)AND(\CurDir ##[$80CD] 1)
-			If R<5 :\CurDir ##[$80CF] 0:Else \CurDir ##[$80CF] 1:End If
+		If (\CurDir BitTst 0)AND(\CurDir BitTst 1)
+			If R<5 :\CurDir BitClr 0:Else \CurDir BitClr 1:End If
 		End If
-		If (\CurDir ##[$80CD] 2)AND(\CurDir ##[$80CD] 3)
-			If R>5 :\CurDir ##[$80CF] 3:Else \CurDir ##[$80CF] 2:End If
+		If (\CurDir BitTst 2)AND(\CurDir BitTst 3)
+			If R>5 :\CurDir BitClr 3:Else \CurDir BitClr 2:End If
 		End If
 	End If
 
@@ -2126,12 +2126,12 @@ While globfree(Ump())
 	\S\vy=0
 	DX=0
 
-	If \CurDir ##[$80CD] 0:*U\vy=-HashSpeed:TY-1:*U\ImList=UmUp	 :CM=0:OM=1:End If
-	If \CurDir ##[$80CD] 1:*U\vy= HashSpeed:TY+1:*U\ImList=UmDown :CM=1:OM=0:End If
-	If \CurDir ##[$80CD] 2:*U\vx=-HashSpeed:TX-1:*U\ImList=UmLeft :CM=2:OM=3:DX=-1:End If
-	If \CurDir ##[$80CD] 3:*U\vx= HashSpeed:TX+1:*U\ImList=UmRight:CM=3:OM=2:DX= 1:End If
+	If \CurDir BitTst 0:*U\vy=-HashSpeed:TY-1:*U\ImList=UmUp	 :CM=0:OM=1:End If
+	If \CurDir BitTst 1:*U\vy= HashSpeed:TY+1:*U\ImList=UmDown :CM=1:OM=0:End If
+	If \CurDir BitTst 2:*U\vx=-HashSpeed:TX-1:*U\ImList=UmLeft :CM=2:OM=3:DX=-1:End If
+	If \CurDir BitTst 3:*U\vx= HashSpeed:TX+1:*U\ImList=UmRight:CM=3:OM=2:DX= 1:End If
 
-	If MAP(\MapX,\MapY) ##[$80CD] CM : Mutate=False : EndIf
+	If MAP(\MapX,\MapY) BitTst CM : Mutate=False : EndIf
 
 	If (TX>11)OR(TX<0)OR(TY>12)OR(TY<0) :Goto Uover:EndIf
 
@@ -2148,13 +2148,13 @@ While globfree(Ump())
 			*U\vy=0
 			Goto NoWay
 		EndIf
-		If((\CurDir AND $C)<>0)AND(*ApMap(TX,TY)\Action=0)AND(*ApMap(TX+DX,TY)=0)AND(MAP(TX,TY) ##[$80CD] CM)
+		If((\CurDir AND $C)<>0)AND(*ApMap(TX,TY)\Action=0)AND(*ApMap(TX+DX,TY)=0)AND(MAP(TX,TY) BitTst CM)
 			\Action=2
 			\OldAction=2
 			*TmpApple=*ApMap(TX,TY)
 			*TmpApple\Action=1
 			*TmpApple\S\Steps= HashSteps
-			If \CurDir ##[$80CD] 2
+			If \CurDir BitTst 2
 				*U\ImList=UPshLft: *TmpApple\S\vx=-HashSpeed
 				*TmpApple\MapX-1 : *ApMap(TX-1,TY)=*TmpApple
 			Else
@@ -2191,8 +2191,8 @@ While globfree(Ump())
 	EndIf
 
 	If (Dig)
-		If Things(TX,TY) ##[$80CD] 0
-			Things(TX,TY) ##[$80CF] 0
+		If Things(TX,TY) BitTst 0
+			Things(TX,TY) BitClr 0
 			Cherries-1
 		EndIf
 		\Action=4
@@ -2203,14 +2203,14 @@ While globfree(Ump())
 			Case UmUp	 : *U\ImList=UmDigUp
 			Case UmDown : *U\ImList=UmDigDown
 		End Select
-		MAP(\MapX,\MapY) ##[$80CE] CM
-		globalloc Mup()
+		MAP(\MapX,\MapY) BitSet CM
+		AddItem Mup()
 		Mup()\x=PosX(\MapX)
 		Mup()\y=PosY(\MapY)
 		Mup()\s=MAP(\MapX,\MapY)-1
 		Mup()\o=False
-		MAP(TX,TY) ##[$80CE] OM
-		globalloc Mup()
+		MAP(TX,TY) BitSet OM
+		AddItem Mup()
 		Mup()\x=PosX(TX)
 		Mup()\y=PosY(TY)
 		Mup()\s=MAP(TX,TY)-1
@@ -2244,11 +2244,11 @@ Return
 ;************************************************
 
 
-newmem App()
+ResetList App()
 
-While globfree(App())
+While NextItem(App())
 
-	##[$80CA] App()
+	USEPATH App()
 	*A.AnimShape=App()\S
 
 	If LetterActive
@@ -2265,7 +2265,7 @@ While globfree(App())
 			*L\Steps=HashSteps*10
 			LM\Action=2
 			LM\OldAction=2
-			freelast App()
+			KillItem App()
 			Goto over
 		EndIf
 	EndIf
@@ -2294,7 +2294,7 @@ While globfree(App())
 				EndIf
 			EndIf
 			NoApples-1
-			freelast App()
+			KillItem App()
 			Goto over
 		EndIf
 		If *A\ImList=APSplit1:*A\ImList=APSplit2:EndIf
@@ -2318,7 +2318,7 @@ While globfree(App())
 	If ((\MapX=MrDo\MapX)AND(\MapY+1=MrDo\MapY)): Goto over :EndIf
 
 	TmpY=\MapY+1
-	While(MAP(\MapX,TmpY)##[$80CD]1)AND(TmpY<12)AND(*ApMap(\MapX,TmpY+1)=0)AND(Things(\MapX,TmpY+1)=0)
+	While(MAP(\MapX,TmpY)BitTst1)AND(TmpY<12)AND(*ApMap(\MapX,TmpY+1)=0)AND(Things(\MapX,TmpY+1)=0)
 		TmpY+1
 	Wend
 	TmpY=TmpY-\MapY
@@ -2329,15 +2329,15 @@ While globfree(App())
 	*ApMap(\MapX,\MapY)=0
 	\S\vy	 =3			 ;6 AppleSpeed
 	\S\Steps=6*TmpY	;3
-	If (NOT(MAP(\MapX,\MapY)##[$80CD]1))AND(MAP(\MapX,\MapY)<>0)
-		MAP(\MapX,\MapY) ##[$80CE] 1
-		globalloc Mup()
+	If (NOT(MAP(\MapX,\MapY)BitTst1))AND(MAP(\MapX,\MapY)<>0)
+		MAP(\MapX,\MapY) BitSet 1
+		AddItem Mup()
 		Mup()\x=PosX(\MapX)
 		Mup()\y=PosY(\MapY)
 		Mup()\s=MAP(\MapX,\MapY)-1
 		Mup()\o=False
-		MAP(\MapX,\MapY+1) ##[$80CE] 0
-		globalloc Mup()
+		MAP(\MapX,\MapY+1) BitSet 0
+		AddItem Mup()
 		Mup()\x=PosX(\MapX)
 		Mup()\y=PosY(\MapY+1)
 		Mup()\s=MAP(\MapX,\MapY+1)-1
@@ -2364,8 +2364,8 @@ Return
 ;
 ;************************************************
 
-newmem App()
-While globfree(App())
+ResetList App()
+While NextItem(App())
 	*A.AnimShape=App()\S
 
 	Select(App()\Action)
@@ -2383,10 +2383,10 @@ While globfree(App())
 				Case 8 :DX= 1:CM=3:OM=2
 			End Select
 
-			If NOT (MrDo\CurDir ##[$80CD] OM) ; = App()\CurDir
+			If NOT (MrDo\CurDir BitTst OM) ; = App()\CurDir
 				If PColl(*A\x-6,*A\y-8,12,16,MrDo\S\x-6,MrDo\S\y-8,12,16)AND(MrDo\Action=0)
-					##[$80CA] App()
-					If (MAP(MrDo\MapX,MrDo\MapY) ##[$80CD] CM)AND(*ApMap(MrDo\MapX+DX,MrDo\MapY)=0)
+					USEPATH App()
+					If (MAP(MrDo\MapX,MrDo\MapY) BitTst CM)AND(*ApMap(MrDo\MapX+DX,MrDo\MapY)=0)
 						MrDo\Action = 5				: MrDo\OldAction = 5
 						MrDo\MapX	 = \MapX+DX
 						MrDo\S\vx	 = *A\vx		: MrDo\S\Steps	 = HashSteps
@@ -2411,9 +2411,9 @@ While globfree(App())
 				Case 8 :MrDo\S\ImList=DPshLft
 			End Select
 
-			##[$80CA] App()
+			USEPATH App()
 			MrDo\Action=5:MrDo\OldAction=5
-			If (MAP(\MapX,\MapY) ##[$80CD] CM)AND(*ApMap(MrDo\MapX+DX,MrDo\MapY)=0)
+			If (MAP(\MapX,\MapY) BitTst CM)AND(*ApMap(MrDo\MapX+DX,MrDo\MapY)=0)
 				MrDo\MapX = \MapX+DX : MrDo\S\x		 = *A\x+18*DX
 				MrDo\S\y	= *A\y		 : MrDo\MapY		= \MapY
 				MrDo\S\vx = *A\vx		: MrDo\S\Steps = *A\Steps
@@ -2423,10 +2423,10 @@ While globfree(App())
 					\C\Action	 = 1					 : \C\S\Steps = HashSteps-*A\Steps
 					*ApMap(\MapX,\MapY)=0		 : \MapX			= \MapX-DX
 					*A\vx			 = -*A\vx			: \CurDir		= 0
-					\CurDir ##[$80CE] OM
+					\CurDir BitSet OM
 					*A\Steps		= HashSteps-*A\Steps : *ApMap(\MapX,\MapY)=App()
 					MrDo\CurDir = 0							 : MrDo\OldDir	 = 0
-					MrDo\CurDir ##[$80CE] OM				 : MrDo\OldDir ##[$80CE] OM
+					MrDo\CurDir BitSet OM				 : MrDo\OldDir BitSet OM
 					MrDo\S\x		= *A\x+18*DX			: MrDo\MapX		 = \MapX+DX
 					MrDo\S\vx	 = *A\vx					 : MrDo\S\Steps	= *A\Steps
 				Else
@@ -2476,7 +2476,7 @@ Return
 ;
 ;************************************************
 
-##[$80CA] MrDo
+USEPATH MrDo
 
 If NOT Alive Then Return
 
@@ -2486,10 +2486,10 @@ If \Action<>0
 	If (\CurDir AND $C) <>0
 		DDX=0
 		Joy=Joyx(1)
-		If (Joy=-1)AND(\CurDir ##[$80CD] 3)
+		If (Joy=-1)AND(\CurDir BitTst 3)
 			\S\ImList=DoLeft	: \CurDir=4 : JM=2 : DDX=-1
 		EndIf
-		If (Joy= 1)AND(\CurDir ##[$80CD] 2)
+		If (Joy= 1)AND(\CurDir BitTst 2)
 			\S\ImList=DoRight : \CurDir=8 : JM=3 : DDX= 1
 		EndIf
 		If (\Action<>5)AND(DDX<>0)AND(*ApMap(\MapX+DDX,\MapY)=0)
@@ -2498,10 +2498,10 @@ If \Action<>0
 	Else
 		DDY=0
 		Joy=Joyy(1)
-		If (Joy=-1)AND(\CurDir ##[$80CD] 1)
+		If (Joy=-1)AND(\CurDir BitTst 1)
 			\S\ImList=DoUp	 : \CurDir=1 : JM=0 : DDY=-1
 		EndIf
-		If (Joy= 1)AND(\CurDir ##[$80CD] 0)
+		If (Joy= 1)AND(\CurDir BitTst 0)
 			\S\ImList=DoDown : \CurDir=2 : JM=1 : DDY= 1
 		EndIf
 		If (\Action<>5)AND(DDY<>0)AND(*ApMap(\MapX,\MapY+DDY)=0)
@@ -2520,28 +2520,28 @@ Select(Joy)
 	Case 0
 		\S\ImList=DoUp	 :DY=-1:JM=0:OM=1
 	Case 1
-		If \OldDir ##[$80CD] 0	:\S\ImList=DoRight:DX=1 :JM=3:OM=2
+		If \OldDir BitTst 0	:\S\ImList=DoRight:DX=1 :JM=3:OM=2
 		Else								 :\S\ImList=DoUp	 :DY=-1:JM=0:OM=1:EndIf
 		If \MapY=0					 :\S\ImList=DoRight:DX=1 :JM=3:OM=2:EndIf
 		If \MapX=11					:\S\ImList=DoUp	 :DY=-1:JM=0:OM=1:EndIf
 	Case 2
 		\S\ImList=DoRight:DX=1 :JM=3:OM=2
 	Case 3
-		If \OldDir ##[$80CD] 1	:\S\ImList=DoRight:DX=1 :JM=3:OM=2
+		If \OldDir BitTst 1	:\S\ImList=DoRight:DX=1 :JM=3:OM=2
 		Else								 :\S\ImList=DoDown :DY=1 :JM=1:OM=0:EndIf
 		If \MapY=12					:\S\ImList=DoRight:DX=1 :JM=3:OM=2:EndIf
 		If \MapX=11					:\S\ImList=DoDown :DY=1 :JM=1:OM=0:EndIf
 	Case 4
 		\S\ImList=DoDown :DY=1 :JM=1:OM=0
 	Case 5
-		If \OldDir ##[$80CD] 1	:\S\ImList=DoLeft :DX=-1:JM=2:OM=3
+		If \OldDir BitTst 1	:\S\ImList=DoLeft :DX=-1:JM=2:OM=3
 		Else								 :\S\ImList=DoDown :DY=1 :JM=1:OM=0:EndIf
 		If \MapY=12					:\S\ImList=DoLeft :DX=-1:JM=2:OM=3:EndIf
 		If \MapX=0					 :\S\ImList=DoDown :DY=1 :JM=1:OM=0:EndIf
 	Case 6
 		\S\ImList=DoLeft :DX=-1:JM=2:OM=3
 	Case 7
-		If \OldDir ##[$80CD] 0	:\S\ImList=DoLeft:DX=-1:JM=2:OM=3
+		If \OldDir BitTst 0	:\S\ImList=DoLeft:DX=-1:JM=2:OM=3
 		Else								 :\S\ImList=DoUp	:DY=-1:JM=0:OM=1:EndIf
 		If \MapX=0					 :\S\ImList=DoUp	:DY=-1:JM=0:OM=1:EndIf
 		If \MapY=0					 :\S\ImList=DoLeft:DX=-1:JM=2:OM=3:EndIf
@@ -2559,12 +2559,12 @@ Select(Joy)
 		Return
 End Select
 
-If NOT(\CurDir ##[$80CD] JM)
+If NOT(\CurDir BitTst JM)
 	MrDo\Action=1
 	MrDo\OldAction=1
 	DX=0:DY=0
 	\CurDir=0
-	\CurDir ##[$80CE] JM
+	\CurDir BitSet JM
 	MrDo\S\Steps=1
 EndIf
 
@@ -2604,7 +2604,7 @@ If (*ApMap(\MapX+DX,\MapY+DY)<>0)AND(*ApMap(\MapX+DX,\MapY+DY)\Action=0)
 	EndIf
 EndIf
 
-If NOT(MAP(\MapX,\MapY) ##[$80CD] JM)
+If NOT(MAP(\MapX,\MapY) BitTst JM)
 	\Action	 = 3
 	\OldAction= 3
 	Select (MrDo\S\ImList)
@@ -2613,16 +2613,16 @@ If NOT(MAP(\MapX,\MapY) ##[$80CD] JM)
 		Case DoUp		: MrDo\S\ImList=DoDigUp
 		Case DoDown	: MrDo\S\ImList=DoDigDown
 	End Select
-	MAP(\MapX,\MapY) ##[$80CE] JM
-	globalloc Mup()
+	MAP(\MapX,\MapY) BitSet JM
+	AddItem Mup()
 	Mup()\x=PosX(\MapX)
 	Mup()\y=PosY(\MapY)
 	Mup()\s=MAP(\MapX,\MapY)-1
 	Mup()\o=False
 	\MapX=\MapX+DX
 	\MapY=\MapY+DY
-	MAP(\MapX,\MapY) ##[$80CE] OM
-	globalloc Mup()
+	MAP(\MapX,\MapY) BitSet OM
+	AddItem Mup()
 	Mup()\x=PosX(\MapX)
 	Mup()\y=PosY(\MapY)
 	Mup()\s=MAP(\MapX,\MapY)-1
@@ -2639,9 +2639,9 @@ If \Action=0 : \Action=1 :EndIf
 \S\Steps=	HashSteps
 \OldDir=\CurDir
 
-If Things(\MapX,\MapY) ##[$80CD] 0
-	Things(\MapX,\MapY) ##[$80CF] 0
-	globalloc Sco()
+If Things(\MapX,\MapY) BitTst 0
+	Things(\MapX,\MapY) BitClr 0
+	AddItem Sco()
 	Sco()\x=PosX(\MapX)
 	Sco()\y=PosY(\MapY)
 	Sound SCount,3
@@ -2654,9 +2654,9 @@ Else
 	SCount=0
 EndIf
 
-If Things(\MapX,\MapY) ##[$80CD] 1
-	Things(\MapX,\MapY) ##[$80CF] 1
-	globalloc Sco()
+If Things(\MapX,\MapY) BitTst 1
+	Things(\MapX,\MapY) BitClr 1
+	AddItem Sco()
 	Sco()\x=PosX(\MapX)
 	Sco()\y=PosY(\MapY)
 	Sco()\s=176
@@ -2667,9 +2667,9 @@ If Things(\MapX,\MapY) ##[$80CD] 1
 	Sound 14,3
 EndIf
 
-If Things(\MapX,\MapY) ##[$80CD] 3
-	Things(\MapX,\MapY) ##[$80CF] 3
-	globalloc Sco()
+If Things(\MapX,\MapY) BitTst 3
+	Things(\MapX,\MapY) BitClr 3
+	AddItem Sco()
 	Sco()\x=PosX(\MapX)
 	Sco()\y=PosY(\MapY)
 	Sco()\s=GScoShape
@@ -2680,8 +2680,8 @@ If Things(\MapX,\MapY) ##[$80CD] 3
 	Gosub SB_MaraInit
 EndIf
 
-If Things(\MapX,\MapY) ##[$80CD] 4
-	Things(\MapX,\MapY) ##[$80CF] 4
+If Things(\MapX,\MapY) BitTst 4
+	Things(\MapX,\MapY) BitClr 4
 	ExtraDo\S\Kill= True
 	ExtraDoActive = False
 	Gosub SB_ExtraMrDo
@@ -2707,15 +2707,15 @@ Return
 
 
 
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 UnBuffer CBitMap
 
-newmem Mup()
-While globfree(Mup())
-	##[$80CA] Mup()
-	longdiv	\s,\x,\y
+ResetList Mup()
+While NextItem(Mup())
+	USEPATH Mup()
+	Blit	\s,\x,\y
 	If \o
-		freelast Mup()
+		KillItem Mup()
 	Else
 		\o=True
 	EndIf
@@ -2725,9 +2725,9 @@ UpDate+1
 UpDate=UpDate AND HashUpDate
 If UpDate=0 : ImNo+1 : ImNo = ImNo & 3 : EndIf
 
-newmem Ash()
-While globfree(Ash())
-	##[$80CA] Ash()
+ResetList Ash()
+While NextItem(Ash())
+	USEPATH Ash()
 	If \Steps<>0
 		\Steps-1
 		\x=\x+\vx
@@ -2739,15 +2739,15 @@ While globfree(Ash())
 	EndIf
 	BBlit CBitMap,\ImList\I[ImNo],\x,\y
 	If \Kill
-		freelast Ash()
+		KillItem Ash()
 	EndIf
 Wend
 
-newmem Sco()
-While globfree(Sco())
-	##[$80CA] Sco()
+ResetList Sco()
+While NextItem(Sco())
+	USEPATH Sco()
 	If \o=0
-		freelast Sco()
+		KillItem Sco()
 	Else
 		BBlit CBitMap,\s,\x,\y
 		\o-1
@@ -2779,40 +2779,40 @@ For Y=0 To 12
 Next
 
 ;Umph AnimShapes
-##[$80CA] UmphBaseNorm	: \I[0]= 78:\I[1]= 78:\I[2]= 78:\I[3]= 78
-##[$80CA] UmphBaseFlash : \I[0]= 78:\I[1]= 78:\I[2]= 79:\I[3]= 79
-##[$80CA] UmLeft				: \I[0]= 85:\I[1]= 86:\I[2]= 85:\I[3]= 87
-##[$80CA] UmRight			 : \I[0]= 79:\I[1]= 80:\I[2]= 79:\I[3]= 81
-##[$80CA] UmUp					: \I[0]= 88:\I[1]= 89:\I[2]= 88:\I[3]= 90
-##[$80CA] UmDown				: \I[0]= 82:\I[1]= 83:\I[2]= 82:\I[3]= 84
-##[$80CA] UmSquaHor		 : \I[0]= 77:\I[1]= 77:\I[2]= 77:\I[3]= 77
-##[$80CA] UmSquashed		: \I[0]= 91:\I[1]= 91:\I[2]= 91:\I[3]= 91
-##[$80CA] UPshRgt			 : \I[0]= 92:\I[1]= 93:\I[2]= 92:\I[3]= 94
-##[$80CA] UPshLft			 : \I[0]= 95:\I[1]= 96:\I[2]= 95:\I[3]= 97
-##[$80CA] UmDigRight		: \I[0]=111:\I[1]=112:\I[2]=111:\I[3]=113
-##[$80CA] UmDigLeft		 : \I[0]=114:\I[1]=115:\I[2]=114:\I[3]=116
-##[$80CA] UmDigDown		 : \I[0]=125:\I[1]=126:\I[2]=125:\I[3]=127
-##[$80CA] UmDigUp			 : \I[0]=128:\I[1]=129:\I[2]=128:\I[3]=130
-##[$80CA] UmMtLeft			: \I[0]= 85:\I[1]= 99:\I[2]= 85:\I[3]= 99
-##[$80CA] UmMtRight		 : \I[0]= 79:\I[1]= 98:\I[2]= 79:\I[3]= 98
-##[$80CA] UmMtUp				: \I[0]= 88:\I[1]=100:\I[2]= 88:\I[3]=100
-##[$80CA] UmMtDown			: \I[0]= 82:\I[1]=101:\I[2]= 82:\I[3]=101
+USEPATH UmphBaseNorm	: \I[0]= 78:\I[1]= 78:\I[2]= 78:\I[3]= 78
+USEPATH UmphBaseFlash : \I[0]= 78:\I[1]= 78:\I[2]= 79:\I[3]= 79
+USEPATH UmLeft				: \I[0]= 85:\I[1]= 86:\I[2]= 85:\I[3]= 87
+USEPATH UmRight			 : \I[0]= 79:\I[1]= 80:\I[2]= 79:\I[3]= 81
+USEPATH UmUp					: \I[0]= 88:\I[1]= 89:\I[2]= 88:\I[3]= 90
+USEPATH UmDown				: \I[0]= 82:\I[1]= 83:\I[2]= 82:\I[3]= 84
+USEPATH UmSquaHor		 : \I[0]= 77:\I[1]= 77:\I[2]= 77:\I[3]= 77
+USEPATH UmSquashed		: \I[0]= 91:\I[1]= 91:\I[2]= 91:\I[3]= 91
+USEPATH UPshRgt			 : \I[0]= 92:\I[1]= 93:\I[2]= 92:\I[3]= 94
+USEPATH UPshLft			 : \I[0]= 95:\I[1]= 96:\I[2]= 95:\I[3]= 97
+USEPATH UmDigRight		: \I[0]=111:\I[1]=112:\I[2]=111:\I[3]=113
+USEPATH UmDigLeft		 : \I[0]=114:\I[1]=115:\I[2]=114:\I[3]=116
+USEPATH UmDigDown		 : \I[0]=125:\I[1]=126:\I[2]=125:\I[3]=127
+USEPATH UmDigUp			 : \I[0]=128:\I[1]=129:\I[2]=128:\I[3]=130
+USEPATH UmMtLeft			: \I[0]= 85:\I[1]= 99:\I[2]= 85:\I[3]= 99
+USEPATH UmMtRight		 : \I[0]= 79:\I[1]= 98:\I[2]= 79:\I[3]= 98
+USEPATH UmMtUp				: \I[0]= 88:\I[1]=100:\I[2]= 88:\I[3]=100
+USEPATH UmMtDown			: \I[0]= 82:\I[1]=101:\I[2]= 82:\I[3]=101
 
 ;Maras
-##[$80CA] MaraRight	 : \I[0]=149:\I[1]=150:\I[2]=151:\I[3]=150
-##[$80CA] MaraDown		: \I[0]=152:\I[1]=153:\I[2]=154:\I[3]=153
-##[$80CA] MaraUp			: \I[0]=155:\I[1]=156:\I[2]=157:\I[3]=156
-##[$80CA] MaraLeft		: \I[0]=158:\I[1]=159:\I[2]=160:\I[3]=159
-##[$80CA] MaraEat		 : \I[0]=161:\I[1]=162:\I[2]=163:\I[3]=162
+USEPATH MaraRight	 : \I[0]=149:\I[1]=150:\I[2]=151:\I[3]=150
+USEPATH MaraDown		: \I[0]=152:\I[1]=153:\I[2]=154:\I[3]=153
+USEPATH MaraUp			: \I[0]=155:\I[1]=156:\I[2]=157:\I[3]=156
+USEPATH MaraLeft		: \I[0]=158:\I[1]=159:\I[2]=160:\I[3]=159
+USEPATH MaraEat		 : \I[0]=161:\I[1]=162:\I[2]=163:\I[3]=162
 
 
 ;Letter Monster
-##[$80CA] LME	 : \I[0]=131:\I[1]=132:\I[2]=133:\I[3]=132 ;E
-##[$80CA] LMX	 : \I[0]=134:\I[1]=135:\I[2]=136:\I[3]=135 ;X
-##[$80CA] LMT	 : \I[0]=137:\I[1]=138:\I[2]=139:\I[3]=138 ;T
-##[$80CA] LMR	 : \I[0]=140:\I[1]=141:\I[2]=142:\I[3]=141 ;R
-##[$80CA] LMA	 : \I[0]=143:\I[1]=144:\I[2]=145:\I[3]=144 ;A
-##[$80CA] LMEat : \I[0]=146:\I[1]=147:\I[2]=148:\I[3]=147 ;EAT
+USEPATH LME	 : \I[0]=131:\I[1]=132:\I[2]=133:\I[3]=132 ;E
+USEPATH LMX	 : \I[0]=134:\I[1]=135:\I[2]=136:\I[3]=135 ;X
+USEPATH LMT	 : \I[0]=137:\I[1]=138:\I[2]=139:\I[3]=138 ;T
+USEPATH LMR	 : \I[0]=140:\I[1]=141:\I[2]=142:\I[3]=141 ;R
+USEPATH LMA	 : \I[0]=143:\I[1]=144:\I[2]=145:\I[3]=144 ;A
+USEPATH LMEat : \I[0]=146:\I[1]=147:\I[2]=148:\I[3]=147 ;EAT
 EXTRA(0)\x=135,11,54,False,LME
 EXTRA(1)\x=147,11,55,False,LMX
 EXTRA(2)\x=160,11,56,False,LMT
@@ -2820,49 +2820,49 @@ EXTRA(3)\x=173,11,57,False,LMR
 EXTRA(4)\x=185,11,58,False,LMA
 
 ;Specials
-##[$80CA] SDiamond:\I[0]=50:\I[1]=51:\I[2]=52:\I[3]=53
+USEPATH SDiamond:\I[0]=50:\I[1]=51:\I[2]=52:\I[3]=53
 DiamondActive=False
-##[$80CA] SExtraDo	:\I[0]=45:\I[1]=46:\I[2]=47:\I[3]=46
+USEPATH SExtraDo	:\I[0]=45:\I[1]=46:\I[2]=47:\I[3]=46
 ExtraDoActive=False
 
 
 ;MrDo
-##[$80CA] DoLeft		: \I[0]= 65:\I[1]= 66:\I[2]= 67:\I[3]= 66
-##[$80CA] DoRight	 : \I[0]= 59:\I[1]= 60:\I[2]= 61:\I[3]= 60
-##[$80CA] DoUp			: \I[0]= 68:\I[1]= 69:\I[2]= 70:\I[3]= 69
-##[$80CA] DoDown		: \I[0]= 62:\I[1]= 63:\I[2]= 64:\I[3]= 63
-##[$80CA] DPshLft	 : \I[0]= 74:\I[1]= 75:\I[2]= 74:\I[3]= 76
-##[$80CA] DPshRgt	 : \I[0]= 71:\I[1]= 72:\I[2]= 71:\I[3]= 73
-##[$80CA] DoDead		: \I[0]= 59:\I[1]= 62:\I[2]= 59:\I[3]= 68
-##[$80CA] DoDigLeft : \I[0]=107:\I[1]=108:\I[2]=109:\I[3]=110
-##[$80CA] DoDigRight: \I[0]=103:\I[1]=104:\I[2]=105:\I[3]=106
-##[$80CA] DoDigDown : \I[0]=121:\I[1]=122:\I[2]=123:\I[3]=124
-##[$80CA] DoDigUp	 : \I[0]=117:\I[1]=118:\I[2]=119:\I[3]=120
-##[$80CA] DoSquashed: \I[0]=102:\I[1]=102:\I[2]=102:\I[3]=102
-##[$80CA] DoSquaHor : \I[0]= 48:\I[1]= 48:\I[2]= 48:\I[3]= 48
+USEPATH DoLeft		: \I[0]= 65:\I[1]= 66:\I[2]= 67:\I[3]= 66
+USEPATH DoRight	 : \I[0]= 59:\I[1]= 60:\I[2]= 61:\I[3]= 60
+USEPATH DoUp			: \I[0]= 68:\I[1]= 69:\I[2]= 70:\I[3]= 69
+USEPATH DoDown		: \I[0]= 62:\I[1]= 63:\I[2]= 64:\I[3]= 63
+USEPATH DPshLft	 : \I[0]= 74:\I[1]= 75:\I[2]= 74:\I[3]= 76
+USEPATH DPshRgt	 : \I[0]= 71:\I[1]= 72:\I[2]= 71:\I[3]= 73
+USEPATH DoDead		: \I[0]= 59:\I[1]= 62:\I[2]= 59:\I[3]= 68
+USEPATH DoDigLeft : \I[0]=107:\I[1]=108:\I[2]=109:\I[3]=110
+USEPATH DoDigRight: \I[0]=103:\I[1]=104:\I[2]=105:\I[3]=106
+USEPATH DoDigDown : \I[0]=121:\I[1]=122:\I[2]=123:\I[3]=124
+USEPATH DoDigUp	 : \I[0]=117:\I[1]=118:\I[2]=119:\I[3]=120
+USEPATH DoSquashed: \I[0]=102:\I[1]=102:\I[2]=102:\I[3]=102
+USEPATH DoSquaHor : \I[0]= 48:\I[1]= 48:\I[2]= 48:\I[3]= 48
 
 
 ;Apple
-##[$80CA] APNorm	:\I[0]=42:\I[1]=42:\I[2]=42:\I[3]=42
-##[$80CA] APSplit1:\I[0]=43:\I[1]=43:\I[2]=43:\I[3]=43
-##[$80CA] APSplit2:\I[0]=44:\I[1]=44:\I[2]=44:\I[3]=44
+USEPATH APNorm	:\I[0]=42:\I[1]=42:\I[2]=42:\I[3]=42
+USEPATH APSplit1:\I[0]=43:\I[1]=43:\I[2]=43:\I[3]=43
+USEPATH APSplit2:\I[0]=44:\I[1]=44:\I[2]=44:\I[3]=44
 
 ;draw info
 VWait
 Show CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 BlockScroll
-longdiv 178,25,35
-longdiv 179,25,114
-longdiv 180,28,14
-longdiv 181,63,12
+Blit 178,25,35
+Blit 179,25,114
+Blit 180,28,14
+Blit 181,63,12
 
 If NoOfPlayers=1
-	longdiv 178,294,35
-	longdiv 179,294,114
-	longdiv 180,278,14
-	longdiv 182,314,12
+	Blit 178,294,35
+	Blit 179,294,114
+	Blit 180,278,14
+	Blit 182,314,12
 EndIf
 
 CBitMap=1-CBitMap
@@ -2898,13 +2898,13 @@ Return
 VWait
 Show CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 
 Gosub SB_SelectMap
 
 Read Blck(1),Blck(2),G
 
-##[$80CA] SGoodie:\I[0]=G:\I[1]=G:\I[2]=G:\I[3]=G
+USEPATH SGoodie:\I[0]=G:\I[1]=G:\I[2]=G:\I[3]=G
 
 Acnt=0
 Cherries=0
@@ -2912,20 +2912,20 @@ For Y=0 To 12
 	For X=0 To 11
 		Read SP
 		SP=((SP ASR 4) AND 3)
-		longdiv Blck(SP),PosX(X),PosY(Y)
-		If Things(X,Y) ##[$80CD] 0
-			longdiv 41,PosX(X),PosY(Y)
+		Blit Blck(SP),PosX(X),PosY(Y)
+		If Things(X,Y) BitTst 0
+			Blit 41,PosX(X),PosY(Y)
 			Cherries+1
 		Else
 			Things(X,Y)=0
 		EndIf
 		If(MAP(X,Y)<>0)
-			longdiv MAP(X,Y)-1,PosX(X),PosY(Y)
+			Blit MAP(X,Y)-1,PosX(X),PosY(Y)
 		EndIf
 		*ApMap(X,Y)=0
 		If PlyApMap(CurrentPlayer,X,Y)=1
-			globalloc App()
-			##[$80CA] App()
+			AddItem App()
+			USEPATH App()
 			\Action		= 0
 			\CurDir		= 0
 			\OldDir		= 0
@@ -2933,8 +2933,8 @@ For Y=0 To 12
 			\MapX			= X
 			\MapY			= Y
 			*ApMap(X,Y)=App()
-			globalloc Ash()
-			##[$80CA] Ash()
+			AddItem Ash()
+			USEPATH Ash()
 			\x=PosX(X),PosY(Y),0,0,0,APNorm,App(),False
 			App()\S=Ash()
 			Ash()\C=App()
@@ -2945,10 +2945,10 @@ Next Y
 NoApples=Acnt
 
 ;setup extra
-longdiv 177,160,11
+Blit 177,160,11
 For i=0 To 4
-	If EXTRA ##[$80CD] i
-		longdiv EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
+	If EXTRA BitTst i
+		Blit EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
 	EndIf
 Next i
 
@@ -2956,21 +2956,21 @@ VWait
 Show CBitMap
 ShapesBitMap CBitMap,1-CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 
 ;SetUp UmphBase
-globalloc Ash()
-globalloc Ump()
-##[$80CA] Ump():\Action=6,0,5,6,0,0,0,Ash()
+AddItem Ash()
+AddItem Ump()
+USEPATH Ump():\Action=6,0,5,6,0,0,0,Ash()
 Things(5,6)=4
 *UmphBase=Ump()
-##[$80CA] Ash()
+USEPATH Ash()
 \x=PosX(Ump()\MapX),PosY(Ump()\MapY),0,0,0,UmphBaseNorm,Ump(),False
 
 ;setup MrDo
-globalloc Ash()
-##[$80CA] MrDo:\Action=0,0,6,12,4,4,0,Ash()
-##[$80CA] Ash():
+AddItem Ash()
+USEPATH MrDo:\Action=0,0,6,12,4,4,0,Ash()
+USEPATH Ash():
 \x=PosX(MrDo\MapX),PosY(MrDo\MapY),0,0,0,DoLeft,MrDo,False
 JM=2
 
@@ -2995,14 +2995,14 @@ Return
 VWait
 Show CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 
 Gosub SB_SelectMap
 
 Read Blck(1),Blck(2)
 Read G
 
-##[$80CA] SGoodie:\I[0]=G:\I[1]=G:\I[2]=G:\I[3]=G
+USEPATH SGoodie:\I[0]=G:\I[1]=G:\I[2]=G:\I[3]=G
 
 For Y=0 To 12
 	For X=0 To 11
@@ -3014,14 +3014,14 @@ For Y=0 To 12
 	For X=0 To 11
 		Things(X,Y)=0
 		SP=((MAP(X,Y)/16) AND 3)
-		longdiv Blck(SP),PosX(X),PosY(Y)
+		Blit Blck(SP),PosX(X),PosY(Y)
 		If (MAP.b(X,Y) AND $80)=$80
-			longdiv 41,PosX(X),PosY(Y)
+			Blit 41,PosX(X),PosY(Y)
 			Things(X,Y)=1
 		EndIf
 		MAP(X,Y)=MAP(X,Y) AND $F
 		If(MAP(X,Y)<>0)
-			longdiv MAP(X,Y)-1,PosX(X),PosY(Y)
+			Blit MAP(X,Y)-1,PosX(X),PosY(Y)
 		EndIf
 		*ApMap(X,Y)=0
 	Next X
@@ -3036,8 +3036,8 @@ For x=1 To 10
 			If(MAP(x,y+1)=0)AND(MAP(x,y)=0)AND(Things(x,y)=0)
 				If(*ApMap(x-1,y)=0)AND(*ApMap(x,y-1)=0)AND(*ApMap(x-1,y-1)=0)AND(*ApMap(x,y)=0)AND(*ApMap(x+1,y-1)=0)
 					If(Rnd(50)<10)
-						globalloc App()
-						##[$80CA] App()
+						AddItem App()
+						USEPATH App()
 						\Action		= 0
 						\CurDir		= 0
 						\OldDir		= 0
@@ -3045,8 +3045,8 @@ For x=1 To 10
 						\MapX			= x
 						\MapY			= y
 						*ApMap(x,y)=App()
-						globalloc Ash()
-						##[$80CA] Ash()
+						AddItem Ash()
+						USEPATH Ash()
 						\x=PosX(x),PosY(y),0,0,0,APNorm,App(),False
 						App()\S=Ash()
 						Ash()\C=App()
@@ -3062,10 +3062,10 @@ Wend
 NoApples=Acnt
 
 ;setup extra
-longdiv 177,160,11
+Blit 177,160,11
 For i=0 To 4
-	If EXTRA ##[$80CD] i
-		longdiv EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
+	If EXTRA BitTst i
+		Blit EXTRA(i)\s,EXTRA(i)\x,EXTRA(i)\y
 	EndIf
 Next i
 
@@ -3074,23 +3074,23 @@ VWait
 Show CBitMap
 ShapesBitMap CBitMap,1-CBitMap
 CBitMap=1-CBitMap
-Use lmaxlen CBitMap
+Use BitMap CBitMap
 
 ;SetUp UmphBase
-globalloc Ash()
-globalloc Ump()
-##[$80CA] Ump():\Action=6,0,5,6,0,0,0,Ash()
+AddItem Ash()
+AddItem Ump()
+USEPATH Ump():\Action=6,0,5,6,0,0,0,Ash()
 Things(5,6)=4
 *UmphBase=Ump()
-##[$80CA] Ash()
+USEPATH Ash()
 \x=PosX(Ump()\MapX),PosY(Ump()\MapY),0,0,0,UmphBaseNorm,Ump(),False
 
 NoOfUmphs=8+Level/2
 
 ;setup MrDo
-globalloc Ash()
-##[$80CA] MrDo:\Action=0,0,6,12,4,4,0,Ash()
-##[$80CA] Ash():
+AddItem Ash()
+USEPATH MrDo:\Action=0,0,6,12,4,4,0,Ash()
+USEPATH Ash():
 \x=PosX(MrDo\MapX),PosY(MrDo\MapY),0,0,0,DoLeft,MrDo,False
 JM=2
 

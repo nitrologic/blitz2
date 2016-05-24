@@ -27,8 +27,8 @@ Next
 
 End
 
-lmaxlen 0,1280,280,8
-allocst 0,0,0,1280,280,8,$8020,"HELLO",1,2,0
+BitMap 0,1280,280,8
+Screen 0,0,0,1280,280,8,$8020,"HELLO",1,2,0
 
 t.q=255/63:tt.q=63/255:l.q=0
 For i=0 To 63

@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/GraphicDump.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicDump.bb
 ; This little program will receive a window address from CanDo and
 ; then output that window as a Graphic Dump to the printer.
-##[$80CC]
+NoCli
 ; I send the arguments from within CanDo to print the window I specify
 ; If an error occurs it is saved as a little file in ram: and then I
 ; check the file and determine what the error was and act accordingly

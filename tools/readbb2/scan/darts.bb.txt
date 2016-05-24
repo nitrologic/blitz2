@@ -137,8 +137,8 @@ Next
 
 ;setup display
 
-lmaxlen 0,320,256,3
-lmaxlen 1,320,256,3
+BitMap 0,320,256,3
+BitMap 1,320,256,3
 
 BLITZ
 
@@ -153,10 +153,10 @@ Mouse On:MouseArea -150,-150,120,120:BlitzKeys On
 .mainloop
 
 Repeat
-	VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db	;double buffer
-	 mycls{Peek.l (Addr lmaxlen(db)+8)}
-	 mycls{Peek.l (Addr lmaxlen(db)+12)}
-	 mycls{Peek.l (Addr lmaxlen(db)+16)}
+	VWait:DisplayBitMap 0,db:db=1-db:Use BitMap db	;double buffer
+	 mycls{Peek.l (Addr BitMap(db)+8)}
+	 mycls{Peek.l (Addr BitMap(db)+12)}
+	 mycls{Peek.l (Addr BitMap(db)+16)}
 ;do you
 	x=MouseX:y=MouseY
 	Line x+155,y+128,x+165,y+128,1:Line x+160,y+123,x+160,y+133,1
@@ -177,28 +177,28 @@ Macro mypoly
 	Polyf 3,&t,`4,`5
 End Macro
 
-##[$80CA] bang()
+USEPATH bang()
 
 .dobang
-	newmem bang()
-	While globfree(bang())
+	ResetList bang()
+	While NextItem(bang())
 		\x+\vx:\y+\vy:\z+\vz
 		\rotx+\rvx:\roty+\rvy:\rotz+\rvz
 		calcid{bang(),rt}
 		If genstar{bang()}
 			For i=0 To 4 Step 2:!myline {i,i+1}:Next
 		Else
-			freelast bang()
+			KillItem bang()
 		EndIf
 	Wend
 	Return
 
-##[$80CA] nme()
+USEPATH nme()
 
 .addnme:
 	newnme-1
 	If newnme<0
-		If globalloc(nme())
+		If AddItem(nme())
 			newnme=5
 			\x=Rnd(8000)-4000,0,6000
 			\rotx=0,Rnd(4096),512
@@ -210,12 +210,12 @@ End Macro
 
 .movenme:
 	;
-	newmem nme()
+	ResetList nme()
 	SortList nme(),sizof .object\z
 	;
-	newmem nme()
+	ResetList nme()
 	;
-	While globfree(nme())
+	While NextItem(nme())
 		calcid{nme(),rt}
 		moveonz{nme(),\thrust}
 		\x+\vx:\y+\vy:\z+\vz:
@@ -231,16 +231,16 @@ End Macro
 				 !mypoly{0,2,6,7,-1}
 				 !mypoly{0,6,3,7,-1}
 
-				newmem fire()
-				While globfree(fire())
+				ResetList fire()
+				While NextItem(fire())
 					If Abs(\x-fire()\x)<1000
 						If Abs(\y-fire()\y)<1000
 							If Abs(\z-fire()\z)<1000
-								If globalloc(bang())
+								If AddItem(bang())
 									bang()\x=\x,\y,\z,\vx,\vy,\vz
 									bang()\rvx=100,130,90
 								EndIf
-								freelast nme():freelast fire():Goto popout
+								KillItem nme():KillItem fire():Goto popout
 							EndIf
 						EndIf
 					EndIf
@@ -248,15 +248,15 @@ End Macro
 
 			EndIf
 		Else
-			freelast nme()
+			KillItem nme()
 		EndIf
 	Wend
 	Return
 
-##[$80CA] fire()
+USEPATH fire()
 
 .addfire:
-	If globalloc(fire())
+	If AddItem(fire())
 		xo=-xo
 		\x=xo,1000,1000
 		calcid{fire(),rt}
@@ -267,13 +267,13 @@ End Macro
 	Return
 
 .dofire:
-	newmem fire()
-	While globfree(fire())
+	ResetList fire()
+	While NextItem(fire())
 		\x+\vx:\y+\vy:\z+\vz
 		If \z<16000
 			genline{fire()}:!myline{0,7}
 		Else
-			freelast fire()
+			KillItem fire()
 		EndIf
 	Wend
 	Return

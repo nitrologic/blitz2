@@ -37,8 +37,8 @@ StopCycle 0,7,15,15,15
 
 #bplmod1=$108
 #bplmod2=$10a
-lmaxlen 0,320,275,3
-lmaxlen 1,320,275,3
+BitMap 0,320,275,3
+BitMap 1,320,275,3
 Slice 0,34,320,275,$fff8,3,0,8,320,320
 Show 0
 Use SetCycle 0
@@ -68,7 +68,7 @@ Repeat
 	VWait
 	Show DB
 	DB=1-DB
-	Use lmaxlen DB
+	Use BitMap DB
 	BlockScroll
 
 	X=X+XI : If X>359 Then X=0
@@ -77,16 +77,16 @@ Repeat
 	Y2=Y2+YI2 : If Y2>359 Then Y2=0
 
 	For I=1 To NLINES
-		longdiv 0,CX(X+PX1(I))+160,CX(Y+PY1(I))+105
-		longdiv 1,CX(X2+PX2(I))+160,CX(Y2+PY2(I))+105
+		Blit 0,CX(X+PX1(I))+160,CX(Y+PY1(I))+105
+		Blit 1,CX(X2+PX2(I))+160,CX(Y2+PY2(I))+105
 	Next
 
 	T=T+1
 
 	If Joyb(0)>0 Then End
 Until T=300
-Use lmaxlen 0 : BlockScroll
-Use lmaxlen 1 : BlockScroll
+Use BitMap 0 : BlockScroll
+Use BitMap 1 : BlockScroll
 Goto NUPAT
 
 .PATDATA

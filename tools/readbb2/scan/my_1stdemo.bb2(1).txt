@@ -7,7 +7,7 @@
 ;
 ;*****************************
 
-WBStartup:##[$80CC]
+WBStartup:NoCli
 LoadModule 0,"blitz_products:modules/mod.sheam"						; Load the module
 LoadShapes 0,"blitz_products:shapes/sensor_stuff.shapes"	 ; Get Font & Logo
 VWait 20
@@ -16,7 +16,7 @@ BLITZ																											; Blitz rules!
 #bplmod1=$108
 #bplmod2=$10A
 PlayModule 0																							 ; Play some music
-lmaxlen 0,384,250,4																				 ; Define a bitmap
+BitMap 0,384,250,4																				 ; Define a bitmap
 
 Restore cdat																							 ;
 For tel=0 To 15																						; Read the colors
@@ -50,7 +50,7 @@ co$=Mki$(#bplmod1)+Mki$(-41)
 co$+Mki$(#bplmod2)+Mki$(-41)
 CustomCop co$,245
 
-longdiv 41,30,50																					 ; Logo
+Blit 41,30,50																					 ; Logo
 Show 0																					; Here we are!
 
 controle$="abcdefghijklmnopqrstuvwxyz0123456789.,-!"
@@ -66,7 +66,7 @@ Repeat
 	ftel=Instr(controle$,find$)-1
 	teller=QWrap(teller+1,1,lengte)
 	If ftel=-1 Goto verder
-	longdiv ftel,335,5
+	Blit ftel,335,5
 	verder:
 	For tel=1 To 2
 		Scroll 5,5,350,8,0,5

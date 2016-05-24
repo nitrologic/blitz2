@@ -293,8 +293,8 @@ For h=1 To #num
 	plots(h)\spd=Int(Rnd(7))+1
 Next h
 
-lmaxlen 0,320,256,4
-lmaxlen 1,320,256,4
+BitMap 0,320,256,4
+BitMap 1,320,256,4
 BLITZ
 Slice 0,44,4
 Show 0
@@ -310,6 +310,6 @@ Repeat
 	Show dbuffer
 	dbuffer=1-dbuffer
 	##[$A08C] dbuffer
-	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,0}
+	Drawfield{&plots(0),Addr BitMap(dbuffer),-1,0}
 Until Joyb(0)
 End

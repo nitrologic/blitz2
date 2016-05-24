@@ -87,8 +87,8 @@ End Function
 BSET #7,$bfe201	 ;fire 1 -> output
 tout{0}:dout{0}				 ;timer and data to 0!
 
-allocst 0,0,0,320,256,3,0,"",1,0
-localstat 0,0,0,320,256,$100f,Par$(1),1,0
+Screen 0,0,0,320,256,3,0,"",1,0
+Window 0,0,0,320,256,$100f,Par$(1),1,0
 
 Repeat
 	If Left$(LCase$(Par$(1)),1)="i"

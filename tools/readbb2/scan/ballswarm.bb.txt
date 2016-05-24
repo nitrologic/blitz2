@@ -13,12 +13,12 @@ BLITZ
 
 ;turn error checking off
 ;
-##[$80D3]
+Runerrsoff
 
 ;setup a bitmap
 ;
-lmaxlen 0,320,200,3
-lmaxlen 1,320,200,3
+BitMap 0,320,200,3
+BitMap 1,320,200,3
 
 ;setup a slice for it
 ;
@@ -69,15 +69,15 @@ For n=1 To maxm
 ;	balls(n)\x=Rnd(280)+20,Rnd(160)+20,1,1
 Next n
 
-longmult 0,maxm
-longmult 1,maxm
+Queue 0,maxm
+Queue 1,maxm
 
 While Joyb(0)=0
 
 	VWait
 	Show scr
 	scr=1-scr
-	Use lmaxlen scr
+	Use BitMap scr
 	UnQueue scr
 	lx=balls(1)\x
 	ly=balls(1)\y
@@ -141,7 +141,7 @@ Wend
 
 ;turn error checking back on
 ;
-##[$80D2]
+Runerrson
 
 End
 

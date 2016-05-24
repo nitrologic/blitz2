@@ -44,7 +44,7 @@ DEFTYPE.w
 
 
 
-##[$80CC]
+NoCli
 
 
 ;For filerequester....
@@ -79,13 +79,13 @@ End Statement
 
 .Example
 ;Get WB palette....
-freest 0
+WbToScreen 0
 For i=0 To 7:StopCycle 0,i,Blue(i),Palette(i),PalRGB(i):Next
 
 ;Now open our screen...
 
-allocst 0,0,0,640,200,WBDepth,$8000,"What do you think of *THIS*!!",1,2
-localstat 0,0,0,640,200,$1000,"Put Icons on your own windows!",1,2
+Screen 0,0,0,640,200,WBDepth,$8000,"What do you think of *THIS*!!",1,2
+Window 0,0,0,640,200,$1000,"Put Icons on your own windows!",1,2
 
 Use SetCycle 0
 

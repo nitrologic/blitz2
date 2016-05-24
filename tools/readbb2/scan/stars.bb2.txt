@@ -3,7 +3,7 @@
 ; WB Starfield hack by Iain Catterick
 ;
 
-WBStartup:freest 0:ScreensBitMap 0,0
+WBStartup:WbToScreen 0:ScreensBitMap 0,0
 
 NEWTYPE .STAR
 	X.q
@@ -19,13 +19,13 @@ Dim List MYSTAR.STAR(#MAXSTARS)
 
 .START:
 
-localstat 0,0,0,100,11,$E,"STARS",2,1
+Window 0,0,0,100,11,$E,"STARS",2,1
 
-##[$80CA] MYSTAR()
+USEPATH MYSTAR()
 
 Repeat
 
-If globalloc(MYSTAR())
+If AddItem(MYSTAR())
 	\X=WBWidth;-Int(Rnd(40))
 	\Y=Int(Rnd(WBHeight))
 	\SPEED=(Int(Rnd(3))+1)*5
@@ -46,15 +46,15 @@ End
 
 .MOVESTARS:
 
-newmem MYSTAR()
+ResetList MYSTAR()
 
-While globfree(MYSTAR())
+While NextItem(MYSTAR())
 
 	If \X-\SPEED<0
 		If \FLAG=True
 			Point \X,\Y,0
 		EndIf
-		freelast MYSTAR()
+		KillItem MYSTAR()
 	Else
 		\OLDX=\X
 		\X-\SPEED
@@ -67,9 +67,9 @@ Return
 
 .DRAWSTARS:
 
-newmem MYSTAR()
+ResetList MYSTAR()
 
-While globfree(MYSTAR())
+While NextItem(MYSTAR())
 
 ;	VWait
 

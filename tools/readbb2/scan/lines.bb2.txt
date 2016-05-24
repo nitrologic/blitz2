@@ -26,8 +26,8 @@ PlayModule 1
 
 Dim PX1(NUMLINES),PY1(NUMLINES),PX2(NUMLINES),PY2(NUMLINES)
 
-lmaxlen 0,320,256,1
-lmaxlen 1,320,256,1
+BitMap 0,320,256,1
+BitMap 1,320,256,1
 
 Slice 0,44,320,256,$FFFA,1,8,2,320,320
 Green 0,0,0,0
@@ -52,7 +52,7 @@ Repeat
 	VWait
 	Show DB
 	DB=1-DB
-	Use lmaxlen DB
+	Use BitMap DB
 	BlockScroll
 
 	X=X+XI : If X>359 Then X=0
@@ -69,8 +69,8 @@ Repeat
 	If Joyb(0)>0 Then End
 Until T=time
 
-Use lmaxlen 0 : BlockScroll
-Use lmaxlen 1 : BlockScroll
+Use BitMap 0 : BlockScroll
+Use BitMap 1 : BlockScroll
 VWait 10
 Goto NUPAT
 

@@ -63,16 +63,16 @@ Next
 
 Gosub setup_palette
 Gosub setup_menus
-allocst 0,11,"Puzzle Screen"
+Screen 0,11,"Puzzle Screen"
 Use SetCycle 0
 Gosub set_pointer_colours
 
 ; IDCMP gadgets, menus, window activate
 DefaultIDCMP	$20 | $100 | $40000
 WJam 0
-localstat 0,0,20,640,200,$1800,"",1,2,0
+Window 0,0,20,640,200,$1800,"",1,2,0
 WPointer 6
-arrmult 0
+SetMenu 0
 
 For x=0 To 31
 	Read cells(x)\def
@@ -82,7 +82,7 @@ Gosub draw_default_cells
 move_number=0
 Repeat
 	event_capture=WaitEvent
-	Use localstat EventWindow
+	Use Window EventWindow
 	Select event_capture
 
 	Case $20
@@ -119,10 +119,10 @@ End
 	;creates a blank 'active' square gadget to be drawn over
 	;later, as dynamic gadget rendering appears a little tricky
 
-	lmaxlen 0,61,31,3
+	BitMap 0,61,31,3
 	Boxf 0,0,60,30,0
 	GetaShape 0,0,0,60,30
-	Free lmaxlen 0
+	Free BitMap 0
 
 Return
 
@@ -131,7 +131,7 @@ Return
 
 	;create a new mouse pointer shape
 
-	lmaxlen 0,20,35,2
+	BitMap 0,20,35,2
 	Boxf 0,0,60,30,0
 	Line 0,1,0,33,1
 	Line 4,1,4,11,1
@@ -199,7 +199,7 @@ Return
 	Line 7,20,7,24,3
 	GetaShape 7,0,0,16,27
 
-	Free lmaxlen 0
+	Free BitMap 0
 
 Return
 
@@ -345,19 +345,19 @@ Return
 
 	;create menu entries main window
 	;
-	newlocarr 0,0,"Project		 "
+	MenuTitle 0,0,"Project		 "
 	MenuItem 0,0,0,0,"About"
 	MenuItem 0,0,0,1,"Restart		 ","S"
 	MenuItem 0,0,0,2,"Quit				","Q"
 
-	newlocarr 0,1,"Game"
+	MenuTitle 0,1,"Game"
 	MenuItem 0,0,1,0,"Rules			 "
 	MenuItem 0,0,1,1,"Backup			","B"
 	MenuItem 0,0,1,2,"Replay			","R"
 
 	;create menu entries rules and about windows
 	;
-	newlocarr 1,0,"Close"
+	MenuTitle 1,0,"Close"
 	MenuItem 1,0,0,0,"Close Window		 ","C"
 
 Return
@@ -549,9 +549,9 @@ Return
 	DefaultIDCMP $100 | $200
 
 	;window drag, close and activate
-	localstat 1,68,35,432,121,$2 | $8 | $1000,"Rules Window",1,2
-	arrmult 1
-	Use localstat 1
+	Window 1,68,35,432,121,$2 | $8 | $1000,"Rules Window",1,2
+	SetMenu 1
+	Use Window 1
 	WPointer 7
 	WLocate 0,4
 	NPrint "1) Place the white tiles onto the brown board so that"
@@ -574,7 +574,7 @@ Return
 .close_window
 
 	FlushEvents
-	Free localstat EventWindow
+	Free Window EventWindow
 	Activate 0
 
 Return
@@ -586,9 +586,9 @@ Return
 	DefaultIDCMP $100 | $200
 
 	;window drag, close and activate
-	localstat 2,#sboardx,#sboardy,240,60,$2 | $8 | $1000,"About Window",1,2
-	arrmult 1
-	Use localstat 2
+	Window 2,#sboardx,#sboardy,240,60,$2 | $8 | $1000,"About Window",1,2
+	SetMenu 1
+	Use Window 2
 	WPointer 7
 	WLocate 0,4
 	NPrint "Puzzle Play ver 1.0"

@@ -5,8 +5,8 @@
 ;Set up bitmaps and/or screens in the usual way
 ;i.e. give yourself something to draw on.
 WBStartup
-lmaxlen 0,320,256,5
-allocst 0,0,0,320,256,5,0,"",1,2,0
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
 ;------------------------------------------------------
 ;Set up the palette. I usually use a 32 colour screen but plot
 ;using the top 16 colours only. These I set to 16 monochrome
@@ -15,7 +15,7 @@ allocst 0,0,0,320,256,5,0,"",1,2,0
 ;Colour 0 is best left black unless you like coloured borders.
 Green 0,0,0,0:For i=16 To 31:Green i,31-i,i-16,i-16:Next
 
-ShowScreen 0:Use lmaxlen 0:BlockScroll 0
+ShowScreen 0:Use BitMap 0:BlockScroll 0
 ;------------------------------------------------------
 ;It doesn't matter too much whether you plot horizontally first or
 ;vertically first.

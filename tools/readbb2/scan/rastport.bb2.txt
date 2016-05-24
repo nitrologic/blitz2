@@ -96,7 +96,7 @@ End NEWTYPE
 
 ;/* only used for bobs */
 
-#AREAOUTLINE=$08;/* ##[$80D1] by areafiller */
+#AREAOUTLINE=$08;/* Used by areafiller */
 #NOCROSSFILL=$20;/* areafills have no crossovers */
 
 ;/* there is only one style of clipping: raster clipping */

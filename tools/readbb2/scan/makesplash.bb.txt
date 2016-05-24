@@ -1,18 +1,18 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MakeSplash.bb
 
-allocst 0,0,0,320,256,8,0,"",0,1
+Screen 0,0,0,320,256,8,0,"",0,1
 ScreensBitMap 0,0
 LoadScreen 0,"splash.iff",0
 
-allocst 1,0,200,320,56,4,0,"",0,1
-localstat 0,0,0,320,56,$11900,"",0,1
+Screen 1,0,200,320,56,4,0,"",0,1
+Window 0,0,0,320,56,$11900,"",0,1
 WindowOutput 0
 NPrint "dfjssffd"
 NPrint "dfjssffd"
 NPrint "dfjssffd"
 NPrint "dfjssffd"
 
-Use allocst 0
+Use Screen 0
 Use SetCycle 0
 r=0
 g=64

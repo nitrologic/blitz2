@@ -3,8 +3,8 @@ SetErr
 	NPrint "Fatal Error !"
 	End
 End SetErr
-WBStartup:##[$80CC]
-freest 0;:WBenchToFront_
+WBStartup:NoCli
+WbToScreen 0;:WBenchToFront_
 
 ;fontname$="topaz.font"
 fontheight=8
@@ -63,10 +63,10 @@ EndIf
 text$=text$+String$(" ",85)
 
 If (NOT y<11) AND (NOT y>WBHeight-(fontheight+2))
-	localstat 0,0,y,WBWidth,fontheight+2,$900,"",2,1
+	Window 0,0,y,WBWidth,fontheight+2,$900,"",2,1
 ;	WTitle " ","Press ESC to quit"
 	If fontname$
-		remline 0,fontname$,fontheight
+		LoadFont 0,fontname$,fontheight
 		WindowFont 0
 	EndIf
 	DefaultIDCMP $400

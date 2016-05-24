@@ -56,10 +56,10 @@ End Function
 
 ;Goto maketable
 
-allocst 0,1
+Screen 0,1
 ScreensBitMap 0,0
 BlockScroll 1
-bm.l=Peek.l(Addr lmaxlen(0)+8)
+bm.l=Peek.l(Addr BitMap(0)+8)
 BitMapOutput 0:Locate 20,0
 
 Repeat

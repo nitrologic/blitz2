@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/userlibprogs/neil/ProgressIndicatorDemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/ProgressIndicatorDemo.bb
-WBStartup:##[$80CC]
-freest 0
-localstat 0,0,0,100,100,0,"Oi You!",2,1
+WBStartup:NoCli
+WbToScreen 0
+Window 0,0,0,100,100,0,"Oi You!",2,1
 
 ret.l=##[$9B81]("Request",300,600,1)
 

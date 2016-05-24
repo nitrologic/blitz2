@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/vehicles/makeiff.bb
-casestrcomp 0,"sega.palette"
-allocst 0,4
+LoadPalette 0,"sega.palette"
+Screen 0,4
 ScreensBitMap 0,0
 FadePalette 0
 

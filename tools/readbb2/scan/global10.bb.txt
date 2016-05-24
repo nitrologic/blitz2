@@ -56,7 +56,7 @@ MaxLen p$=169:MaxLen f$=64
 
 #wid=130:#defwid=2000:#defhwid=1000
 LoadSound 0,"brass2"
-casestrcomp 0,g$+"cup1.iff"
+LoadPalette 0,g$+"cup1.iff"
 
 LoadShape 0,g$+"pt.pt":GetaSprite 0,0
 LoadShape 0,g$+"pt.up":GetaSprite 1,0:GetaSprite 6,0
@@ -432,13 +432,13 @@ Next
 *tgon\j=(peg(0)\j+peg(1)\j+peg(2)\j+peg(3)\j) ASR 2
 *tgon\k=!qhite{*tgon\i,*tgon\j}
 bigx=#dp+1024+#dp:bigy=#dp+516+#dp
-lmaxlen 0,bigx,bigy,4
+BitMap 0,bigx,bigy,4
 BitMapOutput 0
 
 BitPlanesBitMap 0,8,6
 BitPlanesBitMap 0,9,8 ; the blue track
 BitPlanesBitMap 0,10,1 ; the background
-Use lmaxlen 0
+Use BitMap 0
 
 #vs=16000:last.w=1:first.w=1		 :; Queue used by MapEditor
 Dim verti.w(#vs),vertj.w(#vs)
@@ -459,7 +459,7 @@ MaxLen p$=169:MaxLen f$=64:f$="maps/Map6.Xga"
 Dim top(4)
 
 
-	Use lmaxlen 0:;Gosub DoControl
+	Use BitMap 0:;Gosub DoControl
 Gosub OpenUp
 ;LoadShapes 0,g$+"backg.shapes"
 
@@ -484,7 +484,7 @@ For cnt.w=0 To 14
 Next
 CEND
 
-Use lmaxlen 0
+Use BitMap 0
 
 ;Circle 4,4,4,4,1
 ;GetaShape 50,0,0,8,8
@@ -583,7 +583,7 @@ Gosub Redisplay:Goto Main
 					If lin$="+" Then selected=impact:Gosub Split:impact=-1:Goto out
 					If lin$="-" Then selected=impact:Gosub Erase:impact=-1:Goto out
 					If 1=1
-						Use lmaxlen 9
+						Use BitMap 9
 						dt=impact-1:col.b=0:Gosub DoCurve:Gosub FindCurve
 						dt+1:Gosub DoCurve:impact=dt:Gosub FindCurve
 						dt+1:Gosub DoCurve
@@ -870,7 +870,7 @@ DoMen
 		scrl=Off
 		plax=Int((topleftx+20)/16)*16:play=Int((toplefty+20)/8)*8-1
 		plbx=plax+128:plby=play+128
-		Use lmaxlen 0
+		Use BitMap 0
 		GetaShape 0,plax,play,128,128
 		Boxf plax,play,plbx,plby,0
 		Box plax,play,plbx-1,plby-1,1
@@ -1021,7 +1021,7 @@ Return
 					AddMunt{i	,j+1}
 			Next
 		Next
-		##[$80CA] con(cnt)
+		USEPATH con(cnt)
 		For cnt=0 To pts+5
 
 					\lb=0:\mb=0:\rb=0
@@ -1108,8 +1108,8 @@ Repeat
 ;	FindLo{dth,condt,io}
 ;	Line 0,0,mapx{bez\i,bez\j},mapy{bez\i,bez\j},Rnd(3)
 
-	Use lmaxlen 0:UnBuffer 0
-	Use lmaxlen 10
+	Use BitMap 0:UnBuffer 0
+	Use BitMap 10
 	col.b=1
 	If changed.b<>0
 		For i.w=0 To 63
@@ -1121,12 +1121,12 @@ Repeat
 		If mode.w=1 Then col=2:Gosub FindGrunt ;purple
 	End If
 	changed.b=0
-	Use lmaxlen 9
+	Use BitMap 9
 	ojob.w=job:job=Joyb(0)
 	If direct<>5 Then Gosub Buttons
 	Gosub DoMen
 	Gosub Keys
-	Use lmaxlen 0
+	Use BitMap 0
 
 		If (direct=5) OR (direct=6) OR (direct=7)
 			If job=0
@@ -1136,7 +1136,7 @@ Repeat
 				partb=(my-sy) ASR 5
 				wi+parta+partb
 				wj+partb-parta
-				Use lmaxlen 0
+				Use BitMap 0
 				BBlit 0,50,mapx{Int(wi),Int(wj)},mapy{Int(wi),Int(wj)}:VWait
 			EndIf
 			If (job=1)
@@ -1190,10 +1190,10 @@ Until done
 End
 
 .Redisplay
-	Use lmaxlen 0
+	Use BitMap 0
 	Boxf 0,0,bigx,bigy,0
 ;	Boxf bigx,0,bigx,bigy,0
-	Use lmaxlen 10
+	Use BitMap 10
 ;	Line #dp,#dp,bigx/3,#dp,2
 
 	col=1
@@ -1208,7 +1208,7 @@ End
 ;		Gosub DoCurve
 ;	Next
 
-	Use lmaxlen 0
+	Use BitMap 0
 	Gosub UpDateSurv
 Return
 
@@ -1244,7 +1244,7 @@ BLITZ
 .PutExo
 BlitzKeys Off:ClrInt 5
 QAMIGA:f$=t$+".Pax":p$=m$
-	freest 0:##[$FFB5]
+	WbToScreen 0:##[$FFB5]
 	AMIGA
 	f$=FileRequest$("Save which Map?",p$,f$)
 	If f$<>""
@@ -1252,7 +1252,7 @@ QAMIGA:f$=t$+".Pax":p$=m$
 			FileOutput 0
 			Exists 0,&map(0,0),2*64*64
 			Print Mki$(pts)
-			##[$80CA] con(i)
+			USEPATH con(i)
 			For cnt=0 To pts
 				i=cnt;-hudif
 ;				If i>pts Then i-pts1
@@ -1284,7 +1284,7 @@ BLITZ
 	Show 0:DisplayOn
 
 	QAMIGA
-	done=Off:BitMapOutput 0:Use lmaxlen 0
+	done=Off:BitMapOutput 0:Use BitMap 0
 	Poke.l Peek.l(Peek.l(4)+276)+184,-1		:; turn errors off!
 
 	Repeat
@@ -1338,13 +1338,13 @@ BLITZ
 		CloseFile 0
 		DefaultInput
 	Else
-		Free lmaxlen 0:AMIGA
+		Free BitMap 0:AMIGA
 		NPrint "Sorry - Could not find Track Data!"
 		NPrint " pReSs mOuSebUttON tO ConTinUe.."
 		MouseWait:End
 	EndIf
 	BLITZ
-	BitMapOutput 0:Use lmaxlen 0:done=Off
+	BitMapOutput 0:Use BitMap 0:done=Off
 	Boxf 0,0,1024,516,0
 	Locate 0,1:Print Centre$(dname$,40)
 	For cnt=0 To hightrack
@@ -1353,7 +1353,7 @@ BLITZ
 	Next
 	Mouse On:BlitzKeys On:sel=-1:BitPlanesBitMap 0,3,4
 	Repeat
-		Use lmaxlen 3
+		Use BitMap 3
 		ShowSprite 0,MouseX,MouseY,0
 		cnt=Int((MouseY)ASR 3)-5
 		If (-1<cnt) AND (cnt<(hightrack))
@@ -1369,7 +1369,7 @@ BLITZ
 			If (-1<cnt) AND (cnt< (hightrack)) Then done=On
 		EndIf
 		If RawStatus($45) Then Goto exit
-		Use lmaxlen 0
+		Use BitMap 0
 	Until done
 	Mouse Off:BlitzKeys Off
 	BLITZ
@@ -1392,7 +1392,7 @@ QAMIGA
 
 				If cnt<0 Then cnt+pts1
 				If cnt>pts Then cnt-pts1
-				##[$80CA] con(cnt)
+				USEPATH con(cnt)
 				\lti=Cvq(Inkey$(4))
 				\ltj=Cvq(Inkey$(4))
 				\rti=Cvq(Inkey$(4))
@@ -1596,15 +1596,15 @@ Sucker
 Return
 
 .UpDateSurv
-Use lmaxlen 8:Boxf 0,0,bigx,bigy,0;:Boxf bigx ASR 1,0,bigx,bigy,0
-Use lmaxlen 9:Boxf 0,0,bigx,bigy,0;:Boxf bigx ASR 1,0,bigx,bigy,0
+Use BitMap 8:Boxf 0,0,bigx,bigy,0;:Boxf bigx ASR 1,0,bigx,bigy,0
+Use BitMap 9:Boxf 0,0,bigx,bigy,0;:Boxf bigx ASR 1,0,bigx,bigy,0
 col=1
 For impact=1 To pts+1
 	dt=impact:Gosub DoCurve
 	dt=impact:Gosub FindCurve
 Next
 
-Use lmaxlen 8:col=3
+Use BitMap 8:col=3
 For cnt.w=0 To #maxngon
 	If area(cnt)\active=1
 		*tgon=area(cnt)
@@ -1638,7 +1638,7 @@ Next
 
 If mode.w=1 Then col=2:Gosub FindGrunt ;purple
 
-Use lmaxlen 0
+Use BitMap 0
 Return
 
 Macro lline
@@ -1653,19 +1653,19 @@ End Macro
 Return
 
 .FindGrunt
-	Use lmaxlen 8
+	Use BitMap 8
 
 	For cnt=0 To 14
-		Use lmaxlen 8
+		Use BitMap 8
 		bez\i=gr(cnt)\sx,gr(cnt)\sy
 		bez\k=mapx{gr(cnt)\i,gr(cnt)\j},mapy{gr(cnt)\i,gr(cnt)\j}
 
 		Line bez\i,bez\j,bez\k,bez\l,col
-		Use lmaxlen 9
+		Use BitMap 9
 		Circle bez\i,bez\j,6,col ASR 1
 	Next
 
-	Use lmaxlen 8
+	Use BitMap 8
 	For cnt=0 To 4
 		cntt.w=cnt*3
 		bez\i=gr(cntt)\sx,gr(cntt)\sy:			 cntt+1
@@ -1723,7 +1723,7 @@ Return
 
 
 DoCurve
-	Use lmaxlen 9
+	Use BitMap 9
 	pts1.w=pts+1:pts2.w=pts+2:pts3.w=pts+3
 	CopCon{pts1,0}
 	For src=1 To 4:CopCon{src,src+pts1}:Next
@@ -1804,7 +1804,7 @@ Erase
 Return
 
 .FindCurve
-	Use lmaxlen 9
+	Use BitMap 9
 
 	If mode.w<>1 ;purple
 
@@ -1844,7 +1844,7 @@ Return
 Return
 
 FindPeg
-	Use lmaxlen 8
+	Use BitMap 8
 	If *tpost\active>0
 		*tpost\sx=mapx{*tpost\i,*tpost\j}
 ;		*tpost\k=!qhite{*tpost\i,*tpost\j}
@@ -1857,7 +1857,7 @@ Return
 
 FindArea
 	If *tgon\active>0
-		Use lmaxlen 8
+		Use BitMap 8
 		If col=0
 			Circle *tgon\sx,*tgon\sy,10,col
 			Line *tgon\sx,*tgon\sy,*tgon\sx,mapy{*tgon\i,*tgon\j},col
@@ -1879,7 +1879,7 @@ DrawVert
 Return
 
 DrawEdge
-	Use lmaxlen 8
+	Use BitMap 8
 	If col=0
 		Circle *tedge\sx,*tedge\sy,4,col
 		Line *tedge\sx,*tedge\sy,*tedge\sx,mapy{*tedge\i,*tedge\j},col
@@ -2675,7 +2675,7 @@ Return
 Return
 
 exit
-QAMIGA:Free lmaxlen 0: End
+QAMIGA:Free BitMap 0: End
 
 
 CNIF 1=0

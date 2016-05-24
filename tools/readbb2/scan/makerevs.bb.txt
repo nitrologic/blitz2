@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEREVS.BB
 
-allocst 0,0,0,320,512+64,4,0,"",0,1
+Screen 0,0,0,320,512+64,4,0,"",0,1
 ScreensBitMap 0,0
 
 LoadBitMap 0,"speedo.iff",0
@@ -23,8 +23,8 @@ BlockScroll
 
 xx=0:yy=0
 For l=0 To 65
-		longdiv 1000,xx,yy
-		longdiv l,xx+8,yy+8
+		Blit 1000,xx,yy
+		Blit l,xx+8,yy+8
 		xx+48:If xx+48>319 Then xx=0:yy+48
 Next
 

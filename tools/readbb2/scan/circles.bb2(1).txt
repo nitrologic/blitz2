@@ -43,7 +43,7 @@ End Statement
 .StartUp:
 AMIGA
 For h.l=0 To 5
-	lmaxlen 0,320,256,5
+	BitMap 0,320,256,5
 Next h
 
 LoadBitMap 0,"circles.iff"
@@ -57,7 +57,7 @@ For h=0 To 359
 	cn(h)=HCos(a)
 Next h
 
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 
 For h=0 To 15
@@ -66,9 +66,9 @@ For h=0 To 15
 Next h
 
 For h=0 To 5
-	Free lmaxlen 9
+	Free BitMap 9
 	BitPlanesBitMap h,9,%10000
-	Use lmaxlen 9
+	Use BitMap 9
 	DrawTriangles {0+h+h,200,128,1}
 	DrawTriangles {360-h-h,127,80,1}
 	DrawTriangles {0+h+h,79,40,1}

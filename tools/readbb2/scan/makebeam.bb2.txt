@@ -1,11 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makebeam.bb2
 ;
-lmaxlen 0,352,1,1
+BitMap 0,352,1,1
 LoadShape 0,"laser.iff"
-longdiv 0,0,0
+Blit 0,0,0
 XFlip 0
-longdiv 0,176,0
-b.l=Peek.l(Addr lmaxlen(0)+8)
+Blit 0,176,0
+b.l=Peek.l(Addr BitMap(0)+8)
 ;
 If ReadMem(0,"beam.bin")
 	FileOutput 0

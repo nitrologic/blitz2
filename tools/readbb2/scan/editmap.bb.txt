@@ -10,7 +10,7 @@ PropGadget 9,30,21,128,2,9,79
 SetVProp 9,2,0,.0667
 PropGadget 9,45,21,128,3,9,79
 SetVProp 9,3,0,.0667
-workstart 9,60,80,0,4,"OK"
+TextGadget 9,60,80,0,4,"OK"
 
 
 MaxLen gpa$=192		 ;gfx
@@ -32,13 +32,13 @@ sp$=""
 MaxLen pat$=192
 pat$="#?"
 
-allocst 0,0,0,320,256,5,0,"",0,1
+Screen 0,0,0,320,256,5,0,"",0,1
 ScreensBitMap 0,0
-localstat 0,0,0,320,256,$11900,"",0,1
+Window 0,0,0,320,256,$11900,"",0,1
 WindowInput 0
 WColour 17,23
 BitMapOutput 0
-Use lmaxlen 0
+Use BitMap 0
 
 LoadShape 1002,"s:edarrows.iff"
 
@@ -272,7 +272,7 @@ EndIf
 Goto ggad
 ex:
 Boxf 78,78,78+160,78+79,0
-longdiv 999,78,78
+Blit 999,78,78
 
 Function Return hit
 End Function
@@ -394,7 +394,7 @@ BlockScroll back
 
 f$=ASLFileRequest$("Load Blocks..",gpa$,gna$,pat$,0,8,320,242)
 
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 BlockScroll back
 VWait 5
@@ -432,7 +432,7 @@ my=my*20+mx
 
 ssx=0:ssy=0
 
-##[$80D3]
+Runerrsoff
 For s=0 To my
 		col(topblock)=Cls(ssx+8,ssy+8)
 		If col(topblock)=0 Then col(topblock)=Cls(ssx+10,ssy+9)
@@ -446,7 +446,7 @@ For s=0 To my
 		If topblock=1000 Then Pop For:Goto qqqz
 Next
 qqqz:
-##[$80D2]
+Runerrson
 
 BlockScroll back
 Goto MAIN
@@ -457,14 +457,14 @@ startb=0
 redrawem:
 VWait
 BlockScroll back
-##[$80D3]
+Runerrsoff
 For y=0 To 11
 		For x=0 To 19
 				Boxf x*16,y*16,x*16+15,y*16+15,0
 				BlitColl map(mapx+x,mapy+y),x*16,y*16
 		Next
 Next
-##[$80D2]
+Runerrson
 Line 0,192,319,192,18
 
 makegadget{0,1,25,"Current Block:"}
@@ -529,7 +529,7 @@ If a$="=" AND cycss<20 Then cycss+1
 If a$="p"
 		f$=ASLFileRequest$("Save IFF...",gpa$,gna$)
 		If f$="" Then Goto MAIN
-		Use lmaxlen 0
+		Use BitMap 0
 		BitMapOutput 0
 		BlockScroll 0
 		For y=0 To 11
@@ -632,7 +632,7 @@ If a$=" " AND recth<>0
 		EndIf
 EndIf
 
-##[$80D3]
+Runerrsoff
 If aa=31
 		If mapx>0
 				mapx-1
@@ -681,7 +681,7 @@ If aa=29
 				Next
 		EndIf
 EndIf
-##[$80D2]
+Runerrson
 
 
 If Joyb(0)=1
@@ -721,7 +721,7 @@ If Joyb(0)=1
 		EndIf
 EndIf
 
-##[$80D3]
+Runerrsoff
 If Joyb(0)=2
 		my=SMouseY:mx=SMouseX
 		If my>217
@@ -798,7 +798,7 @@ If Joyb(0)=2
 				Goto redrawem
 		EndIf
 EndIf
-##[$80D2]
+Runerrson
 
 Goto edloop
 ;------------------------------------------------------
@@ -883,7 +883,7 @@ xx=0:yy=0
 For y=zy To zy+24
 		For x=zx To zx+39
 				Boxf xx,yy,xx+7,yy+7,0
-				longdiv map(x,y)+500,xx,yy
+				Blit map(x,y)+500,xx,yy
 				xx+8:If xx>319 Then xx=0:yy+8
 		Next
 Next
@@ -912,7 +912,7 @@ If Joyb(0)=2
 						yy=0:xx=0
 						For y=zy To zy+24
 								Boxf xx,yy,xx+7,yy+7,0
-								longdiv map(zx,y)+500,xx,yy
+								Blit map(zx,y)+500,xx,yy
 								yy+8
 						Next
 				EndIf
@@ -924,7 +924,7 @@ If Joyb(0)=2
 						yy=0:xx=320-8
 						For y=zy To zy+24
 								Boxf xx,yy,xx+7,yy+7,0
-								longdiv map(zx+39,y)+500,xx,yy
+								Blit map(zx+39,y)+500,xx,yy
 								yy+8
 						Next
 				EndIf
@@ -936,7 +936,7 @@ If Joyb(0)=2
 						yy=0:xx=0
 						For x=zx To zx+39
 								Boxf xx,yy,xx+7,yy+7,0
-								longdiv map(x,zy)+500,xx,yy
+								Blit map(x,zy)+500,xx,yy
 								xx+8
 						Next
 				EndIf
@@ -948,7 +948,7 @@ If Joyb(0)=2
 						yy=200-8:xx=0
 						For x=zx To zx+39
 								Boxf xx,yy,xx+7,yy+7,0
-								longdiv map(x,zy+24)+500,xx,yy
+								Blit map(x,zy+24)+500,xx,yy
 								xx+8
 						Next
 				EndIf
@@ -979,13 +979,13 @@ clrgadgets{}
 makegadget{0,16,28,"Zoom X 16"}
 
 dooby:
-##[$80D3]
+Runerrsoff
 For y=0 To MAPHEIGHT-1
 		For x=0 To MAPWIDTH-1
 				Point x,y,col(map(x,y))
 		Next
 Next
-##[$80D2]
+Runerrson
 
 Line 0,MAPHEIGHT,320,MAPHEIGHT,18
 
@@ -1081,7 +1081,7 @@ mem.l=##[$FE97](130000,65537)
 m.l=mem
 w.w=0
 ss.w=0
-##[$80D3]
+Runerrsoff
 For y=0 To MAPHEIGHT-1
 		For x=0 To MAPWIDTH-1
 				w=map(x,y):w=w&$fff
@@ -1092,7 +1092,7 @@ For y=0 To MAPHEIGHT-1
 				m+2
 		Next
 Next
-##[$80D2]
+Runerrson
 
 h.l=##[$FE01](f$,1006)
 If h.l<>0
@@ -1118,7 +1118,7 @@ mem.l=##[$FE97](130000,65537)
 
 h.l=##[$FE01](f$,1004)
 If h.l<>0
-		##[$80D3]
+		Runerrsoff
 		c.l=##[$FE03](h,mem,130000)
 		m.l=mem
 		w.w=0
@@ -1136,7 +1136,7 @@ If h.l<>0
 						m+2
 				Next
 		Next
-		##[$80D2]
+		Runerrson
 		##[$FE02](h)
 EndIf
 
@@ -1158,7 +1158,7 @@ mem.l=##[$FE97](130000,65537)
 
 h.l=##[$FE01](f$,1004)
 If h.l<>0
-		##[$80D3]
+		Runerrsoff
 		c.l=##[$FE03](h,mem,130000)
 		m.l=mem
 		w.w=0
@@ -1173,7 +1173,7 @@ If h.l<>0
 						m+2
 				Next
 		Next
-		##[$80D2]
+		Runerrson
 		##[$FE02](h)
 EndIf
 
@@ -1212,10 +1212,10 @@ Print " "
 CopyShape eblock,999
 Scale 999,4,4,0
 Boxf 130,40,130+64,40+64,0
-longdiv 999,130,40
+Blit 999,130,40
 Box 129,39,129+66,39+66,16
 Boxf 200,64,215,80,0
-longdiv eblock,200,64
+Blit eblock,200,64
 xx=130:yy=40+64
 If collision(eblock)<>0
 		Circle xx+32,yy-32,20,20,ccc
@@ -1229,7 +1229,7 @@ Line 0,217,319,217,ccc
 Line 0,251,319,251,ccc
 ##[$FF22]
 For l=startb To endb
-		longdiv l,xx,yy
+		Blit l,xx,yy
 		If l=eblock Then Box xx,yy,xx+15,yy+15,-1
 		If collision(l)<>0
 				Circle xx+8,yy+8,4,4,ccc
@@ -1281,13 +1281,13 @@ EndIf
 
 If a$="c"
 		Boxf 130,40,130+64,40+64,0
-		longdiv 999,130,40
+		Blit 999,130,40
 		Box 129,39,129+66,39+66,16
 		collision(eblock)=0
 EndIf
 If a$="x"
 		Boxf 130,40,130+64,40+64,0
-		longdiv 999,130,40
+		Blit 999,130,40
 		Box 129,39,129+66,39+66,16
 		w.w=collision(eblock)
 		w=w&$fff0
@@ -1299,7 +1299,7 @@ If a$="x"
 		If zzw.w<>0
 				w=w&$0f00
 				w=w LSR 8
-				longdiv 1002+w,130+24,40+24
+				Blit 1002+w,130+24,40+24
 		EndIf
 		Locate 17,6
 		If zw=0
@@ -1355,7 +1355,7 @@ EndIf
 
 If a$="2" OR a$="4" OR a$="6" OR a$="8" OR a$="0" OR a$="5"
 		Boxf 130,40,130+64,40+64,0
-		longdiv 999,130,40
+		Blit 999,130,40
 		Box 129,39,129+66,39+66,16
 		w.w=collision(eblock)
 		w=w&$fff0
@@ -1367,7 +1367,7 @@ If a$="2" OR a$="4" OR a$="6" OR a$="8" OR a$="0" OR a$="5"
 		If zzw<>0
 				w=w&$0f00
 				w=w LSR 8
-				longdiv 1002+w,130+24,40+24
+				Blit 1002+w,130+24,40+24
 		EndIf
 		Locate 17,6
 		If zw=0
@@ -1412,7 +1412,7 @@ dododo:
 				Scale 999,4,4,0
 
 				Boxf 130,40,130+64,40+64,0
-				longdiv 999,130,40
+				Blit 999,130,40
 				Box 129,39,129+66,39+66,16
 				w.w=collision(eblock)
 				If w<>0
@@ -1422,7 +1422,7 @@ dododo:
 						If zzw<>0
 								w=w&$0f00
 								w=w LSR 8
-								longdiv 1002+w,130+24,40+24
+								Blit 1002+w,130+24,40+24
 						EndIf
 						Locate 17,6
 						If zw=0
@@ -1480,7 +1480,7 @@ If Joyb(0)=2
 				Line 0,251,319,251,18
 				##[$FF22]
 				For l=startb To endb
-						longdiv l,xx,yy
+						Blit l,xx,yy
 						If l=eblock Then Box xx,yy,xx+15,yy+15,-1
 						If collision(l)<>0
 								Circle xx+8,yy+8,4,4,ccc
@@ -1505,8 +1505,8 @@ BlockScroll back
 For y=0 To 11+2
 		For x=0 To 19
 				Boxf x*16,y*16,x*16+15,y*16+15,0
-				longdiv map(mapx+x,mapy+y),x*16,y*16
-				longdiv maps(mapx+x,mapy+y)+1002,x*16,y*16
+				Blit map(mapx+x,mapy+y),x*16,y*16
+				Blit maps(mapx+x,mapy+y)+1002,x*16,y*16
 		Next
 Next
 Line 0,224,319,224,18
@@ -1532,7 +1532,7 @@ EndIf
 
 
 Boxf 8,29*8,8+16,29*8+16,back
-longdiv 1002+dir,8,29*8
+Blit 1002+dir,8,29*8
 
 mx=SMouseX
 my=SMouseY
@@ -1563,8 +1563,8 @@ If a$="s" Then Gosub SaveMap:Goto EditScroll
 
 If a$="l" Then Gosub LoadMap:Goto EditScroll
 
-If a$="." Then dir+1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:longdiv 1002+dir,8,29*8
-If a$="," Then dir-1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:longdiv 1002+dir,8,29*8
+If a$="." Then dir+1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:Blit 1002+dir,8,29*8
+If a$="," Then dir-1:dir=dir&15:Boxf 8,29*8,8+16,29*8+16,back:Blit 1002+dir,8,29*8
 
 If a$="m" Then Gosub MergeMap:Goto EditScroll
 
@@ -1575,8 +1575,8 @@ If aa=31
 				yy=0:xx=0
 				For y=mapy To mapy+11+2
 						Boxf xx,yy,xx+15,yy+15,0
-						longdiv map(mapx,y),xx,yy
-						longdiv maps(mapx,y)+1002,xx,yy
+						Blit map(mapx,y),xx,yy
+						Blit maps(mapx,y)+1002,xx,yy
 						yy+16
 				Next
 		EndIf
@@ -1588,8 +1588,8 @@ If aa=30
 				yy=0:xx=320-16
 				For y=mapy To mapy+11+2
 						Boxf xx,yy,xx+15,yy+15,0
-						longdiv map(mapx+19,y),xx,yy
-						longdiv maps(mapx+19,y)+1002,xx,yy
+						Blit map(mapx+19,y),xx,yy
+						Blit maps(mapx+19,y)+1002,xx,yy
 						yy+16
 				Next
 		EndIf
@@ -1601,8 +1601,8 @@ If aa=28
 				yy=0:xx=0
 				For x=mapx To mapx+19
 						Boxf xx,yy,xx+15,yy+15,0
-						longdiv map(x,mapy),xx,yy
-						longdiv maps(x,mapy)+1002,xx,yy
+						Blit map(x,mapy),xx,yy
+						Blit maps(x,mapy)+1002,xx,yy
 						xx+16
 				Next
 		EndIf
@@ -1614,8 +1614,8 @@ If aa=29
 				yy=192-16+32:xx=0
 				For x=mapx To mapx+19
 						Boxf xx,yy,xx+15,yy+15,0
-						longdiv map(x,mapy+11+2),xx,yy
-						longdiv maps(x,mapy+11+2)+1002,xx,yy
+						Blit map(x,mapy+11+2),xx,yy
+						Blit maps(x,mapy+11+2)+1002,xx,yy
 						xx+16
 				Next
 		EndIf
@@ -1631,8 +1631,8 @@ If Joyb(0)=1
 				my=Int(my/16)
 				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
 				Boxf mx*16,my*16,mx*16+15,my*16+15,0
-				longdiv map(mapx+mx,mapy+my),mx*16,my*16
-				longdiv 1002+dir,mx*16,my*16
+				Blit map(mapx+mx,mapy+my),mx*16,my*16
+				Blit 1002+dir,mx*16,my*16
 				maps(mapx+mx,mapy+my)=dir
 				Box bmx*16,bmy*16,bmx*16+15,bmy*16+15,-1
 		EndIf
@@ -1751,7 +1751,7 @@ BlockScroll 0
 
 ssx=0:ssy=0
 For l=0 To topblock-1
-		longdiv l,ssx,ssy
+		Blit l,ssx,ssy
 		ssx+16
 		If ssx>319 Then ssx=0:ssy+16
 Next
@@ -1806,7 +1806,7 @@ makegadget{4,35,30,"CYCL"}
 Boxf 95,39,224,168,0
 Box 95,39,224,168,16
 Boxf 240,40,255,55,0
-longdiv blk,240,40
+Blit blk,240,40
 
 srcx=240:srcy=40
 desx=96:desy=40
@@ -1930,7 +1930,7 @@ If Joyb(0)=2
 				SetString 19,21
 				SelectMode 18
 				ButtonGroup 0
-				localstat 9,10,40,114,142,$1000,"Palette",18,16,9
+				Window 9,10,40,114,142,$1000,"Palette",18,16,9
 				WindowInput 9
 				WindowOutput 9
 				WLocate 10,10
@@ -1968,9 +1968,9 @@ If Joyb(0)=2
 				Until Event=64 AND GadgetHit=4
 
 				WindowInput 0
-				Use lmaxlen 0
+				Use BitMap 0
 				BitMapOutput 0
-				Free localstat 9
+				Free Window 9
 
 				EndIf
 		EndIf
@@ -1992,7 +1992,7 @@ BlockScroll 0
 
 ssx=0:ssy=0
 For l=0 To topblock-1
-		longdiv l,ssx,ssy
+		Blit l,ssx,ssy
 		ssx+16
 		If ssx>319 Then ssx=0:ssy+16
 Next
@@ -2026,7 +2026,7 @@ BlockScroll 0
 
 ssx=0:ssy=0
 For l=0 To topblock-1
-		longdiv l,ssx,ssy
+		Blit l,ssx,ssy
 		ssx+16
 		If ssx>319 Then ssx=0:ssy+16
 Next
@@ -2082,7 +2082,7 @@ Line 0,251,319,251,ccc
 xx=0:yy=218
 endb=startb+39:If endb>(topblock-1) Then endb=topblock-1
 For l=startb To endb
-		longdiv l,xx,yy
+		Blit l,xx,yy
 ;		If l=eblock Then Box xx,yy,xx+15,yy+15,-1
 		If collision(l)=1
 				Circle xx+8,yy+8,4,4,ccc

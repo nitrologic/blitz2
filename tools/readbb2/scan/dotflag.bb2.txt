@@ -14,7 +14,7 @@ End If
 VWait 100
 BLITZ
 
-lmaxlen 0,720,256,1
+BitMap 0,720,256,1
 Slice 0,44,320,256,$fff8,1,8,2,720,720
 Green 0,0,0,0 : Green 1,12,12,12
 Show 0,0,0

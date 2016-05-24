@@ -7,9 +7,9 @@ MaxLen pa$=160 ;set path string variable for filerequester
 MaxLen fi$=64	;set filename string variable for filerequester
 
 Enable 1
-For i=0 To 7:Read a$:workstart 0,4+i*18,14,512+32,8+i,a$:Next
+For i=0 To 7:Read a$:TextGadget 0,4+i*18,14,512+32,8+i,a$:Next
 Enable 2
-For i=0 To 7:SelectMode 0,i:workstart 0,4+i*18,32,512+32,i," ":Next
+For i=0 To 7:SelectMode 0,i:TextGadget 0,4+i*18,32,512+32,i," ":Next
 For i=0 To 2:PropGadget 0,8,50+i*10,64,16+i,134,8:Next
 funcnames:Data$ ".","o","O","f","F"," ","B","C"
 SelectMode 0,3
@@ -17,7 +17,7 @@ currpen=1:Borders 0,1,On:currfunc=1:Borders 0,9,On
 
 DEFTYPE .l backdrop
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"LOAD		 ","L"
 MenuItem 0,0,0,1,"SAVE		 ","S"
 MenuItem 0,0,0,2,"QUIT		 ","Q"
@@ -52,7 +52,7 @@ dotoolbox:
 	Return
 
 .dofunc:
-	##[$FFB0] backdrop:Use localstat 0:x=WMouseX:y=WMouseY:Use lmaxlen 1
+	##[$FFB0] backdrop:Use Window 0:x=WMouseX:y=WMouseY:Use BitMap 1
 	If currfunc<3
 		bs=1+currfunc*2							 ;do freehand with brushsize
 		Repeat
@@ -60,11 +60,11 @@ dotoolbox:
 		Until Event=8 ;button up!
 	EndIf															;do flood
 	If currfunc=3 OR currfunc=4
-		If currfunc=4 Then Use lmaxlen 1 Else Use lmaxlen 0
+		If currfunc=4 Then Use BitMap 1 Else Use BitMap 0
 		WaitEvent:FloodFill x,y,(Cls(x,y) AND $38)+currpen
 	EndIf
 	If currfunc=6
-		Use lmaxlen 1				 ;do box
+		Use BitMap 1				 ;do box
 		Repeat
 			xx=WMouseX:yy=WMouseY
 			Boxf x,y,xx,yy,-currpen:##[$FE1B] 5:Boxf x,y,xx,yy,-currpen
@@ -75,9 +75,9 @@ dotoolbox:
 	Return
 
 .dodraw
-	Use localstat 0
+	Use Window 0
 	Repeat
-		Use lmaxlen 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
+		Use BitMap 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
 	Until MButtons=5
 	Return
 
@@ -86,7 +86,7 @@ dotoolbox:
 	If WriteMem(0,a$) Then CloseFile 0 Else Return
 	ILBMDepth a$:
 	w=ILBMViewMode:h=DecodeILBM:Gosub opendisplay
-	##[$FFB0] backdrop:Use lmaxlen 0:LoadBitMap 0,a$
+	##[$FFB0] backdrop:Use BitMap 0:LoadBitMap 0,a$
 	If aga
 		If ##[$D087]<8 Then For i=0 To 31:ReMap i,(255-i*8):Next ;remap palette
 	Else
@@ -131,8 +131,8 @@ End Statement
 	Return
 
 .opendisplay
-	Free localstat 0:Free localstat 1:Free allocst 0
-	allocst 0,0,0,w,h,d,m,"",1,2:ScreensBitMap 0,0
+	Free Window 0:Free Window 1:Free Screen 0
+	Screen 0,0,0,w,h,d,m,"",1,2:ScreensBitMap 0,0
 	If aga
 		BitPlanesBitMap 0,1,$1f:BitPlanesBitMap 0,3,$e0
 	Else
@@ -141,12 +141,12 @@ End Statement
 
 	Restore cols:For p=0 To 7:Read r,g,b:setcolors{p,r,g,b}:Next
 	Use SetCycle 0
-	localstat 0,0,0,w,h,$1800,"",1,2:arrmult 0
+	Window 0,0,0,w,h,$1800,"",1,2:SetMenu 0
 
-	Use lmaxlen 1:For i=0 To 31:Boxf i*20,0,i*20+20,199,i:Next
+	Use BitMap 1:For i=0 To 31:Boxf i*20,0,i*20+20,199,i:Next
 
-	backdrop.l=Peek.l(Addr localstat(0)) ;for direct calls to intuition library
-	localstat 1,100,100,150,82,$2,"TOOL BOX",1,2,0:arrmult 0:Gosub setprop
+	backdrop.l=Peek.l(Addr Window(0)) ;for direct calls to intuition library
+	Window 1,100,100,150,82,$2,"TOOL BOX",1,2,0:SetMenu 0:Gosub setprop
 
 	Return
 

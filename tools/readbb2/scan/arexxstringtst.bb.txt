@@ -28,8 +28,8 @@ Include arexxres.bb
 
 ;DefaultIDCMP $200				 ;window will only report CLOSE GADGET
 FindScreen 0
-localstat 0,0,0,350,250,$143f,"TEST FUNCTION0",0,1
-localstat 1,200,0,350,250,$143f,"TEST FUNCTION1",0,1
+Window 0,0,0,350,250,$143f,"TEST FUNCTION0",0,1
+Window 1,200,0,350,250,$143f,"TEST FUNCTION1",0,1
 
 Port.l = CreateMsgPort("FuncPort")
 msg.l = CreateRexxMsg(Port,".rexx","FuncPort")

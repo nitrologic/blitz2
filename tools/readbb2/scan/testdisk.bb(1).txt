@@ -20,7 +20,7 @@ Poke.l ?dbuff,BankLoc(1)
 BLITZ
 VWait 20
 
-lmaxlen 0,320,256,1
+BitMap 0,320,256,1
 InitCopList 0,1
 DisplayBitMap 0,0
 CreateDisplay 0

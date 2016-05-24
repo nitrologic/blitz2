@@ -92,11 +92,11 @@ main:
 		Read DisplaySize(ModeNo)
 	Next ModeNo
 
-	remline 0,"GTBMenu.font",8
+	LoadFont 0,"GTBMenu.font",8
 
 	FindScreen		0
 	DefaultIDCMP	$00000244
-	localstat				0,172,53,168,139,$0000100E,"Calculator",1,2
+	Window				0,172,53,168,139,$0000100E,"Calculator",1,2
 	Use IntuiFont 0
 	GTText				0,0,8,4,128,12,"",$0001,""
 	GTButton			0,1,136,4,16,12,Chr$(187),$0010

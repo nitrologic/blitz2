@@ -16,10 +16,10 @@ Data.w 0,3,5,7,6,11,8,9,10,11,12,13,20,21,22,14,15,16,17,18,19,7
 
 ##[$FE1F] "copy work:genam ram:",0,0
 sseg.l=##[$FE15]("show3d")
-lmaxlen 9,320,200,4
-bpa.l=Peek.l(Addr lmaxlen(9)+8)
+BitMap 9,320,200,4
+bpa.l=Peek.l(Addr BitMap(9)+8)
 
-newlocarr 0,0," 3D OPTIONS "
+MenuTitle 0,0," 3D OPTIONS "
 MenuItem 0,0,0,0,"LOAD									 ","L"
 MenuItem 0,0,0,1,"SAVE									 ","S"
 MenuItem 0,0,0,2,"LOAD DITHER BRUSH			","D"
@@ -30,10 +30,10 @@ MenuItem 0,0,0,6,"MAP NEW COLOURS				","M"
 MenuItem 0,0,0,7,"QUIT									 ","Q"
 
 StringText$ Off
-workstart 0,96,12,0,1,"<"
+TextGadget 0,96,12,0,1,"<"
 StringGadget 0,96+16,12,0,2,4,32
 ButtonId 0,2,"0"
-workstart 0,96+56,12,0,3,">"
+TextGadget 0,96+56,12,0,3,">"
 
 si=4:t$=Chr$(9)
 xsc=8:ysc=8:zsc=8
@@ -167,8 +167,8 @@ StopCycle 0,8,15,8,0
 
 nco=0 ;number of colours
 
-allocst 0,0,0,640,256,5,$8000,"3D EDITOR",1,2:Use SetCycle 0:ScreensBitMap 0,0
-localstat 0,0,0,640,256,$1840,"",1,2,0:arrmult 0
+Screen 0,0,0,640,256,5,$8000,"3D EDITOR",1,2:Use SetCycle 0:ScreensBitMap 0,0
+Window 0,0,0,640,256,$1840,"",1,2,0:SetMenu 0
 Gosub windowtext
 ;
 co=1
@@ -223,7 +223,7 @@ Case 256	;menu
 						##[$BE14] 0,&ysc(1),mo LSL 2
 						##[$BE14] 0,&zsc(1),mo LSL 2
 					EndIf
-					CloseFile 0:Use localstat 0:co=1:sa=999
+					CloseFile 0:Use Window 0:co=1:sa=999
 				Else
 					##[$FF8C] 0:mess{"Error reading file"}
 				EndIf
@@ -248,7 +248,7 @@ Case 256	;menu
 					Exists 0,&xsc(1),mo LSL 2
 					Exists 0,&ysc(1),mo LSL 2
 					Exists 0,&zsc(1),mo LSL 2
-					CloseFile 0:Use localstat 0:co=oco
+					CloseFile 0:Use Window 0:co=oco
 				Else
 					##[$FF8C] 0:mess{"Error writing file"}
 				EndIf
@@ -289,7 +289,7 @@ Case 256	;menu
 						Gosub writeobjco
 						Next
 						;
-						CloseFile 1:CloseFile 0:Use localstat 0:co=oco
+						CloseFile 1:CloseFile 0:Use Window 0:co=oco
 					Else
 						##[$FF8C] 0:mess{"Error writing map file"}
 					EndIf
@@ -313,7 +313,7 @@ Case 256	;menu
 						For opco2=0 To opco
 						Gosub readobjectco
 						Next
-						CloseFile 0:Use localstat 0:sa=999
+						CloseFile 0:Use Window 0:sa=999
 					Else
 						##[$FF8C] 0:mess{"Error reading file"}
 					EndIf
@@ -664,7 +664,7 @@ Case 1024
 			Gosub writeobjco
 			CloseFile 0
 			##[$FE1F] "ram:genam ram:temp",0,0
-			Use localstat 0
+			Use Window 0
 			seg.l=##[$FE15]("ram:temp")
 			;
 			GetReg a3,bpa
@@ -846,8 +846,8 @@ If f$
 		mess{"Can't access IFF file"}
 		Goto ifferr
 	End SetErr
-	casestrcomp 3,f$:StopCycle 3,0,0,0,0
-	casestrcomp 0,f$,16:Use SetCycle 0
+	LoadPalette 3,f$:StopCycle 3,0,0,0,0
+	LoadPalette 0,f$,16:Use SetCycle 0
 	LoadShape 2,f$:BlitColl 2,0,20:nco=ShapeHeight(2)LSR 1
 	yyy=20
 	For yy=0 To ShapeHeight(2)-1 Step 2
@@ -857,8 +857,8 @@ If f$
 	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
 	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
 	Next:GetaShape 2,640-32,20,32,nco LSL 3
-	CludgeBitMap 2,2:Use lmaxlen 2
-	For k=0 To 15:ReMap k,k+16:Next:Use lmaxlen 0
+	CludgeBitMap 2,2:Use BitMap 2
+	For k=0 To 15:ReMap k,k+16:Next:Use BitMap 0
 	Gosub makegrid:sa=-1
 	ifferr:ClrErr
 EndIf

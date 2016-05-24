@@ -4,7 +4,7 @@
 ;OK, keliediscope effect...
 ;
 
-allocst 0,0,0,320,200,8,0,"",0,0:ScreensBitMap 0,0:BlockScroll
+Screen 0,0,0,320,200,8,0,"",0,0:ScreensBitMap 0,0:BlockScroll
 
 xa=.125
 

@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/casey/Process.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/casey/Process.bb2
 WBStartup
 
-allocst 0,5
+Screen 0,5
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"CLS"
 MenuItem 0,0,0,1,"SAVE"
 SubItem 0,0,0,1,0,"IFF "
@@ -13,7 +13,7 @@ SubItem 0,0,0,2,0,"IFF "
 SubItem 0,0,0,2,1,"RAW "
 
 MenuItem 0,0,0,3,"QUIT"
-newlocarr 0,1,"Actions"
+MenuTitle 0,1,"Actions"
 MenuItem 0,0,1,0,"Difference"
 MenuItem 0,0,1,1,"Average"
 MenuItem 0,0,1,2,"Invert"
@@ -22,10 +22,10 @@ MenuItem 0,0,1,4,"Enhance"
 MenuItem 0,0,1,5,"Threshold"
 MenuItem 0,0,1,6,"Emboss"
 
-localstat 0,0,0,320,DispHeight-12,$1900,"Processor",22,24
+Window 0,0,0,320,DispHeight-12,$1900,"Processor",22,24
 
 WLocate 0,20
-arrmult 0
+SetMenu 0
 
 MaxLen path$=192
 MaxLen name$=192
@@ -38,7 +38,7 @@ ScreensBitMap 0,0
 Dim table.l(255)
 Dim Ptable.w(31)
 
-sWindow.l=Peek.l(Addr localstat(0))
+sWindow.l=Peek.l(Addr Window(0))
 sScreen.l=Peek.l(sWindow+46)
 sBitMap.l=Peek.l(sScreen+88)
 
@@ -136,7 +136,7 @@ p$=FileRequest$("FileToLoad",path$,name$)
 If p$="" Then Return
 
 LoadScreen	0,p$
-casestrcomp 0,p$
+LoadPalette 0,p$
 
 Use SetCycle 0
 ShowScreen 0

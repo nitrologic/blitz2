@@ -320,7 +320,7 @@ If *pin\out<>out
 		If *gate				;connects to a gate?
 			n=*pin\n
 			If n<pa(*gate\p)\info\in	;goes to an input?
-				If out Then in=*gate\in ##[$80CE] n Else in=*gate\in ##[$80CF] n	;change input!
+				If out Then in=*gate\in BitSet n Else in=*gate\in BitClr n	;change input!
 				If in<>*gate\in ;input changed?
 					;
 					*gate\in=in:calcout{*gate}
@@ -338,8 +338,8 @@ EndIf
 ;
 End Statement
 
-remline 1,"topaz.font",8
-remline 0,"microscopic.font",5
+LoadFont 1,"topaz.font",8
+LoadFont 0,"microscopic.font",5
 
 gf=0:x=280:y=-1:bg=1:gp=1
 
@@ -355,7 +355,7 @@ Repeat
 	Case "\"
 		gf=0:y+1
 	Default
-		workstart 0,x,y,gf,n,Centre$(t$,8)
+		TextGadget 0,x,y,gf,n,Centre$(t$,8)
 		n+1:y+9
 	End Select
 Until t$=""
@@ -368,7 +368,7 @@ siy=y:siv=0 ;selectable items visible
 ButtonGroup 0
 
 While y<256
-	workstart 0,x,y,0,n,"				 ":n+1:y+6:siv+1
+	TextGadget 0,x,y,0,n,"				 ":n+1:y+6:siv+1
 Wend
 
 Borders 0,7,On:Borders 0,12,On
@@ -382,13 +382,13 @@ Data$ "*","ADD","MOVE","REMOVE"
 
 Data$ ""
 
-workstart 1,264,250,0,1,"EXIT EMULATION"
+TextGadget 1,264,250,0,1,"EXIT EMULATION"
 
 MaxLen pa$=160
 MaxLen fi$=160
 
-lmaxlen 1,320,256,3
-Use IntuiFont 1:allocst 0,3:ScreensBitMap 0,0:BlockScroll
+BitMap 1,320,256,3
+Use IntuiFont 1:Screen 0,3:ScreensBitMap 0,0:BlockScroll
 
 Green 0,10,10,10
 Green 1,15,15,15
@@ -408,7 +408,7 @@ map_ac=2			;map axis colour
 map_mf=.25		;map move fraction. 1=move a whole display, .25=move 1/4 etc.
 map_vw=280		;map view width
 map_vh=248		;map view height
-localstat 0,0,0,320,256,$1800,"",0,0,0:Menus Off:WindowFont 1
+Window 0,0,0,320,256,$1800,"",0,0,0:Menus Off:WindowFont 1
 
 BitMapWindow 0,2,0,0,map_vw,map_vh
 
@@ -437,7 +437,7 @@ Repeat
 	Gosub refmap
 	;
 	If emul ;emulating?
-		If locfree(do())	;running?
+		If FirstItem(do())	;running?
 			If ems<>1 Then ems=1:emmess{"RUNNING"}
 			WLocate 0,0
 			Gosub rethink
@@ -467,7 +467,7 @@ Repeat
 				Select se_f
 				Case 1
 					##[$C00F] ga(),fga
-					While globfree(ga())
+					While NextItem(ga())
 						xd.l=ga()\x-map_x
 						yd.l=ga()\y-map_y
 						di.l=xd*xd+yd*yd
@@ -482,7 +482,7 @@ Repeat
 					;
 				Case 2
 					##[$C00F] us(),fus
-					While globfree(us())
+					While NextItem(us())
 						xd.l=us()\x-map_x
 						yd.l=us()\y-map_y
 						di.l=xd*xd+yd*yd
@@ -498,7 +498,7 @@ Repeat
 				Case 4	;pad
 					;
 					##[$C00F] pd(),fpd
-					While globfree(pd())
+					While NextItem(pd())
 						xd.l=pd()\x-map_x
 						yd.l=pd()\y-map_y
 						di.l=xd*xd+yd*yd
@@ -523,7 +523,7 @@ Repeat
 			If emul
 				md.l=$0fffffff:*pad=0
 				##[$C00F] pd(),fpd
-				While globfree(pd())
+				While NextItem(pd())
 					xd.l=pd()\x-map_x
 					yd.l=pd()\y-map_y
 					di.l=xd*xd+yd*yd
@@ -693,10 +693,10 @@ For k=1 To pa(p)\info\in+pa(p)\info\out
 	PushItem pn()
 	Gosub killcons
 	PopItem pn()
-	freelast pn():globfree pn()
+	KillItem pn():NextItem pn()
 Next
 ;
-##[$C00F] ga(),*gate:freelast ga()
+##[$C00F] ga(),*gate:KillItem ga()
 ;
 ref=-1:Return
 
@@ -710,10 +710,10 @@ For k=1 To ui(*user\u)\npn
 	PushItem pn()
 	Gosub killcons
 	PopItem pn()
-	freelast pn():globfree pn()
+	KillItem pn():NextItem pn()
 Next
 ;
-##[$C00F] us(),*user:freelast us()
+##[$C00F] us(),*user:KillItem us()
 ;
 ref=-1:Return
 
@@ -722,8 +722,8 @@ ref=-1:Return
 ;*pad=pad to kill
 ;
 ##[$C00F] pn(),*pad\pin:PushItem pn():Gosub killcons
-PopItem pn():freelast pn()
-##[$C00F] pd(),*pad:MaxLen pd()\t=0:freelast pd()
+PopItem pn():KillItem pn()
+##[$C00F] pd(),*pad:MaxLen pd()\t=0:KillItem pd()
 ;
 ref=-1:Return
 
@@ -744,7 +744,7 @@ If f$
 		;
 		Print Mki$(##[$C010](pd())-npd)
 		;
-		While globfree(pd())
+		While NextItem(pd())
 			Exists 0,&pd(),SizeOf.pad
 			NPrint pd()\t
 		Wend
@@ -753,14 +753,14 @@ If f$
 		;
 		Print Mki$(##[$C010](us())-nus)
 		;
-		While globfree(us())
+		While NextItem(us())
 			Exists 0,&us(),SizeOf.user
 		Wend
 		;
 		;write gate list
 		Print Mki$(##[$C010](ga())-nga)
 		;
-		While globfree(ga())
+		While NextItem(ga())
 			Exists 0,&ga(),SizeOf.gate
 			NPrint pa(ga()\p)\t ;name of gate!
 		Wend
@@ -768,14 +768,14 @@ If f$
 		;write pin list
 		Print Mki$(##[$C010](pn())-npn)
 		;
-		While globfree(pn())
+		While NextItem(pn())
 			Exists 0,&pn(),SizeOf.pin
 		Wend
 		;
 		;write text list
 		Print Mki$(##[$C010](tx()))
-		newmem tx()
-		While globfree(tx())
+		ResetList tx()
+		While NextItem(tx())
 			Exists 0,&tx(),SizeOf.text
 			NPrint tx()\t
 		Wend
@@ -783,7 +783,7 @@ If f$
 		;write ga()\ipin, ga()\opin stuff...
 		;
 		##[$C00F] ga(),fga
-		While globfree(ga())
+		While NextItem(ga())
 			;
 			If ga()\ipin
 				##[$C00F] pn(),ga()\ipin
@@ -802,7 +802,7 @@ If f$
 		;
 		;write pn()\con stuff
 		##[$C00F] pn(),fpn
-		While globfree(pn())
+		While NextItem(pn())
 			;
 			PushItem pn()
 			*con=pn()\con
@@ -829,7 +829,7 @@ If f$
 		;
 		;write pd()\pin
 		##[$C00F] pd(),fpd
-		While globfree(pd())
+		While NextItem(pd())
 			If pd()\pin
 				##[$C00F] pn(),pd()\pin
 				Print Mki$(##[$C011](pn())-npn)
@@ -840,7 +840,7 @@ If f$
 		;
 		;write us()\upin
 		##[$C00F] us(),fus
-		While globfree(us())
+		While NextItem(us())
 			If us()\upin
 				##[$C00F] pn(),us()\upin
 				Print Mki$(##[$C011](pn())-npn)
@@ -849,7 +849,7 @@ If f$
 			EndIf
 		Wend
 		;
-		CloseFile 0:Use localstat 0
+		CloseFile 0:Use Window 0
 	Else
 	EndIf
 EndIf
@@ -861,10 +861,10 @@ If f$
 	If WriteMem(0,f$)
 		;
 		If user
-			newmem ga():fga2=0:nga=0
-			newmem pn():fpn2=0:npn=0
-			newmem pd():fpd2=0:npd=0
-			newmem us():fus2=0:nus=0
+			ResetList ga():fga2=0:nga=0
+			ResetList pn():fpn2=0:npn=0
+			ResetList pd():fpd2=0:npd=0
+			ResetList us():fus2=0:nus=0
 		Else
 			Gosub new
 			fga2=fga:nga=1
@@ -877,7 +877,7 @@ If f$
 		;
 		n=Cvi(Inkey$(2)):npd2=n	;number of pads loaded!
 		For k=1 To n
-		If globalloc(pd())
+		If AddItem(pd())
 			##[$BE14] 0,&pd(),SizeOf.pad
 			pd()\t_=0
 			pd()\t=Edit$(256)
@@ -886,14 +886,14 @@ If f$
 		;
 		n=Cvi(Inkey$(2)):nus2=n	;number of user loaded!
 		For k=1 To n
-		If globalloc(us())
+		If AddItem(us())
 			##[$BE14] 0,&us(),SizeOf.user
 		EndIf
 		Next
 		;
 		n=Cvi(Inkey$(2)):nga2=n	;number of gates loaded!
 		For k=1 To n
-		If globalloc(ga())
+		If AddItem(ga())
 			##[$BE14] 0,&ga(),SizeOf.gate
 			t$=Edit$(256) ;get part name
 			;
@@ -916,7 +916,7 @@ If f$
 		;
 		n=Cvi(Inkey$(2)):npn2=n	;number of pins loaded!
 		For k=1 To n
-		If globalloc(pn())
+		If AddItem(pn())
 			##[$BE14] 0,&pn(),SizeOf.pin
 			If user
 				pn()\hide=$7fff7fff
@@ -930,7 +930,7 @@ If f$
 			##[$BE14] 0,&tx(),SizeOf.text:t$=Edit$(256)
 			tx()\t_=0
 			If user
-				freelast tx()
+				KillItem tx()
 			Else
 				tx()\t=t$
 			EndIf
@@ -942,7 +942,7 @@ If f$
 		;
 		##[$C00F] ga(),fga2
 		For k=1 To nga2
-			globfree ga()
+			NextItem ga()
 			n=Cvi(Inkey$(2))	;ipin#
 			If n
 				##[$C012] pn(),n+npn
@@ -962,7 +962,7 @@ If f$
 		;read pn()\con list...
 		##[$C00F] pn(),fpn2
 		For k=1 To npn2
-			globfree pn():PushItem pn()
+			NextItem pn():PushItem pn()
 			con.l=&pn()\con
 			While Peek.l(con)
 				*con=##[$FE97](SizeOf.con,1)
@@ -992,7 +992,7 @@ If f$
 		;
 		##[$C00F] pd(),fpd2
 		For k=1 To npd2
-			globfree pd()
+			NextItem pd()
 			n=Cvi(Inkey$(2))	;pin#
 			If n
 				##[$C012] pn(),n+npn
@@ -1004,7 +1004,7 @@ If f$
 		;
 		##[$C00F] us(),fus2
 		For k=1 To nus2
-			globfree us()
+			NextItem us()
 			n=Cvi(Inkey$(2))	;pin#
 			If n
 				##[$C012] pn(),n+npn
@@ -1014,13 +1014,13 @@ If f$
 			EndIf
 		Next
 		;
-		CloseFile 0:Use localstat 0:ref=-1
+		CloseFile 0:Use Window 0:ref=-1
 		;
 		;connect up any pads to parent user part!
 		;
 		If user
 			##[$C00F] us(),ups(user)
-			##[$C00F] pn(),us()\upin:locfree pd()
+			##[$C00F] pn(),us()\upin:FirstItem pd()
 			For k=1 To ui(us()\u)\npn
 				;
 				*pin=pd()\pin ;pin of pad!
@@ -1037,12 +1037,12 @@ If f$
 				*con\succ=pn()\con:pn()\con=*con
 				*con\pin=*pin:*con\r=-2
 				;
-				globfree pd():globfree pn()
+				NextItem pd():NextItem pn()
 			Next
 		EndIf
 		;
 		If nus2 ;any user bits?
-			##[$C00F] us(),fus2:globfree us()
+			##[$C00F] us(),fus2:NextItem us()
 			nl=nus2:Gosub loaduser
 		EndIf
 		;
@@ -1067,7 +1067,7 @@ While nl
 	;
 	PopItem us():MOVE.l (a7)+,SizeOf nl(a5)
 	;
-	nl-1:globfree us()
+	nl-1:NextItem us()
 	;
 Wend
 user-1
@@ -1091,14 +1091,14 @@ If emul Then Gosub endemul
 ;
 ClearList ga()
 ;
-newmem tx()
-While globfree(tx())
+ResetList tx()
+While NextItem(tx())
 	MaxLen tx()\t=0
 Wend
 ClearList tx()
 ;
-newmem pn()
-While globfree(pn())
+ResetList pn()
+While NextItem(pn())
 	*con=pn()\con:pn()\con=0
 	While *con
 		*con2=*con\succ
@@ -1108,8 +1108,8 @@ While globfree(pn())
 Wend
 ClearList pn()
 ;
-newmem pd()
-While globfree(pd())
+ResetList pd()
+While NextItem(pd())
 	MaxLen pd()\t=0
 Wend
 ClearList pd()
@@ -1126,7 +1126,7 @@ ref=-1:Return
 refmap
 If ref
 	If ref<0
-		Use lmaxlen 1
+		Use BitMap 1
 		Gosub map_drawgrid
 		Gosub showgates
 		Gosub showusers
@@ -1134,7 +1134,7 @@ If ref
 		Gosub showpads
 		Gosub showpins
 		Gosub showtexts
-		Use lmaxlen 0
+		Use BitMap 0
 	EndIf
 	Scroll 0,0,map_vw,map_vh,0,0,1
 	ref=0
@@ -1153,15 +1153,15 @@ emul=-1:emmess{"INITIALIZING"}:time=0:ems=-1
 ClearList ta()	;no tasks
 ClearList do()	;no 'todo' list
 ;
-newmem pn()
-While globfree(pn())
+ResetList pn()
+While NextItem(pn())
 	If &pn()<>fpn
 		pn()\out=0
 	EndIf
 Wend
 ;
-newmem ga()
-While globfree(ga())
+ResetList ga()
+While NextItem(ga())
 	If &ga()<>fga
 		;
 		*gate=&ga()
@@ -1193,15 +1193,15 @@ While globfree(ga())
 	;
 Wend
 ;
-newmem ga()
-While globfree(ga())
+ResetList ga()
+While NextItem(ga())
 	If &ga()<>fga
 		added=0:calcout{&ga()}
 		If added	;added to 'do' list?
 			;
 			time2=time+do()\d ;destination time
 			PushItem ga()
-			While time<time2 AND locfree(do())<>0
+			While time<time2 AND FirstItem(do())<>0
 				Gosub rethink
 			Wend
 			ClearList do()
@@ -1217,8 +1217,8 @@ ref=-1:Return
 ;
 emul=0
 ;
-newmem ta()
-While globfree(ta())
+ResetList ta()
+While NextItem(ta())
 	##[$FEAC] ta()\task,ta()\sig	;tell it to stop!
 	;
 	;how do we know when it's stopped?
@@ -1237,8 +1237,8 @@ ref=-1:Return
 ;
 mind=32767:dcnt=0
 ;
-newmem do()
-While globfree(do())
+ResetList do()
+While NextItem(do())
 	dcnt+1:If do()\d<mind Then mind=do()\d
 Wend
 ;
@@ -1246,14 +1246,14 @@ Wend
 ;
 time+mind
 ;
-newmem do()
+ResetList do()
 While dcnt
-	dcnt-1:globfree do()
+	dcnt-1:NextItem do()
 	If do()\d=mind
 		PushItem do()
 		propagate{do()\pin,do()\out}
 		PopItem do()
-		freelast do()
+		KillItem do()
 	Else
 		do()\d-mind
 	EndIf
@@ -1331,9 +1331,9 @@ If AddLast(ga())
 	*gate\p=sel,map_x,map_y,se_r
 	*gate\ipin=0,0 ;no input/output pins yet
 	;
-	Use lmaxlen 1
+	Use BitMap 1
 	drawshape{pa(sel)\info\sh,se_x,se_y,se_sc,se_r}
-	Use lmaxlen 0:ref=1
+	Use BitMap 0:ref=1
 	;
 	;add pins...
 	;
@@ -1356,7 +1356,7 @@ Return
 .showgates
 ;
 ##[$C00F] ga(),fga
-While globfree(ga())
+While NextItem(ga())
 	map_x=ga()\x:map_y=ga()\y
 	Gosub map_xytoscreen
 	drawshape{pa(ga()\p)\info\sh,map_x,map_y,se_sc,ga()\r}
@@ -1366,7 +1366,7 @@ Return
 .showpins
 If emul
 	##[$C00F] pn(),fpn
-	While globfree(pn())
+	While NextItem(pn())
 		showout{&pn()}
 	Wend
 EndIf
@@ -1408,7 +1408,7 @@ Return
 ;
 If AddLast(us())
 	;
-	Use lmaxlen 1
+	Use BitMap 1
 	sh=ui(sel)\sh:x=se_x:y=se_y:r=se_r
 	pn$=ui(sel)\pn
 	drawshape{sh,x,y,us_sc,r} ;draw it!
@@ -1426,7 +1426,7 @@ If AddLast(us())
 		EndIf
 	Next
 	;
-	Gosub showuser2:Use lmaxlen 0:ref=1
+	Gosub showuser2:Use BitMap 0:ref=1
 	;
 	nl=1:Gosub loaduser
 	;
@@ -1435,7 +1435,7 @@ Return
 
 showusers
 ##[$C00F] us(),fus
-While globfree(us())
+While NextItem(us())
 	sh=ui(us()\u)\sh:pn$=ui(us()\u)\pn
 	map_x=us()\x:map_y=us()\y:Gosub map_xytoscreen
 	x=map_x:y=map_y:r=us()\r:Gosub showuser
@@ -1462,7 +1462,7 @@ If se_x>=0
 		md.l=$0fffffff:If tr_f=0 Then *tr_pin2=0
 		;
 		##[$C00F] pn(),fpn
-		While globfree(pn())
+		While NextItem(pn())
 			If *tr_pin2<>&pn()
 				xd.l=pn()\x-map_x
 				yd.l=pn()\y-map_y
@@ -1540,9 +1540,9 @@ If t$
 			pn()\con=0					;no connections
 			pn()\gate=0				 ;not connected to a gate!
 			pn()\out=-1				 ;not outputting anything!
-			Use lmaxlen 1
+			Use BitMap 1
 			x=se_x:y=se_y:r=se_r:Gosub showpad
-			Use lmaxlen 0:ref=1
+			Use BitMap 0:ref=1
 		EndIf
 	EndIf
 EndIf
@@ -1551,7 +1551,7 @@ Return
 
 .showpads
 ##[$C00F] pd(),fpd
-While globfree(pd())
+While NextItem(pd())
 	map_x=pd()\x:map_y=pd()\y:Gosub map_xytoscreen
 	x=map_x:y=map_y:r=pd()\r:t$=pd()\t:Gosub showpad
 Wend
@@ -1582,7 +1582,7 @@ col=4:r=0:Gosub showtext:col=0:Return
 *con\pin=*tr_pin
 *con\r=tr_r
 ;
-c=7:Use lmaxlen 1:Gosub trakline2:Use lmaxlen 0:ref=1
+c=7:Use BitMap 1:Gosub trakline2:Use BitMap 0:ref=1
 ;
 Return
 
@@ -1590,7 +1590,7 @@ Return
 ;
 c=7
 ##[$C00F] pn(),fpn
-While globfree(pn())
+While NextItem(pn())
 	map_x=pn()\x:map_y=pn()\y:Gosub map_xytoscreen:x=map_x:y=map_y
 	*con=pn()\con
 	While *con
@@ -1622,9 +1622,9 @@ Return
 If AddLast(tx())
 	tx()\x=map_x,map_y,se_r
 	tx()\t=tx_t$
-	Use lmaxlen 1
+	Use BitMap 1
 	x=se_x:y=se_y:t$=tx_t$:r=se_r:col=4:Gosub showtext:col=0
-	Use lmaxlen 0
+	Use BitMap 0
 	ref=1
 EndIf
 Return
@@ -1634,8 +1634,8 @@ Return
 ;show all user text
 ;
 col=4
-newmem tx()
-While globfree(tx())
+ResetList tx()
+While NextItem(tx())
 	map_x=tx()\x:map_y=tx()\y:t$=tx()\t:r=tx()\r
 	Gosub map_xytoscreen:x=map_x:y=map_y:Gosub showtext
 Wend

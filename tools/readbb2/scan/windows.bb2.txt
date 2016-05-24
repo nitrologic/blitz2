@@ -4,32 +4,32 @@
 
 ;first, we need a screen for the windows to open on...
 ;
-allocst 0,11,"My Screen"
+Screen 0,11,"My Screen"
 
 ;alternatively, we could have used the workbench screen, like so:
 ;WbToScreen 0:WBenchToFront
 
 ;window 0...
 ;
-localstat 0,0,12,320,100,$0,"Window 0",1,2
+Window 0,0,12,320,100,$0,"Window 0",1,2
 Print "Window Flags=$0"
 
 ;window 1...
 ;
-localstat 1,320,12,320,100,$2,"Window 1",1,2
+Window 1,320,12,320,100,$2,"Window 1",1,2
 NPrint "Window Flags=$2"
 Print "Window has drag bar"
 
 ;window 2...
 ;
-localstat 2,0,112,320,100,$6,"Window 2",1,2
+Window 2,0,112,320,100,$6,"Window 2",1,2
 NPrint "Window Flags=$3"
 NPrint "Window has drag bar"
 Print "Window has depth gadget"
 
 ;window 3...
 ;
-localstat 3,320,112,320,100,$100f,"Window 3",1,2
+Window 3,320,112,320,100,$100f,"Window 3",1,2
 NPrint "Window Flags=$f"
 NPrint "Window has the works!"
 NPrint "Close me to exit!"

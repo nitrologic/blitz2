@@ -4,7 +4,7 @@ SetErr
 	End
 End SetErr
 WBStartup;:NoCli
-freest 0;:WBenchToFront_
+WbToScreen 0;:WBenchToFront_
 ;ScreensBitMap 0,0
 
 If NumPars
@@ -62,9 +62,9 @@ If numpics
 	For pic=1 To numpics
 		If ##[$BE15](picture$(pic))
 			ILBMDepth picture$(pic)
-			allocst 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
+			Screen 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
 ;			ShowScreen 0
-			casestrcomp 0,picture$(pic)
+			LoadPalette 0,picture$(pic)
 			FadePalette 0
 			LoadScreen 1,picture$(pic)
 ;			ShowScreen 1

@@ -15,14 +15,14 @@
 
 SpriteMode 2								 ; 64 pixel wide sprites
 
-lmaxlen 0,1024,516,4
+BitMap 0,1024,516,4
 For i=0 To 255:AGAGreen 0,i,Rnd(255),Rnd(255),Rnd(255):Next
 For i=0 To 15:Boxf Rnd(1024),Rnd(516),Rnd(1024),Rnd(516),i:Next
 
 Box 0,0,304,266,-1
 
 LoadShape 0,"sprite.iff":GetaSprite 0,0
-casestrcomp 0,"sprite.iff",240
+LoadPalette 0,"sprite.iff",240
 
 InitCopList 0,34,267,$10814,8,256,0 ;hires sprite smooth scroll 4 bitplanes
 

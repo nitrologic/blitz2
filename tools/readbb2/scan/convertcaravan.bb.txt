@@ -66,29 +66,29 @@ thresh=120
 	StopCycle 0,3,14,6,8
 	t$="Imagine -> SkidMarks Frame Converter"
 	t$+"									 (c)1994 Acid Software"
-	allocst 0,0,0,640,256,2,$8000,t$,2,1:FadePalette 0
+	Screen 0,0,0,640,256,2,$8000,t$,2,1:FadePalette 0
 	;
 	StringGadget 0,52,3,0,0,124,150:ButtonId 0,0,i$
 	StringGadget 0,268,3,0,1,24,150:ButtonId 0,1,v$
 	StringGadget 0,462,3,0,2,24,150:ButtonId 0,2,s$
 	;
-	workstart 0,18,26,0,3, "SELECT FILE"
-	workstart 0,18,42,0,4, " GENERATE	"
-	workstart 0,18,58,0,5, "	 QUIT		"
+	TextGadget 0,18,26,0,3, "SELECT FILE"
+	TextGadget 0,18,42,0,4, " GENERATE	"
+	TextGadget 0,18,58,0,5, "	 QUIT		"
 
-	workstart 0,128,26,0,6, "SHOW SHADOW"
-	workstart 0,128,42,0,7, " SHOW AGA	"
-	workstart 0,128,58,0,8," SHOW ECS	"
+	TextGadget 0,128,26,0,6, "SHOW SHADOW"
+	TextGadget 0,128,42,0,7, " SHOW AGA	"
+	TextGadget 0,128,58,0,8," SHOW ECS	"
 
 	For y=0 To 3
-		workstart 0,546,22+y*13,0,10+y+y,"<"
-		workstart 0,590,22+y*13,0,11+y+y,">"
+		TextGadget 0,546,22+y*13,0,10+y+y,"<"
+		TextGadget 0,590,22+y*13,0,11+y+y,">"
 		;
-		workstart 0,346,22+y*13,0,18+y+y,"<"
-		workstart 0,390,22+y*13,0,19+y+y,">"
+		TextGadget 0,346,22+y*13,0,18+y+y,"<"
+		TextGadget 0,390,22+y*13,0,19+y+y,">"
 	Next
 	;
-	localstat 0,0,11,640,245,$1800,"",2,1,0
+	Window 0,0,11,640,245,$1800,"",2,1,0
 	;
 	ResetString 12,3,610,12
 	;
@@ -227,14 +227,14 @@ thresh=120
 	If ReadMem(0,p$+v$+".def")
 		FileOutput 0:NPrint v$:NPrint s$
 		Exists 0,&car\settings,SizeOf .handling
-		Exists 0,Peek.l(Addr lmaxlen(0)+8),64*32/4
+		Exists 0,Peek.l(Addr BitMap(0)+8),64*32/4
 		CloseFile 0
 	EndIf
 	WindowOutput 0
 	Return
 
 .convertshadow:
-	Use lmaxlen 0:BlockScroll:##[$80CA] q
+	Use BitMap 0:BlockScroll:USEPATH q
 	xdim=a(4):ydim=a(5)
 	;
 	d=(24-frame)AND31
@@ -262,27 +262,27 @@ thresh=120
 	;
 	Polyf 4,&q\rx0,1
 	;
-	Use lmaxlen 1:BlockScroll:Use lmaxlen 2:BlockScroll
+	Use BitMap 1:BlockScroll:Use BitMap 2:BlockScroll
 	;
 	Goto doframe
 
 .convertframe	;frame=1..800 -> shape 0
 	;
-	Use lmaxlen 0:BlockScroll:Use lmaxlen 1:BlockScroll:Use lmaxlen 2:BlockScroll
+	Use BitMap 0:BlockScroll:Use BitMap 1:BlockScroll:Use BitMap 2:BlockScroll
 	;
 doframe:
 	ox=a(6):oy=a(7)
 	ff$=f$+"pic."+Right$(Str$(10000+frame),4)
 	If ##[$BE15](ff$)=0 Then Gosub fileerr:Return
-	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use lmaxlen 0
+	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use BitMap 0
 	For y=0 To 31:For x=0 To 63
 		c=pickcolor{m,x+ox,y+oy,&a(0),0}
 		If c<>0
-			Use lmaxlen 0:Point x,y,c
+			Use BitMap 0:Point x,y,c
 			If (x AND 1)=0
 				c=pickcolor{m,x+ox,y+oy,&a(0),1}
-				Use lmaxlen 1:Point x LSR 1,y,c
-				If aga=0 Then Use lmaxlen 2:Point (x AND 254),y,c:Point (x AND254)+1,y,c
+				Use BitMap 1:Point x LSR 1,y,c
+				If aga=0 Then Use BitMap 2:Point (x AND 254),y,c:Point (x AND254)+1,y,c
 			EndIf
 		EndIf
 	Next:Next

@@ -44,7 +44,7 @@ End Function
 .shapes
 CNIF #msh<>0
 	;
-	allocst 0,1:ScreensBitMap 0,0
+	Screen 0,1:ScreensBitMap 0,0
 	;
 	LoadShape 0,"tower"
 	LoadShape zm,"blob"
@@ -86,7 +86,7 @@ CNIF #msh<>0
 
 CELSE
 
-	casestrcomp 0,"mock",8
+	LoadPalette 0,"mock",8
 	LoadShapes 0,"shapes"
 
 CEND
@@ -97,7 +97,7 @@ Dim aa(zm2)				 ;alien x adds
 Dim sy.w(zm2)				 ;shadow y position
 Dim xl(zm2),xh(zm2) ;for wrap around at different z's
 Dim List o.object(200)
-##[$80CA] o()
+USEPATH o()
 
 ;****************** SET UP STUFF ******************
 
@@ -137,8 +137,8 @@ If aat>0 AND asa>0
 Else
 	If ala
 		aat=256:asa+1:ala-1
-		locfree o()
-		globalloc o()
+		FirstItem o()
+		AddItem o()
 		\x=0:\z=zm2:\s=am:\f=2:\rt=0
 	Else
 		aat=-1
@@ -151,7 +151,7 @@ Repeat
 	VWait
 Until fc>=2
 If fc>2 Then Green 0,15,15,0
-fc=0:ShowB db,144,0:db=1-db:UnQueue db:Use lmaxlen db
+fc=0:ShowB db,144,0:db=1-db:UnQueue db:Use BitMap db
 Return
 
 .moveplayer	 ;get player movement flags
@@ -178,11 +178,11 @@ Return
 If th
 	\x*tm(z):\z-1
 	If \z<0
-		freelast o():PushItem o()
-		locfree o():globalloc o():\z+zm:PopItem o()
+		KillItem o():PushItem o()
+		FirstItem o():AddItem o():\z+zm:PopItem o()
 	Else
 		If \z>=zm
-			freelast o():PushItem o()
+			KillItem o():PushItem o()
 			AddLast o():\z-zm:PopItem o()
 		EndIf
 	EndIf
@@ -194,12 +194,12 @@ If \z>lz	;gone through previous object?
 		bw=ShapeWidth(zm+\z):xd=QAbs(lx-\x)
 		If lf=0 ;through tower?
 			If xd<bw LSR 1
-				freelast o():Return
+				KillItem o():Return
 			EndIf
 		EndIf
 		If lf=2 ;through alien?
 			If xd<bw LSL 1
-				asa-1:PrevItem o():freelast o():globfree o():Return
+				asa-1:PrevItem o():KillItem o():NextItem o():Return
 			EndIf
 		EndIf
 	EndIf
@@ -207,22 +207,22 @@ If \z>lz	;gone through previous object?
 	If \f=0
 		If lf=3
 			If QAbs(lx-\x)<ShapeWidth(zm+lz) LSR 1
-				PrevItem o():freelast o():globfree o():Return
+				PrevItem o():KillItem o():NextItem o():Return
 			EndIf
 		EndIf
 	EndIf
 	;
-	freelast o()
+	KillItem o()
 	PrevItem o()
-	globalloc o()
-	globfree o()
+	AddItem o()
+	NextItem o()
 EndIf
 ;
 Return
 
 .moveobjects	;move all objects
-locfree o():lz=zm
-While globfree(o())
+FirstItem o():lz=zm
+While NextItem(o())
 	;
 	z=\z:\x=QWrap(\x,xl(z),xh(z)):x=320+\x
 	If x>80 AND x<560
@@ -252,7 +252,7 @@ Return
 
 .firebull
 PushItem o()
-globalloc o():\x=x:\z=z:\s=zm:\f=3
+AddItem o():\x=x:\z=z:\s=zm:\f=3
 PopItem o()
 Return
 
@@ -290,7 +290,7 @@ Goto relplayer
 .dobullet		 ;handle player bullet movement
 \z+2
 If \z>=zm
-	freelast o()
+	KillItem o()
 Else
 	Gosub relplayer
 EndIf
@@ -299,7 +299,7 @@ Return
 .doalienbullet		 ;handle player bullet movement
 \z-2
 If \z<1
-	freelast o()
+	KillItem o()
 Else
 	Gosub relplayer
 EndIf
@@ -326,15 +326,15 @@ ShowF 2
 Return
 
 .initstuff
-lmaxlen 0,640,200,3
-lmaxlen 1,640,200,3
-lmaxlen 2,352,200,3
+BitMap 0,640,200,3
+BitMap 1,640,200,3
+BitMap 2,352,200,3
 ;
 Boxf 0,0,351,15,7
 Boxf 0,144,351,199,7
 ;
-longmult 0,100
-longmult 1,100
+Queue 0,100
+Queue 1,100
 ;
 SetInt 5
 	fc+1

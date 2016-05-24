@@ -3,16 +3,16 @@
 ; tiny terminal program using serial port by Simon
 ;
 
-newlocarr 0,0,"Projects"
+MenuTitle 0,0,"Projects"
 MenuItem 0,0,0,0,"Quit		","Q"
 
-allocst 0,12,"BlitzTerm"
+Screen 0,12,"BlitzTerm"
 
 winheight=DispHeight-12
 columns=Int(winheight/8)-2
 
-localstat 0,0,12,640,winheight,$1900,"",0,2,1
-arrmult 0
+Window 0,0,12,640,winheight,$1900,"",0,2,1
+SetMenu 0
 
 WindowOutput 0:WindowInput 0
 

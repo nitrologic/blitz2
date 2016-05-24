@@ -4,8 +4,8 @@
 #G8=9
 #W1=1
 
-allocst 0,0,0,640,256,2,-32768,"TEST",0,1
+Screen 0,0,0,640,256,2,-32768,"TEST",0,1
 GTText #W1,#G11,12,5,296,40,"",1,""
 GTButton #W1,#G8,204,49,104,12," Cancle ",16
 GTButton #W1,#G8,12,49,104,12," Scale ",16
-localstat #W1,176,56,328,80,4102,"Scale",1,2:AttachGTList #W1,#W1
+Window #W1,176,56,328,80,4102,"Scale",1,2:AttachGTList #W1,#W1

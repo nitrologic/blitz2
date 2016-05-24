@@ -6,7 +6,7 @@
 								 ;;													 ;;
 								 ;;***************************;;
 
-WBStartup:##[$80CB]:##[$80CC]:SetErr:End:End SetErr
+WBStartup:CloseEd:NoCli:SetErr:End:End SetErr
 
 If Processor>=2 Then maxscrn=51 Else maxscrn=10
 
@@ -50,9 +50,9 @@ Dim pix2(15,15)								; 16*16 shapes
 Dim gt.blck(19,4)
 
 scn=1
-newmem level()
-If NOT globfree(level())
-	If globalloc(level())
+ResetList level()
+If NOT NextItem(level())
+	If AddItem(level())
 		level()\n=scn
 		For n=0 To 99
 			level()\a[n]\x0=0,0,0,0,0,0,0,0
@@ -66,16 +66,16 @@ If NOT globfree(level())
 EndIf
 
 
-allocst 0,4										 ; track editor screen
+Screen 0,4										 ; track editor screen
 ;
 ; scrns have 16 clrs, 0-7 fixed for editors, 8-15 for track/bikes
 ;
 
-lmaxlen 0,320,180,4						 ; superbitmap for window 0
-lmaxlen 1,640,70,4							;		"				 "		"		1
-lmaxlen 2,320+64,180,4					; animation bitmap (sort of)
-lmaxlen 3,16,16,2							 ; shapes bitmap
-lmaxlen 5,320,180,2						 ; shapemaker bitmap (4 colours)
+BitMap 0,320,180,4						 ; superbitmap for window 0
+BitMap 1,640,70,4							;		"				 "		"		1
+BitMap 2,320+64,180,4					; animation bitmap (sort of)
+BitMap 3,16,16,2							 ; shapes bitmap
+BitMap 5,320,180,2						 ; shapemaker bitmap (4 colours)
 Buffer 0,3000
 
 
@@ -92,16 +92,16 @@ For n=8 To 15
 Next
 Use SetCycle 0:FadePalette 0
 
-casestrcomp 1,"gfx/iff/banbike.iff",4
+LoadPalette 1,"gfx/iff/banbike.iff",4
 LoadShapes	0,"gfx/banbike.shapes"	 ; banana bikes
 
-Use lmaxlen 3												 ;
+Use BitMap 3												 ;
 For n=0 To 3												 ; first track shapes
 	BlockScroll 8+n:GetaShape 32+n,0,0,16,16	 ; (basic colour blocks)
 Next																 ;
 BlockScroll 0																;
 
-newlocarr 0,0," Project "
+MenuTitle 0,0," Project "
 MenuItem	0,0,0,0,"New Project		"
 MenuItem	0,0,0,1,"Load Level		 ","L"
 MenuItem	0,0,0,2,"Save Level		 ","S"
@@ -109,13 +109,13 @@ MenuItem	0,0,0,3,"Make Level		 ","M"
 MenuItem	0,0,0,4,"About					"
 MenuItem	0,0,0,5,"Quit					 ","Q"
 
-newlocarr 0,1," Track "
+MenuTitle 0,1," Track "
 MenuItem	0,0,1,0,"Set Colours"
 MenuItem	0,0,1,1,"Set Forces"
 MenuItem	0,0,1,2,"Clear Screen"
 MenuItem	0,0,1,3,"Preview"
 
-newlocarr 0,2," Shapes "
+MenuTitle 0,2," Shapes "
 MenuItem	0,0,2,0,"Load Shapes"
 MenuItem	0,0,2,1,"Save Shapes"
 MenuItem	0,0,2,2,"Edit Shapes"
@@ -123,32 +123,32 @@ MenuItem	0,0,2,3,"Make Shapes"
 MenuColour 0,2,3,Off
 
 DefaultIDCMP $8|$10|$100|$400|$80000
-localstat 0,0,0,320,181,$1880,"Bike Thing Level Editor",5,2,0,0
-arrmult 0:PositionSuperBitMap 0,0
+Window 0,0,0,320,181,$1880,"Bike Thing Level Editor",5,2,0,0
+SetMenu 0:PositionSuperBitMap 0,0
 ;
 ; this is the 'action' window for the track editor
 ;
 
 StringText$ 2,1:SetString 5,2
 ButtonGroup 1:SelectMode 6,2
-workstart 1,24,10,0,0,"	 "
-workstart 1,3,10,0,1,"<<"
-workstart 1,53,10,0,2,">>"
-workstart 1,84,10,0,3,"L|H"
-workstart 1,96,10,0,4,"COLOUR SCREEN| EDIT SCREEN "
-workstart 1,214,10,0,5,"S|F|R"
-workstart 1,226,10,0,6,"TEST SCREEN| STOP TEST "
+TextGadget 1,24,10,0,0,"	 "
+TextGadget 1,3,10,0,1,"<<"
+TextGadget 1,53,10,0,2,">>"
+TextGadget 1,84,10,0,3,"L|H"
+TextGadget 1,96,10,0,4,"COLOUR SCREEN| EDIT SCREEN "
+TextGadget 1,214,10,0,5,"S|F|R"
+TextGadget 1,226,10,0,6,"TEST SCREEN| STOP TEST "
 ##[$C620] 1,5:##[$C620] 1,6
 
 DefaultIDCMP $20|$40|$400
-localstat 1,0,182,320,70,$0880,"",0,0,1,1
+Window 1,0,182,320,70,$0880,"",0,0,1,1
 PositionSuperBitMap 0,0
 ;
 ; this is the 'gadgets and blocks' window for the track editor
 ;
-Use lmaxlen 1
+Use BitMap 1
 For n=0 To 3
-	longdiv 32+n,10+n*16+2,30,2
+	Blit 32+n,10+n*16+2,30,2
 Next
 PutSuperBitMap
 
@@ -285,20 +285,20 @@ Repeat
 					Green 3,0,0,0:Green 1,0,0,0
 					;
 					oscn=scn
-					Use localstat 1:Cursor 1
+					Use Window 1:Cursor 1
 					WColour 6,2:WLocate 26,11
 					WJam0:scn$=Edit$(3):WJam1
 					scn=Val(scn$)
 					If scn>maxscrn OR scn=0
 						scn=oscn
 					Else
-						newmem level()
-						While globfree(level())
+						ResetList level()
+						While NextItem(level())
 							If level()\n=scn Then Pop While:Goto foundl
 						Wend
 						foundl:
 						If level()\n<>scn
-							If globalloc(level())
+							If AddItem(level())
 								level()\n=scn
 								For n=0 To 99
 									level()\a[n]\x0=0,0,0,0,0,0,0,0
@@ -314,14 +314,14 @@ Repeat
 					;
 					FlushEvents
 					Green 3,r,g,b:Green 1,r2,g2,b2
-					Use localstat 0:Activate 0:Menus On
+					Use Window 0:Activate 0:Menus On
 				Case 1
 					Activate 0:scn=QLimit(scn-1,1,maxscrn)
 					If PrevItem(level())
 						Gosub editsc
 					Else
 						trn=0
-						If globalloc(level())
+						If AddItem(level())
 							level()\n=scn
 							For n=0 To 99
 								level()\a[n]\x0=0,0,0,0,0,0,0,0
@@ -335,11 +335,11 @@ Repeat
 					EndIf
 				Case 2
 					Activate 0:scn=QLimit(scn+1,1,maxscrn)
-					If globfree(level())
+					If NextItem(level())
 						Gosub editsc
 					Else
 						trn=0
-						If globalloc(level())
+						If AddItem(level())
 							level()\n=scn
 							For n=0 To 99
 								level()\a[n]\x0=0,0,0,0,0,0,0,0
@@ -381,7 +381,7 @@ Repeat
 					If ItemHit=4 Then Gosub about
 					If ItemHit=5
 						For n=0 To 5
-							Free lmaxlen n
+							Free BitMap n
 						Next
 						For n=32 To 32+shpcnt
 							Free MidHandle n
@@ -415,9 +415,9 @@ Repeat
 		FlushEvents $10:Gosub drawln
 	EndIf
 	;
-	Use localstat 1
+	Use Window 1
 	WLocate 26,11:Print scn
-	Use localstat 0
+	Use Window 0
 	;
 Forever
 
@@ -429,7 +429,7 @@ Forever
 .setupw
 	; draw five lanes and grid on window 0
 	;
-	Use localstat 0
+	Use Window 0
 	WLine 1,8,3,8,3
 	WLine 160,8,318,8,3
 	WLine 0,28,320,28,5
@@ -442,9 +442,9 @@ Forever
 		WLine gr,178,gr,180,5
 	Next
 	;
-	Use localstat 1
+	Use Window 1
 	WLocate 26,11:WColour 6,2:WJam1:Print scn
-	Use localstat 0:FadePalette 0
+	Use Window 0:FadePalette 0
 	; initialise some variables
 	;
 	jwd=1:start=0:trn=0
@@ -491,17 +491,17 @@ Return
 
 
 .colrsc
-	Use localstat 0:GetSuperBitMap
-	Use lmaxlen 0:Boxf 0,96,320,176,9
+	Use Window 0:GetSuperBitMap
+	Use BitMap 0:Boxf 0,96,320,176,9
 	;
 	For n=0 To 99
 		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done
-		##[$80CA] level()\a[n]
+		USEPATH level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\y2,\x3,\y3
-		##[$80CA] level()\b[n]
+		USEPATH level()\b[n]
 		q.tri\x0=\x0,\y0,\x1,\y1,\x2,\y2
 		Polyf 4,p,11:Polyf 3,q,10
-		##[$80CA] level()\a[n]
+		USEPATH level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\jsy,\x3,\jsy
 		Polyf 4,p,10
 		If Disable(1,3)=2
@@ -520,7 +520,7 @@ Return
 		##[$C621] 1,4,1:Redraw 1,4
 		##[$C61F] 1,3:Redraw 1,3
 	EndIf
-	Use localstat 0:InnerCls
+	Use Window 0:InnerCls
 	WLine 1,8,3,8,3
 	WLine 160,8,318,8,3
 	WLine 0,28,320,28,5
@@ -534,7 +534,7 @@ Return
 	Next
 	For n=0 To 99
 		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done2
-		##[$80CA] level()\a[n]
+		USEPATH level()\a[n]
 		For ln=0 To \jwd
 			WLine \x0,\y0-ln*16,\x1,\y1-ln*16,15
 		Next
@@ -556,8 +556,8 @@ Return
 		##[$C620] 1,n
 		Redraw 1,n
 	Next
-	Use localstat 0:GetSuperBitMap
-	Use lmaxlen 2:Scroll 0,0,320,180,32,0,0
+	Use Window 0:GetSuperBitMap
+	Use BitMap 2:Scroll 0,0,320,180,32,0,0
 	;
 	shpx=48:shpy2=96
 	oshpx=shpx:oshpy=shpy:xp=0:ln=0
@@ -633,8 +633,8 @@ Return
 			FadePalette 0
 		EndIf
 		If ev.l=$80000 Then Activate 0
-		Use localstat 1:WLocate 26,50:Print fwh," ",bwh," ",shpn
-		Use localstat 0
+		Use Window 1:WLocate 26,50:Print fwh," ",bwh," ",shpn
+		Use Window 0
 	Until ev.l=$40
 	;
 	For n=0 To 5
@@ -675,14 +675,14 @@ Return
 
 .makel
 	xmap=0
-	newmem level()
-	While globfree(level())
+	ResetList level()
+	While NextItem(level())
 		Gosub editsc
 		Gosub colrsc
 		Gosub makes
 		x=0:y=0
 		For n=0 To 179
-			##[$80CA] level()\c[n]
+			USEPATH level()\c[n]
 			bmap(x+xmap,y)=\shpn-32
 			If y>=4
 				y2=y-4
@@ -796,16 +796,16 @@ Return
 	Next
 	;
 	blckn=0
-	Use lmaxlen 5:BlockScroll:Use SetCycle 1
+	Use BitMap 5:BlockScroll:Use SetCycle 1
 	Boxf 0,96,320,176,1
 	For n=0 To 99
 		If level()\a[n]\x0=level()\a[n]\x1 Then Pop For:Goto done3
-		##[$80CA] level()\a[n]
+		USEPATH level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\y2,\x3,\y3
-		##[$80CA] level()\b[n]
+		USEPATH level()\b[n]
 		q.tri\x0=\x0,\y0,\x1,\y1,\x2,\y2
 		Polyf 4,p,3:Polyf 3,q,2
-		##[$80CA] level()\a[n]
+		USEPATH level()\a[n]
 		p.trpz\x0=\x0,\y0,\x1,\y1,\x2,\jsy,\x3,\jsy
 		Polyf 4,p,2
 		If Disable(1,3)=2
@@ -835,7 +835,7 @@ Return
 	For y=32 To 160 Step 16
 		For x=0 To 304 Step 16
 			;
-			Use lmaxlen 5
+			Use BitMap 5
 			blckn=(x/16)+((y/16-2)*20):blnk=0
 			For xx=0 To 15
 				For yy=0 To 15
@@ -849,8 +849,8 @@ Return
 			Else
 				shpexist=0
 				For n=1 To 3+shpcnt
-					Use lmaxlen 3:BlockScroll
-					longdiv 32+n,0,0:BitMaptoWindow 3,1,0,0,100,30,16,16
+					Use BitMap 3:BlockScroll
+					Blit 32+n,0,0:BitMaptoWindow 3,1,0,0,100,30,16,16
 					For xx=0 To 15
 						For yy=0 To 15
 							pix2(xx,yy)=Cls(xx,yy)
@@ -869,23 +869,23 @@ Return
 			EndIf
 			;
 			If shpexist=0
-				Use localstat 0:Use lmaxlen 5
+				Use Window 0:Use BitMap 5
 				GetaShape 36+shpcnt,x,y,16,16
 				level()\c[blckn]\shpn=36+shpcnt
-				Use localstat 1:Use lmaxlen 1
-				longdiv 36+shpcnt,200,30,2
+				Use Window 1:Use BitMap 1
+				Blit 36+shpcnt,200,30,2
 				shpcnt+1
 				PutSuperBitMap
 			EndIf
 			;
 			there:
-			Use localstat 0:Use lmaxlen 0
+			Use Window 0:Use BitMap 0
 			WLocate 10,2:Print shpcnt," ",blckn," ",level()\c[blckn]\shpn
-			Use localstat 1
+			Use Window 1
 			WLocate 26,11:Print scn
-			Use localstat 0
+			Use Window 0
 		Next
 	Next
 	EndIf
-	Use localstat 0:Use lmaxlen 0:FlushEvents:Activate 0
+	Use Window 0:Use BitMap 0:FlushEvents:Activate 0
 Return

@@ -9,7 +9,7 @@
 
 SetErr:End:End SetErr
 
-lmaxlen 0,256,12,1
+BitMap 0,256,12,1
 LoadBitMap 0,"data/map"
 
 Dim m(255,63)
@@ -29,14 +29,14 @@ w=704
 
 Statement b{s,x,y}
 If s Then BlitMode CookieMode Else BlitMode EraseMode
-longdiv 0,x,y
+Blit 0,x,y
 End Statement
 
 Statement c{s,x,y}
-If s Then BlitMode CookieMode:longdiv 0,x,y
+If s Then BlitMode CookieMode:Blit 0,x,y
 End Statement
 
-lmaxlen 0,w,192,3
+BitMap 0,w,192,3
 ;Boxf 16,0,351,191,2
 BitMapOutput 0
 

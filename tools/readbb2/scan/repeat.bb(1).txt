@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/repeat.bb
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
 BlockScroll
 
-casestrcomp 0,"repeat.iff"
+LoadPalette 0,"repeat.iff"
 FadePalette 0
 LoadShapes 0,"repeat.blocks"
 

@@ -8,7 +8,7 @@ Next
 
 Filter Off
 
-astring 0,"defender.font"
+LoadBlitzFont 0,"defender.font"
 
 For k=1 To 16
 If k<>7
@@ -40,17 +40,17 @@ LoadShapes 0,"shapes"
 LoadShape 46,"littleship"
 LoadShape 47,"littlesmart"
 ;
-lmaxlen 10,320,62,5
+BitMap 10,320,62,5
 LoadBitMap 10,"titlescreen.iff",3
 Scroll 0,0,280,62,20,0
 Boxf 0,0,19,63,0
 ;
 LoadShape 24,"bullet"
 LoadShape 25,"bomb"
-casestrcomp 0,"palette"
-casestrcomp 2,"littleship"
+LoadPalette 0,"palette"
+LoadPalette 2,"littleship"
 
-lmaxlen 0,16,16,3
+BitMap 0,16,16,3
 For k=1 To 7
 Read tc.w,bc.w
 Point 0,0,tc:Point 1,0,tc
@@ -62,7 +62,7 @@ Data.w 6,6,3,2,3,1
 Data.w 1,1,4,4,5,5
 Data.w 3,0
 
-lmaxlen 0,16,16,1
+BitMap 0,16,16,1
 Point 0,0,1:Point 1,0,1:Point 0,1,1:Point 1,1,1
 GetaShape 40,0,0,2,2
 
@@ -267,8 +267,8 @@ Dim List b.exp(200)
 Dim List c.laser(3)
 Dim g.glow(10)
 
-longmult 0,700
-longmult 1,700
+Queue 0,700
+Queue 1,700
 
 For k=0 To 10:For j=0 To 2:g(k)\c[j]=3:Next j,k
 
@@ -278,7 +278,7 @@ g(2)\c[2]=15:g(2)\a=1 LSR 5
 g(3)\c[0]=15:g(3)\a=1,1
 g(4)\c[0]=15:g(4)\a=1.5,1
 
-##[$80CA] a()
+USEPATH a()
 
 While AddLast(a())
 	\sx=160
@@ -302,13 +302,13 @@ Gosub introsetup
 DisplayOn
 ;
 SetInt 5
-	ShowF db,16,16:db=1-db:Use lmaxlen db:UnQueue db
+	ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
 	Gosub doint2
 	Green 9,g(0)\c[0],g(0)\c[1],g(0)\c[2]
 	Gosub cycleshapes
 	g=0:Gosub hueadd
-	PushItem a():newmem a()
-	While globfree(a())
+	PushItem a():ResetList a()
+	While NextItem(a())
 		\s=QWrap(\s+.25,\xs2,\ys2)
 	Wend
 	PopItem a()
@@ -374,7 +374,7 @@ Until j2=0
 ;blurb...
 ;
 Gosub introsetup
-Restore blurb:Locate 0,1:Colour 4,0:Use lmaxlen 0
+Restore blurb:Locate 0,1:Colour 4,0:Use BitMap 0
 Repeat
 Read i$
 If Len(i$)<3
@@ -384,7 +384,7 @@ If Len(i$)<3
 	Case "!"
 	Default
 		Print "(":k=Val(i$)
-		longdiv k,CursX LSL 3+8-ShapeWidth(k)/2,CursY LSL 3+4-ShapeHeight(k)/2
+		Blit k,CursX LSL 3+8-ShapeWidth(k)/2,CursY LSL 3+4-ShapeHeight(k)/2
 		Locate CursX+2,CursY:Print ")"
 	End Select
 Else
@@ -415,7 +415,7 @@ Wend
 ;
 Gosub introsetup
 ;
-Use lmaxlen 2:BlockScroll
+Use BitMap 2:BlockScroll
 ;
 Locate 15,2:Print "HALL OF FAME"
 Boxf 120,24,215,25,3
@@ -429,7 +429,7 @@ Next
 DisplayOn
 ;
 SetInt 5
-	ShowF db,16,16:db=1-db:Use lmaxlen db:UnQueue db
+	ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
 	Gosub doint2
 	Green 9,g(0)\c[0],g(0)\c[1],g(0)\c[2]
 	Green 10,g(1)\c[0],g(1)\c[1],g(1)\c[2]
@@ -654,13 +654,13 @@ While Joyb(0)=0
 	Until frame<>oframe
 	oframe=frame
 	;
-	newmem a()
+	ResetList a()
 	;
 	act3=act
 	;
 	While act3
 		act3-1
-		If globfree(a())
+		If NextItem(a())
 			;
 			;check if shot...
 			;
@@ -673,7 +673,7 @@ While Joyb(0)=0
 								If hsnd=0 Then hsnd=11
 								Gosub scanerase
 								k=41:sca+500:Gosub addbonus
-								\f=0:freelast a():act-1:hcl+1:Goto isdone
+								\f=0:KillItem a():act-1:hcl+1:Goto isdone
 								;
 							Else
 								die=-1:Gosub blowup:Goto isdone
@@ -683,11 +683,11 @@ While Joyb(0)=0
 					;
 					MOVE #$0020,$dff09a
 					;
-					newmem c()
-					While globfree(c())
+					ResetList c()
+					While NextItem(c())
 						If SpritesHit(c()\s,c()\x,c()\y,\s,\x,\y)
 							;
-							freelast c():Gosub blowup:Goto isdone
+							KillItem c():Gosub blowup:Goto isdone
 							;
 						EndIf
 					Wend
@@ -738,7 +738,7 @@ While Joyb(0)=0
 						\xs=0,0
 						\f=3
 						;
-						freelast a():PushItem a():AddFirst a():PopItem a()
+						KillItem a():PushItem a():AddFirst a():PopItem a()
 						;
 						MOVE #$c020,$dff09a
 						Pop Select:Goto isdone
@@ -804,7 +804,7 @@ While Joyb(0)=0
 						\ys=QAbs(\ys)
 					Else
 						Gosub scanerase
-						\f=0:act-1:freelast a():wlan+1
+						\f=0:act-1:KillItem a():wlan+1
 					EndIf
 					nlan-1:If nlan=0 Then lanc=0
 					Pop Select:Goto isdone
@@ -914,7 +914,7 @@ While Joyb(0)=0
 				;
 			Case -1 ;bullet/bomb
 				If \t<0 OR \y<8
-					\f=0:act-1:freelast a()
+					\f=0:act-1:KillItem a()
 					Pop Select:Goto isdone
 				Else
 					If RectsHit(24,\x,\y,s,xp,yp)
@@ -923,7 +923,7 @@ While Joyb(0)=0
 				EndIf
 			Case -2 ;bonus
 				If \t<0
-					\f=0:act-1:freelast a()
+					\f=0:act-1:KillItem a()
 					Pop Select:Goto isdone
 				Else
 					If \s<45 Then \s=QWrap(\s+.125,41,45)
@@ -935,13 +935,13 @@ While Joyb(0)=0
 				x3=((\x+864) LSR 4)&127+95:y3=Int(\y LSR 3)
 				If x3<>\sx OR y3<>\sy
 					Gosub alloff
-					Use lmaxlen 2
+					Use BitMap 2
 					BlitMode EraseMode
-					longdiv 30,\sx,\sy
+					Blit 30,\sx,\sy
 					BlitMode CookieMode
-					longdiv \e+30,x3,y3
+					Blit \e+30,x3,y3
 					\sx=x3:\sy=y3
-					Use lmaxlen db
+					Use BitMap db
 					Gosub allon
 				EndIf
 			EndIf
@@ -979,12 +979,12 @@ While Joyb(0)=0
 			Else
 				moud=16:If Rnd<.1 Then Sound 14,15
 				Gosub alloff
-				Use lmaxlen 4
+				Use BitMap 4
 				Point mo+mox2,y(mo+mox2 AND 2047),0
 				Point mo+mox2+1,y(mo+mox2+1 AND 2047),0
 				Point mo+mox2+2,y(mo+mox2+2 AND 2047),0
 				Point mo+mox2+3,y(mo+mox2+3 AND 2047),0
-				Use lmaxlen db
+				Use BitMap db
 				Gosub allon
 				;
 				For k=1 To 3
@@ -1001,7 +1001,7 @@ While Joyb(0)=0
 		Until mox2>=324
 		;
 		Repeat
-		Until NOT locfree(b())
+		Until NOT FirstItem(b())
 		;
 		Gosub alloff
 		spc=-1:nhum=-1:cmode&3:Gosub makemounts
@@ -1158,7 +1158,7 @@ While Joyb(0)=0
 				Locate 17,10:sca=pat:If sca>5 Then sca=5
 				sca*100:Print "BONUS X ",sca
 				For k=1 To nhum
-				longdiv 1,k*16+96,96:sco+sca
+				Blit 1,k*16+96,96:sco+sca
 				Next
 			EndIf
 			;
@@ -1217,8 +1217,8 @@ While Joyb(0)=0
 			;
 			smb=-1:msnd=14
 			;
-			newmem a():act3=act
-			While globfree(a()) AND act3
+			ResetList a():act3=act
+			While NextItem(a()) AND act3
 				act3-1
 				If \x<336
 					If \f<>1 AND \f<>5 AND \f<>6 AND \f<>-1
@@ -1251,13 +1251,13 @@ While Joyb(0)=0
 			x3=((xp+864) LSR 4)&127+95:y3=Int((y+28) LSR 3)
 			If x3<>hsx OR y3<>hsy
 				Gosub alloff
-				Use lmaxlen 2
+				Use BitMap 2
 				BlitMode EraseMode
-				longdiv 30,hsx,hsy
+				Blit 30,hsx,hsy
 				BlitMode CookieMode
-				longdiv 30,x3,y3
+				Blit 30,x3,y3
 				hsx=x3:hsy=y3
-				Use lmaxlen db
+				Use BitMap db
 				Gosub allon
 			EndIf
 		EndIf
@@ -1272,12 +1272,12 @@ While Joyb(0)=0
 ;	If Rnd<.1 ;do something to stars
 		If Rnd<.5 ;move a star
 			k=Rnd(nsta)+1
-			Gosub alloff:Use lmaxlen sta(k)\b
+			Gosub alloff:Use BitMap sta(k)\b
 			Point sta(k)\x,sta(k)\y,0:Point sta(k)\x+320,sta(k)\y,0
 			x2=Rnd(320):If k<17 Then y2=Rnd(112) Else y2=Rnd(88)
 			c=Rnd(3)+1
 			Point x2,y2,c:Point x2+320,y2,c:sta(k)\x=x2,y2
-			Use lmaxlen db:Gosub allon
+			Use BitMap db:Gosub allon
 		Else			;change a colour
 			Gosub calckrgb
 			k=Rnd(3)+10
@@ -1329,9 +1329,9 @@ Return
 .introsetup
 Gosub freeall
 ;
-lmaxlen 0,352,232,3
-lmaxlen 1,352,232,3
-lmaxlen 2,320,232,3:BitMapOutput 2:Colour 1,0
+BitMap 0,352,232,3
+BitMap 1,352,232,3
+BitMap 2,320,232,3:BitMapOutput 2:Colour 1,0
 ;
 Slice 0,slit,320,231,$fff0,5,8,32,320,320
 Use SetCycle 3:Show 10
@@ -1364,11 +1364,11 @@ DisplayOn
 Return
 
 scanclean
-Use lmaxlen 2
+Use BitMap 2
 Boxf 0,0,319,27,7
 Boxf 160-65,0,160+64,27,0
 Gosub allstats
-Use lmaxlen db:Return
+Use BitMap db:Return
 
 mcolour
 If spc
@@ -1385,7 +1385,7 @@ Return
 
 .hueadd
 ;
-##[$80CA] g(g)
+USEPATH g(g)
 ;
 cn2=\cn
 c2=\c[cn2]+\a:\c[cn2]=c2
@@ -1400,7 +1400,7 @@ If c2>=15 OR c2<=3
 EndIf
 Return
 
-##[$80CA] a()
+USEPATH a()
 
 addall
 na=nhum:Gosub addhumes
@@ -1480,12 +1480,12 @@ Else
 	lsx=72
 EndIf
 ;
-Gosub alloff:Use lmaxlen 2
+Gosub alloff:Use BitMap 2
 ;
 lss=nliv:lss2=0:lsy=10:lsx2=lsx
 While lss
 	lss-1
-	longdiv 46,lsx,lsy
+	Blit 46,lsx,lsy
 	lsx-8:lss2+1
 	If lss2=8
 		lsx=lsx2
@@ -1497,7 +1497,7 @@ Wend
 lss=nsmt:lss2=0:lsy=18:lsx=lsx2
 While lss
 	lss-1
-	longdiv 47,lsx,lsy
+	Blit 47,lsx,lsy
 	lsx-8:lss2+1
 	If lss2=8
 		lsx=lsx2
@@ -1508,11 +1508,11 @@ Wend
 ;
 If lss2<16
 	BlitMode SolidMode
-	longdiv 47,lsx,lsy
+	Blit 47,lsx,lsy
 	BlitMode CookieMode
 EndIf
 ;
-Use lmaxlen db:Gosub allon
+Use BitMap db:Gosub allon
 ;
 Return
 
@@ -1681,8 +1681,8 @@ Return
 .findhume
 ;
 If nhum
-	PushItem a():newmem a():k=Int(Rnd(nhum))
-	While globfree(a())
+	PushItem a():ResetList a():k=Int(Rnd(nhum))
+	While NextItem(a())
 		If a()\f=1
 			k-1
 			If k<0	;pick this one!
@@ -1879,9 +1879,9 @@ If \e>=0 AND \e<7
 	Gosub alloff
 	;
 	BlitMode EraseMode
-	Use lmaxlen 2
-	longdiv 30,\sx,\sy
-	Use lmaxlen db
+	Use BitMap 2
+	Blit 30,\sx,\sy
+	Use BitMap db
 	BlitMode CookieMode
 	;
 	Gosub allon
@@ -1914,13 +1914,13 @@ Case 9	;pod obliterated!
 	;
 	Gosub alloff:x3=\x:y3=\y:PushItem a()
 	;
-	newmem a():act4=act
+	ResetList a():act4=act
 	While act4
-		globfree a():act4-1
+		NextItem a():act4-1
 	Wend
 	;
 	For k=1 To Rnd(5)+2
-	globalloc a():nswa+1
+	AddItem a():nswa+1
 	Gosub addswarmer:act+1:If Rnd>.1 Then act3+1
 	Next
 	;
@@ -1945,25 +1945,25 @@ Gosub allon
 ;
 Next
 ;
-\f=0:act-1:freelast a()
+\f=0:act-1:KillItem a()
 ;
 Return
 
 freeall
 DisplayOff:ClrInt 5:FreeSlices
-For k=0 To 9:Free lmaxlen k:Next
+For k=0 To 9:Free BitMap k:Next
 VWait 12:Return
 
 .gameon
 ;
 Gosub freeall
 ;
-lmaxlen 0,352,232,3	;action bitmaps!
-lmaxlen 1,352,232,3	;ditto for double buffering!
+BitMap 0,352,232,3	;action bitmaps!
+BitMap 1,352,232,3	;ditto for double buffering!
 ;
-lmaxlen 2,320,30,3	 ;for panel - front bitmap
+BitMap 2,320,30,3	 ;for panel - front bitmap
 BitMapOutput 2:Colour 1,7
-lmaxlen 3,256,30,2	 ;for back of panel - scrolling little mounts!
+BitMap 3,256,30,2	 ;for back of panel - scrolling little mounts!
 ;
 y3=23
 ;
@@ -1975,8 +1975,8 @@ Next
 ;
 Scroll 0,0,128,30,128,0
 
-lmaxlen 4,2048+320,88,2	;for mounts!
-lmaxlen 5,640,112,2	;for stars!
+BitMap 4,2048+320,88,2	;for mounts!
+BitMap 5,640,112,2	;for stars!
 ;
 For k=1 To 16
 x=Rnd(320):y=Rnd(112):c=Rnd(3)+1
@@ -2009,7 +2009,7 @@ Return
 
 scancolour
 ;
-Use Slice 0:Use lmaxlen 2
+Use Slice 0:Use BitMap 2
 ;
 k=pat MOD 6+2
 ;
@@ -2024,7 +2024,7 @@ Return
 
 .makemounts
 ;
-Use lmaxlen 4
+Use BitMap 4
 Boxf 0,0,639,87,0
 If spc
 	nsta=32:For k=1 To 16
@@ -2154,17 +2154,17 @@ If cmode<4
 	EndIf
 	Use Slice 1
 	;
-	##[$80CA] c()
-	newmem c()
-	While globfree(c())
+	USEPATH c()
+	ResetList c()
+	While NextItem(c())
 		\x+\xs
 		If \x>=8 AND \x<336+8
 			QBlit db,\s,\x,\y
 		Else
-			freelast c()
+			KillItem c()
 		EndIf
 	Wend
-	##[$80CA] a()
+	USEPATH a()
 	;
 	If hcl
 		QBlit db,0,x+16,y+24
@@ -2189,8 +2189,8 @@ Use Slice 0:Green 9,0,0,0:ShowSprite 30,352,24,0
 Use Slice 1
 FlushQueue 0:FlushQueue 1
 Gosub scanclean
-Use lmaxlen 1:BlockScroll:db=0
-Use lmaxlen db:BlockScroll:ShowF 0,16,16
+Use BitMap 1:BlockScroll:db=0
+Use BitMap db:BlockScroll:ShowF 0,16,16
 Return
 
 alloff
@@ -2232,7 +2232,7 @@ Return
 
 .doint
 ;
-ShowF db,16,16:db=1-db:Use lmaxlen db:UnQueue db
+ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
 ;
 Gosub player
 ;
@@ -2256,11 +2256,11 @@ PushItem a()
 ;
 ;******************* ANIMATION UPDATE *******************
 ;
-newmem a():act2=act
+ResetList a():act2=act
 ;
 While act2
 	act2-1
-	If globfree(a())
+	If NextItem(a())
 		If VPos<200
 			;
 			If \f=6 Then \ys+.01 ;kludge for humanoids
@@ -2286,7 +2286,7 @@ While act2
 					\x=QWrap(\x+1024,0,2048)
 					Goto animout
 				EndIf
-			Until NOT globfree(a())
+			Until NOT NextItem(a())
 			;
 			Goto animout
 			;
@@ -2294,7 +2294,7 @@ While act2
 	EndIf
 Wend
 ;
-While globfree(a())
+While NextItem(a())
 	\x=QWrap(\x-xa,0,2048)
 Wend
 ;
@@ -2304,9 +2304,9 @@ animout
 ;
 ;***************** EXPLOSIONS UPDATE ********************
 ;
-##[$80CA] b()
+USEPATH b()
 ;
-If locfree(b())
+If FirstItem(b())
 	Repeat
 		;
 		\x=QWrap(\x+\xs-xa,0,2048)
@@ -2317,9 +2317,9 @@ If locfree(b())
 				If \x>=0 AND \x<336
 					If \y>=8 AND \y<216
 						QBlit db,\s,\x,\y
-						Use lmaxlen 1-db
+						Use BitMap 1-db
 						QBlit 1-db,\s,\x,\y
-						Use lmaxlen db
+						Use BitMap db
 					EndIf
 				EndIf
 			EndIf
@@ -2327,15 +2327,15 @@ If locfree(b())
 			If acd
 				acd-\a:If acd=0 Then act+aaa:aaa=0
 			EndIf
-			freelast b()
+			KillItem b()
 		EndIf
-	Until NOT globfree(b())
+	Until NOT NextItem(b())
 Else
 	act+aaa:aaa=0
 EndIf
 ;
 expout
-PopItem a():##[$80CA] a()
+PopItem a():USEPATH a()
 ;
 intdone
 Return

@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples_old/quikasm/qasm.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/quikasm/qasm.bb2
 #unbug=0
 ;
-WBStartup:##[$80CC]:##[$80CB]
+WBStartup:NoCli:CloseEd
 ;
 ;This example is a bit heavier...A no pass assembler!
 ;
@@ -146,12 +146,12 @@ Function Return Peek.l(lines(0)-40)
 End Function
 
 Statement setbps{n}
-Poke.w Addr lmaxlen(0)+4,n
+Poke.w Addr BitMap(0)+4,n
 End Statement
 
 Function yesno{t$}
 ;
-localstat 1,80,32,480,64,$1002,"DECISION TIME!",1,2,1
+Window 1,80,32,480,64,$1002,"DECISION TIME!",1,2,1
 WLocate 8,16
 Print Centre$(t$,57)
 Repeat
@@ -170,7 +170,7 @@ Repeat
 Forever
 ;
 endfunc
-Free localstat 1:Use localstat 0:BitMapOutput 0
+Free Window 1:Use Window 0:BitMapOutput 0
 Function Return k
 ;
 End Function
@@ -205,7 +205,7 @@ Gosub init:Gosub windon:Gosub new:Gosub refall
 
 .main
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 If upmo Then upmo=0:Gosub updatemouse
 ;
@@ -221,7 +221,7 @@ Case $400 ;keystroke!
 		;return
 		;
 		pc=\pc+\ln
-		If globalloc(lines())
+		If AddItem(lines())
 			;
 			If blkt
 				If cl<blkt
@@ -277,11 +277,11 @@ Case $400 ;keystroke!
 			If bq AND 3 ;shifted?
 				y=Int(vl(cw)*.75)
 				If cl+y>hl Then y=hl-cl
-				cl+y:For k=1 To y:j=globfree(lines()):Next
+				cl+y:For k=1 To y:j=NextItem(lines()):Next
 				Gosub refresh
 			Else
 				Scroll 0,wtp+8,windwp,vl(cw)LSL 3-8,0,wtp
-				cl+1:k=globfree(lines())
+				cl+1:k=NextItem(lines())
 				;
 				Gosub showbottom
 				;
@@ -348,12 +348,12 @@ Case $100
 						EndIf
 						;
 						Gosub new						 ;new the file!
-						locfree lines()	 ;top of sorc...
-						globfree lines():freelast lines()
+						FirstItem lines()	 ;top of sorc...
+						NextItem lines():KillItem lines()
 						;
 						;read lines
 						;
-						For k=1 To lhl:globalloc lines()
+						For k=1 To lhl:AddItem lines()
 						MaxLen \ops=0
 						##[$BE14] 0,lines(),SizeOf.aline
 						Poke.l lines()+SizeOf.aline\ops,0
@@ -390,8 +390,8 @@ Case $100
 						;
 						;fix rcode...
 						;
-						locfree lines()
-						For k=1 To lhl:globfree lines()
+						FirstItem lines()
+						For k=1 To lhl:NextItem lines()
 						If \tok<>4 AND \rcode
 							j=\rcode
 							For l=0 To \npc-1
@@ -403,7 +403,7 @@ Case $100
 						hl=lhl:hil=lhil:eqs=leqs:dup=ldup:unk=lunk
 						codef=code+lcl:rcodef=rcode+lrl
 						;
-						locfree lines():globfree lines()
+						FirstItem lines():NextItem lines()
 						cc(cw)=getcurr{}:dcp=-1
 						;
 					Else	;not right file!
@@ -431,8 +431,8 @@ Case $100
 					;
 					;write out lines
 					;
-					locfree lines()
-					For k=1 To hl:globfree lines()
+					FirstItem lines()
+					For k=1 To hl:NextItem lines()
 					Exists 0,lines(),SizeOf.aline
 					ps{\ops}	;operands!
 					;
@@ -464,7 +464,7 @@ Case $100
 			EndIf
 		Case 3	;about
 			;
-			localstat 1,64,16,512,184,$1002,"ABOUT QUIK ASM",1,2,4
+			Window 1,64,16,512,184,$1002,"ABOUT QUIK ASM",1,2,4
 
 			WLocate 4,8:WColour 3,0
 			Print "	 IN WHICH POOH ATTEMPTS TO WRITE A NO-PASS ASSEMBLER."
@@ -497,7 +497,7 @@ Case $100
 
 			Repeat:Gosub readgad:Until gad=1
 
-			localstat 1,64,16,512,184,$1002,"ABOUT QUIK ASM",1,2,4
+			Window 1,64,16,512,184,$1002,"ABOUT QUIK ASM",1,2,4
 
 			WLocate 4,8
 			Print "QUIK ASM IS A SIMPLE ZERO PASS 68000 ASSEMBLER."
@@ -543,7 +543,7 @@ Case $100
 			If erl Then cl=erl:putcurr{erc}:Gosub qrefcw Else Gosub eder7
 		Case 3	;find next duplicate label
 			PushItem lines():k=0:j=cl
-			While globfree(lines())
+			While NextItem(lines())
 				j+1
 				If \lab<>-1
 					*lab=labat+\lab
@@ -559,8 +559,8 @@ Case $100
 				Gosub eder7
 			EndIf
 		Case 4	;reprocess incbins!
-			PushItem lines():locfree lines():dcl=0
-			While globfree(lines())
+			PushItem lines():FirstItem lines():dcl=0
+			While NextItem(lines())
 				dcl+1 ;next line!
 				If \tok=3 ;incbin?
 					f$=\ops:k=Instr(f$,";")
@@ -579,8 +579,8 @@ Case $100
 .
 			If yesno{"ARE YOU SURE? THIS MAY TAKE A WHILE!"}
 				PushItem lines()
-				locfree lines():jimi_=0
-				While globfree(lines()) AND jimi_<hl
+				FirstItem lines():jimi_=0
+				While NextItem(lines()) AND jimi_<hl
 					Gosub calctext
 					Gosub zapold
 					Gosub linechange2
@@ -595,8 +595,8 @@ Case $100
 			;top of file
 			;
 			If cl>1
-				k=locfree(lines())
-				k=globfree(lines()):cl=1:Gosub refresh
+				k=FirstItem(lines())
+				k=NextItem(lines()):cl=1:Gosub refresh
 			Else
 				Gosub eder1
 			EndIf
@@ -613,7 +613,7 @@ Case $100
 			;insert line
 			;
 			k=PrevItem(lines()):pc=\pc+\ln
-			If globalloc(lines()) ;can we insert?
+			If AddItem(lines()) ;can we insert?
 				;
 				If blkt
 					If cl<=blkt
@@ -633,7 +633,7 @@ Case $100
 				l=cl:nu=1:Gosub insfix:Gosub qrefall
 				;
 			Else
-				k=globfree(lines()):Gosub eder5
+				k=NextItem(lines()):Gosub eder5
 			EndIf
 		Case 3
 			;delete line!
@@ -654,11 +654,11 @@ Case $100
 				y=cy:l=1:Gosub showcwline:Gosub qrefall:Goto deldone
 			EndIf
 			;
-			l=cl:nu=1:freelast lines()
+			l=cl:nu=1:KillItem lines()
 			;
 			If cl<hl
 				Scroll 0,y+8,windwp,wbp-y-7,0,y
-				k=globfree(lines()):hl-1:Gosub showbottom
+				k=NextItem(lines()):hl-1:Gosub showbottom
 			Else
 				cl-1:hl-1:Gosub qrefcw
 			EndIf
@@ -676,7 +676,7 @@ Case $100
 					FileInput 0:PrevItem lines():nu=0	;no lines yet!
 					While NOT DosBuffLen(0)	;more?
 						pc=\pc+\ln
-						If globalloc(lines()) ;free line?
+						If AddItem(lines()) ;free line?
 							nu+1:hl+1:Gosub zeroline:\pc=pc
 							li$=Edit$(256)
 							;
@@ -742,9 +742,9 @@ Case $100
 			;dec=destination item, blc=block current item
 			;
 			While knt>=blkt
-				Gosub calctext:k=globfree(lines()):blc=getcurr{}
+				Gosub calctext:k=NextItem(lines()):blc=getcurr{}
 				putcurr{dec}:pc=\pc+\ln
-				k=globalloc(lines()):hl+1:dec=getcurr{}
+				k=AddItem(lines()):hl+1:dec=getcurr{}
 				Gosub zeroline:\pc=pc
 				erf=0 ;no errs
 				Gosub linechange2:putcurr{blc}
@@ -768,15 +768,15 @@ Case $100
 			;
 			While l>=blkt
 				ln+\ln:Gosub zapold
-				If l<>blkb Then freelast lines()
-				l-1:hl-1:k=globfree(lines())
+				If l<>blkb Then KillItem lines()
+				l-1:hl-1:k=NextItem(lines())
 			Wend
 			;
 			PopItem lines()
-			\ln=ln:ln=0:Gosub newlen:freelast lines()
+			\ln=ln:ln=0:Gosub newlen:KillItem lines()
 			;
 			If hl=0 ;no lines left!
-				k=locfree(lines()):k=globalloc(lines())
+				k=FirstItem(lines()):k=AddItem(lines())
 				Gosub zeroline:\pc=code:hl=1
 			EndIf
 			;
@@ -811,7 +811,7 @@ Case $100
 						Goto mtabs
 					EndIf
 					;
-					NPrint li$:globfree lines():Next
+					NPrint li$:NextItem lines():Next
 					PopItem lines()
 					CloseFile 0:BitMapOutput 0
 				Else
@@ -825,7 +825,7 @@ Case $100
 		;
 		Select ItemHit
 		Case 0
-			localstat 1,96,32,448,88,$1002,"FIND/REPLACE",1,2,2
+			Window 1,96,32,448,88,$1002,"FIND/REPLACE",1,2,2
 			WLocate 4,16:Print "FIND		:"
 			WLocate 4,32:Print "REPLACE :"
 			ClearString 1,6
@@ -846,7 +846,7 @@ Case $100
 			;
 			Repeat
 				dcl+1:Gosub isfihere
-			Until (NOT globfree(lines())) OR dcl>=hl OR dcp
+			Until (NOT NextItem(lines())) OR dcl>=hl OR dcp
 			;
 			Gosub finitfind
 			;
@@ -918,7 +918,7 @@ Case $100
 			If labs(k)\flags Then j+1
 			Next
 			;
-			localstat 1,80,32,480,128,$1002,"PROGRAM STATISTICS...",1,2,3
+			Window 1,80,32,480,128,$1002,"PROGRAM STATISTICS...",1,2,3
 			WLocate 4,16
 			Print "SOURCE LINES : ",hl
 			WLocate 4,32
@@ -960,8 +960,8 @@ Locate 0,1.5:Colour 3,2
 ;
 PushItem lines()
 ;
-locfree lines()
-While globfree(lines())
+FirstItem lines()
+While NextItem(lines())
 If \lab<>-1
 	*lab=labat+\lab
 	If *lab\flags&2
@@ -1002,9 +1002,9 @@ If wo>1
 		If cl(k)>=l+nu Then cl(k)-nu Else cl(k)=l+nu
 		If cl(k)>hl Then cl(k)=hl
 		;
-		j=locfree(lines()):j=cl(k)
+		j=FirstItem(lines()):j=cl(k)
 		While j
-			zz=globfree(lines()):j-1
+			zz=NextItem(lines()):j-1
 		Wend
 		cc(k)=getcurr{}
 	EndIf
@@ -1049,7 +1049,7 @@ cx=j-1:dcp=getcurr{}
 Return
 
 closereq
-Free localstat 1:Use localstat 0:BitMapOutput 0
+Free Window 1:Use Window 0:BitMapOutput 0
 wac
 Repeat
 Until WaitEvent=$40000
@@ -1061,7 +1061,7 @@ Boxf 0,wbp,windwp-1,wbp-7,0
 If vl(cw)-cy+cl<hl+3
 	PushItem lines():y=cy:l=cl
 	While y<vl(cw)-1
-		y+1:l+1:k=globfree(lines())
+		y+1:l+1:k=NextItem(lines())
 	Wend
 	Gosub showcwline
 	PopItem lines()
@@ -1087,8 +1087,8 @@ Else
 EndIf
 ;
 x=196:SetString 1,1
-workstart 0,8,104,0,1," OK "
-workstart 0,368,104,0,2," CANCEL "
+TextGadget 0,8,104,0,1," OK "
+TextGadget 0,368,104,0,2," CANCEL "
 ;
 StringGadget 0,x,17,0,3,8,64
 ButtonId 0,3,Str$(maxlines)
@@ -1101,12 +1101,12 @@ ButtonId 0,6,Str$(maxcode)
 StringGadget 0,x,17+64,0,7,8,64
 ButtonId 0,7,Str$(maxrcode)
 ;
-workstart 0,412,17+48,0,8,"Y":omem=2
-workstart 0,412,17+64,0,9,"N":rmem=1
+TextGadget 0,412,17+48,0,8,"Y":omem=2
+TextGadget 0,412,17+64,0,9,"N":rmem=1
 ;
-workstart 0,196,104,0,10," SAVE "
+TextGadget 0,196,104,0,10," SAVE "
 ;
-localstat 1,96,24,448,120,$1002,"OPTIONS",2,1,0
+Window 1,96,24,448,120,$1002,"OPTIONS",2,1,0
 WColour 1,0
 ;
 WLocate 4,08:Print "MAXIMUM SOURCE LINES :"
@@ -1122,7 +1122,7 @@ Repeat
 	If gad=2 Then End ;cancel
 	If gad=1					;ok
 		Gosub readstuff
-		Free localstat 1:Return
+		Free Window 1:Return
 	EndIf
 	If gad=8
 ;		omem=3-omem:WLocate 412,56
@@ -1172,29 +1172,29 @@ EndIf
 Goto readgad
 
 .findtop	;find top of block
-locfree lines():l=1
-While globfree(lines()) AND l<blkt
+FirstItem lines():l=1
+While NextItem(lines()) AND l<blkt
 l+1:Wend
 Return
 
 .findcl
 If cl>hl Then cl=hl
 ;
-k=locfree(lines()):l=1
-While globfree(lines()) AND l<cl
+k=FirstItem(lines()):l=1
+While NextItem(lines()) AND l<cl
 l+1:Wend
 ;
 Return
 
 .runcode
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 erl=0
 ;
 If dup	;any duplicate labels?
-	PushItem lines():k=locfree(lines())
-	While globfree(lines())
+	PushItem lines():k=FirstItem(lines())
+	While NextItem(lines())
 		erl+1
 		If \lab<>-1
 			*lab=labat+\lab
@@ -1205,8 +1205,8 @@ If dup	;any duplicate labels?
 EndIf
 ;
 If unk	;any unknown labels?
-	PushItem lines():k=locfree(lines())
-	While globfree(lines())
+	PushItem lines():k=FirstItem(lines())
+	While NextItem(lines())
 		erl+1
 		For k=0 To #maxlaref-1
 		If \laref[k]<>-1
@@ -1222,8 +1222,8 @@ If eqs	;any equs?
 	;
 	;execute equ code FIRST! (and in order, damnit!)
 	;
-	newmem equs()
-	While globfree(equs())
+	ResetList equs()
+	While NextItem(equs())
 		GetReg d0,equs()
 		MOVE.l #runerr,d1:JSR execcode
 	Wend
@@ -1254,8 +1254,8 @@ dumpregs:Ds.l 16
 runerr	;rcode error!
 ;
 ADDQ #4,a7
-PushItem lines():k=locfree(lines()):k=Peek.l(?errat)
-While globfree(lines())
+PushItem lines():k=FirstItem(lines()):k=Peek.l(?errat)
+While NextItem(lines())
 	erl+1
 	If \rcode
 		If k>\rcode AND k<=\rcode+\rcodel
@@ -1274,7 +1274,7 @@ MOVEM.l d0-d7/a0-a7,dumpregs				 ;save regs
 ;
 MOVEM.l thedregs,d0-d7/a0-a6				;get blitz regs
 ;
-localstat 1,56,12,528,176,$1002,"REGISTER DUMP",1,2,5
+Window 1,56,12,528,176,$1002,"REGISTER DUMP",1,2,5
 y=8
 For k=0 To 15
 WLocate 4,y:WColour 3,0
@@ -1308,10 +1308,10 @@ viewsrc
 ;
 Gosub deon:NPrint "SOURCE:"
 ;
-##[$80CA] lines()
+USEPATH lines()
 PushItem lines()
-If locfree(lines())
-	While globfree(lines())
+If FirstItem(lines())
+	While NextItem(lines())
 		NPrint \ops
 	Wend
 EndIf
@@ -1337,11 +1337,11 @@ Gosub deon:NPrint "CODE:"
 ;
 NPrint "$",Hex$(code)," -> $",Hex$(codef)
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 PushItem lines()
-k=locfree(lines())
-While globfree(lines())
+k=FirstItem(lines())
+While NextItem(lines())
 	If \ln
 		Print "$",Hex$(\pc)
 		For k=0 To \ln-2 Step 2
@@ -1500,7 +1500,7 @@ If codef-code>maxcode Then Goto aser15 ;not enough code space!
 ;
 If rcodef-rcode>maxrcode Then Goto aser16 ;not enough rcode
 ;
-##[$80CA] lines()
+USEPATH lines()
 lz$=li$
 k=Instr(lz$,";"):If k Then lz$=StripTrail$(Left$(lz$,k-1),32)
 lz$+",":ll$=LCase$(lz$)
@@ -1606,8 +1606,8 @@ If t<11
 		;
 		;OK, now, insert at right pos in equs
 		;
-		newmem equs()
-		While k:globfree equs():k-1:Wend
+		ResetList equs()
+		While k:NextItem equs():k-1:Wend
 		;
 		Gosub fetchabs	;get equ value!
 		;
@@ -1617,7 +1617,7 @@ If t<11
 			Gosub makevaimm
 		EndIf
 		;
-		If NOT globalloc(equs()) Then Goto aser14	;OK to add?
+		If NOT AddItem(equs()) Then Goto aser14	;OK to add?
 		;
 		putrw{Peek.w(?putequ)}:putrw{\lab}:putrw{$4e75}
 		;
@@ -1799,7 +1799,7 @@ Case 8	;swap movem bits in src if dest is -(an)
 	If mo(1)=$10
 		j=ex(0):ex(0)=0
 		For k=0 To 15
-		If j ##[$80CD] k Then ex(0) ##[$80CE] (15-k)
+		If j BitTst k Then ex(0) BitSet (15-k)
 		Next
 	EndIf
 Case 16 ;imm data (-128->127) @ bp 0 of opcode
@@ -2024,7 +2024,7 @@ getareg
 If c$<>"a" AND c$<>"d" Then Goto aser4
 k=0:If c$="a" Then k=8
 c$=ch{}:If NOT rn{c$} Then Goto aser4
-k+Asc(c$)-48:c$=ch{}:ex(np) ##[$80CE] k:Return
+k+Asc(c$)-48:c$=ch{}:ex(np) BitSet k:Return
 
 .fetchd
 ;
@@ -2057,11 +2057,11 @@ If c$="d" AND (Mid$(ll$,p+3,1)="/" OR Mid$(ll$,p+3,1)="-")
 	j=k:c$=LCase$(ch{}):Gosub getareg
 	If j<k
 		For k2=j To k
-		ex(np) ##[$80CE] k2
+		ex(np) BitSet k2
 		Next
 	Else
 		For k2=k To j
-		ex(np) ##[$80CE] k2
+		ex(np) BitSet k2
 		Next
 	EndIf
 	Goto getrlist2
@@ -2360,7 +2360,7 @@ Return
 
 .newlen
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 ;ln=new length
 ;
@@ -2375,7 +2375,7 @@ If d
 	;
 	CELSE
 	PushItem lines()
-	While globfree(lines())
+	While NextItem(lines())
 		;
 		If \npc
 			j=\rcode
@@ -2484,7 +2484,7 @@ Return
 .delrcode ;delete any rcode on current line
 ;
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 If \rcode
 	;
@@ -2493,7 +2493,7 @@ If \rcode
 	If \tok=4 ;equ? - special case
 		;
 		Poke.l equs(0)-40,k-8 ;make rcode for equate current item!
-		freelast equs():eqs-1
+		KillItem equs():eqs-1
 		;
 	Else
 		;
@@ -2509,12 +2509,12 @@ If \rcode
 		MOVE (a1)+,(a0)+:BRA 'loop
 		'done
 		;
-		PushItem lines():locfree lines()
+		PushItem lines():FirstItem lines()
 		;
 		;bye bye basic...let's convert this bit to mcode too.
 		;
 		CELSE
-		While globfree(lines())
+		While NextItem(lines())
 			If \rcode>k Then \rcode-j
 		Wend
 		CELSE
@@ -2550,7 +2550,7 @@ Return
 
 .dellab ;delete any label stuff on current line
 ;
-##[$80CA] lines()
+USEPATH lines()
 For k=0 To #maxlaref-1
 If \laref[k]<>-1
 	*lab=labat+\laref[k]
@@ -2575,8 +2575,8 @@ If \lab<>-1 ;label on this line?
 		;yes, we have to find the other!
 		;
 		PushItem lines()
-		k=locfree(lines())
-		While globfree(lines())
+		k=FirstItem(lines())
+		While NextItem(lines())
 			If \lab=j ;here?
 				*lab2.label=labat+\lab
 				*lab2\lval=\pc
@@ -2604,7 +2604,7 @@ Return
 
 .adjtemp	;relocate temp code to \pc
 ;
-##[$80CA] lines()
+USEPATH lines()
 For j=0 To 1
 For k=1 To npc(j)
 Poke.l tr(j)+pcr(k,j),Peek.l(tr(j)+pcr(k,j))-tc+\pc
@@ -2612,7 +2612,7 @@ Next k,j
 Return
 
 zapold
-##[$80CA] lines()
+USEPATH lines()
 Gosub dellab		;delete any label stuff
 Gosub delrcode	;and any rcode
 \npc=0
@@ -2642,7 +2642,7 @@ Return
 
 linechange2
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;first, work out l$ (label), t (token) and o$ (operands)
 ;and maybe also r - rcode
 ;
@@ -2882,7 +2882,7 @@ If erf	;already an error there????
 	If Len(err$)>80 Then Return
 	err$+"/"+er$
 Else
-	##[$FF8C] Peek.l(Addr allocst(0))	;beep screen!
+	##[$FF8C] Peek.l(Addr Screen(0))	;beep screen!
 	err$="ERROR! : "+er$:erf=-1
 EndIf
 ;
@@ -2920,7 +2920,7 @@ EndIf
 Return
 
 .calctext
-##[$80CA] lines()
+USEPATH lines()
 ;
 li$=""
 If \lab<>-1
@@ -3081,9 +3081,9 @@ If mx>=windwp
 	If my>=12
 		;in mousables area!
 		;
-		PushItem lines():locfree lines():dcl=0:dcp=0
+		PushItem lines():FirstItem lines():dcl=0:dcp=0
 		;
-		While globfree(lines())
+		While NextItem(lines())
 			dcl+1
 			If \lab<>-1
 				*lab=labat+\lab
@@ -3243,7 +3243,7 @@ y=Int(vl(w)LSR 1):l=cl(w):y2=y:l2=l:PushItem lines()
 ;
 While y<vl(w) AND l<=hl+1
 	Gosub showline
-	y+1:l+1:k=globfree(lines())
+	y+1:l+1:k=NextItem(lines())
 Wend
 ;
 y=y2:l=l2:PopItem lines()
@@ -3262,7 +3262,7 @@ showcwline:w=cw
 ;
 ;y=Curs Y, w=window, l=src line, current item=just that!
 ;
-##[$80CA] lines()
+USEPATH lines()
 If w<>cw
 	setbps{2}
 	If blkt
@@ -3335,7 +3335,7 @@ Return
 
 .new	;erase entire program
 ;
-##[$80CA] lines()
+USEPATH lines()
 ;
 codef=code:rcodef=rcode
 ;
@@ -3352,8 +3352,8 @@ upmo=-1					 ;update mousables
 ;
 cl(1)=1:wt(1)=2:vl(1)=windhp LSR 3-1
 ;
-newmem lines()
-While globfree(lines())
+ResetList lines()
+While NextItem(lines())
 	MaxLen \ops=0
 Wend
 ClearList lines():ClearList equs()
@@ -3376,7 +3376,7 @@ Next
 Goto newwin
 
 .zeroline
-##[$80CA] lines()
+USEPATH lines()
 MaxLen \ops=0
 \pc=0,0,-1,0,0
 \rcode=0,0,0 ;no pcrefs
@@ -3387,7 +3387,7 @@ Return
 .edon	 ;turn on editor screen
 ;
 sct$="QUIK-ASM V 1.0 - WRITTEN BY MARK SIBLY IN BLITZ BASIC ]["
-allocst 0,0,0,640,windhp+12,2,$8000,sct$,3,2
+Screen 0,0,0,640,windhp+12,2,$8000,sct$,3,2
 Green 0,0,4,11
 Green 1,0,15,15
 Green 2,0,0,8
@@ -3395,20 +3395,20 @@ Green 3,15,15,15
 Return
 
 windon	;turn on window
-localstat 0,0,0,640,windhp+12,$1900,"",3,0:CatchDosErrs
-wad=Peek.l(Addr localstat(0))	;intution window struct
-arrmult 0:ScreensBitMap 0,0:BitMapOutput 0
+Window 0,0,0,640,windhp+12,$1900,"",3,0:CatchDosErrs
+wad=Peek.l(Addr Window(0))	;intution window struct
+SetMenu 0:ScreensBitMap 0,0:BitMapOutput 0
 setbps{1}:Return
 
 init
-newlocarr 0,0," PROJECT "
+MenuTitle 0,0," PROJECT "
 	MenuItem 0,0,0,0,"NEW","Y"
 	MenuItem 0,0,0,1,"LOAD","L"
 	MenuItem 0,0,0,2,"SAVE","S"
 	MenuItem 0,0,0,3,"ABOUT		 ","Z"
 	MenuItem 0,0,0,4,"QUIT","Q"
 
-newlocarr 0,1," ASSEMBLER "
+MenuTitle 0,1," ASSEMBLER "
 	MenuItem 0,0,1,0,"RUN!","X"
 	MenuItem 0,0,1,1,"CREATE EXECUTABLE"
 	MenuItem 0,0,1,2,"JUMP TO ERROR","J"
@@ -3418,31 +3418,31 @@ newlocarr 0,1," ASSEMBLER "
 
 	MenuColour 0,1,1,Off ;no create executable yet!
 
-newlocarr 0,2," SOURCE "
+MenuTitle 0,2," SOURCE "
 	MenuItem 0,0,2,0,"TOP OF SOURCE","T"
 	MenuItem 0,0,2,1,"BOTTOM OF SOURCE		 ","B"
 	MenuItem 0,0,2,2,"INSERT LINE","I"
 	MenuItem 0,0,2,3,"DELETE LINE","D"
 	MenuItem 0,0,2,4,"INSERT FROM DISK","J"
 
-newlocarr 0,3," BLOCK "
+MenuTitle 0,3," BLOCK "
 	MenuItem 0,0,3,0,"MARK","M"
 	MenuItem 0,0,3,1,"FORGET","W"
 	MenuItem 0,0,3,2,"COPY","V"
 	MenuItem 0,0,3,3,"KILL","K"
 	MenuItem 0,0,3,4,"SAVE TO DISK		 ","U"
 
-newlocarr 0,4," SEARCH "
+MenuTitle 0,4," SEARCH "
 	MenuItem 0,0,4,0,"FIND","F"
 	MenuItem 0,0,4,1,"FIND NEXT","N"
 	MenuItem 0,0,4,2,"FIND PREVIOUS		 ","P"
 	MenuItem 0,0,4,3,"REPLACE","R"
 
-newlocarr 0,5," WINDOWS "
+MenuTitle 0,5," WINDOWS "
 	MenuItem 0,0,5,0,"OPEN NEW","O"
 	MenuItem 0,0,5,1,"CLOSE CURRENT		 ","C"
 
-newlocarr 0,6," MISC "
+MenuTitle 0,6," MISC "
 	MenuItem 0,0,6,0,"LAST ERROR		 ","E"
 	MenuItem 0,0,6,1,"STATS","G"
 	MenuItem 0,0,6,2,"CLI","H"
@@ -3450,27 +3450,27 @@ newlocarr 0,6," MISC "
 ;
 ;yes no req...
 SelectMode 3,0
-workstart 1,8,48,0,1," YES "
-workstart 1,432,48,0,2," NO "
+TextGadget 1,8,48,0,1," YES "
+TextGadget 1,432,48,0,2," NO "
 ;
 ;search...
-workstart 2,8,73,0,1," OK "
-workstart 2,384,73,0,2," EXIT "
-workstart 2,56,73,1,3," LABEL "
-workstart 2,128,73,1,4," CASE SENSITIVE "
-workstart 2,272,73,1,5," NEW WINDOW "
+TextGadget 2,8,73,0,1," OK "
+TextGadget 2,384,73,0,2," EXIT "
+TextGadget 2,56,73,1,3," LABEL "
+TextGadget 2,128,73,1,4," CASE SENSITIVE "
+TextGadget 2,272,73,1,5," NEW WINDOW "
 StringGadget 2,84,25,0,6,80,348
 StringGadget 2,84,41,0,7,80,348
 ;
 ;stats...
-workstart 3,224,112,0,1," OK "
+TextGadget 3,224,112,0,1," OK "
 
 ;about...
-workstart 4,240,168,0,1," OK "
+TextGadget 4,240,168,0,1," OK "
 SelectMode 1,0
 
 ;reg dump...
-workstart 5,240,160,0,1," OK "
+TextGadget 5,240,160,0,1," OK "
 
 hit=-1
 Repeat

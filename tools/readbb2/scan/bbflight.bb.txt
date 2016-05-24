@@ -62,7 +62,7 @@ NEWTYPE .mob
 End NEWTYPE
 
 
-##[$80CA] test.var
+USEPATH test.var
 
 ;lock.l=Lock_("dh4:",-2)		 ;lock directory read only
 ;oldlock.l=CurrentDir_(lock)						;make current dir

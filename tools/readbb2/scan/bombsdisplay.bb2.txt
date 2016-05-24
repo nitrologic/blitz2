@@ -17,7 +17,7 @@ Statement DrawSquare{ *bombptr.gameVars, num.l, xpos.l, ypos.l}
 ; Checks if xpos and ypos are within bounds of the grid,
 ; then draws a square at (xpos,ypos) with object "num"
 .DrawSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (xpos>=\displayXCoord) AND (xpos<\displayXCoord+10*\displayWide)
 				If (ypos>=\displayYCoord) AND (ypos<\displayYCoord+10*\displayHigh)
 ;						 coords are OK, now erase whatever is there
@@ -40,7 +40,7 @@ Statement UpdateTitleBar{ *bombptr.gameVars}
 ; Update the number of bombs flagged
 ; This is hard-coded, change this if you add any "gadgets" in the title-bar!
 .UpdateTitleBar
-##[$80CA] *bombptr
+USEPATH *bombptr
 		WBox 64,5, 152,13, 11
 		WLocate 64,7:Print \markedBombs
 End Statement	;UpdateTitleBar
@@ -50,9 +50,9 @@ End Statement	;UpdateTitleBar
 Statement UpdateProgressBar{ *bombptr.gameVars}
 ; Updates the position of the runner
 .UpdateProgressBar
-##[$80CA] *bombptr
+USEPATH *bombptr
 		pctInc = (\openedSquares + \markedBombs - \falseBombs) * 100 / \totalSquares
-##[$80CA] *bombptr\progressBar
+USEPATH *bombptr\progressBar
 		newX = \startXCoord + pctInc*(\endXCoord-\startXCoord)/100
 ; need to change this still
 		WBox \xcoord,\ycoord, \xcoord+7,\ycoord+14, 0
@@ -73,7 +73,7 @@ Statement UpdateTime{ *bombptr.gameVars}
 ; Calculates the rating
 ; May try to change this to interrupts
 .UpdateTime
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If \gameInProgress=1
 				VWait
 				\timeInProgress = \timeInProgress + 1
@@ -101,7 +101,7 @@ Statement ShowAllBombs{ *bombptr.gameVars, num.l}
 ; Plays an explosion, animates an explosion, then
 ; displays the positions of all bombs and ends the game
 .ShowAllBombs
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\gameInProgress = 3
 		\rating = 0
 ; play the explosion and the animation
@@ -145,7 +145,7 @@ Statement RestoreRegion{ *bombptr.gameVars, theRegion.b}
 ; was released outside of it's area, then this routine will
 ; restore the gadget or square to before the down press
 .RestoreRegion
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select theRegion
 			Case #closeRegion
 				\closeState = 0
@@ -195,7 +195,7 @@ Shared ntscOffset
 ; Draws a border around the displayed part of the field
 ; This is hard-coded
 .DrawGrid
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\displayXCoord = ( (320) - (\displayWide*10) )/2
 		\displayYCoord = ( (DispHeight+18) - (\displayHigh*10) )/2 + ntscOffset
 		endX = \displayXCoord + \displayWide*10
@@ -233,7 +233,7 @@ Statement DoScrolls{ *bombptr.gameVars, override.b}
 ; "override" is used to display the arrows only without any
 ; checks for clicks or redrawing of the grid at startup or restart
 .DoScrolls
-##[$80CA] *bombptr
+USEPATH *bombptr
 		arrowHit.b = False
 		If (\displayWide=\wide) AND (\displayHigh=\high)
 				Statement Return
@@ -372,7 +372,7 @@ skip1
 				End If
 ;redraw the valid arrows
 				For i=1 To 10
-##[$80CA] *bombptr\scrollArrows[i]
+USEPATH *bombptr\scrollArrows[i]
 						If \displayed Then WBlit \num, \xpos,\ypos
 				Next i
 		End If
@@ -383,7 +383,7 @@ End Statement	;DoScrolls
 Statement InitScrolls{ *bombptr.gameVars}
 ; Initializes all variables for the scroll-arrows
 .InitScrolls
-##[$80CA] *bombptr
+USEPATH *bombptr
 		localY.w = \displayYCoord + \displayHigh*5 - 65
 		leftX.w = \displayXCoord-23
 		riteX.w = \displayXCoord + \displayWide*10 + 13

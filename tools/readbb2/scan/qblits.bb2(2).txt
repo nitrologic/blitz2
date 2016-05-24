@@ -38,11 +38,11 @@ BLITZ
 ;the '50' here means the queue can handle up to 50 'QBlits'
 ;before an 'UnQueue' is necessary.
 ;
-longmult 0,50
+Queue 0,50
 
 ;initialize a lor-res, 8 colour bitmap...
 ;
-lmaxlen 0,320,200,3
+BitMap 0,320,200,3
 
 ;initialize a slice, and set it's colour palette
 ;
@@ -58,7 +58,7 @@ While Joyb(0)=0
 
 	;start at first item in list
 	;
-	newmem balls()
+	ResetList balls()
 
 	;wait for vertical blank
 	;
@@ -70,7 +70,7 @@ While Joyb(0)=0
 
 	;while more items to come...
 	;
-	While globfree(balls())
+	While NextItem(balls())
 
 		;update balls' position
 		;

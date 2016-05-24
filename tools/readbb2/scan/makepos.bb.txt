@@ -3,7 +3,7 @@
 MaxLen p$=192
 MaxLen n$=192
 
-allocst 0,0,0,320,256,8,0,"",0,1
+Screen 0,0,0,320,256,8,0,"",0,1
 ScreensBitMap 0,0
 BlockScroll
 

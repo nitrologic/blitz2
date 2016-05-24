@@ -118,9 +118,9 @@ e$=f$+".l"
 s$="ram:sega"
 se$=s$+".l"
 
-##[$80CC]
-freest 0
-localstat 0,WBWidth-360,12,360,80,$43f,"Daemon - "+f$,1,2
+NoCli
+WbToScreen 0
+Window 0,WBWidth-360,12,360,80,$43f,"Daemon - "+f$,1,2
 WindowOutput 0
 
 

@@ -41,7 +41,7 @@ EndIf
 
 If ReadMem(0,"ram:test")
 	FileOutput 0
-	##[$80CA] c1\settings
+	USEPATH c1\settings
 	NPrint c$+"settings:"
 	Print "	dc.w "
 	Print \engfric,","
@@ -56,7 +56,7 @@ If ReadMem(0,"ram:test")
 	Print \cretard,","
 	Print \caccel,",0,0,0,0,0"
 	NPrint ""
-	##[$80CA] c2\settings
+	USEPATH c2\settings
 	Print "	dc.w "
 	Print \engfric,","
 	Print \retard,","

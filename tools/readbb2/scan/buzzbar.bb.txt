@@ -14,25 +14,25 @@ Dim qcos.q(1023)
 
 me.ship\x=0,0,0,0,0,0,0
 
-lmaxlen 0,320+64,256+64,3	;doublebuffered display
-lmaxlen 1,320+64,256+64,3
-lmaxlen 2,832,768,3				;background
+BitMap 0,320+64,256+64,3	;doublebuffered display
+BitMap 1,320+64,256+64,3
+BitMap 2,832,768,3				;background
 
 LoadShapes 0,"ships.shapes"
 LoadShapes 64,"bombs.shapes"
 LoadShapes 80,"shards.shapes"
 
 LoadBitMap 2,"moon.iff"
-Use lmaxlen 2
+Use BitMap 2
 Scroll 0,0,320,512,512,0
 Scroll 0,0,832,256,0,512
-Use lmaxlen 0
+Use BitMap 0
 
-casestrcomp 0,"ships.iff"
-casestrcomp 0,"moon.iff",8
+LoadPalette 0,"ships.iff"
+LoadPalette 0,"moon.iff",8
 
-longmult 0,100
-longmult 1,100
+Queue 0,100
+Queue 1,100
 
 BLITZ										;setup blitz display
 Mouse On
@@ -49,7 +49,7 @@ While NOT RawStatus($45)			 ;main loop
 	ShowF db,32,32
 	ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
 	db=1-db
-	Use lmaxlen db
+	Use BitMap db
 	UnQueue db
 	Gosub drawnme
 	Gosub drawbullets
@@ -80,7 +80,7 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 	EndIf
 	If RawStatus($39) OR Joyb(0)&1 OR Joyb(1)&1			;fire
 		If rl=0
-			If globalloc(bul())
+			If AddItem(bul())
 				bul()\x=me\x,me\y,me\rot
 				bul()\xv=!ssin{me\rot} ASL 8+me\xv
 				bul()\yv=-!ccos{me\rot} ASL 8+me\yv
@@ -101,9 +101,9 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 	Return
 
 .moveexplosions
-	newmem bng()
-	##[$80CA] bng()
-	While globfree(bng())
+	ResetList bng()
+	USEPATH bng()
+	While NextItem(bng())
 		\rot-1
 		If \rot>-1
 			\x+\xv:\y+\yv
@@ -113,15 +113,15 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 				QBlit db,80+\rot/4,px,py
 			EndIf
 		Else
-			freelast bng()
+			KillItem bng()
 		EndIf
 	Wend
 	Return
 
 .drawnme
-	newmem nme()
-	##[$80CA] nme()
-	While globfree(nme())
+	ResetList nme()
+	USEPATH nme()
+	While NextItem(nme())
 		\upd-1
 		If \upd<0
 			\upd=5
@@ -145,32 +145,32 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 	Return
 
 .drawbullets
-	newmem bul()
-	##[$80CA] bul()
-	While globfree(bul())
+	ResetList bul()
+	USEPATH bul()
+	While NextItem(bul())
 		\x+\xv																 ;speed
 		\y+\yv
 		px=((\x-me\x) ASR 6)+#xcntr
 		py=((\y-me\y) ASR 6)+#ycntr
 		If !onscreen{px,py}
 			If ##[$CB09](64,px,py)
-				newmem nme()
-				While globfree(nme())
+				ResetList nme()
+				While NextItem(nme())
 					If SpritesHit(16,nme()\px,nme()\py,64,px,py)
 						For i=1 To 5
-							If globalloc(bng())
+							If AddItem(bng())
 								bng()\x=\x,\y,31
 								bng()\xv=nme()\xv/2+Rnd(64)-32
 								bng()\yv=nme()\yv/2+Rnd(64)-32
 							EndIf
 						Next
-						freelast nme()
+						KillItem nme()
 				 EndIf
 				Wend
 			EndIf
 			QBlit db,64,px,py
 		Else
-			freelast bul()
+			KillItem bul()
 		EndIf
 	Wend
 	Return
@@ -184,9 +184,9 @@ Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
 	Return
 
 .setupnme:
-	##[$80CA] nme()
+	USEPATH nme()
 	For i=1 To 16
-		globalloc nme()
+		AddItem nme()
 		\x=Rnd(65535),Rnd(65535),Rnd(65535)
 		\id=Rnd(2)
 		Select \id

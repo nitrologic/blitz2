@@ -4,7 +4,7 @@
 ;============================;
 
 WBStartup
-##[$80CC]
+NoCli
 AutoCookie On
 
 NEWTYPE.Object
@@ -54,8 +54,8 @@ AGAGreen 0,3,150,0,0
 AGAGreen 0,4,255,255,255
 LoadShapes 0,"space_wars4.shp"
 
-longmult 0,10
-lmaxlen 0,640,512,3
+Queue 0,10
+BitMap 0,640,512,3
 
 Ship\x=320,128,0,0,0
 Mass\x=320,158,0,0,64

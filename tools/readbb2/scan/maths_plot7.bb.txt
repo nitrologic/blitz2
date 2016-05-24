@@ -4,17 +4,17 @@
 
 ;HOLD DOWN RIGHT MOUSE BUTTON TO INTERRUPT PLOTTING
 
-allocst 0,0,0,320,256,5,0,"",19,20
+Screen 0,0,0,320,256,5,0,"",19,20
 
 Green 0,0,0,0:Green 1,11,0,0:Green 2,15,15,15
 For i=16 To 31:Green i,31-i,31-i,31-i:Next
 MaxLen pa$=160:MaxLen fi$=64
 SizeLimits 320,256,-1,-1
-localstat 0,0,0,320,256,$1800,"",16,30
-newlocarr 0,0,"Project"
+Window 0,0,0,320,256,$1800,"",16,30
+MenuTitle 0,0,"Project"
 MenuItem 0,0,0,0,"Save picture"
 MenuItem 0,0,0,1,"Quit"
-newlocarr 0,1,"Draw"
+MenuTitle 0,1,"Draw"
 MenuItem 0,0,1,0,"Zoom"
 MenuItem 0,0,1,1,"Default bounds"
 MenuItem 0,0,1,2,"Set plot area"
@@ -23,9 +23,9 @@ MenuItem 0,0,1,4,"Clear screen"
 MenuItem 0,0,1,5,"Plot"
 MenuItem 0,3,1,6,"	Leave boxes"
 
-arrmult 0
+SetMenu 0
 ScreensBitMap 0,0
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
 
 lxdef.f=-3:uxdef.f=3:lydef.f=-3:uydef.f=3
@@ -70,7 +70,7 @@ EndIf
 Goto l3
 
 l1:Green 0,0,0,0:For i=16 To 31:Green i,31-i,31-i,31-i:Next
-Use lmaxlen 0
+Use BitMap 0
 For i=ldx To udx Step dxstep:x.f=lx+(xdiff*(i-ldx))/dxdiff
 	If Joyb(1)<>0 Then Pop For:Goto l3
 	For j=ldy To udy Step dystep:y.f=uy-(ydiff*(j-ldy))/dydiff

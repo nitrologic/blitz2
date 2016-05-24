@@ -5,7 +5,7 @@
 ; Warning: crashes with hires/interlace 16 colour pictures!
 ; (due to bug with "LoadShape" command).
 ;
-freest 0
+WbToScreen 0
 MaxLen pa$=160
 MaxLen fi$=64
 pa$="pix:scripts_test"
@@ -57,7 +57,7 @@ If scrwidth=640 AND scrheight<512 Then viewmode=$8000
 
 ; Create two screens for double buffering...
 
-allocst 0,0,0,scrwidth,scrheight,##[$D087],viewmode,"",1,2
+Screen 0,0,0,scrwidth,scrheight,##[$D087],viewmode,"",1,2
 ScreensBitMap 0,0
 Use SetCycle 1
 BlockScroll
@@ -67,7 +67,7 @@ BlockScroll
 ;Cls
 ; Make one of them a bitmap rather than a screen...
 ; This improves multi-tasking (don't see hidden screen when multi-tasking).
-lmaxlen 1,scrwidth,scrheight,##[$D087]
+BitMap 1,scrwidth,scrheight,##[$D087]
 Use SetCycle 1
 
 dbuff.w = 1
@@ -84,9 +84,9 @@ dbuff.w = 1
 ; stepping through with the DeBugger (with pics of changing palettes).
 While Joyb(0)=0
 	For i=1 To npics
-		Use lmaxlen dbuff
+		Use BitMap dbuff
 		BlockScroll
-		longdiv i,0,0
+		Blit i,0,0
 		Use SetCycle i
 		ShowBitMap dbuff
 		VWait

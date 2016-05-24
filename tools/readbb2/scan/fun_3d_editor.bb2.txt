@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_3D_Editor.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_3D_Editor.bb2
-##[$80CC]
+NoCli
 WBStartup
 
 ;INCDIR	""
@@ -74,7 +74,7 @@ Statement update_display_window{}
 	Dim polygon.Poly_Points_Type(12)
 	Dim output_list2.Vector_Type(#PMAX)
 
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
 
 	sby=dscale/100.0
@@ -104,7 +104,7 @@ Statement update_display_window{}
 				apply_matrix{&Final,&point_list(points),&output_list(points)}
 			Next points
 			If d_axis
-				Use lmaxlen 0
+				Use BitMap 0
 				VTemp1\x=0,0,0,1
 				apply_matrix{&Final,&VTemp1,&VTemp2}
 				ax.w=VTemp2\x
@@ -199,7 +199,7 @@ Statement update_design_window{}
 Shared	cpoint,cfacet,pcount,fcount
 Shared point_list(),facet_list()
 
-Use localstat 0
+Use Window 0
 WindowOutput 0
 WLocate 50,29.5
 If cpoint>-1
@@ -291,20 +291,20 @@ End Statement
 Statement initialise_editor{}
 
 
-	freest 0
+	WbToScreen 0
 	##[$FFB5]
 	set_up_gadgets{}
 
-	lmaxlen 1,10,10,1
-	lmaxlen 0,200,150,WBDepth
+	BitMap 1,10,10,1
+	BitMap 0,200,150,WBDepth
 
 	DefaultIDCMP $20|$40|$200
 
-	localstat 1,320,0,200,150,$2,"F3D - Display Window",0,1
-	localstat 2,520,0,120,150,$2,"F3D - Display Control",0,1
+	Window 1,320,0,200,150,$2,"F3D - Display Window",0,1
+	Window 2,520,0,120,150,$2,"F3D - Display Control",0,1
 	AttachGTList 1,2
 
-	localstat 0,0,0,320,150,$8|$2|$1000,"FUNdamental 3D Editor - Design Window",0,1
+	Window 0,0,0,320,150,$8|$2|$1000,"FUNdamental 3D Editor - Design Window",0,1
 
 	AttachGTList 0,0
 	GTBevelBox 0,6,35,150,110,0
@@ -418,7 +418,7 @@ Statement demo{}
 	oy.w=dyrot
 	oz.w=dzrot
 
-	localstat 3,(WBWidth-100)/2,(WBHeight-50)/2,100,50,$1000|$2,"F3D Demo",0,1
+	Window 3,(WBWidth-100)/2,(WBHeight-50)/2,100,50,$1000|$2,"F3D Demo",0,1
 	AttachGTList	2,3
 
 	Repeat
@@ -429,7 +429,7 @@ Statement demo{}
 		ev.l=Event
 	Until (ev=$40) AND (GadgetHit=100)
 
-	Free localstat 3
+	Free Window 3
 
 	dxrot=ox
 	dyrot=oy
@@ -504,13 +504,13 @@ Statement gadget_press{gh.l}
 	Select gh
 		Case 0
 			If cpoint>-1 Then point_list(cpoint)\x=GTGetInteger(0,0) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,1),Peek.l(Addr localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,1),Peek.l(Addr Window (0)),0)
 		Case 1
 			If cpoint>-1 Then point_list(cpoint)\y=GTGetInteger(0,1) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,2),Peek.l(Addr localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,2),Peek.l(Addr Window (0)),0)
 		Case 2
 			If cpoint>-1 Then point_list(cpoint)\z=GTGetInteger(0,2) : ud=True
-			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,0),Peek.l(Addr localstat (0)),0)
+			If cpoint>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,0),Peek.l(Addr Window (0)),0)
 		Case 3
 			If pcount<#PMAX Then pcount+1 : cpoint=pcount : ud=True : uc=True : point_list(pcount)\x=0,0,0,1
 		Case 4
@@ -521,22 +521,22 @@ Statement gadget_press{gh.l}
 			If cpoint<pcount Then cpoint+1 : uc=True : ud=True
 		Case 10
 			If cfacet>-1 Then facet_list(cfacet)\Points[0]=GTGetInteger(0,10) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,11),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,11),Peek.l(Addr Window (0)),0)
 		Case 11
 			If cfacet>-1 Then facet_list(cfacet)\Points[1]=GTGetInteger(0,11) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,12),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,12),Peek.l(Addr Window (0)),0)
 		Case 12
 			If cfacet>-1 Then facet_list(cfacet)\Points[2]=GTGetInteger(0,12) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,13),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,13),Peek.l(Addr Window (0)),0)
 		Case 13
 			If cfacet>-1 Then facet_list(cfacet)\Points[3]=GTGetInteger(0,13) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,14),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,14),Peek.l(Addr Window (0)),0)
 		Case 14
 			If cfacet>-1 Then facet_list(cfacet)\FColour=GTGetInteger(0,14) : ud=True
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,15),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,15),Peek.l(Addr Window (0)),0)
 		Case 15
 			If cfacet>-1 Then facet_list(cfacet)\FCMask=GTGetInteger(0,15)
-			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,10),Peek.l(Addr localstat (0)),0)
+			If cfacet>-1 Then dummy.l=##[$FFC9](GTGadPtr(0,10),Peek.l(Addr Window (0)),0)
 		Case 16
 			If fcount<#FMAX Then fcount+1 : cfacet=fcount : ud=True : uc=True
 		Case 17

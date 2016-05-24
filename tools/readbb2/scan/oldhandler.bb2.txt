@@ -174,10 +174,10 @@ If wm<>2 Then Goto openbig Else Return
 getevent
 Repeat
 	If Peek.l(ib)<>s0
-		Free localstat 0:Gosub findsc
+		Free Window 0:Gosub findsc
 		On wm+1 Gosub opentiny,opensmall,openbig
 	EndIf
-	While locfree(d_e())
+	While FirstItem(d_e())
 		Select d_e()\t
 		Case 0	;supervisor mode error!
 			Gosub checkbig
@@ -193,7 +193,7 @@ Repeat
 		Case 4	;outa-here
 			End
 		End Select
-		MaxLen d_e()\s=0:freelast d_e()
+		MaxLen d_e()\s=0:KillItem d_e()
 	Wend
 	ev=Event:If ev=0 Then ##[$FF29]
 Until ev
@@ -202,14 +202,14 @@ Return
 findsc	;find front screen!
 ;
 FindScreen 0
-s0.l=Peek.l(Addr allocst(0))
+s0.l=Peek.l(Addr Screen(0))
 sw=Peek.w(s0+12)	;width
 sh=Peek.w(s0+14)	;height
 Return
 
 .opentiny
 w=82:h=25:x=sw-w:y=0:gy=11:Gosub makegads
-localstat 0,x,y,w,h,$6,"",1,0,0
+Window 0,x,y,w,h,$6,"",1,0,0
 ix=WLeftOff:iy=WTopOff:iw=InnerWidth:ih=InnerHeight-iy-1
 ;WBox ix,iy,ix+iw-1,iy+ih-1,2
 wm=0
@@ -217,7 +217,7 @@ Return
 
 .opensmall
 w=sw:h=57:x=0:y=0:gy=43:Gosub makegads
-localstat 0,x,y,w,h,$e,"Blitz Debugger",1,0,0
+Window 0,x,y,w,h,$e,"Blitz Debugger",1,0,0
 ix=WLeftOff:iy=WTopOff:iw=InnerWidth:ih=InnerHeight-iy-1
 ;WBox ix,iy,ix+iw-1,iy+ih-1,2
 wm=1
@@ -225,7 +225,7 @@ Return
 
 .openbig
 w=sw:h=113:x=0:y=0:gy=43:Gosub makegads
-localstat 0,x,y,w,h,$e,"Blitz Debugger",1,0,0
+Window 0,x,y,w,h,$e,"Blitz Debugger",1,0,0
 ix=WLeftOff:iy=WTopOff:iw=InnerWidth:ih=InnerHeight-56-iy-1
 ;WBox ix,iy,ix+iw-1,iy+31,2
 bx=WLeftOff:by=WTopOff+44:bw=InnerWidth:bh=InnerHeight-by+11
@@ -234,13 +234,13 @@ wm=2
 Return
 
 .makegads
-Free localstat 0:Free GadgetJam 0:Restore gads
+Free Window 0:Free GadgetJam 0:Restore gads
 gx=4:gn=0
 Repeat
 	Read t$
 	If t$<>"" AND gx+8<w
 		l=Instr(t$,"|"):If l=0 Then l=Len(t$) Else l-1
-		gn+1:workstart 0,gx,gy,0,gn,t$
+		gn+1:TextGadget 0,gx,gy,0,gn,t$
 		gx+l LSL 3+10
 	EndIf
 Until t$=""

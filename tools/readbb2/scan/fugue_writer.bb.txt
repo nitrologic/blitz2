@@ -7,10 +7,10 @@
 LoadSound 0,"ringpiano1"
 LoadSound 1,"ringpiano2"
 
-allocst 0,10
+Screen 0,10
 ScreensBitMap 0,0
 ShowScreen 0
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
 BitMapOutput 0
 Locate 2,5:Print "A simple programme to compose fugues on 'Oh Susannah'."

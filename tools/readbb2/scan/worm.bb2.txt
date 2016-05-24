@@ -24,7 +24,7 @@ s.seg[256]
 End NEWTYPE
 
 LoadShapes 0,"worm.shapes"
-casestrcomp 0,"worm.iff"
+LoadPalette 0,"worm.iff"
 ;LoadBlitzFont 0,"worm.font"
 
 Dim a(300)
@@ -66,7 +66,7 @@ Data.l 100
 Data$ "CAM"
 Data.l 10
 
-##[$80CA] w(pl)
+USEPATH w(pl)
 
 For k=1 To 4:Read px(k),py(k):Next
 Data 0,0,26,0,0,31,26,31
@@ -81,7 +81,7 @@ pu(4)=-1:pd(4)=0
 
 Statement cblit{s,x,y}
 Shared bxo,byo
-longdiv s,x LSL 3+bxo,y LSL 3+byo
+Blit s,x LSL 3+bxo,y LSL 3+byo
 End Statement
 
 Statement mblit{s,x,y}
@@ -173,7 +173,7 @@ If k Then Function Return k
 Forever
 End Function
 
-lmaxlen 0,352,256,4:BitMapOutput 0
+BitMap 0,352,256,4:BitMapOutput 0
 
 npl=1
 
@@ -550,7 +550,7 @@ If us(pl)
 	If \t=0
 		For k=0 To 4
 		If \x[k] Then BlitMode CookieMode Else BlitMode EraseMode
-		longdiv k+4,CursX LSL 3,CursY LSL 3:Locate CursX+1,CursY
+		Blit k+4,CursX LSL 3,CursY LSL 3:Locate CursX+1,CursY
 		Next
 	EndIf
 EndIf
@@ -558,7 +558,7 @@ EndIf
 If \t
 	If \t&4 Then BlitMode CookieMode Else BlitMode EraseMode
 	For k=0 To 4
-	longdiv k+4,(px(pl)+13+k) LSL 3,py(pl) LSL 3
+	Blit k+4,(px(pl)+13+k) LSL 3,py(pl) LSL 3
 	Next
 	\t-1:If \t=0 Then us(pl)=-1
 EndIf

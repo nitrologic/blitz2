@@ -10,7 +10,7 @@
 ;
 ;TURN OFF RUNTIME ERRORS ONCE YOU GET IT RUNNING!
 
-lmaxlen 0,256,64,1
+BitMap 0,256,64,1
 LoadBitMap 0,"data/map"
 
 Dim m(255,63)
@@ -28,14 +28,14 @@ w=704
 
 Statement b{s,x,y}
 If s Then BlitMode CookieMode Else BlitMode EraseMode
-longdiv 0,x,y
+Blit 0,x,y
 End Statement
 
 Statement c{s,x,y}
-If s Then BlitMode CookieMode:longdiv 0,x,y
+If s Then BlitMode CookieMode:Blit 0,x,y
 End Statement
 
-lmaxlen 0,w,192,3
+BitMap 0,w,192,3
 ;Boxf 16,0,351,191,2
 BitMapOutput 0
 
@@ -68,7 +68,7 @@ While Joyb(1)=0 AND RawStatus($45)=0
 	;
 	VWait
 	;
-	DisplayBitMap 0,db,sx,sy:db=1-db:Use lmaxlen db
+	DisplayBitMap 0,db,sx,sy:db=1-db:Use BitMap db
 	;
 	ox2=x2
 	oy2=y2

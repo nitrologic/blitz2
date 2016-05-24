@@ -297,7 +297,7 @@ Statement ShowBonus{ad.l}
 	StopCycle 0,1,0,0,0
 	DisplayBitMap 0,0
 	DisplayPalette 0,0
-	Use lmaxlen 0 : BlockScroll : VWait
+	Use BitMap 0 : BlockScroll : VWait
 	suc=##[$A483](ad,0)
 	For h=1 To 255 Step 4
 		AGAGreen 0,1,h,h,h
@@ -340,14 +340,14 @@ End Statement
 
 Statement DrawPowerUps {bitm,x2,y2,powerup_active.l}
 	Shared powx(),powy()
-	Use lmaxlen bitm
+	Use BitMap bitm
 	x=x2 : y=y2
 	n.w=#powerups/9
 	num.w=0
 	For h=0 To n-1
 		For a.w=0 To 8
-			longdiv #bonusshapes+num,x,y
-			If (powerup_active ##[$80CD] num)=0 Then ##[$8F04] bitm,x,y
+			Blit #bonusshapes+num,x,y
+			If (powerup_active BitTst num)=0 Then ##[$8F04] bitm,x,y
 			powx(num)=x : powy(num)=y : x+32
 			num+1
 		Next a
@@ -357,8 +357,8 @@ Statement DrawPowerUps {bitm,x2,y2,powerup_active.l}
 	If h
 		x+(9-h)*16
 		For a=0 To h-1
-			longdiv #bonusshapes+num,x,y
-			If (powerup_active ##[$80CD] num)=0 Then ##[$8F04] bitm,x,y
+			Blit #bonusshapes+num,x,y
+			If (powerup_active BitTst num)=0 Then ##[$8F04] bitm,x,y
 			powx(num)=x : powy(num)=y : x+32
 			num+1
 		Next a
@@ -375,7 +375,7 @@ Statement PutPowerUp{shp.b,num.b,form.b,chance.b}
 	Shared mapxy(),mapxy2(),quadx(),quady(),players,active()
 	Shared powerup_active
 
-	If powerup_active ##[$80CD] (shp-2)
+	If powerup_active BitTst (shp-2)
 		If (Int(Rnd(chance*100))/100)+1=chance
 			If form=0
 				For ploop=1 To num
@@ -412,7 +412,7 @@ End Statement
 
 Statement DrawButton {x.w,y.w,a$}
 	Shared font
-	longdiv #buttonshape,x,y
+	Blit #buttonshape,x,y
 	##[$AE81] #font,x+22,y+6,a$,1,16
 End Statement
 
@@ -458,7 +458,7 @@ saving.b=0
 delay_timer.w=150
 load_frame.b=0
 
-##[$80CC]
+NoCli
 
 ##[$B593] 0
 path$=""
@@ -568,10 +568,10 @@ bombmovedata: Data.b 2,0,-2,0,0,2,0,-2
 #wdown=%0010
 For n=0 To 14
 	walldata.b=Peek.b(?walldatas+n)
-	If (walldata ##[$80CD] 0) Then tunnelwall(n)\up=-1
-	If (walldata ##[$80CD] 1) Then tunnelwall(n)\down=-1
-	If (walldata ##[$80CD] 2) Then tunnelwall(n)\left=-1
-	If (walldata ##[$80CD] 3) Then tunnelwall(n)\right=-1
+	If (walldata BitTst 0) Then tunnelwall(n)\up=-1
+	If (walldata BitTst 1) Then tunnelwall(n)\down=-1
+	If (walldata BitTst 2) Then tunnelwall(n)\left=-1
+	If (walldata BitTst 3) Then tunnelwall(n)\right=-1
 Next n
 
 ##[$8F01] &mapxy(0,0),&nomovemap(0,0),&tunnelwall(0)\left,#tunnelshapes
@@ -597,17 +597,17 @@ InitCopList 3,44,31,$13000|#maindeep,0,#maincols,0			; 32 lores (31 high)
 InitCopList 4,44+34,222,$13000|#maindeep,0,#maincols,0	; 32 lores (222 high)
 InitCopList 5,44,256*4,$13000|#maindeep,2,#maincols,1784; Special
 
-lmaxlen 0,320,256,#maindeep
-lmaxlen 1,320,256,#maindeep
-lmaxlen 3,320,256,8
-lmaxlen 6,320,32,#maindeep
+BitMap 0,320,256,#maindeep
+BitMap 1,320,256,#maindeep
+BitMap 3,320,256,8
+BitMap 6,320,32,#maindeep
 
 DisplayBitMap 3,6
 
 Buffer 0,30000
 Buffer 1,30000
-longmult 0,50
-longmult 1,50
+Queue 0,50
+Queue 1,50
 
 suc=##[$A595](0,70000)
 If suc=0 Then End
@@ -645,7 +645,7 @@ Repeat
 	exit_option=0
 	option=d_option : Gosub MenuControl : d_option=1
 
-	Use lmaxlen 0 : ##[$AE83] 0
+	Use BitMap 0 : ##[$AE83] 0
 	ClearPalette{0,31} : DisplayPalette 0,0 : BlockScroll : VWait
 
 	If deepmenu=0
@@ -836,9 +836,9 @@ Poweruptext:
 			If opow<>pow Then Gosub AboutPowerup
 			jf=##[$A006](1)
 			If jf
-				powerup_active ##[$80D0] pow : opow=pow
-				If powerup_active ##[$80CD] pow
-					longdiv #bonusshapes+pow,powx(pow),powy(pow)
+				powerup_active BitChg pow : opow=pow
+				If powerup_active BitTst pow
+					Blit #bonusshapes+pow,powx(pow),powy(pow)
 				Else
 					##[$8F04] 0,powx(pow),powy(pow)
 				EndIf
@@ -894,14 +894,14 @@ Return
 AboutPowerup
 	Box powx(opow)-5,powy(opow)-5,powx(opow)+20,powy(opow)+20,0
 	Box powx(pow)-5,powy(pow)-5,powx(pow)+20,powy(pow)+20,18
-	Use lmaxlen 1
+	Use BitMap 1
 	Boxf 0,201,319,236,0
 	##[$AE85] %1,28
 	##[$AE83] 1
 	##[$AE81] #font,160,201,powerup$(pow)
 	y2.w=210
 	##[$AE81] #font,160,210,powerdesc(pow+1)
-	Use lmaxlen 0
+	Use BitMap 0
 	##[$AE83] 0
 	##[$B206] 0,201,320,36,0,201,1
 	##[$A103] 0,0,##[$A10B](0,powx(pow),powy(pow)),5376,16,16
@@ -1000,15 +1000,15 @@ Return
 		EndIf
 
 		If jf AND ob=2
-			mapstatus ##[$80D0] conmap
-			If (mapstatus ##[$80CD] conmap)
+			mapstatus BitChg conmap
+			If (mapstatus BitTst conmap)
 				selectedmaps+1
 			Else
 				selectedmaps-1
 			EndIf
 			Gosub MapStatusButton
 
-			Use lmaxlen 0
+			Use BitMap 0
 			Boxf 80,50,239,57,0
 			##[$AE81] #font,160,50,"Number selected: "+Str$(selectedmaps)
 			condisp=3
@@ -1029,7 +1029,7 @@ Return
 	s.w=0
 	While s<selectedmaps
 		n+1
-		If (mapstatus ##[$80CD] n)
+		If (mapstatus BitTst n)
 			maparray(s)=n
 			s+1
 		EndIf
@@ -1040,7 +1040,7 @@ Return
 Return
 
 MapStatusButton:
-	If (mapstatus ##[$80CD] conmap)
+	If (mapstatus BitTst conmap)
 		DrawButton {137,#buttonY2,"OFF"}
 	Else
 		DrawButton {137,#buttonY2,"ON"}
@@ -1049,9 +1049,9 @@ Return
 
 Drawthemap:
 	ad.l=?maps+(conmap*247)
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll
-	status.b=(mapstatus ##[$80CD] conmap)
+	status.b=(mapstatus BitTst conmap)
 	For y=0 To 12
 		For x=0 To 18
 			If Peek.b(ad) Then BlitColl Peek.b(ad)-1,x ASL 4,y ASL 4
@@ -1061,7 +1061,7 @@ Drawthemap:
 
 	##[$A10C] 1,1,0,0,320,208
 	Boxf 0,104,160,120,0
-	Use lmaxlen 0
+	Use BitMap 0
 
 	If status=0
 		##[$A59E]
@@ -1072,13 +1072,13 @@ Drawthemap:
 		Next y
 	EndIf
 
-	Use lmaxlen 1
+	Use BitMap 1
 	Boxf 80,118,239,125,0
 	##[$AE85] %1,28
 	##[$AE83] 1,1
 	##[$AE81] #font,160,118,"Viewing map "+Str$(conmap+1)+" of "+Str$(#mapcount)
 	##[$AE83] 0
-	Use lmaxlen 0
+	Use BitMap 0
 	Scroll 80,118,160,8,80,118,1
 
 	Select condisp
@@ -1104,7 +1104,7 @@ Return
 
 Statement DrawSlider{x.w,y.w,w.w,num}
 	Shared ingame(),temp(),player
-	Use lmaxlen 0
+	Use BitMap 0
 	ya.w=w*15
 	VWait
 	Scroll 0,ya,160,14,x,y,1
@@ -1132,7 +1132,7 @@ BLITZ
 
 	x=79 : y=70 : num=19
 	For h=0 To 2
-		longdiv num,x-21,y
+		Blit num,x-21,y
 		Box x,y,x+161,y+15,28
 		Line x+1,y+15,x+161,y+15,26
 		Line x+161,y,x+161,y+14,26
@@ -1143,7 +1143,7 @@ BLITZ
 
 	##[$A483] ?gradientbars,1
 
-	Use lmaxlen 0
+	Use BitMap 0
 	wide.w=304 ASR 2
 	x=(wide ASR 1)-19
 	For h=1 To 4
@@ -1153,9 +1153,9 @@ BLITZ
 
 		buttonx(h)=x-1 : buttony(h)=38
 		ingame(h)=x+26
-		longdiv shapeoffset(h)+16,x+5,47
+		Blit shapeoffset(h)+16,x+5,47
 		x+26
-		longdiv #statusbarpics,x-13,36
+		Blit #statusbarpics,x-13,36
 		Boxf x,38,x+2,39,2
 		Boxf x,46,x+4,47,6
 		If pstatus(h)
@@ -1289,8 +1289,8 @@ Return
 
 BLITZ
 .About:
-	lmaxlen 2,640,256+64,2
-	ad.l=Addr lmaxlen(2)+8
+	BitMap 2,640,256+64,2
+	ad.l=Addr BitMap(2)+8
 	For h=0 To 1
 		bitptr(h)=Peek.l(ad+(h*4))
 	Next h
@@ -1318,7 +1318,7 @@ BLITZ
 	AGAGreen 0,3,252,252,252
 	aboutexit.b=False
 	For loop=1 To num
-		##[$AE83] bitm : Use lmaxlen bitm
+		##[$AE83] bitm : Use BitMap bitm
 		BlockScroll : VWait:##[$A59E]
 		Read aa.w
 		y=128-(aa*28)
@@ -1362,7 +1362,7 @@ BLITZ
 	Next h
 
 	##[$AE89] oswald
-	Free lmaxlen 2
+	Free BitMap 2
 Return
 
 Aboutinfo:
@@ -1428,7 +1428,7 @@ Return
 
 .MenuControl:
 	BLITZ
-	Free lmaxlen 4 : Free lmaxlen 5
+	Free BitMap 4 : Free BitMap 5
 	BitPlanesBitMap 3,4,%1000000
 	BitPlanesBitMap 0,5,%1
 	BitPlanesBitMap 3,7,%10000000
@@ -1442,7 +1442,7 @@ Return
 
 	DisplayPalette 1,0
 	DisplayBitMap 1,3
-	##[$AE83] 3,1 : Use lmaxlen 3
+	##[$AE83] 3,1 : Use BitMap 3
 	ytext.w=107
 	##[$AE85] %1,31
 	##[$AE81] #font,160,96,"SELECT AN OPTION"
@@ -1562,12 +1562,12 @@ menujump:
 		For h=1 To 96
 			##[$A104] 5,4,#offsetvalue,#offsetvalue,h,132
 		Next h
-		Use lmaxlen 5
+		Use BitMap 5
 		BlockScroll
 	EndIf
 
-	Free lmaxlen 7
-	Free lmaxlen 4 : Free lmaxlen 5
+	Free BitMap 7
+	Free BitMap 4 : Free BitMap 5
 	PalFadeOut {1,#pal256,128}
 	DisplayBitMap 0,0
 	DisplayPalette 0,2
@@ -1586,7 +1586,7 @@ Updatemenus:
 		VWait
 	Next anq
 
-	Use lmaxlen 7
+	Use BitMap 7
 	BlockScroll 0
 	VWait
 	##[$AE83] 7
@@ -1634,7 +1634,7 @@ winnerfade.b=0
 nextgameplayer.b=0
 nextgamepowerup.b=0
 nextbonusgame.b=Int(Rnd(2))+1
-speedtrialstatus=(powerup_active ##[$80CD] 18)
+speedtrialstatus=(powerup_active BitTst 18)
 mapnumber=-1
 
 ;If playmode=1 Then Goto PlayFirstTo
@@ -1677,11 +1677,11 @@ Return
 	If players>1
 		playerstatus=0
 		For h=1 To 4
-			If pmove(h) Then playerstatus ##[$80CE] h
+			If pmove(h) Then playerstatus BitSet h
 		Next h
 		Repeat
 			For h=1 To 4
-				If (playerstatus ##[$80CD] h)
+				If (playerstatus BitTst h)
 					pstatus(h)=1
 				Else
 					pstatus(h)=0
@@ -1716,7 +1716,7 @@ End Statement
 
 	;8=grey
 	;9=orange
-	Use lmaxlen 1
+	Use BitMap 1
 
 	a=Rnd(#backgroundnum)
 	CopyShape #backgroundshapes+a,0
@@ -1736,17 +1736,17 @@ End Statement
 
 	For h=0 To 13
 		BlitColl 0,0,0
-		longdiv #flamebombshapes+h,0,0
+		Blit #flamebombshapes+h,0,0
 		GetaShape 3+h,0,0,16,16
 	Next h
 	For h=0 To 8
 		BlitColl 0,0,0
-		longdiv #destructblocks+dblck+h,0,0
+		Blit #destructblocks+dblck+h,0,0
 		GetaShape #blockdestruct+h,0,0,16,16
 	Next h
 
 	BlitColl 0,0,0
-	longdiv #freezebombback,0,0
+	Blit #freezebombback,0,0
 	GetaShape #freezebomb,0,0,16,16
 
 	shapeoffset(1)=#playershapes
@@ -1766,7 +1766,7 @@ End Statement
 	If taggame Then mapnumber=#mapcount
 
 	address.l=?maps+(mapnumber*247)
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll
 
 	; store map in array
@@ -1872,7 +1872,7 @@ End Statement
 Return
 
 .Displaylevel:
-	Use lmaxlen 3 : BlockScroll
+	Use BitMap 3 : BlockScroll
 
 	StopCycle 0,255,0,0,0
 	##[$A084] 1
@@ -1881,7 +1881,7 @@ Return
 		##[$A08B] 1,0,h-64,h
 	Next h
 
-	Use lmaxlen 3
+	Use BitMap 3
 	Scroll 0,0,320,31,0,0,6
 	Scroll 0,0,320,220,0,34,0
 	VWait 2
@@ -1893,8 +1893,8 @@ Return
 	CreateDisplay 1
 
 	VWait 2
-	Free lmaxlen 5
-	lmaxlen 5,320,256,1
+	Free BitMap 5
+	BitMap 5,320,256,1
 	##[$A483] ?getready2,5
 	BitPlanesBitMap 3,4,%1000000
 
@@ -1915,7 +1915,7 @@ Return
 	DisplayBitMap 4,0
 	CreateDisplay 3,4
 	VWait
-	Free lmaxlen 4 : Free lmaxlen 5
+	Free BitMap 4 : Free BitMap 5
 	ClearPalette{0,256}
 Return
 
@@ -1929,7 +1929,7 @@ BLITZ
 players_left=players
 deathsound=0 : escape=0 : shade.w=0
 
-Use lmaxlen 0
+Use BitMap 0
 For h=1 To players
 	cur=active(h)
 	invisible(cur)=0
@@ -1950,9 +1950,9 @@ If nextgameplayer
 	mapxy2(x/16,y/16)=nextgamepowerup+2
 	nextgameplayer=0
 	If mapxy(x/16,y/16)<#tunnelshapes
-		Use lmaxlen 1
+		Use BitMap 1
 		BlitColl #bonusshapes+nextgamepowerup,x,y
-		Use lmaxlen 0
+		Use BitMap 0
 		BlitColl #bonusshapes+nextgamepowerup,x,y
 	EndIf
 EndIf
@@ -1989,17 +1989,17 @@ Repeat
 	EndIf
 
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	UnBuffer dbuffer
 
-	newmem doblock()
-	While globfree(doblock())
+	ResetList doblock()
+	While NextItem(doblock())
 		BlitColl doblock()\num,doblock()\x,doblock()\y
-		freelast doblock()
+		KillItem doblock()
 	Wend
 
-	newmem bomb()
-	While globfree(bomb())
+	ResetList bomb()
+	While NextItem(bomb())
 		bf.w=bomb()\frozen
 		If bf<-1 Then bomb()\frozen+1
 		If bf=-1
@@ -2014,7 +2014,7 @@ Repeat
 		If btim=0
 			Gosub Explodebomb
 			bombdrop(bomb()\player)-1
-			freelast bomb()
+			KillItem bomb()
 			Goto label
 		EndIf
 		If (bf<-1 OR bf=0) AND bomb()\tunnel=0 AND btim>0
@@ -2024,12 +2024,12 @@ Repeat
 	Wend
 
 label:
-	newmem blck()
-	While globfree(blck())
+	ResetList blck()
+	While NextItem(blck())
 		blck()\fram+1
 		x.w=blck()\x : y.w=blck()\y
 		If blck()\fram>=32
-			globalloc doblock()
+			AddItem doblock()
 			a.b=mapxy2(x ASR 4,y ASR 4)
 			If a>1
 				num=#bonusshapes-2+a
@@ -2040,18 +2040,18 @@ label:
 			EndIf
 			doblock()\x=x,y,num
 			nomovemap(x ASR 4,y ASR 4)=False
-			mapxy(x ASR 4,y ASR 4)=0 : freelast blck()
+			mapxy(x ASR 4,y ASR 4)=0 : KillItem blck()
 		Else
 			BlitColl #blockdestruct+(blck()\fram ASR 2),x,y
 		EndIf
 	Wend
 
-	newmem explode()
-	While globfree(explode())
+	ResetList explode()
+	While NextItem(explode())
 		explode()\count-1
 		If explode()\count=0
 			Gosub RemoveExplode
-			freelast explode()
+			KillItem explode()
 		EndIf
 	Wend
 
@@ -2102,8 +2102,8 @@ label:
 			If pl_frame(cur)=40
 				pmove(cur)=0 : players_left-1
 				pstatus(cur)=0
-				Use lmaxlen 6 : longdiv #bigredcross,ingame(cur)-16,0
-				Use lmaxlen dbuffer
+				Use BitMap 6 : Blit #bigredcross,ingame(cur)-16,0
+				Use BitMap dbuffer
 			Else
 				BBlit dbuffer,32+shapeoffset(cur)+(pl_frame(cur) ASR 2),posx(cur)+7,posy(cur)+7
 			EndIf
@@ -2134,8 +2134,8 @@ label:
 
 	Next curyr
 
-	newmem bombmove()
-	While globfree(bombmove())
+	ResetList bombmove()
+	While NextItem(bombmove())
 		If bombmove()\btimer>1 Then bombmove()\btimer-1
 		x.w=(bombmove()\x+8) ASR 4 : y.w=(bombmove()\y+8) ASR 4
 
@@ -2177,7 +2177,7 @@ label:
 			Gosub Putbombdown
 			bomb()\btimer=bombmove()\btimer
 			If mapxy2(x,y)=1 Then bomb()\btimer=1
-			freelast bombmove()
+			KillItem bombmove()
 		EndIf
 	Wend
 
@@ -2208,8 +2208,8 @@ Return
 		VWait
 	Next anq
 
-	Use lmaxlen 0 : BlockScroll
-	Use lmaxlen 6 : BlockScroll
+	Use BitMap 0 : BlockScroll
+	Use BitMap 6 : BlockScroll
 
 	FlushBuffer 0
 	FlushBuffer 1
@@ -2228,7 +2228,7 @@ atimer:
 	timeleft.w=230
 	Line 312,196,312,1,11
 	BlitColl #sparkyshapes+(spark ASR 1),304,231-timeleft
-	longdiv #timershape,306,191
+	Blit #timershape,306,191
 Return
 
 BLITZ
@@ -2240,11 +2240,11 @@ players=1 : active(1)=player
 Gosub StatusBar
 
 x3.w=ingame(cur)
-Use lmaxlen 6
+Use BitMap 6
 Boxf x3,#statusy_flame,x3+16,#statusy_flame+1,6
 Boxf x3,#statusy_bomb,x3+16,#statusy_bomb+1,2
 
-Use lmaxlen 0
+Use BitMap 0
 cur=active(player)
 invisible(player)=0
 posx(player)=startx(player) : posy(player)=starty(player)
@@ -2267,24 +2267,24 @@ Repeat
 	Time50+1
 	DisplayBitMap 4,dbuffer
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	UnBuffer dbuffer
 
-	newmem doblock()
-	While globfree(doblock())
+	ResetList doblock()
+	While NextItem(doblock())
 		BlitColl doblock()\num,doblock()\x,doblock()\y
-		freelast doblock()
+		KillItem doblock()
 	Wend
 
-	newmem bomb()
-	While globfree(bomb())
+	ResetList bomb()
+	While NextItem(bomb())
 		If nomovemap(bomb()\x ASR 4,bomb()\y ASR 4)=0 Then bomb()\btimer=1
 		If bomb()\btimer>=0
 			bomb()\btimer-1
 			If bomb()\btimer=0
 				Gosub Explodebomb
 				bombdrop(bomb()\player)-1
-				freelast bomb()
+				KillItem bomb()
 				Goto label2
 			Else
 				If bomb()\tunnel=0 Then BlitColl bombframe(bomb()\btimer/4),bomb()\x,bomb()\y
@@ -2293,12 +2293,12 @@ Repeat
 	Wend
 
 label2:
-	newmem blck()
-	While globfree(blck())
+	ResetList blck()
+	While NextItem(blck())
 		blck()\fram+1
 		x.w=blck()\x : y.w=blck()\y
 		If blck()\fram>=32
-			globalloc doblock()
+			AddItem doblock()
 			doblock()\x=x,y,0
 			BlitColl 0,x,y
 			If mapxy2(x ASR 4,y ASR 4)>1
@@ -2306,18 +2306,18 @@ label2:
 				BlitColl #bonusshapes-2+mapxy2(x ASR 4,y ASR 4),x,y
 			EndIf
 			nomovemap(x ASR 4,y ASR 4)=False
-			mapxy(x ASR 4,y ASR 4)=0 : freelast blck()
+			mapxy(x ASR 4,y ASR 4)=0 : KillItem blck()
 		Else
 			BlitColl #blockdestruct+blck()\fram/4,x,y
 		EndIf
 	Wend
 
-	newmem explode()
-	While globfree(explode())
+	ResetList explode()
+	While NextItem(explode())
 		explode()\count-1
 		If explode()\count=0
 			Gosub RemoveExplode
-			freelast explode()
+			KillItem explode()
 		EndIf
 	Wend
 
@@ -2348,8 +2348,8 @@ label2:
 		If pl_frame(player)=40
 			pmove(player)=0 : players_left-1
 			pstatus(player)=0
-			Use lmaxlen 6 : longdiv #bigredcross,ingame(player)-16,0
-			Use lmaxlen dbuffer
+			Use BitMap 6 : Blit #bigredcross,ingame(player)-16,0
+			Use BitMap dbuffer
 		Else
 			BBlit dbuffer,32+shapeoffset(player)+(pl_frame(player) ASR 2),posx(player)+7,posy(player)+7
 		EndIf
@@ -2389,7 +2389,7 @@ BLITZ
 	If map2>1
 		mapxy2(x,y)=0
 		If mapxy(x,y)<#tunnelshapes
-			globalloc doblock()
+			AddItem doblock()
 			doblock()\x=x ASL 4,y ASL 4,0
 			BlitColl 0,x ASL 4,y ASL 4
 		EndIf
@@ -2435,7 +2435,7 @@ Return
 	If bombdrop(cur)<bomblimit(cur) AND cb=0 AND mapxy2(x,y)=0
 .Putbombdown:
 		bombdrop(cur)+1
-		globalloc bomb()
+		AddItem bomb()
 		If Int(Rnd(1000))<10
 			bomb()\frozen=-(Int(Rnd(50))+50)
 		Else
@@ -2459,12 +2459,12 @@ Return
 	canfire(cur)=1
 	If mapxy(bx,by)>=#tunnelshapes OR canthrow(cur)=0 Then Return
 
-	newmem bomb()
+	ResetList bomb()
 	found.b=0
-	While globfree(bomb()) AND found=0
+	While NextItem(bomb()) AND found=0
 		If ((bomb()\x+8)ASR 4)=bx AND ((bomb()\y+8)ASR 4)=by
 			canthrow(cur)-1
-			globalloc bombmove()
+			AddItem bombmove()
 			pldird.b=pl_dir(cur) ASR 3
 			bombmove()\xmove=bombmovedir(pldird)\xmove
 			bombmove()\ymove=bombmovedir(pldird)\ymove
@@ -2479,11 +2479,11 @@ Return
 			EndIf
 
 			nomovemap(bx,by)=0
-			globalloc doblock()
+			AddItem doblock()
 			doblock()\x=bomb()\x,bomb()\y,0
 			BlitColl 0,bomb()\x,bomb()\y
 
-			freelast bomb()
+			KillItem bomb()
 			found=True
 		EndIf
 	Wend
@@ -2491,30 +2491,30 @@ Return
 
 BLITZ
 .StatusBar
-	Use lmaxlen 6
-	longdiv #greybar,0,0
+	Use BitMap 6
+	Blit #greybar,0,0
 	If taggame OR players<1 Then Return
 	wide.w=304/players
 	x=(wide ASR 1)-19
 	For h=1 To players
 		cur=active(h)
 		ingame(cur)=x+26
-		longdiv shapeoffset(cur)+16,x+5,15
+		Blit shapeoffset(cur)+16,x+5,15
 		ink=playercol(cur)
 		If score(cur)<10
-			longdiv #smallnumbers+score(cur),x-8,9
+			Blit #smallnumbers+score(cur),x-8,9
 		Else
-			longdiv #smallnumbers+(score(cur)/10),x-10,9
-			longdiv #smallnumbers+(score(cur) MOD 10),x-6,9
+			Blit #smallnumbers+(score(cur)/10),x-10,9
+			Blit #smallnumbers+(score(cur) MOD 10),x-6,9
 		EndIf
 		If conwins(cur)<10
-			longdiv #smallnumbers+conwins(cur),x-8,18
+			Blit #smallnumbers+conwins(cur),x-8,18
 		Else
-			longdiv #smallnumbers+(conwins(cur)/10),x-10,18
-			longdiv #smallnumbers+(conwins(cur) MOD 10),x-6,18
+			Blit #smallnumbers+(conwins(cur)/10),x-10,18
+			Blit #smallnumbers+(conwins(cur) MOD 10),x-6,18
 		EndIf
 		x+26
-		longdiv #statusbarpics,x-13,6
+		Blit #statusbarpics,x-13,6
 		Boxf x,8,x+bomblimit(cur)ASL 1,9,2
 		Boxf x,16,x+plength(cur)ASL 1,17,6
 		If pstatus(cur)
@@ -2523,7 +2523,7 @@ BLITZ
 		EndIf
 		x+wide-26
 	Next h
-	Use lmaxlen 0
+	Use BitMap 0
 Return
 
 .PowerUPs:
@@ -2537,8 +2537,8 @@ llength:
 	If plength(cur)<8 Then plength(cur)+1
 	Sound 9,channel(cur)
 	x3.w=ingame(cur)
-	Use lmaxlen 6 : Boxf x3,#statusy_flame,x3+plength(cur)*2,#statusy_flame+1,6
-	Use lmaxlen dbuffer
+	Use BitMap 6 : Boxf x3,#statusy_flame,x3+plength(cur)*2,#statusy_flame+1,6
+	Use BitMap dbuffer
 Return
 
 Gameboy:
@@ -2554,8 +2554,8 @@ Addbomb:
 	If bomblimit(cur)<8 Then bomblimit(cur)+1
 	Sound 7,channel(cur)
 	x3.w=ingame(cur)
-	Use lmaxlen 6 : Boxf x3,#statusy_bomb,x3+bomblimit(cur)*2,#statusy_bomb+1,2
-	Use lmaxlen dbuffer
+	Use BitMap 6 : Boxf x3,#statusy_bomb,x3+bomblimit(cur)*2,#statusy_bomb+1,2
+	Use BitMap dbuffer
 Return
 
 Gflamer:
@@ -2563,8 +2563,8 @@ Gflamer:
 	plength(cur)=8
 	Sound 4,channel(cur)
 	x3.w=ingame(cur)
-	Use lmaxlen 6 : Boxf x3,#statusy_flame,x3+16,#statusy_flame+1,6
-	Use lmaxlen dbuffer
+	Use BitMap 6 : Boxf x3,#statusy_flame,x3+16,#statusy_flame+1,6
+	Use BitMap dbuffer
 Return
 
 Newblock:
@@ -2584,7 +2584,7 @@ Newblock:
 	nomovemap(x2,y2)=True
 	mapxy(x2,y2)=1
 	BlitColl 1,x2 ASL 4,y2 ASL 4
-	globalloc doblock()
+	AddItem doblock()
 	doblock()\x=x2 ASL 4,y2 ASL 4,1
 ;	doblock()\y=y2 ASL 4 : doblock()\num=1
 Return
@@ -2601,7 +2601,7 @@ Alldropbomb:
 				bombdrop(n)+1
 				BlitColl bombframe(13),x2,y2
 			EndIf
-			globalloc bomb()
+			AddItem bomb()
 ;x,y,timer,player,tunnel,frozen
 			bomb()\x=x2,y2,100,n,(mapxy(xb,yb)>=#tunnelshapes),0
 			nomovemap(xb,yb)=1
@@ -2612,8 +2612,8 @@ Return
 Explodeall
 ; This will explode all bombs (except the current players)
 	Sound 1,channel(cur)
-	newmem bomb()
-	While globfree(bomb())
+	ResetList bomb()
+	While NextItem(bomb())
 		If bomb()\player<>cur Then bomb()\btimer=1
 	Wend
 Return
@@ -2662,8 +2662,8 @@ GoldBomb:
 	Sound 10,channel(cur)
 	bomblimit(cur)=8
 	x3.w=ingame(cur)
-	Use lmaxlen 6 : Boxf x3,#statusy_bomb,x3+16,#statusy_bomb+1,2
-	Use lmaxlen dbuffer
+	Use BitMap 6 : Boxf x3,#statusy_bomb,x3+16,#statusy_bomb+1,2
+	Use BitMap dbuffer
 Return
 
 Shield:
@@ -2675,9 +2675,9 @@ Shield:
 	If pstatus(cur)>s2 Then pstatus(cur)=s2
 	x2.w=pstatus(cur)/18
 	x3.w=ingame(cur)
-	Use lmaxlen 6 : Boxf x3,#statusy_shield,x3+x2,#statusy_shield+1,28
+	Use BitMap 6 : Boxf x3,#statusy_shield,x3+x2,#statusy_shield+1,28
 	If pstatus(cur)<shieldtime ASL 2 Then Boxf x3+x2+1,#statusy_shield,x3+16,#statusy_shield+1,12
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 Return
 
 FreezeBomb:
@@ -2686,13 +2686,13 @@ FreezeBomb:
 ;last one has gone) and if it is you)
 	Sound 6,channel(cur)
 	For h=1 To 4 : bombcount(h)=0 : Next h
-	newmem bomb()
-	While globfree(bomb())
+	ResetList bomb()
+	While NextItem(bomb())
 		owner=bomb()\player
 		bombcount(owner)+1
 		If owner<>cur AND bombcount(owner)<bomblimit(owner) AND bomb()\btimer>0
 			If mapxy(bomb()\x ASR 4,bomb()\y ASR 4)=0
-				globalloc doblock()
+				AddItem doblock()
 				doblock()\x=bomb()\x,bomb()\y,#freezebomb
 				BlitColl #freezebomb,bomb()\x,bomb()\y
 			EndIf
@@ -2708,12 +2708,12 @@ Unshield:
 			pstatus(h2)-shieldtime
 			If pstatus(h2)<0 Then pstatus(h2)=0
 			x3=ingame(h2)
-			Use lmaxlen 6 : Boxf x3,24,x3+16,25,12
+			Use BitMap 6 : Boxf x3,24,x3+16,25,12
 			If pstatus(h2)
 				x2.w=pstatus(h2)/18
 				Boxf x3,24,x3+x2,25,28
 			EndIf
-			Use lmaxlen dbuffer
+			Use BitMap dbuffer
 		EndIf
 	Next h
 Return
@@ -2734,8 +2734,8 @@ CanThrow:
 Return
 
 BombBlock:
-	newmem bomb()
-	While globfree(bomb())
+	ResetList bomb()
+	While NextItem(bomb())
 		x2=bomb()\x ASR 4 : y2=bomb()\y ASR 4
 		notplayer=0
 		For h2=1 To players
@@ -2749,9 +2749,9 @@ BombBlock:
 			x=bomb()\x
 			y=bomb()\y
 			BlitColl 1,x,y
-			globalloc doblock()
+			AddItem doblock()
 			doblock()\x=x,y,1
-			freelast bomb()
+			KillItem bomb()
 		EndIf
 	Wend
 Return
@@ -2775,7 +2775,7 @@ BLITZ
 UpdateShield:
 	x3=ingame(cur)
 	If pmove(cur)=1
-		Use lmaxlen 6
+		Use BitMap 6
 		If pstatus(cur)
 			x2.w=pstatus(cur)/18
 			Boxf x3,24,x3+x2,25,28
@@ -2783,7 +2783,7 @@ UpdateShield:
 		Else
 			Boxf x3,#statusy_shield,x3+16,#statusy_shield+1,12
 		EndIf
-		Use lmaxlen dbuffer
+		Use BitMap dbuffer
 	EndIf
 Return
 
@@ -2794,17 +2794,17 @@ BLITZ
 	nomovemap(x,y)=0
 	mapxy2(x,y)=1
 	blength.b=plength(bomb()\player)
-	globalloc explode()
+	AddItem explode()
 	explode()\count=32
 	explode()\x=x : explode()\y=y
 	If mapxy(x,y)=0
-		globalloc doblock()
+		AddItem doblock()
 		doblock()\x=bmx,bmy,10 ; : doblock()\y=bmy
 		BlitColl 10,bmx,bmy
 	EndIf
 	Sound 2,channel(bomb()\player)
 
-	##[$80CA] explode()
+	USEPATH explode()
 
 ;Left of bomb
 Left:
@@ -2816,13 +2816,13 @@ Left:
 		If map>=#tunnelshapes AND map2<#tunnelshapes AND map<>#trightexit Then Pop For : Goto Right
 		map2=map
 		If map=1
-			globalloc blck()
+			AddItem blck()
 			blck()\x=h ASL 4,bmy,0
 			Pop For
 			mapxy(h,y)=2 : Goto Right
 		EndIf
 		If mapxy2(h,y)>1 AND map=0
-			mapxy(h,y)=1 : mapxy2(h,y)=0 : globalloc blck()
+			mapxy(h,y)=1 : mapxy2(h,y)=0 : AddItem blck()
 			blck()\x=h ASL 4,bmy,16
 			Pop For : Goto Right
 		EndIf
@@ -2830,7 +2830,7 @@ Left:
 		If nomovemap(h,y)=1 Then Pop For : nomovemap(h,y)=0 : mapxy2(h,y)=1 : Goto Right
 		If mapxy2(h,y)=1 Then Pop For : Goto Right
 		If map=0
-			globalloc doblock()
+			AddItem doblock()
 			If h<>x-blength Then doblock()\x=h ASL 4,bmy,12 : BlitColl 12,h ASL 4,bmy
 			If h=x-blength Then doblock()\x=h ASL 4,bmy,11 : BlitColl 11,h ASL 4,bmy
 			mapxy2(h,y)=1
@@ -2848,12 +2848,12 @@ Right:
 		If map>=#tunnelshapes AND map2<#tunnelshapes AND map<>#tleftexit Then Pop For : Goto Up
 		map2=map
 		If map=1
-			globalloc blck()
+			AddItem blck()
 			blck()\x=h ASL 4,bmy,0
 			Pop For : mapxy(h,y)=2 : Goto Up
 		EndIf
 		If mapxy2(h,y)>1 AND map=0
-			mapxy(h,y)=1 : mapxy2(h,y)=0 : globalloc blck()
+			mapxy(h,y)=1 : mapxy2(h,y)=0 : AddItem blck()
 			blck()\x=h ASL 4,bmy,16
 			Pop For : Goto Up
 		EndIf
@@ -2861,7 +2861,7 @@ Right:
 		If nomovemap(h,y)=1 Then Pop For : nomovemap(h,y)=0 : mapxy2(h,y)=1 : Goto Up
 		If mapxy2(h,y)=1 Then Pop For : Goto Up
 		If map=0
-			globalloc doblock()
+			AddItem doblock()
 			If h<>x+blength Then doblock()\x=h ASL 4,bmy,12 : BlitColl 12,h ASL 4,bmy
 			If h=x+blength Then doblock()\x=h ASL 4,bmy,13 : BlitColl 13,h ASL 4,bmy
 			mapxy2(h,y)=1
@@ -2879,12 +2879,12 @@ Up:
 		If map>=#tunnelshapes AND map2<#tunnelshapes AND map<>#tdownexit Then Pop For : Goto Down
 		map2=map
 		If map=1
-			globalloc blck()
+			AddItem blck()
 			blck()\x=bmx,h ASL 4,0
 			Pop For : mapxy(x,h)=2 : Goto Down
 		EndIf
 		If mapxy2(x,h)>1 AND map=0
-			mapxy(x,h)=1 : mapxy2(x,h)=0 : globalloc blck()
+			mapxy(x,h)=1 : mapxy2(x,h)=0 : AddItem blck()
 			blck()\x=bmx,h ASL 4,16
 			Pop For : Goto Down
 		EndIf
@@ -2892,7 +2892,7 @@ Up:
 		If nomovemap(x,h)=1 Then Pop For : nomovemap(x,h)=0 : mapxy2(x,h)=1 : explode()\right+1: Goto Down
 		If mapxy2(x,h)=1 Then Pop For : Goto Down
 		If map=0
-			globalloc doblock()
+			AddItem doblock()
 			If h<>y-blength Then doblock()\x=bmx,h ASL 4,15 : BlitColl 15,bmx,h ASL 4
 			If h=y-blength Then doblock()\x=bmx,h ASL 4,14 : BlitColl 14,bmx,h ASL 4
 			mapxy2(x,h)=1
@@ -2909,12 +2909,12 @@ Down:
 		If map>=#tunnelshapes AND map2<#tunnelshapes AND map<>#tupexit Then Pop For : Return
 		map2=map
 		If map=1
-			globalloc blck()
+			AddItem blck()
 			blck()\x=bmx,h ASL 4,0
 			Pop For : mapxy(x,h)=2 : Return
 		EndIf
 		If mapxy2(x,h)>1 AND map=0
-			mapxy(x,h)=1 : mapxy2(x,h)=0 : globalloc blck()
+			mapxy(x,h)=1 : mapxy2(x,h)=0 : AddItem blck()
 			blck()\x=bmx,h ASL 4,16
 			Pop For : Return
 		EndIf
@@ -2922,7 +2922,7 @@ Down:
 		If nomovemap(x,h)=1 Then Pop For : nomovemap(x,h)=0 : mapxy2(x,h)=1 : Return
 		If mapxy2(x,h)=1 Then Pop For : Return
 		If map=0
-			globalloc doblock()
+			AddItem doblock()
 			If h<>y+blength Then doblock()\x=bmx,h ASL 4,15 : BlitColl 15,bmx,h ASL 4
 			If h=y+blength Then doblock()\x=bmx,h ASL 4,16 : BlitColl 16,bmx,h ASL 4
 			mapxy2(x,h)=1
@@ -2943,7 +2943,7 @@ BLITZ
 			mapxy2(h,y)=0
 			If mapxy(h,y)<#tunnelshapes
 				BlitColl 0,h ASL 4,y22
-				globalloc doblock()
+				AddItem doblock()
 				doblock()\x=h ASL 4,y22,0
 			EndIf
 		EndIf
@@ -2956,7 +2956,7 @@ BLITZ
 			mapxy2(x,h)=0
 			If mapxy(x,h)<#tunnelshapes
 				BlitColl 0,x22,h ASL 4
-				globalloc doblock()
+				AddItem doblock()
 				doblock()\x=x22,h ASL 4,0
 			EndIf
 		EndIf
@@ -2973,7 +2973,7 @@ Return
 		StartMedModule 0
 		medplay=1
 	EndIf
-	##[$AE83] 3,1 : Use lmaxlen 3
+	##[$AE83] 3,1 : Use BitMap 3
 	BlockScroll : VWait
 	##[$A485] ?getreadypbm,3,#pal256
 	ClearPalette{0,256}
@@ -3010,7 +3010,7 @@ Return
 
 		For player=1 To 4
 			If pmove(player)=0
-				longdiv #staticshapes+pl_frame(player),staticx(player),staticy(player)
+				Blit #staticshapes+pl_frame(player),staticx(player),staticy(player)
 				pl_frame(player)+1
 				pl_frame(player) AND %111
 			EndIf
@@ -3024,7 +3024,7 @@ Return
 			If pmove(player)=0 AND jf
 				players+1
 				pmove(player)=1 : active(players)=player
-				longdiv #staticshapes+7+player,staticx(player),staticy(player)
+				Blit #staticshapes+7+player,staticx(player),staticy(player)
 			EndIf
 
 			If pmove(player)=1
@@ -3055,7 +3055,7 @@ Return
 	DisplayBitMap 0,0
 	DisplayPalette 0,2
 	CreateDisplay 0
-	Use lmaxlen 0 : ##[$AE83] 0
+	Use BitMap 0 : ##[$AE83] 0
 	Gosub haltmed
 Return
 
@@ -3079,14 +3079,14 @@ Return
 	CreateDisplay 1
 	CrMDecrunch ?firsttoaga,##[$A591](0)
 	##[$A485] ##[$A591](0),3,#pal256
-	Use lmaxlen 3 : ##[$AE83] 3
+	Use BitMap 3 : ##[$AE83] 3
 	##[$AE85] %1,0
 	##[$AE81] #font,161,3,"F I R S T	 TO	 3	 G A M E S"
 	##[$AE81] #font,160,2,"F I R S T	 TO	 3	 G A M E S",%1,31
 
 	players=0
 	For h=1 To 4
-		If (playerstatus ##[$80CD] h) Then players+1
+		If (playerstatus BitTst h) Then players+1
 	Next h
 
 	wide=320/players
@@ -3094,11 +3094,11 @@ Return
 
 	y=16
 	For h=1 To 4
-		If (playerstatus ##[$80CD] h)
-			longdiv #blokesAGA-1+h,x,y
+		If (playerstatus BitTst h)
+			Blit #blokesAGA-1+h,x,y
 			If score(h)
 				For s=1 To score(h)
-					longdiv #blokesAGA+6,x+6,y+64+s*22
+					Blit #blokesAGA+6,x+6,y+64+s*22
 				Next s
 			EndIf
 			If h=winner Then x2=x
@@ -3114,7 +3114,7 @@ Return
 	If winner<>0
 		score(winner)+1 : conwins(winner)+1
 		Sound 2,%1111
-		longdiv #blokesAGA+6,x2+6,y+64+score(winner)*22
+		Blit #blokesAGA+6,x2+6,y+64+score(winner)*22
 		VWait 20
 	EndIf
 	Gosub WaitFireAll
@@ -3137,11 +3137,11 @@ Return
 	ClearPalette{0,256}
 	DisplayBitMap 1,3
 	DisplayPalette 1,0
-	Use lmaxlen 3 : ##[$AE83] 3,1
+	Use BitMap 3 : ##[$AE83] 3,1
 
 	If winner
-		longdiv #blokesAGA-1+winner,138,97
-		longdiv #blokesAGA+6,145,81
+		Blit #blokesAGA-1+winner,138,97
+		Blit #blokesAGA+6,145,81
 		If conwins(winner) MOD 3<>0 AND speedtrialstatus
 			winsleft.b=3-(conwins(winner) MOD 3)
 			##[$AE85] %1,33
@@ -3166,7 +3166,7 @@ Return
 	Else
 		##[$AE85] %1,33
 		##[$AE81] #lush1,160,83,"DRAWN"
-		longdiv #blokesAGA+6,143,117
+		Blit #blokesAGA+6,143,117
 		##[$AE81] #lush1,160,153,"GAME"
 	EndIf
 
@@ -3183,7 +3183,7 @@ Return
 .SpeedResult:
 	DisplayBitMap 0,0
 	##[$AE85] %1,28
-	Use lmaxlen 3 : ##[$AE83] 3,1
+	Use BitMap 3 : ##[$AE83] 3,1
 
 	CrMDecrunch ?wingameice,##[$A591](0)
 	##[$A485] ##[$A591](0),3,#pal256
@@ -3191,11 +3191,11 @@ Return
 	##[$8F05] #pal256,136,24,255,255,0
 
 	If gotit=1
-		longdiv #blokesAGA+5,143,79
-		longdiv #blokesAGA-1+player,138,106
+		Blit #blokesAGA+5,143,79
+		Blit #blokesAGA-1+player,138,106
 		##[$AE81] #lush1,160,40,"CONGRATULATIONS!"
 	Else
-		longdiv #blokesAGA-1+player,138,106
+		Blit #blokesAGA-1+player,138,106
 		##[$AE81] #lush1,160,40,"BETTER LUCK NEXT TIME!"
 	EndIf
 
@@ -3233,13 +3233,13 @@ Return
 	CrMDecrunch ?drawbackice,##[$A591](0)
 	##[$A485] ##[$A591](0),3,#pal256
 
-	Use lmaxlen 3 : ##[$AE83] 3,1
+	Use BitMap 3 : ##[$AE83] 3,1
 	##[$AE85] %1,0
 	If winner
 		suc=##[$A484](?winbackpal,#pal256)
-		longdiv #blokesAGA+7,160,211
-		longdiv #blokesAGA-1+winner,135,127
-		longdiv #blokesAGA+4,131,93
+		Blit #blokesAGA+7,160,211
+		Blit #blokesAGA-1+winner,135,127
+		Blit #blokesAGA+4,131,93
 	Else
 		##[$AE81] #lush1,160,120,"DRAWN CONTEST!"
 	EndIf
@@ -3259,7 +3259,7 @@ Return
 	Until n
 	Gosub haltmed
 	PalFadeOut {1,0,256}
-	Use lmaxlen 0 : ##[$AE83] 0,1
+	Use BitMap 0 : ##[$AE83] 0,1
 	CreateDisplay 0
 	VWait 5
 Return
@@ -3299,14 +3299,14 @@ Return
 
 				selectedmaps=0
 				For h=0 To #mapcount-1
-					If (mapstatus ##[$80CD] h) Then selectedmaps+1
+					If (mapstatus BitTst h) Then selectedmaps+1
 				Next h
 
 				n=-1
 				s.w=0
 				While s<selectedmaps
 					n+1
-					If (mapstatus ##[$80CD] n)
+					If (mapstatus BitTst n)
 						maparray(s)=n
 						s+1
 					EndIf
@@ -3384,7 +3384,7 @@ Return
 	DisplayPalette 0,0
 	CrMDecrunch ?loadinganim,##[$A591](0)
 	##[$9C81] ##[$A591](0),0,#pal32
-	DisplayBitMap 0,0 : Use lmaxlen 0
+	DisplayBitMap 0,0 : Use BitMap 0
 	PalFade {0,#pal32,32}
 	DisplayPalette 0,0
 	##[$9C83] Off
@@ -3428,7 +3428,7 @@ LoadingEnd:
 	BLITZ
 	PalFadeOut{0,#pal32,32}
 	DisplayBitMap 0,0
-	Use lmaxlen 0 : BlockScroll
+	Use BitMap 0 : BlockScroll
 	VWait
 Return
 
@@ -3447,20 +3447,20 @@ Return
 #hitmax=40
 .KillYerFriends:
 BLITZ
-Free lmaxlen 2
+Free BitMap 2
 BitPlanesBitMap 3,2,%111111
 ##[$A484] ?defpalpal,#pal32
 
-Use lmaxlen 2 : ##[$AE83] 2
+Use BitMap 2 : ##[$AE83] 2
 
 BlockScroll 0
 For x.w=0 To 19
-	longdiv #pangblock,(x*16)+8,8
-	longdiv #pangblock,(x*16)+8,232
+	Blit #pangblock,(x*16)+8,8
+	Blit #pangblock,(x*16)+8,232
 Next x
 For y.w=1 To 14
-	longdiv #pangblock,8,(y*16)+8
-	longdiv #pangblock,312,(y*16)+8
+	Blit #pangblock,8,(y*16)+8
+	Blit #pangblock,312,(y*16)+8
 Next y
 
 ClearPalette{0,32}
@@ -3500,10 +3500,10 @@ DisplayPalette 5,#pal32
 Boxf 0,240,319,255,0
 VWait : ##[$A59E]
 ##[$AE81] #font,160,246,"K I L L	Y E R	F R I E N D S",%1,28
-Use lmaxlen 1
+Use BitMap 1
 Scroll 0,0,320,256,0,0,2
 ShapesBitMap 1,0
-Use lmaxlen 0
+Use BitMap 0
 
 For h=1 To #num
 	pang(h)\x=36+(h-1)*60
@@ -3535,17 +3535,17 @@ Repeat
 	VWait
 	DisplayBitMap 5,dbuffer
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	UnQueue dbuffer,2
 
-	newmem act_bullet()
-	While globfree(act_bullet())
+	ResetList act_bullet()
+	While NextItem(act_bullet())
 		owner=act_bullet()\owner
 		x.w=act_bullet()\x : y.w=act_bullet()\y
 		bombhit.b=##[$A004](0,3,x,y)
 		If bombhit<>-1
 			player_b(owner)-1
-			freelast act_bullet()
+			KillItem act_bullet()
 			pang(bombhit+1)\hits+1
 			If pang(bombhit+1)\hits=#hitmax
 				num_players-1 : Sound 2,%1100
@@ -3553,7 +3553,7 @@ Repeat
 		Else
 			act_bullet()\y-6 : y-6
 			If y<20
-				player_b(owner)-1 : freelast act_bullet()
+				player_b(owner)-1 : KillItem act_bullet()
 			Else
 				QBlit dbuffer,#pangshapes+3+owner,x+6,y
 			EndIf
@@ -3574,7 +3574,7 @@ Repeat
 
 			If jf AND player_b(h)<5 AND canfire(h)=0
 				Sound 13,%0001,10
-				globalloc act_bullet()
+				AddItem act_bullet()
 				act_bullet()\x=posx(h),212,h
 ;				act_bullet()\y=212
 ;				act_bullet()\owner=h
@@ -3612,7 +3612,7 @@ Repeat
 			If pang(h)\spd<8 Then pang(h)\spd+0.3
 
 			QBlit dbuffer,#pangshapes+h-1,newx,newy
-			longdiv #pangshapes+9+(pang(h)\hits/3),newx,newy+1
+			Blit #pangshapes+9+(pang(h)\hits/3),newx,newy+1
 
 			##[$A002] h-1,newx-16,newy-16,newx+16,newy+16
 		Else
@@ -3628,14 +3628,14 @@ For h=1 To 4
 Next h
 
 SyncBitmaps{disp}
-Use lmaxlen 2
+Use BitMap 2
 ClearList act_bullet()
 FlushQueue 0
 FlushQueue 1
 disp.b=5
 
 .choosepup
-Use lmaxlen 2 : BlockScroll 16
+Use BitMap 2 : BlockScroll 16
 VWait : ##[$A59E]
 ##[$AE83] 2,1 : ##[$AE85] %1,28
 If num_players=0
@@ -3647,7 +3647,7 @@ EndIf
 
 dbuffer=0
 For x=0 To 60 Step 4
-	Use lmaxlen 0
+	Use BitMap 0
 	Line 159-x,134,160+x,134,16
 	VWait
 Next x
@@ -3655,7 +3655,7 @@ For y=1 To 55
 	VWait
 	DisplayBitMap disp,dbuffer
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	Scroll 60,100,200,y,60,135-y,2
 Next y
 VWait
@@ -3666,7 +3666,7 @@ If num_players=1
 	player=winner
 	Restore WinKillYF_data
 	Read num
-	Use lmaxlen 2 : BlockScroll 16
+	Use BitMap 2 : BlockScroll 16
 	VWait
 	##[$AE81] #lush1,160,20,"Congratulations Player "+Str$(player)+"!"
 	For h=0 To num-1
@@ -3678,7 +3678,7 @@ If num_players=1
 		VWait
 		DisplayBitMap disp,dbuffer
 		dbuffer=1-dbuffer
-		Use lmaxlen dbuffer
+		Use BitMap dbuffer
 		Scroll 60,h,200,54,60,80,2
 	Next h
 	VWait
@@ -3686,7 +3686,7 @@ If num_players=1
 	If dbuffer=1 Then ShapesBitMap 1,0
 	VWait
 	DisplayBitMap disp,0
-	Use lmaxlen 0
+	Use BitMap 0
 	For y=0 To 41
 		Line 18,180-y,301,180-y,16
 		Line 18,181+y,301,181+y,16
@@ -3744,14 +3744,14 @@ If num_players=1
 		EndIf
 		jf=##[$A006](winner) : If winner=4 AND keyboard4 Then jf=keyfire
 
-	Until jf AND BGPowers ##[$80CD] pow
+	Until jf AND BGPowers BitTst pow
 
 	nextgamepowerup=pow
 	##[$A107] 0,0,##[$A10B](0,powx(pow),powy(pow)),3692,16,16
 	##[$A107] 0,0,##[$A10B](0,powx(pow),powy(pow)),3704,16,16
 
 	For y=41 To 0 Step -1
-		Use lmaxlen 0
+		Use BitMap 0
 		Line 18,180-y,301,180-y,16
 		Line 18,181+y,301,181+y,16
 		VWait
@@ -3759,7 +3759,7 @@ If num_players=1
 
 	x=104
 	For h=1 To 4
-		longdiv shapeoffset(h)+16,x+8,181
+		Blit shapeoffset(h)+16,x+8,181
 		powx(h-1)=x : powy(h-1)=173
 		x+32
 	Next h
@@ -3790,9 +3790,9 @@ If disp<>0
 	VWait
 	disp=0
 EndIf
-Use lmaxlen 0 : BlockScroll
+Use BitMap 0 : BlockScroll
 VWait : ##[$A59E]
-Free lmaxlen 2
+Free BitMap 2
 Return
 
 KYF_About:
@@ -3811,7 +3811,7 @@ WinKillYF_data:
 ##[$A088] #pal32,1
 
 ;BitMap 2,320,256,5
-Free lmaxlen 2
+Free BitMap 2
 BitPlanesBitMap 3,2,%11111
 playersold=players
 escape=0
@@ -3825,9 +3825,9 @@ address.l=?maps+(#mapcount*247)
 ClearPalette{0,32}
 DisplayPalette 0,0
 VWait
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll
-longdiv #greybar,0,0
+Blit #greybar,0,0
 
 ; store5 map in array and draw it
 For y=0 To 12
@@ -3849,7 +3849,7 @@ Scroll 304,0,16,224,304,32
 Boxf 304,0,319,31,16
 ##[$AE83] 0
 ##[$AE81] #font,160,246,"B L O W	 U P	 Y E R	 F R I E N D S",%1,28
-Use lmaxlen 2
+Use BitMap 2
 Scroll 0,0,320,256-32,0,0,0
 ShapesBitMap 0,1
 
@@ -3886,7 +3886,7 @@ Tag:
 BLITZ
 If players<2 Then Return
 If taggame=1
-	Use lmaxlen 0
+	Use BitMap 0
 	Scroll 0,0,320,256-32,0,0,2
 	timeleft=230
 	PalFade{0,1,32}
@@ -3904,7 +3904,7 @@ deathsound=0 : escape=0 : shade.w=0
 
 dbuffer.b=0
 
-Use lmaxlen 0
+Use BitMap 0
 For h=1 To players
 	cur=active(h)
 	invisible(cur)=0
@@ -3929,10 +3929,10 @@ For n=1 To iters
 		h2.w=active(h)
 		bomber=h2
 		posx=startx(h2) : posy=starty(h2)
-		Use lmaxlen 1
-		longdiv shapeoffset(h2)+16,152,16
-		Use lmaxlen 0
-		longdiv shapeoffset(h2)+16,152,16
+		Use BitMap 1
+		Blit shapeoffset(h2)+16,152,16
+		Use BitMap 0
+		Blit shapeoffset(h2)+16,152,16
 		BBlit 1,9,posx,posy+32
 
 		VWait 25-(iters-n+1)
@@ -3941,7 +3941,7 @@ For n=1 To iters
 Next n
 
 trut.l=0
-Use lmaxlen 0
+Use BitMap 0
 ##[$A084] 1
 
 Repeat
@@ -3952,7 +3952,7 @@ Repeat
 	fadish+fadishdir : If fadish<0.3 OR fadish>1.8 Then fadishdir=-fadishdir
 	DisplayPalette 0,0
 	dbuffer=1-dbuffer
-	Use lmaxlen dbuffer
+	Use BitMap dbuffer
 	UnBuffer dbuffer
 
 	If RawStatus(25)
@@ -3974,10 +3974,10 @@ Repeat
 			by.w=Abs(posy(bomber)-posy(cur))
 			If bx<8 AND by<8 AND bomber<>cur AND pmove(bomber)=1
 				Sound 5,%1111
-				Use lmaxlen 1-dbuffer
-				longdiv shapeoffset(cur)+16,152,16
-				Use lmaxlen dbuffer
-				longdiv shapeoffset(cur)+16,152,16
+				Use BitMap 1-dbuffer
+				Blit shapeoffset(cur)+16,152,16
+				Use BitMap dbuffer
+				Blit shapeoffset(cur)+16,152,16
 				bomber=cur
 				trut=150
 			EndIf

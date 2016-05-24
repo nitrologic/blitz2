@@ -8,13 +8,13 @@
 ;*					 VERSION	 OF BLITZ BASIC	TWO									 *
 ;*																													 *
 ;*************************************************************
-allocst 0,11
-localstat 0,0,0,640,256,$1800,"test",2,1
+Screen 0,11
+Window 0,0,0,640,256,$1800,"test",2,1
 WindowOutput 0
 Green 0,0,0,0:Green 2,10,0,0:Green 3,15,4,4
 ScreensBitMap 0,0
 BlockScroll
-Use lmaxlen 0
+Use BitMap 0
 a$="BLITZ":b$="BASIC":c$="TWO"
 Statement	large{d$,x,y,af,p,j}
 	Shared ln,vn

@@ -56,13 +56,13 @@ f$=ASLFileRequest$("Videoscape-Object",pa$,fi$) ; Oh... hmm.. the command i thin
 
 ; Here we open a screen with Resolution 320*200*1 and a "blank" window
 
-allocst 0,0,0,320,255,1,$00,"Particle 1.0",0,1
-localstat 0,0,11,320,189,$1c00,"",1,0
+Screen 0,0,0,320,255,1,$00,"Particle 1.0",0,1
+Window 0,0,11,320,189,$1c00,"",1,0
 ScreensBitMap 0,0		 ; Bitmap 0 is from Screen 0
 
-lmaxlen 1,320,255,1		; Bitmap 1 to prepare Double-buffering...
+BitMap 1,320,255,1		; Bitmap 1 to prepare Double-buffering...
 
-Use lmaxlen 0					; ... but first we need Bitplane 1 for our work.
+Use BitMap 0					; ... but first we need Bitplane 1 for our work.
 
 
 ; Loading routine for any Videoscape 3DG1 ASCII-File:
@@ -155,7 +155,7 @@ Repeat
 	VWait
 	DisplayBitMap 0,bmp
 	bmp=1-bmp
-	Use lmaxlen bmp
+	Use BitMap bmp
 	BlockScroll
 
 	; calculate constantes in formula
@@ -266,7 +266,7 @@ Repeat
 
 ;	 x=xx * x(i) + xy * y(i) + xz * z(i)
 
-		GetReg d4,Addr lmaxlen(bmp)
+		GetReg d4,Addr BitMap(bmp)
 		GetReg d0,mem
 		GetReg d1,i
 

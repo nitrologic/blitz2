@@ -4,7 +4,7 @@
 ; need to use the icon bum5:blitzblank/blitzblank.info
 ; or else it crashes!
 
-##[$80CB]
+CloseEd
 
 ;We need these OS-includes
 XInclude commodities.bb2

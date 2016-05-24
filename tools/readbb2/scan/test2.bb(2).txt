@@ -37,7 +37,7 @@ Next
 
 If WriteMem(0,"skidconfig")
 	FileInput 0
-	##[$80CA] config
+	USEPATH config
 	\init=Edit$(80):\dial=Edit$(80)
 	For i=0 To 8:\func[i]=Edit$(80):Next
 	For i=0 To 11:\name[i]=Edit$(80):Next
@@ -60,7 +60,7 @@ NEWTYPE .cheader
 	pic.b[64*32/4]
 End NEWTYPE
 
-lmaxlen 6,608,76,4 ;37696 bytes (16 color si's interface)
+BitMap 6,608,76,4 ;37696 bytes (16 color si's interface)
 
 ;LoadBitMap 0,"banner.iff"
 LoadBank 0,g$+"crash4.iff"
@@ -193,21 +193,21 @@ Shared cvh(),np()
 
 	nxcar.w=np(x)\car
 	*car.cheader=cvh(nxcar)
-	temp.w=##[$80D1] lmaxlen
-	Use lmaxlen 11:BlockScroll
+	temp.w=Used BitMap
+	Use BitMap 11:BlockScroll
 	If *car\name<>""
-		##[$FEDB] &*car\pic,Peek.l(Addr lmaxlen(11)+8),64*32/4
+		##[$FEDB] &*car\pic,Peek.l(Addr BitMap(11)+8),64*32/4
 	EndIf
 	ReMap 1,4:ReMap 2,5:ReMap 3,6+x
 
 	MakeCookie #cvhshape
-	Use lmaxlen 6
+	Use BitMap 6
 
 ;		AddBox 5,5+i*3,14+i*72,22,68,34,8
 	Boxf 14+x*72,22,14+x*72+68,29+22,2
 	ClipBlit #cvhshape,14+x*72,22
 
-	Use lmaxlen temp
+	Use BitMap temp
 	##[$BA86] 5+x*3
 End Statement
 
@@ -226,7 +226,7 @@ DisplayBitMap 0,6:DisplayPalette 0,0
 CreateDisplay 0
 BitMapOutput 6
 
-Use lmaxlen 6
+Use BitMap 6
 Gosub setupui
 Gosub getplayers
 
@@ -334,7 +334,7 @@ CNIF 1=0
 		If m=11 Then soff=QWrap(soff+1,0,3):Gosub setserial:##[$BA85]
 		If m=10 Then n=0:chg=-1
 		;
-		##[$80CA] config
+		USEPATH config
 		\init=##[$BA8D](15):\dial=##[$BA8D](16)
 		For i=0 To 3
 			\name[i+soff*4]=##[$BA8D](25+i)
@@ -606,7 +606,7 @@ Return
 setserial:
 Return
 
-	##[$80CA] config
+	USEPATH config
 	##[$BA8C] 15,\init:##[$BA8C] 16,\dial
 	For y=0 To 2
 		a$="F"+Str$(y+1+soff*3)+":":##[$BA93] 35+y,a$
@@ -665,11 +665,11 @@ readtrackdisk:
 	Next
 	##[$D007] 1,640,#ys*2,4,*thisone
 	For y=0 To 1:For x=0 To 2
-		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
+		Use BitMap 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
 		MakeCookie 0
-		Use lmaxlen 0:ClipBlit 0,1+x*101+y*303,85
+		Use BitMap 0:ClipBlit 0,1+x*101+y*303,85
 	Next:Next
-	Use lmaxlen 0:For x=0 To 5:xx=x*101+1:Box xx,84,xx+100,113,tt:Next
+	Use BitMap 0:For x=0 To 5:xx=x*101+1:Box xx,84,xx+100,113,tt:Next
 	CustomColors 0,0,83,1,0,16
 	Return
 
@@ -678,7 +678,7 @@ Quit:
 	QAMIGA
 	If ReadMem(0,"skidconfig")
 		FileOutput 0
-		##[$80CA] config
+		USEPATH config
 		NPrint \init:NPrint \dial
 		For i=0 To 8:NPrint \func[i]:Next
 		For i=0 To 11:NPrint \name[i]:Next
@@ -692,7 +692,7 @@ Quit:
 CNIF 1=0
 	If ReadMem(0,"skidconfig")
 		FileOutput 0
-		##[$80CA] config
+		USEPATH config
 		NPrint \init:NPrint \dial
 		For i=0 To 8:NPrint \func[i]:Next
 		For i=0 To 11:NPrint \name[i]:Next

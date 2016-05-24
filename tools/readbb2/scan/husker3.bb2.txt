@@ -217,13 +217,13 @@ Return
 
 ;	InitBank 6,SizeOf.header,2
 
-	lmaxlen 4,320,18,1; dispmiddle credits..
+	BitMap 4,320,18,1; dispmiddle credits..
 
 	siz.l=BankLoc(5)
 
 	;signbmap=22
 	BitPlanesBitMap 0,23,4
-	lmaxlen 24,400,16,1 ;chat.iff
+	BitMap 24,400,16,1 ;chat.iff
 
 Return
 
@@ -297,10 +297,10 @@ Return
 
 .InitMiscGfx
 
-	lmaxlen 1,64,80,4:Use lmaxlen 1
-	GetaShape 0,0,0,64,80:Free lmaxlen 1
+	BitMap 1,64,80,4:Use BitMap 1
+	GetaShape 0,0,0,64,80:Free BitMap 1
 
-	##[$80CA] *p
+	USEPATH *p
 	For pl=0 To 3 :*p=Pl.car(pl)
 		\sprnum1=pl	:GetaSprite \sprnum1,0
 		\sprnum2=pl+4:GetaSprite \sprnum2,0
@@ -312,7 +312,7 @@ Return
 	LoadShape 47,g$+"flag.iff"
 
 	StopCycle 7,0,0,0,0:StopCycle 7,1,15,15,15
-	lmaxlen 7,1312,8,1:bmc.l=Peek.l(Addr lmaxlen(7)+8)
+	BitMap 7,1312,8,1:bmc.l=Peek.l(Addr BitMap(7)+8)
 	BitMapOutput 7:Locate 0,0:Colour 1,0
 	For c=32 To 32+#shapewid:Print Chr$(c):Next
 	GetaShape 99,0,0,#shapewid*8,8:shc.l=Peek.l (Addr MidHandle(99)+14)
@@ -330,7 +330,7 @@ Return
 		cnoise.w=10
 	EndIf
 
-	Use lmaxlen 0
+	Use BitMap 0
 	Point 0,0,11:Point 1,0,11		:; set up skids..
 	Point 0,1,11:Point 1,1,10:GetaShape 15,0,0,2,2
 	LoadBitMap 24,g$+"Chat2.IFF"
@@ -342,7 +342,7 @@ Return
 	LoadShape #menshap+3,g$+"slow.iff"
 	LoadShape #menshap+4,g$+"fast.iff"
 	For cnt.w=#menshap To #menshap+4
-		CludgeBitMap cnt,14:Use lmaxlen 14:ReMap 16,31
+		CludgeBitMap cnt,14:Use BitMap 14:ReMap 16,31
 		DecodeShapes cnt
 	Next
 	CopyShape #menshap+3,#menshap+5
@@ -370,7 +370,7 @@ Return
 Return
 
 
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 Statement dosign{s.l,d.l,l.l,flip.w}
 	UNLK a4:MOVE.l a4,-(a7):MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE #4,a4
 	MOVE d3,d4:LEA 80(a1),a1:MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3
@@ -414,7 +414,7 @@ dirty2:
 	OR d2,(a1)+:OR d3,(a1)+:OR d4,(a1)+:OR d5,(a1)+:OR d6,(a1)+:OR d7,(a1)+
 	MOVE.l (a7)+,a4:RTS
 End Statement
-CNIF #errs:##[$80D2]:CEND
+CNIF #errs:Runerrson:CEND
 
 
 .InitSign
@@ -437,7 +437,7 @@ CNIF #errs:##[$80D2]:CEND
 		If i AND $01 Then signl(e+7)=$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
+	BitMap signbmap,64,16,1:ssign.l=Peek.l(Addr BitMap(signbmap)+8)
 	LoadShape signshape,g$+"sign.iff"
 	CopyShape signshape,signshape+1:XFlip signshape
 	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)
@@ -447,7 +447,7 @@ Return
 
 .IncMe
 
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 ;INCLUDE "src:AsemINC.bb"
 ;INCLUDE "src:SpriINC.bb"
 ;SM
@@ -1059,7 +1059,7 @@ End Statement
 ;-------end of SpriInc.bb-------------------------------------------
 
 
-CNIF #errs:##[$80D2] :CEND
+CNIF #errs:Runerrson :CEND
 
 
 Statement CopCon{src,dest}
@@ -1120,7 +1120,7 @@ CNIF 1=0
 		StopCycle 10,i,rr ASR 4,gg ASR 4,bb ASR 4
 	Next
 CEND
-	Use lmaxlen 0:BlockScroll
+	Use BitMap 0:BlockScroll
 	LoadBitMap 0,"Cd.iff",10
 	GetMap{"cd"}
 
@@ -1150,7 +1150,7 @@ Return
 	For d=0 To 31
 		qs=qsin(d):qc=qcos(d)
 		*sha.ShadPt=BankLoc(0)+d*SizeOf.ShadPt
-		##[$80CA] *sha
+		USEPATH *sha
 		\ri3=(-xdim*qc+ydim*qs) ASR #scal:\rj3=(-xdim*qs-ydim*qc)ASR #scal
 		\ri2=(-xdim*qc-ydim*qs) ASR #scal:\rj2=(-xdim*qs+ydim*qc)ASR #scal
 		\ri1=( xdim*qc-ydim*qs) ASR #scal:\rj1=( xdim*qs+ydim*qc)ASR #scal
@@ -1202,7 +1202,7 @@ Return
 
 .
 
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 TesTEd
 Function .w TestNew{first.l,second.l}
 	;
@@ -1335,7 +1335,7 @@ Function.w bouncepod {zeroth.l,first.l,second.l}
 
 	fail2:MOVEQ#0,d0:RTS
 End Function
-CNIF #errs:##[$80D2] :CEND
+CNIF #errs:Runerrson :CEND
 
 Statement bounce{result.w,first.l,second.l}
 	Shared sqlu.l
@@ -1591,11 +1591,11 @@ Return
 	wid.w=(#defx+84+64+40) AND $fff0
 	htg=#defy+50+16:hth.w=htg+72
 
-	Use lmaxlen 0:BitMapOutput 0
-	Use lmaxlen 4:BlockScroll:hymax.w=0
+	Use BitMap 0:BitMapOutput 0
+	Use BitMap 4:BlockScroll:hymax.w=0
 	Restore Cred
 
-	Use lmaxlen 0
+	Use BitMap 0
 	chat.w=10:narrow.w=16
 	xx=QLimit(signx-20,0,1024-320)
 	yy=QLimit(signy-80,0,516-280)
@@ -1641,9 +1641,9 @@ Return
 
 	FlushBuffer 0:FlushBuffer 1:FlushBuffer 2
 
-	Use lmaxlen 0:selmen.w=0:Gosub ReDispMen
+	Use BitMap 0:selmen.w=0:Gosub ReDispMen
 
-	##[$80CA] *p:hymax=-50:level=14
+	USEPATH *p:hymax=-50:level=14
 	Repeat
 		CNIF #bars
 			MOVE.w #$0f00,$dff180:For silly.w=0 To 2:Next:MOVE.w #$0444,$dff180
@@ -1662,12 +1662,12 @@ Return
 		If ojoy<>joy Then nu.w=QLimit(selmen+joy,0,3)
 		If nu<>selmen
 			sh.w=selmen+#menshap:nx=xx+210:ny=yy+50+selmen*50
-			CludgeBitMap sh,14:Use lmaxlen 14:ReMap 13,8
-			Use lmaxlen 0:longdiv sh,nx,ny
+			CludgeBitMap sh,14:Use BitMap 14:ReMap 13,8
+			Use BitMap 0:Blit sh,nx,ny
 			selmen=nu
 			sh.w=selmen+#menshap:nx=xx+210:ny=yy+50+selmen*50
-			CludgeBitMap sh,14:Use lmaxlen 14:ReMap 8,13
-			Use lmaxlen 0:longdiv sh,nx,ny
+			CludgeBitMap sh,14:Use BitMap 14:ReMap 8,13
+			Use BitMap 0:Blit sh,nx,ny
 		EndIf
 
 		sc=-1:ret.w=DoChatSimple{}
@@ -1694,7 +1694,7 @@ Return
 			If sc=$f1 Then fast.w=Off:Gosub ReDispMen; :ProcChatSimple{83}:ProcChatSimple{108}:ProcChatSimple{111}:ProcChatSimple{119}
 
 
-			Use lmaxlen 0:UnBuffer 1
+			Use BitMap 0:UnBuffer 1
 
 			If oplyrs>0 Then BBlit 1,47,804,180:;491,186
 			If oplyrs>1 Then BBlit 1,47,827,182:;04,506,203
@@ -1724,7 +1724,7 @@ Return
 				plyrs.w=2:writeser{$ff}:clkt=30 ;race conditions
 			EndIf
 			If clkt=30
-				Use lmaxlen 0
+				Use BitMap 0
 				FlushBuffer 0
 				BBlit 0,47,774,103;433,167
 				If plyrs>1 Then BBlit 0,47,800,114;447,167
@@ -1751,7 +1751,7 @@ Return
 
 	connect.w=oplyrs>-1:twin=connect
 
-	Use lmaxlen 0:BitMapOutput 0
+	Use BitMap 0:BitMapOutput 0
 	ClrInt 5:If med Then StopMed:Volume 0,0,0,0
 
 Return
@@ -1761,9 +1761,9 @@ Return
 	If fast Then CopyShape #menshap+4,#menshap+3 Else CopyShape #menshap+5,#menshap+3
 	For ty.w=0 To 3
 		nx=xx+210:ny=yy+50+ty*50:sh.w=ty+#menshap
-		CludgeBitMap sh,14:Use lmaxlen 14
+		CludgeBitMap sh,14:Use BitMap 14
 		If selmen<>ty Then ReMap 13,8 Else ReMap 8,13
-		Use lmaxlen 0:BBlit 2,sh.w,nx,ny
+		Use BitMap 0:BBlit 2,sh.w,nx,ny
 	Next
 Return
 
@@ -1830,12 +1830,12 @@ Return
 
 			Line 0,0,0,0,0
 			dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-			Use lmaxlen 23
+			Use BitMap 23
 
 			If signflip
-				longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+				Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 			Else
-				longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+				Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 			EndIf
 		Next
 
@@ -1872,12 +1872,12 @@ Return
 	For signframe=0 To 3
 		Line 0,0,0,0,0
 		dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-		Use lmaxlen 23
+		Use BitMap 23
 
 		If signflip
-			longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+			Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 		Else
-			longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+			Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 		EndIf
 	Next
 
@@ -1948,24 +1948,24 @@ End Statement
 				Read top$
 			EndIf
 			If top$="-1" Then Restore Cred:Read top$
-			qprint{&top$,Addr lmaxlen (4),Addr lmaxlen(24)}
+			qprint{&top$,Addr BitMap (4),Addr BitMap(24)}
 			hymax.w=Len(top$) ASL 3
 		EndIf
-		Use lmaxlen signbmap:Scroll hy,0,32,16,0,0,4
+		Use BitMap signbmap:Scroll hy,0,32,16,0,0,4
 	EndIf
 	For signframe=0 To 3
 
 		Line 0,0,0,0,0
 		dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-		Use lmaxlen 23
+		Use BitMap 23
 
 		If signflip
-			longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+			Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 		Else
-			longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+			Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 		EndIf
 	Next
-	Use lmaxlen 0
+	Use BitMap 0
 Return
 
 Cred
@@ -1990,7 +1990,7 @@ Cred
 	race.w=1
 
 	done.w=Off:esc.w=0
-	BitMapOutput 0:Use lmaxlen 0:Colour 1,0
+	BitMapOutput 0:Use BitMap 0:Colour 1,0
 
 	Select fast
 		Case Off: cmpacc=-0.6
@@ -2041,7 +2041,7 @@ CEND
 	pl=0
 
 	besttim=$7fff:bestpl.w=-1
-	##[$80CA] *p
+	USEPATH *p
 
 	.ContGame
 
@@ -2113,8 +2113,8 @@ Return
 Macro DrawSkid
 	If *p`1\traction > 0.08
 		If NOT *p`1\inair
-			longdiv 15,QLimit(*sq`1\v0x+*p`1\sx-32,0,1021),QLimit(*sq`1\v0y+*p`1\sy,0,509)
-			longdiv 15,QLimit(*sq`1\v1x+*p`1\sx-32,0,1021),QLimit(*sq`1\v1y+*p`1\sy,0,509)
+			Blit 15,QLimit(*sq`1\v0x+*p`1\sx-32,0,1021),QLimit(*sq`1\v0y+*p`1\sy,0,509)
+			Blit 15,QLimit(*sq`1\v1x+*p`1\sx-32,0,1021),QLimit(*sq`1\v1y+*p`1\sy,0,509)
 		EndIf
 	End If
 End Macro
@@ -2165,8 +2165,8 @@ Repeat
 				Case 2:top$="hijk"
 				Case 3:top$="defg"
 			End Select
-			qprint{&top$,Addr lmaxlen (4),Addr lmaxlen(24)}
-			Use lmaxlen signbmap
+			qprint{&top$,Addr BitMap (4),Addr BitMap(24)}
+			Use BitMap signbmap
 			Scroll 32,0,32,16,0,0,4
 			If dum=3 Then Poke.w (Addr Sound(4) +4) , sndper ASL 1
 			If dum=0
@@ -2257,7 +2257,7 @@ Repeat
 				EndIf
 				Gosub MoveIndiv
 
-	Use lmaxlen 0
+	Use BitMap 0
 	!DrawSkid{0}
 	!DrawSkid{1}
 	!DrawSkid{2}
@@ -2276,7 +2276,7 @@ Repeat
 
 ;	!Wave
 
-	##[$80CA] *p
+	USEPATH *p
 	For pl=0 To 3	; if in a collision, \movi=\movj=0
 		*p=Pl(pl)
 		*p\rev+*p\nrev
@@ -2339,13 +2339,13 @@ Repeat
 
 	signframe=(signframe+1)&3
 	dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-	Use lmaxlen 23
+	Use BitMap 23
 	If signflip
-		longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+		Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 	Else
-		longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+		Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 	EndIf
-	Use lmaxlen 0
+	Use BitMap 0
 
 Until done
 Volume 15,0,0,0,0
@@ -2409,7 +2409,7 @@ Return
 
 .MoveIndiv
 
-	##[$80CA] *p
+	USEPATH *p
 	If \control=6 Then comp=True:Else:comp=False	;computer override!
 
 	If \idle
@@ -2574,7 +2574,7 @@ CEND
 Return
 
 CNIF #collisions
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 ; cp\mti=(*p\headi-*op\headi),(*p\headj-*op\headj)
 	Function.w fastcollide{p.l,op.l,sha.l}
 		Macro a SizeOf.car\`1(a0):End Macro	;me
@@ -2635,7 +2635,7 @@ CNIF #errs:##[$80D3]:CEND
 
 	End Function
 
-CNIF #errs:##[$80D2]: CEND
+CNIF #errs:Runerrson: CEND
 
 	Crash
 		*sha=BankLoc(*cp0\bnk)+*cp0\head*SizeOf.ShadPt
@@ -2710,7 +2710,7 @@ End Macro
 
 
 
-##[$80CA] *p
+USEPATH *p
 
 .GetX
 ;	Stop
@@ -2829,7 +2829,7 @@ Return
 ;End Macro
 
 .QuickRender
-	##[$80CA] *p
+	USEPATH *p
 	For pl=0 To 3
 		*p=Pl(pl)
 		\head=24 :\roll=2:\pitch=2
@@ -2914,7 +2914,7 @@ HandShake
 Return
 
 .SetStartCar
-	##[$80CA] *p
+	USEPATH *p
 	\idle=Off:\drop=Off
 	\inair=On:\ch=2
 	\pitch=2:\roll=2:\mpitch=0:\mroll=0
@@ -3160,7 +3160,7 @@ Return
 
 		*e\langst=fang-(b1*dang)
 		*e\langadd=dang ASR 4
-		Use lmaxlen 0
+		Use BitMap 0
 
 	EndIf
 Return

@@ -20,7 +20,7 @@
 .System
 
 
-##[$80CC]							 ; Don't open a CLI window
+NoCli							 ; Don't open a CLI window
 WBStartup					 ; Don't crash when I open you on Work Bench
 ##[$FFB5]			; Bring WB screen to front (Intuition call)
 
@@ -51,13 +51,13 @@ Dim Ball.Bouncer(50)	 ; I've 50 balls defined as .Bouncers
 	; Set up Gadget List 0 with three Buttons.
 	;					_________/
 	;				 /
-workstart 0,8,12,%1,1,"Gravity"	; Set up a "Gravity Button"
+TextGadget 0,8,12,%1,1,"Gravity"	; Set up a "Gravity Button"
 																	; The "Flags" are %1 which
 																	; means it is an ON or OFF
 																	; "Switch" rather than a
 																	; simple button.
 
-workstart 0,120,12,0,2,"10 Balls|20 Balls|30 Balls|40 Balls|50 Balls"
+TextGadget 0,120,12,0,2,"10 Balls|20 Balls|30 Balls|40 Balls|50 Balls"
 																	; This is not a toggle button
 																	; so no "Flags" but it does
 																	; have a selection of titles
@@ -65,7 +65,7 @@ workstart 0,120,12,0,2,"10 Balls|20 Balls|30 Balls|40 Balls|50 Balls"
 																	; makes it a "Cycle" gadget.
 																	; Nice and Easy.
 
-workstart 0,260,12,0,3,"Random Balls" ; This is the simplest
+TextGadget 0,260,12,0,3,"Random Balls" ; This is the simplest
 																			 ; type of button.
 																			 ; It returns an event
 																			 ; when pressed/released
@@ -75,10 +75,10 @@ workstart 0,260,12,0,3,"Random Balls" ; This is the simplest
 .Screen
 
 
-freest 0					; Get the WB screen as Blitz Screen 0
-Use allocst 0					; Use the screen
+WbToScreen 0					; Get the WB screen as Blitz Screen 0
+Use Screen 0					; Use the screen
 
-localstat 0,64,14,400,200,$100a,"Bouncers",0,1,0
+Window 0,64,14,400,200,$100a,"Bouncers",0,1,0
 											; Window 0 opened at 64,14, size 400x200
 											; $100a Flags give it a close gadget and
 											; make it draggable and also Activate it
@@ -130,7 +130,7 @@ Repeat											 ; A good place to start
 .Close
 
 
-Free localstat 0						 ; Bye Bye Window
+Free Window 0						 ; Bye Bye Window
 ##[$FFB4]						 ; WB screen to back to see editor
 
 End											 ; Bye Bye Program
@@ -160,7 +160,7 @@ If Gravity= True Then YBounce= 0.6 Else YBounce= 1
 													;	Less Upwards Bounce if Gravity is ON
 
 For b=1 To NumBalls					; For each ball ...
-	##[$80CA] Ball(b)						; Save some typing of Variable-names
+	USEPATH Ball(b)						; Save some typing of Variable-names
 
 	\x= \x + \x1							 ; Make NEW positins
 	\y= \y + \y1
@@ -180,10 +180,10 @@ Return
 ._Update_Balls
 
 
-Use localstat 0											; Just to make sure
+Use Window 0											; Just to make sure
 
 For b= 1 To NumBalls							; For each ball
-	##[$80CA] Ball(b)								 ; Save some Variable-name typing
+	USEPATH Ball(b)								 ; Save some Variable-name typing
 	WPlot \oldx , \oldy , 0				 ; Unplot old ball
 	WPlot \x , \y , \color					; Plot at new position
 	\oldx= \x											 ; Set Last positions as OLD

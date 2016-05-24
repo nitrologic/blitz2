@@ -25,26 +25,26 @@ main:
 	FilePath	= "SYS:"
 	MEDVolume = 64
 
-	remline 0,"GTBGadget.font",8
+	LoadFont 0,"GTBGadget.font",8
 
 	MenuGap		2,1
 	SubItemOff 100,0
-	newlocarr	0,0,"File"
+	MenuTitle	0,0,"File"
 	MenuItem	 0,$00,0,0,LSet$("Open...",14),"O"
 	MenuItem	 0,$40,0,1,String$(Chr$(127),14)
 	MenuItem	 0,$00,0,2,"Minimise"
 	MenuItem	 0,$00,0,3,"Maximise"
 	MenuItem	 0,$40,0,4,String$(Chr$(127),14)
 	MenuItem	 0,$00,0,5,"Quit","Q"
-	newlocarr	0,1,"Player"
+	MenuTitle	0,1,"Player"
 	MenuItem	 0,$00,1,0,LSet$("Stop Module",17),"S"
 	MenuItem	 0,$00,1,1,"Play Module","P"
 	MenuItem	 0,$00,1,2,"Cont Module"
 
 	FindScreen		0
 	DefaultIDCMP	$00000374
-	localstat				0,88,43,320,77,$0020100E,"MED Player",1,2
-	arrmult			 0
+	Window				0,88,43,320,77,$0020100E,"MED Player",1,2
+	SetMenu			 0
 	GTSlider			0,0,8,4,296,14,"",$0021,1,64,MEDVolume
 	GTButton			0,1,8,18,68,14,"File...",$0010
 	GTString			0,2,76,18,228,14,"",$0001,80,""

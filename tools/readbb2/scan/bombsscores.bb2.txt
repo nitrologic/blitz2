@@ -38,7 +38,7 @@ Shared *biptr.OSInput
 		keepSS.b=True
 		Repeat
 				GetUserInput{ *biptr}
-##[$80CA] *biptr
+USEPATH *biptr
 				Select \ev
 					Case $8
 						Select \code
@@ -86,10 +86,10 @@ Shared *biptr.OSInput
 ; Sets \rewriteTimes to TRUE
 ; Closes the screen and winwow
 .TheScores
-##[$80CA] *bombptr
-		allocst 3, 2, "RATINGS"
+USEPATH *bombptr
+		Screen 3, 2, "RATINGS"
 		DefaultIDCMP $8
-		localstat 3, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
+		Window 3, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
 		WJam 0
 
 		WBox 0,0, 320, 20, 3
@@ -123,8 +123,8 @@ Shared *biptr.OSInput
 		Repeat
 				GetUserInput{ *biptr}
 		Until (*biptr\ev=$8) AND (*biptr\code=$E8)
-		Free localstat 3
-		Free allocst 3
+		Free Window 3
+		Free Screen 3
 End Statement	;TheScores
 
 ; =======================================

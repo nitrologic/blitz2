@@ -728,7 +728,7 @@ nosurface:	MOVEM.l d3-d4/a6,-(a7)
 	MOVE.l screenaddr,a0
 	MOVE.l (a0),a1
 	LEA $c(a7),a2
-	ALibJsr localstat
+	ALibJsr Window
 	LEA $c(a7),a7
 	MOVEM.l (a7)+,d3-d4/a6
 	MOVE.l (a3),d0

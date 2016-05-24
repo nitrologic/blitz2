@@ -185,7 +185,7 @@ End Function
 	openers=0:inningsok=0:Gosub printevents:Return
 
 .inningsinput:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	WaitEvent
 	b=\ba[id-1]:entry(cmess)\batter[openers]=b:bat(openers)=b
 	p=openers:b=id-1:If b<>p Then Exchange \ba[p],\ba[b]
@@ -202,7 +202,7 @@ End Function
 	Return
 
 .overinput:
-	##[$80CA] team(bowling)
+	USEPATH team(bowling)
 	WaitEvent
 	If id=70
 		near=1-near
@@ -261,7 +261,7 @@ End Function
 	Return
 
 .newbatterinput:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	batter=\ba[id-1]
 	newbatterok=1
 	t$="NEW BATTER IS "+team(batting)\team\name[batter]
@@ -315,7 +315,7 @@ End Function
 
 .ovalclick:
 	If EMouseX<0 OR EMouseX>191 OR EMouseY<0 OR EMouseY>109 Then Return
-	Use localstat 1
+	Use Window 1
 	mb=MButtons
 	x=QLimit(EMouseX-4,0,184)
 	y=QLimit(EMouseY-4,0,102)
@@ -324,7 +324,7 @@ End Function
 		If mb=2 Then runs=QLimit(runs-1,0,9)
 	EndIf
 	ShapesBitMap 0,1
-	Use lmaxlen 1:BitMapOutput 1
+	Use BitMap 1:BitMapOutput 1
 	Line ex,ey,x,y,1
 	Locate x/8,y/8:Print runs
 	BitMaptoWindow 1,1
@@ -334,7 +334,7 @@ End Function
 	Return
 
 .printstats:
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	WLocate 138,129:Print "BATTER"
 	WLocate 230,129:Print " B	 R	 4	6	M "
 	WLocate 230,139:Print "100 122 10 10 123"
@@ -344,14 +344,14 @@ End Function
 	Return
 
 .setupscreen
-	allocst 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
-	##[$80CA] team(x)\team
+	Screen 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
+	USEPATH team(x)\team
 
 	For x=0 To 1
 		t$=LSet$(\teamname,20)+"("+LSet$(\teamabbrev,2)+")"
-		workstart 0,4,99+x*13,0,x*20,t$ ;x*262+120,2,0,x*20,t$
+		TextGadget 0,4,99+x*13,0,x*20,t$ ;x*262+120,2,0,x*20,t$
 		For i=0 To 11
-			workstart 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
+			TextGadget 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
 		Next
 	Next
 	;
@@ -359,17 +359,17 @@ End Function
 	For x=0 To 1
 		For i=0 To 9
 			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
-			workstart 0,598+x*68,3+i*12,m,id,a$:id+1
+			TextGadget 0,598+x*68,3+i*12,m,id,a$:id+1
 		Next
 	Next
 	;
-	workstart 0,398,113,0,70,"ENDS"
-	workstart 0,442,113,0,71,"FACE"
-	workstart 0,486,113,0,72,"		 OK		 "
+	TextGadget 0,398,113,0,70,"ENDS"
+	TextGadget 0,442,113,0,71,"FACE"
+	TextGadget 0,486,113,0,72,"		 OK		 "
 	;
 	PropGadget 0,0,0,$80,100,12,96
 	;
-	localstat 0,0,0,736,283,$1800,"",1,2,0:MenusOff
+	Window 0,0,0,736,283,$1800,"",1,2,0:MenusOff
 	;
 	ResetString 18,2,370,92
 
@@ -383,10 +383,10 @@ End Function
 	ResetString 118,129,250,152
 	ResetString 380,129,350,152
 	;
-	localstat 1,397,1,192,110,$800,"",1,2:MenusOff
+	Window 1,397,1,192,110,$800,"",1,2:MenusOff
 	;
-	lmaxlen 0,192,110,3
-	lmaxlen 1,192,110,3
+	BitMap 0,192,110,3
+	BitMap 1,192,110,3
 	;
 	Return
 
@@ -395,7 +395,7 @@ End Function
 	Data.s CAUGHT,BOWLED,STUMPED,RUNOUT,RETIRED,HITWICKET,HANDLEDBALL,,,QUIT
 
 .drawoval:
-	Use lmaxlen 0:BlockScroll 3
+	Use BitMap 0:BlockScroll 3
 	Circlef 95,54,80,53,4
 	Boxf 95-10,55-12,95+10,55+12,5
 	ends=near:ex=94:ey=44+ends*21
@@ -411,7 +411,7 @@ End Function
 .readteam
 	If WriteMem(0,"teams")
 		FileInput 0
-		##[$80CA] team(i)\team
+		USEPATH team(i)\team
 		For i=0 To 1
 			\teamname=Edit$(80)
 			\teamabbrev=Edit$(80)
@@ -424,7 +424,7 @@ End Function
 	Return
 
 .printevents
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	moff=QLimit(cmess-9,0,4096)
 	For i=0 To 9
 		ii=moff+i:If ii=cmess Then col=1 Else col=2
@@ -434,7 +434,7 @@ End Function
 	Return
 
 .listplayers
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	;
 	t$=LSet$(\team\teamname,20)+"("+LSet$(\team\teamabbrev,2)+")"
 	##[$C622] 0,0,t$
@@ -442,7 +442,7 @@ End Function
 		##[$C622] 0,i+1,LSet$(\team\name[\ba[i]],12)
 	Next
 	;
-	##[$80CA] team(bowling)
+	USEPATH team(bowling)
 	;
 	t$=LSet$(\team\teamname,20)+"("+LSet$(\team\teamabbrev,2)+")"
 	##[$C622] 0,20,t$

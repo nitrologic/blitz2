@@ -8,7 +8,7 @@
 ;Use the joystick to control scrolling, joystick button to exit
 ;
 
-lmaxlen 0,256,64,1
+BitMap 0,256,64,1
 LoadBitMap 0,"data/map"
 
 Dim m(255,63)
@@ -26,14 +26,14 @@ w=704
 
 Statement b{s,x,y}
 If s Then BlitMode CookieMode Else BlitMode EraseMode
-longdiv 0,x,y
+Blit 0,x,y
 End Statement
 
 Statement c{s,x,y}
-If s Then BlitMode CookieMode:longdiv 0,x,y
+If s Then BlitMode CookieMode:Blit 0,x,y
 End Statement
 
-lmaxlen 0,w,192,3
+BitMap 0,w,192,3
 ;Boxf 16,0,351,191,2
 BitMapOutput 0
 
@@ -66,7 +66,7 @@ While Joyb(1)=0
 ;
 VWait
 ;
-Show db,sx,sy:db=1-db:Use lmaxlen db
+Show db,sx,sy:db=1-db:Use BitMap db
 ;
 ox2=x2
 oy2=y2

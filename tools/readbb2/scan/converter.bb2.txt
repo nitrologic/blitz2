@@ -8,7 +8,7 @@ StringGadget 0,64,12,0,0,18,144
 StringGadget 0,64,26,0,1,18,144
 StringGadget 0,64,40,0,2,18,144
 ;
-localstat 0,100,50,220,56,$1008,"BASE CONVERTER",1,2,0
+Window 0,100,50,220,56,$1008,"BASE CONVERTER",1,2,0
 ;
 WLocate 2,04:Print "DECIMAL"
 WLocate 2,18:Print "	 HEX$"

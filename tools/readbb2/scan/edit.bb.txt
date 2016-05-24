@@ -35,7 +35,7 @@ Repeat						;main loop based on Intuition events
 			If MenuHit=0 AND ItemHit=1 Then Gosub savemap
 			If MenuHit=0 AND ItemHit=2 Then End
 		Case $40000
-			Use localstat 0:Redraw 0,0:Redraw 0,1
+			Use Window 0:Redraw 0,0:Redraw 0,1
 	End Select
 Forever
 
@@ -52,7 +52,7 @@ Forever
 
 .draw
 	Repeat
-		Use localstat 0
+		Use Window 0
 		cx=QLimit(Int((WMouseX-6)/8),0,ww-1)
 		cy=QLimit(Int((WMouseY-10)/8),0,wh-1)
 		map(posx+cx,posy+cy)=brush
@@ -61,7 +61,7 @@ Forever
 	Return
 
 .sizewindow
-	Use localstat 0
+	Use Window 0
 	ww=Int(WindowWidth/8)-3		;num blocks we can display
 	wh=Int(WindowHeight/8)-3	 ;with current window size
 	Gosub drawdungeon
@@ -84,20 +84,20 @@ Forever
 	Return
 
 .initui
-	newlocarr 0,0,"PROJECT"						 ;set up menus for our editor
+	MenuTitle 0,0,"PROJECT"						 ;set up menus for our editor
 	MenuItem 0,0,0,0,"LOAD			","L"
 	MenuItem 0,0,0,1,"SAVE			","S"
 	MenuItem 0,0,0,2,"QUIT			","Q"
 	PropGadget 0,-16,10,2+16+128,0,16,-20 ;gadgets for sliders
 	PropGadget 0,4,-9,4+8+64,1,-22,10
 	For i=0 To 4													;gadgets for brush select
-		workstart 1,i*24+12,12,512,2+i,c$(i)
+		TextGadget 1,i*24+12,12,512,2+i,c$(i)
 	Next
 	brush=1:Borders 1,3,On
-	allocst 0,10,"Dungeon Editor"					;and a screen and windows
-	localstat 0,0,12,640,240,$1001,"DUNGEON",1,2,0:arrmult 0
-	localstat 1,400,0,140,28,$1002,"BLOCKS",1,2,1:arrmult 0
-	Use localstat 0:Redraw 0,0:Redraw 0,1
+	Screen 0,10,"Dungeon Editor"					;and a screen and windows
+	Window 0,0,12,640,240,$1001,"DUNGEON",1,2,0:SetMenu 0
+	Window 1,400,0,140,28,$1002,"BLOCKS",1,2,1:SetMenu 0
+	Use Window 0:Redraw 0,0:Redraw 0,1
 	Return
 
 .loadmap

@@ -16,7 +16,7 @@ BLITZ
 ;set up a bitmap. Note that this bitmap is twice as wide
 ;and twice as high as the display will be...
 ;
-lmaxlen 0,640,400,3
+BitMap 0,640,400,3
 
 ;draw 1000 random stars
 ;

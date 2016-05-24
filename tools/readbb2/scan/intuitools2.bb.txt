@@ -62,16 +62,16 @@ NEWTYPE .finfo:name.s:ysize.w:style.b:flags:p1:p2:dm:pad:End NEWTYPE
 
 NEWTYPE .tst:a.w:c$:End NEWTYPE
 Dim List test.tst(32)
-While globalloc(test()):test()\c="ITEM"+Str$(i):i+1:Wend
+While AddItem(test()):test()\c="ITEM"+Str$(i):i+1:Wend
 
 Statement drawbox{*g.obj}
-	##[$80CA] *g
+	USEPATH *g
 	x=\x:y=\y
 	\c[0]\x=x,y:\c[1]\x=x+\w/2-2,y:\c[2]\x=x+\w-6,y
 	\c[3]\x=x,y+\h/2-1:\c[4]\x=x+\w-6,y+\h/2-1
 	\c[5]\x=x,y+\h-3:\c[6]\x=x+\w/2-2,y+\h-3
 	\c[7]\x=x+\w-6,y+\h-3
-	##[$80CA] *g\c[i]
+	USEPATH *g\c[i]
 	For i=0 To 7
 		Boxf \x,\y,\x+5,\y+2,-1
 	Next
@@ -96,7 +96,7 @@ DEFTYPE .l n0,n1,n2
 
 Dim List q.obj(50)
 
-remline 0,"topaz.font",8
+LoadFont 0,"topaz.font",8
 
 q$=Chr$(34)
 
@@ -144,20 +144,20 @@ mode=0
 	Forever
 
 .createcode:
-	Use allocst 1:##[$80CA] q()
+	Use Screen 1:USEPATH q()
 	f$=ASLFileRequest$("CREATE SOURCE CODE",pc$,fc$)
 	If ReadMem(0,f$)
 		FileOutput 0
 		;
-		newmem q()
-		While globfree(q()):Print "#"+\constant+"="+Str$(\id)+Chr$(0):Wend
+		ResetList q()
+		While NextItem(q()):Print "#"+\constant+"="+Str$(\id)+Chr$(0):Wend
 		Print Chr$(0)
 		;
 		sp$=Str$(p\w)+","+Str$(p\h)+","+Str$(p\d)+","+Str$(p\m)
 		Print Mki$($cf01)+" 0,0,0,"+sp$+","+q$+"TEST"+q$+",0,1"+Chr$(0)
 		;
-		newmem q()
-		While globfree(q()):Print \c0+Chr$(0):Wend:Print Chr$(0)
+		ResetList q()
+		While NextItem(q()):Print \c0+Chr$(0):Wend:Print Chr$(0)
 		;
 		CloseFile 0
 	EndIf
@@ -170,7 +170,7 @@ mode=0
 	Return
 
 .addwindow:
-	MenusOff:Use localstat 0:WTitle "","ADD WINDOW BY DRAGGING MOUSE"
+	MenusOff:Use Window 0:WTitle "","ADD WINDOW BY DRAGGING MOUSE"
 	Repeat:ev.l=WaitEvent:Until ev=$8		 ;wait for button
 	x=SMouseX:y=SMouseY
 	If AddLast(q())
@@ -182,19 +182,19 @@ mode=0
 		If q()\constant="" Then q()\constant="W"+Str$(p\numwin)
 		If auto Then Gosub editobject Else Gosub redrawwindow
 	EndIf
-	MenusOn:Use localstat 0:WTitle "",ver$:Return
+	MenusOn:Use Window 0:WTitle "",ver$:Return
 
 .addgadget:
 	If *w=0 Then BeepScreen 1:Return
-	MenusOff:Use localstat 0:WTitle "","ADD GADGET BY DRAGGING MOUSE"
-	##[$80CA] q()
+	MenusOff:Use Window 0:WTitle "","ADD GADGET BY DRAGGING MOUSE"
+	USEPATH q()
 	Repeat:ev.l=WaitEvent:Until ev=$8		 ;wait for button
 	x=SMouseX:y=SMouseY
-	newmem q()
-	While globfree(q())
+	ResetList q()
+	While NextItem(q())
 		If PColl (x,y,1,1,\x,\y,\w,\h) AND \obj=0 Then Goto gotwin
 	Wend
-	BeepScreen 1:MenusOn:Use localstat 0:WTitle "",ver$:Return
+	BeepScreen 1:MenusOn:Use Window 0:WTitle "",ver$:Return
 gotwin:
 	*w=\win
 	If AddFirst(q())
@@ -207,21 +207,21 @@ gotwin:
 		If q()\constant="" Then q()\constant="G"+Str$(p\numgad)
 		If auto Then Gosub editobject Else Gosub redrawwindow
 	EndIf
-	MenusOn:Use localstat 0:WTitle "",ver$:Return
+	MenusOn:Use Window 0:WTitle "",ver$:Return
 
 .hitobject:
 	If MButtons=1
 		x=SMouseX:y=SMouseY
-		newmem q()
-		While globfree(q())		 ;check all handles
+		ResetList q()
+		While NextItem(q())		 ;check all handles
 			For i=0 To 7
 				If PColl (x,y,1,1,q()\c[i]\x,q()\c[i]\y,8,4)
 					*w=q()\win:tt=0:g=0:Pop For:Goto gothit
 				EndIf
 			Next
 		Wend
-		newmem q()
-		While globfree(q())		 ;check inside complete
+		ResetList q()
+		While NextItem(q())		 ;check inside complete
 			If PColl (x,y,1,1,q()\x,q()\y,q()\w,q()\h)
 				*w=q()\win:tt=0:g=0:i=-1:Goto gothit
 			EndIf
@@ -241,7 +241,7 @@ gothit:
 	Return
 
 .sizeobject:
-	##[$80CA] q()
+	USEPATH q()
 	Repeat
 		ev.l=WaitEvent
 		drawbox{q()}
@@ -273,24 +273,24 @@ gothit:
 	Return
 
 .redrawwindow:
-	##[$80CA] *w
+	USEPATH *w
 	If *w=0 Then Return
 	If q()\obj=0 Then *w=q() Else *w=q()\win
-	Free localstat *w\id+2:Free GadgetJam *w\id+2:Free GTList *w\id+2
+	Free Window *w\id+2:Free GadgetJam *w\id+2:Free GTList *w\id+2
 	PushItem q():Gosub calcgads:PopItem q()
-	Use allocst mode		;0
+	Use Screen mode		;0
 	;
 	\x=QLimit(\x,0,p\w-16)		;ensure window is legal
 	\y=QLimit(\y,0,p\h-4)
 	\w=QLimit(\w,0,p\w-\x)
 	\h=QLimit(\h,0,p\h-\y)
 	;
-	localstat \id+2,\x,\y,\w,\h,\gflags,\gstring,1,2,\id+2:arrmult mode
+	Window \id+2,\x,\y,\w,\h,\gflags,\gstring,1,2,\id+2:SetMenu mode
 	AttachGTList \id+2,\id+2
 	If mode=0
 		PushItem q()
-		newmem q():##[$80CA] q()
-		While globfree(q())
+		ResetList q():USEPATH q()
+		While NextItem(q())
 			If \win=*w
 				\x=*w\x+\ox:\y=*w\y+\oy
 				If \gtype>3 Then \y+p\height+3:\x+4
@@ -302,7 +302,7 @@ gothit:
 	Return
 
 Function.s totpars{*q.obj} ;create | separated par$
-	##[$80CA] *q
+	USEPATH *q
 	max=0:p$="":n=0
 	For i=0 To 7
 		l=Len(\pars[i]):If l>0 Then n=i
@@ -319,17 +319,17 @@ End Function
 ;toggle|pos0-3|select|slider|propbox|mx|g00|gtlabl0-3|brdr0..3|gt0..3
 ;	0			 1			2			3			 4	 5	 6			7			8-11		12-14
 
-##[$80CA] q()
+USEPATH q()
 Macro p2 Str$(`1)+","+Str$(`2):End Macro
 Macro p3 Str$(`1)+","+Str$(`2)+","+Str$(`3):End Macro
 Macro p4 Str$(`1)+","+Str$(`2)+","+Str$(`3)+","+Str$(`4):End Macro
 Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 
 .calcgads:
-	##[$80CA] q()
+	USEPATH q()
 	gt=0:bb=0:ww$=" #"+*w\constant+","
-	newmem q()
-	While globfree(q())
+	ResetList q()
+	While NextItem(q())
 		If \obj=1 AND \win=*w
 			gg$="#"+\constant+","
 			If \gtype>3				;gadtools!
@@ -342,7 +342,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 				Case 0
 					\gflags=\flags[0]+\flags[1]*2+\flags[2]*32
 					\gstring=topars{q()}:If \gstring="" Then \gstring=" "
-					workstart *w\id+2,\ox,\oy,\gflags,\id,\gstring
+					TextGadget *w\id+2,\ox,\oy,\gflags,\id,\gstring
 					\c0=Mki$($c601)+ww$+!p3{\ox,\oy,\gflags}+","+gg$+q$+\gstring+q$
 				Case 1
 					\gflags=\flags[1]*2+\flags[2]*32:n0=\nars[0]:If n0=0 Then n0=1
@@ -439,8 +439,8 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		EndIf
 	Wend
 
-	newmem q()
-	While globfree(q())
+	ResetList q()
+	While NextItem(q())
 		If \obj=0 AND \win=*w
 			\c0=Mki$($c501)+" #"+*w\constant+","+!p4{\x,\y,\w,\h}
 			\c0+","+Str$(\gflags)+","+q$+\gstring+q$+",1,2"
@@ -451,7 +451,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 	Return
 
 .doload
-	Use allocst 1:##[$80CA] q()
+	Use Screen 1:USEPATH q()
 	f$=ASLFileRequest$("LOAD PROJECT",pa$,fi$)
 	If f$="" Then Return
 	If WriteMem(0,f$)
@@ -462,7 +462,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 			p\numwin=input{}:p\numgad=input{}
 			ClearList q()
 			While NOT DosBuffLen(0)
-				globalloc q()
+				AddItem q()
 				\x=input{}:\y=input{}:\w=input{}:\h=input{}
 				\obj=input{}:\id=input{}
 				\label=Edit$(80):\constant=Edit$(80)
@@ -473,11 +473,11 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 				\winid=input{}:\ox=input{}:\oy=input{}
 				\c0=Edit$(128)
 			Wend
-			newmem q()							 ;link up window pointers
-			While globfree(q())
+			ResetList q()							 ;link up window pointers
+			While NextItem(q())
 				If \obj=0
-					*w=q():PushItem q():newmem q()
-					While globfree(q())
+					*w=q():PushItem q():ResetList q()
+					While NextItem(q())
 						If \winid=*w\id Then \win=*w
 					Wend
 					PopItem q()
@@ -490,7 +490,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 	Return
 
 .dosave
-	Use allocst 1:##[$80CA] q()
+	Use Screen 1:USEPATH q()
 	f$=ASLFileRequest$("SAVE PROJECT",pa$,fi$)
 	If ReadMem(0,f$)
 		FileOutput 0
@@ -498,8 +498,8 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		NPrint p\w:NPrint p\h:NPrint p\d:NPrint p\m
 		NPrint p\font:NPrint p\height:NPrint p\style
 		NPrint p\numwin:NPrint p\numgad
-		newmem q()
-		While globfree(q())
+		ResetList q()
+		While NextItem(q())
 			NPrint \x:NPrint \y:NPrint \w:NPrint \h
 			NPrint \obj:NPrint \id
 			NPrint \label:NPrint \constant
@@ -516,7 +516,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 	Return
 
 .getscreen:
-	Use allocst 1
+	Use Screen 1
 	*s.sinfo=ASLScreenRequest(31)
 	If *s<>0
 		p\w=*s\w,*s\h,*s\d,*s\id
@@ -525,7 +525,7 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 	Return
 
 .getfont:
-	Use allocst 1
+	Use Screen 1
 	*f.finfo=ASLFontRequest(15)
 	If *f<>0
 		p\font=*f\name,*f\ysize,*f\style
@@ -535,29 +535,29 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 
 .freeall:
 	For i=1 To p\numwin
-		Free localstat i+1:Free GadgetJam i+1:Free GTList i+1
+		Free Window i+1:Free GadgetJam i+1:Free GTList i+1
 	Next
 	Return
 
 .nuscreen:
 	Gosub freeall
-	CloseWindow 0:CloseScreen 0:CloseScreen 1:Free lmaxlen 0
-	remline 1,p\font,p\height,p\style:Use IntuiFont 1
+	CloseWindow 0:CloseScreen 0:CloseScreen 1:Free BitMap 0
+	LoadFont 1,p\font,p\height,p\style:Use IntuiFont 1
 	Gosub initmenus
 	p\w=p\w&$fff0
-	lmaxlen 0,p\w,p\h,p\d
-	allocst 0,0,0,p\w,p\h,p\d,p\m,ver$,1,2,0
-	allocst 1,0,0,p\w,p\h,p\d,p\m,ver$,1,2,0
-	Use allocst 1
-	localstat 0,0,0,p\w,p\h,$1900,"",1,2:arrmult mode ;0
-	newmem q()
-	While globfree(q())
+	BitMap 0,p\w,p\h,p\d
+	Screen 0,0,0,p\w,p\h,p\d,p\m,ver$,1,2,0
+	Screen 1,0,0,p\w,p\h,p\d,p\m,ver$,1,2,0
+	Use Screen 1
+	Window 0,0,0,p\w,p\h,$1900,"",1,2:SetMenu mode ;0
+	ResetList q()
+	While NextItem(q())
 		If q()\obj=0 Then Gosub redrawwindow
 	Wend
 	Return
 
 .initmenus:
-	newlocarr 0,0,"PROJECT	"
+	MenuTitle 0,0,"PROJECT	"
 		MenuItem 0,0,0,0,"LOAD							 ","L"
 		MenuItem 0,0,0,1,"SAVE	 ","S"
 		MenuItem 0,0,0,2,"SCREEN ","C"
@@ -566,16 +566,16 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		MenuItem 0,0,0,5,"TEST	 ","T"
 		MenuItem 0,0,0,6,"CREATE ","X"
 		MenuItem 0,0,0,7,"QUIT	 ","Q"
-	newlocarr 0,1,"OPTIONS	"
+	MenuTitle 0,1,"OPTIONS	"
 		MenuItem 0,1,1,0,"	GRID				"
 		MenuItem 0,1,1,1,"	AUTO OPTION "
-	newlocarr 0,2,"ADD OBJECT	"
+	MenuTitle 0,2,"ADD OBJECT	"
 		MenuItem 0,0,2,0,"WINDOW									 ","W"
 		MenuItem 0,0,2,1,"TEXT GADGET","E"
 		MenuItem 0,0,2,2,"STRING GADGET","R"
 		MenuItem 0,0,2,3,"PROP GADGET","O"
 		MenuItem 0,0,2,4,"SHAPE GADGET","H"
-	newlocarr 0,3,"ADD GTGADGET	"
+	MenuTitle 0,3,"ADD GTGADGET	"
 		MenuItem 0,0,3,0,"GTButton								 ","1"
 		MenuItem 0,0,3,1,"GTCheckBox","2"
 		MenuItem 0,0,3,2,"GTCycle","3"
@@ -589,16 +589,16 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		MenuItem 0,0,3,10,"GTString","!"
 		MenuItem 0,0,3,11,"GTText","@"
 		MenuItem 0,0,3,12,"GTShape","@"
-	newlocarr 1,0,"TEST MENU	"
+	MenuTitle 1,0,"TEST MENU	"
 		MenuItem 1,0,0,0,"QUIT TEST								","Q"
 	Return
 
 .editobject:
-	##[$80CA] q()
-	Use allocst 1:WindowFont 0
+	USEPATH q()
+	Use Screen 1:WindowFont 0
 	wx=(p\w-320)/2:wy=(p\h-200)/2
 	If \obj=0
-		localstat 1,wx,wy,320,200,$1000,"",1,2,1
+		Window 1,wx,wy,320,200,$1000,"",1,2,1
 		WindowFont 0:WColour 2
 		WLocate 4,04:Print "WindowName:":ButtonId 1,0,\gstring:Redraw 1,0
 		WLocate 4,17:Print "	Constant:":ButtonId 1,1,\constant:Redraw 1,1
@@ -613,13 +613,13 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 					\gflags=(\gflags AND bm)
 					If Disable(1,gh)=On Then \gflags+bf
 				EndIf
-				If gh=19 Then freelast q():newmem q():*w=0:Goto spag1
+				If gh=19 Then KillItem q():ResetList q():*w=0:Goto spag1
 			EndIf
 		Until ev=$40 AND gh=18
 ;		Gosub calcwin
 	EndIf
 	If \obj=1
-		localstat 1,wx,wy,320,200,$1000,"",1,2,0
+		Window 1,wx,wy,320,200,$1000,"",1,2,0
 		WindowFont 0:WColour 2
 		WLocate 4,04:Print "GadgetType:"
 		WLocate 4,17:Print " TextLabel:"
@@ -659,12 +659,12 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 					If gh<28 Then ClearString 1,gh+1
 				EndIf
 				If gh=19
-					freelast q():newmem q():gh=18
-					Repeat:globfree q():Until q()=*w		 ;cludge maximus
+					KillItem q():ResetList q():gh=18
+					Repeat:NextItem q():Until q()=*w		 ;cludge maximus
 				EndIf
 				If gh=20
 					*o=q()
-					If globalloc(q())
+					If AddItem(q())
 						q()\obj=1:q()\id=p\numgad:p\numgad+1
 						q()\win=*o\win:q()\winid=*o\winid
 						q()\x=*o\x,*o\y,*o\w,*o\h:q()\ox=*o\ox,*o\oy
@@ -683,8 +683,8 @@ Macro gt ww$+gg$+!p4{\ox,\oy,\w,\h}+","+q$+\label+q$+","+Str$(\gflags):End Macro
 		Until ev=$40 AND gh=18
 	EndIf
 spag1:
-	Free localstat 1
-	WindowInput 0:WindowOutput 0:Use localstat 0:WindowFont 1
+	Free Window 1
+	WindowInput 0:WindowOutput 0:Use Window 0:WindowFont 1
 	Gosub redrawwindow
 	Return
 
@@ -697,11 +697,11 @@ spag1:
 	x=10:y=30
 	For f=2 To 14
 		Read a$:a$=Centre$(a$,17)
-		workstart 1,x,y,1,f,a$
+		TextGadget 1,x,y,1,f,a$
 		x+150:If x=310 Then x=10:y+13
 	Next
-	workstart 1,20,185,0,18," OK "
-	workstart 1,220,185,0,19," DELETE "
+	TextGadget 1,20,185,0,18," OK "
+	TextGadget 1,220,185,0,19," DELETE "
 	Return
 
 wads:
@@ -723,27 +723,27 @@ wads:
 		EndIf
 	Until a$=""
 	gt$=Mid$(gt$,2)
-	workstart 0,100,4,0,0,gt$
+	TextGadget 0,100,4,0,0,gt$
 	StringGadget 0,100,17,0,1,32,206
 	StringGadget 0,100,30,0,2,32,206
-	workstart 0,66,44,0,3,"NO TOGGLE| TOGGLE	"
-	workstart 0,150,44,0,4,"TOP LEFT |TOP RIGHT|BOT LEFT |BOT RIGHT"
-	workstart 0,234,44,0,5,"INVSELECT|BOXSELECT"
-	workstart 0,66,56,0,6,"HORIZONTL|VERTICAL |HOR&VERT "
-	workstart 0,150,56,0,7,"PROP BOX |NOPROPBOX"
-	workstart 0,234,56,0,8," NOT MX	| MX TYPE "
-	workstart 0,66,68,0,9,"OUTSIDEBORDER|INSIDEBORDER"
-	workstart 0,66,80,0,10," LEFT_LABEL |RIGHT_LABEL|	TOP_LABEL|BOTTM_LABEL|INNER_LABEL"
-	workstart 0,183,68,1,11," L "
-	workstart 0,216,68,1,12," R "
-	workstart 0,249,68,1,13," T "
-	workstart 0,282,68,1,14," B "
-	workstart 0,170,80,1,15," HI "
-	workstart 0,210,80,1,16," IM "
-	workstart 0,250,80,1,17," ON "
-	workstart 0,20,185,0,18," OK "
-	workstart 0,100,185,0,19," DELETE "
-	workstart 0,200,185,0,20," DUPLICATE "
+	TextGadget 0,66,44,0,3,"NO TOGGLE| TOGGLE	"
+	TextGadget 0,150,44,0,4,"TOP LEFT |TOP RIGHT|BOT LEFT |BOT RIGHT"
+	TextGadget 0,234,44,0,5,"INVSELECT|BOXSELECT"
+	TextGadget 0,66,56,0,6,"HORIZONTL|VERTICAL |HOR&VERT "
+	TextGadget 0,150,56,0,7,"PROP BOX |NOPROPBOX"
+	TextGadget 0,234,56,0,8," NOT MX	| MX TYPE "
+	TextGadget 0,66,68,0,9,"OUTSIDEBORDER|INSIDEBORDER"
+	TextGadget 0,66,80,0,10," LEFT_LABEL |RIGHT_LABEL|	TOP_LABEL|BOTTM_LABEL|INNER_LABEL"
+	TextGadget 0,183,68,1,11," L "
+	TextGadget 0,216,68,1,12," R "
+	TextGadget 0,249,68,1,13," T "
+	TextGadget 0,282,68,1,14," B "
+	TextGadget 0,170,80,1,15," HI "
+	TextGadget 0,210,80,1,16," IM "
+	TextGadget 0,250,80,1,17," ON "
+	TextGadget 0,20,185,0,18," OK "
+	TextGadget 0,100,185,0,19," DELETE "
+	TextGadget 0,200,185,0,20," DUPLICATE "
 	For i=0 To 7:StringGadget 0,80,94+i*11,0,i+21,32,226:Next
 	Return
 

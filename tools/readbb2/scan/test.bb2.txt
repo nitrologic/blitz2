@@ -26,7 +26,7 @@ maxy=512
 
 ty=maxy-256
 
-lmaxlen 0,4096,256,2
+BitMap 0,4096,256,2
 
 LoadBitMap 0,"newmounts.iff",0
 
@@ -42,8 +42,8 @@ Green 0,8,0,0
 
 Show 0
 
-b1.l=Peek.l(Addr lmaxlen(0)+8)
-b2.l=Peek.l(Addr lmaxlen(0)+12)
+b1.l=Peek.l(Addr BitMap(0)+8)
+b2.l=Peek.l(Addr BitMap(0)+12)
 
 yad=12		;y adjust
 

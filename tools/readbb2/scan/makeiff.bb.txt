@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/cars/makeiff.bb
 ;LoadPalette 0,"blitz2:sega/gfx/cars.iff"
 
-allocst 0,4+8+16
+Screen 0,4+8+16
 ScreensBitMap 0,0
 FadePalette 0
 

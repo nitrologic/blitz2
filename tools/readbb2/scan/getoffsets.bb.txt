@@ -1,11 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/GetOffsets.bb
 
-allocst 0,0,0,320,256+128,4,0,"",0,1
+Screen 0,0,0,320,256+128,4,0,"",0,1
 ScreensBitMap 0,0
 
 LoadBitMap 0,"redcar.iff",0
 Use SetCycle 0
-Use lmaxlen 0
+Use BitMap 0
 
 x=0:y=0
 For l=0 To 31
@@ -26,7 +26,7 @@ ux=160:uy=128
 For fr=0 To 31
 		Boxf ux,uy,ux+50,uy+50,0
 		##[$FF22]
-		longdiv fr,ux,uy
+		Blit fr,ux,uy
 
 
 		VWait 20

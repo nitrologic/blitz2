@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/Print.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/Print.bb
-##[$80CC]
+NoCli
 WBStartup
-freest 0
+WbToScreen 0
 ##[$FFB5]
 MaxLen pa$ = 160
 MaxLen fi$ = 64

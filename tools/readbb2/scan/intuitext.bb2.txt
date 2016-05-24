@@ -20,12 +20,12 @@ NEWTYPE .IntuiText
 	inext.l
 End NEWTYPE
 
-freest 0
-localstat 2,156,45,364,141,$1002,"WINDOW",1,2,2
+WbToScreen 0
+Window 2,156,45,364,141,$1002,"WINDOW",1,2,2
 
 ;Fonts to load
-remline 0,"Times.font",24
-remline 1,"Times.font",15
+LoadFont 0,"Times.font",24
+LoadFont 1,"Times.font",15
 
 rp.l=RastPort(2)
 DEFTYPE.IntuiText text

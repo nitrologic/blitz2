@@ -40,8 +40,8 @@ Function.l	Hook{current.l}
 	EndIf
 End Function
 
-freest0
-localstat 0,(WBWidth-240)/2,(WBHeight-54)/2,240,54,$8|$1002,"Crunching...",1,2; Fenster oeffnen
+WbToScreen0
+Window 0,(WBWidth-240)/2,(WBHeight-54)/2,240,54,$8|$1002,"Crunching...",1,2; Fenster oeffnen
 StringText$ 0,0																		 ; Kein Borderspacing
 SetString 2,1																	; Borderfarben gesamt
 ResetString 8,12,224,39												; Borderrahmen

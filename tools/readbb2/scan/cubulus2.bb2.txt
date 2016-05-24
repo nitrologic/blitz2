@@ -4,20 +4,20 @@
 #debug=0
 
 DEFTYPE.l
-##[$80CC]
+NoCli
 
 Dim hn$(40,6)
 
 .ShowMap:
 Statement ShowMap{s,d}
-u=##[$80D1] lmaxlen
-Use lmaxlen d
+u=Used BitMap
+Use BitMap d
 For t=0 To 127
 VWait
 Scroll 0,127-t,320,1,0,127-t,s
 Scroll 0,128+t,320,1,0,128+t,s
 Next
-Use lmaxlen u
+Use BitMap u
 End Statement
 
 
@@ -81,29 +81,29 @@ ShapeGadget m,tw+26,b*x2+c*x1+xo,0,c+b*4+21,3+g,4+g
 ShapeGadget m,10,b*x2+c*x1+xo,0,c+b*4+61,7+g,8+g
 Next
 Next
-workstart m,250,80,0,99,"Random"
-workstart m,250,93,0,98," QUIT "
+TextGadget m,250,80,0,99,"Random"
+TextGadget m,250,93,0,98," QUIT "
 Next
-workstart 2,250,106,0,97," Easy "
-workstart 3,250,106,0,97,"Medium"
-workstart 4,250,106,0,97," Hard "
-workstart 2,250,196,0,96," ABOUT "
-workstart 3,250,196,0,96," ABOUT "
-workstart 4,250,196,0,96," ABOUT "
+TextGadget 2,250,106,0,97," Easy "
+TextGadget 3,250,106,0,97,"Medium"
+TextGadget 4,250,106,0,97," Hard "
+TextGadget 2,250,196,0,96," ABOUT "
+TextGadget 3,250,196,0,96," ABOUT "
+TextGadget 4,250,196,0,96," ABOUT "
 ;TextGadget 2,250,196,0,96," trap "
 
 
-lmaxlen 1,320,256,5
+BitMap 1,320,256,5
 CludgeBitMap 75,2
-allocst 0,0,0,320,256,5,0,"",0,1
-allocst 3,0,0,320,256,5,0,"",0,1
-localstat 3,0,0,320,256,$1800,"",0,1
+Screen 0,0,0,320,256,5,0,"",0,1
+Screen 3,0,0,320,256,5,0,"",0,1
+Window 3,0,0,320,256,$1800,"",0,1
 Use SetCycle 1
 ScreensBitMap 3,3
-Use allocst 0
+Use Screen 0
 Use SetCycle 1
 ScreensBitMap 0,0
-Poke.l ?bm,Peek.l (Addr lmaxlen(0)+8)
+Poke.l ?bm,Peek.l (Addr BitMap(0)+8)
 .interupt:
 SetInt 5
 CMP.w	 #0,cnt
@@ -168,14 +168,14 @@ num:		MOVE.b (a3)+,(a1)
 nobm:
 End SetInt
 .ngm:
-localstat 0,0,0,320,256,$1800,"",0,1,ms
+Window 0,0,0,320,256,$1800,"",0,1,ms
 x1=x1(ms):x2=x2(ms):ss=ss(ms):xo=xo(ms):tw=tw(ms)
 For t=0 To ms :For r=0 To ms
-longdiv t+r*(ms+1)+ss,t*x1+250,r*x1+xo
+Blit t+r*(ms+1)+ss,t*x1+250,r*x1+xo
 Next:Next
 Gosub random
 ShowMap{0,3}
-t=##[$FFA6](Peek.l(Addr allocst(0)))
+t=##[$FFA6](Peek.l(Addr Screen(0)))
 .lp:
 Poke.l	?cnt,0
 GetReg	d0,ms
@@ -219,33 +219,33 @@ On o+1 Goto up,rt,dn,lf
 Goto lp
 .about:
 MOVE.w	#-1,cnt
-Use lmaxlen 3
+Use BitMap 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(Addr allocst(3)))
-Use lmaxlen 1
+t=##[$FFA6](Peek.l(Addr Screen(3)))
+Use BitMap 1
 BlockScroll 0
-longdiv 80,0,0
+Blit 80,0,0
 ShowMap{1,3}
 MouseWait
 ShowMap{0,3}
-t=##[$FFA6](Peek.l(Addr allocst(0)))
+t=##[$FFA6](Peek.l(Addr Screen(0)))
 Goto	lp
 nwlvl:
 Poke.w	?cnt,-1
-Use lmaxlen 3
+Use BitMap 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(Addr allocst(3)))
-Use lmaxlen 0
+t=##[$FFA6](Peek.l(Addr Screen(3)))
+Use BitMap 0
 ms=ms+1:If ms=5 Then ms=2
 CloseWindow 0
 Goto ngm
 .up:
 x=xo+k*x2+c*x1
 For t=1 To x2
-Use lmaxlen 1
+Use BitMap 1
 Scroll x,27,x1,tw-1,0,0,0
 Scroll x,26,x1,1,0,tw-1,0
-Use lmaxlen 0
+Use BitMap 0
 VWait
 Scroll 0,0,x1,tw,x,26,1
 Next
@@ -254,10 +254,10 @@ Goto lp
 .dn:
 x=xo+k*x2+c*x1
 For t=1 To x2
-Use lmaxlen 1
+Use BitMap 1
 Scroll x,26,x1,tw-1,0,1,0
 Scroll x,tw+25,x1,1,0,0,0
-Use lmaxlen 0
+Use BitMap 0
 VWait
 Scroll 0,0,x1,tw,x,26,1
 Next
@@ -266,10 +266,10 @@ Goto lp
 .rt:
 y=xo+k*x2+c*x1
 For t=1 To x2
-Use lmaxlen 1
+Use BitMap 1
 Scroll 26,y,tw-1,x1,1,0,0
 Scroll tw+25,y,1,x1,0,0,0
-Use lmaxlen 0
+Use BitMap 0
 VWait
 Scroll 0,0,tw,x1,26,y,1
 Next
@@ -278,10 +278,10 @@ Goto lp
 .lf:
 y=xo+k*x2+c*x1
 For t=1 To x2
-Use lmaxlen 1
+Use BitMap 1
 Scroll 27,y,tw-1,x1,0,0,0
 Scroll 26,y,1,x1,tw-1,0,0
-Use lmaxlen 0
+Use BitMap 0
 VWait
 Scroll 0,0,tw,x1,26,y,1
 Next
@@ -290,26 +290,26 @@ Goto lp
 .done:
 Poke.w	?cnt,-1
 
-Use lmaxlen 3
+Use BitMap 3
 Scroll 0,0,320,256,0,0,0
-t=##[$FFA6](Peek.l(Addr allocst(3)))
+t=##[$FFA6](Peek.l(Addr Screen(3)))
 
-Use lmaxlen 1
+Use BitMap 1
 BlockScroll 0
-longdiv 75,60,28
+Blit 75,60,28
 ShowMap{1,3}
 MouseWait
 
 BitMapOutput 1
 Gosub addname
 k=0
-Use lmaxlen 1
+Use BitMap 1
 BitMapOutput 1
 
 .Hiscores:
 BlockScroll 0
-longdiv 76,60,0
-longdiv 78-k,123,37
+Blit 76,60,0
+Blit 78-k,123,37
 Line 0,35,319,35,1
 
 BitMapOutput 1
@@ -332,7 +332,7 @@ c+1
 If c=200 Then Goto Hiscores
 BTST #6,$bfe001
 BNE	h
-Use lmaxlen 0
+Use BitMap 0
 Goto ngm
 .random:
 bk.l=?blks
@@ -400,7 +400,7 @@ rnx:
 Next
 For t=0 To ms :For r=0 To ms
 For x=0 To 3 :For y=0 To 3
-longdiv	Peek.b(x+t*4+y*20+r*80+bk)+ss,x*x1+t*x2+xo,y*x1+r*x2+xo
+Blit	Peek.b(x+t*4+y*20+r*80+bk)+ss,x*x1+t*x2+xo,y*x1+r*x2+xo
 Next:Next:Next:Next
 
 MOVE.l	#$09090a05,clk
@@ -460,13 +460,13 @@ Return
 
 .getname:
 BlockScroll 0
-longdiv 79,60,80
+Blit 79,60,80
 ;onam$="King Fuzzy"
 
 ShowMap{1,3}
-Use lmaxlen 3
+Use BitMap 3
 WindowInput 3
-Use localstat 3
+Use Window 3
 
 WLocate 128,100
 

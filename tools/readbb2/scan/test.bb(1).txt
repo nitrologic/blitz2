@@ -10,13 +10,13 @@ End NEWTYPE
 
 NPrint a.t\b[2]
 
-##[$80D3]
+Runerrsoff
 
 For i=1 To 20
 	a.t\a[i]=20
 Next
 
-##[$80D2]
+Runerrson
 
 For i=1 To 20
 	a.t\a[i]=20

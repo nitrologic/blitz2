@@ -4,7 +4,7 @@
 ;
 
 m.l=OpenSerial("serial.device",0,2400,0)
-lmaxlen 0,320,256,1:InitCopList 0,1
+BitMap 0,320,256,1:InitCopList 0,1
 
 BLITZ
 

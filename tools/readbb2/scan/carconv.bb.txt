@@ -11,7 +11,7 @@ f$="f1"
 
 Gosub getsprite
 
-lmaxlen 0,1280,320,3
+BitMap 0,1280,320,3
 For i=1 To 4
 	LoadBitMap 0,"f1:skid/cars/logos/"+f$+Str$(i)+".8"
 	y=0
@@ -120,7 +120,7 @@ dosprite
 
 getsprite
 	SpriteMode 2
-	lmaxlen 1,320,256,4
+	BitMap 1,320,256,4
 	Circlef 32,32,32,7
 	GetaShape 0,0,0,64,80
 	GetaSprite 0,0
@@ -128,7 +128,7 @@ getsprite
 
 showspri:
 	InitCopList 0,44,256,$801,8,32,0
-	casestrcomp 0,"testpalette",16
+	LoadPalette 0,"testpalette",16
 	AGAGreen 0,0,64,240,64
 	BLITZ
 	CreateDisplay 0

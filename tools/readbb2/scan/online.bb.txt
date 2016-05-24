@@ -29,16 +29,16 @@ Gosub loadlib
 #bmc=#bmw/8
 #winw=#bmw+24
 
-lmaxlen 0,#bmw,#bmh,1
+BitMap 0,#bmw,#bmh,1
 
-##[$80CC]
-:FindScreen 0:*s.Screen=Peek.l(Addr allocst(0))
+NoCli
+:FindScreen 0:*s.Screen=Peek.l(Addr Screen(0))
 
 Gosub initgadgets
 
 AddIDCMP $10 ;report mouse moves for domove routine
 SizeLimits #winw,64,#winw,#bmh+27
-localstat 0,0,12,#winw,*s\Height-48,$143b+$80,"",1,2,0
+Window 0,0,12,#winw,*s\Height-48,$143b+$80,"",1,2,0
 
 Gosub newcommand
 
@@ -129,7 +129,7 @@ End
 .indexpage
 	Gosub readindex
 	If ind>0
-		BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+		BitMapOutput 0:Locate 0,0:Use BitMap 0:BlockScroll
 		If indp<0 Then indp=Int(index/141)
 		i=indp*141
 		If i=>index Then i=0:indp=0
@@ -148,7 +148,7 @@ End
 	Return
 
 .doabout:
-	BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+	BitMapOutput 0:Locate 0,0:Use BitMap 0:BlockScroll
 	Restore about:Read a$
 	While a$<>"***"
 		If Left$(a$,1)="*"
@@ -176,7 +176,7 @@ End
 .doexample
 	ex$="examples/"+Mid$(a$(pos0),2)+".bb"
 	If WriteMem(0,ex$)
-		BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll
+		BitMapOutput 0:Locate 0,0:Use BitMap 0:BlockScroll
 		FileInput 0
 		While NOT DosBuffLen(0)
 			NPrint Edit$(256)
@@ -190,7 +190,7 @@ End
 
 .renderbitmap:	 ;pos0..pos1
 	;
-	BitMapOutput 0:Locate 0,0:Use lmaxlen 0:BlockScroll:ng=0
+	BitMapOutput 0:Locate 0,0:Use BitMap 0:BlockScroll:ng=0
 	;
 	For i=pos0 To pos1-1
 		;
@@ -306,13 +306,13 @@ End
 	SelectMode 0,3:SetString 1,2
 	PropGadget 0,-14,12,$11000+2+16+128,1,12,-25 ;gadgets for sliders
 ;	TextGadget 0,024,0,$14000,2,"BLITZ2 ONLINE REFERENCE MANUAL"
-	workstart 0,004,-12,$18004,3,"ABOUT"
-	workstart 0,054,-12,$18004,4,"LIBRARY"
-	workstart 0,120,-12,$18004,5,"DESCRIPTION"
-	workstart 0,220,-12,$18004,6,"EXAMPLE"
-	workstart 0,290,-12,$18004,7,"<<"
-	workstart 0,320,-12,$18004,8,">>"
-	workstart 0,350,-12,$18004,9,"INDEX"
+	TextGadget 0,004,-12,$18004,3,"ABOUT"
+	TextGadget 0,054,-12,$18004,4,"LIBRARY"
+	TextGadget 0,120,-12,$18004,5,"DESCRIPTION"
+	TextGadget 0,220,-12,$18004,6,"EXAMPLE"
+	TextGadget 0,290,-12,$18004,7,"<<"
+	TextGadget 0,320,-12,$18004,8,">>"
+	TextGadget 0,350,-12,$18004,9,"INDEX"
 	Return
 
 .loadlib
@@ -339,7 +339,7 @@ End
 	lock.l=##[$FE0A](&v$,-2)
 	If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
 		While ##[$FE0E](lock,myfib)<>0			;skip through files
-			##[$80CA] myfib
+			USEPATH myfib
 			If \fib_DirEntryType=-3
 				f$=Peek$(&\fib_FileName)
 				lib=Val(Mid$(f$,4)):com=1

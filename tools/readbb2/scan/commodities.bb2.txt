@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/commodities.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/commodities.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/commodities.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/commodities.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/commodities.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/commodities.bb2
-##[$80CB]
+CloseEd
 #LIBRARIES_COMMODITIES_H=-1
 ;**
 ;**	 $Filename: libraries/commodities.h $

@@ -9,15 +9,15 @@ dirx(1)=0:diry(1)=1
 dirx(2)=-1:diry(2)=0
 dirx(3)=0:diry(3)=-1
 
-lmaxlen 0,640,256,3
-lmaxlen 1,640,256,3					;play area
-lmaxlen 2,320,128,3					;scanner 1
+BitMap 0,640,256,3
+BitMap 1,640,256,3					;play area
+BitMap 2,320,128,3					;scanner 1
 LoadBitMap 0,"tron.iff",0
-casestrcomp 0,"tron.iff",8
+LoadPalette 0,"tron.iff",8
 ShapesBitMap 0,1
 
 BLITZ
-Use lmaxlen 0
+Use BitMap 0
 BitMapInput
 BitMapOutput 0
 Slice 0,$2c,320,128,$fffa,6,8,32,320,640
@@ -36,24 +36,24 @@ ShowF 2,0,0
 ShowB 0,0,0
 Colour 7
 If p1x=-1
-		Use lmaxlen 2
+		Use BitMap 2
 		Locate 13,10
 		Print "PLAYER 2 WINS."
 EndIf
 If p2x=-1
-		Use lmaxlen 2
+		Use BitMap 2
 		Locate 13,10
 		Print "PLAYER 1 WINS."
 EndIf
 If p1x=-1 OR p2x=-1
-		Use lmaxlen 2
+		Use BitMap 2
 		Locate 15,13
 		Print "Press Fire"
 		bb:VWait:If Joyb(1)<>0 Then Goto bb
 		aa:VWait:If Joyb(1)=0 Then Goto aa
 EndIf
 
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll
 ShapesBitMap 1,0
 
@@ -68,7 +68,7 @@ xx=0:yy=0
 axx=0:ayy=0
 ccc=5
 
-Use lmaxlen 2
+Use BitMap 2
 BitMapOutput 2
 Colour 6
 Locate 4,11
@@ -92,7 +92,7 @@ p2x+p2d
 If p2x=319 Then p2d=-p2d
 If p2x=0 Then p2d=-p2d
 
-Use lmaxlen 2
+Use BitMap 2
 BitMapOutput 2
 If wai=0
 getcom:
@@ -115,10 +115,10 @@ Goto frontend
 
 .STARTGAME
 
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll
 ShapesBitMap 1,0
-Use lmaxlen 2
+Use BitMap 2
 BlockScroll
 Box 219,79,301,113,4						;x/8,y/8
 
@@ -181,7 +181,7 @@ psx=QLimit(p2x-160,0,320)
 psy=QLimit(p2y-64,0,128)
 ShowB 0,psx,psy
 
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 
 Gosub UpDate
@@ -272,12 +272,12 @@ Else						;computer controlled
 EndIf
 
 ;update scanner...
-Use lmaxlen 2
+Use BitMap 2
 BitMapOutput 2
 Point 220+(p1x/8),80+(p1y/8),7
 Point 220+(p2x/8),80+(p2y/8),6
 
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 Return
 

@@ -24,8 +24,8 @@ ILBMDepth "clown.hires"
 LoadMedModule 1,"circus.med"
 LoadModule 2, "Dead.str"
 StartMedModule 1
-freest 0
-allocst 1,##[$D087]+16
+WbToScreen 0
+Screen 1,##[$D087]+16
 ScreensBitMap 1,0
 ShowScreen 0
 LoadBitMap 0,"clown.hires",0
@@ -37,8 +37,8 @@ While Joyb(0) = 0
 Wend
 StopMed
 
-Free lmaxlen 0
-Free lmaxlen 1
+Free BitMap 0
+Free BitMap 1
 
 ; Load shapes and sounds
 
@@ -47,7 +47,7 @@ LoadShapes 15,"explode.shapes4"
 LoadShapes 26,"tightrope.shapes"
 LoadShape 30,"tent.iff",1
 
-casestrcomp 0,"circus_images.iff"
+LoadPalette 0,"circus_images.iff"
 
 LoadSound 0,"boing.sample"
 LoadSound 1,"pop.sample"
@@ -140,7 +140,7 @@ hit_position.b = 40
 
 ;	Set up bitmap 0 for scrolling the baloons
 
-lmaxlen 0,800,256,3
+BitMap 0,800,256,3
 
 ;	Set up the shape queue to allow automatic creation and removal of shapes
 ;	on the BitMap.
@@ -154,7 +154,7 @@ Gosub setup_baloons
 ;	Set up a second bitmap to allow the See Saw and clowns to move
 ;	without being scrolled.
 
-lmaxlen 1,400,256,3
+BitMap 1,400,256,3
 
 ;	Set up a slice for dual playfield mode.
 
@@ -174,7 +174,7 @@ Gosub score_display
 Gosub display_lives
 
 
-longdiv 30,10,0										 ; Display tent
+Blit 30,10,0										 ; Display tent
 .main_game:
 
 While NOT RawStatus($45)				 ; while escape key	not pressed
@@ -259,7 +259,7 @@ End
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .setup_baloons:
 
-Use lmaxlen 0
+Use BitMap 0
 
 ; Reduce speed to give player a chance
 
@@ -267,9 +267,9 @@ Use lmaxlen 0
 ; Blit baloon shapes onto bitmap 1 in 3 rows of 3 colours
 
 	For screenx = 10 To 310 Step 32
-		 longdiv 0,screenx,10
-		 longdiv 1,screenx,48
-		 longdiv 2,screenx,86
+		 Blit 0,screenx,10
+		 Blit 1,screenx,48
+		 Blit 2,screenx,86
 	Next
 
 ; initialise number of baloons popped counter to 0
@@ -305,7 +305,7 @@ Return
 
 ; check baloon collision with clown using bitmap 0 to detect baloon collisions
 
-	Use lmaxlen 0
+	Use BitMap 0
 
 	checkcol.w=QLimit (manx+x.w,0,640)
 	If ##[$CB09] (5,checkcol,many)	OR ##[$CB09] (6,checkcol,many)
@@ -433,7 +433,7 @@ Return
 
 	EndIf
 
-	Use lmaxlen 1										; go back to other bitmap
+	Use BitMap 1										; go back to other bitmap
 
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -526,11 +526,11 @@ Return
 		btimeout.w + 1
 		If btimeout > 400
 			bounce = False
-			Use lmaxlen 0
+			Use BitMap 0
 			If NOT (fly.b OR	mouse_move.b)	 ; If no other bonus active
 			 Sound 2,2,64,64									;	remove looping bonus sound
 			EndIf
-		 Use lmaxlen 1
+		 Use BitMap 1
 		EndIf
 	EndIf
 
@@ -576,7 +576,7 @@ Return
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .display_lives:
-	Use lmaxlen 1
+	Use BitMap 1
 	Boxf 150,0,340,10,0								; Erase lives from screen
 	If lives > 11											; Display all lives below 11
 		lives_left.b = 11
@@ -584,7 +584,7 @@ Return
 		lives_left = lives
 	EndIf
 	For index =	lives_left To 1 Step -1
-		longdiv 10,150+(index * 15),0
+		Blit 10,150+(index * 15),0
 	Next
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -627,7 +627,7 @@ Return
 .clown_death:
 
 	 If NOT play.b							; If Death just happened
-		 Use lmaxlen 1
+		 Use BitMap 1
 		 play = True							;	 just after clowns death.
 		 PlayModule 2
 		 deathy.w= 280						;	 Allows dead clown to pause before going
@@ -654,7 +654,7 @@ Return
 		 released = False
 		 popped = False
 		 hit_position = 40
-		 Use lmaxlen 1
+		 Use BitMap 1
 
 			If lives = 0							 ; All lives lost.
 				StopModule
@@ -678,9 +678,9 @@ Return
 
 						If NOT demo									; If demo just started clear high score
 						 Gosub setup_baloons
-						 Use lmaxlen 1
+						 Use BitMap 1
 						 BlockScroll 0
-						 longdiv 30,10,0								; Display background
+						 Blit 30,10,0								; Display background
 						EndIf
 
 						demo = True									; Demo started
@@ -730,7 +730,7 @@ Return
 				Wend
 
 				BlockScroll 0
-				longdiv 30,10,0										; Display backkround
+				Blit 30,10,0										; Display backkround
 				Gosub setup_baloons
 				Gosub initialise								; Re -initialise for next game.
 			EndIf
@@ -742,7 +742,7 @@ Return
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .bonus:
- Use lmaxlen 1
+ Use BitMap 1
  LoopSound 2,2,64,64
  Select bonus_type.b
  Case 1													; extra clown and 1000 points
@@ -764,7 +764,7 @@ Return
  Case 2													; Tightrope bounce
 	 bounce = True								 ; Produced by catching flowers
 	 btimeout = 0									; with see saw
-	 Use lmaxlen 1
+	 Use BitMap 1
  Case 3													; Magnetic see saw bonus
 	 mouse_move.b = True
 	 mtimeout = 0
@@ -785,7 +785,7 @@ Return
 Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .bonus_release
-	Use lmaxlen 1
+	Use BitMap 1
 	objecty + 1
 	BBlit 0,object,objectx,objecty
 	If SpritesHit (object,objectx,objecty,3,x0.w,y0+20)
@@ -808,7 +808,7 @@ Return
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 .high_score_update
 
-	Use lmaxlen 1
+	Use BitMap 1
 	If NOT demo
 		position.b = -1										 ; Obtain high score position in table
 		For index = 11 To 0 Step - 1
@@ -852,7 +852,7 @@ Return
 	Colour 5													 ; Display high score table
 	VWait
 	BlockScroll 0
-	longdiv 30,10,0										 ; Display tent
+	Blit 30,10,0										 ; Display tent
 	For index = 0 To 22 Step 2
 	Locate 9,index+3
 	NPrint table(index/2)\name_high," ",table(index/2)\score_high

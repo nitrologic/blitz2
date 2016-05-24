@@ -16,7 +16,7 @@ For i=0 To 32:mount(i)\x=i*32,180:Next
 
 width=1024:height=200			 ;size of bitmap
 
-lmaxlen 0,width,height,2		 ;create bitmap for our window
+BitMap 0,width,height,2		 ;create bitmap for our window
 
 FindScreen 0								;open on workbench
 
@@ -89,7 +89,7 @@ refreshsuper:
 	Return
 
 .drawmountains:
-	Use lmaxlen 0:BlockScroll			 ;clear bitmap and draw mountains
+	Use BitMap 0:BlockScroll			 ;clear bitmap and draw mountains
 	For i=0 To 31
 		Line mount(i)\x,mount(i)\y,mount(i+1)\x,mount(i+1)\y,1
 	Next
@@ -99,7 +99,7 @@ refreshsuper:
 	Return
 
 .createmenus
-	newlocarr 0,0,"PROJECT"
+	MenuTitle 0,0,"PROJECT"
 	MenuItem 0,0,0,0,"LOAD				","L"
 	MenuItem 0,0,0,1,"SAVE				","S"
 	MenuItem 0,0,0,2,"QUIT				","Q"
@@ -110,8 +110,8 @@ refreshsuper:
 	PropGadget 0,-14,10,$11000+2+16+128,2,12,-20 ;gadgets for sliders
 	AddIDCMP $10 ;report mouse moves for domove routine
 	SizeLimits 32,32,width+22,height+20
-	localstat 0,0,0,320,200,$1489,"MOUNTAIN EDITOR",1,2,0,0
-	arrmult 0
+	Window 0,0,0,320,200,$1489,"MOUNTAIN EDITOR",1,2,0,0
+	SetMenu 0
 	Return
 
 .makeshapes

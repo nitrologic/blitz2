@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/blowup.bb2
 
 
-allocst 0,1:ScreensBitMap 0,0:Green 0,0,0,0:Green 1,15,15,15
+Screen 0,1:ScreensBitMap 0,0:Green 0,0,0,0:Green 1,15,15,15
 
 n=192
 

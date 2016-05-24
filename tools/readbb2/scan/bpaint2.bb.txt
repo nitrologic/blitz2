@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/arexx/bpaint2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/bpaint2.bb
 Include arexxres.bb
 
-##[$80CC]
+NoCli
 Dim arg$(32)
 Dim arg(32)
 ;-- Blitz Paint, A Barfy paint programme with a Arexx interface
@@ -24,8 +24,8 @@ Dim arg(32)
 ;****************************** functions and statements *******************************************
 
 Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
-workstart 1,200,48,0,1,"THANKS!"
-localstat 1,80,182,480,64,$1002,ti$,1,2,1
+TextGadget 1,200,48,0,1,"THANKS!"
+Window 1,80,182,480,64,$1002,ti$,1,2,1
 WLocate 8,6
 Print Centre$(tex$,57)
 WLocate 8,16
@@ -49,7 +49,7 @@ Repeat
 Forever
 
 endfunc
-Free localstat 1:Use localstat 0
+Free Window 1:Use Window 0
 End Statement
 
 Statement breakout{command$}
@@ -81,8 +81,8 @@ End Statement
 
 ;************ the programme ********************************
 .setup
-allocst 0,10,"BLITZpaint	(port name BPAINT2)"
-localstat 0,120,12,400,150,$8|$400,"Blitzpaint",0,1,0
+Screen 0,10,"BLITZpaint	(port name BPAINT2)"
+Window 0,120,12,400,150,$8|$400,"Blitzpaint",0,1,0
 Activate 0
 WindowOutput 0
 

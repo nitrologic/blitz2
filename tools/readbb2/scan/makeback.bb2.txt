@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makeback.bb2
 
-lmaxlen 0,4096,256,2
+BitMap 0,4096,256,2
 
 LoadBitMap 0,"mounts.iff",0
 

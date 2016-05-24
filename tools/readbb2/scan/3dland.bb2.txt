@@ -3,8 +3,8 @@
 ; funny sort of program by acid worker blackbourn
 ;
 
-lmaxlen 0,320,256,2:BitPlanesBitMap 0,4,1:BitPlanesBitMap 0,8,2
-lmaxlen 1,320,256,2:BitPlanesBitMap 1,5,1:BitPlanesBitMap 1,9,2
+BitMap 0,320,256,2:BitPlanesBitMap 0,4,1:BitPlanesBitMap 0,8,2
+BitMap 1,320,256,2:BitPlanesBitMap 1,5,1:BitPlanesBitMap 1,9,2
 BLITZ
 InitCopList 0,44,256,$0002,0,4,0
 CreateDisplay 0
@@ -151,7 +151,7 @@ theta=Rnd :Mouse On:MouseArea 0,0,320,300
 Repeat
 ;	MOVE #0,$dff180
 	VWait:DisplayBitMap 0,db
-:db=1-db:Use lmaxlen db:BlockScroll
+:db=1-db:Use BitMap db:BlockScroll
 
 
 	mx=(160-MouseX)*0.1:mz=(MouseY-200)*0.1
@@ -163,8 +163,8 @@ Repeat
 	idx.q=(theta*c) AND 511
 	Process{qcos(idx),qsin(idx)}
 
-	Position{&R}:Use lmaxlen db+8:Draw{}
-	Position{&B}:Use lmaxlen db+4:Draw{}
+	Position{&R}:Use BitMap db+8:Draw{}
+	Position{&B}:Use BitMap db+4:Draw{}
 Until Joyb(0)<>0
 End
 

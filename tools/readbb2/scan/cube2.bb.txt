@@ -1,23 +1,23 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/Fuzzy/Cube2.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Fuzzy/Cube2.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/Fuzzy/Cube2.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Fuzzy/Cube2.bb
-##[$80CC]
+NoCli
 DEFTYPE.l
 
-remline 2,"topaz.font",8
+LoadFont 2,"topaz.font",8
 ;LoadFont 1,"crypt.font",27
 SetString 6,1
 SelectMode 3,0
-workstart	1,0,00,0,99," Randomize "
-workstart	1,0,33,1,98," Print "
-workstart	1,0,66,0,97," Quit "
+TextGadget	1,0,00,0,99," Randomize "
+TextGadget	1,0,33,1,98," Print "
+TextGadget	1,0,66,0,97," Quit "
 
 
 LoadShapes 6,"data/cube.shp"
 
-allocst 0,0,0,640,512,3,$8004,"",0,1
+Screen 0,0,0,640,512,3,$8004,"",0,1
 Green 0,8,8,8:Green 1,0,0,0:Green 2,15,0,0:Green 3,0,15,0
 Green 4,15,0,15:Green 5,15,15,0:Green 6,15,15,15:Green 7,0,0,15
 DefaultIDCMP $48
-localstat 0,0,0,640,512,$11800,"",0,1,1
+Window 0,0,0,640,512,$11800,"",0,1,1
 ScreensBitMap 0,0
 WindowFont 2
 Dim c(6,4,4)
@@ -102,9 +102,9 @@ Goto rot
 .disp:
 For x=0 To 2
 For y=0 To 2
-longdiv 5+c(1,x,y),164+(x+y)*52,125+(x-y)*30
-longdiv 11+c(2,x,y),164+x*52,155+x*30+y*60
-longdiv 17+c(3,x,y),320+x*52,215-x*30+y*60
+Blit 5+c(1,x,y),164+(x+y)*52,125+(x-y)*30
+Blit 11+c(2,x,y),164+x*52,155+x*30+y*60
+Blit 17+c(3,x,y),320+x*52,215-x*30+y*60
 Next
 Next
 Return

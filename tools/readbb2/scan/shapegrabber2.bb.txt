@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/ShapeGrabber/ShapeGrabber2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/ShapeGrabber/ShapeGrabber2.bb
- ##[$80CC]
+ NoCli
 
 Dim sd(60)
 en=0
@@ -23,7 +23,7 @@ ShapeGadget 0,2,152,0,13,84,85
 ShapeGadget 0,2,163,0,14,86,87
 ShapeGadget 0,2,108,0,15,88,89
 
-allocst 0,0,0,640,200,4,$8000," Shape Graber By King Fuzzy",1,6
+Screen 0,0,0,640,200,4,$8000," Shape Graber By King Fuzzy",1,6
 Green 0,0,0,0
 Green 1,13,13,13
 Green 2,2,3,3
@@ -43,21 +43,21 @@ Green 15,1,2,3
 
 
 DefaultIDCMP $118
-localstat 0,0,0,640,200,$1A00,"",2,5
+Window 0,0,0,640,200,$1A00,"",2,5
 Wi=640:Hi=200:dp=4
 LoadScreen 0,"data/Blitz2.logo2",0
 
 MaxLen pa$=160
 MaxLen fl$=160
 
-newlocarr 0,0," Project "
+MenuTitle 0,0," Project "
 MenuItem	0,0,0,0,"Load Iff				","L"
 MenuItem	0,0,0,1,"Save Shapes		 ","S"
 MenuItem	0,0,0,2,"About					 ","A"
 MenuItem	0,0,0,3,"Edit Shapes		 ","E"
 MenuItem	0,0,0,4,"Quit						","Q"
 
-newlocarr 0,1," Options "
+MenuTitle 0,1," Options "
 MenuItem	0,0,1,0,"Set Grid Size"
 MenuItem	0,1,1,1,"	Grid ON/OFF					 ","G"
 MenuItem	0,3,1,2,"	Copy Left border			","4"
@@ -75,20 +75,20 @@ If fl$="" Then Goto lop
 
 ILBMDepth fl$
 Hi=DecodeILBM:Wi=ILBMViewMode:dp=##[$D087]
-Free localstat 0
-Free allocst 0
-allocst 0,0,0,Wi,Hi,dp,##[$D088]," ",1,2
+Free Window 0
+Free Screen 0
+Screen 0,0,0,Wi,Hi,dp,##[$D088]," ",1,2
 DefaultIDCMP $118
-localstat 0,0,0,Wi,Hi,$1A00,"",1,2
+Window 0,0,0,Wi,Hi,$1A00,"",1,2
 
 LoadScreen 0,fl$,0
 Use SetCycle 0
 
 skp1:
-arrmult 0
+SetMenu 0
 skp2:
-Use allocst 0
-Use localstat 0
+Use Screen 0
+Use Window 0
 ScreensBitMap 0,0
 WJam 2
 NW=0
@@ -146,7 +146,7 @@ Print m1,"	",m2,"		"
 Goto lop
 .gdsz:
 Gosub crhrf
-Wnd.l=Peek.l(Addr localstat(0))
+Wnd.l=Peek.l(Addr Window(0))
 t.l=##[$FF95](Wnd,$18)
 pmouse:
 FlushEvents $10
@@ -196,8 +196,8 @@ Next
 
 Return
 .kill:
-Free localstat 0
-Free allocst 0
+Free Window 0
+Free Screen 0
 End
 .sav:
 If shp=0 Then Goto lop
@@ -257,10 +257,10 @@ reed:
 cs=0
 If shp=0 Then Goto skp2
 t$=" Shape Editor : Shape # "+Str$(en+1)+" of "+Str$(shp)
-allocst 1,0,0,640,400,sd(en),0,t$,2,3
+Screen 1,0,0,640,400,sd(en),0,t$,2,3
 Use SetCycle 0
 DefaultIDCMP $40
-localstat 1,0,0,640,200,$1800,"",2,3,0
+Window 1,0,0,640,200,$1800,"",2,3,0
 ScreensBitMap 1,0
 WLocate 30,1
 WColour 2,0
@@ -271,8 +271,8 @@ If w>620 OR h>370 Then ns=1
 
 If rn=0 Then CopyShape en,55
 bord:
-If ns=0 Then longdiv en,100,20
-If ns=1 Then longdiv 59,100,20
+If ns=0 Then Blit en,100,20
+If ns=1 Then Blit 59,100,20
 
 WLocate 30,9
 WJam 1
@@ -295,22 +295,22 @@ rsz:
 
 qut:
 If ns=0 Then Gosub fix
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto skp2
 nxs:
 If ns=0 Then Gosub fix
 en+1
 If en => shp Then en=0
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto ednx
 pvs:
 If ns=0 Then Gosub fix
 en-1
 If en < 0	Then en=shp-1
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto ednx
 trt:
 If h-y>1 Then y+1:h-1:cs=1
@@ -327,7 +327,7 @@ Goto bord
 fix:
 If cs=0 Then Return
 BlockScroll 0
-longdiv en,0,0
+Blit en,0,0
 GetaShape en,x,y,w,h
 Return
 flx:
@@ -340,14 +340,14 @@ rot:
 rn=rn+.125:If rn>= 1 Then rn=0
 CopyShape 55,en
 Rotate en,rn
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto reed
 
 rst:
 CopyShape 55,en
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto ednx
 del:
 If shp=1 Then shp=0:Goto qut
@@ -358,13 +358,13 @@ CopyShape a+1,a
 sd(a)=sd(a+1)
 Next
 dodsp:
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto ednx
 
 .snum:
 DefaultIDCMP $400
-localstat 2,100,30,120,70,$1000,tt$,1,2
+Window 2,100,30,120,70,$1000,tt$,1,2
 WJam1
 WColour 1,0
 WLocate 20,9
@@ -377,7 +377,7 @@ WLocate 30,39
 WindowInput 2
 EditFrom 2
 op=Edit (en+1,2)
-Free localstat 2
+Free Window 2
 op-1
 Return
 swp:
@@ -404,22 +404,22 @@ sd(op)=td
 Goto dodsp
 .About:
 Gosub crhrf
-allocst 1,0,0,320,200,2,0,"",1,2
+Screen 1,0,0,320,200,2,0,"",1,2
 Green 0,0,0,0
 Green 2,15,0,0
 Green 3,15,8,0
 Green 1,15,15,15
 
 DefaultIDCMP $200
-localstat 1,0,0,320,200,$1008,"",1,0
+Window 1,0,0,320,200,$1008,"",1,0
 ScreensBitMap 1,0
 
-longdiv 58,60,40
+Blit 58,60,40
 
 FlushEvents
 e=WaitEvent
-Free localstat 1
-Free allocst 1
+Free Window 1
+Free Screen 1
 Goto skp2
 
 

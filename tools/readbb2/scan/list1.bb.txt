@@ -3,12 +3,12 @@ LoadShape 0,"brush.iff",0
 
 BLITZ
 
-lmaxlen 0,320,256,3
+BitMap 0,320,256,3
 
 Slice 0,44,3
 
 Show 0
 
-longdiv 0,100,100
+Blit 0,100,100
 
 MouseWait

@@ -125,13 +125,13 @@ End Macro
 
 Statement changeobj{f$,t$}
 Shared o()
-newmem o()
-While globfree(o())
+ResetList o()
+While NextItem(o())
 	If o()\n=f$ Then o()\n=t$:Statement Return
 Wend
 End Statement
 
-##[$80CA] g()
+USEPATH g()
 
 Function zconv{n,z}
 Function Return n/(z LSR 2+1)
@@ -170,9 +170,9 @@ End Statement
 
 Statement killgad{id}
 Shared g()
-newmem g()
-While globfree(g())
-	If \id=id Then freelast g():Statement Return
+ResetList g()
+While NextItem(g())
+	If \id=id Then KillItem g():Statement Return
 Wend
 End Statement
 
@@ -183,8 +183,8 @@ End Statement
 
 Statement turnoff{id}
 Shared g()
-newmem g()
-While globfree(g())
+ResetList g()
+While NextItem(g())
 	If \id=id
 		Line \x,\y,\x+\w-2,\y,1
 		Line \x,\y,\x,\y+\h-2,1
@@ -205,8 +205,8 @@ End Statement
 
 Statement turnon{id}
 Shared g()
-newmem g()
-While globfree(g())
+ResetList g()
+While NextItem(g())
 	If \id=id
 		Line \x,\y,\x+\w-2,\y,2
 		Line \x,\y,\x,\y+\h-2,2
@@ -224,8 +224,8 @@ If Joyb(0)
 	If lb
 		lb=0
 		x=MouseX LSL 1:y=MouseY
-		newmem g()
-		While globfree(g())
+		ResetList g()
+		While NextItem(g())
 			If x>=\x AND y>=\y
 				If x<\x+\w AND y<\y+\h
 					id=\id:If \i Then turnon{id}
@@ -245,9 +245,9 @@ Shared g()
 Boxf 4,20,330,135,2
 Line 331,20,331,136,1
 Line 331,136,4,136,1
-newmem g()
-While globfree(g())
-	If \id>0 Then freelast g()
+ResetList g()
+While NextItem(g())
+	If \id>0 Then KillItem g()
 Wend
 End Statement
 
@@ -346,7 +346,7 @@ End Statement
 QAMIGA
 .amigaprox
 
-##[$80CA] p()
+USEPATH p()
 
 Statement doif{t$,o}
 Shared p(),f(),k
@@ -420,11 +420,11 @@ End Function
 LoadShape 0,"pointer":GetaSprite 0,0
 LoadShape 0,"sight":DecodeShapes 0:GetaSprite 1,0
 LoadShape 0,"grid":GetaSprite 2,0
-casestrcomp 0,"shapes.iff":StopCycle 0,0,0,0,0
+LoadPalette 0,"shapes.iff":StopCycle 0,0,0,0,0
 LoadShape 0,"galaxy.iff"
 ;LoadBlitzFont 0,"st.font"
 LoadShape 7,"starship.iff":DecodeShapes 7
-lmaxlen 0,144,80,3:longdiv 0,0,0
+BitMap 0,144,80,3:Blit 0,0,0
 
 If WriteMem(0,"prog")
 	FileInput 0
@@ -465,13 +465,13 @@ BLITZ
 
 .begin
 ;
-longmult 0,64:longmult 1,64
+Queue 0,64:Queue 1,64
 Gosub initstars
 stpal2{}
-lmaxlen 0,640,256,2	;stars & hyperspace!
-lmaxlen 1,640,144,3	;panel
-lmaxlen 2,320,256,4	;for pretty pix of planets & people
-lmaxlen 3,144,80,3	 ;for nav stuff
+BitMap 0,640,256,2	;stars & hyperspace!
+BitMap 1,640,144,3	;panel
+BitMap 2,320,256,4	;for pretty pix of planets & people
+BitMap 3,144,80,3	 ;for nav stuff
 ;
 BlockScroll 2
 For x=0 To 128 Step 16
@@ -484,10 +484,10 @@ GetaShape 1,0,0,129,65
 GetaShape 2,0,0,16,8
 GetaShape 8,0,0,1,1
 ;
-lmaxlen 4,448,192,3	;DB bitmaps for arcade section!
-lmaxlen 5,448,192,3	;						 "
+BitMap 4,448,192,3	;DB bitmaps for arcade section!
+BitMap 5,448,192,3	;						 "
 ;
-Use lmaxlen 1:BitMapOutput 1
+Use BitMap 1:BitMapOutput 1
 
 Slice 0,32,320,128,$fffa,5,8,32,640,640
 *sl0.slice=Addr Slice(0):Gosub go4cols
@@ -530,9 +530,9 @@ wa=.25
 SetInt 5
 		;
 		If ss
-			Use lmaxlen 0:Gosub dostars
+			Use BitMap 0:Gosub dostars
 			If wp Then Gosub warpeffects
-			Use lmaxlen 1
+			Use BitMap 1
 		Else
 			If ce
 				Gosub commeffects
@@ -624,10 +624,10 @@ Return
 
 dostarfield
 ;
-##[$80CA] a()
+USEPATH a()
 ;
 ShowF 4+db,64,32:ShowB 0,x,y
-db=1-db:Use lmaxlen 4+db:UnQueue db
+db=1-db:Use BitMap 4+db:UnQueue db
 ;
 If cy(db)
 	Line 64+0,32+127,64+cx(db),32+cy(db),0
@@ -660,7 +660,7 @@ If ast
 		at=Int(Rnd(6))
 		If ala
 			asa+1:ala-1
-			locfree a():globalloc a()
+			FirstItem a():AddItem a()
 			If ala&7
 				\x=Rnd(96)-48+(MouseX-160),Rnd(64)-32+(MouseY-64)LSL 1,Rnd+31,3
 			Else
@@ -674,15 +674,15 @@ Else
 		ala-.125
 		If ala=Int(ala)
 			asa+1
-			locfree a():globalloc a()
+			FirstItem a():AddItem a()
 			\x=Rnd(384)-192,Rnd(160)-80,sw3,0,0,0,0
 			\dz=Int(Rnd(16))+4:\s=64
 		EndIf
 	EndIf
 EndIf
 ;
-locfree a():lz=32
-While globfree(a())
+FirstItem a():lz=32
+While NextItem(a())
 	;
 	sx=\x-xs:sy=\y-ys:sz=\z:z2=sz LSL sw4
 	If QAbs(sx)<192
@@ -717,7 +717,7 @@ While globfree(a())
 		Else
 			\ft=Rnd(64)+32
 			PushItem a()
-			If globalloc(a())
+			If AddItem(a())
 				\x=sx,sy,sz,1:\s=96
 				Gosub homein
 			EndIf
@@ -755,7 +755,7 @@ While globfree(a())
 	Case 1	;missile
 		Gosub xymover:sx*m4(z2):sy*m4(z2):sz-sw2
 		If sz<sw2
-			freelast a()
+			KillItem a()
 			If QAbs(sx)<48 AND QAbs(sy)<24 Then MOVE #$f00,$dff180
 		Else
 			Gosub chkdieswap
@@ -763,14 +763,14 @@ While globfree(a())
 	Case 2	;explosion
 		\s+4
 		If \s+sz>159
-			freelast a()
+			KillItem a()
 		Else
 			Gosub chkswap
 		EndIf
 	Case 3		;fast asteroid
 		sx*m4(z2):sy*m4(z2):sz-sw2
 		If sz<sw2
-			freelast a()
+			KillItem a()
 			If QAbs(sx)<96 AND QAbs(sy)<48 Then MOVE #$f00,$dff180
 		Else
 			Gosub chkswap
@@ -778,7 +778,7 @@ While globfree(a())
 	Case 4		;fast asteroid
 		sx*m1(z2):sy*m1(z2):sz-sw
 		If sz<sw
-			freelast a()
+			KillItem a()
 			If QAbs(sx)<96 AND QAbs(sy)<48 Then MOVE #$f00,$dff180
 		Else
 			Gosub chkswap
@@ -795,10 +795,10 @@ Return
 ;
 ast=1-ast
 ;
-Use lmaxlen 0
+Use BitMap 0
 Boxf 0,128,639,255,0:Boxf 320,0,639,127,0:!bwait
-newmem s()
-While globfree(s())
+ResetList s()
+While NextItem(s())
 x=s()\x:y=s()\y:c=s()\c
 Point x+320,y,c:Point x,y+128,c:Point x+320,y+128,c
 Wend
@@ -809,7 +809,7 @@ x=0:y=0:na=0:cy(0)=0:cy(1)=0
 QAMIGA
 If ast
 	LoadShapes 64,"asteroids.3dshapes"
-	casestrcomp 1,"asteroid"
+	LoadPalette 1,"asteroid"
 Else
 	LoadShape 64,"starship.iff",1
 	LoadShape 96,"starbomb.iff"
@@ -845,10 +845,10 @@ Repeat
 Until asa+ala=0 OR Joyb(0)=2
 ;
 Repeat
-	VWait:locfree a()
-Until NOT globfree(a())
+	VWait:FirstItem a()
+Until NOT NextItem(a())
 ;
-VWait 2:ss2=0:Use lmaxlen 0:stpal2{}:x=Int(x):y=Int(y)
+VWait 2:ss2=0:Use BitMap 0:stpal2{}:x=Int(x):y=Int(y)
 Gosub go4cols:Show 0,x,y:Use SetCycle 1
 While x OR y
 If x
@@ -860,7 +860,7 @@ EndIf
 VWait:Show 0,x,y
 Wend
 ;
-Use lmaxlen 1:ss2=0:Goto mousea
+Use BitMap 1:ss2=0:Goto mousea
 
 xymover
 Select \xs
@@ -889,7 +889,7 @@ EndIf
 chkswap
 \x=sx,sy,sz
 If sz>lz	;have to swap?
-	freelast a():PrevItem a():globalloc a():globfree a()
+	KillItem a():PrevItem a():AddItem a():NextItem a()
 EndIf
 Return
 
@@ -922,9 +922,9 @@ dit=0
 Return
 
 .findloc
-##[$80CA] p()
-newmem p()
-While globfree(p())
+USEPATH p()
+ResetList p()
+While NextItem(p())
 	If \l=pl$ Then pc=-1:Return
 Wend
 pc=0:Return
@@ -953,14 +953,14 @@ Return
 .handlecomms
 FadeOut 1:Gosub go16cols:Show 2,0,0
 QAMIGA
-Use lmaxlen 2:Boxf 0,0,351,127,0
+Use BitMap 2:Boxf 0,0,351,127,0
 LoadShape 3,ocb$,2:Handle 3,ShapeWidth(3)/2,ShapeHeight(3)-1
-longdiv 3,160,127
+Blit 3,160,127
 LoadShape 3,occ$
 For k=3 To 6
 Handle k,ShapeWidth(k)/2,ShapeHeight(k)-1
-Next:longdiv 3,160,127
-Use lmaxlen 1
+Next:Blit 3,160,127
+Use BitMap 1
 BLITZ
 FadeIn 2:Return
 
@@ -978,18 +978,18 @@ commeffects
 If ce2
 	ce2-1
 Else
-	Use lmaxlen 2
-	longdiv ce,160,127:ce+cea
+	Use BitMap 2
+	Blit ce,160,127:ce+cea
 	If ce<=3
 		cea=-cea:ce+cea:ce2=Int(Rnd(4))
 	Else
 		If ce>=6 Then cea=-cea:ce+cea
 	EndIf
-	Use lmaxlen 1
+	Use BitMap 1
 EndIf
 Return
 
-##[$80CA] g()
+USEPATH g()
 
 .kludge
 ca.l=CopLoc
@@ -1071,22 +1071,22 @@ EndIf
 Return
 
 .navact1	;nav action 1 - zoom in on selected sector
-Gosub nveoff:VWait:longdiv 1,19,48:longdiv 0,19,48
+Gosub nveoff:VWait:Blit 1,19,48:Blit 0,19,48
 g-1:x=g & 7:y=Int(g LSR 3):x2=x LSL 4:y2=y LSL 3
 gx=x:gy=y
-Use lmaxlen 3:longdiv 1,0,0
-Scroll 19+x2,48+y2,16,8,x2,y2,1:Use lmaxlen 1
+Use BitMap 3:Blit 1,0,0
+Scroll 19+x2,48+y2,16,8,x2,y2,1:Use BitMap 1
 For k=1 To 3
 VWait 10:Scroll 0,0,128,64,19,48,3
-VWait 10:longdiv 2,19+x2,48+y2
+VWait 10:Blit 2,19+x2,48+y2
 Next:Scroll 0,0,128,64,19,48,3
 Colour 3,2
 For k=1 To 8
 Locate k+k+1,5:Print Chr$(k+64)
 Locate 1,k+5:Print k
 Next
-Use lmaxlen 3
-ClearList z():##[$80CA] z()
+Use BitMap 3
+ClearList z():USEPATH z()
 For k=0 To 14 Step 2
 For j=0 To 7
 If Cls(x2+k,y2+j)<>2 AND Cls(x2+k,y2+j)<>7
@@ -1099,28 +1099,28 @@ If Cls(x2+k,y2+j)<>2 AND Cls(x2+k,y2+j)<>7
 	\c=Cls(x2+k,y2+j)
 EndIf
 Next j,k
-Use lmaxlen 1
+Use BitMap 1
 For k=1 To 16
-VWait:longdiv 1,19,48:!bwait
-newmem z()
-While globfree(z())
+VWait:Blit 1,19,48:!bwait
+ResetList z()
+While NextItem(z())
 	\x+\xs:\y+\ys:Point \x,\y,\c ;:Plot \x+1,\y,\c
 Wend
 Next
-newmem z()
-While globfree(z())
+ResetList z()
+While NextItem(z())
 	Boxf \x-3,\y-1,\x+2,\y+1,\c
 Wend
 Locate 1,3:Colour 1,2
 prnt{Centre$("SECTOR MAP - GALAXY COORDINATES "+Chr$(gx+65)+Chr$(gy+49),40)}
-##[$80CA] g()
+USEPATH g()
 addgad2{"GALAXY MAP",2,15,65}
 ac=2
 If gx=Int(px LSR 3) AND gy=Int(py LSR 3) Then nve=2 Else nve=3
 Return
 
 .teleact1
-##[$80CA] o()
+USEPATH o()
 If g>18
 	turnoff2{g}
 	Select g
@@ -1143,7 +1143,7 @@ If g>18
 					\l="*":If ly1 Then ly1-1
 				Else
 					exec{\c2}
-					If \l2=pl$ Then exec{\c3}:freelast o() Else \l=pl$:If ps=5 Then freelast o()
+					If \l2=pl$ Then exec{\c3}:KillItem o() Else \l=pl$:If ps=5 Then KillItem o()
 					If ly2 Then ly2-1
 				EndIf
 				y=15 LSL 3-2:Boxf 8,y-1,325,y+11,2:killgad{23}
@@ -1164,8 +1164,8 @@ Return
 
 findit
 k=0
-newmem o()
-While globfree(o())
+ResetList o()
+While NextItem(o())
 	If \l=tk$
 		If k>=ty Then f=-1:Return Else k+1
 	EndIf
@@ -1174,8 +1174,8 @@ f=0:Return
 
 reflist ;ly=list offset, x=x axis, k$=match location
 k=0:y=5:Colour 4,0
-newmem o()
-While globfree(o())
+ResetList o()
+While NextItem(o())
 	If \l=k$
 		If k>=ly
 			Locate x,y:Print RSet$(\n,17):y+1:If y>11 Then Goto out
@@ -1215,7 +1215,7 @@ addgad2{"MORE",23,13,21}
 addgad2{"LESS",36,13,22}
 
 ly1=0:ly2=0:Gosub refleft:Gosub refrite
-##[$80CA] g()
+USEPATH g()
 ac=4:tk$="":Return
 
 .donav
@@ -1225,13 +1225,13 @@ For x=0 To 7
 id+1:addzone{x LSL 4+19,y LSL 3+48,16,8,id}
 Next x,y
 Locate 1,3:prnt{Centre$("GALAXY MAP",40)}
-longdiv 1,19,48
+Blit 1,19,48
 Colour 3,2
 For k=1 To 8
 Locate k+k+1,5:Print Chr$(k+64)
 Locate 1,k+5:Print k
 Next
-longdiv 0,19,48:Gosub mapkey
+Blit 0,19,48:Gosub mapkey
 ac=1:nve=1:Return
 
 .makeopts
@@ -1272,9 +1272,9 @@ Case 2
 	If cc
 		If ccs	;selected reply
 			cc=c(cc)\r[ccs-3]\c:Boxf 8,24,327,97,2
-			newmem g()
-			While globfree(g())
-				If g()\id>2 Then freelast g()
+			ResetList g()
+			While NextItem(g())
+				If g()\id>2 Then KillItem g()
 			Wend
 			Gosub posscomms
 		Else
@@ -1338,13 +1338,13 @@ If ps=1 OR ps=3
 	Next
 EndIf
 Handle 3,ShapeWidth(3)/2,0
-Use lmaxlen 2:BlockScroll:!bwait
-newmem s()
-While globfree(s())
+Use BitMap 2:BlockScroll:!bwait
+ResetList s()
+While NextItem(s())
 	Point s()\x,s()\y,s()\c
 	Point Rnd(320),Rnd(128)+128,Rnd(3)+1
-Wend:longdiv 3,160,128
-Use lmaxlen 1
+Wend:Blit 3,160,128
+Use BitMap 1
 Select ps
 Case 0
 	cprntcr{"DOCKING AT STARBASE..."}
@@ -1364,12 +1364,12 @@ Return
 
 commscls
 cc=0:FadeOut 2:Show 2,0,yo
-Use lmaxlen 2:Boxf 0,0,351,127,0:!bwait
-newmem s()
-While globfree(s())
+Use BitMap 2:Boxf 0,0,351,127,0:!bwait
+ResetList s()
+While NextItem(s())
 	Point s()\x,s()\y,s()\c
 Wend
-Use lmaxlen 1:FadeIn 1
+Use BitMap 1:FadeIn 1
 Return
 
 scrollstars
@@ -1421,9 +1421,9 @@ Next
 ss=0:Return
 
 .dostars
-##[$80CA] s()
-newmem s()
-While globfree(s())
+USEPATH s()
+ResetList s()
+While NextItem(s())
 	Point \lx,\ly,0
 	ixa=\xa ASR a1:\xs+ixa:\x+\xs:ix=\x
 	If ix>=0 AND ix<320
@@ -1448,11 +1448,11 @@ While globfree(s())
 		\lx=-1
 	EndIf
 Wend
-##[$80CA] g()
+USEPATH g()
 Return
 
 initstars
-##[$80CA] s()
+USEPATH s()
 
 While AddLast(s())
 	\x=Rnd(320):\y=Rnd(128)
@@ -1464,7 +1464,7 @@ While AddLast(s())
 	;
 	\lx=-1,-1
 Wend
-##[$80CA] g()
+USEPATH g()
 Return
 
 .amigasubs
@@ -1490,7 +1490,7 @@ Function Return k$
 End Function
 
 .obj
-##[$80CA] o()
+USEPATH o()
 AddLast o()
 \n=Mid$(f$,2),ed{}
 \c=ced{},ced{},ed{},ced{},ced{}
@@ -1498,7 +1498,7 @@ Return
 
 .conv ;f$="$ conv number"
 k=Val(Mid$(f$,2))
-##[$80CA] c(k)
+USEPATH c(k)
 ;
 ;fetch conversation text...
 ;
@@ -1514,7 +1514,7 @@ k2=-1
 Return
 
 .evnt ;t$=coords
-##[$80CA] p()
+USEPATH p()
 AddLast p():\l=f$:k=-1
 Repeat
 	f$=ed{}

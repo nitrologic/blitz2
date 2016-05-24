@@ -55,10 +55,10 @@ SetIO io
 
 ;bigx=1024:bigy=512
 bigx=768*2:bigy=384*2
-lmaxlen 0,bigx,bigy,8
+BitMap 0,bigx,bigy,8
 BitPlanesBitMap 0,3,128
 BitMapOutput 0
-Use lmaxlen 0
+Use BitMap 0
 
 #map=Off:#exo=Off:#exo24=On:#freq=Off:#pmap=Off
 Include "LoadINC.bb"
@@ -69,11 +69,11 @@ t$="track1"
 GetExo24{m$+t$}
 
 
-Use lmaxlen 0
+Use BitMap 0
 
 
 
-Use lmaxlen 0
+Use BitMap 0
 
 CNIF Off
 
@@ -187,7 +187,7 @@ Return
 
 .DoCurve
 
-	Use lmaxlen 3
+	Use BitMap 3
 	For dtp.q=2 To pts3+0.2 Step 0.02
 		FindLo dtp.q
 
@@ -207,7 +207,7 @@ Return
 
 
 .DoStartLine
-	Use lmaxlen 3
+	Use BitMap 3
 	dtf=pts3+0.5
 	FindLo dtf
 	tri(0)\x=MapX(bez\i,bez\j),MapY(bez\i,bez\j)

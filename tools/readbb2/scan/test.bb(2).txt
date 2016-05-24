@@ -90,16 +90,16 @@ Dim f.face(60)
 					Until a$="AXIS" OR DosBuffLen(0)
 				EndIf
 				If *robot=0
-					If globalloc(shapes())
-						##[$80CA] shapes()
+					If AddItem(shapes())
+						USEPATH shapes()
 						##[$AA06] shapes(),i-1,&p(1),j-1,&f(1)
 						\atype=1:\pos\x=3000,-600,0:\rota\x=0,0,0:;\swing=24,12
 						rx=p(0)\x:ry=p(0)\y:rz=p(0)\z
 						*robot=shapes():*parent=shapes()
 					EndIf
 				Else
-					If globalloc(parts())
-						##[$80CA] parts()
+					If AddItem(parts())
+						USEPATH parts()
 						##[$AA06] parts(),i-1,&p(1),j-1,&f(1)
 						z=16:\atype=1
 						\pos\x=(p(0)\x-rx)*z,(p(0)\y-ry)*-z,(p(0)\z-rz)*z
@@ -120,11 +120,11 @@ Dim f.face(60)
 
 .initialise
 	;
-	lmaxlen 2,320,32,5:For y=0 To 31:Line 0,y,319,y,y:Next ;colbmap
+	BitMap 2,320,32,5:For y=0 To 31:Line 0,y,319,y,y:Next ;colbmap
 	;
 	If #iso=0
-		lmaxlen 0,320,256,4
-		lmaxlen 1,320,256,4
+		BitMap 0,320,256,4
+		BitMap 1,320,256,4
 		##[$AB02] 0,0,1,2,2,50*65536+50,wx,wy,ww,wh
 ;		InitDisplay3D 1,0,1,2,2,60*65536+60,256,0,64,64
 		##[$AB05] 3,3;13,5
@@ -132,16 +132,16 @@ Dim f.face(60)
 		Gosub palettergb:DisplayPalette 0,0
 	EndIf
 	If #iso=1
-		lmaxlen 0,320,512,2
-		lmaxlen 1,320,512,2
+		BitMap 0,320,512,2
+		BitMap 1,320,512,2
 		##[$AB02] 0,0,1,2,1,50*65536+50
 		##[$AB05] 0,0:##[$AB07] 0,7000,8
 		InitCopList 0,44,256,$12014,8,16,0
 		Gosub paletterb:DisplayPalette 0,0
 	EndIf
 	If #iso=2
-		lmaxlen 0,320,420,4
-		lmaxlen 1,320,420,4
+		BitMap 0,320,420,4
+		BitMap 1,320,420,4
 		##[$AB02] 0,0,1,2,1,50*65536+50
 		##[$AB05] 0,0:##[$AB07] 0,7000,8
 		InitCopList 0,44,210,$13014,8,16,0
@@ -195,7 +195,7 @@ Dim f.face(60)
 .movementhandler
 		;
 		update-1:If update<0
-			##[$80CA] *ship
+			USEPATH *ship
 			##[$AA02] shapes()
 			If \pos\y>0 Then \pos\y=0
 			update=4
@@ -214,7 +214,7 @@ Dim f.face(60)
 		Gosub moveship
 		ddb=db:db=1-db:VWait 4							 ;display db for interupt
 		##[$AB06] 0,db,shapes(),*ship
-		Use lmaxlen db
+		Use BitMap db
 ;		Gosub drawbones
 		Box wx,wy,wx+ww-1,wy+wh-1,1
 		Box wx+ww-1,wy+wh-1,wx|ww-5,wy+wh-5,1
@@ -227,9 +227,9 @@ Dim f.face(60)
 
 Statement bone{x.w,y,*object.part3d}		 ;draw lines to all sisters
 	Shared wsx,wsy,h(),*curr
-	##[$80CA] *object
+	USEPATH *object
 	xx=\verts[0]\sx+wsx:yy=\verts[0]\sy+wsy
-	If globalloc(h()) Then h()\x=xx,yy,*object
+	If AddItem(h()) Then h()\x=xx,yy,*object
 	If x+y<>0 Then Line x,y,xx,yy,0
 	c=-1:If *object=*curr Then c=0
 	Boxf xx,yy,xx+3,yy+3,c
@@ -242,15 +242,15 @@ End Statement
 .
 .spotbone
 	*old.part3d=*curr
-	newmem h():##[$80CA] h()
-	While globfree(h())
+	ResetList h():USEPATH h()
+	While NextItem(h())
 		If PColl(px,py,1,1,\x,\y,3,3) Then *curr=\p
 	Wend
 	If mmode=4 AND *old<>*curr						;newage connection
 		If *curr=*robot Then Return
 		If *curr\child=*old Then Return
 		If *curr\parent=*old Then Return
-		##[$80CA] *curr
+		USEPATH *curr
 		!stopints
 			If \parent
 				If \sister Then \sister\parent=\parent
@@ -274,7 +274,7 @@ End Statement
 Statement drawbutton{x.w,y,w,h,a$,c.w}
 	Colour c:offset=(w-Len(a$)*8)/2
 	For db=0 To 1 ;doublebuffered!
-		Use lmaxlen db:BitMapOutput db:Colour c
+		Use BitMap db:BitMapOutput db:Colour c
 		Box x,y,x+w-1,y+h-1,c
 		Locate (x+offset)/8,(y+2)/8:Print a$
 	Next
@@ -312,7 +312,7 @@ mainui:
 			End Select
 		EndIf
 		If id>9
-			Use lmaxlen 1-db
+			Use BitMap 1-db
 			Gosub eorbutton:While Joyb(0)<>0:VWait:Wend:Gosub eorbutton
 			Select id
 				Case 13:End
@@ -325,8 +325,8 @@ mainui:
 	Read x,y,w,h,xa,ya,xn,yn
 	For i=0 To yn-1
 		For j=0 To xn-1
-			If globalloc(b())
-				##[$80CA] b()
+			If AddItem(b())
+				USEPATH b()
 				b()\id=id,x+j*xa,y+i*ya,w,h:Read b()\txt
 				drawbutton{\x,\y,\w,\h,\txt,c}
 				id+1
@@ -340,9 +340,9 @@ mainui:
 
 .spotui
 	id=-1
-	newmem b()
-	While globfree(b())
-		##[$80CA] b()
+	ResetList b()
+	While NextItem(b())
+		USEPATH b()
 		If PColl(px,py,1,1,\x,\y,\w,\h)
 			id=\id:Pop While:Return
 		EndIf
@@ -354,13 +354,13 @@ mainui:
 ;--------------------------------------------------------------------
 
 .setupshapes
-	##[$80CA] shapes()
+	USEPATH shapes()
 	Gosub addviewer
 	Gosub adddarts
 	Return
 
 addviewer:
-	globalloc shapes()							;viewer
+	AddItem shapes()							;viewer
 	*ship.part3d=shapes()
 	*ship\pos\x=0,0,0
 	*ship\rot\x=0,1024,0
@@ -400,7 +400,7 @@ rbcols:
 
 adddarts:
 	For i=1 To 8
-		 If globalloc (shapes())
+		 If AddItem (shapes())
 			 \pos\x=Rnd(4000),-500,Rnd(4000)
 ;			 \posv\x=40,0,0
 ;			 \rot\x=10,0,0
@@ -417,7 +417,7 @@ addground:
 	d=8000
 	For x=-3 To 3
 	 For y=-3 To 3
-		 If globalloc (shapes())
+		 If AddItem (shapes())
 			 \pos\x=x*d,0,y*d
 			 \rot\x=0,0,0
 			 \rotv\x=0,0,0					;10,20,30
@@ -430,9 +430,9 @@ addground:
 
 
 .dofire
-	##[$80CA] shapes()
+	USEPATH shapes()
 	If Joyb(0)&2 AND rl<1
-		If globalloc(shapes())
+		If AddItem(shapes())
 			\pos\x=*ship\pos\x,*ship\pos\y,*ship\pos\z
 			\rot\x=*ship\rot\x,*ship\rot\y,*ship\rot\z
 			\rotv\x=0,0,0
@@ -451,9 +451,9 @@ addground:
 	Return
 
 .movenme
-	##[$80CA] shapes()
-	newmem shapes():*curr=*ship
-	While globfree(shapes())
+	USEPATH shapes()
+	ResetList shapes():*curr=*ship
+	While NextItem(shapes())
 		Select \frame
 			Case ?dart
 				\rot\y=##[$AA03](shapes(),*ship)
@@ -461,13 +461,13 @@ addground:
 				*curr=shapes()
 			Case ?sphere
 				\lifecount-1
-				If \lifecount<1 Then freelast shapes()
+				If \lifecount<1 Then KillItem shapes()
 		End Select
 	Wend
 	Return
 
 .moveship:
-	##[$80CA] *ship ;shapes()
+	USEPATH *ship ;shapes()
 	mx=MouseXSpeed
 	my=MouseYSpeed
 	j=Joyb(0)&1
@@ -484,11 +484,11 @@ addground:
 
 
 .setup3d
-	##[$80CA] shapes()
+	USEPATH shapes()
 	d=10
 	For x=0 To 3
 	 For y=0 To 3
-		 If globalloc (shapes())
+		 If AddItem (shapes())
 			 \pos\x=x*d,0,y*d
 			 \rot\x=0,0,0
 			 \frame=?pyramid
@@ -498,8 +498,8 @@ addground:
 	Next
 
 	For i=1 To 10								;16 boxes
-		If globalloc(shapes())
-			##[$80CA] shapes()
+		If AddItem(shapes())
+			USEPATH shapes()
 			\pos\x=Rnd(15535),0,Rnd(15535)
 			\rot\x=0,0,0
 			\rotv\x=0,0,0
@@ -510,10 +510,10 @@ addground:
 		EndIf
 	Next
 
-	globalloc shapes()							;viewer
+	AddItem shapes()							;viewer
 	*ship.part3d=shapes()
 
-	globalloc shapes()							;scanner
+	AddItem shapes()							;scanner
 	*scan.part3d=shapes()
 	\pos\x=0,-20000,0			;hi up
 	\rot\x=-1024,0,0			 ;pointing straight down
@@ -681,7 +681,7 @@ Statement readfigure{*temp.seg}
 	Read *temp\length
 	*prev.seg=0
 	For i=1 To numkids	 ;no loop if numkids=0 (thanks Mark!)
-		globalloc segs()		 ;get a seg from the list array
+		AddItem segs()		 ;get a seg from the list array
 		segs()\bro=*prev	 ;link to last brother
 		*prev=segs()			 ;make last brother me
 		readfigure{segs()} ;and onto the next brother

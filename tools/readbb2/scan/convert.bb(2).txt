@@ -59,19 +59,19 @@ thresh=120
 	StopCycle 0,3,14,6,8
 	t$="Imagine -> SkidMarks Frame Converter"
 	t$+"									 (c)1994 Acid Software"
-	allocst 0,0,0,640,256,2,$8000,t$,2,1:FadePalette 0
+	Screen 0,0,0,640,256,2,$8000,t$,2,1:FadePalette 0
 	;
 	StringGadget 0,88,4,0,1,32,210:StringGadget 0,408,4,0,2,32,210
-	workstart 0,520,22,0,3, "	SELECT	"
-	workstart 0,520,35,0,4, " SHOW AGA "
-	workstart 0,520,48,0,5, " SHOW ECS "
-	workstart 0,520,61,0,6, " GENERATE "
-	workstart 0,520,230,0,7,"	 QUIT	 "
+	TextGadget 0,520,22,0,3, "	SELECT	"
+	TextGadget 0,520,35,0,4, " SHOW AGA "
+	TextGadget 0,520,48,0,5, " SHOW ECS "
+	TextGadget 0,520,61,0,6, " GENERATE "
+	TextGadget 0,520,230,0,7,"	 QUIT	 "
 	For y=0 To 3
-		workstart 0,446,22+y*13,0,8+y+y,"<"
-		workstart 0,490,22+y*13,0,9+y+y,">"
+		TextGadget 0,446,22+y*13,0,8+y+y,"<"
+		TextGadget 0,490,22+y*13,0,9+y+y,">"
 	Next
-	localstat 0,0,11,640,245,$1800,"",2,1,0
+	Window 0,0,11,640,245,$1800,"",2,1,0
 	;
 	ResetString 12,22,610,52
 	ResetString 12,81,610,142
@@ -166,7 +166,7 @@ thresh=120
 	If ReadMem(0,"ram:"+n$+".def")
 		FileOutput 0:NPrint n$:NPrint d$
 		Exists 0,&car\settings,SizeOf .handling
-		Exists 0,Peek.l(Addr lmaxlen(0)+8),64*32/4
+		Exists 0,Peek.l(Addr BitMap(0)+8),64*32/4
 		CloseFile 0
 	EndIf
 	WindowOutput 0
@@ -176,14 +176,14 @@ thresh=120
 	;
 	ff$=f$+"pic."+Right$(Str$(10000+frame),4)
 	If ##[$BE15](ff$)=0 Then BeepScreen 0:Return
-	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use lmaxlen 0
+	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use BitMap 0
 	For y=0 To 31:For x=0 To 63
 		c=pickcolor{m,x+ox,y+oy,&a(0),0}
-		Use lmaxlen 0:Point x,y,c
+		Use BitMap 0:Point x,y,c
 		If ((x+y) AND 1)=0
 			c=pickcolor1{m,x+ox,y+oy,&a(0),1}
-			Use lmaxlen 1:Point x LSR 1,y,c
-			If aga=0 Then Use lmaxlen 2:Point (x AND 254),y,c:Point (x AND254)+1,y,c
+			Use BitMap 1:Point x LSR 1,y,c
+			If aga=0 Then Use BitMap 2:Point (x AND 254),y,c:Point (x AND254)+1,y,c
 		EndIf
 	Next:Next
 	dx=(frame-1) AND 7:dy=Int((frame-1) LSR 3) AND 3

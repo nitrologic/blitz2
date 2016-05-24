@@ -8,8 +8,8 @@ NPrint "OK!"
 ;
 Dim t.w(100)
 
-lmaxlen 0,320,256,3
-lmaxlen 1,320,256,3
+BitMap 0,320,256,3
+BitMap 1,320,256,3
 
 NEWTYPE.obj
 x.w
@@ -56,7 +56,7 @@ cy=-128
 While Joyb(0)=0
 	;
 	Repeat:VWait:Until fc>2:fc=0
-	Show db:db=1-db:Use lmaxlen db ;:Cls
+	Show db:db=1-db:Use BitMap db ;:Cls
 	;
 ;	czr+64:cxr+113
 	;
@@ -64,13 +64,13 @@ While Joyb(0)=0
 	;
 	Horizon3D 4,5
 	;
-	newmem o()
-	While globfree(o())
+	ResetList o()
+	While NextItem(o())
 		If o()\f
-			freelast o()
+			KillItem o()
 		Else
 			Matrix3D 0,o()\x,o()\y,o()\z,o()\xr,o()\yr,o()\zr
-			fltoqu 0,0
+			ShapeTD 0,0
 		EndIf
 	Wend
 	;

@@ -37,7 +37,7 @@ Dim List	swords.wt(30000)		; The words in the search list 28996
 Dim List	fwords.wt(100)			; The words in the found list
 Dim List	LO.w(#noc)					; A list of the known characters
 
-##[$80CA] swords()
+USEPATH swords()
 
 
 FindScreen 0
@@ -59,7 +59,7 @@ Next scl
 
 GTListView #Win0,#VL,8,70,350,84,"LIST IT",4,fwords()
 
-localstat				#Win0,10,30,630,200,4126,"Word Hacker",1,2,0
+Window				#Win0,10,30,630,200,4126,"Word Hacker",1,2,0
 AttachGTList	#Win0,#Win0
 
 #MOUSEMOVE=$10:#INTUITICKS=$400000:#GADGETUP=$40
@@ -108,9 +108,9 @@ Return
 
 If SearchWord$	= "" Then BeepScreen 0:Return
 
-newmem swords()
-newmem fwords()
-newmem LO()
+ResetList swords()
+ResetList fwords()
+ResetList LO()
 
 ClearList fwords()
 ClearList LO()
@@ -121,30 +121,30 @@ losc.w=0
 
 For scl.w = 1 To wl
 	If Mid$(SearchWord$,scl,1) <> " "
-		globalloc LO()
+		AddItem LO()
 		LO()=scl				; store location of known letters
 		losc+1
 	EndIf
 Next scl
 
 
-While globfree(swords())
+While NextItem(swords())
 
 	If \wordsiz = wl
 
-		newmem LO()
+		ResetList LO()
 		cool.w = True
 
 		For sad = 1 To losc
 
 			If cool
-				globfree LO()
+				NextItem LO()
 				If Mid$(\theword,LO(),1) <> Mid$(SearchWord$,LO(),1) Then cool = False
 			EndIf
 
 		Next sad
 
-		If cool Then globalloc fwords() : fwords()\theword=\theword
+		If cool Then AddItem fwords() : fwords()\theword=\theword
 
 	EndIf
 
@@ -170,7 +170,7 @@ CrMDecrunch Bank(0)
 ba.l = Bank(0) : bend.l = ba+BankSize(0)
 
 While ba<bend
-	globalloc swords()
+	AddItem swords()
 
 	\theword	= ##[$B388](ba,$a)
 	\wordsiz	= Len(\theword)

@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/remap4.bb
-lmaxlen 0,768,384,4
-allocst 0,0,0,768,384,4,$8004,"",1,2,0
-casestrcomp 0,"snow.palette":FadePalette 0
+BitMap 0,768,384,4
+Screen 0,0,0,768,384,4,$8004,"",1,2,0
+LoadPalette 0,"snow.palette":FadePalette 0
 
 tr=5:Gosub doremap
 tr=6:Gosub doremap
@@ -14,7 +14,7 @@ End
 
 doremap:
 LoadBitMap 0,"tracks/iff/track.fix"+Str$(tr)
-Use lmaxlen 0
+Use BitMap 0
 ReMap 1,13
 ReMap 11,1
 ReMap 8,11

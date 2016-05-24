@@ -28,9 +28,9 @@ End NEWTYPE
 
 .initialise
 
-	lmaxlen 0,320,256,3
-	lmaxlen 1,320,256,3
-	lmaxlen 2,320,8,3:Use lmaxlen 2:For y=0 To 7:Line 0,y,319,y,y:Next
+	BitMap 0,320,256,3
+	BitMap 1,320,256,3
+	BitMap 2,320,8,3:Use BitMap 2:For y=0 To 7:Line 0,y,319,y,y:Next
 
 	##[$AB82] 0,0,1,2,0,50*65536+50 ;,0,0,320,200
 	##[$AB82] 1,0,1,2,0,60*65536+60,256,0,64,64
@@ -57,7 +57,7 @@ End NEWTYPE
 
 SetInt 5
 	update-1:If update<0
-		##[$80CA] *ship
+		USEPATH *ship
 		mx=MouseXSpeed:my=MouseYSpeed
 		j=Joyb(0):d=1:If j AND 2 Then d=-1:j=1
 		;
@@ -85,7 +85,7 @@ End SetInt
 	VWait 4:End
 
 .setupshapes
-	##[$80CA] shapes()
+	USEPATH shapes()
 	Gosub pyramids
 	Gosub viewer
 	Return
@@ -94,7 +94,7 @@ pyramids:
 	d=1000
 	For x=-3 To 3
 	 For y=-3 To 3
-		 If globalloc (shapes())
+		 If AddItem (shapes())
 			 \pos\x=x*d,0,y*d
 			 \rot\x=0,0,0
 			 \frame=?pyramid
@@ -105,7 +105,7 @@ pyramids:
 	Return
 
 viewer:
-	globalloc shapes()							;viewer
+	AddItem shapes()							;viewer
 	*ship.part3d=shapes()
 	Return
 
@@ -122,9 +122,9 @@ viewer:
 
 
 .dofire
-	##[$80CA] shapes()
+	USEPATH shapes()
 	If Joyb(0)&2 AND rl<1
-		If globalloc(shapes())
+		If AddItem(shapes())
 			\pos\x=*ship\pos\x,*ship\pos\y,*ship\pos\z
 			\rot\x=*ship\rot\x,*ship\rot\y,*ship\rot\z
 			\rotv\x=0,0,0
@@ -143,9 +143,9 @@ viewer:
 	Return
 
 .movenme
-	##[$80CA] shapes()
-	newmem shapes():*curr=*ship
-	While globfree(shapes())
+	USEPATH shapes()
+	ResetList shapes():*curr=*ship
+	While NextItem(shapes())
 		Select \frame
 			Case ?dart
 				\rot\y=##[$AA03](shapes(),*ship)
@@ -153,13 +153,13 @@ viewer:
 				*curr=shapes()
 			Case ?sphere
 				\animvals[15]-1
-				If \animvals[15]<1 Then freelast shapes()
+				If \animvals[15]<1 Then KillItem shapes()
 		End Select
 	Wend
 	Return
 
 .moveship:
-	##[$80CA] *ship ;shapes()
+	USEPATH *ship ;shapes()
 	mx=MouseXSpeed
 	my=MouseYSpeed
 	j=Joyb(0)&1
@@ -186,11 +186,11 @@ rgbcols:
 	Data.w 8,8,8,13,9,0,8,10,14,12,3,2
 
 .setup3d
-	##[$80CA] shapes()
+	USEPATH shapes()
 	d=10
 	For x=0 To 3
 	 For y=0 To 3
-		 If globalloc (shapes())
+		 If AddItem (shapes())
 			 \pos\x=x*d,0,y*d
 			 \rot\x=0,0,0
 			 \frame=?pyramid
@@ -200,8 +200,8 @@ rgbcols:
 	Next
 
 	For i=1 To 10								;16 boxes
-		If globalloc(shapes())
-			##[$80CA] shapes()
+		If AddItem(shapes())
+			USEPATH shapes()
 			\pos\x=Rnd(15535),0,Rnd(15535)
 			\rot\x=0,0,0
 			\rotv\x=0,0,0
@@ -212,10 +212,10 @@ rgbcols:
 		EndIf
 	Next
 
-	globalloc shapes()							;viewer
+	AddItem shapes()							;viewer
 	*ship.part3d=shapes()
 
-	globalloc shapes()							;scanner
+	AddItem shapes()							;scanner
 	*scan.part3d=shapes()
 	\pos\x=0,-20000,0			;hi up
 	\rot\x=-1024,0,0			 ;pointing straight down

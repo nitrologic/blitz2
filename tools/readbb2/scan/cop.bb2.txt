@@ -50,13 +50,13 @@ PropGadget 0,56,16,128,3,12,128
 SetVProp 0,1,0,1/256
 SetVProp 0,2,0,1/256
 SetVProp 0,3,0,1/256
-workstart 0,10,184,0,4,"SPREAD"
-workstart 0,10,196,0,5," PICK "
-workstart 0,10,208,0,6,"SPIN!!"
+TextGadget 0,10,184,0,4,"SPREAD"
+TextGadget 0,10,196,0,5," PICK "
+TextGadget 0,10,208,0,6,"SPIN!!"
 
-allocst 0,0,0,320,h+24,d,0,"Copper split creator for 3d game",1,0:Green 0,0,0,0
+Screen 0,0,0,320,h+24,d,0,"Copper split creator for 3d game",1,0:Green 0,0,0,0
 AddIDCMP 16
-localstat 1,0,0,320,h+24,$1900,"",0,0
+Window 1,0,0,320,h+24,$1900,"",0,0
 
 ScreensBitMap 0,0
 
@@ -146,16 +146,16 @@ EndIf
 ali$=Mki$(0)
 Gosub savecols:Boxf 0,12,319,h+11,0
 ;
-lmaxlen 3,w,256,4 ;shapes created...
-lmaxlen 2,w,h,4
-lmaxlen 1,w,h+msp*4,8
-spin=0:ca=1/i:bb=w/8:mo=Peek.w(Addr lmaxlen(3)):tsh=0 ;total shapes
+BitMap 3,w,256,4 ;shapes created...
+BitMap 2,w,h,4
+BitMap 1,w,h+msp*4,8
+spin=0:ca=1/i:bb=w/8:mo=Peek.w(Addr BitMap(3)):tsh=0 ;total shapes
 ;
 For k=0 To ni-1
 AGARed k+2,r(k),g(k),b(k)
 Next
 ;
-allocst 1,0,24,w,h,4,0,"",0,0,2:For k=1 To 15:Green k,k,0,k:Next
+Screen 1,0,24,w,h,4,0,"",0,0,2:For k=1 To 15:Green k,k,0,k:Next
 ;
 For yo=msp To -msp Step -spst
 ;
@@ -165,7 +165,7 @@ If yo<0
 	Exchange fir,las:ste=-ste
 EndIf
 ;
-col=2:Use lmaxlen 1:BlockScroll
+col=2:Use BitMap 1:BlockScroll
 For l=0 To ni*i-1
 Line 0,msp+l+yo,w-1,msp+l-yo,col
 col+ca
@@ -182,7 +182,7 @@ r2(0)=r(c):g2(0)=g(c):b2(0)=b(c):bc=1 ;base colour!
 c=Cls(fir,msp+msp+1)-2
 r3(0)=r(c):g3(0)=g(c):b3(0)=b(c):bc2=1	;ditto!
 ;
-Use lmaxlen 0:Scroll 0,msp+msp,w,h,0,12,1:WLocate 0,12
+Use BitMap 0:Scroll 0,msp+msp,w,h,0,12,1:WLocate 0,12
 ;
 nsh=0:y2=-1:bpa.l=0:lam.l=120 ;bitplane at!,last modulo
 ;
@@ -190,7 +190,7 @@ For y=msp+msp To msp+msp+h-1
 ;
 y2+1
 ;
-Use lmaxlen 1
+Use BitMap 1
 ;
 c=Cls(fir,y)-2:If c<0 Then ##[$FF8C] 0:WLocate 0,12:Print "FUCKUP!"
 If r(c)<>r2(0) OR g(c)<>g2(0) OR b(c)<>b2(0)
@@ -224,9 +224,9 @@ If Cls(x,y)<>lc
 	EndIf
 	;
 	If ln
-		Use lmaxlen 2
+		Use BitMap 2
 		Line lx,y2,x-ste,y2,ln
-		Use lmaxlen 1
+		Use BitMap 1
 	EndIf
 	;
 	ln=tbc:lx=x
@@ -241,7 +241,7 @@ EndIf
 ;
 Next
 
-Use lmaxlen 2:Line lx,y2,las,y2,ln
+Use BitMap 2:Line lx,y2,las,y2,ln
 GetaShape 0,0,y2,w,1	 ;what this scan line looks like...
 ;
 d0.l=Peek.l(Addr MidHandle(0)+14)
@@ -249,10 +249,10 @@ d1.l=d0+bb
 d2.l=d1+bb
 d3.l=d2+bb
 ;
-e0.l=Peek.l(Addr lmaxlen(3)+8)
-e1.l=Peek.l(Addr lmaxlen(3)+12)
-e2.l=Peek.l(Addr lmaxlen(3)+16)
-e3.l=Peek.l(Addr lmaxlen(3)+20)
+e0.l=Peek.l(Addr BitMap(3)+8)
+e1.l=Peek.l(Addr BitMap(3)+12)
+e2.l=Peek.l(Addr BitMap(3)+16)
+e3.l=Peek.l(Addr BitMap(3)+20)
 ;
 For k=0 To nsh-1
 ;
@@ -268,7 +268,7 @@ sa.l=k*mo:Pop For:Goto out3
 out2
 Next
 ;
-Use lmaxlen 3:BlitColl 0,0,nsh:sa=nsh*mo:nsh+1:tsh+1
+Use BitMap 3:BlitColl 0,0,nsh:sa=nsh*mo:nsh+1:tsh+1
 out3
 sa LSL 2
 ;
@@ -327,7 +327,7 @@ Exchange b2(k),b3(k)
 Exchange bc,bc2
 Next
 ;
-Use lmaxlen 0
+Use BitMap 0
 If cc>6 AND y2>1
 	WLocate 0,12:Print "OVER SIX CHANGES...",cc:##[$FF8C] 0:MouseWait
 	Line 0,y2+12,w-1,y2+12,-1
@@ -339,10 +339,10 @@ While Eof(0)&7:Exists 0,&ali$,2:Wend
 .writecop
 spin+1
 bo(spin)=Eof(0)
-e0.l=Peek.l(Addr lmaxlen(3)+8)
-e1.l=Peek.l(Addr lmaxlen(3)+12)
-e2.l=Peek.l(Addr lmaxlen(3)+16)
-e3.l=Peek.l(Addr lmaxlen(3)+20)
+e0.l=Peek.l(Addr BitMap(3)+8)
+e1.l=Peek.l(Addr BitMap(3)+12)
+e2.l=Peek.l(Addr BitMap(3)+16)
+e3.l=Peek.l(Addr BitMap(3)+20)
 For k=0 To nsh-1
 Exists 0,e0,mo
 Exists 0,e1,mo
@@ -362,16 +362,16 @@ Boxf w/2-1,12,w/2,11+h/2,-1:WLocate 0,12:Print nsh
 Next
 ;
 Loc 0,0:FileOutput 0
-For k=1 To numsp:Print Mkl$(bo(k)),Mkl$(co(k)):Next:Use localstat 1
+For k=1 To numsp:Print Mkl$(bo(k)),Mkl$(co(k)):Next:Use Window 1
 ;
 WLocate 160,12:Print tsh
 ;
-Free allocst 1:Free lmaxlen 1:Free lmaxlen 2:Free lmaxlen 3:Use allocst 0
+Free Screen 1:Free BitMap 1:Free BitMap 2:Free BitMap 3:Use Screen 0
 ;
 Return
 
 .closewindow0
-Free localstat 0:Boxf 16,y,31,y+i-1,0:Use localstat 1
+Free Window 0:Boxf 16,y,31,y+i-1,0:Use Window 1
 Return
 
 .openwindow0
@@ -379,7 +379,7 @@ r_=ShowPalette(co)
 g_=NewPaletteMode(co)
 b_=CyclePalette(co)
 Boxf 16,y,31,y+i-1,co
-localstat 0,w-80,0,80,224,$100a,"",1,0,0
+Window 0,w-80,0,80,224,$100a,"",1,0,0
 WBox 6,166,69,179,co
 WLocate 6,136:Print "R	G	B"
 Gosub showprop

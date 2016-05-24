@@ -10,8 +10,8 @@ End NEWTYPE
 #devo=0
 
 WBStartup
-##[$80CB]
-##[$80CC]
+CloseEd
+NoCli
 Dim map.b(17152)
 Dim hdr.w(30)
 Dim copa.l(11)
@@ -35,18 +35,18 @@ n.w=0
 For i=1 To 7:Read n$(i):Next
 Data$ "tzc","ert","bod","hel","rem","anx","cjk"
 
-lmaxlen 0,304,240,3
-lmaxlen 1,304,240,3
-lmaxlen 2,512,384,3
-lmaxlen 3,256,16,2
-lmaxlen 4,272,16,2
-lmaxlen 6,32,26,2:Use lmaxlen 6:Boxf 5,5,25,21,2:Boxf 7,7,23,19,1
-lmaxlen 7,144,96,3;collision bitmap
+BitMap 0,304,240,3
+BitMap 1,304,240,3
+BitMap 2,512,384,3
+BitMap 3,256,16,2
+BitMap 4,272,16,2
+BitMap 6,32,26,2:Use BitMap 6:Boxf 5,5,25,21,2:Boxf 7,7,23,19,1
+BitMap 7,144,96,3;collision bitmap
 Buffer 0,7168
 Buffer 1,7168
 Buffer 2,16384
 Buffer 3,16384
-longmult 0,2
+Queue 0,2
 LoadShapes 245,293,"Movement/res.shp"
 LoadSprites 0,16,"Movement/rose.spr"
 LoadSound 1,"Breath/SWITCH"
@@ -75,7 +75,7 @@ Gosub initplat
 Repeat
 Gosub game
 Until 0
-Free lmaxlen0:Free lmaxlen 1:Free lmaxlen 2
+Free BitMap0:Free BitMap 1:Free BitMap 2
 End
 
 .slate
@@ -91,7 +91,7 @@ Green 1,15,15,8:Green 2,15,10,0
 Use Slice 0
 ;ShowSprite 8,264,24,0
 ;ShowSprite 8,264,56,2
-Use lmaxlen 2:BlockScroll 0
+Use BitMap 2:BlockScroll 0
 Green 19,0,0,0:Green 18,8,0,0:Green 17,14,2,6:Green 16,0,0,0
 Green 23,0,0,0:Green 22,8,0,8:Green 21,12,0,15:Green 20,0,0,0
 Green 27,0,9,0:Green 26,0,15,0:Green 25,7,15,7:Green 24,0,0,0
@@ -129,28 +129,28 @@ LoadShapes 372,377,"Movement/cal.shp"
 VWait 250
 BLITZ
 BlitMode CookieMode
-Use lmaxlen 2:BlockScroll 0:Use lmaxlen 3:BlockScroll 0:Use lmaxlen 4:BlockScroll 0
+Use BitMap 2:BlockScroll 0:Use BitMap 3:BlockScroll 0:Use BitMap 4:BlockScroll 0
 For i=0 To 4 Step 2:ShowSprite 8,0,64,i:Next
 For i=0 To 3:FlushBuffer i:Next
 Use Slice 0:ShowF 0,16,16,16:ShowB 2,16,16,16:Use SetCycle 0:db=0
 Green 19,0,0,0:Green 18,8,0,0:Green 17,14,2,6:Green 16,0,0,0
 Green 23,0,0,0:Green 22,8,0,8:Green 21,12,0,15:Green 20,0,0,0
 Green 27,0,9,0:Green 26,0,15,0:Green 25,7,15,7:Green 24,0,0,0
-Use lmaxlen 1:Scroll 0,0,304,240,0,0,0
+Use BitMap 1:Scroll 0,0,304,240,0,0,0
 For i=0 To 5
  Sound 10,1,63
  xmin=48+i*32
  For x=268 To xmin Step -4
-	db=1-db:UnBuffer db:Use lmaxlen db:BBlit db,372+i,x,148:VWait:ShowF db,16,16,16
+	db=1-db:UnBuffer db:Use BitMap db:BBlit db,372+i,x,148:VWait:ShowF db,16,16,16
  Next
- FlushBuffer db:UnBuffer 1-db:Use lmaxlen 1-db:Scroll 0,0,304,240,0,0,db
+ FlushBuffer db:UnBuffer 1-db:Use BitMap 1-db:Scroll 0,0,304,240,0,0,db
 Next
 ms$=""
 Repeat
  Use Slice 1
- Use lmaxlen 4
+ Use BitMap 4
  If Len(ms$)>1
-	longdiv trans{Asc(Left$(ms$,1))},256,4
+	Blit trans{Asc(Left$(ms$,1))},256,4
 	ms$=UnRight$(ms$,1)
  Else
 	ms$="MR ZEN, PROGRAMMED BY MIKE COOPER IN BLITZ BASIC 2................."
@@ -236,7 +236,7 @@ zkarma(body)=0
 Gosub bodyload
 lflag=1:If map(zadr-1)&15=2 Then lflag=0
 For i=0 To 1
- db=1-db:Use lmaxlen db
+ db=1-db:Use BitMap db
  UnBuffer db
  If lflag=1
 	BlitColl 0,160,128:BlitColl 0,144,128:BlitColl 81,160,144:BlitColl 65,144,144
@@ -249,7 +249,7 @@ For i=0 To 1
  ShowB 2,bx,by,16+nzx
 Next
 For i=0 To 15
-##[$80CA] token(i)
+USEPATH token(i)
 \x=144:\y=128
 \u=Rnd(9)-5:\v=-(Rnd(5)*2+12)
 \id=i&3:If \id=3 Then \id=2
@@ -278,16 +278,16 @@ Return
 
 Statement write{x,y,a$,hflag}
 Shared bx,by
-Use lmaxlen 2
+Use BitMap 2
 x0=bx+56+x ASL 3:y0=by+24+y ASL 3
-For i=1 To Len(a$):longdiv trans{Asc(Mid$(a$,i,1))},x0+i ASL 3,y0,hflag:Next
+For i=1 To Len(a$):Blit trans{Asc(Mid$(a$,i,1))},x0+i ASL 3,y0,hflag:Next
 End Statement
 
 Statement text{a$}
 Shared bx,by
-Use lmaxlen 2
+Use BitMap 2
 x0=bx+64:y0=by+120
-For i=0 To 15:longdiv trans{Asc(Mid$(a$,i+1,1))},x0+i ASL 3,y0,0:Next
+For i=0 To 15:Blit trans{Asc(Mid$(a$,i+1,1))},x0+i ASL 3,y0,0:Next
 For i=0 To 3
 Scroll bx+64,by+34,128,104,bx+64,by+32
 VWait 8
@@ -296,7 +296,7 @@ End Statement
 
 Statement clrom{n}
 Shared bx,by
-Use lmaxlen 2
+Use BitMap 2
 For i=0 To n ASL 2
 Scroll bx+64,by+34,128,104,bx+64,by+32
 VWait 8
@@ -308,9 +308,9 @@ Use Slice 0:Green 13,15,15,15:Green 14,10,10,15
 za0=406+body*3:za=za0:zu=0:zv=0
 magic=0:nbob=0:ClearList eb()
 Gosub display:Gosub display:BlitMode CookieMode
-Use lmaxlen 2:Boxf 48+bx,16+by,207+bx,143+by,0
+Use BitMap 2:Boxf 48+bx,16+by,207+bx,143+by,0
 For k=0 To 1:db=1-db
-Use lmaxlen db:UnBuffer db:Boxf 80,48,207,143,0:BlitColl 199,128,128:BlitColl 215,144,128:BBlit db,za0,144,128
+Use BitMap db:UnBuffer db:Boxf 80,48,207,143,0:BlitColl 199,128,128:BlitColl 215,144,128:BBlit db,za0,144,128
 VWait:ShowF db,16,16,bx:Next
 Restore omega
 For i=1 To 4:Read men$(i):Next
@@ -328,9 +328,9 @@ Repeat
 	 write{1,zenu*2-1,men$(zenu),1}
 	 VWait 25
 	EndIf
-	db=1-db:Use lmaxlen db:UnBuffer db:BBlit db,za0+Joyx(1),144,128:VWait:ShowF db,16,16,bx
+	db=1-db:Use BitMap db:UnBuffer db:BBlit db,za0+Joyx(1),144,128:VWait:ShowF db,16,16,bx
  Until Joyx(1)=-1
- Use lmaxlen 2:Boxf 48+bx,16+by,207+bx,143+by,0
+ Use BitMap 2:Boxf 48+bx,16+by,207+bx,143+by,0
  Select zenu
 	Case 1
 	 text{"AS A CUSTOMER IN"}:text{"AN	EXOTIC	SHOP"}
@@ -416,9 +416,9 @@ Repeat
  End Select
 Until zenu=4
 For k=0 To 1:db=1-db
-Use lmaxlen db:UnBuffer db:Boxf 80,48,207,143,7:BlitColl 167,128,128:BlitColl 183,144,128:BBlit db,za0,144,128
+Use BitMap db:UnBuffer db:Boxf 80,48,207,143,7:BlitColl 167,128,128:BlitColl 183,144,128:BBlit db,za0,144,128
 VWait:ShowF db,16,16,bx:Next
-Use lmaxlen 2
+Use BitMap 2
 For i=0 To 15:For j=0 To 11
 adr=1024+i+j ASL 4
 Poke.b &n+1,Peek.b(&map(adr))
@@ -484,7 +484,7 @@ tgx=zmx:tgy=zmy
 Case 1:Gosub teleport
 Case 2:Gosub shrink
 End Select
-Use lmaxlen 7:UnQueue 0:QBlit 0,za,48,64
+Use BitMap 7:UnQueue 0:QBlit 0,za,48,64
 If spell=0 Then Gosub zmagic
 If map(zadr)=30 Then Gosub strike:sfx(0)=3
 EndIf
@@ -556,7 +556,7 @@ zv=QLimit(zvv,-vt,vt)
 typ=(map(zadr-fw)ASR 4)&3
 zv0=Sgn(zv):If Abs(zvv)<4 Then zv0=0
 za=302-3*((1+Sgn(zu))ASR 1)+zv0+6*typ
-Use lmaxlen 7:UnQueue 0:QBlit 0,za,48,64
+Use BitMap 7:UnQueue 0:QBlit 0,za,48,64
 EndIf
 ;doors
 If zadr=3023 OR zadr=3024 Then gate=1:nzcx=21:nzcy=101:nlev=4
@@ -564,8 +564,8 @@ If zadr=195 OR zadr=196 Then gate=1:nzcx=50:nzcy=63:nlev=6
 ;zmagic/fxevo
 If magic>0 OR Joyb(1)<>0 Then magic+1
 If magic=1
- If globalloc(eb())
- ##[$80CA] eb()
+ If AddItem(eb())
+ USEPATH eb()
  sfx(0)=sfx2
  \x=zcx(db) ASL 4 +zx(db)
  \y=zcy(db) ASL 4 +zy(db)+8-ShapeHeight(za)
@@ -580,9 +580,9 @@ If magic>=5 AND Joyb(1)=0 Then magic=0
 zmx=zcx(db) ASL 4:zmy=zcy(db) ASL 4
 nzx=zx(db)+zu:nzy=zy(db)+zv
 zmx+nzx:zmx&$fff0:zmy+nzy:zmy&$fff0
-newmem eb()
-While globfree(eb())
-##[$80CA] eb()
+ResetList eb()
+While NextItem(eb())
+USEPATH eb()
 Select \id
 Case 1;blast
  adr=QLimit(\x ASR 4+(\y ASR 4) ASL fsh,0,4095)
@@ -596,20 +596,20 @@ Case 1;blast
 Case 0;explosion
  \z-1:\a=375-\z
 End Select
-If \z=-1 Then freelast eb()
+If \z=-1 Then KillItem eb()
 Wend
 ;monsters
 nbob=-1
-newmem alien()
-##[$80CA] alien()
+ResetList alien()
+USEPATH alien()
 If monadr<>-1
- If globalloc(alien())
+ If AddItem(alien())
  \x=(monadr&fwm1) ASL 4:\y=(monadr ASR fsh)ASL 4
  \u=0:\v=0:\hm=monadr:Poke.b &n+1,Peek.b(&map(monadr))
  \id=n/16:map(monadr)=gtile(\id)
  EndIf
 EndIf
-While globfree(alien())
+While NextItem(alien())
 xflag=1:typ=\id:If typ=2 Then typ=1
 Select typ
 Case 0;headspin
@@ -652,20 +652,20 @@ Case 16;bullet
  If \x<0 OR \x>511 OR \y<0 OR \y>895 Then \id=19:\z=4:noise{2,8,Abs(\x-zmx)+Abs(\y-zmy)}
 Case 18;explosion
  \z-1:\a=375-\z
- If \z=-1 Then freelast alien():xflag=0
+ If \z=-1 Then KillItem alien():xflag=0
 Case 19;bullet explosion
  \z-1:\a=399-\z
- If \z=-1 Then freelast alien():xflag=0
+ If \z=-1 Then KillItem alien():xflag=0
 End Select
 If xflag<>0
 scrx=144+\x-zmx
 scry=128+\y-zmy
-Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 If p=1
  nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=\a
 	If \id=3 AND cyc&7=3
 	 x0=\x:y0=\y
-	 If globalloc(alien())
+	 If AddItem(alien())
 		noise{2,9,Abs(\x-zmx)+Abs(\y-zmy)}
 		\x=x0:\y=y0
 		\id=16:dx=\x-zmx:dy=\y-zmy+16
@@ -676,7 +676,7 @@ If p=1
  If p<1
 	xflag=0
 	If \id<16 Then map(\hm)=4+\id ASL 4
-	freelast alien()
+	KillItem alien()
  EndIf
 EndIf
 Wend
@@ -712,9 +712,9 @@ If fscrx>=16 AND fscrx<=288 AND fscry>=32 AND fscry<=240;on screen
 	nbob+1:xbob(nbob)=fscrx:ybob(nbob)=fscry-16:abob(nbob)=bu0+fcyc
  Else
 	If body=2
-	 newmem eb()
-	 ##[$80CA] eb()
-	 While globfree(eb())
+	 ResetList eb()
+	 USEPATH eb()
+	 While NextItem(eb())
 		If SpritesHit(\a,\x,\y,fa,fmx,fmy) Then friend=1
 	 Wend
 	EndIf
@@ -772,7 +772,7 @@ tgx=zmx:tgy=zmy
 Case 1:Gosub teleport
 Case 2:Gosub shrink
 End Select
-Use lmaxlen 7:UnQueue 0:QBlit 0,za,48,64
+Use BitMap 7:UnQueue 0:QBlit 0,za,48,64
 If spell=0 Then Gosub zmagic
 EndIf
 Gosub fxevo
@@ -839,7 +839,7 @@ Case 1:Gosub teleport
 Case 2:Gosub shrink
 Case 3:If dimflag=0 AND Len(m$)=0 Then lives=0:gate=-1
 End Select
-Use lmaxlen 7:UnQueue 0:QBlit 0,za,48,64
+Use BitMap 7:UnQueue 0:QBlit 0,za,48,64
 If spell=0 Then Gosub zmagic
 EndIf
 Gosub fxevo
@@ -860,7 +860,7 @@ CEND
 
 .display
 db=1-db:cyc+1:monadr=-1
-Use lmaxlen db
+Use BitMap db
 zzu=zu+ozu:zzv=zv+ozv
 nzx=zx(db)+zzu:nzy=zy(db)+zzv
 hscr=0:vscr=0
@@ -954,7 +954,7 @@ If nun>0
  nun-1
  scrx=144+QWrap(unx-zmx,-xlim,xlim)
  scry=128+QWrap(uny-zmy,-ylim,ylim)
- Use lmaxlen db:If scrx>=0 AND scrx<=288 AND scrx>=0 AND scry<=224 Then BlitColl una,scrx,scry
+ Use BitMap db:If scrx>=0 AND scrx<=288 AND scrx>=0 AND scry<=224 Then BlitColl una,scrx,scry
 EndIf
 
 For i=0 To nbob
@@ -964,11 +964,11 @@ Next
 If ntoken>0
  ttime-1:If ttime=0 Then ntoken=0:If pips(0)=0 OR pips(1)=0 Then gate=-1
  For i=0 To ntoken
-	##[$80CA] token(i)
+	USEPATH token(i)
 	\a=(\id*4)+286+(cyc+i)&3
 	\v+2:\y+QLimit(\v,-8,8):\x+\u
-	Use lmaxlen 6:p=Cls(6+\x/16,6+\y/16)
-	Use lmaxlen db:If p=1 Then BBlit db,\a,\x,\y
+	Use BitMap 6:p=Cls(6+\x/16,6+\y/16)
+	Use BitMap db:If p=1 Then BBlit db,\a,\x,\y
  Next
  VWait
 EndIf
@@ -987,24 +987,24 @@ If pips(0)>0 AND pips(1)>0
  If magic>0 Then BBlit db,bu0+(magic&3),144+nzx,136+nzy-ShapeHeight(za)
 EndIf
 
-newmem eb()
-While globfree(eb())
-##[$80CA] eb()
+ResetList eb()
+While NextItem(eb())
+USEPATH eb()
 scrx=144+QWrap(\x-zmx,-xlim,xlim)
 scry=128+QWrap(\y-zmy,-ylim,ylim)
-Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
-Use lmaxlen db:If p=1 Then BBlit db,\a,scrx,scry
+Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
+Use BitMap db:If p=1 Then BBlit db,\a,scrx,scry
 Wend
 
 Use Slice 1
 bmx=(cyc&7)ASL 1
 If bmx=0
- Use lmaxlen 4
+ Use BitMap 4
  If Len(m$)>0
 	If Len(m$)=1 Then m$=m$+"."
 	BlitMode CookieMode
-	longdiv trans{Asc(Left$(m$,1))},256,4
-	longdiv trans{Asc(Mid$(m$,2,1))},264,4
+	Blit trans{Asc(Left$(m$,1))},256,4
+	Blit trans{Asc(Mid$(m$,2,1))},264,4
 	m$=Right$(m$,Len(m$)-2)
 	If dimflag=0
 	 For i=1 To 3
@@ -1042,7 +1042,7 @@ drflag=0
 For k=0 To ndoors
 scrx=144+QWrap(drpx(k)-zdx,-xlim,xlim)
 scry=128+QWrap(drpy(k)-zdy,-ylim,ylim)
-Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 If p=1 Then ShowSprite (9+cyc&7),16+scrx,scry-16,4:drflag=1
 Next
 If drflag=0 Then ShowSprite 0,264,24,4
@@ -1064,8 +1064,8 @@ Return
 .zmagic
 If magic>0 OR Joyb(1)<>0 Then magic+1
 If magic=1
- If globalloc(eb())
- ##[$80CA] eb()
+ If AddItem(eb())
+ USEPATH eb()
  \x=zcx(db) ASL 4 +zx(db)
  \y=zcy(db) ASL 4 +zy(db)+8-ShapeHeight(za)
  \id=1
@@ -1084,8 +1084,8 @@ If magic=sfxt
  If body=2 AND air=0 Then spell=2:zu=0:zv=0:za=356:sflag=1:sfx(0)=9
  If body=3 AND air=0
 	If typ(map(zadr)&15)<>0
-	 globalloc eb()
-	 ##[$80CA] eb()
+	 AddItem eb()
+	 USEPATH eb()
 	 \x=(zcx(db)ASL4)+8:\y=(zcy(db)ASL4)
 	 \id=2:\z=35:\a=typ(map(zadr)&15)*5+350
 	 icadr=zadr-fw:If typ(map(zadr)&15)=1 Then icadr-fw:\y-16
@@ -1255,9 +1255,9 @@ Return
 zmx=zcx(db) ASL 4:zmy=zcy(db) ASL 4
 nzx=zx(db)+zu:nzy=zy(db)+zv
 zmx+nzx:zmx&$fff0:zmy+nzy:zmy&$fff0
-newmem eb()
-While globfree(eb())
-##[$80CA] eb()
+ResetList eb()
+While NextItem(eb())
+USEPATH eb()
 Select \id
 Case 1;blast
  \v+egrav
@@ -1278,7 +1278,7 @@ Case 2;ice block
  If \z>29 Then \a+1:If \z&1=1 Then noise{1,14,Abs(\x-zmx)+Abs(\y-zmy)}
  If \z<4	Then \a-1:icadr=-1
 End Select
-If \z=-1 Then freelast eb()
+If \z=-1 Then KillItem eb()
 Wend
 Return
 
@@ -1368,8 +1368,8 @@ If zadr=swpos(k)
  For j=0 To swh(k)-1:For i=0 To sww(k)-1
 	adr=swadr(k)+i+j*fw:Exchange map(adr),swinf(k,src):src+1
  Next:Next
- swatch=2:swicon=-32*(swset(lev) ##[$80CD] k):map(zadr-fw)=swicon:map(zadr)=25-(swicon ASR 1)
- swset(lev) ##[$80D0] k
+ swatch=2:swicon=-32*(swset(lev) BitTst k):map(zadr-fw)=swicon:map(zadr)=25-(swicon ASR 1)
+ swset(lev) BitChg k
  sfx(0)=14
 EndIf
 Next
@@ -1413,9 +1413,9 @@ If fscrx>=16 AND fscrx<=288 AND fscry>=32 AND fscry<=240;on screen
 	nbob+1:xbob(nbob)=fscrx:ybob(nbob)=fscry-16:abob(nbob)=bu0+fcyc
  Else
 	If body=2
-	 newmem eb()
-	 ##[$80CA] eb()
-	 While globfree(eb())
+	 ResetList eb()
+	 USEPATH eb()
+	 While NextItem(eb())
 		If SpritesHit(\a,\x,\y,fa,fmx,fmy) Then friend=1:noise{1,9,2}
 	 Wend
 	EndIf
@@ -1425,16 +1425,16 @@ Return
 
 .generic
 nbob=-1
-newmem alien()
-##[$80CA] alien()
+ResetList alien()
+USEPATH alien()
 If monadr<>-1
- If globalloc(alien())
+ If AddItem(alien())
  \x=(monadr&fwm1) ASL 4:\y=(monadr ASR fsh)ASL 4
  \u=0:\v=0:\hm=monadr:Poke.b &n+1,Peek.b(&map(monadr))
  \id=n/16:\z=ghits(\id):map(monadr)=gtile(\id)
  EndIf
 EndIf
-While globfree(alien())
+While NextItem(alien())
 xflag=-1
 typ=\id ASR 1
 If typ&1=1 AND typ<6 Then typ-1
@@ -1442,11 +1442,11 @@ If typ&1=1 AND typ<6 Then typ-1
  Case 0;static
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=((cyc+\z)ASR gspd(\id))&3+ga0(\id):\a=abob(nbob)
 	EndIf
-	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: freelast alien()
+	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: KillItem alien()
  Case 2;patroller
 	If \u=0 Then \u=gspd(\id):;If cyc&1 Then \u=-\u
 	If \u<0
@@ -1465,11 +1465,11 @@ If typ&1=1 AND typ<6 Then typ-1
 	If scrx<0 Then \u=Abs(\u)
 	If scrx>304 Then \u=-Abs(\u)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=\a
 	EndIf
-	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: freelast alien()
+	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: KillItem alien()
  Case 4;homer/pulsar
 	If (cyc+\z)&7=0
 	 dx=QWrap(\x-tgx,-xlim,xlim):dy=QWrap(\y-tgy+16,-ylim,ylim)
@@ -1478,14 +1478,14 @@ If typ&1=1 AND typ<6 Then typ-1
 	\x=QWrap(\x+\u,0,fmw):\y=QWrap(\y+\v,0,fmh)
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry
 	 If \id<10 Then tmp=Sgn(\u)+Sgn(\v)*3:abob(nbob)=ga0(\id)+3+tmp:If tmp<0 Then abob(nbob)+1
 	 If \id>9 Then abob(nbob)=((\z+cyc)&7)ASR 1+ga0(\id)
 	 \a=abob(nbob)
 	EndIf
-	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: freelast alien()
+	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: KillItem alien()
  Case 6;faller
 	\v+2:\x=QWrap(\x+\u,0,fmw):\y=QWrap(\y+QLimit(\v,-8,8),0,fmh)
 	If \v>=8
@@ -1497,12 +1497,12 @@ If typ&1=1 AND typ<6 Then typ-1
 	EndIf
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 \a=ga0(\id):If \v<0 Then \a+1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=\a
 	EndIf
-	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: freelast alien()
+	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: KillItem alien()
  Case 7;bouncer
 	If \u=0 Then \v=8:\u=-gspd(\id):\a=ga0(\id)
 	If \v=8 Then \v=-10:\u=-\u
@@ -1510,18 +1510,18 @@ If typ&1=1 AND typ<6 Then typ-1
 	\x=QWrap(\x+\u,0,fmw):\y=QWrap(\y+\v,0,fmh)
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=\a
 	EndIf
-	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: freelast alien()
+	If p<1 Then xflag=0:map(\hm)=4+\id ASL 4: KillItem alien()
  Case 8;bullet
 	\v+\z
 	\x=QWrap(\x+\u,0,fmw):\y=QWrap(\y+QLimit(\v,-8,8),0,fmh)
 	adr=(\x ASR 4)+(\y ASR 4) ASL fsh
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry:abob(nbob)=(cyc+\z)&3+ga0(16)
 	EndIf
@@ -1529,18 +1529,18 @@ If typ&1=1 AND typ<6 Then typ-1
  Case 9;explosion
 	scrx=144+QWrap(\x-zmx,-xlim,xlim)
 	scry=128+QWrap(\y-zmy,-ylim,ylim)
-	Use lmaxlen 6:p=Cls(6+scrx/16,6+scry/16)
+	Use BitMap 6:p=Cls(6+scrx/16,6+scry/16)
 	If p=1
 	 nbob+1:xbob(nbob)=scrx:ybob(nbob)=scry
 	 abob(nbob)=ga0(\id)-\z
 	EndIf
 	\z-1
-	If \z<0 Then xflag=0:freelast alien()
+	If \z<0 Then xflag=0:KillItem alien()
 End Select
 If xflag<>0
  If (gbul(\id)<>0 AND (\z+cyc)&31=0) OR (gbul(\id)=2 AND (\z+cyc)&15=0)
 	x0=\x:y0=\y:bul0=gbul(\id)
-	If globalloc(alien())
+	If AddItem(alien())
 	 noise{2,sbul,Abs(scrx-144)+Abs(scry-128)}
 	 \x=x0:\y=y0:\id=16
 	 Select bul0
@@ -1562,15 +1562,15 @@ Return
 
 CNIF #devo=0
 .gcoll
-newmem eb()
-Use lmaxlen 7
-While globfree(eb())
+ResetList eb()
+Use BitMap 7
+While NextItem(eb())
  If eb()\id>=1
 	x0=eb()\x:y0=eb()\y:a0=eb()\a
-	newmem alien()
-	While globfree(alien())
+	ResetList alien()
+	While NextItem(alien())
 	 If alien()\id<17
-		##[$80CA] alien()
+		USEPATH alien()
 		x1=QWrap(\x-x0,-xlim,xlim):y1=QWrap(\y-y0,-ylim,ylim)
 		If SpritesHit(a0,0,0,\a,x1,y1)
 		 If ##[$CB09](\a,104+x1,48+y1)
@@ -1584,10 +1584,10 @@ While globfree(eb())
 Wend
 If spell=0
 x0=zmx+zx(db):y0=zmy+zy(db)
-newmem alien()
-While globfree(alien())
+ResetList alien()
+While NextItem(alien())
  If alien()\id<17
-	##[$80CA] alien()
+	USEPATH alien()
 	x1=QWrap(\x-x0,-xlim,xlim):y1=QWrap(\y-y0,-ylim,ylim)
 	If SpritesHit(za,0,0,\a,x1,y1)
 	 If ##[$CB09](\a,48+x1,64+y1) Then Gosub strike
@@ -1603,7 +1603,7 @@ hit(dtype)=16:pips(dtype)-1:If pips(dtype)<0 Then pips(dtype)=0
 Use Slice 0:ShowSprite (pips(dtype)/p0(dtype)),264,24+(dtype ASL 5),dtype ASL 1
 If pips(dtype)>0 Then Return
 For i=0 To 15
-##[$80CA] token(i)
+USEPATH token(i)
 \x=144:\y=128
 \u=Rnd(9)-5:\v=-(Rnd(5)*2+12)
 \id=i&3:If \id=3 Then \id=2
@@ -1643,7 +1643,7 @@ If lev=1
 pips(0)=p0(0)*8:pips(1)=p0(1)*8
 EndIf
 BlitMode CookieMode
-Use lmaxlen 7:For i=352 To 355:longdiv i,104,48:Next
+Use BitMap 7:For i=352 To 355:Blit i,104,48:Next
 bodyflag=1
 Return
 
@@ -1678,7 +1678,7 @@ If (lev>3 AND lev<8) OR (lev>11 AND lev<15) OR lev=16 Then For i=0 To 15:CopySha
 fwm1=fw-1:fhm1=fh-1:size=fh*fw:fmw=16*fw:fmh=16*fh
 xlim=fw ASL 3:ylim=fh ASL 3
 For i=4 To 9
-If (fw ##[$80CD] i) Then fsh=i
+If (fw BitTst i) Then fsh=i
 Next
 VWait 250
 BLITZ
@@ -1697,7 +1697,7 @@ Read nswitch
 For i=0 To nswitch
  Read x1,y1,x2,y2,sww(i),swh(i):swpos(i)=x1+y1*fw:swadr(i)=x2+y2*fw
  For j=0 To sww(i)*swh(i)-1:Read swinf(i,j):Next
- If (swset(lev) ##[$80CD] i)
+ If (swset(lev) BitTst i)
 	src=0:For j0=0 To swh(i)-1:For i0=0 To sww(i)-1
 	 adr=swadr(i)+i0+j0*fw:Exchange map(adr),swinf(i,src):src+1
 	Next:Next
@@ -1713,7 +1713,7 @@ Return
 .veil_of_maya
 gate=0
 zadr=nzcx+nzcy ASL fsh
-Use lmaxlen 4:BlockScroll 0
+Use BitMap 4:BlockScroll 0
 Use Slice 1
 For i=1 To 3
  Green i+8,bmc(i) ASR 8,(bmc(i)ASR 4)&15,bmc(i)&15
@@ -1724,16 +1724,16 @@ Use Slice 0
 For i=0 To 3:FlushBuffer i:Next:ClearList alien():nbob=0
 For i=1 To 11:Poke.w copa(i),0:Next
 For i=9 To 15:Green i,0,0,0:Next;FadeOut 0,1,9,15
-Use lmaxlen db:ReMap 0,7:Use lmaxlen 1-db:Scroll 0,0,304,240,0,0,db
-Use lmaxlen 2
+Use BitMap db:ReMap 0,7:Use BitMap 1-db:Scroll 0,0,304,240,0,0,db
+Use BitMap 2
 For i=0 To 18
 For j=0 To 14
 adr=QWrap(nzcx-9+i,0,fw)+fw*QWrap(nzcy-8+j,0,fh)
 Poke.b &n+1,Peek.b(&map(adr))
 BlitColl n,i*16,j*16
 If n&15=4
- If globalloc(alien())
- ##[$80CA] alien()
+ If AddItem(alien())
+ USEPATH alien()
  \x=(adr&fwm1) ASL 4:\y=(adr ASR fsh)ASL 4
  \u=0:\v=0:\hm=adr
  \id=n/16:\z=ghits(\id):map(adr)=gtile(\id)
@@ -1744,24 +1744,24 @@ Next
 For k=9 To 15:Green k,r(k-8),g(k-8),b(k-8):Next;Fade in new fg pal to bg screen
 ShowB 2,16,16,fx0
 BlitMode EraseMode
-Use lmaxlen 1-db
+Use BitMap 1-db
 Scroll fx0,fy0,256,192,0,0
 For i=0 To 15:BlitColl 255,i*16,80:BlitColl 255,i*16,96:Next
 For j=0 To 11:BlitColl 255,112,j*16:BlitColl 255,128,j*16:Next
 VWait:ShowF 1-db,0,0,16
-Use lmaxlen db:Scroll 0,0,256,192,0,0,1-db
+Use BitMap db:Scroll 0,0,256,192,0,0,1-db
 tx=64:ty=0
 Restore veil_of_maya
 For i=0 To 15:Read sine(i):Next
 Data.w 0,50,91,118,128,118,91,50,0,-50,-91,-118,-128,-118,-91,-50
-Use lmaxlen db
+Use BitMap db
 Scroll 4,3,124,93,0,0:Scroll 128,3,124,93,132,0
 Scroll 4,96,124,93,0,99:Scroll 128,96,124,93,132,99
 VWait:ShowF db,0,0,16:db=1-db
 t01=2:t02=2:If body=0 Then t01=1:t02=0
 For i=0 To 15 Step 4:token(i)\id=0:token(i+1)\id=t02:token(i+2)\id=1:token(i+3)\id=t01:Next
 For i=2 To 32
-Use lmaxlen db
+Use BitMap db
 sizex=128-(i-1)*4:sizey=96-(i-1)*3
 Scroll 8,6,sizex,sizey,0,0
 Scroll 120+i*4,6,sizex,sizey,128+i*4,0
@@ -1773,7 +1773,7 @@ tu=50*tx+87*ty:tv=-87*tx+50*ty
 tspd=Abs(tu)+Abs(tv):tu=-8*tu/tspd:tv=-8*tv/tspd
 tx+tu:ty+tv
 For j=0 To 15
-##[$80CA] token(j)
+USEPATH token(j)
 cs=sine((j+4)&15):sn=sine(j)
 \x=128+((cs*tx+sn*ty)ASR 7)
 \y=96+((cs*ty-sn*tx)ASR 7)
@@ -1782,17 +1782,17 @@ BBlit db,\a,\x,\y
 Next
 VWait:ShowF db,0,0,16:db=1-db:UnBuffer db
 Next
-For i=0 To 15:##[$80CA] token(i)
+For i=0 To 15:USEPATH token(i)
 cs=sine((i+4)&15):sn=sine(i)
 \x+16:\y+16
 \u=(cs*tu+sn*tv)ASR 7
 \v=((cs*tv-sn*tu)ASR 7)-8
 Next
 For i=1 To 7:Green i,r(i),g(i),b(i):Next
-Use lmaxlen db:UnBuffer db:Scroll 0,0,304,240,0,0,2
-For i=0 To 15:##[$80CA] token(i):\x+\u:\y+\v:BBlit db,\a,\x,\y:Next
+Use BitMap db:UnBuffer db:Scroll 0,0,304,240,0,0,2
+For i=0 To 15:USEPATH token(i):\x+\u:\y+\v:BBlit db,\a,\x,\y:Next
 VWait:ShowF db,16,16,16
-Use lmaxlen 1-db:UnBuffer 1-db:Scroll 0,0,304,240,0,0,2
+Use BitMap 1-db:UnBuffer 1-db:Scroll 0,0,304,240,0,0,2
 For i=9 To 15:Green i,0,0,0:Next
 bx=(nzcx+bw)*8:by=(nzcy+bh)*8
 While bx>bw*8:bx-bw*8:Wend
@@ -1801,15 +1801,15 @@ j0=by ASR 4:ShowB 2,bx,by,16
 y1=j0
 Sound 6,1,63
 For j=0 To 23
- Use lmaxlen 2
+ Use BitMap 2
  x0=0:y1=QWrap(y1+1,0,bh):adr=size+y1*bw:y0=QWrap(j+j0,0,24)ASL 4
  For i=0 To 31
 	Poke.b &n+1,Peek.b(&map(adr)):adr+1:If i=bw-1 Then adr-bw
 	BlitColl n,x0,y0:x0+16
  Next
- Use lmaxlen db
+ Use BitMap db
  UnBuffer db
- For k=0 To 15:##[$80CA] token(k)
+ For k=0 To 15:USEPATH token(k)
 	\v=\v+2:If \v>8 Then \v=8
 	\x+\u:\y+\v:\a=286+\id*4+(k+j)&3:If \y<224 Then BBlit db,\a,\x,\y
  Next

@@ -24,7 +24,7 @@ For cy=0 To 10
 	x(cy+720)=x(cy):y(cy+720)=y(cy)
 Next cy
 For d=0 To 6			;set screen	options to 7
-	allocst d,2
+	Screen d,2
 	ScreensBitMap d,d
 	Green 0,0,0,0
 	Green 1,10,15,9
@@ -39,12 +39,12 @@ Repeat
 			For deh=0 To 360 Step 7
 					For sup=0 To 6
 					ShowScreen sc
-					Use lmaxlen sc
+					Use BitMap sc
 					sn=deh+r+sup
 					cs=deh+sup
 					dx=x(sn)+#xoff
 					dy=y(cs)+#yoff
-					longdiv 0,dx,dy
+					Blit 0,dx,dy
 					sc=sc+1
 					 Next sup
 			sc=0

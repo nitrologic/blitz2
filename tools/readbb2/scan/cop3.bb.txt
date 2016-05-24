@@ -8,10 +8,10 @@ SpriteMode 2
 Circlef 32,32,32,1:Circlef 16,8,6,2:Circlef 48,8,6,3:Circlef 32,32,8,0
 GetaSprite 0,0
 
-lmaxlen 0,640,512,4
+BitMap 0,640,512,4
 
 For i=0 To 100
-	Use lmaxlen 0:Box Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
+	Use BitMap 0:Box Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(16)
 Next
 
 DecodePalette 0,48

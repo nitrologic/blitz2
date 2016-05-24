@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/tools/intuitools.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/tools/intuitools.bb
 ;
-WBStartup:##[$80CC]
+WBStartup:NoCli
 ;
 ;A window making programming
 ;
@@ -69,25 +69,25 @@ Data.w 0,1,2,3
 Data.w 8,11,10,12
 Data.w 4,5,6
 
-##[$80CA] gads()
+USEPATH gads()
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 	MenuItem 0,0,0,0,"LOAD","L"
 	MenuItem 0,0,0,1,"SAVE","V"
 	MenuItem 0,0,0,2,"CREATE SOURCE		 ","C"
 	MenuItem 0,0,0,3,"QUIT","Q"
 
-newlocarr 0,1,"SCREEN"
+MenuTitle 0,1,"SCREEN"
 	MenuItem 0,0,1,0,"PALETTE"
 ;	MenuItem 0,0,1,1,"2.0 SCREEN PENS"
 	MenuItem 0,0,1,1,"OPTIONS		 ","O"
 
-newlocarr 0,2,"WINDOW"
+MenuTitle 0,2,"WINDOW"
 	MenuItem 0,0,2,0,"ADD TEXT		 ","A"
 	MenuItem 0,0,2,1,"TEST"
 	MenuItem 0,0,2,2,"OPTIONS","W"
 
-newlocarr 0,3,"GADGETS"
+MenuTitle 0,3,"GADGETS"
 	MenuItem 0,0,3,0,"TEXT","T"
 	MenuItem 0,0,3,1,"STRING		 ","S"
 	MenuItem 0,0,3,2,"PROP","P"
@@ -134,13 +134,13 @@ ngads=0
 ;text gadget create...
 ;
 StringGadget 0,128,16,0,1,80,160
-workstart 0,128,30,0,2,"					"
+TextGadget 0,128,30,0,2,"					"
 StringGadget 0,128,44,0,3,3,24
 	ButtonId 0,3,"1"
 StringGadget 0,128,58,0,4,3,24
 	ButtonId 0,4,"0"
-workstart 0,128,72,0,5,"					"
-workstart 0,128,86,0,6,"	 "
+TextGadget 0,128,72,0,5,"					"
+TextGadget 0,128,86,0,6,"	 "
 StringGadget 0,128,100,0,7,3,24
 	ButtonId 0,7,"1"
 StringGadget 0,128,114,0,8,3,24
@@ -149,15 +149,15 @@ StringGadget 0,128,128,0,9,4,32
 	ButtonId 0,9,"4"
 StringGadget 0,128,142,0,10,4,32
 	ButtonId 0,10,"2"
-workstart 0,8,172,0,100," MAKE "
-workstart 0,256,172,0,101," EXIT "
+TextGadget 0,8,172,0,100," MAKE "
+TextGadget 0,256,172,0,101," EXIT "
 
 ;string gadget create...
 ;
 StringGadget 1,128,16,0,1,256,160
 StringGadget 1,128,30,0,2,9,72
 	ButtonId 1,2,"40"
-workstart 1,128,44,0,3,"	 "
+TextGadget 1,128,44,0,3,"	 "
 StringGadget 1,128,58,0,4,3,24
 	ButtonId 1,4,"1"
 StringGadget 1,128,72,0,5,3,24
@@ -166,14 +166,14 @@ StringGadget 1,128,86,0,6,4,32
 	ButtonId 1,6,"4"
 StringGadget 1,128,100,0,7,4,32
 	ButtonId 1,7,"2"
-workstart 1,8,172,0,100," MAKE "
-workstart 1,256,172,0,101," EXIT "
+TextGadget 1,8,172,0,100," MAKE "
+TextGadget 1,256,172,0,101," EXIT "
 
 ;prop gadget...
 ;
-workstart 2,128,16,0,1,"	 "
-workstart 2,128,30,0,2,"	 "
-workstart 2,128,44,0,3,"	 "
+TextGadget 2,128,16,0,1,"	 "
+TextGadget 2,128,30,0,2,"	 "
+TextGadget 2,128,44,0,3,"	 "
 StringGadget 2,128,58,0,4,4,32
 	ButtonId 2,4,"1"
 StringGadget 2,184,58,0,5,4,32
@@ -182,26 +182,26 @@ StringGadget 2,128,72,0,6,4,32
 	ButtonId 2,6,"1"
 StringGadget 2,184,72,0,7,4,32
 	ButtonId 2,7,"2"
-workstart 2,128,86,0,8,"	 "
-workstart 2,128,100,0,9,"	 "
-workstart 2,8,172,0,100," MAKE "
-workstart 2,256,172,0,101," EXIT "
+TextGadget 2,128,86,0,8,"	 "
+TextGadget 2,128,100,0,9,"	 "
+TextGadget 2,8,172,0,100," MAKE "
+TextGadget 2,256,172,0,101," EXIT "
 
 ;shape gadget...
 ;
-workstart 3,128,16,0,1,"					"
-workstart 3,128,30,0,2,"	 "
-workstart 3,8,172,0,100," MAKE "
-workstart 3,256,172,0,101," EXIT "
+TextGadget 3,128,16,0,1,"					"
+TextGadget 3,128,30,0,2,"	 "
+TextGadget 3,8,172,0,100," MAKE "
+TextGadget 3,256,172,0,101," EXIT "
 
 ;make gadget...
 ;
 StringGadget 10,32,156,0,1,6,48
-workstart 10,144,156,0,2,"		 "
-workstart 10,256,156,0,3,"			"
+TextGadget 10,144,156,0,2,"		 "
+TextGadget 10,256,156,0,3,"			"
 ;
-workstart 10,8,172,0,100," MAKE "
-workstart 10,256,172,0,101," EXIT "
+TextGadget 10,8,172,0,100," MAKE "
+TextGadget 10,256,172,0,101," EXIT "
 
 ;create source
 ;
@@ -211,12 +211,12 @@ StringGadget 15,128,30,0,2,5,40
 	ButtonId 15,2,"0"
 StringGadget 15,128,44,0,3,5,40
 	ButtonId 15,3,"0"
-workstart 15,128,58,0,4,"	 "
-workstart 15,128,72,0,5,"	 "
-workstart 15,128,86,0,6,"	 "
+TextGadget 15,128,58,0,4,"	 "
+TextGadget 15,128,72,0,5,"	 "
+TextGadget 15,128,86,0,6,"	 "
 ;
-workstart 15,8,172,0,100," MAKE "
-workstart 15,256,172,0,101," EXIT "
+TextGadget 15,8,172,0,100," MAKE "
+TextGadget 15,256,172,0,101," EXIT "
 
 Statement p{a$}
 WLocate 4,WCursY+6
@@ -238,7 +238,7 @@ u{a$,GadgetHit}
 End Statement
 
 Statement w{a$,a}
-localstat 2,0,12,320,188,$1008,a$,1,2,a
+Window 2,0,12,320,188,$1008,a$,1,2,a
 End Statement
 
 AddIDCMP 16:pg_v=1:pg_b=1:wr=1:hr=1
@@ -268,7 +268,7 @@ Buffer 0,mw LSR 3*mh*de+1024
 ;
 ;add text to window...
 ;
-lmaxlen 1,mw,8,1
+BitMap 1,mw,8,1
 ;
 Free GadgetJam 4
 ;
@@ -277,10 +277,10 @@ StringGadget 4,80,30,0,2,3,24
 	ButtonId 4,2,"1"
 StringGadget 4,80,44,0,3,3,24
 	ButtonId 4,3,"0"
-workstart 4,80,58,0,4,"					"
+TextGadget 4,80,58,0,4,"					"
 ;
-workstart 4,8,172,0,100," MAKE "
-workstart 4,256,172,0,101," EXIT "
+TextGadget 4,8,172,0,100," MAKE "
+TextGadget 4,256,172,0,101," EXIT "
 ;
 ;window options..
 ;
@@ -309,25 +309,25 @@ StringGadget 12,96,86,0,12,5,40
 StringGadget 12,264,86,0,13,5,40
 	ButtonId 12,13,Str$(maxh)
 ;
-workstart 12,8,104,1,14,	" SIZING "
-workstart 12,84,104,1,15, "	DRAG	"
-workstart 12,160,104,1,16," DEPTH	"
-workstart 12,236,104,1,17," CLOSE	"
+TextGadget 12,8,104,1,14,	" SIZING "
+TextGadget 12,84,104,1,15, "	DRAG	"
+TextGadget 12,160,104,1,16," DEPTH	"
+TextGadget 12,236,104,1,17," CLOSE	"
 ;
-workstart 12,8,118,1,18,	"BACKDROP"
-workstart 12,84,118,1,19, "NOBORDER"
-workstart 12,160,118,1,20,"GIMME 00"
-workstart 12,236,118,1,21,"ACTIVATE"
+TextGadget 12,8,118,1,18,	"BACKDROP"
+TextGadget 12,84,118,1,19, "NOBORDER"
+TextGadget 12,160,118,1,20,"GIMME 00"
+TextGadget 12,236,118,1,21,"ACTIVATE"
 ;
-workstart 12,8,132,1,22,	"	 SIZE RIGHT		"
-workstart 12,160,132,1,23,"	 SIZE BOTTOM	 "
+TextGadget 12,8,132,1,22,	"	 SIZE RIGHT		"
+TextGadget 12,160,132,1,23,"	 SIZE BOTTOM	 "
 ;
-workstart 12,84,146,1,24, " SIMPLE REFRESH	"
+TextGadget 12,84,146,1,24, " SIMPLE REFRESH	"
 
-workstart 12,8,172,0,100," DONE "
+TextGadget 12,8,172,0,100," DONE "
 
 For k=0 To 10
-If wf ##[$80CD] fb(k)
+If wf BitTst fb(k)
 	Borders 12,14+k,On
 Else
 	Borders 12,14+k,Off
@@ -344,12 +344,12 @@ StringGadget 13,96,30,0,2,3,24
 	ButtonId 13,2,Str$(sd)
 StringGadget 13,96,44,0,3,3,24
 	ButtonId 13,3,Str$(sb)
-workstart 13,96,58,0,4,"										 "
+TextGadget 13,96,58,0,4,"										 "
 StringGadget 13,96,72,0,5,4,32
 	ButtonId 13,5,Str$(mh)
 StringGadget 13,96,86,0,6,3,24
 	ButtonId 13,6,Str$(de)
-workstart 13,8,172,0,100," DONE "
+TextGadget 13,8,172,0,100," DONE "
 ;
 ;make palette requester gadgets
 ;
@@ -360,7 +360,7 @@ For k=0 To mc
 If k&15=0 Then x=-2:y+20
 x+18
 SelectMode 0,k
-workstart 14,x,y,0,k+1," "
+TextGadget 14,x,y,0,k+1," "
 Next
 SelectMode 1,0
 ;
@@ -368,27 +368,27 @@ PropGadget 14,60,100,64,65,252,12
 PropGadget 14,60,116,64,66,252,12
 PropGadget 14,60,132,64,67,252,12
 ;
-workstart 14,8,172,0,100," OKAY "
-workstart 14,240,172,0,101," CANCEL "
+TextGadget 14,8,172,0,100," OKAY "
+TextGadget 14,240,172,0,101," CANCEL "
 ;
 ScreenPens sp(0),sp(1),sp(2),sp(3),sp(4),sp(5),sp(5)
-allocst 0,0,0,mw,mh,de,fl,sti$,sd,sb
+Screen 0,0,0,mw,mh,de,fl,sti$,sd,sb
 Use SetCycle 1
-localstat 0,0,0,mw,mh,$1900,"",1,2
+Window 0,0,0,mw,mh,$1900,"",1,2
 ScreensBitMap 0,0
-arrmult 0
+SetMenu 0
 newsc=0
 Gosub shownew
 
 .main
 If newsc
-	Free localstat 0
-	Free localstat 1
-	Free localstat 2
+	Free Window 0
+	Free Window 1
+	Free Window 2
 	FlushEvents
 	Goto newscreen
 EndIf
-ev.l=WaitEvent:Use localstat EventWindow
+ev.l=WaitEvent:Use Window EventWindow
 Select ev
 Case 256
 	Select MenuHit
@@ -492,9 +492,9 @@ Case 256
 							;
 							BitMapOutput 1:Locate 0,0:Print text$
 							;
-							Use lmaxlen 1
+							Use BitMap 1
 							GetaShape 0,0,0,gw,gh
-							Use lmaxlen 0
+							Use BitMap 0
 							;
 							Gosub posit2
 							;
@@ -510,13 +510,13 @@ Case 256
 					End Select
 				End Select
 			Until ex
-			Gosub fw2:Use localstat 0
+			Gosub fw2:Use Window 0
 		Case 1	;test...
 			Gosub viewwin2
-			localstat 2,0,0,320,16,14,"CLOSE ME TO EXIT TEST MODE!",1,2
+			Window 2,0,0,320,16,14,"CLOSE ME TO EXIT TEST MODE!",1,2
 			Repeat
 			Until WaitEvent=512 AND EventWindow=2
-			Free localstat 2:Gosub shownew
+			Free Window 2:Gosub shownew
 		Case 2	;window options
 			ButtonId 12,6,Str$(wx)
 			ButtonId 12,7,Str$(wy)
@@ -546,7 +546,7 @@ Case 256
 				Select ev
 				Case 64
 					If GadgetHit>13 AND GadgetHit<25
-						wf ##[$80D0] fb(GadgetHit-14)
+						wf BitChg fb(GadgetHit-14)
 					EndIf
 					Select GadgetHit
 					Case 100
@@ -571,9 +571,9 @@ Case 256
 				End Select
 			Until ex
 			;
-			Free localstat 2
+			Free Window 2
 			Gosub shownew
-			Use localstat 0
+			Use Window 0
 			;
 		End Select
 	Case 3
@@ -659,8 +659,8 @@ Case 256
 								.
 								\gt=0,gx,gy,gw,gh,gi,gf
 								;
-								k=0:If tg_togg Then k=1:If tg_togg=2 Then k ##[$80CE] 15
-								If tg_bo=0 Then k ##[$80CE] 14
+								k=0:If tg_togg Then k=1:If tg_togg=2 Then k BitSet 15
+								If tg_bo=0 Then k BitSet 14
 								\tg_text=text$,k,tg_jam,c1,c2,b1,b2,bx,by
 								;
 								Gosub shownew
@@ -676,7 +676,7 @@ Case 256
 				End Select
 			Until ex
 			Gosub fw2
-			Use localstat 0
+			Use Window 0
 			;
 		Case 1
 			;
@@ -751,7 +751,7 @@ Case 256
 								;
 								x=SMouseX:y=gy+gh-1:Gosub showabox
 								Repeat
-									WaitEvent:Use localstat EventWindow
+									WaitEvent:Use Window EventWindow
 									Gosub showabox
 									x=SMouseX
 									Gosub showabox
@@ -779,7 +779,7 @@ Case 256
 				End Select
 			Until ex
 			Gosub fw2
-			Use localstat 0
+			Use Window 0
 			;
 		Case 2
 			;
@@ -860,7 +860,7 @@ Case 256
 								;
 								Gosub showabox2
 								Repeat
-									WaitEvent:Use localstat EventWindow
+									WaitEvent:Use Window EventWindow
 									Gosub showabox
 									Gosub showabox2
 								Until MButtons=1
@@ -893,7 +893,7 @@ Case 256
 				End Select
 			Until ex
 			Gosub fw2
-			Use localstat 0
+			Use Window 0
 			;
 		Case 3
 			;
@@ -946,7 +946,7 @@ Case 256
 							bps=Peek.w(sha+4)
 							If bps>de Then Poke.w sha+4,de
 							;
-							longdiv 0,gx,gy+12
+							Blit 0,gx,gy+12
 							;
 							Poke.w sha+4,bps
 							;
@@ -961,7 +961,7 @@ Case 256
 									\gt=3,gx,gy,gw,gh,gi,gf
 									;
 									k=0
-									If ig_togg Then k=1:If ig_togg=2 Then k ##[$80CE] 15
+									If ig_togg Then k=1:If ig_togg=2 Then k BitSet 15
 									;
 									\ig_file=text$,k
 									;
@@ -980,7 +980,7 @@ Case 256
 			Until ex
 			sfail
 			Gosub fw2
-			Use localstat 0
+			Use Window 0
 			;
 		End Select
 	End Select
@@ -1007,18 +1007,18 @@ Case 8
 				;
 				inw+(ww-ww2):inh+(wh-wh2)
 				;
-				newmem gads()
-				While globfree(gads())
-					If \gf ##[$80CD] 1 ;rel rite?
+				ResetList gads()
+				While NextItem(gads())
+					If \gf BitTst 1 ;rel rite?
 						\gx-ww2+ww
 					EndIf
-					If \gf ##[$80CD] 2 ;rel bot?
+					If \gf BitTst 2 ;rel bot?
 						\gy-wh2+wh
 					EndIf
-					If \gf ##[$80CD] 3 ;rel width?
+					If \gf BitTst 3 ;rel width?
 						\gw-ww2+ww
 					EndIf
-					If \gf ##[$80CD] 4 ;rel hite?
+					If \gf BitTst 4 ;rel hite?
 						\gh-wh2+wh
 					EndIf
 				Wend
@@ -1027,8 +1027,8 @@ Case 8
 				;
 			Else
 				;possible gadget move!
-				newmem gads()
-				While globfree(gads())
+				ResetList gads()
+				While NextItem(gads())
 					If ex>=\gx+wx AND ex<\gx+\gw+wx AND ey>=\gy+wy AND ey<\gy+\gh+wy
 						;move a gadget!
 						;
@@ -1039,9 +1039,9 @@ Case 8
 ;						Boxf \gx+wx,\gy+wy,\gx+\gw+wx-1,\gy+\gh+wy-1,0
 						;
 						If \gt=3 Then repsh=-1
-						ni=\gi:freelast gads()
+						ni=\gi:KillItem gads()
 						;
-						localstat 2,0,0,320,16,14,"PASTE MODE - RIGHT BUTTON TO EXIT",1,2
+						Window 2,0,0,320,16,14,"PASTE MODE - RIGHT BUTTON TO EXIT",1,2
 						;
 						Gosub shownew
 						;
@@ -1050,7 +1050,7 @@ Case 8
 						Repeat
 							Gosub posit2
 							If mb=1
-								If globalloc(gads())
+								If AddItem(gads())
 									des=&gads()
 									Gosub copygad
 									\gx=gx,gy:\gi=ni
@@ -1059,7 +1059,7 @@ Case 8
 								EndIf
 							EndIf
 						Until mb=2
-						Free localstat 2
+						Free Window 2
 						Gosub shownew:Goto bdone
 					EndIf
 				Wend
@@ -1094,7 +1094,7 @@ Return
 
 qwin
 FlushEvents
-localstat 1,wx,wy,ww,wh,wf,wt$,wd,wb
+Window 1,wx,wy,ww,wh,wf,wt$,wd,wb
 inw=InnerWidth:inh=InnerHeight
 wlo=WLeftOff:wto=WTopOff
 Return
@@ -1175,8 +1175,8 @@ If f$
 		;
 		a{ngads}
 		;
-		newmem gads()
-		While globfree(gads())
+		ResetList gads()
+		While NextItem(gads())
 			Exists 0,&gads(),SizeOf.agadget
 			NPrint \tg_text
 			NPrint \sg_text
@@ -1233,7 +1233,7 @@ Repeat
 		End Select
 	End Select
 Until ex
-Gosub fw2:Use localstat 0
+Gosub fw2:Use Window 0
 ;
 Return
 
@@ -1328,7 +1328,7 @@ Repeat
 		EndIf
 	End Select
 Until ex
-Gosub fw2:Use localstat 0
+Gosub fw2:Use Window 0
 Return
 
 .hidecc
@@ -1358,8 +1358,8 @@ Redraw 2,65:Redraw 2,66:Redraw 2,67:Return
 
 findhi
 hni=-1
-newmem gads()
-While globfree(gads())
+ResetList gads()
+While NextItem(gads())
 	If \gi>hni Then hni=\gi
 Wend
 Return
@@ -1408,12 +1408,12 @@ Gosub fw2
 ;
 posit2:Menus Off
 ;
-Use localstat 0:Activate 1
+Use Window 0:Activate 1
 ;
 Gosub showwin:Gosub showgad
 ;
 Repeat
-	WaitEvent:Use localstat EventWindow
+	WaitEvent:Use Window EventWindow
 	Gosub showgad
 	mb=MButtons
 Until mb=1 OR mb=2
@@ -1450,8 +1450,8 @@ Repeat
 			;
 			;check gadget ID doesn't already exist!
 			;
-			newmem gads()
-			While globfree(gads())
+			ResetList gads()
+			While NextItem(gads())
 				If \gi=gi ;no can do!
 					Gosub badid
 					Goto seldone
@@ -1535,7 +1535,7 @@ Return
 
 .makeglist ;makegadgetlist 11!
 ;
-Free GadgetJam 11:Use localstat 1:gadf=-1
+Free GadgetJam 11:Use Window 1:gadf=-1
 ;
 makeglist2
 ;
@@ -1544,8 +1544,8 @@ lbo=0
 shn=0
 ngads=0
 ;
-newmem gads()
-	While globfree(gads())
+ResetList gads()
+	While NextItem(gads())
 	ngads+1
 	;
 	x=\gx:y=\gy
@@ -1557,10 +1557,10 @@ newmem gads()
 		ww2=ww:wh2=wh
 	EndIf
 	;
-	If \gf ##[$80CD] 1 ;rel rite?
+	If \gf BitTst 1 ;rel rite?
 		x-ww2+1
 	EndIf
-	If \gf ##[$80CD] 2 ;rel bot?
+	If \gf BitTst 2 ;rel bot?
 		y-wh2+1
 	EndIf
 	;
@@ -1572,20 +1572,20 @@ newmem gads()
 		Gosub handlejam
 		;
 		bo=0 ;no borders!
-		If \tg_flags ##[$80CD] 14	;border?
+		If \tg_flags BitTst 14	;border?
 			bx=\tg_bx:by=\tg_by:b1=\tg_b1:b2=\tg_b2:bo=-1
 		EndIf
 		Gosub handlebord
 		;
 		If gadf
-			workstart 11,x,y,\tg_flags&1|\gf,\gi,\tg_text
-			If \tg_flags ##[$80CD] 15	;toggle on?
+			TextGadget 11,x,y,\tg_flags&1|\gf,\gi,\tg_text
+			If \tg_flags BitTst 15	;toggle on?
 				Borders 11,\gi,On
 			EndIf
 		Else
 			Print "TextGadget ",gan,",",x,",",y,",",\tg_flags&1|\gf,","
 			NPrint \gi,",",Chr$(34),\tg_text,Chr$(34)
-			If \tg_flags ##[$80CD] 15	;toggle?
+			If \tg_flags BitTst 15	;toggle?
 				NPrint "Toggle ",gan,",",\gi,",On"
 			EndIf
 		EndIf
@@ -1614,10 +1614,10 @@ newmem gads()
 	Case 2	;prop gadget
 		;
 		w=\gw:h=\gh
-		If \gf ##[$80CD] 3 ;rel width?
+		If \gf BitTst 3 ;rel width?
 			w-ww2
 		EndIf
-		If \gf ##[$80CD] 4 ;rel height?
+		If \gf BitTst 4 ;rel height?
 			h-wh2
 		EndIf
 		;
@@ -1627,14 +1627,14 @@ newmem gads()
 			NPrint "PropGadget ",gan,",",x,",",y,",",\gf,",",\gi,",",w,",",h
 		EndIf
 		;
-		If \gf ##[$80CD] 6
+		If \gf BitTst 6
 			If gadf
 				SetHProp 11,\gi,0,\pg_xset
 			Else
 				NPrint "SetHProp ",gan,",",\gi,",0,",\pg_xset
 			EndIf
 		EndIf
-		If \gf ##[$80CD] 7
+		If \gf BitTst 7
 			If gadf
 				SetVProp 11,\gi,0,\pg_yset
 			Else
@@ -1650,13 +1650,13 @@ newmem gads()
 				LoadShape shn,\ig_file
 			EndIf
 			ShapeGadget 11,x,y,\ig_flags&1|\gf,\gi,shn
-			If \ig_flags ##[$80CD] 15
+			If \ig_flags BitTst 15
 				Borders 11,\gi,On
 			EndIf
 		Else
 			NPrint "LoadShape ",shn,",",\ig_file
 			NPrint "Shapegadget ",gan,",",x,",",y,",",\ig_flags&1|\gf,",",\gi,",",shn
-			If \ig_flags ##[$80CD] 15
+			If \ig_flags BitTst 15
 				NPrint "Toggle ",gan,",",\gi,",On"
 			EndIf
 		EndIf
@@ -1666,12 +1666,12 @@ Wend
 repsh=0
 Return
 
-.maketext:txtf=-1:Use localstat 1
+.maketext:txtf=-1:Use Window 1
 ;
 .maketext2:lj=-1:lc1=-1:lc2=-1
 ;
-newmem gads()
-While globfree(gads())
+ResetList gads()
+While NextItem(gads())
 	If \gt=4	;window text?
 		x=\gx-wlo:y=\gy-wto
 		;
@@ -1700,17 +1700,17 @@ Return
 .viewwin2
 SizeLimits minw,minh,maxw,maxh
 FlushEvents
-localstat 1,wx,wy,ww,wh,wf,wt$,wd,wb,11
+Window 1,wx,wy,ww,wh,wf,wt$,wd,wb,11
 inw=InnerWidth:inh=InnerHeight
 wlo=WLeftOff:wto=WTopOff
-arrmult 0:Goto maketext
+SetMenu 0:Goto maketext
 
 
-fw2:Free localstat 2:FlushEvents
+fw2:Free Window 2:FlushEvents
 ;
 viewwin
 Gosub viewwin2
-Poke.l Peek.l(Addr localstat(1))+62,0:Return
+Poke.l Peek.l(Addr Window(1))+62,0:Return
 
 showabox2:x=SMouseX:y=SMouseY
 .showabox

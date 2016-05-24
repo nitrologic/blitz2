@@ -417,7 +417,7 @@ getrot
 
 
 		DEFTYPE .vec v
-		##[$80CA] myrot
+		USEPATH myrot
 
 		v\xx=\xa*px+\ya*py+\za*pz
 		v\xy=\xa*qx+\ya*qy+\za*qz

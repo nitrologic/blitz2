@@ -8,9 +8,9 @@ Function.l jfr{a.q,b.q}
 	SWAP d0:MOVE d1,d0:SWAP d0:AsmExit
 End Function
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
-Use lmaxlen 0
+Use BitMap 0
 
 
 #sqs=32;20

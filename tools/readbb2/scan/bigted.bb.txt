@@ -41,10 +41,10 @@ Statement ioprint{io,k$}
 doio{io,3,&k$,Len(k$)}
 End Statement
 
-allocst 0,0,0,640,200,2,$8000,"",1,2
-s=Peek.l(Addr allocst(0))
+Screen 0,0,0,640,200,2,$8000,"",1,2
+s=Peek.l(Addr Screen(0))
 Poke.l ?scrn,s
-w=##[$FF9E](?newwindow):Poke.l Addr localstat(0),w:Use localstat 0
+w=##[$FF9E](?newwindow):Poke.l Addr Window(0),w:Use Window 0
 ;LoadFont 0,"diamond.font",8:WindowFont 0
 
 io=opencon{w}:iow=io ;AllocMem_(128,$10001)
@@ -115,7 +115,7 @@ Repeat
 	End Select
 Until l$=Chr$(27)
 
-Poke.l Addr localstat(0),0
+Poke.l Addr Window(0),0
 ;FreeMem_ iow,128
 closecon{io}
 ##[$FF88] w

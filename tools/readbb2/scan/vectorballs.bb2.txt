@@ -9,13 +9,13 @@ LoadShapes 0,"shapes/vecballs"
 VWait
 
 BLITZ
-lmaxlen 0,384,256,3
-lmaxlen 1,384,256,3
+BitMap 0,384,256,3
+BitMap 1,384,256,3
 Slice 0,44,320,256,$fff8,3,8,32,384,384
-Use lmaxlen 0
+Use BitMap 0
 Show 0
-longmult 0,12
-longmult 1,12
+Queue 0,12
+Queue 1,12
 
 ; ---- Variables Init ----
 
@@ -62,7 +62,7 @@ While Joyb(0)=0
 	 VWait
 
 	 ; Double buffer
-	 Show db:db=1-db:Use lmaxlen db:UnQueue db
+	 Show db:db=1-db:Use BitMap db:UnQueue db
 
 	 For I=1 To 12
 				 ; Setup gravity & x speed

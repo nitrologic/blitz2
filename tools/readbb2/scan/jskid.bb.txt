@@ -1681,7 +1681,7 @@ Return
 	pl=0
 
 	besttim=$7fff:bestpl.w=-1
-	##[$80CA] *p
+	USEPATH *p
 
 	.ContGame
 
@@ -1753,7 +1753,7 @@ Return
 *p3\control=#contcomp
 
 
-##[$80CA] *p
+USEPATH *p
 nlup.l=?mycarcont
 lup.l=?mycarcont
 
@@ -1980,7 +1980,7 @@ Return
 #mung=On; ff
 #clip=On; ff
 
-##[$80CA] *p
+USEPATH *p
 .MoveIndiv
 	If \towed<>0 Then Return
 
@@ -2235,7 +2235,7 @@ Return
 	CEND
 
 	Else
-		##[$80CA] *p
+		USEPATH *p
 		If \idle=1
 
 			\traction=0
@@ -2293,7 +2293,7 @@ Return
 
 
 CNIF #collisions
-CNIF #errs:##[$80D3]:CEND
+CNIF #errs:Runerrsoff:CEND
 ; cp\mti=(*p\headi-*op\headi),(*p\headj-*op\headj)
 	Function.w FastCollide{p.l,op.l,sha.l}
 		Macro a SizeOf.car\`1(a0):End Macro	;me
@@ -2354,7 +2354,7 @@ CNIF #errs:##[$80D3]:CEND
 
 	End Function
 
-CNIF #errs:##[$80D2]: CEND
+CNIF #errs:Runerrson: CEND
 
 	Crash
 ;		*sha=BankLoc(*cp0\bnk)+*cp0\head*SizeOf.ShadPt
@@ -2402,7 +2402,7 @@ Return
 
 
 
-##[$80CA] *p
+USEPATH *p
 
 .GetX
 ;	Stop
@@ -2508,7 +2508,7 @@ Return
 Return
 
 CheckWallLatent
-	##[$80CA] *p
+	USEPATH *p
 	For *p=*p0 To *p3 Step SizeOf.car	; if in a collision, \movi=0=\movj
 		*p\rev+*p\nrev
 
@@ -2559,7 +2559,7 @@ Return
 ;End Macro
 
 .SetStartCar
-	##[$80CA] *p
+	USEPATH *p
 	\idle=Off:\drop=Off
 	\inair=On
 	\pitch=2:\roll=2:\mpitch=0:\mroll=0

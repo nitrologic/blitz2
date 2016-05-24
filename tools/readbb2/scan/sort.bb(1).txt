@@ -25,13 +25,13 @@ End Statement
 
 Dim List a.q(20)
 
-globalloc a():a()=10
-globalloc a():a()=20
-globalloc a():a()=30
+AddItem a():a()=10
+AddItem a():a()=20
+AddItem a():a()=30
 
-newmem a():globfree a():sortlist{&a()-8}
+ResetList a():NextItem a():sortlist{&a()-8}
 
-newmem a():While globfree(a()):NPrint a():Wend
+ResetList a():While NextItem(a()):NPrint a():Wend
 
 MouseWait
 End

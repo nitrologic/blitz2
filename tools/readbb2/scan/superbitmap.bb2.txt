@@ -6,7 +6,7 @@
 width=320
 height=200
 
-lmaxlen 0,width,height,2				;bitmap for our window
+BitMap 0,width,height,2				;bitmap for our window
 Circlef 160,100,160,100,1		 ;with a circle
 Box 0,0,width-1,height-1,3
 
@@ -18,7 +18,7 @@ PropGadget 0,-14,10,$11000+2+16+128,2,12,-20 ;gadgets for sliders
 AddIDCMP $10 ;report mouse moves for domove routine
 
 SizeLimits 32,32,width+22,height+20
-localstat 0,0,0,100,100,$1489,"HELLO",1,2,0,0
+Window 0,0,0,100,100,$1489,"HELLO",1,2,0,0
 
 Gosub drawsuper
 

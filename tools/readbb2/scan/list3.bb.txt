@@ -7,37 +7,37 @@ End NEWTYPE
 
 Dim List balls.obj(20)
 
-While globalloc(balls())
+While AddItem(balls())
 	balls()\x=Rnd(250),Rnd(200),Rnd(6)-3,Rnd(6)-3
 Wend
 
 BLITZ
 
-lmaxlen 0,320,256,3
-lmaxlen 1,320,256,3
+BitMap 0,320,256,3
+BitMap 1,320,256,3
 
 Mouse On
-lmaxlen 2,640,512,3
+BitMap 2,640,512,3
 For i=0 To 100
 	Line Rnd(640),Rnd(512),Rnd(640),Rnd(512),Rnd(7)
 Next
 
-longmult 0,200:longmult 1,200	 ;a queue for each bitmap
+Queue 0,200:Queue 1,200	 ;a queue for each bitmap
 
 Slice 0,44,320,256,$fffa,6,8,32,320,640
 
 While Joyb(0)=0
 	VWait:Show db:ShowF 2,MouseX,MouseY
-	db=1-db:Use lmaxlen db
+	db=1-db:Use BitMap db
 ;	UnQueue db								;Cls
 	BlockScroll
-	newmem balls()
-	While globfree(balls())
-		##[$80CA] balls()
+	ResetList balls()
+	While NextItem(balls())
+		USEPATH balls()
 		\x+\xa:\y+\ya
 		\frame=QWrap(\frame+1,0,8)
 		If \x<0 OR \x>250 Then \xa=-\xa:\x+\xa
 		If \y<0 OR \y>200 Then \ya=-\ya:\y+\ya
-		longdiv \frame,\x,\y
+		Blit \frame,\x,\y
 	Wend
 Wend

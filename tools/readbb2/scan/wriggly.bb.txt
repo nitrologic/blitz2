@@ -180,7 +180,7 @@ Dim bump.b(40,32)
 ;----------------------------------------------------------------------
 
 WBStartup
-##[$80CC]
+NoCli
 
 AbsMouse 639,511
 
@@ -301,7 +301,7 @@ Shared *pal, fader, maxfade
 	DEFTYPE .q q
 	q=fader/maxfade
 	For reg=0 To 15
-		If fade_bits ##[$80CD] reg
+		If fade_bits BitTst reg
 			Green reg,*pal\xred[reg]*q,*pal\xgrn[reg]*q,*pal\xblu[reg]*q
 		EndIf
 	Next reg
@@ -334,7 +334,7 @@ Shared *pal, fader, maxfade
 	fader-1
 	q=fader/maxfade
 	For reg=0 To 15
-		If fade_bits ##[$80CD] reg
+		If fade_bits BitTst reg
 			Green reg,*pal\xred[reg]*q,*pal\xgrn[reg]*q,*pal\xblu[reg]*q
 		EndIf
 	Next reg
@@ -360,7 +360,7 @@ Statement RGB_On{reg_bits}
 Shared *pal
 
 	For reg=0 To 15
-		If reg_bits ##[$80CD] reg
+		If reg_bits BitTst reg
 			Green reg,*pal\xred[reg],*pal\xgrn[reg],*pal\xblu[reg]
 		EndIf
 	Next reg
@@ -371,7 +371,7 @@ Statement RGB_Off{reg_bits}
 ;Set colour registers signalled in "reg_bits" to black
 
 	For reg=0 To 15
-		If reg_bits ##[$80CD] reg
+		If reg_bits BitTst reg
 			Green reg,0,0,0
 		EndIf
 	Next reg
@@ -387,10 +387,10 @@ Shared msg$
 
 	For i=1 To Len(msg$)
 		s=CharShape{Asc(Mid$(msg$,i,1))}
-		longdiv s,x+i*10,y-1,col
-		longdiv s,x+i*10,y+1,col
+		Blit s,x+i*10,y-1,col
+		Blit s,x+i*10,y+1,col
 		BlitMode InvMode
-		longdiv s,x+i*10,y,col
+		Blit s,x+i*10,y,col
 		BlitMode CookieMode
 	Next i
 End Statement
@@ -403,9 +403,9 @@ Statement ShapeText{x,y,col,adr.l,n}
 
 	For i=0 To n-1
 		s=CharShape{Peek.b(adr+i)}
-		longdiv s,x+i*10,y+1,col
+		Blit s,x+i*10,y+1,col
 		BlitMode InvMode
-		longdiv s,x+i*10,y,col
+		Blit s,x+i*10,y,col
 		BlitMode CookieMode
 	Next i
 End Statement
@@ -417,18 +417,18 @@ Statement RBox{x1,y1,x2,y2,col}
 	x1*16:y1*16
 	x2*16:y2*16
 
-	longdiv 376,x1,y1,col
-	longdiv 378,x1,y2,col
+	Blit 376,x1,y1,col
+	Blit 378,x1,y2,col
 	For x=x1+16 To x2-16 Step 16
-		longdiv 374,x,y1,col
-		longdiv 374,x,y2,col
+		Blit 374,x,y1,col
+		Blit 374,x,y2,col
 	Next x
 
-	longdiv 377,x2,y1,col
-	longdiv 379,x2,y2,col
+	Blit 377,x2,y1,col
+	Blit 379,x2,y2,col
 	For y=y1+16 To y2-16 Step 16
-		longdiv 375,x1,y,col
-		longdiv 375,x2,y,col
+		Blit 375,x1,y,col
+		Blit 375,x2,y,col
 	Next y
 
 End Statement
@@ -440,18 +440,18 @@ Statement SBox{x1,y1,x2,y2,col}
 	x1*16:y1*16
 	x2*16:y2*16
 
-	longdiv 370,x1,y1,col
-	longdiv 372,x1,y2,col
+	Blit 370,x1,y1,col
+	Blit 372,x1,y2,col
 	For x=x1+16 To x2-16 Step 16
-		longdiv 368,x,y1,col
-		longdiv 368,x,y2,col
+		Blit 368,x,y1,col
+		Blit 368,x,y2,col
 	Next x
 
-	longdiv 371,x2,y1,col
-	longdiv 373,x2,y2,col
+	Blit 371,x2,y1,col
+	Blit 373,x2,y2,col
 	For y=y1+16 To y2-16 Step 16
-		longdiv 369,x1,y,col
-		longdiv 369,x2,y,col
+		Blit 369,x1,y,col
+		Blit 369,x2,y,col
 	Next y
 
 End Statement
@@ -528,19 +528,19 @@ Initialise:
 
 	For i=0 To 15:GetaSprite i,i+#SPRITES:Next i
 
-	longmult 0,4
+	Queue 0,4
 	Buffer 0,8192
 
-	lmaxlen 0,640,256,4
-	Use lmaxlen 0
+	BitMap 0,640,256,4
+	Use BitMap 0
 	BlockScroll
 
-	lmaxlen 1,320,256,4
-	Use lmaxlen 1
+	BitMap 1,320,256,4
+	Use BitMap 1
 	BlockScroll
 
-	lmaxlen 2,320,256,4
-	Use lmaxlen 2
+	BitMap 2,320,256,4
+	Use BitMap 2
 	BlockScroll
 
 	InitPalette On
@@ -555,7 +555,7 @@ Return
 ;----------------------------------------------------------------------
 
 Titles:
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll
 	BitMapOutput 0
 
@@ -584,7 +584,7 @@ Titles:
 					BlockScroll
 					FadePalette 0
 					*pal=?title1_pal
-					longdiv 0,320,50,3
+					Blit 0,320,50,3
 					maxfade=32
 					fader=0
 					phase+1
@@ -604,8 +604,8 @@ Titles:
 					If fader=0 Then phase+1
 				Case 5
 					UnQueue 0
-					longdiv 1,249,112,1
-					longdiv 3,410,112,2
+					Blit 1,249,112,1
+					Blit 3,410,112,2
 					msg=4
 					phase+1
 				Case 6
@@ -649,10 +649,10 @@ Titles:
 					adr=?notes_data
 					phase+1
 				Case 15
-					longdiv 10,85,5,0
-					longdiv 11,86,0,7
-					longdiv 12,488,23,2
-					longdiv 13,91,201,1
+					Blit 10,85,5,0
+					Blit 11,86,0,7
+					Blit 12,488,23,2
+					Blit 13,91,201,1
 					Colour 3,8
 					FadeUp{%1111111111111111}
 					If fader>maxfade Then phase+1
@@ -673,7 +673,7 @@ Titles:
 						If c<16 Then Colour c,8 Else Print Chr$(c)
 					EndIf
 				Case 19
-					longdiv 14,412,217,1
+					Blit 14,412,217,1
 					phase+1:delay=1000
 				Case 20
 					FadeDown{%1111111111111111}
@@ -692,7 +692,7 @@ Titles:
 					Point 524,254,0
 					phase+1
 				Case 22
-					longdiv 7,320,36,2
+					Blit 7,320,36,2
 					maxfade=16
 					fader=0
 					n=0
@@ -710,12 +710,12 @@ Titles:
 					phase+1
 				Case 26
 					For c=0 To 11
-						longdiv CharShape{*hiscore(n)\char[c]},160+c*14,y,0
+						Blit CharShape{*hiscore(n)\char[c]},160+c*14,y,0
 					Next c
 					phase+1
 				Case 27
 					For c=1 To 8
-						longdiv CharShape{Asc(Right$(pts$,c))},480-c*14,y,1
+						Blit CharShape{Asc(Right$(pts$,c))},480-c*14,y,1
 					Next c
 					fader=0
 					phase+1
@@ -724,12 +724,12 @@ Titles:
 					If fader>maxfade Then phase+1
 				Case 29
 					For c=0 To 11
-						longdiv CharShape{*hiscore(n)\char[c]},160+c*14,y,2
+						Blit CharShape{*hiscore(n)\char[c]},160+c*14,y,2
 					Next c
 					phase+1
 				Case 30
 					For c=1 To 8
-						longdiv CharShape{Asc(Right$(pts$,c))},480-c*14,y,3
+						Blit CharShape{Asc(Right$(pts$,c))},480-c*14,y,3
 					Next c
 					phase+1
 				Case 31
@@ -761,8 +761,8 @@ Titles:
 					adr=?hints_data
 					phase+1
 				Case 37
-					longdiv 12,488,23,2
-					longdiv 13,91,201,1
+					Blit 12,488,23,2
+					Blit 13,91,201,1
 					Colour 3,8
 					FadeUp{%1111111111111111}
 					If fader>maxfade Then phase+1
@@ -816,7 +816,7 @@ Return
 ;----------------------------------------------------------------------
 
 PlayGame:
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll
 	BitMapOutput 1
 
@@ -1110,10 +1110,10 @@ BuildRoom:
 				Else
 					id(x,y)=0
 					hit=Peek.b(?block_data+s)
-					If hit ##[$80CD] 0 Then bump(bx,by)=#OBSTACLE
-					If hit ##[$80CD] 1 Then bump(bx+1,by)=#OBSTACLE
-					If hit ##[$80CD] 2 Then bump(bx,by+1)=#OBSTACLE
-					If hit ##[$80CD] 3 Then bump(bx+1,by+1)=#OBSTACLE
+					If hit BitTst 0 Then bump(bx,by)=#OBSTACLE
+					If hit BitTst 1 Then bump(bx+1,by)=#OBSTACLE
+					If hit BitTst 2 Then bump(bx,by+1)=#OBSTACLE
+					If hit BitTst 3 Then bump(bx+1,by+1)=#OBSTACLE
 					s+#BACK_SHAPES
 				EndIf
 			EndIf
@@ -1151,11 +1151,11 @@ ShowRoom:
 			CNIF #DEBUG=0
 				BlitColl #EARTH,x*16,y*16
 			CEND
-			If map(x,y) Then longdiv map(x,y),x*16,y*16
+			If map(x,y) Then Blit map(x,y),x*16,y*16
 		Next x
 	Next y
 	ShapesBitMap 1,2
-	longdiv 15,0,0,0
+	Blit 15,0,0,0
 	Gosub ShowScore
 	Gosub ShowGems
 	Gosub ShowLevel
@@ -1231,8 +1231,8 @@ StartHead:
 	For i=0 To 3
 		!Jwait
 		worm_head+1
-		longdiv worm_head,head_x,head_y,0
-		longdiv nozzle,xx,yy
+		Blit worm_head,head_x,head_y,0
+		Blit nozzle,xx,yy
 	Next i
 Return
 
@@ -1244,7 +1244,7 @@ Return
 StartTail:
 	worm_tail=buff(tail)+48
 	Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
-	longdiv worm_tail+1,tail_x,tail_y
+	Blit worm_tail+1,tail_x,tail_y
 Return
 
 
@@ -1269,7 +1269,7 @@ MoveHead:
 			bump(bx+*quad\x1[path],by+*quad\y1[path])|#WORM
 			bump(bx+*quad\x2[path],by+*quad\y2[path])|#WORM
 		EndIf
-		longdiv worm_head,head_x,head_y
+		Blit worm_head,head_x,head_y
 
 		If phase=1 Then Gosub TickTock
 		If phase=2 Then Gosub Update
@@ -1307,7 +1307,7 @@ MoveWorm:
 				tail_x+dx(mv)
 				tail_y+dy(mv)
 			EndIf
-			longdiv worm_tail,tail_x,tail_y
+			Blit worm_tail,tail_x,tail_y
 		EndIf
 
 		If phase=0 Then Gosub TurnHead
@@ -1321,7 +1321,7 @@ MoveWorm:
 			bump(bx+*quad\x1[path],by+*quad\y1[path])|#WORM
 			bump(bx+*quad\x2[path],by+*quad\y2[path])|#WORM
 		EndIf
-		longdiv worm_head,head_x,head_y
+		Blit worm_head,head_x,head_y
 
 		If phase=1 Then Gosub TickTock
 		If phase=2 Then Gosub Update
@@ -1348,8 +1348,8 @@ MoveTail:
 				Gosub TurnHead
 			Else
 				worm_head+1
-				longdiv worm_head,head_x,head_y
-				longdiv nozzle,xx,yy
+				Blit worm_head,head_x,head_y
+				Blit nozzle,xx,yy
 			EndIf
 		EndIf
 
@@ -1369,7 +1369,7 @@ MoveTail:
 				tail_x+dx(mv)
 				tail_y+dy(mv)
 			EndIf
-			longdiv worm_tail,tail_x,tail_y
+			Blit worm_tail,tail_x,tail_y
 		EndIf
 
 		If phase=1 AND no_gems Then pts+10:Gosub Update:Sound 11,4,32
@@ -1389,13 +1389,13 @@ StopTail:
 	For i=1 To 3
 		!Jwait
 		Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
-		longdiv worm_tail,tail_x,tail_y
-		longdiv nozzle,xx,yy
+		Blit worm_tail,tail_x,tail_y
+		Blit nozzle,xx,yy
 		worm_tail+1
 	Next i
 	!Jwait
 	Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
-	longdiv nozzle,xx,yy
+	Blit nozzle,xx,yy
 	path=*frame\impact[worm_tail]
 	bx=tail_x/8
 	by=tail_y/8
@@ -1461,13 +1461,13 @@ BumpCheck:
 						bump(bx,by)=#BLANK
 						bump(bx+1,by+1)=#BLANK
 						map(xx,yy)=0
-						Use lmaxlen 2
+						Use BitMap 2
 						CNIF #DEBUG>0
 							Boxf head_x,head_y,head_x+15,head_y+15,0
 						CELSE
 							BlitColl #EARTH,head_x,head_y
 						CEND
-						Use lmaxlen 1
+						Use BitMap 1
 						g=(gem(id(xx,yy)) LSR 4)&3
 						gem(id(xx,yy))=0
 						pts+gemval(g)
@@ -1604,7 +1604,7 @@ GameOver:
 	BlockScroll
 	*pal=?title1_pal
 
-	longdiv 9,160,100,1
+	Blit 9,160,100,1
 	Sound 9,2,64
 
 	DoFadeUp{%0000000011100000,1}
@@ -1729,7 +1729,7 @@ AddChar:
 		If key>95 Then key-32
 		name$=name$+Chr$(key)
 		Boxf x,y,x+9,y+15,0
-		longdiv CharShape{key},x,y,0
+		Blit CharShape{key},x,y,0
 		x+10
 		i+1
 		Boxf x,y,x+9,y+15,15

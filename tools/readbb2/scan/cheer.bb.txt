@@ -17,12 +17,12 @@ nxnib:
 	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
 End Function
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
-Use lmaxlen 0
+Use BitMap 0
 InitBank 0,32768,0
 blok.l=Bank(0)
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 
 LoadBitMap 0,"cheer.iff",0
 FadePalette 0
@@ -54,7 +54,7 @@ End Statement
 While Joyb(0)=0
 ;	orient{&ppl(0),SMouseX,SMouseY,32}
 	VWait 5
-	##[$80CA] ppl(i)
+	USEPATH ppl(i)
 	For i=0 To 31
 		ClipBlit \rot,\x,\y
 	Next
@@ -70,7 +70,7 @@ End
 .compileppl
 
 BlockScroll:sh=0
-For y=0 To 11:For x=0 To 7:longdiv sh,x*8,y*16:sh+1:Next:Next
+For y=0 To 11:For x=0 To 7:Blit sh,x*8,y*16:sh+1:Next:Next
 
 For y=0 To 11
 	For x=0 To 7
@@ -134,12 +134,12 @@ j(3)=8
 While Joyb(0)=0
 	VWait 9
 	;
-	longdiv i+j(j),20,20
+	Blit i+j(j),20,20
 	i=(i+1)AND7
 	j=(j+1)AND3
 	;
-	longdiv k+24,40,20
-	longdiv k+48,60,20
+	Blit k+24,40,20
+	Blit k+48,60,20
 	k+1:If k>23 Then k-24
 	;
 Wend

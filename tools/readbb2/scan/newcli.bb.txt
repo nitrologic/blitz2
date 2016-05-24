@@ -8,15 +8,15 @@
 ; to automatically close CLI after doing a command
 ;
 
-newlocarr 0,0,"PROJECT"
+MenuTitle 0,0,"PROJECT"
 MenuItem 0,0,0,0,"CLI					 ","Z"
 MenuItem 0,0,0,1,"DISKCOPY			"
 MenuItem 0,0,0,2,"QUIT					","Q"
 
-allocst 0,10
-localstat 0,0,10,640,DispHeight-10,$1000,"NEWCLI DEMO (via menu)",1,2
+Screen 0,10
+Window 0,0,10,640,DispHeight-10,$1000,"NEWCLI DEMO (via menu)",1,2
 
-arrmult 0
+SetMenu 0
 
 Repeat
 	ev.l=WaitEvent

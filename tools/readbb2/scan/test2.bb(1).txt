@@ -26,10 +26,10 @@ GetaSprite 0,0
 
 DecodePalette 0,32
 
-lmaxlen 0,1024,516,5
+BitMap 0,1024,516,5
 LoadBitMap 0,"track.iff",0
 
-lmaxlen 1,608,38,4:Box 0,0,607,37,1:Box 0,0,639,37,1
+BitMap 1,608,38,4:Box 0,0,607,37,1:Box 0,0,639,37,1
 
 InitCopList 0,44,38,$904,8,32,0
 DisplayAdjust 0,-4,8,0,16,32

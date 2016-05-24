@@ -3,12 +3,12 @@ LoadShapes 0,"blitz_products:shapes/blitzfonts-2c"				; load some mod
 VWait
 ;
 BLITZ
-lmaxlen 0,384,260,2
-lmaxlen 1,384,260,2
+BitMap 0,384,260,2
+BitMap 1,384,260,2
 Slice 0,44,320,260,$fff8,2,8,32,384,384
 Show 0,32,0
 Show 1,32,0
-Use lmaxlen 0
+Use BitMap 0
 GetaShape 0,0,0,1,1
 ;
 Dim Y(240),XP(40),I(140)
@@ -43,7 +43,7 @@ DIS=18
 ;
 While Joyb(0)=0
 	 VWait
-	 Show db,32,0:db=1-db:Use lmaxlen db:BlockScroll 0
+	 Show db,32,0:db=1-db:Use BitMap db:BlockScroll 0
 	 ;
 	 DIS-3
 	 If DIS=0
@@ -53,7 +53,7 @@ While Joyb(0)=0
 	 EndIf
 	 ;
 	 For LOP=0 To 18
-	 longdiv I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
+	 Blit I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
 	 Next
 	 POS=QWrap(POS-1,0,157)
 Wend

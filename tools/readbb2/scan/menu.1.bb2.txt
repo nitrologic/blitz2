@@ -4,7 +4,7 @@ SetErr
 	End
 End SetErr
 WBStartup;:NoCli
-freest 0;:WBenchToFront_
+WbToScreen 0;:WBenchToFront_
 
 NPrint Centre$("Terry Jewell's Disk No. 2",58)
 NPrint Centre$("By",58)
@@ -27,9 +27,9 @@ PlayModule 0
 
 If ##[$BE15](picture$)
 	ILBMDepth picture$
-	allocst 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
-	localstat 0,0,DecodeILBM-fontsize-1,ILBMViewMode,fontsize+1,$1900,"",2,1:Menus Off
-	casestrcomp 0,picture$
+	Screen 1,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",2,1
+	Window 0,0,DecodeILBM-fontsize-1,ILBMViewMode,fontsize+1,$1900,"",2,1:Menus Off
+	LoadPalette 0,picture$
 	FadePalette 0
 	LoadScreen 1,picture$
 Else
@@ -38,7 +38,7 @@ Else
 EndIf
 
 If ##[$BE15](fontname$)
-	remline 0,fontname$,fontsize
+	LoadFont 0,fontname$,fontsize
 	WindowFont 0
 Else
 	End

@@ -466,19 +466,19 @@ Statement RefreshTypeWindow{}
 	Shared typelist(),typelength,typepointer
 	Shared newtypewindow,typewidth,ix,iy
 
-	Use localstat 6
+	Use Window 6
 	inw.w=InnerWidth
 	inh.w=InnerHeight
 	ad.l=typepointer
-	Use lmaxlen 1
+	Use BitMap 1
 	BitMapOutput 1
 	Boxf 0,0,inw-typewidth,inh AND %1111111111111000,0
 	Locate 0,0
 	If typepointer
 		NPrint Hex$(typepointer)
 		y=9
-		newmem typelist()
-		While globfree(typelist())
+		ResetList typelist()
+		While NextItem(typelist())
 			a.b=typelist()\typ
 			Select a
 				Case 1
@@ -545,7 +545,7 @@ Statement NewTypeWindow{address.l}
 	oy.w=12
 	ow.w=320
 	If newtypewindow
-		Use localstat 6
+		Use Window 6
 		ow=WindowWidth
 		ox=WindowX
 		oy=WindowY : If oy+winheight>##[$B590] Then oy=##[$B590]-winheight
@@ -553,13 +553,13 @@ Statement NewTypeWindow{address.l}
 	newtypewindow=False
 
 	StringText$ 2,4
-	workstart 1,ix,iy,0,1,"O"
+	TextGadget 1,ix,iy,0,1,"O"
 
 	tracenum=0
 
 	SizeLimits 160,winheight,640,winheight
-	localstat 6,ox,oy,ow,winheight,$100f|$200000,"Newtype: "+typetitle$+" #"+Str$(tracenum),1,2,1
-	arrmult 0
+	Window 6,ox,oy,ow,winheight,$100f|$200000,"Newtype: "+typetitle$+" #"+Str$(tracenum),1,2,1
+	SetMenu 0
 
 	typewidth=(typelength ASL 3)+8+16
 
@@ -567,9 +567,9 @@ Statement NewTypeWindow{address.l}
 
 	WLocate 16,1
 	NPrint "Address"
-	newmem typelist()
+	ResetList typelist()
 	oy=9
-	While globfree(typelist())
+	While NextItem(typelist())
 		WLocate 16,oy : oy+8
 		NPrint LSet$(typelist()\name,typelength)
 	Wend
@@ -591,8 +591,8 @@ AddIDCMP $400
 
 ;Leading Edge Software *********************************
 
-lmaxlen 1,640,256,1
-lmaxlen 0,640,100,1
+BitMap 1,640,256,1
+BitMap 0,640,100,1
 CNIF #test=1
 	GetaShape 0,0,0,16,16
 CEND
@@ -603,7 +603,7 @@ regswinx.w=0
 regswiny.w=135-87
 Gosub InitRegsWin
 
-newlocarr 0,0,"Help"
+MenuTitle 0,0,"Help"
 MenuItem 0,0,0,0,"Status register			","1"
 MenuItem 0,0,0,1,"About debugger","2"
 MenuItem 0,0,0,2,"About LES","3"
@@ -611,7 +611,7 @@ MenuItem 0,0,0,2,"About LES","3"
 ww=440:wh=121
 Gosub initgads
 
-newlocarr 0,2,"Objects"
+MenuTitle 0,2,"Objects"
 MenuItem 0,0,2,0,"==Trace objects==" : MenuColour 0,2,0,Off
 ad.l=?MyTypes
 num=1
@@ -699,16 +699,16 @@ Repeat
 					Case 10
 						regswin=NOT(regswin)
 						If regswin
-							localstat 2,regswinx,regswiny,640,87,%1110|$20|$200000,"Register window",-1,-1
-							arrmult 0
+							Window 2,regswinx,regswiny,640,87,%1110|$20|$200000,"Register window",-1,-1
+							SetMenu 0
 							Gosub InitRegsWin
 							Gosub RedrawRegs
 						Else
-							Use localstat 2
+							Use Window 2
 							regswinx=WindowX
 							regswiny=WindowY
 							CloseWindow 2
-							Use localstat 0
+							Use Window 0
 ;							Gosub InitRegsWin
 ;							BitMaptoWindow 0,2,0,0,ix+4,iy+1,630,88
 						EndIf
@@ -716,17 +716,17 @@ Repeat
 						memwin=NOT(memwin)
 						If memwin
 							SizeLimits 640-ww,100,640-ww,256
-							localstat 3,memwinx,memwiny,memwinw,memwinh,$2f|$200000,"Memory window",1,2
-							arrmult 0
+							Window 3,memwinx,memwiny,memwinw,memwinh,$2f|$200000,"Memory window",1,2
+							SetMenu 0
 							Gosub RedrawMem
 						Else
-							Use localstat 3
+							Use Window 3
 							memwinx=WindowX
 							memwiny=WindowY
 							memwinw=WindowWidth
 							memwinh=WindowHeight
 							CloseWindow 3
-							Use localstat 0
+							Use Window 0
 						EndIf
 				End Select
 			EndIf
@@ -751,23 +751,23 @@ Repeat
 				Select evw
 					Case 2
 						regswin=NOT(regswin)
-						Use localstat 2
+						Use Window 2
 						regswinx=WindowX
 						regswiny=WindowY
 						CloseWindow 2
-						Use localstat 0
+						Use Window 0
 					Case 3
 						memwin=NOT(memwin)
-						Use localstat 3
+						Use Window 3
 						memwinx=WindowX
 						memwiny=WindowY
 						memwinw=WindowWidth
 						memwinh=WindowHeight
 						CloseWindow 3
-						Use localstat 0
+						Use Window 0
 					Case 6
 						CloseWindow 6
-						Use localstat 0
+						Use Window 0
 						newtypewindow=False
 				End Select
 			EndIf
@@ -863,12 +863,12 @@ Forever
 			Gosub newsize:;Gosub refwindow
 			Gosub refwindow
 		Case 3
-			Use localstat 3
+			Use Window 3
 			InnerCls
 			memwinsize=InnerHeight ASR 3
 			Gosub RedrawMem
 		Case 6
-			Use localstat 6
+			Use Window 6
 			RefreshTypeWindow{}
 	End Select
 Return
@@ -969,7 +969,7 @@ Return
 
 .wprint
 	Gosub checkw
-	Use localstat 0
+	Use Window 0
 	WLine ix,wprinty,ix+iw-1,wprinty,1
 	WBox ix,wprinty+1,ix+iw-1,iy+ih+11,0
 
@@ -982,12 +982,12 @@ Return
 .initgads
 	StringText$ 4,2:SetString 2,1
 	gx=4:gn=1
-	newlocarr 0,1,"Shortcuts"
+	MenuTitle 0,1,"Shortcuts"
 	Repeat
 		Read t$,but$
 		If t$<>""
 			gf=0:If gn=10 Then gx+64
-			workstart 0,gx,12,gf,gn,t$:gx+Len(t$)LSL 3+8
+			TextGadget 0,gx,12,gf,gn,t$:gx+Len(t$)LSL 3+8
 			MenuItem 0,0,1,gn-1,t$+"				 ",but$
 			gn+1
 		EndIf
@@ -1006,13 +1006,13 @@ Data$ "",""
 	If #test=1 Then Poke.l ?scrbehind+4,0
 	ScreenTags 0,scrtitle$,?myscreentags
 	CNIF #test=0
-		localstat 4,0,0,640,256,$900|$200000,"",1,2
+		Window 4,0,0,640,256,$900|$200000,"",1,2
 	CELSE
-		localstat 4,0,0,640,256,$1900|$200000,"",1,2
+		Window 4,0,0,640,256,$1900|$200000,"",1,2
 	CEND
-	arrmult 0
+	SetMenu 0
 	CatchDosErrs
-	s0=Peek.l(Addr allocst(0))
+	s0=Peek.l(Addr Screen(0))
 	sw=Peek.w(s0+12):sh=Peek.w(s0+14)
 Return
 
@@ -1038,24 +1038,24 @@ Return
 Return
 
 .openwindow
-	arrmult 0
+	SetMenu 0
 	ScreensBitMap 0,2
 
-	localstat 1,0,12,640,26,%1110|$20|$200000,"Program control window",1,2,0
-	arrmult 0
-	localstat 2,regswinx,regswiny,640,87,%1110|$20|$200000,"Register window",1,2
-	arrmult 0
+	Window 1,0,12,640,26,%1110|$20|$200000,"Program control window",1,2,0
+	SetMenu 0
+	Window 2,regswinx,regswiny,640,87,%1110|$20|$200000,"Register window",1,2
+	SetMenu 0
 	SizeLimits 640-ww,100,640-ww,256
-	localstat 3,wx+ww,wy,640-ww,wh,$2f|$200000,"Memory window",1,2
-	arrmult 0
+	Window 3,wx+ww,wy,640-ww,wh,$2f|$200000,"Memory window",1,2
+	SetMenu 0
 	SizeLimits ww,wh,640,256
-	localstat 0,wx,wy,ww,wh,$2f|$200000,"Source code window",1,2:w0=Peek.l(Addr localstat(0))
-	arrmult 0
+	Window 0,wx,wy,ww,wh,$2f|$200000,"Source code window",1,2:w0=Peek.l(Addr Window(0))
+	SetMenu 0
 
 	memwinheight=InnerHeight
 	memwinsize=InnerHeight ASR 3
 
-	Use localstat 0
+	Use Window 0
 	WindowInput 0
 
 .newsize
@@ -1075,7 +1075,7 @@ Return
 
 .getevent
 	Repeat
-		While locfree(d_e())
+		While FirstItem(d_e())
 			If memwin Then Gosub RedrawMem
 			If regswin Then Gosub RedrawRegs
 			If newtypewindow Then RefreshTypeWindow{}
@@ -1119,7 +1119,7 @@ Return
 				CloseScreen 0
 				##[$FE99] buffmem,#bufflen:End
 			End Select
-			MaxLen d_e()\s=0:freelast d_e()
+			MaxLen d_e()\s=0:KillItem d_e()
 		Wend
 		ev=Event:If ev=0 Then ##[$FF29]
 	Until ev
@@ -1128,7 +1128,7 @@ Return
 .RedrawMem:
 	a$=String$(" ",10)
 	b$="		"
-	Use localstat 3
+	Use Window 3
 	ad.l=mempointer
 	For h=0 To memwinsize-1
 		HexWord{ad,&a$,2}
@@ -1169,7 +1169,7 @@ Return
 	GetSR{&sr$,mysr}
 	Print sr$
 	BitMaptoWindow 0,2,0,0,ix+4,iy+1,630,72
-	Use localstat 0
+	Use Window 0
 Return
 
 .InitRegsWin:

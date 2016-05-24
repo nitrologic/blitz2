@@ -52,9 +52,9 @@ immune=0
 End
 
 .setup
-	lmaxlen 0,384,256,5
-	lmaxlen 1,384,256,5
-	lmaxlen 3,384,256,5
+	BitMap 0,384,256,5
+	BitMap 1,384,256,5
+	BitMap 3,384,256,5
 	QAMIGA
 	If bosst=12
 		LoadBitMap 0,"Gfx/blitzlogo2.iff",1
@@ -71,7 +71,7 @@ Return
 
 .intro
 	Use Slice 1
-	Use lmaxlen 2
+	Use BitMap 2
 	Use SetCycle 0
 	Restore banding
 	For q=3 To 11
@@ -81,7 +81,7 @@ Return
 	Next q
 	Boxf 4,3,77,11,31 : Boxf 4,3,4+(level*8),11,30
 	For q=1 To lives
-		longdiv 189,246+(q-1)*9,7
+		Blit 189,246+(q-1)*9,7
 	Next q
 	Show 2,0,0
 	BitMapOutput 2
@@ -99,9 +99,9 @@ Return
 		If Joyb(0)=1 Then End
 	Until Joyb(1)=1
 	bosst=0
-	Free lmaxlen 0
-	Free lmaxlen 1
-	Free lmaxlen 3
+	Free BitMap 0
+	Free BitMap 1
+	Free BitMap 3
 Return
 
 .dimensions
@@ -126,7 +126,7 @@ Return
 .files
 	QAMIGA
 	LoadShapes 0,maxshape+1,"Craft.shapes"
-	casestrcomp 0,"Gfx/grab1.Iff"
+	LoadPalette 0,"Gfx/grab1.Iff"
 	fle$="maps/map1.data"
 	If OpenFile(0,fle$)
 		index=0
@@ -150,9 +150,9 @@ Return
 .go_blitz
 	Slice 0,62,320,243,$fff8,5,8,32,384,384
 	Slice 1,44,320,16,$fff8,5,8,32,320,320
-	lmaxlen 2,320,16,5
+	BitMap 2,320,16,5
 	Use SetCycle 0
-	longdiv maxshape+1,0,0
+	Blit maxshape+1,0,0
 	Show 2
 Return
 
@@ -161,8 +161,8 @@ Return
 	LoadShapes maxshape+1,"Craft.shapes"
 	VWait 25
 	BLITZ
-	lmaxlen 0,384,1087,5
-	lmaxlen 1,384,1087,5
+	BitMap 0,384,1087,5
+	BitMap 1,384,1087,5
 	Use Slice 0
 	Show 0,32,32
 	Buffer 0,16384
@@ -182,7 +182,7 @@ Return
 		VWait
 		Show bmap,32,sy
 		bmap=1-bmap
-		Use lmaxlen bmap
+		Use BitMap bmap
 		UnBuffer bmap
 		immune=immune-1
 		If immune=-1 Then immune=0
@@ -207,22 +207,22 @@ Return
 	lives=lives-1
 	If lives=-1 Then nd=1
 	level=21-rate
-	Use lmaxlen 2
+	Use BitMap 2
 	Boxf 4,3,77,11,31 : Boxf 4,3,4+(level*8),11,30
 	Boxf 242,3,314,11,6
 	If lives>0
 		For q=1 To lives
-			longdiv 189,246+(q-1)*9,7
+			Blit 189,246+(q-1)*9,7
 		Next q
 	EndIf
-	Use lmaxlen bmap
+	Use BitMap bmap
 	For qdead=0 To 50
 		ev=ev+1
 		If ev=1000 Then ev=1
 		VWait
 		Show bmap,32,sy
 		bmap=1-bmap
-		Use lmaxlen bmap
+		Use BitMap bmap
 		UnBuffer bmap
 		Gosub joystick
 		Gosub bullet
@@ -447,9 +447,9 @@ Return
 					If rate=12 Then weapon=2
 					If rate=11 Then rate=12
 					level=21-rate
-					Use lmaxlen 2
+					Use BitMap 2
 					Boxf 4,3,77,11,31 : Boxf 4,3,4+(level*8),11,30
-					Use lmaxlen bmap
+					Use BitMap bmap
 					If blspd=13 Then blspd=12
 					If dric=6 Then dri=2
 					If dric=12
@@ -575,9 +575,9 @@ Return
 		If rate=11 Then rate=12
 		If blspd=13 Then blspd=12
 		level=21-rate
-		Use lmaxlen 2
+		Use BitMap 2
 		Boxf 4,3,77,11,31 : Boxf 4,3,4+(level*8),11,30
-		Use lmaxlen bmap
+		Use BitMap bmap
 	EndIf
 	If dri=7
 		If qc=0 Then bigi=184
@@ -637,9 +637,9 @@ Return
 					If rate=12 Then weapon=2
 					If rate=11 Then rate=12
 					level=21-rate
-					Use lmaxlen 2
+					Use BitMap 2
 					Boxf 4,3,77,11,31 : Boxf 4,3,4+(level*8),11,30
-					Use lmaxlen bmap
+					Use BitMap bmap
 					If blspd=13 Then blspd=12
 				Else
 					Sound 2,10
@@ -729,11 +729,11 @@ Return
 		bossqy=y : bosst=4
 	EndIf
 	If bosst=10
-		Use lmaxlen 0
-		longdiv bossi,bossx,bossy
-		Use lmaxlen 1
-		longdiv bossi,bossx,bossy
-		Use lmaxlen 2
+		Use BitMap 0
+		Blit bossi,bossx,bossy
+		Use BitMap 1
+		Blit bossi,bossx,bossy
+		Use BitMap 2
 		bosst=11 : bossc=0
 	EndIf
 	If bosst=11
@@ -742,7 +742,7 @@ Return
 		bossc=bossc+1
 		If bossc=20 Then ASyncFade On : FadeOut 0
 		If bossc>20 Then DoFade
-		Use lmaxlen bmap
+		Use BitMap bmap
 		For q=0 To 4
 			qx=Rnd(32)-16
 			qy=Rnd(32)-16
@@ -761,9 +761,9 @@ Return
 .draw
 	If tripc<3
 		If scount2<10
-			Use lmaxlen 0 : Boxf scx*32+32,scy,scx*32+63,scy+31,0 : longdiv map(scx,scmy),(scx*32)+32,scy
+			Use BitMap 0 : Boxf scx*32+32,scy,scx*32+63,scy+31,0 : Blit map(scx,scmy),(scx*32)+32,scy
 		Else
-			Use lmaxlen 1 : Boxf scx*32+32,scy,scx*32+63,scy+31,0 : longdiv map(scx,scmy),(scx*32)+32,scy
+			Use BitMap 1 : Boxf scx*32+32,scy,scx*32+63,scy+31,0 : Blit map(scx,scmy),(scx*32)+32,scy
 		EndIf
 		scount2=scount2+1 : scount=1 : scx=scx+1
 		If scx=10 Then scx=0
@@ -771,16 +771,16 @@ Return
 			scy=scy-32 : scmy=scmy+1 : scount2=0 : scount=12
 		EndIf
 		If scy<0 Then scy=scy+1023 : scmy=scmy-8
-		Use lmaxlen bmap
+		Use BitMap bmap
 	EndIf
 Return
 
 .drawmap
-	Use lmaxlen 0
+	Use BitMap 0
 	qqy=0
 	For qy=31 To 0 Step -1
 		For qx=0 To 9
-			longdiv map(qx,qy),(qx*32)+32,(qqy*32)+32
+			Blit map(qx,qy),(qx*32)+32,(qqy*32)+32
 		Next qx
 		qqy=qqy+1
 	Next qy

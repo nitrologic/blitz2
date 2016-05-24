@@ -4,7 +4,7 @@ l.l=##[$FEBA]("lowlevel.library")
 
 BLITZ
 
-lmaxlen 0,320,256,1:Slice 0,44,1:Show 0:BitMapOutput 0
+BitMap 0,320,256,1:Slice 0,44,1:Show 0:BitMapOutput 0
 
 While Joyb(0)=0
 	GetReg a6,l:JSR $dd862

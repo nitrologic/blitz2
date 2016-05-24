@@ -10,7 +10,7 @@ NEWTYPE .ifs
 	a.q:b:c:d:e:f:p
 End NEWTYPE
 
-allocst 0,1+8+16
+Screen 0,1+8+16
 
 Green 0,0,0,0:Green 1,15,15,15
 
@@ -20,7 +20,7 @@ For image=1 To 6
 	;
 	value=18500
 	;
-	Use lmaxlen 0
+	Use BitMap 0
 	;
 	BlockScroll
 	;
@@ -28,10 +28,10 @@ For image=1 To 6
 	;
 	Dim List code.ifs(trans)
 	;
-	##[$80CA] code()
+	USEPATH code()
 	;
 	For i=0 To trans-1
-		globalloc code()
+		AddItem code()
 		Read \a,\b,\c,\d,\e,\f,\p
 	Next
 	;
@@ -41,9 +41,9 @@ For image=1 To 6
 ;
 ; fractal background routine
 ;
-			Use lmaxlen 0
-			newmem code()
-			While globfree(code())
+			Use BitMap 0
+			ResetList code()
+			While NextItem(code())
 				n=Rnd
 				If n <= \p
 					newx=\a*x + \b*y + \e

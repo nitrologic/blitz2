@@ -6,19 +6,19 @@ Next
 End
 
 doconvert
-	lmaxlen 0,2048,516,5
-	lmaxlen 1,2048,516,5
+	BitMap 0,2048,516,5
+	BitMap 1,2048,516,5
 
 	LoadBitMap 0,"cd:shots2/map"+Str$(j),0
-	casestrcomp 0,"cd:shots2/cars"+Str$(j),16
+	LoadPalette 0,"cd:shots2/cars"+Str$(j),16
 	LoadBitMap 1,"cd:shots2/cars"+Str$(j)
 
-	Use lmaxlen 1
+	Use BitMap 1
 	For i=1 To 15:ReMap i,16+i:Next
 
 	NPrint "scaling"
 
-	Use lmaxlen 0
+	Use BitMap 0
 	For i=0 To 1023
 		Scroll 1023-i,0,1,516,2047-i-i,0
 		Scroll 1023-i,0,1,516,2046-i-i,0
@@ -27,11 +27,11 @@ doconvert
 	NPrint "blitting"
 
 	For i=0 To 7
-		Use lmaxlen 1
+		Use BitMap 1
 		GetaShape 0,i*256,0,256,516
 		MakeCookie 0
-		Use lmaxlen 0
-		longdiv 0,i*256,0
+		Use BitMap 0
+		Blit 0,i*256,0
 	Next
 
 	NPrint "saving"

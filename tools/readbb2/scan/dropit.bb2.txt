@@ -13,10 +13,10 @@
 XInclude "mystructs.bb"
 
 WBStartup
-##[$80CC]
-##[$80CB]
+NoCli
+CloseEd
 
-CNIF #FINAL:##[$80D3]:CEND
+CNIF #FINAL:Runerrsoff:CEND
 
 DEFTYPE.Screen *s
 DEFTYPE.w sh,sw
@@ -447,30 +447,30 @@ End NEWTYPE
 							Case #GTG_WAITAFTER
 								Gosub GetCurEntry
 ;								*cEntry\flags BitChg #FB_WAITAFTER
-								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_WAITAFTER
+								*cEntry\execFlags[*cEntry\curExec] BitChg #FB_WAITAFTER
 
 ; Toggle sig first flag
 							Case #GTG_SIGFIRST
 								Gosub GetCurEntry
-								*cEntry\flags ##[$80D0] #FB_SIGFIRST
+								*cEntry\flags BitChg #FB_SIGFIRST
 
 ; Toggle sync flag
 							Case #GTG_SYNC
 								Gosub GetCurEntry
-								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_ASYNC
+								*cEntry\execFlags[*cEntry\curExec] BitChg #FB_ASYNC
 
 ; If asynch was toggled, then en/disable the wait after gadget
 								f=*cEntry\execFlags[*cEntry\curExec]
-								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f BitTst #FB_ASYNC) OR (f BitTst #FB_CLI)=0
 
 ; Toggle shell flag
 							Case #GTG_CLI
 								Gosub GetCurEntry
-								*cEntry\execFlags[*cEntry\curExec] ##[$80D0] #FB_CLI
+								*cEntry\execFlags[*cEntry\curExec] BitChg #FB_CLI
 
 ; If shell was toggled, then en/disable the wait after gadget
 								f=*cEntry\execFlags[*cEntry\curExec]
-								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+								GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(f BitTst #FB_ASYNC) OR (f BitTst #FB_CLI)=0
 
 ; Changed the message string
 							Case #GTG_MESS:
@@ -604,7 +604,7 @@ Return
 ; Tokenise pattern for matching
 		p=##[$FC97](&*cEntry\nPat,?patTokenBuf,#READ_BUF_LEN)
 
-		If *cEntry\flags ##[$80CD] #FB_SIGFIRST
+		If *cEntry\flags BitTst #FB_SIGFIRST
 ; Need to check the signature first
 			If CheckSig{?patTokenBuf,?sigBuff} Then Pop While:Goto jjj
 ; Check to see if name matches
@@ -635,7 +635,7 @@ Return
 CNIF #FINAL
 		SetErr:Goto blob:End SetErr
 CEND
-		localstat 0,(sw-l)/2,(sh-30)/2,l,*s\BarHeight,#WFLG_DRAGBAR,a$,0,1
+		Window 0,(sw-l)/2,(sh-30)/2,l,*s\BarHeight,#WFLG_DRAGBAR,a$,0,1
 		w=1
 blob:
 CNIF #FINAL
@@ -652,7 +652,7 @@ Return
 ;			opExec is the number of the execute we are running
 ; POST: Output window is opened if it's needed
 	out=0:openedOut=1
-	If *cEntry\execFlags[opExec] ##[$80CD] #FB_CLI
+	If *cEntry\execFlags[opExec] BitTst #FB_CLI
 		out.l=##[$FE01]("con:0/0/"+Str$(sw)+"/"+Str$(sh/4)+"/DROPIT Output",1004)
 		If out=0 Then ##[$FF8C]0:openedOut=0
 	EndIf
@@ -666,7 +666,7 @@ Return
 
 ; Check for multiple options, and if more than one, request
 ; from user the input
-	##[$80CA] *cEntry
+	USEPATH *cEntry
 
 ; Make sure there is something to execute!
 	If *cEntry\numExec<=0 Then Message{"No execution command(s)"}:Return
@@ -716,7 +716,7 @@ Return
 
 ; Run it now!
 
-	If *cEntry\execFlags[opExec] ##[$80CD] *FB_ASYNC
+	If *cEntry\execFlags[opExec] BitTst *FB_ASYNC
 		Gosub OpenOutput
 
 ; If openedOut =0 then OpenOutput couldn't open the output
@@ -746,7 +746,7 @@ Return
 ; If we wanted a shell, and also wanted to wait after execution
 ; we now print the prompt and wait.
 		f=*cEntry\execFlags[opExec]
-		If (f ##[$80CD] #FB_WAITAFTER) AND (f ##[$80CD] #FB_CLI)
+		If (f BitTst #FB_WAITAFTER) AND (f BitTst #FB_CLI)
 			##[$FE04] out,"Press RETURN to exit.",21
 			##[$FE03] out,&a,1
 		EndIf
@@ -760,7 +760,7 @@ Return
 
 ; Close the message window if it is open
 CloseWin
-	If w Then Free localstat 0:w=0
+	If w Then Free Window 0:w=0
 Return
 
 
@@ -769,8 +769,8 @@ Return
 ; Get information about the current public screen
 .GetWBInfo
 ;	FindScreen 0
-	freest 0
-	*s.Screen=Peek.l(Addr allocst(0))
+	WbToScreen 0
+	*s.Screen=Peek.l(Addr Screen(0))
 	sh.w=*s\Height
 	sw.w=*s\Width
 Return
@@ -795,14 +795,14 @@ CEND
 
 #CFW_FLAGS=#WFLG_ACTIVATE|#WFLG_DRAGBAR|#WFLG_CLOSEGADGET|#WFLG_DEPTHGADGET
 
-	localstat 1,0,0,#CW_WIDTH,screenTitleHeight+#CW_HEIGHT,#CFW_FLAGS,"DROPIT Config",0,1
+	Window 1,0,0,#CW_WIDTH,screenTitleHeight+#CW_HEIGHT,#CFW_FLAGS,"DROPIT Config",0,1
 
 	AttachGTList 0,1
 
 CNIF #FINAL
 	SetErr:Goto EndIt:End SetErr
 CEND
-	*win=Peek.l(Addr localstat(1))
+	*win=Peek.l(Addr Window(1))
 	winPortSig=1 LSL *win\UserPort\mp_SigBit
 
 Return
@@ -858,7 +858,7 @@ Return
 
 	Gosub GetCurEntry
 
-	##[$80CA] *cEntry
+	USEPATH *cEntry
 	If *cEntry
 		Gosub MakeELV
 
@@ -876,12 +876,12 @@ Return
 		GTSetString 0,#GTG_PAT,Peek$(&\nPat)
 		GTSetString 0,#GTG_SIG,UnLeft$(Peek$(&\sPat),2)
 		GTSetString 0,#GTG_MESS,Peek$(&\mess)
-		GTSetAttrs 0,#GTG_SYNC,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_ASYNC ;f
-		GTSetAttrs 0,#GTG_CLI,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_CLI ;f
+		GTSetAttrs 0,#GTG_SYNC,#GTCB_Checked,\execFlags[*cEntry\curExec] BitTst #FB_ASYNC ;f
+		GTSetAttrs 0,#GTG_CLI,#GTCB_Checked,\execFlags[*cEntry\curExec] BitTst #FB_CLI ;f
 
 
-		GTSetAttrs 0,#GTG_WAITAFTER,#GTCB_Checked,\execFlags[*cEntry\curExec] ##[$80CD] #FB_WAITAFTER ;f
-		GTSetAttrs 0,#GTG_SIGFIRST,#GTCB_Checked,\flags ##[$80CD] #FB_SIGFIRST ;f
+		GTSetAttrs 0,#GTG_WAITAFTER,#GTCB_Checked,\execFlags[*cEntry\curExec] BitTst #FB_WAITAFTER ;f
+		GTSetAttrs 0,#GTG_SIGFIRST,#GTCB_Checked,\flags BitTst #FB_SIGFIRST ;f
 
 
 		Gosub SetGads
@@ -900,7 +900,7 @@ Return
 ; ==============================================================
 
 .AddExec
-	##[$80CA] *cEntry
+	USEPATH *cEntry
 	Gosub GetCurEntry
 	If *cEntry
 		If \numExec < #MAX_EXECUTES
@@ -928,7 +928,7 @@ Return
 		If *cEntry Then *cEntry\nextEntry=mem
 		*cEntry=mem
 		If *fEntry=0 Then *fEntry=mem
-		##[$80CA] *cEntry
+		USEPATH *cEntry
 		Poke$ &\simpName,"NEW ENTRY"
 		Gosub SetGads
 		Gosub MakeLV
@@ -939,8 +939,8 @@ Return
 ; ==============================================================
 
 .DelELV
-	newmem elv()
-	While globfree(elv()):freelast elv():Wend
+	ResetList elv()
+	While NextItem(elv()):KillItem elv():Wend
 Return
 
 ; ==============================================================
@@ -953,7 +953,7 @@ Return
 	Gosub GetCurEntry
 	If *cEntry
 		For t=1 To *cEntry\numExec
-			If globalloc(elv())
+			If AddItem(elv())
 				elv()\l=Peek$(*cEntry\exec[t-1])
 			EndIf
 		Next
@@ -964,8 +964,8 @@ Return
 ; ==============================================================
 
 .DelLV
-	newmem lv()
-	While globfree(lv()):freelast lv():Wend
+	ResetList lv()
+	While NextItem(lv()):KillItem lv():Wend
 Return
 
 ; ==============================================================
@@ -976,7 +976,7 @@ Return
 	GTChangeList 0,#GTG_LV
 	*cEntry=*fEntry
 	While *cEntry
-		If globalloc(lv())
+		If AddItem(lv())
 			lv()\l=Peek$(&*cEntry\simpName)
 			*cEntry=*cEntry\nextEntry
 		Else
@@ -1017,8 +1017,8 @@ Return
 ; entry
 
 GetCurLv
-	newmem lv()
-	For t=0 To curCon:f=globfree(lv()):Next
+	ResetList lv()
+	For t=0 To curCon:f=NextItem(lv()):Next
 Return
 
 ; ==============================================================
@@ -1035,7 +1035,7 @@ CNIF #FINAL
 CEND
 		FileOutput 0
 		*cEntry=*fEntry
-		##[$80CA] *cEntry
+		USEPATH *cEntry
 		While *cEntry
 			f=0
 
@@ -1075,7 +1075,7 @@ Return
 
 .ReadConfig
 	If WriteMem(0,"env:dropit/dropit.config")
-		FileInput 0:count.w=0:newmem lv()
+		FileInput 0:count.w=0:ResetList lv()
 		GTChangeList 0,#GTG_LV
 		While DosBuffLen(0)=0
 			mem.l=##[$FE97](SizeOf.Entry,#MEMF_PUBLIC|#MEMF_CLEAR)
@@ -1088,7 +1088,7 @@ Return
 
 				a$=Edit$(255)						; SIMPLE NAME
 				Poke$ &*cEntry\simpName,a$
-				If globalloc(lv())
+				If AddItem(lv())
 					lv()\l=a$
 				EndIf
 
@@ -1334,7 +1334,7 @@ Return
 ; Turns gadgets on and off based on other status of config
 
 .SetGads
-	##[$80CA] *cEntry
+	USEPATH *cEntry
 	Gosub GetCurEntry
 	If *cEntry
 		GTSetAttrs 0,#GTG_ENAME,#GA_Disabled,\numExec<=0
@@ -1356,7 +1356,7 @@ Return
 	GTSetAttrs 0,#GTG_DEL,#GA_Disabled,count<=0
 
 	f=\execFlags[\curExec]
-	GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(count<=0) OR (f ##[$80CD] #FB_ASYNC) OR (f ##[$80CD] #FB_CLI)=0
+	GTSetAttrs 0,#GTG_WAITAFTER,#GA_Disabled,(count<=0) OR (f BitTst #FB_ASYNC) OR (f BitTst #FB_CLI)=0
 	GTSetAttrs 0,#GTG_SIGFIRST,#GA_Disabled,count<=0
 
 Return

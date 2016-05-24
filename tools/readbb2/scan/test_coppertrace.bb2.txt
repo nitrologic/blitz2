@@ -18,7 +18,7 @@
 
 ;Our copper list
 InitCopList 0,44,256,$10004,8,16,7*200						 ; 7 instructions on 200 lines
-lmaxlen 0,320,256,4
+BitMap 0,320,256,4
 
 DisplayBitMap 0,0
 offset.w=44

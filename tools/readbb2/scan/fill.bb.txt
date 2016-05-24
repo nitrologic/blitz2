@@ -1,7 +1,7 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/bakup/fill.bb
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
-casestrcomp 0,"sprites/fill.iff"
+LoadPalette 0,"sprites/fill.iff"
 LoadShapes 0,"sprites/fill.shapes"
 
 FadePalette 0:BlockScroll

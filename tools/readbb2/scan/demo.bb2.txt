@@ -4,14 +4,14 @@ LoadShapes 0,"shapes/blitzfonts-2c"
 VWait
 ;
 BLITZ
-lmaxlen 0,640,256,2
-lmaxlen 1,640,256,2
-lmaxlen 2,640,512,2
+BitMap 0,640,256,2
+BitMap 1,640,256,2
+BitMap 2,640,512,2
 Slice 0,44,320,256,$fffa,4,8,32,640,640
 ;
 DisplayOff
-longmult 0,40
-longmult 1,40
+Queue 0,40
+Queue 1,40
 ;
 GetaShape 0,0,0,1,1
 ;
@@ -50,7 +50,7 @@ Next
 DIS=18
 ;
 ;
-Use lmaxlen 2
+Use BitMap 2
 For y=0 To 512 Step 32
 For x=0 To 640	Step 32
 		COL=1-COL
@@ -63,7 +63,7 @@ Next
 DisplayOn
 While Joyb(0)=0
 	 VWait
-	 ShowF db,32,0,XS(I):db=1-db:Use lmaxlen db:UnQueue db
+	 ShowF db,32,0,XS(I):db=1-db:Use BitMap db:UnQueue db
 	 ;
 	 I=QWrap(I+1,1,127)
 	 ShowB 2,XS(I),YS(I)

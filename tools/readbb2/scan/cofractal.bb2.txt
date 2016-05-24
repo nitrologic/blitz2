@@ -46,18 +46,18 @@ Dim bxx.w(3), bxy.w(3)
 StopCycle 0,0,0,0,0:StopCycle 0,1,13,13,13:StopCycle 0,2,2,3,3:StopCycle 0,3,4,4,5
 StopCycle 0,4,1,4,7:StopCycle 0,5,4,5,7:StopCycle 0,6,3,3,14:StopCycle 0,7,6,13,9
 
-lmaxlen 0,640,200,3
-allocst 0,3+8:Use SetCycle 0
+BitMap 0,640,200,3
+Screen 0,3+8:Use SetCycle 0
 
 DefaultIDCMP $8|$10|$100|$400|$40000|$80000
-localstat 0,0,0,640,200,$1480,"Cack-O-Fractal Drawing System",1,1,0,0
+Window 0,0,0,640,200,$1480,"Cack-O-Fractal Drawing System",1,1,0,0
 PositionSuperBitMap 0,0
 ;
 ; this is the 'drawing' window and as polygons are being drawn
 ; (using polyf) we need to attach a superduperbitmap.
 
 
-newlocarr 0,0," Project "
+MenuTitle 0,0," Project "
 MenuItem	0,0,0,0,"New Project			"
 MenuItem	0,0,0,1,"Load Table			 ","L"
 MenuItem	0,0,0,2,"Save Table			 ","S"
@@ -65,7 +65,7 @@ MenuItem	0,0,0,3,"Make Table			 ","M"
 MenuItem	0,0,0,4,"About						"
 MenuItem	0,0,0,5,"Quit						 ","Q"
 
-newlocarr 0,1," Drawing Options "
+MenuTitle 0,1," Drawing Options "
 MenuItem	0,0,1,0,"	Set Grid Size						 "
 MenuItem	0,3,1,1,"	Grid	On/Off							"
 MenuItem	0,0,1,2,"	Set Box Size							"
@@ -73,7 +73,7 @@ MenuItem	0,0,1,3,"	Flip Box Vertically			 ","V"
 MenuItem	0,0,1,4,"	Flip Box Horizontally		 ","H"
 MenuItem	0,0,1,5,"	Rotate Box								","R"
 
-newlocarr 0,2," Decoding Options "
+MenuTitle 0,2," Decoding Options "
 MenuItem	0,0,2,0,"	Decode Table			 ","D"
 MenuItem	0,1,2,1,"	Colour On/Off			","C"
 MenuItem	0,0,2,2,"	Colour options	"+Chr$(187)+" "
@@ -86,7 +86,7 @@ MenuItem	0,3,2,4,"	Interlace					","2"
 MenuItem	0,1,2,5,"	Auto-Scale				 ","A"
 MenuItem	0,0,2,6,"	Demo"
 
-newlocarr 0,3," Shade Options "
+MenuTitle 0,3," Shade Options "
 MenuItem 0,4,3,0,"	Top to Bottom			"
 MenuItem 0,2,3,1,"	Bottom to Top			"
 MenuItem 0,2,3,2,"	Left to Right			"
@@ -94,13 +94,13 @@ MenuItem 0,2,3,3,"	Right to Left			"
 MenuItem 0,2,3,4,"	Towards Centre		 "
 MenuItem 0,2,3,5,"	Away from Centre	 "
 
-arrmult 0
+SetMenu 0
 If ExecVersion<39 Then MenuColour 0,2,2,2,Off		 ; no aga
 grdszx.w=20:grdszy.w=20:Gosub drawgrd
 
 
 DefaultIDCMP $8|$40000
-localstat 1,0,200,640,35,$0,"",1,1
+Window 1,0,200,640,35,$0,"",1,1
 ;
 ; this is the status and messages window
 
@@ -121,7 +121,7 @@ MenuColour 0,2,2,Off
 For n=0 To 5
 	MenuColour 0,3,n,Off
 Next
-Use localstat 1
+Use Window 1
 	WColour 4,0
 	WLocate 20,1:Print "xpos ="
 	WLocate 120,1:Print "ypos ="
@@ -135,7 +135,7 @@ Use localstat 1
 	WLocate 425,11:Print "F3 - default shape"
 	WLocate 35,21:Print "F4 - pick up last filled shape"
 	WLocate 325,21:Print "F5 - delete last filled shape"
-Use localstat 0
+Use Window 0
 
 									 ;;*********************;;
 									 ;;			MAIN LOOP			;;
@@ -230,7 +230,7 @@ Repeat
 	;
 	FlushEvents $10:If full=0 Then Gosub drawbx
 	;
-	Use localstat 1
+	Use Window 1
 		WColour 1,0
 		WLocate 80,1:Print px,"	"
 		WLocate 180,1:Print py,"	"
@@ -239,7 +239,7 @@ Repeat
 		WLocate 480,1:Print ang,"	"
 		cbx=bxn:If cbx>#maxtrans Then cbx=#maxtrans
 		WLocate 580,1:Print cbx,"	"
-	Use localstat 0
+	Use Window 0
 	;
 Forever
 
@@ -307,13 +307,13 @@ Return
 	;
 	If	(minxb>=1 AND maxxb<=639) AND (minyb>=1 AND maxyb<=199)
 		;
-		If globalloc(trans())
+		If AddItem(trans())
 			pickedup=0
-			##[$80CA] trans()
+			USEPATH trans()
 			\bxh=bxh:\bxw=bxw
 			\bxa=bxa:\bxn=bxn
 			\h=h:\v=v
-			##[$80CA] trans()\coords
+			USEPATH trans()\coords
 			\x0=x1:\y0=y1				;
 			\x1=x2:\y1=y2				;	place co-ords of box
 			\x2=x4:\y2=y4				;			 corners in list
@@ -337,7 +337,7 @@ Return
 
 
 .drawfbx
-	##[$80CA] trans()\coords
+	USEPATH trans()\coords
 	pnt.bxcrd\x0=\x0,\y0,\x1,\y1,\x2,\y2,\x3,\y3
 	;
 	ang1=HSin(trans()\bxa)					 ; this is for a small white box
@@ -354,25 +354,25 @@ Return
 	pnt2.bxcrd\y3=pnt2.bxcrd\y2+ang2*height*trans()\v
 	;
 	GetSuperBitMap
-	Use lmaxlen 0:Polyf 4,pnt,7:Polyf 4,pnt2,1
+	Use BitMap 0:Polyf 4,pnt,7:Polyf 4,pnt2,1
 	PutSuperBitMap
 Return
 
 
 .pickupfbx
-	##[$80CA] trans()
+	USEPATH trans()
 	done=0
 	If ev.l=$400								; pick up last box
 		;
-		newmem trans()
+		ResetList trans()
 		If LastItem(trans())
 			pickedup=1
 			;
-			##[$80CA] trans()
+			USEPATH trans()
 			bxh=\bxh:bxw=\bxw
 			bxa=\bxa:bxn=\bxn
 			h=\h:v=\v
-			##[$80CA] trans()\coords
+			USEPATH trans()\coords
 			x1=\x0:y1=\y0
 			x2=\x1:y2=\y1
 			x4=\x2:y4=\y2
@@ -382,8 +382,8 @@ Return
 		;
 	Else												; pick up box under cursor
 		;
-		newmem trans()
-		While globfree(trans())
+		ResetList trans()
+		While NextItem(trans())
 		Wend
 		;
 	EndIf
@@ -394,11 +394,11 @@ Return
 
 
 .killfbx
-	freelast trans():full=0:bxn-1
+	KillItem trans():full=0:bxn-1
 	InnerCls																	 ;	redraw filled
 	If MenuList(0,2,1) Then Gosub drawgrd	 ;					boxes
-	newmem trans()													;
-	While globfree(trans())										;
+	ResetList trans()													;
+	While NextItem(trans())										;
 		Gosub drawfbx														;
 		WLine \x0,\y0,\x1,\y1,\x1,\y1,\x2,\y2,0	;
 		WLine \x2,\y2,\x3,\y3,\x3,\y3,\x0,\y0,0	;
@@ -460,8 +460,8 @@ Return
 		Dim List table(trans()\bxn-1) ; Can I do this ?!
 	EndIf
 	;
-	newmem trans()
-	While globfree(trans())
+	ResetList trans()
+	While NextItem(trans())
 		a(1,1)=0:a(2,1)=0		;	these are the original
 		a(1,2)=0:a(2,2)=1		;	image coordinates i.e
 		a(1,3)=1:a(2,3)=1		;	the edges of the grid
@@ -473,7 +473,7 @@ Return
 		z(3)=trans()\coords\x2/640	 ;	of 0 to 1 (x value/640)
 		z(4)=trans()\coords\x3/640	 ;
 		Gosub solvequ
-		If globalloc(table())
+		If AddItem(table())
 			table()\a=ans(1)		;	solutions to four simultaneous
 			table()\b=ans(2)		;		equations with three unkowns
 			table()\e=ans(3)		;
@@ -571,14 +571,14 @@ Return
 	; The probability is required due to the method of decoding
 	; which is the random iteration algorithm.
 	;
-	##[$80CA] table()
-	newmem table()
-	While globfree(table())
+	USEPATH table()
+	ResetList table()
+	While NextItem(table())
 		denom=(\a*\d)-(\b*\c)				; add all transformation areas
 		sumofdenom=sumofdenom+denom	; together
 	Wend
-	newmem table()
-	While globfree(table())
+	ResetList table()
+	While NextItem(table())
 		numer=(\a*\d)-(\b*\c)				; prob=area of transformation
 		\p=QAbs(numer/sumofdenom)		;						 / area of image
 	Wend
@@ -586,24 +586,24 @@ Return
 
 
 .dispt
-	##[$80CA] table()
+	USEPATH table()
 
 	If LastItem(trans())
 		Dim List table2(trans()\bxn-1)	;	here it is again !
 	EndIf
 
-	Use allocst 0
+	Use Screen 0
 
 	StringText$ On:SetString 2,3:StringText$ 4,2
 
 	ButtonGroup 0:SelectMode 1,5
-	workstart 0,100,182,0,1,"EDIT"
-	workstart 0,280,182,0,2,"DECODE"
-	workstart 0,500,182,0,3,"EXIT"
+	TextGadget 0,100,182,0,1,"EDIT"
+	TextGadget 0,280,182,0,2,"DECODE"
+	TextGadget 0,500,182,0,3,"EXIT"
 
 	DefaultIDCMP $8|$10|$20|$40|$100|$400|$40000|$80000
-	localstat 3,0,0,640,200,$1000,"Cack-O-Fractal Drawing System",1,3,0
-	arrmult 0
+	Window 3,0,0,640,200,$1000,"Cack-O-Fractal Drawing System",1,3,0
+	SetMenu 0
 
 
 	WColour 6,0
@@ -616,17 +616,17 @@ Return
 	WLocate 507,5:Print "P"
 	WColour 3,0
 
-	Use localstat 1
+	Use Window 1
 		InnerCls
-	Use localstat 3
+	Use Window 3
 
 	NPrint "":WColour 3,0
 	Format "0.000"
-	newmem table()
-	While globfree(table())
+	ResetList table()
+	While NextItem(table())
 		Print "						 "
 		NPrint	\a,"	 ",\b,"	 ",\c,"	 ",\d,"	 ",\e,"	 ",\f,"	 ",\p
-		If globalloc(table2())
+		If AddItem(table2())
 			table2()\a=\a,\b,\c,\d,\e,\f,\p
 		EndIf
 	Wend
@@ -664,7 +664,7 @@ Return
 	Until flag=1
 
 	Format "###":FlushEvents:CloseWindow 3
-	Use localstat 1
+	Use Window 1
 	WColour 4,0
 	WLocate 20,1:Print "xpos ="
 	WLocate 120,1:Print "ypos ="
@@ -678,7 +678,7 @@ Return
 	WLocate 425,11:Print "F3 - default shape"
 	WLocate 35,21:Print "F4 - pick up last filled shape"
 	WLocate 325,21:Print "F5 - delete last filled shape"
-	Use localstat 0:Activate 0
+	Use Window 0:Activate 0
 Return
 
 
@@ -687,15 +687,15 @@ Return
 
 
 .editt
-	##[$80CA] table()
+	USEPATH table()
 
 	If LastItem(trans())
 		Dim editpos(6,trans()\bxn-1)
 	EndIf
 
 	y=0
-	newmem table()
-	While globfree(table())
+	ResetList table()
+	While NextItem(table())
 		editpos(0,y)=\a:editpos(1,y)=\b
 		editpos(2,y)=\c:editpos(3,y)=\d
 		editpos(4,y)=\e:editpos(5,y)=\f
@@ -734,14 +734,14 @@ Return
 
 
 .dcod
-	##[$80CA] table2()
+	USEPATH table2()
 	demorun=0
-	newmem table2()
-	If globfree(table2())
+	ResetList table2()
+	If NextItem(table2())
 		Dim List table.ifs(trans()\bxn-1)
-		newmem table2()
-		While globfree(table2())
-			If globalloc(table())
+		ResetList table2()
+		While NextItem(table2())
+			If AddItem(table())
 			 table()\a=\a,\b,\c,\d,\e,\f,\p
 			EndIf
 		Wend
@@ -750,7 +750,7 @@ Return
 		Gosub decode
 		;
 		FlushEvents:CloseScreen 1
-		Use allocst 0:Use localstat 0:Activate 0
+		Use Screen 0:Use Window 0:Activate 0
 	EndIf
 Return
 
@@ -768,16 +768,16 @@ Return
 	If aga=-1
 		If hires=8 Then viewm=$8000 Else viewm=$0000
 		If intlc=16 Then viewm=viewm+$4
-		allocst 1,0,0,sw,sh,8,viewm,"",0,0
+		Screen 1,0,0,sw,sh,8,viewm,"",0,0
 	Else
-		allocst 1,1+nbpl+hires+intlc
+		Screen 1,1+nbpl+hires+intlc
 	EndIf
 	Green 0,0,0,0:Green 1,0,0,0:Green 2,0,0,0:Green 3,0,0,0
 	ScreensBitMap 1,1
 	;
 	DefaultIDCMP $8|$100
 	ww=320:wh=sh/2
-	localstat 4,0,0,ww,wh,$0800,"",0,0
+	Window 4,0,0,ww,wh,$0800,"",0,0
 	;
 	; this window is needed when calling the asl file requester so
 	; that the bitmap being drawn is not destroyed.
@@ -794,13 +794,13 @@ Return
 
 
 .calcscales
-		##[$80CA] table()
+		USEPATH table()
 		finished=0:x=0:y=0:settle=0
 		minx=0:maxx=0:xscale=0
 		miny=0:maxy=0:yscale=0
 		Repeat
-			newmem table()
-			While globfree(table())
+			ResetList table()
+			While NextItem(table())
 				n=Rnd
 				If n <= \p
 					newx=\a*x + \b*y + \e
@@ -833,13 +833,13 @@ Return
 
 
 .calcoffs
-		##[$80CA] table()
+		USEPATH table()
 		finished=0:x=0:y=0:settle=0
 		minx=0:maxx=0:xoff=0
 		miny=0:maxy=0:yoff=0
 		Repeat
-			newmem table()
-			While globfree(table())
+			ResetList table()
+			While NextItem(table())
 				n=Rnd
 				If n <= \p
 					newx=\a*x + \b*y + \e
@@ -870,7 +870,7 @@ Return
 
 
 .decode
-	##[$80CA] table()
+	USEPATH table()
 	x=0:y=0:settle=0	; initialise x and y co-ords and settling time
 	jb=0							; initialise joystick button flag
 	;;
@@ -921,14 +921,14 @@ Return
 		;
 	EndIf
 	;;
-	Use lmaxlen 1:Use SetCycle 1:BlockScroll
+	Use BitMap 1:Use SetCycle 1:BlockScroll
 	;;
 	If MenuList(0,2,1)						; use colour decode routine ?
 		;
 		If rancol=-1
 			Repeat																		;
-				newmem table()											 ; random colour
-				While globfree(table())								 ;			 routine
+				ResetList table()											 ; random colour
+				While NextItem(table())								 ;			 routine
 					n=Rnd																 ;
 					If n <= \p
 						newx=\a*x + \b*y + \e
@@ -951,8 +951,8 @@ Return
 			;
 			ch=sh/cshd+1:cw=sw/cshd+1								 ;
 			Repeat																		; colour shade
-				newmem table()											 ;			routine
-				While globfree(table())								 ;
+				ResetList table()											 ;			routine
+				While NextItem(table())								 ;
 					n=Rnd
 					If n <= \p
 						newx=\a*x + \b*y + \e
@@ -990,8 +990,8 @@ Return
 	Else														 ; use black and white
 		;
 		Repeat
-			newmem table()
-			While globfree(table())
+			ResetList table()
+			While NextItem(table())
 				n=Rnd
 				If n <= \p
 					newx=\a*x + \b*y + \e
@@ -1029,12 +1029,12 @@ Return
 
 
 .gridst
-	##[$80CA] trans()\coords
+	USEPATH trans()\coords
 	opx=epx:opy=epy
 	If MenuList(0,1,1)=0
 		InnerCls
-		newmem trans()													; Redraw Filled
-		While globfree(trans())										;				 boxes
+		ResetList trans()													; Redraw Filled
+		While NextItem(trans())										;				 boxes
 			Gosub drawfbx														;
 			WLine \x0,\y0,\x1,\y1,\x1,\y1,\x2,\y2,0	;
 			WLine \x2,\y2,\x3,\y3,\x3,\y3,\x0,\y0,0	;
@@ -1043,8 +1043,8 @@ Return
 	Else
 		InnerCls
 		Gosub drawgrd
-		newmem trans()
-		While globfree(trans())
+		ResetList trans()
+		While NextItem(trans())
 			Gosub drawfbx
 			WLine \x0,\y0,\x1,\y1,\x1,\y1,\x2,\y2,0
 			WLine \x2,\y2,\x3,\y3,\x3,\y3,\x0,\y0,0
@@ -1077,14 +1077,14 @@ Return
 			;
 			Gosub drawbx
 			;
-			Use localstat 1
+			Use Window 1
 			WColour 7,0
 			WLocate 220,1:Print "boxw ="
 			WLocate 320,1:Print "boxh ="
 			WColour 1,0
 			WLocate 280,1:Print bxw,"	"
 			WLocate 380,1:Print bxh,"	"
-			Use localstat 0
+			Use Window 0
 		Until ev.l=$8
 		Menus On
 		;
@@ -1101,12 +1101,12 @@ Return
 	opx=px:opy=py
 	If ev.l=$400
 		Menus Off
-		Use localstat 1
+		Use Window 1
 		WColour 7,0
 		WLocate 420,1:Print "boxa ="
 		WColour 1,0
 		WLocate 480,1:Print ang,"	"
-		Use localstat 0
+		Use Window 0
 		WaitEvent
 		Repeat
 			ev.l=Event
@@ -1133,12 +1133,12 @@ Return
 				 EndIf
 			EndIf
 			;
-			Use localstat 1
+			Use Window 1
 			WColour 7,0
 			WLocate 420,1:Print "boxa ="
 			WColour 1,0
 			WLocate 480,1:Print ang,"	"
-			Use localstat 0
+			Use Window 0
 		Until ev.l=$8
 		Menus On
 	Else
@@ -1149,18 +1149,18 @@ Return
 
 
 .demo
-	##[$80CA] table()
+	USEPATH table()
 	demorun=1
 	Gosub screenchk
 	Restore datastrt
 	;
 	For image=1 To 9
-		Use lmaxlen 1:BlockScroll
+		Use BitMap 1:BlockScroll
 		;
 		Read ntrans
 		Dim List table.ifs(ntrans)
 		For i=0 To ntrans-1
-			globalloc table()
+			AddItem table()
 			Read \a,\b,\c,\d,\e,\f,\p
 		Next
 		;
@@ -1170,7 +1170,7 @@ Return
 	Next
 	;
 	FlushEvents:CloseScreen 1
-	Use allocst 0:Use localstat 0:Activate 0
+	Use Screen 0:Use Window 0:Activate 0
 Return
 
 

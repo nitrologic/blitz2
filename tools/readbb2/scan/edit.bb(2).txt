@@ -46,8 +46,8 @@ If style=1 Then style$="beach" ;LoadShapes 16,"people/beach.shapes"
 If style=2 Then style$="snow"	;LoadShapes 16,"people/snow.shapes"
 If style=3 Then style$="ranch" ;LoadShapes 16,"people/ranch.shapes"
 
-casestrcomp 0,"overlays/"+style$+".palette"
-casestrcomp 0,"overlays/shapes.iff",16
+LoadPalette 0,"overlays/"+style$+".palette"
+LoadPalette 0,"overlays/shapes.iff",16
 
 pa.l=Peek.l(Addr SetCycle(0))+4
 ##[$FEDB] pa+12*12,pa+19*12,12
@@ -273,36 +273,36 @@ End Statement
 	Dim cols.w(32)
 
 	##[$CD10] 0,8,8,4:CludgeBitMap 0,0
-	Use lmaxlen 0:Boxf 0,0,7,7,2:MakeCookie 0
+	Use BitMap 0:Boxf 0,0,7,7,2:MakeCookie 0
 	brush.l=Peek.l(Addr MidHandle(0)+14)
 
 	##[$CD10] 3,8,8,4:CludgeBitMap 3,0
-	Use lmaxlen 0:Boxf 1,0,7,7,2:MakeCookie 3
+	Use BitMap 0:Boxf 1,0,7,7,2:MakeCookie 3
 
 	LoadShape 1,"mouse.iff":GetaSprite 0,1
 	LoadShape 2,"dither.iff"
 
-	lmaxlen 0,768,384,4			;0 = back contours
-	lmaxlen 1,768,384,4			;1 = original contours
-	lmaxlen 2,768,384,4			;2 = temp contours for shading and poles
-	lmaxlen 3,640,80,4
+	BitMap 0,768,384,4			;0 = back contours
+	BitMap 1,768,384,4			;1 = original contours
+	BitMap 2,768,384,4			;2 = temp contours for shading and poles
+	BitMap 3,640,80,4
 
-	lmaxlen 6,768,384,6
+	BitMap 6,768,384,6
 	BitPlanesBitMap 6,4,31		 ;4 = front playfield + concrete
 	BitPlanesBitMap 4,5,15		 ;5 = front playfield
 	BitPlanesBitMap 6,7,32		 ;7 = dither
 
-	bmf.l=Addr lmaxlen(5)
-	bmb.l=Addr lmaxlen(0)
+	bmf.l=Addr BitMap(5)
+	bmb.l=Addr BitMap(0)
 
-	Use lmaxlen 7
+	Use BitMap 7
 	For x=0 To 767 Step 32
 		For y=0 To 383 Step 32
-			longdiv 2,x,y
+			Blit 2,x,y
 		Next
 	Next
 
-	Use lmaxlen 3:BlockScroll 2:Box 0,0,639,79,1
+	Use BitMap 3:BlockScroll 2:Box 0,0,639,79,1
 	x=2:y=10:Dim ppx(128):Dim ppy(128)
 	For i=0 To np-1
 		ppx(i)=x:ppy(i)=y:ClipBlit ab(i)\n,x,y
@@ -311,7 +311,7 @@ End Statement
 
 .readtrack
 
-	LoadBitMap 1,"tracks/iff."+Str$(tr):bm.l=Addr lmaxlen(1)
+	LoadBitMap 1,"tracks/iff."+Str$(tr):bm.l=Addr BitMap(1)
 
 	d$="tracks/track."+Str$(tr)
 	e$="tracks/data."+Str$(tr)
@@ -340,9 +340,9 @@ End Statement
 	;
 	If WriteMem(0,e$)
 		##[$BE14] 0,&corner(0),16
-		Repeat:globalloc ppl():##[$BE14] 0,&ppl(),6:Until ppl()\x=-1
-		Repeat:globalloc sp():##[$BE14] 0,&sp(),6:Until sp()\x=-1
-		freelast sp():freelast ppl():CloseFile 0
+		Repeat:AddItem ppl():##[$BE14] 0,&ppl(),6:Until ppl()\x=-1
+		Repeat:AddItem sp():##[$BE14] 0,&sp(),6:Until sp()\x=-1
+		KillItem sp():KillItem ppl():CloseFile 0
 	EndIf
 
 	InitCopList 0,30,200,$13038,8,32,0:DisplayPalette 0,0
@@ -395,7 +395,7 @@ End Statement
 		VWait
 		a$=Inkey$:If a$<>"" Then a=Asc(a$) Else a=0
 
-		Use lmaxlen 3
+		Use BitMap 3
 		Box ppx(bp)-1,ppy(bp)-1,ppx(bp)+ab(bp)\w*8,ppy(bp)+ab(bp)\h*8,0
 
 		Locate 0,0
@@ -420,10 +420,10 @@ End Statement
 				If Joyb(0)=2 Then Gosub killshape:While Joyb(0)<>0:Wend
 				;
 			Else
-				Use lmaxlen 5:UnBuffer 0
+				Use BitMap 5:UnBuffer 0
 				If a=133 Then cs=QWrap(cs+1,0,12)
 				If Joyb(0)=1
-					If globalloc(sp())
+					If AddItem(sp())
 						sp()\x=bx*8,by*8,cs
 						Gosub refreshoverlay
 					EndIf
@@ -463,7 +463,7 @@ End Statement
 		If a=51 Then corner(7)+1:Gosub refreshoverlay
 		If a=13 Then corner(7)-1:Gosub refreshoverlay
 
-		Use lmaxlen 3
+		Use BitMap 3
 		Box ppx(bp)-1,ppy(bp)-1,ppx(bp)+ab(bp)\w*8,ppy(bp)+ab(bp)\h*8,1
 
 	Until a=27
@@ -519,23 +519,23 @@ End Statement
 			Exists 0,Bank(1),c2*32
 			Exists 0,Bank(2),c1*32
 			;
-			newmem sue()
-			While globfree(sue()):slue.w=sue():Exists 1,&slue,2:Wend
+			ResetList sue()
+			While NextItem(sue()):slue.w=sue():Exists 1,&slue,2:Wend
 			Exists 1,&terminate,2
 			;
-			newmem sue():slue.w=c1+c2+$8080
+			ResetList sue():slue.w=c1+c2+$8080
 			;
-			While globfree(sue())
+			While NextItem(sue())
 				;
 ;				WriteMem 0,&spri(sue())\blox,spri(sue())\blocks ASL 5
 				;
-				newmem sp()
-				While globfree(sp())
+				ResetList sp()
+				While NextItem(sp())
 					If sp()\t=sue()
 						Exists 1,&spri(sue())\num,2
 						Exists 1,&slue,2
 						For i=0 To spri(sue())\num-1
-							##[$80CA] spri(sue())\q[i]
+							USEPATH spri(sue())\q[i]
 							;
 							quak\x=\x*8+sp()\x,\y*8+sp()\y		 ;,\w,\h
 							quak\w=((\h-1)+(\w-1) ASL 2) ASL 8,\w*\h
@@ -563,9 +563,9 @@ End Statement
 
 	If ReadMem(0,e$)
 		Exists 0,&corner(0),16
-		newmem ppl():While globfree(ppl()):Exists 0,&ppl(),6:Wend
+		ResetList ppl():While NextItem(ppl()):Exists 0,&ppl(),6:Wend
 		Exists 0,&terminate,6
-		newmem sp():While globfree(sp()):Exists 0,&sp(),6:Wend
+		ResetList sp():While NextItem(sp()):Exists 0,&sp(),6:Wend
 		Exists 0,&terminate,6
 		CloseFile 0
 	EndIf
@@ -606,14 +606,14 @@ DEFTYPE .w n
 	ShapesBitMap 0,2
 	pil=0
 	;
-	Use lmaxlen 4:BlockScroll
+	Use BitMap 4:BlockScroll
 	For y=0 To 47:For x=0 To 95:mm(x,y)=-1:Next:Next
 	Gosub drawconcrete
 	;
-	Use lmaxlen 5
+	Use BitMap 5
 	;
-	newmem ppl():##[$80CA] ppl()
-	While globfree(ppl())
+	ResetList ppl():USEPATH ppl()
+	While NextItem(ppl())
 
 		If \t>55
 			ClipBlit ab(\t)\n,\x,\y
@@ -621,13 +621,13 @@ DEFTYPE .w n
 			If \t<8										;flagpole
 				ClipBlit ab(\t)\n,\x,\y
 				mm(\x LSR 3,\y LSR 3)=\t
-				Use lmaxlen 1:fy=\y+8
+				Use BitMap 1:fy=\y+8
 				While Cls(\x,fy)>10
-					Use lmaxlen 5:Point \x,fy,9
-					Use lmaxlen 2:Point \x,fy,2:fy+1
-					Use lmaxlen 1
+					Use BitMap 5:Point \x,fy,9
+					Use BitMap 2:Point \x,fy,2:fy+1
+					Use BitMap 1
 				Wend
-				Use lmaxlen 5
+				Use BitMap 5
 			Else
 				;
 				x=\x LSR 3:y=\y LSR 3
@@ -645,7 +645,7 @@ DEFTYPE .w n
 	;
 	Gosub drawfences
 	;
-	Use lmaxlen 6:ReMap 16+3,16+14:ReMap 48+3,48+13:Use lmaxlen 5
+	Use BitMap 6:ReMap 16+3,16+14:ReMap 48+3,48+13:Use BitMap 5
 	;
 	Poke.w ?count,8 ;makeroom for 8 flags
 	;
@@ -665,7 +665,7 @@ DEFTYPE .w n
 	For y=0 To 47					;standard blocks (c2)
 		For x=0 To 95
 			If mm(x,y)<0
-				getblock{Bank(0),Addr lmaxlen(2),x ASL 3,y ASL 3}
+				getblock{Bank(0),Addr BitMap(2),x ASL 3,y ASL 3}
 				mm(x,y)=chkblock{Bank(0),Bank(1)}+$e080
 			EndIf
 		Next
@@ -673,12 +673,12 @@ DEFTYPE .w n
 	c2=Peek.w(?count)
 
 	ClearList sue():suen=0:c3=0:c4=0
-	newmem sp()
-	While globfree(sp())
-		newmem sue()
+	ResetList sp()
+	While NextItem(sp())
+		ResetList sue()
 		Repeat
-			If NOT globfree(sue())
-				globalloc sue():sue()=sp()\t:suen+1
+			If NOT NextItem(sue())
+				AddItem sue():sue()=sp()\t:suen+1
 				c3+spri(sp()\t)\blocks
 			EndIf
 		Until sue()=sp()\t
@@ -700,7 +700,7 @@ DEFTYPE .w n
 	For xb=0 To 7:For yb=0 To 7
 		xx=x ASL 3+xb:yy=y ASL 3+yb
 		If Cls(xx,yy)=0
-			Use lmaxlen 2:c=Cls(xx,yy):Use lmaxlen 5
+			Use BitMap 2:c=Cls(xx,yy):Use BitMap 5
 			;
 			If style=0
 				If c=11 Then c=14:Goto hitit
@@ -752,7 +752,7 @@ DEFTYPE .w n
 			hitit:Point xx,yy,c:lc=c
 		Else
 			If Cls(xx,yy)=3
-				Use lmaxlen 2:c=Cls(xx,yy):Use lmaxlen 5
+				Use BitMap 2:c=Cls(xx,yy):Use BitMap 5
 				If c<9
 					Select c
 						Case 8:c=14
@@ -778,36 +778,36 @@ DEFTYPE .w n
 .animateoverlay:
 	fr+.5
 	If fr=Int(fr)
-		Use lmaxlen 5
-		newmem ppl()
-		While globfree(ppl())
-			##[$80CA] ppl()
+		Use BitMap 5
+		ResetList ppl()
+		While NextItem(ppl())
+			USEPATH ppl()
 			If ab(\t)\f>1
 				Boxf \x,\y,\x+7,\y+7,0
-				longdiv ab(\t)\n+(fr MOD ab(\t)\f),\x,\y
+				Blit ab(\t)\n+(fr MOD ab(\t)\f),\x,\y
 			EndIf
 		Wend
 	EndIf
 	Return
 
 .refreshoverlay:
-	Use lmaxlen 4:BlockScroll
+	Use BitMap 4:BlockScroll
 
 	Gosub drawconcrete
 
-	Use lmaxlen 5
-	c5=0:newmem ppl():##[$80CA] ppl()
-	While globfree(ppl())
+	Use BitMap 5
+	c5=0:ResetList ppl():USEPATH ppl()
+	While NextItem(ppl())
 		If \t<8 OR \t>55 Then ClipBlit ab(\t)\n,\x,\y Else c5+1:ClipBlit ab(\t)\n,\x,\y
 		If \t<8										;flagpole
-			Use lmaxlen 1:fy=\y+8
+			Use BitMap 1:fy=\y+8
 			While Cls(\x,fy)>10
-				Use lmaxlen 5:Point \x,fy,9:fy+1:Use lmaxlen 1:Wend
-			Use lmaxlen 5
+				Use BitMap 5:Point \x,fy,9:fy+1:Use BitMap 1:Wend
+			Use BitMap 5
 		EndIf
 	Wend
-	newmem sp():##[$80CA] sp()
-	While globfree(sp()):ClipBlit 470+\t,\x,\y:Wend
+	ResetList sp():USEPATH sp()
+	While NextItem(sp()):ClipBlit 470+\t,\x,\y:Wend
 	Gosub drawfences
 	Return
 
@@ -840,43 +840,43 @@ drawconcrete:
 
 .addshape:
 	Gosub killshape
-	If globalloc(ppl())
+	If AddItem(ppl())
 		ppl()\x=bx*8,by*8,pp
 		Gosub refreshoverlay
 	EndIf
 	Return
 
 .killshape:
-	newmem ppl()
-	While globfree(ppl())
-		If ppl()\x=bx*8 AND ppl()\y=by*8 Then freelast ppl()
+	ResetList ppl()
+	While NextItem(ppl())
+		If ppl()\x=bx*8 AND ppl()\y=by*8 Then KillItem ppl()
 	Wend
 	Gosub refreshoverlay
 	Return
 
 .killsprite:
-	##[$80CA] sp()
-	newmem sp()
-	While globfree(sp())
+	USEPATH sp()
+	ResetList sp()
+	While NextItem(sp())
 		If PColl(\x,\y,ShapeWidth(470+\t),ShapeHeight(470+\t),bx*8,by*8,1,1)
-			freelast sp()
+			KillItem sp()
 		EndIf
 	Wend
 	Gosub refreshoverlay
 	Return
 
 .backshape:
-	newmem ppl()
-	While globfree(ppl())
+	ResetList ppl()
+	While NextItem(ppl())
 		If ppl()\x=bx*8 AND ppl()\y=by*8
-			t=ppl()\t:##[$80CA] ab(t)
+			t=ppl()\t:USEPATH ab(t)
 			For sh=\n To \n+\f-1
 				CludgeBitMap sh,5
 				For x=0 To \w*8-1
 					For y=0 To \h*8-1
-						Use lmaxlen 0:c=Cls(bx*8+x,by*8+y)
+						Use BitMap 0:c=Cls(bx*8+x,by*8+y)
 						If c=12
-							Use lmaxlen 5:If Cls(x,y)=2 Then Point x,y,3
+							Use BitMap 5:If Cls(x,y)=2 Then Point x,y,3
 						EndIf
 					Next
 				Next
@@ -892,14 +892,14 @@ drawconcrete:
 	Return
 
 .sameblock:
-	Use lmaxlen 0
+	Use BitMap 0
 	x=bx*8:y=by*8
 	wind(x ASR 3,y ASR 3)=n+128+32768
-	drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+	drawblok{Bank(1)+n*32,brush}:Blit 0,x,y
 	Return
 
 .newblock:
-	Use lmaxlen 0
+	Use BitMap 0
 	x=bx*8:y=by*8
 	getblock{Bank(0),bm,x,y}
 	cb.l=cmpblock{Bank(0),Bank(1)}:diff=cb AND 31
@@ -909,17 +909,17 @@ drawconcrete:
 		n=addblock{Bank(0),Bank(1)}
 	EndIf
 	wind(x ASR 3,y ASR 3)=n+128+32768
-	drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+	drawblok{Bank(1)+n*32,brush}:Blit 0,x,y
 	count=Peek.w(?count)
 	Return
 
 .refreshmap:
-	Use lmaxlen 0
+	Use BitMap 0
 	For y=0 To 47
 		For x=0 To 95
 			ind.l=wind(x,y)-128
 			blok.l=Bank(1)+(ind AND 2047)*32
-			drawblok{blok,brush}:longdiv 0,x*8,y*8
+			drawblok{blok,brush}:Blit 0,x*8,y*8
 		Next
 	Next
 	Return
@@ -929,7 +929,7 @@ drawconcrete:
 .
 .quickscan:
 
-	Use lmaxlen 0:BlockScroll
+	Use BitMap 0:BlockScroll
 
 	n.w=0:nn.w=0
 	Dim bcount(8192)
@@ -951,7 +951,7 @@ drawconcrete:
 				getblock{Bank(0),bm,x,y}
 				n=chkblock{Bank(0),Bank(1)}
 				wind(x ASR 3,y ASR 3)=n+128+32768
-				drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+				drawblok{Bank(1)+n*32,brush}:Blit 0,x,y
 			Else
 				wind(x ASR 3,y ASR 3)=0
 			EndIf
@@ -978,10 +978,10 @@ drawconcrete:
 				getblock{Bank(0),bm,x,y}
 				n=addblock{Bank(0),Bank(1)}
 				wind(x ASR 3,y ASR 3)=n+128+32768
-				drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+				drawblok{Bank(1)+n*32,brush}:Blit 0,x,y
 				bcount(first(x ASR 3,y ASR 3))=2
 				Locate 0,0:Print Peek.w(?count),"	"
-				freelast cb()
+				KillItem cb()
 			EndIf
 		Next
 		limit+2
@@ -998,9 +998,9 @@ drawconcrete:
 				If diff<limit
 					cb=cb LSR 5:n=cb:bcount(first)=2
 					wind(x ASR 3,y ASR 3)=n+128+32768
-					drawblok{Bank(1)+n*32,brush}:longdiv 0,x,y
+					drawblok{Bank(1)+n*32,brush}:Blit 0,x,y
 				Else
-					If globalloc(cb()) Then cb()\x=x,y,diff:hits+1
+					If AddItem(cb()) Then cb()\x=x,y,diff:hits+1
 				EndIf
 			EndIf
 		Next

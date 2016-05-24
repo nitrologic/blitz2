@@ -2,7 +2,7 @@
 ;LES Debugger V1.21 test program
 
 DEFTYPE.w
-lmaxlen 0,320,256,1
+BitMap 0,320,256,1
 
 NPrint "Test program demonstrating (very simply!) that the BC gadget does"
 NPrint "indeed do something very very useful for people debugging blitz"

@@ -8,7 +8,7 @@ Mouse On
 ;
 n=25
 ;
-lmaxlen 0,640,512,3
+BitMap 0,640,512,3
 ;
 For i=0 To 150
 	Circlef Rnd(320-32)+16,Rnd(256-32)+16,Rnd(16),Rnd(8)

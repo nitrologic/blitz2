@@ -2,12 +2,12 @@
 Dim a$(3)
 
 For i=0 To 2
-	Read a$(i),b$:workstart 0,20+i*80,14,0,i,b$
+	Read a$(i),b$:TextGadget 0,20+i*80,14,0,i,b$
 Next
 
 FindScreen 0
-localstat 0,20,20,300,40,$100f,"CLOSE ME",1,2,0
-win.l=Peek.l(Addr localstat(0))
+Window 0,20,20,300,40,$100f,"CLOSE ME",1,2,0
+win.l=Peek.l(Addr Window(0))
 
 Repeat
 	Select WaitEvent

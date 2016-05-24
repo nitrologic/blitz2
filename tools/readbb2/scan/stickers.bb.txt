@@ -28,7 +28,7 @@ If WriteMem(0,f$)			 ;read in records
 			i=-1							;blank line flag new record
 		Else
 			i+1							 ;else fill in details
-			If i=0 Then globalloc u()
+			If i=0 Then AddItem u()
 			u()\t[i]=a$
 		EndIf
 	Wend
@@ -39,10 +39,10 @@ EndIf
 
 If ReadMem(0,f$+".prt") ;create .prt file (could be just prt:)
 	FileOutput 0
-	newmem u()
-	While globfree(u())		 ;get pointers to a pair of records
+	ResetList u()
+	While NextItem(u())		 ;get pointers to a pair of records
 		*a.user=u()
-		If globfree(u()) Then *b.user=u()
+		If NextItem(u()) Then *b.user=u()
 		For i=0 To 8
 			a$=*a\t[i]+String$(Chr$(32),42-Len(*a\t[i]))+*b\t[i]
 			NPrint a$

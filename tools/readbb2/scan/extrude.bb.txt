@@ -3,8 +3,8 @@
 ; car extrude
 ;
 
-lmaxlen 0,320,256,5
-lmaxlen 2,320,256,5
+BitMap 0,320,256,5
+BitMap 2,320,256,5
 
 ##[$CD10] 1,32,60,5
 CludgeBitMap 1,1
@@ -13,7 +13,7 @@ LoadBitMap 1,"car2.iff",0
 bb=50
 
 Dim p(32,60)
-Use lmaxlen 1
+Use BitMap 1
 For x=0 To 31
 	y=1
 	For i=1 To 12:p(x,y)=Cls(x,bb+1-i):y+1:Next
@@ -26,8 +26,8 @@ For x=0 To 31
 Next
 
 MakeCookie 1
-Use lmaxlen 0:longdiv 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
-Use lmaxlen 2:longdiv 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
+Use BitMap 0:Blit 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
+Use BitMap 2:Blit 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
 BitMapOrigin 0,160,128
 BitMapOrigin 2,160,128
 
@@ -52,11 +52,11 @@ NEWTYPE .pat
 	mx.w:my.w			 ;pattern direction
 End NEWTYPE
 
-DEFTYPE .pat a:##[$80CA] a
+DEFTYPE .pat a:USEPATH a
 
 While Joyb(0)<>1
 	;
-	VWait:DisplayBitMap 0,db:db=2-db:Use lmaxlen db:Boxf -80,-80,80,80,0
+	VWait:DisplayBitMap 0,db:db=2-db:Use BitMap db:Boxf -80,-80,80,80,0
 	;
 	Gosub getvectors
 	;
@@ -201,8 +201,8 @@ getvectors:
 ; car extrude
 ;
 
-lmaxlen 0,320,256,5
-lmaxlen 2,320,256,5
+BitMap 0,320,256,5
+BitMap 2,320,256,5
 
 ##[$CD10] 1,32,60,5
 CludgeBitMap 1,1
@@ -211,7 +211,7 @@ LoadBitMap 1,"car2.iff",0
 bb=50
 
 Dim p(32,60)
-Use lmaxlen 1
+Use BitMap 1
 For x=0 To 31
 	y=1
 	For i=1 To 12:p(x,y)=Cls(x,bb+1-i):y+1:Next
@@ -224,8 +224,8 @@ For x=0 To 31
 Next
 
 MakeCookie 1
-Use lmaxlen 0:longdiv 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
-Use lmaxlen 2:longdiv 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
+Use BitMap 0:Blit 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
+Use BitMap 2:Blit 1,0,20:For i=0 To 15:Boxf i*8,0,i*8+8,8,i:Next
 BitMapOrigin 0,160,128
 BitMapOrigin 2,160,128
 
@@ -250,11 +250,11 @@ NEWTYPE .pat
 	mx.w:my.w			 ;pattern direction
 End NEWTYPE
 
-DEFTYPE .pat a:##[$80CA] a
+DEFTYPE .pat a:USEPATH a
 
 While Joyb(0)<>1
 	;
-	VWait:DisplayBitMap 0,db:db=2-db:Use lmaxlen db:Boxf -80,-80,80,80,0
+	VWait:DisplayBitMap 0,db:db=2-db:Use BitMap db:Boxf -80,-80,80,80,0
 	;
 	Gosub getvectors
 	;

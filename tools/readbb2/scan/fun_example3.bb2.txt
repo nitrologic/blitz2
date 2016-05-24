@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example3.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example3.bb2
-##[$80CC]
+NoCli
 WBStartup
 
 INCDIR	"FUN_Math:"
@@ -22,7 +22,7 @@ DEFTYPE.Vector_Type VTemp1
 DEFTYPE.Vector_Type VTemp2
 DEFTYPE.Vector_Type Normal
 
-freest 0
+WbToScreen 0
 ##[$FFB5]
 
 Restore Cube_Data
@@ -40,9 +40,9 @@ For sides.b=0 To 5
 Next sides
 
 
-lmaxlen 0,200,180,1
-localstat 0,10,10,200,180,$8|$2|$1000,"Matrix Example 3",0,1
-Use lmaxlen 0
+BitMap 0,200,180,1
+Window 0,10,10,200,180,$8|$2|$1000,"Matrix Example 3",0,1
+Use BitMap 0
 
 xrot.w=0
 yrot.w=67

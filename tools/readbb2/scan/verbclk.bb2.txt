@@ -14,7 +14,7 @@
 ; Enjoy!
 ;
 
-##[$80CC]:WBStartup
+NoCli:WBStartup
 
 DEFTYPE .l
 

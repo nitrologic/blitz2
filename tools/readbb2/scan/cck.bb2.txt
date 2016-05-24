@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/cck/cck.bb2
-WBStartup:##[$80CC]:##[$80CB]
+WBStartup:NoCli:CloseEd
 ;
 ;Marks Computer Construction Kit.
 ;
@@ -57,15 +57,15 @@ End Function
 
 For k=0 To 14:Read f$:LoadShape k,"shapes/"+f$+".brush"
 Handle k,0,-12:Next
-casestrcomp 0,"palette"
+LoadPalette 0,"palette"
 
-newlocarr 0,0,"Project"
+MenuTitle 0,0,"Project"
 MenuItem 0,0,0,0,"NEW"
 MenuItem 0,0,0,1,"Load		","O"
 MenuItem 0,0,0,2,"Save","A"
 MenuItem 0,0,0,3,"Quit","Q"
 ;
-newlocarr 0,1,"Primitives"
+MenuTitle 0,1,"Primitives"
 MenuItem 0,0,1,0,"Power Source		","P"
 MenuItem 0,0,1,1,"Switch","S"
 MenuItem 0,0,1,2,"LED","L"
@@ -76,7 +76,7 @@ MenuItem 0,0,1,6,"Track","T"
 MenuItem 0,0,1,7,"Remove Part"
 MenuItem 0,0,1,8,"Remove Track"
 ;
-newlocarr 0,2,"Parts"
+MenuTitle 0,2,"Parts"
 MenuItem 0,0,2,0,"Create"
 MenuItem 0,0,2,1,"Show All"
 MenuItem 0,0,2,2,"Show Parts"
@@ -94,16 +94,16 @@ Else
 	End
 EndIf
 
-workstart 0,0,164,0,1,"RUN"
-workstart 0,40,164,0,2,"STOP"
-workstart 0,88,164,0,3,"PAUSE"
-workstart 0,144,164,0,4,"STEP"
-workstart 0,192,164,0,5,"RUN QUICK"
+TextGadget 0,0,164,0,1,"RUN"
+TextGadget 0,40,164,0,2,"STOP"
+TextGadget 0,88,164,0,3,"PAUSE"
+TextGadget 0,144,164,0,4,"STEP"
+TextGadget 0,192,164,0,5,"RUN QUICK"
 
-allocst 0,0,0,320,200,3,0,"Computer Construction Kit",1,0
+Screen 0,0,0,320,200,3,0,"Computer Construction Kit",1,0
 Use SetCycle 0:ScreensBitMap 0,0
-localstat 0,0,12,320,188,$1800,"",1,2,0
-CatchDosErrs:arrmult 0 ;attach menus to window.
+Window 0,0,12,320,188,$1800,"",1,2,0
+CatchDosErrs:SetMenu 0 ;attach menus to window.
 
 Buffer 0,10240 ;for BBLIT
 MaxLen pa$=192:pa$="examples"	;for file requester
@@ -163,8 +163,8 @@ Case 256	;menupick
 					Print Mki$(board(x,y)\flags)
 					Next:Next
 					;
-					newmem parts()
-					While globfree(parts())
+					ResetList parts()
+					While NextItem(parts())
 						Print Mki$(parts()\p)
 						Print Mki$(parts()\x)
 						Print Mki$(parts()\y)
@@ -230,7 +230,7 @@ Case 256	;menupick
 					Pop For:Pop For:BlitMode EraseMode
 					For xa2=0 To 2:For ya2=-1 To 1
 					mx=nx+xa2:my=ny+ya2
-					longdiv 1,mx LSL 2,my LSL 2
+					Blit 1,mx LSL 2,my LSL 2
 					board(mx,my)\flags=0
 					Next:Next:BlitMode CookieMode:Goto deldone
 				End If
@@ -311,13 +311,13 @@ Case 256	;menupick
 					WLocate sx*4+(w*2-Len(f$)*4),h*2-4+sy*4
 					Print f$
 					For k=1 To ni
-					longdiv 13,(sx+ix(k)) LSL 2,sy LSL 2
+					Blit 13,(sx+ix(k)) LSL 2,sy LSL 2
 					Next
 					For k=1 To no
-					longdiv 14,(sx+ox(k)) LSL 2,my LSL 2
+					Blit 14,(sx+ox(k)) LSL 2,my LSL 2
 					Next
 					MenuItem 0,0,2,pmn+npt,f$
-					arrmult 0
+					SetMenu 0
 				Else
 					Boxf sx LSL 2,sy LSL 2+12,mx LSL 2+3,my LSL 2+15,-1
 				End If
@@ -370,10 +370,10 @@ If p>0 AND p<=npt
 		WLocate mx*4+(w*2-Len(f$)*4),h*2-4+my*4
 		Print f$
 		For k=1 To ni
-		longdiv 13,(mx+ix(k)) LSL 2,my LSL 2
+		Blit 13,(mx+ix(k)) LSL 2,my LSL 2
 		Next
 		For k=1 To no
-		longdiv 14,(mx+ox(k)) LSL 2,(my+h-1) LSL 2
+		Blit 14,(mx+ox(k)) LSL 2,(my+h-1) LSL 2
 		Next
 		For x=0 To w-1:For y=0 To h-1
 		board(mx+x,my+y)\flags=rw{},0
@@ -419,7 +419,7 @@ puttrack
 If trpf Then BBlit 0,1,x,y:Return
 ;
 If trpf>0
-	longdiv 1,x,y
+	Blit 1,x,y
 	board(x LSR 2,y LSR 2)\flags=0:Return
 End If
 ;
@@ -427,14 +427,14 @@ If board(x LSR 2,y LSR 2)\flags<100 OR k
 	board(x LSR 2,y LSR 2)\flags=100,CookieMode
 Else
 	board(x LSR 2,y LSR 2)\flags=12,CookieMode
-	longdiv 12,x,y
+	Blit 12,x,y
 End If
 Return
 
 .showparts
 Menus 0:Print "Wait..."
-newmem parts()
-While globfree(parts())
+ResetList parts()
+While NextItem(parts())
 	p=parts()\p
 	mx=parts()\x
 	my=parts()\y
@@ -451,16 +451,16 @@ For x=0 To wid:For y=0 To hit
 bf=board(x,y)\flags
 board(x,y)\bmode=CookieMode
 If bf>=100
-	longdiv 1,x LSL 2,y LSL 2:Goto lmore
+	Blit 1,x LSL 2,y LSL 2:Goto lmore
 End If
 If (bf>2 AND bf<9) OR bf=11
-	longdiv bf,x LSL 2,y LSL 2-4:Goto lmore
+	Blit bf,x LSL 2,y LSL 2-4:Goto lmore
 End If
 If bf=10
-	longdiv 9,x LSL 2,y LSL 2-4:Goto lmore
+	Blit 9,x LSL 2,y LSL 2-4:Goto lmore
 End If
 If bf=13 OR bf=14 OR bf=12
-	longdiv bf,x LSL 2,y LSL 2:Goto lmore
+	Blit bf,x LSL 2,y LSL 2:Goto lmore
 End If
 ;
 lmore:Next:Next:Menus 1:Return
@@ -513,7 +513,7 @@ If bf
 	BlitMode board(px,py)\bmode
 	If bf>100
 		board(px,py)\flags=100
-		longdiv 1,px LSL 2,py LSL 2
+		Blit 1,px LSL 2,py LSL 2
 	Else
 		Select board(px,py)\flags
 		Case 3
@@ -521,11 +521,11 @@ If bf
 		Case 11
 			Gosub poweron
 		Case 6
-			longdiv 6,px LSL 2,py LSL 2-4
+			Blit 6,px LSL 2,py LSL 2-4
 		Case 10
-			longdiv 9,px LSL 2,py LSL 2-4
+			Blit 9,px LSL 2,py LSL 2-4
 		Case 12
-			longdiv 12,px LSL 2,py LSL 2
+			Blit 12,px LSL 2,py LSL 2
 		End Select
 	End If
 End If
@@ -574,18 +574,18 @@ If MButtons=1
 		If board(px,py)\flags=4
 			board(px,py)\flags=5	;switch on!
 			BlitMode EraseMode
-			longdiv 4,px LSL 2,py LSL 2-4
+			Blit 4,px LSL 2,py LSL 2-4
 			BlitMode CookieMode
-			longdiv 5,px LSL 2,py LSL 2-4
+			Blit 5,px LSL 2,py LSL 2-4
 			po=-1:If board(px-1,py)\flags>=101 Then po=1
 			Gosub newswitch
 		Else
 			If board(px,py)\flags=5
 				board(px,py)\flags=4	;switch off!
 				BlitMode EraseMode
-				longdiv 5,px LSL 2,py LSL 2-4
+				Blit 5,px LSL 2,py LSL 2-4
 				BlitMode CookieMode
-				longdiv 4,px LSL 2,py LSL 2-4
+				Blit 4,px LSL 2,py LSL 2-4
 				po=-1:Gosub newswitch
 			End If
 		End If
@@ -594,21 +594,21 @@ End If
 ;
 ;Update all pulses...
 ;
-newmem pulse()
-While globfree(pulse())
+ResetList pulse()
+While NextItem(pulse())
 	px=pulse()\x:py=pulse()\y:po=pulse()\ison
 	lx=pulse()\lx:ly=pulse()\ly
 	board(px,py)\flags+po
 	BlitMode board(px,py)\bmode
 	If board(px,py)\flags<101
 		;it's off!
-		longdiv 1,px LSL 2,py LSL 2
+		Blit 1,px LSL 2,py LSL 2
 		If board(px,py)\flags<100 Then board(px,py)\flags=100
 	Else
 		;it's on!
-		longdiv 2,px LSL 2,py LSL 2
+		Blit 2,px LSL 2,py LSL 2
 	End If
-	freelast pulse()	;delete this pulse.
+	KillItem pulse()	;delete this pulse.
 	ny=py:For xa=-1 To 1 Step 2
 	nx=px+xa:Gosub newpulse
 	Next
@@ -627,7 +627,7 @@ fboard:If nx=lx AND ny=ly Then po=opo:Return
 bf=board(nx,ny)\flags:If bf=0 Then po=opo:Return
 If bf>99
 	If po>0 OR (bf>100 AND po<0)
-		If globalloc(pulse())
+		If AddItem(pulse())
 			pulse()\x=nx,ny,px,py,po:po=opo:Return
 		End If
 	End If
@@ -643,14 +643,14 @@ Else
 	End If
 	If bf=6 ;LED!
 		If pf>=101 ;led on!
-			longdiv 7,nx LSL 2,ny LSL 2-4
+			Blit 7,nx LSL 2,ny LSL 2-4
 			nx+3:Goto fboard
 		End If
 		;led off!
 		BlitMode EraseMode
-		longdiv 7,nx LSL 2,ny LSL 2-4
+		Blit 7,nx LSL 2,ny LSL 2-4
 		BlitMode CookieMode
-		longdiv 6,nx LSL 2,ny LSL 2-4
+		Blit 6,nx LSL 2,ny LSL 2-4
 		nx+3:Goto fboard
 	End If
 	If bf=9	 ;transistor gate
@@ -658,17 +658,17 @@ Else
 		bm=board(px-2,py+2)\bmode
 		If bm
 			BlitMode EraseMode
-			longdiv 7,px LSL 2-4,py LSL 2+4
+			Blit 7,px LSL 2-4,py LSL 2+4
 		End If
 		BlitMode bm
 		If pf>=101 ;gate closed
-			longdiv 10,px LSL 2-4,py LSL 2+4
+			Blit 10,px LSL 2-4,py LSL 2+4
 			If tf<>board(px+2,py+2)\flags ;change!
 				po=-1:If tf>=101 Then po=1
 				nx+2:ny+1:Goto fboard
 			End If
 		Else
-			longdiv 9,px LSL 2-4,py LSL 2+4	;gate open
+			Blit 9,px LSL 2-4,py LSL 2+4	;gate open
 			If board(px+2,py+2)\flags>=101	;was outputing a 1...
 				po=-1:nx+2:ny+1:Goto fboard
 			End If

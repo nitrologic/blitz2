@@ -1,11 +1,11 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/testsort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/testsort.bb
 Dim List a.q(10)
 
-While globalloc(a()):a()=Rnd(50):Wend
+While AddItem(a()):a()=Rnd(50):Wend
 
 SortList a()
 
-newmem a():While globfree(a()):NPrint a():Wend
+ResetList a():While NextItem(a()):NPrint a():Wend
 
 ;MouseWait
 ;End

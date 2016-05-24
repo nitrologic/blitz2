@@ -149,7 +149,7 @@ End Function
 		;
 		If id=200 Then End
 		;
-		##[$80CA] entry(cmess)
+		USEPATH entry(cmess)
 		;
 		If id=105 Then \id=0:nxmess-1:cmess-1	 ;backup!
 		;
@@ -202,20 +202,20 @@ End Function
 	Forever
 
 .tobatok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	Gosub listplayers
 	Gosub initnextevent:\id=2:\batter=1:\partner=0
 	Return
 
 .newbatter:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	bat=team(batting)\ba[id-1]
 	If team(batting)\bat[bat]\status<>0 Then BeepScreen 0:Return
 	\newbatter=bat
 	Return
 
 .newbatterok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If \batter=\batterout Then \batter=\newbatter Else \partner=\newbatter
 	Gosub sortbatters
 	Gosub initnextevent
@@ -223,14 +223,14 @@ End Function
 	Return
 
 .openingbattersok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If \batter=\partner Then BeepScreen 0:Return
 	Gosub sortbatters
 	Gosub initnextevent:\id=3:\over=1
 	Return
 
 .bowlerok:
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	i=-1:Repeat:i+1:Until \bo[i]=bowl:j=i
 	If i>0
 		Repeat
@@ -242,7 +242,7 @@ End Function
 			EndIf
 		Until i=0
 	EndIf
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	Gosub listplayers
 	Gosub initnextevent
 	\id=4:\ball=1:\over+1
@@ -250,7 +250,7 @@ End Function
 	Return
 
 .ballok:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If \shot=0 Then BeepScreen 0:Return								 ;notplayed shot
 	If \shot=10 OR \shot=12 OR \shot=13 OR \shot=14		 ;no fielder entered
 		If \fielder=-1 Then BeepScreen 0:Return
@@ -267,7 +267,7 @@ End Function
 	Return
 
 .initnextevent
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	;
 	currover=\over
 	Gosub dostats
@@ -286,7 +286,7 @@ End Function
 	Return
 
 .displayevent:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	WLocate 6,99:Print inst$(\id)
 	Select \id
 		Case 0
@@ -342,7 +342,7 @@ End Function
 	Return
 
 .openingbatter:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	bat=id-1
 	If bat=\batter OR bat=\partner
 		Exchange \batter,\partner
@@ -352,9 +352,9 @@ End Function
 	Return
 
 .ovalclick:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	If EMouseX<0 OR EMouseX>191 OR EMouseY<0 OR EMouseY>109 Then Return
-	Use localstat 1
+	Use Window 1
 	x=QLimit(EMouseX-4,0,184):y=QLimit(EMouseY-4,0,102)
 	If \whichend=0
 		ex=94:ey=34:\wx=x-ex:\wy=y-ey
@@ -369,11 +369,11 @@ End Function
 	If \shot<2 Then \shot=2
 	Gosub updateoval
 	Activate 1
-	Use localstat 0
+	Use Window 0
 	Return
 
 .updateoval:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	ShapesBitMap 0,1
 	If \shot>1 AND \shot<9
 		If \whichend=0
@@ -381,7 +381,7 @@ End Function
 		Else
 			ex=94:ey=34+21:x=ex+\wx:y=ey-\wy
 		EndIf
-		Use lmaxlen 1:BitMapOutput 1
+		Use BitMap 1:BitMapOutput 1
 		Line ex,ey,x,y,1:Locate x/8,y/8:Print runs
 	EndIf
 	BitMaptoWindow 1,1
@@ -390,7 +390,7 @@ End Function
 
 .drawoval:
 	ends=entry(cmess)\whichend
-	Use lmaxlen 0:BlockScroll 3
+	Use BitMap 0:BlockScroll 3
 	Circlef 95,46,80,45,4
 	Boxf 95-10,46-12,95+10,46+12,5
 	ex=94:ey=34+ends*21
@@ -399,14 +399,14 @@ End Function
 	Return
 
 .sortbatters:
-	##[$80CA] entry(cmess)
+	USEPATH entry(cmess)
 	ba=\partner:Gosub movehim
 	ba=\batter:Gosub movehim
 	Gosub listplayers
 	Return
 
 movehim:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	i=-1:Repeat:i+1:Until \ba[i]=ba:j=i
 	If i>0
 		Repeat
@@ -417,26 +417,26 @@ movehim:
 	Return
 
 .listplayers
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	batting=entry(cmess)\batting:bowling=1-batting
 	For i=0 To 11
 		##[$C622] 0,i+1,LSet$(\name[\ba[i]],12):Redraw 0,i+1
 	Next
-	##[$80CA] team(bowling)
+	USEPATH team(bowling)
 	For i=0 To 11
 		##[$C622] 0,i+21,LSet$(\name[\bo[i]],12):Redraw 0,i+21
 	Next
 	Return
 
 .setupscreen
-	allocst 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
-	##[$80CA] team(x)
+	Screen 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
+	USEPATH team(x)
 	;
 	For x=0 To 1
 		t$="("+LSet$(\teamabbrev,2)+")"
-		workstart 0,6+x*56,150,0,x*20,t$
+		TextGadget 0,6+x*56,150,0,x*20,t$
 		For i=0 To 11
-			workstart 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
+			TextGadget 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
 		Next
 	Next
 	;
@@ -444,19 +444,19 @@ movehim:
 	For x=0 To 1
 		For i=0 To 9
 			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
-			workstart 0,598+x*68,3+i*12,m,id,a$:id+1
+			TextGadget 0,598+x*68,3+i*12,m,id,a$:id+1
 		Next
 	Next
 	;
 	PropGadget 0,0,0,$80,100,12,96
-	workstart 0,6,130,0,101,"	 BEGIN	 "
-	workstart 0,6,190,0,102,"STOP"
-	workstart 0,54,190,0,103,"START"
-	workstart 0,6,230,0,104,"END INNINGS"
-	workstart 0,6,250,0,105,"	BACK UP! "
-	workstart 0,6,268,0,200,"	 QUIT		"
+	TextGadget 0,6,130,0,101,"	 BEGIN	 "
+	TextGadget 0,6,190,0,102,"STOP"
+	TextGadget 0,54,190,0,103,"START"
+	TextGadget 0,6,230,0,104,"END INNINGS"
+	TextGadget 0,6,250,0,105,"	BACK UP! "
+	TextGadget 0,6,268,0,200,"	 QUIT		"
 	;
-	localstat 0,0,0,736,283,$1800,"",1,2,0:MenusOff
+	Window 0,0,0,736,283,$1800,"",1,2,0:MenusOff
 	;
 	ResetString 18,2,370,92
 	ResetString 4,99,584,7
@@ -472,8 +472,8 @@ movehim:
 	WLocate 138,129:Print "BATTERS"
 	WLocate 414,129:Print "BOWLERS"
 	;
-	localstat 1,397,1,192,94,$800,"",1,2:MenusOff
-	lmaxlen 0,192,94,3:lmaxlen 1,192,94,3
+	Window 1,397,1,192,94,$800,"",1,2:MenusOff
+	BitMap 0,192,94,3:BitMap 1,192,94,3
 	;
 	Return
 
@@ -489,7 +489,7 @@ movehim:
 .readteam
 	If WriteMem(0,"teams")
 		FileInput 0
-		##[$80CA] team(i)
+		USEPATH team(i)
 		For i=0 To 1
 			\teamname=Edit$(80)
 			\teamabbrev=Edit$(80)
@@ -507,7 +507,7 @@ movehim:
 	nxmess=9:cmess=8:Return
 
 .printevents
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	moff=QLimit(cmess-9,0,4096)
 	For i=0 To 9
 		ii=moff+i:If ii=cmess Then col=1 Else col=7
@@ -530,9 +530,9 @@ movehim:
 
 .printstats
 	;
-	Use localstat 0:WindowOutput 0
+	Use Window 0:WindowOutput 0
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	WColour 1:WLocate 230,129:Print " B	 R	4	6	 M "
 	For i=0 To 11
 		j=team(batting)\ba[i]
@@ -548,7 +548,7 @@ movehim:
 		WColour 2:WLocate 230,139+i*12:Print t$
 	Next
 	;
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	t$=\teamname+"	("+\teamabbrev+") "
 	t$+Str$(\runs+\extras)+"-"+Str$(\wickets)+"	"
 	u$=nth{currover}
@@ -556,7 +556,7 @@ movehim:
 	;
 	WColour 2:WLocate 4,109:Print t$
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	WColour 1:WLocate 492,129:Print " O B	M	R	W	X nb	b lb	w "
 	For i=0 To 11
 		j=team(1-batting)\bo[i]
@@ -577,7 +577,7 @@ movehim:
 		WColour 2:WLocate 492,139+i*12:Print t$
 	Next
 	;
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	t$=\teamname+"	("+\teamabbrev+") "
 	t$+Str$(\runs+\extras)+"-"+Str$(\wickets)+"	("
 	t$+Str$(\cscore)+"-"+Str$(\cwickets)+")				"
@@ -588,7 +588,7 @@ movehim:
 
 .dostats:							 ;set currover for
 	;
-	##[$80CA] entry(i)
+	USEPATH entry(i)
 	;
 	For i=0 To 1
 		team(i)\runs=0
@@ -661,10 +661,10 @@ movehim:
 ;<<CD 270-7>>
 
 .makescoreticks:
-	##[$80CA] team(batting)
+	USEPATH team(batting)
 	t1$=\teamabbrev+" "+Str$(\runs+\extras)+"-"+Str$(\wickets)
 	t2$=nth{currover}:t2$+" Over"
-	##[$80CA] team(1-batting)
+	USEPATH team(1-batting)
 	t3$=\teamabbrev+" "+Str$(\cscore)+"-"+Str$(\cwickets)
 	If ReadMem(0,"scoretick1.txt")
 		FileOutput 0
@@ -698,7 +698,7 @@ movehim:
 	;<<MORRISON>>
 	;<t><<^^3<t>2<t>^26<t>1>>
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	;
 	If ReadMem(0,"allbowlersbl.txt")
 		FileOutput 0
@@ -721,7 +721,7 @@ movehim:
 	;<<88>>
 	;<<3 FOURS	 2 SIXES	 222 Mins	 122 BALLS>>
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	;
 	If ReadMem(0,"batsmaninbl.txt")
 		FileOutput 0
@@ -744,7 +744,7 @@ movehim:
 	;<<3 FOURS	 2 SIXES	 222 Mins	 122 BALLS>>
 	;<<225-9>>	--- Pad score here as ^5-9^, then ^55-9, then 225-9
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	*f.side=team(1-batting)
 	;
 	If ReadMem(0,"batsmanoutbl.txt")
@@ -788,7 +788,7 @@ movehim:
 	;<<CurrentBATSMAN1>>
 	;<<CurrentBATSMAN2>>
 	;
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	*f.side=team(1-batting)
 	;
 	If ReadMem(0,"batting scorecard.txt")
@@ -827,7 +827,7 @@ movehim:
 	;<<MORRISON>>
 	;<t><<^^3<t>2<t>^26<t>1>>
 	;
-	##[$80CA] team(1-batting)\bowl[j]
+	USEPATH team(1-batting)\bowl[j]
 	;
 	If ReadMem(0,"bowlerbl.txt")
 		FileOutput 0
@@ -873,7 +873,7 @@ movehim:
 	Return
 
 outstatusstring:
-	##[$80CA] team(batting)\bat[j]
+	USEPATH team(batting)\bat[j]
 	*f.side=team(1-batting)
 	t$=Chr$(9)
 	If \status=10 AND \fielder>-1 Then t$+"c "+*f\name[\fielder]+"	"

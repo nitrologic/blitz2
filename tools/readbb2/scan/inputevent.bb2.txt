@@ -195,9 +195,9 @@ End NEWTYPE
 #IECODE_NOBUTTON=$FF
 
 ;/*	IECLASS_EVENT (V36) */
-#IECODE_NEWACTIVE=$01;/* new active input localstat */
-#IECODE_NEWSIZE=$02;/* resize of localstat */
-#IECODE_REFRESH=$03;/* refresh of localstat */
+#IECODE_NEWACTIVE=$01;/* new active input Window */
+#IECODE_NEWSIZE=$02;/* resize of Window */
+#IECODE_REFRESH=$03;/* refresh of Window */
 
 ;/*	IECLASS_REQUESTER */
 ;/* broadcast when the first Requester (not subsequent ones) opens up in */

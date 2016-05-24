@@ -20,7 +20,7 @@ DEFTYPE .config config
 
 If WriteMem(0,"skidconfig")
 	FileInput 0
-	##[$80CA] config
+	USEPATH config
 	\init=Edit$(80):\dial=Edit$(80)
 	For i=0 To 8:\func[i]=Edit$(80):Next
 	For i=0 To 11:\name[i]=Edit$(80):Next
@@ -30,7 +30,7 @@ EndIf
 
 If ReadMem(0,"skidconfig")
 	FileOutput 0
-	##[$80CA] config
+	USEPATH config
 	NPrint \init:NPrint \dial
 	For i=0 To 8:NPrint \func[i]:Next
 	For i=0 To 11:NPrint \name[i]:Next
@@ -55,7 +55,7 @@ DEFTYPE .cheader car
 
 ##[$CD10] 2,64,32,4:CludgeBitMap 2,2
 
-lmaxlen 0,608,76,4 ;37696 bytes (16 color main interface)
+BitMap 0,608,76,4 ;37696 bytes (16 color main interface)
 
 LoadShape 0,"mouse.iff":GetaSprite 0,0
 
@@ -76,8 +76,8 @@ Statement loadcar{name$,car}
 	If WriteMem(0,"vehicles/truck.def")
 		FileInput 0:car\name=Edit$(80):car\designer=Edit$(80)
 		##[$BE14] 0,&car\settings,SizeOf .handling
-		##[$BE14] 0,Peek.l(Addr lmaxlen(2)+8),64*32/4
-		Use lmaxlen 2:ReMap 1,4:ReMap 2,5:ReMap 3,6+n
+		##[$BE14] 0,Peek.l(Addr BitMap(2)+8),64*32/4
+		Use BitMap 2:ReMap 1,4:ReMap 2,5:ReMap 3,6+n
 		MakeCookie 2
 		CloseFile 0
 	EndIf
@@ -100,7 +100,7 @@ CreateDisplay 0
 BitMapOutput 0
 
 loadcar{"",0}
-Use lmaxlen 0
+Use BitMap 0
 Gosub setupui
 
 n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]
@@ -166,7 +166,7 @@ handleit:
 		If ##[$BA8F]=11 Then soff=QWrap(soff+1,0,3):Gosub setserial:##[$BA85]
 		If ##[$BA8F]=10 Then n=0:Use ##[$BA81] n:##[$BA87] 3:##[$BA85]:Return
 		;
-		##[$80CA] config
+		USEPATH config
 		\init=##[$BA8D](15):\dial=##[$BA8D](16)
 		For i=0 To 3
 			\name[i+soff*4]=##[$BA8D](25+i)
@@ -296,7 +296,7 @@ setupui:
 	Return
 
 setserial:
-	##[$80CA] config
+	USEPATH config
 	##[$BA8C] 15,\init:##[$BA8C] 16,\dial
 	For y=0 To 2
 		a$="F"+Str$(y+1+soff*3)+":":##[$BA93] 35+y,a$
@@ -355,11 +355,11 @@ readtrackdisk:
 	Next
 	##[$D007] 1,640,#ys*2,4,*thisone
 	For y=0 To 1:For x=0 To 2
-		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
+		Use BitMap 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
 		MakeCookie 0
-		Use lmaxlen 0:ClipBlit 0,1+x*101+y*303,85
+		Use BitMap 0:ClipBlit 0,1+x*101+y*303,85
 	Next:Next
-	Use lmaxlen 0:For x=0 To 5:xx=x*101+1:Box xx,84,xx+100,113,tt:Next
+	Use BitMap 0:For x=0 To 5:xx=x*101+1:Box xx,84,xx+100,113,tt:Next
 	CustomColors 0,0,83,1,0,16
 	Return
 
@@ -367,7 +367,7 @@ quit:
 	AMIGA
 	If ReadMem(0,"skidconfig")
 		FileOutput 0
-		##[$80CA] config
+		USEPATH config
 		NPrint \init:NPrint \dial
 		For i=0 To 8:NPrint \func[i]:Next
 		For i=0 To 11:NPrint \name[i]:Next

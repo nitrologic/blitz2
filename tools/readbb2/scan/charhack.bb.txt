@@ -7,10 +7,10 @@ start:
 	If NumPars<>1 Then Goto fail
 	a$=Par$(1)+".font"
 	If WriteMem (0,"fonts:"+a$) Then CloseFile 0 Else Goto fail
-	astring 0,a$:Use ##[$C70D] 0
-	allocst 0,0,0,320,256,1,0,"",1,2
+	LoadBlitzFont 0,a$:Use ##[$C70D] 0
+	Screen 0,0,0,320,256,1,0,"",1,2
 	ScreensBitMap 0,0:BitMapOutput 0:BlockScroll
-	lmaxlen 1,128,64,1
+	BitMap 1,128,64,1
 
 srch$=Peeks$(?chars,1024)
 
@@ -23,8 +23,8 @@ EndIf
 
 p.l=Instr(ted$,srch$)
 
-Poke$ Peek.l (Addr lmaxlen(1)+8),srch$
-Use lmaxlen 0:Scroll 0,0,128,64,0,0,1	;german chars
+Poke$ Peek.l (Addr BitMap(1)+8),srch$
+Use BitMap 0:Scroll 0,0,128,64,0,0,1	;german chars
 
 For y=2 To 7
 	Locate 0,y
@@ -33,12 +33,12 @@ For y=2 To 7
 	Next
 Next
 
-Use lmaxlen 1:Scroll 0,0,128,64,0,0,0
+Use BitMap 1:Scroll 0,0,128,64,0,0,0
 
 If ReadMem(0,"blitz2:ted2")
 	FileOutput 0
 	Print Left$(ted$,p-1)
-	Exists 0,Peek.l(Addr lmaxlen(1)+8),1024
+	Exists 0,Peek.l(Addr BitMap(1)+8),1024
 	Print Mid$(ted$,p+1024)
 	CloseFile 0
 EndIf

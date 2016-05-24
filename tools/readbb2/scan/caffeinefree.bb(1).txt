@@ -9,7 +9,7 @@
 
 WBStartup ;run from an icon
 
-##[$80CB]:##[$80CC] ;free up ted and cli for low mem developers
+CloseEd:NoCli ;free up ted and cli for low mem developers
 
 For k=1 To 100:VWait:##[$FF89]:Next	;try and kill workbench
 
@@ -144,8 +144,8 @@ Dim btime.w(10)						 ;bonus timers
 Dim hiscores.hiscore(8)		 ;hiscore table
 
 ;allocate bitmaps
-lmaxlen 0,#WIDTH+16+16+16,#HEIGHT+20+32,4
-lmaxlen 1,#WIDTH+16+16+16,#HEIGHT+20+32,4
+BitMap 0,#WIDTH+16+16+16,#HEIGHT+20+32,4
+BitMap 1,#WIDTH+16+16+16,#HEIGHT+20+32,4
 
 ;load in stuff.
 
@@ -172,26 +172,26 @@ LoadSound 2,"inc/sfx/appear6.sfx"	 ;player hit by bad dude
 LoadSound 3,"inc/sfx/appear6.sfx"			 ;bullet hit baddude
 LoadSound 4,"inc/sfx/boom.sfx"					;explosion
 
-casestrcomp 0,"inc/Tech.palette"
-casestrcomp 0,"inc/sprites.palette",16
-casestrcomp 1,"inc/Tech.palette"
-casestrcomp 1,"inc/sprites.palette",16
-casestrcomp 2,"inc/Mountains.palette"
-casestrcomp 2,"inc/sprites.palette",16
-casestrcomp 3,"inc/Dark.palette"
-casestrcomp 3,"inc/sprites.palette",16
+LoadPalette 0,"inc/Tech.palette"
+LoadPalette 0,"inc/sprites.palette",16
+LoadPalette 1,"inc/Tech.palette"
+LoadPalette 1,"inc/sprites.palette",16
+LoadPalette 2,"inc/Mountains.palette"
+LoadPalette 2,"inc/sprites.palette",16
+LoadPalette 3,"inc/Dark.palette"
+LoadPalette 3,"inc/sprites.palette",16
 
 ;load in the status bar image
-lmaxlen 2,#WIDTH,30,4
+BitMap 2,#WIDTH,30,4
 LoadBitMap 2,"inc/StatBar.brush",4
-lmaxlen 3,320,124,4
+BitMap 3,320,124,4
 LoadBitMap 3,"inc/Title.brush",5
 
 AutoCookie Off
 
 ;chop out techtiles
 LoadBitMap 0,"inc/TechTiles.iff"
-Use lmaxlen 0
+Use BitMap 0
 x=0:y=0
 For i=#FIRSTTILE+1 To #FIRSTTILE+255
 	GetaShape i,x*16,y*16,16,16
@@ -201,7 +201,7 @@ Next
 
 ;chop out mountaintiles
 LoadBitMap 0,"inc/Mountains.iff"
-Use lmaxlen 0
+Use BitMap 0
 x=0:y=0
 For i=#FIRSTTILE+256+1 To #FIRSTTILE+256+255
 	GetaShape i,x*16,y*16,16,16
@@ -211,7 +211,7 @@ Next
 
 ;chop out darktiles
 LoadBitMap 0,"inc/DarkTiles.iff"
-Use lmaxlen 0
+Use BitMap 0
 x=0:y=0
 For i=#FIRSTTILE+512+1 To #FIRSTTILE+512+255
 	GetaShape i,x*16,y*16,16,16
@@ -322,7 +322,7 @@ Statement PlonkChars{a$,x.w,y.w}
 		If x<320															;check for screen edge
 			b = ConvertChar{Asc(Mid$(a$,c,1))}
 			If b>=0
-				longdiv b,x,y
+				Blit b,x,y
 				x=x+16
 			EndIf
 		EndIf
@@ -380,9 +380,9 @@ Statement InitLevel{}
 	Next
 
 	;clear bitmaps
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll 0
-	Use lmaxlen 1
+	Use BitMap 1
 	BlockScroll 0
 
 	;BitMapOutput 0
@@ -394,9 +394,9 @@ Statement InitLevel{}
 	;Print "LEVEL "
 	;Print level
 	BlitMode CookieMode
-	Use lmaxlen 0
+	Use BitMap 0
 	PlonkChars{"level "+Str$(level+1),80,100}
-	Use lmaxlen 1
+	Use BitMap 1
 	PlonkChars{"level "+Str$(level+1),80,100}
 
 	DisplayOn
@@ -416,7 +416,7 @@ Statement InitLevel{}
 	WaitForClick{5*50}
 
 	;initialize physical bitmap (draw 1st column)
-	Use lmaxlen phys
+	Use BitMap phys
 	p=mapbuffer
 	For i=1 To #MAPHEIGHT
 		j=Peek.b(p)
@@ -443,7 +443,7 @@ Statement InitLevel{}
 		EndIf
 
 		;update bitmap pointers if needed
-		*bm=Addr lmaxlen(logi)
+		*bm=Addr BitMap(logi)
 		*bm\_data[0]=oldplanes(logi,0)+(xcoarse*2)
 		*bm\_data[1]=oldplanes(logi,1)+(xcoarse*2)
 		*bm\_data[2]=oldplanes(logi,2)+(xcoarse*2)
@@ -451,7 +451,7 @@ Statement InitLevel{}
 
 		;draw up new column of blocks (have to do a whole column
 		;cos we're doing fast scrolling)
-		Use lmaxlen logi
+		Use BitMap logi
 		p=mapbuffer+xcoarse
 		For i=1 To #MAPHEIGHT
 			j=Peek.b(p)
@@ -509,7 +509,7 @@ Statement StartAttackWave{wave.w}
 	Shared dudes(),anptrs,i,p,wavedata,dudecount
 
 	p=wavedata+(wave*#WAVESIZE)
-	##[$80CA] dudes(i)
+	USEPATH dudes(i)
 	For i=0 To #NUMOFDUDES-1
 		\state=Peek.w(p) : p=p+2			;I want postincrement!!!!!!
 		\energy=Peek.w(p) : p=p+2		 ;\energy=peek.w(p++)
@@ -539,7 +539,7 @@ Statement DrawDudes{}
 
 	DEFTYPE.w x,y
 
-	##[$80CA] dudes(i)
+	USEPATH dudes(i)
 
 	For i=0 To #NUMOFDUDES-1
 		If \state>0 AND \delay=0
@@ -565,7 +565,7 @@ Statement ExplodeDude{}
 	;blow up the dude given by d.w
 	Shared dudes(),d,anptrs
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\state=1
 	\antable=Peek.l(anptrs)		 ;anim 0 = explosion
 	\image=Peek.w(\antable)
@@ -577,7 +577,7 @@ Statement GeraldTheMouse{x.w,y.w}
 	Shared dudes(),anptrs
 	DEFTYPE.w dude
 	For dude=0 To #NUMOFDUDES-1
-		##[$80CA] dudes(dude)
+		USEPATH dudes(dude)
 		If \state=0
 			\state=1
 			\x=x+(Rnd(48)*32)
@@ -604,7 +604,7 @@ End Statement
 Statement LinDude{}
 	;moves dude given by d.w in a straight line
 	Shared dudes(),d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\x=\x+\xs
 	\y=\y+\ys
 	If \x<#LEFTLIM OR \x>#RIGHTLIM Then \state=0
@@ -615,7 +615,7 @@ End Statement
 
 Statement VertSineDude{}
 	Shared dudes(),sinlt(),d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\x=\x+\xs
 	\y=(sinlt(\dat0)ASR 1)+\dat1
 	\dat0=\dat0+\ys
@@ -629,7 +629,7 @@ End Statement
 
 Statement HorzSineDude{}
 	Shared dudes(),sinlt(),d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\dat1=\dat1+\xs
 	\x=(sinlt(\dat0) ASR 1)+\dat1
 	\dat0=\dat0+\ys
@@ -642,7 +642,7 @@ End Statement
 
 Statement BothSineDude{}
 	Shared dudes(),sinlt(),d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 
 	\dat0=\dat0+\xs
 	\x=(sinlt(\dat0) ASR 1)+\dat1
@@ -661,7 +661,7 @@ End Statement
 
 Statement MoveBonus{}
 	Shared dudes(),d,scrollspeed
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\x=\x-(scrollspeed ASL 5)
 	\y=\y+\ys
 	If \x<#LEFTLIM OR \x>#RIGHTLIM Then \state=0
@@ -679,7 +679,7 @@ End Statement
 Statement BouncyDude{}
 	;constantly bouncing dude
 	Shared dudes(),d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	\x=\x+\xs
 	\y=\y+\ys
 	If \x<#LEFTLIM OR \x>#RIGHTLIM Then \state=0
@@ -694,7 +694,7 @@ Statement AnimDude{}
 	Shared dudes(),d,anptrs,logi
 	DEFTYPE.w im
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	im=Peek.w(\antable+\anptr)
 	If im<>-1
 		\anptr=\anptr+2
@@ -716,7 +716,7 @@ Statement AnimDudeOnce{}
 	Shared dudes(),d,anptrs,logi
 	DEFTYPE.w im
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	im=Peek.w(\antable+\anptr)
 	If im<>-1
 		\anptr=\anptr+2
@@ -729,7 +729,7 @@ End Statement
 
 Statement HomingDude{}
 	Shared dudes(),anptrs,d,plrx,plry
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 
 	If \x<plrx Then \xs=\xs+\dat0 Else \xs=\xs-\dat0
 	If \y<plry Then \ys=\ys+\dat0 Else \ys=\ys-\dat0
@@ -746,7 +746,7 @@ End Statement
 
 Statement EOLDude1{}
 	Shared dudes(),anptrs,d
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 
 	Select \dat3
 		Case 0
@@ -771,7 +771,7 @@ End Statement
 
 Statement EOLDude2{}
 	Shared dudes(),anptrs,d,sinlt()
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 
 	DEFTYPE.w fd
 
@@ -804,7 +804,7 @@ Statement EOLDude2{}
 			If dudes(1)\state=0 Then fd=1
 
 			If fd<>-1 AND Rnd(1000)<10
-				##[$80CA] dudes(fd)
+				USEPATH dudes(fd)
 				\state=18
 				\x=dudes(d)\x
 				\y=dudes(d)\y+(24*32)
@@ -821,7 +821,7 @@ Statement EOLDude2{}
 				\image=Peek.w(\antable)
 				\flash=0
 
-				##[$80CA] dudes(d)
+				USEPATH dudes(d)
 			EndIf
 
 	End Select
@@ -832,7 +832,7 @@ End Statement
 
 Statement EOLDude3{}
 	Shared dudes(),anptrs,d,sinlt()
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 
 	DEFTYPE.w fd
 
@@ -842,7 +842,7 @@ Statement EOLDude3{}
 		If dudes(2)\state=0 Then fd=2
 
 		If fd<>-1 AND Rnd(1000)<50
-			##[$80CA] dudes(fd)
+			USEPATH dudes(fd)
 			\state=18
 			\x=dudes(d)\x
 			\y=dudes(d)\y	 ;+(24*32)
@@ -859,7 +859,7 @@ Statement EOLDude3{}
 			\image=Peek.w(\antable)
 			\flash=0
 
-			##[$80CA] dudes(d)
+			USEPATH dudes(d)
 		EndIf
 
 
@@ -875,7 +875,7 @@ Statement UpdateDudes{}
 	;Poke.w $dff180,$000F
 
 	freedudes=0														 ;num of free dudes
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	For d=0 To #NUMOFDUDES-1
 		If \delay=0
 			Select dudes(d)\state
@@ -1001,7 +1001,7 @@ Statement Zooooooom{}
 	;make all the currently active dudes zoom off the screen
 	Shared dudes(),d
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	For d=0 To #NUMOFDUDES-1
 		If \state>0 AND \delay=0
 			\state=10						 ;move in straight line
@@ -1030,7 +1030,7 @@ Statement DisplaySprites{}
 		ShowSprite #BULLETSPR,0,0,3
 	EndIf
 
-	##[$80CA] bullets(i)
+	USEPATH bullets(i)
 	For i=0 To 3
 
 		;Select \state
@@ -1133,7 +1133,7 @@ Statement MovePlayer{}
 		If (RawStatus($40) AND keymode) OR (Joyb(1) AND keymode=Off)
 			i=FindFreeBullet{}
 			If i<>-1
-				##[$80CA] bullets(i)
+				USEPATH bullets(i)
 				;\state=1
 				\x=plrx
 				\y=plry+(12 ASL 5)-(plrpitch ASL 5)
@@ -1164,7 +1164,7 @@ End Statement
 Statement MoveBullets{}
 	Shared bullets(),i
 
-	##[$80CA] bullets(i)
+	USEPATH bullets(i)
 	For i=0 To 3
 		If \state>0
 			\x=\x+\xs
@@ -1182,7 +1182,7 @@ Statement ChangeShield{delta.w}
 	Shared plrshield
 	DEFTYPE.w oldshield
 
-	Use lmaxlen 2
+	Use BitMap 2
 	oldshield=plrshield
 	plrshield=plrshield+delta
 	If plrshield<0Then plrshield=0
@@ -1224,9 +1224,9 @@ Statement GiveBonus{num.w}
 			;score bonus
 			btime(num)=100
 	End Select
-	Use lmaxlen 2
+	Use BitMap 2
 	BlitMode CookieMode
-	longdiv 12+num,144+(16*num),7
+	Blit 12+num,144+(16*num),7
 End Statement
 
 
@@ -1248,9 +1248,9 @@ Statement UpdateBTimers{}
 			btime(b)=btime(b)-1
 			If btime(b)=0
 				;timer expired - erase bonus icon thingy
-				Use lmaxlen 2
+				Use BitMap 2
 				BlitMode EraseMode
-				longdiv 12+b,144+(16*b),7
+				Blit 12+b,144+(16*b),7
 			EndIf
 		EndIf
 	Next
@@ -1273,7 +1273,7 @@ Statement CheckCollisions{}
 	dw=16*32														;dudewidth \__ preset to assume
 	dh=16*32														;dudeheight/	 16x16 images
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	For d=0 To #NUMOFDUDES-1
 		If \state<>0 AND \delay=0
 			If \image>=#FIRSTBOB+150
@@ -1318,7 +1318,7 @@ Statement CheckCollisions{}
 	;only check two of the bullets each cycle, to
 	;save a wee bit of uP time...
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	If logi=0 Then pleb=0 Else pleb=2					 ;which two to check?
 	For i=pleb To pleb+2												;bullet loop
 		If bullets(i)\state<>0
@@ -1401,7 +1401,7 @@ Statement BlowUpPlayer{}
 
 	Shared dudes(),d,plrx,plry,plrxs,plrys,antables,anptrs
 
-	##[$80CA] dudes(d)
+	USEPATH dudes(d)
 	For d=0 To #NUMOFDUDES-1
 		\x=plrx+Rnd(16*32)		;-8*32
 		\y=plry+Rnd(16*32)		;-8*32
@@ -1419,7 +1419,7 @@ End Statement
 .InitStatusBox
 Statement InitStatusBox{}
 	Shared plrshield
-	Use lmaxlen 2
+	Use BitMap 2
 	;Cls 0
 	Boxf 8,5,plrshield+8,8,15
 	Boxf 8*8,2*8,((8+6)*8)-1,(3*8)-1,0
@@ -1459,7 +1459,7 @@ Statement RestoreBitmaps{}
 	;restore bitmaps (which are hacked about by the scrolling)
 
 	For i=0 To 1												;bitmap loop
-		*bm = Addr lmaxlen(i)
+		*bm = Addr BitMap(i)
 		For j=0 To 3											;plane loop
 			*bm\_data[j]=oldplanes(i,j)
 		Next
@@ -1482,7 +1482,7 @@ Statement DisplayHiScores{}
 	BlockScroll 0
 	PlonkChars{"todays top scores",0,0}
 
-	##[$80CA] hiscores(i)
+	USEPATH hiscores(i)
 	For i=0 To 7
 		PlonkChars{\name,0,(16*i)+32}
 		PlonkChars{Str$(\score),160,(16*i)+32}
@@ -1521,7 +1521,7 @@ Function.s EnterName{}
 	DEFTYPE.s name$,a$
 	DEFTYPE.w x,y,b,timer,dx,dy,jdel,pos
 
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 	BlockScroll 0
 
@@ -1537,7 +1537,7 @@ Function.s EnterName{}
 	For y=0 To 5
 		For x=0 To 6
 			b = ConvertChar{Asc( Mid$( chargrid$,(y*7)+x+1,1 ) ) }
-			If b<>-1 Then longdiv b,64+(x*24),56+(y*24)
+			If b<>-1 Then Blit b,64+(x*24),56+(y*24)
 		Next
 	Next
 
@@ -1561,7 +1561,7 @@ Function.s EnterName{}
 				;special case for space
 				Box 64+(x*24),56+(y*24),64+(x*24)+15,56+(y*24)+15,15
 			Else
-				BlitMode SolidMode : longdiv b,64+(x*24),56+(y*24)
+				BlitMode SolidMode : Blit b,64+(x*24),56+(y*24)
 			EndIf
 		EndIf
 		If timer=20
@@ -1570,7 +1570,7 @@ Function.s EnterName{}
 				Box 64+(x*24),56+(y*24),64+(x*24)+15,56+(y*24)+15,0
 				timer=0
 			Else
-				BlitMode CookieMode : longdiv b,64+(x*24),56+(y*24) :timer=0
+				BlitMode CookieMode : Blit b,64+(x*24),56+(y*24) :timer=0
 			EndIf
 		EndIf
 
@@ -1596,7 +1596,7 @@ Function.s EnterName{}
 				;special case for space
 					Box 64+(x*24),56+(y*24),64+(x*24)+15,56+(y*24)+15,0
 				Else
-					BlitMode CookieMode : longdiv b,64+(x*24),56+(y*24)
+					BlitMode CookieMode : Blit b,64+(x*24),56+(y*24)
 				EndIf
 
 				x=x+dx
@@ -1610,7 +1610,7 @@ Function.s EnterName{}
 					;special case for space
 					Box 64+(x*24),56+(y*24),64+(x*24)+15,56+(y*24)+15,15
 				Else
-					BlitMode SolidMode : longdiv b,64+(x*24),56+(y*24)
+					BlitMode SolidMode : Blit b,64+(x*24),56+(y*24)
 				EndIf
 			EndIf
 		EndIf
@@ -1640,7 +1640,7 @@ Function.s EnterName{}
 						If pos<8
 							Box 80+(pos*16),208,80+(pos*16)+15,208+15,0
 							BlitMode CookieMode
-							longdiv b,80+(16*pos),208
+							Blit b,80+(16*pos),208
 							name$=name$+a$
 							pos=pos+1
 							If pos<8 Then Box 80+(pos*16),208,80+(pos*16)+15,208+15,15
@@ -1680,7 +1680,7 @@ End Statement
 
 
 Statement Wibble{}
-	Use lmaxlen 0
+	Use BitMap 0
 	BitMapOutput 0
 	BlockScroll 0
 
@@ -1762,7 +1762,7 @@ Function.w Title{}
 					Slice 1,44+128,320,128,$fff8,4,8,32,#WIDTH+32+16,#WIDTH+32+16
 					Show 0
 					Use SetCycle 0
-					Use lmaxlen 0
+					Use BitMap 0
 					BlockScroll 0
 
 					DisplayOn
@@ -1796,22 +1796,22 @@ Function.w Title{}
 				Case 3
 					Boxf 0,0,319,127,0
 					CentrePlonk{"kill bad dudes",20}
-					longdiv #FIRSTBOB+25,96,50
-					longdiv #FIRSTBOB+62,120,50
-					longdiv #FIRSTBOB+71,144,50
-					longdiv #FIRSTBOB+67,168,50
-					longdiv #FIRSTBOB+30,192,50
+					Blit #FIRSTBOB+25,96,50
+					Blit #FIRSTBOB+62,120,50
+					Blit #FIRSTBOB+71,144,50
+					Blit #FIRSTBOB+67,168,50
+					Blit #FIRSTBOB+30,192,50
 					tstate=4
 					delay=200
 					For i=128 To 0 Step -8 : VWait : Show 0,0,i : Next
 				Case 4
 					Boxf 0,128,319,255,0
 					CentrePlonk{"collect bonuses",128+20}
-					longdiv #FIRSTBOB+12,96,128+50
-					longdiv #FIRSTBOB+13,120,128+50
-					longdiv #FIRSTBOB+14,144,128+50
-					longdiv #FIRSTBOB+15,168,128+50
-					longdiv #FIRSTBOB+16,192,128+50
+					Blit #FIRSTBOB+12,96,128+50
+					Blit #FIRSTBOB+13,120,128+50
+					Blit #FIRSTBOB+14,144,128+50
+					Blit #FIRSTBOB+15,168,128+50
+					Blit #FIRSTBOB+16,192,128+50
 					tstate=5
 					delay=200
 					For i=0 To 128 Step 8 :VWait : Show 0,0,i : Next
@@ -1823,7 +1823,7 @@ Function.w Title{}
 					delay=200
 					For i=128 To 0 Step -8 : VWait : Show 0,0,i : Next
 				Case 6
-					Use lmaxlen 1
+					Use BitMap 1
 					DisplayHiScores{}
 					DisplayOff
 					FreeSlices
@@ -1859,8 +1859,8 @@ End Function
 
 DisplayOff
 ;allocate bitmaps
-lmaxlen 0,#WIDTH+16+16+16,#HEIGHT+20+32,4
-lmaxlen 1,#WIDTH+16+16+16,#HEIGHT+20+32,4
+BitMap 0,#WIDTH+16+16+16,#HEIGHT+20+32,4
+BitMap 1,#WIDTH+16+16+16,#HEIGHT+20+32,4
 ;BitMap 2,#WIDTH,30,4
 ;Use BitMap 2
 ;Cls 0
@@ -1869,7 +1869,7 @@ Buffer 0,$8000											;\___allocate bob buffers
 Buffer 1,$8000											;/
 
 ;get first tile shape: a blank (cludge around the mapeditor)
-Use lmaxlen 0
+Use BitMap 0
 BlockScroll 0
 GetaShape #FIRSTTILE,0,0,16,16
 GetaShape #FIRSTTILE+256,0,0,16,16
@@ -1880,7 +1880,7 @@ chargrid$="abcdefghijklmnopqrstuvwxyz0123456789.-! @#"
 
 ;save out bitplane pointers in the oldplanes array
 For i=0 To 1												;bitmap loop
-	*bm = Addr lmaxlen(i)
+	*bm = Addr BitMap(i)
 	For j=0 To 3											;plane loop
 		oldplanes(i,j)=*bm\_data[j]
 	Next
@@ -1903,7 +1903,7 @@ For i=0 To #NUMOFLEVELS-1
 Next
 
 
-##[$80CA] hiscores(i)
+USEPATH hiscores(i)
 For i=0 To 7
 	Read \name
 Next
@@ -1958,7 +1958,7 @@ While Title{}=Off							 ;do title and check for exit
 			DisplaySprites{}
 
 			;do all drawing operations on logical bitmap
-			Use lmaxlen logi
+			Use BitMap logi
 
 			;wipe bobs from logical bitmap
 			UnBuffer logi
@@ -1973,7 +1973,7 @@ While Title{}=Off							 ;do title and check for exit
 			EndIf
 
 			;update bitmap pointers if needed
-			*bm=Addr lmaxlen(logi)
+			*bm=Addr BitMap(logi)
 			*bm\_data[0]=oldplanes(logi,0)+(xcoarse*2)
 			*bm\_data[1]=oldplanes(logi,1)+(xcoarse*2)
 			*bm\_data[2]=oldplanes(logi,2)+(xcoarse*2)
@@ -2027,7 +2027,7 @@ While Title{}=Off							 ;do title and check for exit
 			UpdateBTimers{}				 ;update bonus timers
 
 			;draw up the bobs
-			Use lmaxlen logi
+			Use BitMap logi
 			DrawDudes{}
 
 			DisplayStatus{}

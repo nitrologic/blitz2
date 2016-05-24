@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/gadtools.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/gadtools.bb2
-##[$80CB]
+CloseEd
 #LIBRARIES_GADTOOLS_H=-1
 ;**
 ;** $Filename: libraries/gadtools.h $

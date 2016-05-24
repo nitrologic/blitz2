@@ -7,7 +7,7 @@ Macro mypal:
 	##[$CE18] 0,8+`1*4,11+`1*4,`2*16,`3*16,`4*16,`5*16,`6*16,`7*16
 End Macro
 
-allocst 0,7
+Screen 0,7
 ScreensBitMap 0,0
 
 For i=0 To 63:Boxf i*5,0,i*5+4,7,i:Next
@@ -20,12 +20,12 @@ StopCycle 0,1,2,2,2
 ##[$CE18] 0,2,4,64/2,64/2,192/2,192/2,192/2,224/2
 ##[$CE18] 0,5,7,192/2,64/2,64/2,224/2,192/2,192/2
 
-casestrcomp 0,"palette.iff"
-casestrcomp 0,"select.iff",16
-casestrcomp 0,"titles.iff",32
+LoadPalette 0,"palette.iff"
+LoadPalette 0,"select.iff",16
+LoadPalette 0,"titles.iff",32
 
-casestrcomp 0,"/overlays/f1.palette",48
-casestrcomp 0,"/overlays/cow.palette",64
+LoadPalette 0,"/overlays/f1.palette",48
+LoadPalette 0,"/overlays/cow.palette",64
 
 Use SetCycle 0
 
@@ -45,8 +45,8 @@ End
 
 ;Goto carcar
 
-casestrcomp 0,"sega.palette"
-allocst 0,4
+LoadPalette 0,"sega.palette"
+Screen 0,4
 ScreensBitMap 0,0
 BitMapOutput 0:NPrint ""
 Use SetCycle 0

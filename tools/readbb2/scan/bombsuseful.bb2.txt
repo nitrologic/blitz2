@@ -13,7 +13,7 @@ Statement TheSettings{ *bombptr.gameVars, *biptr.OSInput}
 Shared theArrow.selectarrowtype()
 ; Opens a screen and window for selecting game options
 .TheSettings
-##[$80CA] *bombptr
+USEPATH *bombptr
 
 ; Initialize
 		For i.b=0 To 9
@@ -26,9 +26,9 @@ Shared theArrow.selectarrowtype()
 				theArrow(i)\state = 0
 		Next i
 
-		allocst 2, 2, "BOMBS GAME SETTINGS"
+		Screen 2, 2, "BOMBS GAME SETTINGS"
 		DefaultIDCMP $8| $200
-		localstat 2, 0, 10, 320, DispHeight-10, $8| $1000, "SETTINGS", 0, 1
+		Window 2, 0, 10, 320, DispHeight-10, $8| $1000, "SETTINGS", 0, 1
 		WJam 1
 		FlushEvents
 
@@ -83,15 +83,15 @@ Shared theArrow.selectarrowtype()
 		Until NOT keep
 
 ; Get out of here
-		Free localstat 2
-		Free allocst 2
+		Free Window 2
+		Free Screen 2
 		Statement Return
 
 
 HandleArrows
 ; Reset all arrows to state 1
 		For i=0 To 9
-##[$80CA] theArrow(i)
+USEPATH theArrow(i)
 				\state = 0
 ; Check for an arrow being hit
 				If (*biptr\iMouseX>=\xpos) AND (*biptr\iMouseX<\xpos+10)
@@ -109,7 +109,7 @@ HandleArrows
 		End If
 
 ; Do the useful bit here
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select arrowHit
 			Case 0
 				\wide = \wide-1
@@ -153,7 +153,7 @@ HandleArrows
 
 DrawArrows
 		For i=0 To 9
-##[$80CA] theArrow(i)
+USEPATH theArrow(i)
 				If \state=1
 						WBox \xpos,\ypos, \xpos+9,\ypos+9, 3
 				Else
@@ -165,7 +165,7 @@ DrawArrows
 						WBlit 27, \xpos,\ypos
 				End If
 		Next i
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Return
 
 MinWidth
@@ -277,7 +277,7 @@ End Statement	;TheSettings
 Statement ResetVars{ *bombptr.gameVars}
 ; Re-initializes the game variables for a (re)start
 .ResetVars
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\xcoord = 0
 		\ycoord = 0
 		\leftWide = 0
@@ -305,7 +305,7 @@ Statement PlaceBombs{ *bombptr.gameVars}
 ; PLACES THE REQUIRED NUMBER OF BOMBS IN THE GRID
 ; Just uses bombs of typenr=-1 for now
 .PlaceBombs
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\totalSquares = \wide * \high
 ; Reset all squares to closed and bombs unknown
 		For i.l=1 To \totalSquares
@@ -333,7 +333,7 @@ Function.b CheckTopLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the top-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1) AND (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -353,7 +353,7 @@ Function.b CheckTop{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the top of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -373,7 +373,7 @@ Function.b CheckTopRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the top-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0) AND (num>\wide)
 				Select mode
 					Case #peekBomb
@@ -393,7 +393,7 @@ Function CheckLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1)
 				Select mode
 					Case #peekBomb
@@ -413,7 +413,7 @@ Function CheckRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0)
 				Select mode
 					Case #peekBomb
@@ -433,7 +433,7 @@ Function CheckBottomLeft{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the bottom-left of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>1) AND (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -453,7 +453,7 @@ Function CheckBottom{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the bottom of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num<=\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -473,7 +473,7 @@ Function CheckBottomRight{ *bombptr.gameVars, num.l, mode.b}
 ;		 if "mode" = #peekState it returns the state of the square
 ; If there is no square to the bottom-right of the square "num", then
 ;		 the function returns -1 no matter what the "mode" was
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (num MOD \wide<>0) AND (num<\totalSquares-\wide)
 				Select mode
 					Case #peekBomb
@@ -509,7 +509,7 @@ Statement CheckMark{ *bombptr.gameVars, num.l}
 ; Checks to see if the newly marked square is has a bomb
 ; and increases/decreases \falseBombs accordingly
 .CheckMark
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If \square[num]\hasBomb<>\bombs\typenr
 ;		 there is no bomb here
 				Select \square[num]\state
@@ -528,7 +528,7 @@ End Statement	;CheckMark
 Function.l FindNum{ *bombptr.gameVars}
 ; Returns the number of the square that was clicked on
 .FindNum
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = ((\ycoord-\displayYCoord)/10+\leftHigh)*\wide + (\xcoord-\displayXCoord)/10+\leftWide+1
 		Function Return num
 End Function	;FindNum
@@ -549,7 +549,7 @@ Statement DrawSquare{ *bombptr.gameVars, num.l, xpos.l, ypos.l}
 ; Checks if xpos and ypos are within bounds of the grid,
 ; then draws a square at (xpos,ypos) with object "num"
 DrawSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (xpos>=\displayXCoord) AND (xpos<\displayXCoord+10*\displayWide)
 				If (ypos>=\displayYCoord) AND (ypos<\displayYCoord+10*\displayHigh)
 ;						 coords are OK, now erase whatever is there
@@ -572,7 +572,7 @@ Statement UpdateTitleBar{ *bombptr.gameVars}
 ; Update the number of bombs flagged
 ; This is hard-coded, change this if you add any "gadgets" in the title-bar!
 UpdateTitleBar
-##[$80CA] *bombptr
+USEPATH *bombptr
 		WBox 64,5, 152,13, 11
 		WLocate 64,7:Print \markedBombs
 End Statement	;UpdateTitleBar
@@ -582,9 +582,9 @@ End Statement	;UpdateTitleBar
 Statement UpdateProgressBar{ *bombptr.gameVars}
 ; Updates the position of the runner
 UpdateProgressBar
-##[$80CA] *bombptr
+USEPATH *bombptr
 		pctInc = (\openedSquares + \markedBombs - \falseBombs) * 100 / \totalSquares
-##[$80CA] *bombptr\progressBar
+USEPATH *bombptr\progressBar
 ; need to change this still
 		WBox \xcoord,\ycoord, \xcoord+10,\ycoord+10, 0
 
@@ -600,7 +600,7 @@ Statement UpdateTime{ *bombptr.gameVars}
 ; Executes a vwait, increases the time and displays
 ; May try to change this to interrupts
 UpdateTime
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If \gameInProgress=1
 				VWait
 				\timeInProgress = \timeInProgress + 1
@@ -626,7 +626,7 @@ Statement ShowAllBombs{ *bombptr.gameVars, num.l}
 ; Plays an explosion, animates an explosion, the
 ; displays the positions of all bombs and ends the game
 ShowAllBombs
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\gameInProgress = 3
 		\rating = 0
 		For i.l=1 To \totalSquares
@@ -653,7 +653,7 @@ Statement RestoreRegion{ *bombptr.gameVars, theRegion.b}
 ; was released outside of it's area, then this routine will
 ; restore the gadget or square to before the down press
 RestoreRegion
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select theRegion
 			Case #closeRegion
 				\closeState = 0
@@ -703,7 +703,7 @@ Shared ntscOffset
 ; Draws a border around the displayed part of the field
 ; This is hard-coded
 DrawGrid
-##[$80CA] *bombptr
+USEPATH *bombptr
 		\displayXCoord = ( (320) - (\displayWide*10) )/2
 		\displayYCoord = ( (DispHeight+18) - (\displayHigh*10) )/2 + ntscOffset
 		endX = \displayXCoord + \displayWide*10
@@ -741,7 +741,7 @@ Statement DoScrolls{ *bombptr.gameVars, override.b}
 ; "override" is used to display the arrows only without any
 ; checks for clicks or redrawing of the grid at startup or restart
 DoScrolls
-##[$80CA] *bombptr
+USEPATH *bombptr
 		arrowHit.b = False
 		If (\displayWide=\wide) AND (\displayHigh=\high)
 				Statement Return
@@ -880,7 +880,7 @@ skip1
 				End If
 ;redraw the valid arrows
 				For i=1 To 10
-##[$80CA] *bombptr\scrollArrows[i]
+USEPATH *bombptr\scrollArrows[i]
 						If \displayed Then WBlit \num, \xpos,\ypos
 				Next i
 		End If
@@ -891,7 +891,7 @@ End Statement	;DoScrolls
 Statement InitScrolls{ *bombptr.gameVars}
 ; Initializes all variables for the scroll-arrows
 InitScrolls
-##[$80CA] *bombptr
+USEPATH *bombptr
 		localY.w = \displayYCoord + \displayHigh*5 - 65
 		leftX.w = \displayXCoord-23
 		riteX.w = \displayXCoord + \displayWide*10 + 13
@@ -926,11 +926,11 @@ Shared gameStartTitle$
 ;	 ii	mouse-pointer imagery
 ;	 iii titlebar, grid and scroll-arrows
 SetupDisplay
-##[$80CA] *bombptr
-		allocst 1, 4, "BOMBS!"
+USEPATH *bombptr
+		Screen 1, 4, "BOMBS!"
 		Use SetCycle 0
 		DefaultIDCMP $8
-		localstat 1, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
+		Window 1, 0, 0, 320, DispHeight, $800| $1000, "", 0, 1
 		Handle 30, -8,-8
 		Handle 31, -8,-8
 		WPointer 30
@@ -948,7 +948,7 @@ Statement SquareChecks{ *bombptr.gameVars}
 ;	 ii	any bombs to be found -> only if all unmarked squares
 ;			 must be bombs -> mark them and end the game
 SquareChecks
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (\falseBombs=0) AND (\totalBombs=\totalSquares-\openedSquares)
 				\gameInProgress = 3
 				For i.l=1 To \totalSquares
@@ -963,9 +963,9 @@ SquareChecks
 				Next i
 				UpdateTitleBar{ *bombptr}
 				UpdateProgressBar{ *bombptr}
-				lastWin.l = ##[$80D1] localstat
+				lastWin.l = Used Window
 				If \rating>Val(\ratings[10]\value) Then TheScores{ *bombptr}
-				Use localstat lastWin
+				Use Window lastWin
 		End If
 End Statement	;SquareChecks
 
@@ -974,9 +974,9 @@ End Statement	;SquareChecks
 Statement FreeupDisplay{ *bombptr.gameVars}
 ; Free up all memory in screens, windows etc that was used for the game
 FreeupDisplay
-##[$80CA] *bombptr
-		Free localstat 1
-		Free allocst 1
+USEPATH *bombptr
+		Free Window 1
+		Free Screen 1
 End Statement	;FreeupDisplay
 
 ; =======================================
@@ -990,7 +990,7 @@ FloodGrid
 		If num=0 Then Statement Return
 ; Put the mouse to sleep - does not work yet!
 		WPointer 31
-##[$80CA] *bombptr
+USEPATH *bombptr
 		totalHold.l = 1
 		hold(1)\num = num
 		hold(1)\hasBomb = 0
@@ -1159,7 +1159,7 @@ Statement LMBDownSquare{ *bombptr.gameVars}
 ; Displays one or more half-opened squares
 ; Keeps track of all these squares in "\downSquares[]"
 LMBDownSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = FindNum{ *bombptr}
 		\downSquare[0]\num = 0
 ; first click
@@ -1242,7 +1242,7 @@ Statement LMBUpSquare{ *bombptr.gameVars, theRegion.b}
 ; it opens the square on the first click
 ; or the surrounding squares on the second click
 LMBUpSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = FindNum{ *bombptr}
 		If num<>\LMBDownNum									; same as LMBDown?
 				RestoreRegion{ *bombptr, theRegion}
@@ -1305,7 +1305,7 @@ Statement RMBDownSquare{ *bombptr.gameVars}
 ; Displays one or more half-opened squares
 ; Keeps track of all these squares in "\downSquares[]"
 RMBDownSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = FindNum{ *bombptr}
 		\downSquare[0]\num = 0
 		Select \square[num]\state
@@ -1396,7 +1396,7 @@ Statement RMBUpSquare{ *bombptr.gameVars, theRegion.b}
 ; If the button release was at a different place from the
 ; button press then the squares are restored
 RMBUpSquare
-##[$80CA] *bombptr
+USEPATH *bombptr
 		num.l = FindNum{ *bombptr}
 		If num<>\RMBDownNum									; same as RMBDown?
 				RestoreRegion{ *bombptr, theRegion}
@@ -1439,7 +1439,7 @@ End Statement	;RMBUpSquare
 Statement HandleLMBDown{ *bombptr.gameVars, theRegion.b}
 ; Make intermediate drawings on the screen - no other changes
 HandleLMBDown
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select theRegion
 			Case #closeRegion						 ; CLOSE gadget
 				\closeState = 1
@@ -1473,7 +1473,7 @@ Function.b HandleLMBUp{ *bombptr.gameVars, theRegion.b}
 Shared gameStartTitle$
 ; Restore all regions and take appropriate actions
 HandleLMBUp
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If theRegion<>\LMBDownRegion
 				RestoreRegion{ *bombptr, \LMBDownRegion}
 		Else
@@ -1529,7 +1529,7 @@ End Function	;HandleLMBUp
 Statement HandleRMBDown{ *bombptr.gameVars, theRegion.b}
 ; Make intermediate drawings on the screen - no other changes
 HandleRMBDown
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select theRegion
 			Case #closeRegion							 ; CLOSE gadget
 				\closeState = 1
@@ -1562,15 +1562,15 @@ Function.b HandleRMBUp{ *bombptr.gameVars, theRegion.b}
 ; Only the CLOSE Gadget will return FALSE
 ;
 HandleRMBUp
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If (theRegion<>\RMBDownRegion)
 				RestoreRegion{ *bombptr, \RMBDownRegion}
 		Else
 				Select theRegion
 					Case #closeRegion				 ; CLOSE gadget
-						lastWin.l = ##[$80D1] localstat
+						lastWin.l = Used Window
 						If \rating>Val(\ratings[10]\value) Then TheScores{ *bombptr}
-						Use localstat lastWin
+						Use Window lastWin
 						ResetVars{ *bombptr}
 						WBox 2,2, 36,18, 11
 						WBlit 15-\closeState, 2,2
@@ -1622,7 +1622,7 @@ Function.b SelectRegion{ *bombptr.gameVars}
 ;				5 = GRID
 ; All gadgets are hard coded, the grid depends on the display-settings
 SelectRegion
-##[$80CA] *bombptr
+USEPATH *bombptr
 		theRegion.b = 0
 		If (\ycoord>1) AND (\ycoord<19)							 ; gadgets
 				If (\xcoord>1) AND (\xcoord<19)					 ; close
@@ -1662,7 +1662,7 @@ Statement TheGame{ *bombptr.gameVars, *biptr.OSInput}
 ; Use the RMB to mark a square
 .TheGame
 ; SETS ALL GAME VARIABLES LIKE BOMBS, NEIGHBOURS ETC
-##[$80CA] *bombptr
+USEPATH *bombptr
 		ResetVars{ *bombptr}
 		PlaceBombs{ *bombptr}			; places bombs in the playing field
 		SetupDisplay{ *bombptr}		; draws the grid

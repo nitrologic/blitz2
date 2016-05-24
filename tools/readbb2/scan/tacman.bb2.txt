@@ -84,13 +84,13 @@ hi$(14)="		 QUIT		 "
 
 ;======== LOAD IN FILES AND DO SCREEN SETUP =================
 
-casestrcomp 0,"Eyes/Tacman.IFF"
-casestrcomp 1,"Eyes/Tacman.IFF2"
+LoadPalette 0,"Eyes/Tacman.IFF"
+LoadPalette 1,"Eyes/Tacman.IFF2"
 LoadShapes 0,"Eyes/Tacman.shapes"
 LoadShape 70,"Eyes/TacSpook.shape"
 
 CNIF #test<>1
-	astring 0,"TAC.font"
+	LoadBlitzFont 0,"TAC.font"
 	Use ##[$C70D] 0
 	LoadModule 1,"Ears/gameover.score"
 	LoadModule 0,"Ears/maintitle.score"
@@ -108,8 +108,8 @@ CEND
 
 Gosub ClearLevel
 VWait 60 :BLITZ
-lmaxlen 1,336,272+8,4
-lmaxlen 0,336,272+8,4
+BitMap 1,336,272+8,4
+BitMap 0,336,272+8,4
 Slice 0,28,336,272+8,$fff8,4,8,16,336,336
 Use SetCycle 0 :Use Slice 0 :BlockScroll 0 :Show 0 :Colour 4,5
 Buffer 0,8192 :Buffer 1,8192
@@ -145,7 +145,7 @@ Statement Score{}	 ; Double buffered Score Displayer
 End Statement
 
 Statement wipe{}
-	Use lmaxlen 0 :UnBuffer 0
+	Use BitMap 0 :UnBuffer 0
 	BlockScroll 0 :Show 0 :BitMapOutput 0
 End Statement
 
@@ -256,15 +256,15 @@ If lives=0
 EndIf
 
 ;	----------- Stick down buffer blits ----------
-Use SetCycle 0 :db=0 :Use lmaxlen 0 :BlockScroll 0
+Use SetCycle 0 :db=0 :Use BitMap 0 :BlockScroll 0
 Gosub ResetVars :FlushBuffer 0 :FlushBuffer 1
 Gosub Mapper :ShapesBitMap 0,1
-Use lmaxlen 0	:BBlit 0,13,tx,ty
-Use lmaxlen 1	:BBlit 1,13,tx,ty
+Use BitMap 0	:BBlit 0,13,tx,ty
+Use BitMap 1	:BBlit 1,13,tx,ty
 If bonuslev=False
 	For d=1 To ng(lev)
-	Use lmaxlen 0 :BBlit 0,ghost(d)\image,ghost(d)\x,ghost(d)\y
-	Use lmaxlen 1 :BBlit 1,ghost(d)\image,ghost(d)\x,ghost(d)\y
+	Use BitMap 0 :BBlit 0,ghost(d)\image,ghost(d)\x,ghost(d)\y
+	Use BitMap 1 :BBlit 1,ghost(d)\image,ghost(d)\x,ghost(d)\y
 	Next d
 EndIf
 Show 0 :db=1 :Gosub Panel :DisplayOn
@@ -273,7 +273,7 @@ Repeat :Until Joyr(1)=8
 Repeat :Gosub CheckMoose :Until Joyr(1)<>8
 
 If #test=1 Then End
-eaten=0 :twice=0 :n=0 :db=1 :Show 0 :Use lmaxlen 1
+eaten=0 :twice=0 :n=0 :db=1 :Show 0 :Use BitMap 1
 
 ; =================== MAIN GAME LOOP =====================
 
@@ -337,7 +337,7 @@ If cnt MOD 25=0
 		ghost(d)\vun-(1 AND ghost(d)\vun>0)
 	Next d
 EndIf
-VWait :Show db :db=1-db :Use lmaxlen db
+VWait :Show db :db=1-db :Use BitMap db
 
 If dots=0 AND bonuslev=False Then Pop Repeat :firstgame=False :Goto Setup
 If bonusbits=0 AND bonuslev=True Then Gosub SuperBonus

@@ -7,7 +7,7 @@
 ; multiple sprites added (16)
 ; cars & tracks as sprites
 
-lmaxlen 0,608,124,4 ;37696 bytes (16 color main interface)
+BitMap 0,608,124,4 ;37696 bytes (16 color main interface)
 LoadShape 0,"mouse.iff":GetaSprite 0,0
 LoadBitMap 0,"banner.iff"
 LoadBank 0,"readme"
@@ -189,10 +189,10 @@ readtrackdisk:
 	Next
 	##[$D007] 1,640,#ys*2,4,*thisone
 	For y=0 To 1:For x=0 To 2
-		Use lmaxlen 1:GetaShape 0,x*123,y*32,123,32:Scale 0,100/123,26/32
-		Use lmaxlen 0:longdiv 0,1+x*101+y*303,83
+		Use BitMap 1:GetaShape 0,x*123,y*32,123,32:Scale 0,100/123,26/32
+		Use BitMap 0:Blit 0,1+x*101+y*303,83
 	Next:Next
-	Use lmaxlen 0:For x=0 To 5:xx=x*101+1:Box xx,82,xx+100,82+27,tt:Next
+	Use BitMap 0:For x=0 To 5:xx=x*101+1:Box xx,82,xx+100,82+27,tt:Next
 
 	CustomColors 0,0,81,1,0,16
 	CustomColors 0,18,109,0,0,16

@@ -2,15 +2,15 @@
 
 DEFTYPE.w
 
-lmaxlen 5,320,256,4
-lmaxlen 4,80,80,4
+BitMap 5,320,256,4
+BitMap 4,80,80,4
 LoadBitMap 5,"data/puzzlepics",2
 Dim p(50)
 
 Init:
-allocst 0,0,0,320,256,4,0,"",0,1
+Screen 0,0,0,320,256,4,0,"",0,1
 Use SetCycle 2
-localstat 0,0,0,320,256,$1800,"",0,1
+Window 0,0,0,320,256,$1800,"",0,1
 ScreensBitMap 0,0
 
 Strt:
@@ -43,7 +43,7 @@ Line 110,130,210,130,1
 Line 109,131,211,131,1
 
 
-longdiv 1,120,40
+Blit 1,120,40
 Gosub rand
 
 bx=4:by=4
@@ -156,7 +156,7 @@ Exchange p(b1),p(b2)
 Exchange p(b1),p(b3)
 Next
 CludgeBitMap 1,2
-Use lmaxlen 0
+Use BitMap 0
 For y=0 To 3
 For x=0 To 4
 v=p(x+y*5)

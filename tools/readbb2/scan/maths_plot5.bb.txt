@@ -3,11 +3,11 @@
 ;functions of x and y prior to calculating the z.
 ;This is an easy way of filling the screen with smoothly fitting pieces.
 WBStartup
-lmaxlen 0,320,256,5
-allocst 0,0,0,320,256,5,0,"",1,2,0
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
 Green 0,0,0,0:For i=16 To 31:Green i,i-16,31-i,0:Next
 p2.f=2*Pi
-ShowScreen 0:Use lmaxlen 0:BlockScroll 0
+ShowScreen 0:Use BitMap 0:BlockScroll 0
 For i=0 To 63
 	x.f=(6*i)/64:x=HSin((p2*x)/6)
 	If Joyb(1)<>0:Pop For:Goto l1:EndIf
@@ -23,7 +23,7 @@ For i=0 To 63
 Next:Next
 GetaShape 0,0,0,64,64
 For i=0 To 256 Step 64:For j=0 To 192 Step 64
-	longdiv 0,i,j
+	Blit 0,i,j
 Next:Next
 l1:MouseWait
 VWait 50

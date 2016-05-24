@@ -515,10 +515,10 @@ Function.w Requester {Title.s,Message.s,Gadgets.s}
 	Shared GTBName
 
 	If Title = "" Then Title = GTBName Else Title = GTBName+": "+Title
-	##[$80CA] Request
+	USEPATH Request
 	\es_StructSize = SizeOf.EasyStruct,0
 	\es_Title = &Title,&Message,&Gadgets
-	GadgetNo = ##[$FFDD](Peek.l(Addr localstat(0)),&Request,NULL,NULL)
+	GadgetNo = ##[$FFDD](Peek.l(Addr Window(0)),&Request,NULL,NULL)
 	FlushEvents
 	Function Return GadgetNo
 End Function
@@ -530,8 +530,8 @@ End Function
 ; |	Parameters: NONE																											|
 ; []----------------------------------------------------------------------[]
 Statement ResetMenu {}
-	If Peek.l(Addr localstat(1))
-		Dummy = ##[$FFEF](Peek.l(Addr localstat(1)),Peek.l(Addr ##[$C40D](0)))
+	If Peek.l(Addr Window(1))
+		Dummy = ##[$FFEF](Peek.l(Addr Window(1)),Peek.l(Addr ##[$C40D](0)))
 	EndIf
 End Statement
 
@@ -548,7 +548,7 @@ Statement CheckMenuSubItem {Menu.w, Item.w, SItem.w, State.w}
 	DEFTYPE .Menu	*MenuPtr
 	DEFTYPE .MItem *ItemPtr
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	*MenuPtr = Peek.l(Addr ##[$C40D](0))
 	While *MenuPtr <> 0 AND Menu > 0
 		*MenuPtr = \NextMenu
@@ -556,7 +556,7 @@ Statement CheckMenuSubItem {Menu.w, Item.w, SItem.w, State.w}
 	Wend
 	If *MenuPtr
 		*ItemPtr = \FirstMItem
-		##[$80CA] *ItemPtr
+		USEPATH *ItemPtr
 		While *ItemPtr <> 0 AND Item > 0
 			*ItemPtr = \NextMItem
 			Item-1
@@ -586,7 +586,7 @@ Statement CheckMenuItem {Menu.w, Item.w, State.w}
 	DEFTYPE .Menu	*MenuPtr
 	DEFTYPE .MItem *ItemPtr
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	*MenuPtr = Peek.l(Addr ##[$C40D](0))
 	While *MenuPtr <> 0 AND Menu > 0
 		*MenuPtr = \NextMenu
@@ -594,7 +594,7 @@ Statement CheckMenuItem {Menu.w, Item.w, State.w}
 	Wend
 	If *MenuPtr
 		*ItemPtr = \FirstMItem
-		##[$80CA] *ItemPtr
+		USEPATH *ItemPtr
 		While *ItemPtr <> 0 AND Item > 0
 			*ItemPtr = \NextMItem
 			Item-1
@@ -634,7 +634,7 @@ Function.w GetFontNo {CurrentFont.w}
 
 	Caller = EventWindow
 
-	localstat		 3,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-137)/2,320,137,#REQ_Flags,"Use Font",DPen,BPen
+	Window		 3,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-137)/2,320,137,#REQ_Flags,"Use Font",DPen,BPen
 	Use IntuiFont 1
 	GTListView 3,0,8,4,296,100,"",0,FontList(),CurrentFont
 	GTButton	 3,1,204,106,100,14,"_Cancel",#PLACETEXT_IN
@@ -668,9 +668,9 @@ Function.w GetFontNo {CurrentFont.w}
 	If OK
 		CurrentFont = FontNo
 		FontNo = 0
-		newmem Fonts()
+		ResetList Fonts()
 		For FontNo = 0 To CurrentFont
-			Dummy = globfree(Fonts())
+			Dummy = NextItem(Fonts())
 		Next FontNo
 		*FontPtr = Fonts()
 	EndIf
@@ -694,14 +694,14 @@ Function.w SelectText {Title.s}
 	Shared DPen,BPen
 
 	TextNo = 0
-	newmem Texts()
-	While globfree(Texts())
+	ResetList Texts()
+	While NextItem(Texts())
 		TextNo+1
 	Wend
 
 	If TextNo > 1
 		TextNo = 0
-		localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-145)/2,320,145,#REQ_Flags,Title,DPen,BPen
+		Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-145)/2,320,145,#REQ_Flags,Title,DPen,BPen
 		Use IntuiFont 1
 		GTListView 2,0,8,4,296,110,"",$0001,TextList(),TextNo
 		GTButton	 2,1,8,114,100,14,"OK",$0010
@@ -720,11 +720,11 @@ Function.w SelectText {Title.s}
 					Case #IDCMP_GADGETUP
 						Select GadgetHit
 							Case 0 : TextNo = EventCode
-							Case 1 : newmem Texts()
-											 newmem TextList()
+							Case 1 : ResetList Texts()
+											 ResetList TextList()
 											 For TextItem = 0 To TextNo
-												 Dummy = globfree(Texts())
-												 Dummy = globfree(TextList())
+												 Dummy = NextItem(Texts())
+												 Dummy = NextItem(TextList())
 											 Next TextItem
 											 OK = True
 											 CloseWin = True
@@ -737,8 +737,8 @@ Function.w SelectText {Title.s}
 		Free GTList 2
 	Else
 		If TextNo
-			Dummy = locfree(Texts())
-			Dummy = locfree(TextList())
+			Dummy = FirstItem(Texts())
+			Dummy = FirstItem(TextList())
 			OK = True
 		Else
 			ReqGadget = Requester {"","No text items have been defined.","OK"}
@@ -854,8 +854,8 @@ End Function
 Function.w WinMouseX {WindowNo.w}
 	Shared *GridPtr
 
-	##[$80CA] *GridPtr
-	Use localstat WindowNo
+	USEPATH *GridPtr
+	Use Window WindowNo
 	X = QLimit(EMouseX-WLeftOff,\HBdr,InnerWidth-\HBdr-1)
 	If \Grid AND \X > 1 Then X-(X MOD \X)
 	Function Return X
@@ -874,8 +874,8 @@ End Function
 Function.w WinMouseY {WindowNo.w}
 	Shared *GridPtr
 
-	##[$80CA] *GridPtr
-	Use localstat WindowNo
+	USEPATH *GridPtr
+	Use Window WindowNo
 	Y = QLimit(EMouseY-WTopOff,\VBdr,InnerHeight-\VBdr-1)
 	If \Grid AND \Y > 1 Then Y-(Y MOD \Y)
 	Function Return Y
@@ -894,7 +894,7 @@ End Function
 ; |							Y2 - Bottom coordinate																		|
 ; []----------------------------------------------------------------------[]
 Statement BoundBox {X1.w, Y1.w, X2.w, Y2.w}
-	Use localstat 1
+	Use Window 1
 	Box WindowX+WLeftOff+X1,WindowY+WTopOff+Y1,WindowX+WLeftOff+X2,WindowY+WTopOff+Y2,-1
 End Statement
 
@@ -1122,8 +1122,8 @@ End Function
 		ReqGadget = Requester {"",Message,"Quit"}
 		End
 	EndIf
-	remline 0,"GTBMenu.font",8
-	remline 1,"GTBGadget.font",8
+	LoadFont 0,"GTBMenu.font",8
+	LoadFont 1,"GTBGadget.font",8
 
 	Gosub CreateMenu
 	Gosub LoadSettings
@@ -1138,11 +1138,11 @@ End Function
 	StartColour	 = 0
 	UpdatePalette = True
 
-	##[$80CA] Fonts()
-	If globalloc(Fonts())
+	USEPATH Fonts()
+	If AddItem(Fonts())
 		\Size = 8,0,DefFontName
-		remline 2,\Name,\Size
-		If globalloc(FontList())
+		LoadFont 2,\Name,\Size
+		If AddItem(FontList())
 			FontList()\Text = LSet$(Left$(\Name,Instr(\Name,".font")-1),31)+RSet$(Str$(\Size),3)
 		EndIf
 		FontsLoaded = 1
@@ -1188,7 +1188,7 @@ End Function
 LoadSettings:
 	DEFTYPE .l FileHeader
 
-	##[$80CA] *SettingsPtr
+	USEPATH *SettingsPtr
 	If SettingsFile = ""
 		Use IntuiFont 1
 		SettingsFile = ASLFileRequest$("Load Settings"+Chr$(0),SettingsPath,SettingsUser,"#?.prefs")
@@ -1239,7 +1239,7 @@ LoadSettings:
 	CheckMenuSubItem {3,0,GadgetType,On}
 	ResetMenu {}
 
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	Select *SettingsPtr\ScrSelect
 		Case #SCR_Requester : *ScrDetails = ASLScreenRequest(#ASLScrFlags)
 													If *ScrDetails
@@ -1268,7 +1268,7 @@ CreateMenu:
 	MenuGap 2,1
 	SubItemOff 35,0
 	Use IntuiFont 0
-	newlocarr 0,0,"Project"
+	MenuTitle 0,0,"Project"
 		MenuItem 0,0,0,0,"New","N"
 		MenuItem 0,0,0,1,"Open...","O"
 		MenuItem 0,$40,0,2,Left$(DIV,19)
@@ -1289,12 +1289,12 @@ CreateMenu:
 		MenuItem 0,0,0,9,"About...","?"
 		MenuItem 0,$40,0,10,Left$(DIV,19)
 		MenuItem 0,0,0,11,"Quit","Q"
-	newlocarr 0,1,"Screen"
+	MenuTitle 0,1,"Screen"
 		MenuItem 0,0,1,0,"Mode..."
 		MenuItem 0,0,1,1,"Pens..."
 		MenuItem 0,0,1,2,"Palette..."
 		MenuItem 0,0,1,3,"Settings..."
-	newlocarr 0,2,"Window"
+	MenuTitle 0,2,"Window"
 		MenuItem 0,1,2,0,"	Grid Snap","G"
 		MenuItem 0,0,2,1,"Grid Settings..."
 		MenuItem 0,$40,2,2,Left$(DIV,19)
@@ -1315,7 +1315,7 @@ CreateMenu:
 		MenuItem 0,0,2,13,"Test Menu","T"
 		MenuItem 0,0,2,14,"Edit Menu...","U"
 		MenuItem 0,0,2,15,"Menu Settings..."
-	newlocarr 0,3,"Gadgets"
+	MenuTitle 0,3,"Gadgets"
 		MenuItem 0,0,3,0,"Gadget Type				 "+Chr$(187)
 			SubItem 0,2,3,0,0,"	Button				","1"
 			SubItem 0,2,3,0,1,"	CheckBox","2"
@@ -1361,12 +1361,12 @@ CreateMenu:
 	CloseScreen 0
 	Free GTList 0
 
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	Use IntuiFont 0
 	AddIDCMP #GTB_IDCMP
 	ScreenPens \Pens[2],\Pens[3],\Pens[4],\Pens[5],\Pens[6],\Pens[7],\Pens[8]
-	allocst 0,0,0,\Width,\Height,\Depth,\ViewMode,\Title,DPen,BPen
-	localstat 0,0,0,\Width,\Height,#WFLG_BACKDROP|#WFLG_BORDERLESS|#WFLG_NEWLOOKMENUS,"",DPen,BPen
+	Screen 0,0,0,\Width,\Height,\Depth,\ViewMode,\Title,DPen,BPen
+	Window 0,0,0,\Width,\Height,#WFLG_BACKDROP|#WFLG_BORDERLESS|#WFLG_NEWLOOKMENUS,"",DPen,BPen
 	ScreensBitMap 0,0
 
 	If UpdatePalette
@@ -1380,7 +1380,7 @@ CreateMenu:
 		FadePalette 0
 	EndIf
 
-	##[$80CA] *WindowPtr
+	USEPATH *WindowPtr
 	\Width		 = QLimit(\Width,0,*ScreenPtr\Width)
 	\Height		= QLimit(\Height,0,*ScreenPtr\Height)
 	\X				 = QLimit(\X,0,*ScreenPtr\Width-\Width)
@@ -1399,18 +1399,18 @@ CreateMenu:
 	CloseWindow 1
 	Free GTList 0
 
-	##[$80CA] *WindowPtr
+	USEPATH *WindowPtr
 	Use IntuiFont 0
 	WindowFlags.l = \Flags | #GTB_Flags & NOT (#WFLG_RMBTRAP)
-	localstat 1,\X,\Y,\Width,\Height,WindowFlags,\Title,DPen,BPen
+	Window 1,\X,\Y,\Width,\Height,WindowFlags,\Title,DPen,BPen
 	WindowOutput 1
-	Dummy = ##[$FFB1](Peek.l(Addr localstat(1)),\MinWidth,\MinHeight,\MaxWidth,\MaxHeight)
-	arrmult 0
+	Dummy = ##[$FFB1](Peek.l(Addr Window(1)),\MinWidth,\MinHeight,\MaxWidth,\MaxHeight)
+	SetMenu 0
 
-	Use localstat 1
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	Use Window 1
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		Use IntuiFont 2+\FontNo
 		Select \GadgetType
 			Case #GAD_Button
@@ -1452,8 +1452,8 @@ CreateMenu:
 	Wend
 	AttachGTList 0,1
 
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If SortType = #SORT_Ascending
 			\SortID = ((InnerHeight-\Y)*\Width+(InnerWidth-\X))/10
 		Else
@@ -1466,9 +1466,9 @@ CreateMenu:
 		EndIf
 	Wend
 
-	##[$80CA] Texts()
-	newmem Texts()
-	While globfree(Texts())
+	USEPATH Texts()
+	ResetList Texts()
+	While NextItem(Texts())
 		WindowFont 2+\FontNo,\Style
 		WJam \JAM:WColour \DPen,\BPen
 		WLocate \X,\Y:NPrint \Text
@@ -1482,10 +1482,10 @@ NewScreenMode:
 	Depth = *ScreenPtr\Depth
 	*ScrDetails = ASLScreenRequest(#ASLScrFlags)
 	If *ScrDetails
-		##[$80CA] *ScrDetails
+		USEPATH *ScrDetails
 		*ScreenPtr\X = 0,0,\Width,\Height,\Depth,\ViewMode
 
-		##[$80CA] *ScreenPtr
+		USEPATH *ScreenPtr
 		If \ViewMode = 0
 			If \Width > 320
 				If \Width > 640 Then \ViewMode|#SUPERHIRES Else \ViewMode|#HIRES
@@ -1517,9 +1517,9 @@ NewScreenMode:
 	Mode = #MODE_None
 	Exit = False
 	Repeat
-		Use localstat 1
+		Use Window 1
 		Use IntuiFont 0
-		##[$80CA] *WindowPtr
+		USEPATH *WindowPtr
 		\X = WindowX,WindowY
 
 		FlushEvents #IDCMP_MOUSEMOVE
@@ -1594,7 +1594,7 @@ NewScreenMode:
 							Case	0 : GadgetType = SubHit
 							Case	2 : Gosub UpdateWindow
 							Case	3 : Mode	= #MODE_Select:MenusOff
-												Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&SelectMsg)
+												Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&SelectMsg)
 							Case	4 : Gosub SelectAll
 							Case	5 : Gosub DeselectAll
 							Case	7 : Gosub CutGadgets
@@ -1655,8 +1655,8 @@ NewScreenMode:
 				End Select
 
 			Case #IDCMP_GADGETUP
-				newmem Gadgets()
-				While globfree(Gadgets())
+				ResetList Gadgets()
+				While NextItem(Gadgets())
 					If Gadgets()\ID = GadgetHit
 						Select Gadgets()\GadgetType
 							Case #GAD_Integer : Gadgets()\Value	= GTGetInteger(0,GadgetHit)
@@ -1689,7 +1689,7 @@ NewScreenMode:
 ; ** InitDrawGadget
 ; **
 .InitDrawGadget
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	Gosub DeselectAll
 	If AddLast(Gadgets())
 		*GadgetPtr = Gadgets()
@@ -1718,8 +1718,8 @@ NewScreenMode:
 ; ** DrawGadget
 ; **
 DrawGadget:
-	Use localstat 1
-	##[$80CA] *GadgetPtr
+	Use Window 1
+	USEPATH *GadgetPtr
 	If \GadgetType = #GAD_CheckBox OR \GadgetType = #GAD_MX
 		Gosub MovePasteRect
 	Else
@@ -1731,11 +1731,11 @@ DrawGadget:
 ; ** ResizePasteRect
 ; **
 ResizePasteRect:
-	##[$80CA] *GridPtr
+	USEPATH *GridPtr
 	Grid = \Grid:GridX = \X:GridY = \Y:HBdr = \HBdr:VBdr = \VBdr
 
-	Use localstat 1
-	##[$80CA] *PastePtr
+	Use Window 1
+	USEPATH *PastePtr
 	If \Init Then BoundBox {\X1,\Y1,\X2,\Y2} Else \Init = True
 	\X1 = WinMouseX{1},WinMouseY{1}
 	If Grid AND GridX > 1
@@ -1760,7 +1760,7 @@ ResizePasteRect:
 	If \X1 < \X2 Then X = \X1 Else X = \X2
 	If \Y1 < \Y2 Then Y = \Y1 Else Y = \Y2
 	Info.s = "X="+Str$(X)+" Y="+Str$(Y)+" Width="+Str$(Abs(\X2-\X1)+1)+" Height="+Str$(Abs(\Y2-\Y1)+1)
-	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
+	Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&Info)
 	Format ""
 	Return
 
@@ -1768,8 +1768,8 @@ ResizePasteRect:
 ; ** MovePasteRect
 ; **
 MovePasteRect:
-	##[$80CA] *PastePtr
-	Use localstat 1
+	USEPATH *PastePtr
+	Use Window 1
 	If \Init Then BoundBox {\X1,\Y1,\X2,\Y2} Else \Init = True
 	X = QLimit(WinMouseX{1},0,InnerWidth -*GridPtr\HBdr-(Abs(\X2-\X1)+1))
 	Y = QLimit(WinMouseY{1},0,InnerHeight-*GridPtr\VBdr-(Abs(\Y2-\Y1)+1))
@@ -1779,7 +1779,7 @@ MovePasteRect:
 
 	Format "0000"
 	Info.s = "X="+Str$(X)+" Y="+Str$(Y)
-	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
+	Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&Info)
 	Format ""
 	Return
 
@@ -1789,9 +1789,9 @@ MovePasteRect:
 .ResizeGadget
 	Gadgets = 0
 	*GadgetPtr = 0
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected
 			Gosub SelectOne
 			If Gadgets = 0 Then *GadgetPtr = Gadgets()
@@ -1800,7 +1800,7 @@ MovePasteRect:
 	Wend
 
 	If *GadgetPtr
-		##[$80CA] *GadgetPtr
+		USEPATH *GadgetPtr
 		If \GadgetType <> #GAD_CheckBox AND \GadgetType <> #GAD_MX
 			MenusOff
 			Mode = #MODE_Resize
@@ -1817,15 +1817,15 @@ MovePasteRect:
 .SelectGadget
 	DEFTYPE .l BoxArea
 
-	Use localstat 1
+	Use Window 1
 	Mx = QLimit(EMouseX-WLeftOff,0,InnerWidth-1)
 	My = QLimit(EMouseY-WTopOff,0,InnerHeight-1)
 	BoxArea.l = (WindowWidth+1)*(WindowHeight+1)
 	*GadgetPtr = 0
 
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If Mx >= \X AND Mx < \X+\Width AND My >= \Y AND My < \Y+\Height
 			If (\Width*\Height) < BoxArea
 				BoxArea = \Width*\Height
@@ -1834,8 +1834,8 @@ MovePasteRect:
 		EndIf
 	Wend
 
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If Gadgets() = *GadgetPtr Then Gosub SelectOne
 	Wend
 	Return
@@ -1844,8 +1844,8 @@ MovePasteRect:
 ; ** SelectOne
 ; **
 SelectOne:
-	Use localstat 1
-	##[$80CA] Gadgets()
+	Use Window 1
+	USEPATH Gadgets()
 	If \Selected = True Then \Selected = False Else \Selected = True
 	BoundBox {\X-1,\Y-1,\X+\Width,\Y+\Height}
 	BoundBox {\X-2,\Y-2,\X+\Width+1,\Y+\Height+1}
@@ -1855,9 +1855,9 @@ SelectOne:
 ; ** SelectAll
 ; **
 SelectAll:
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected = False Then Gosub SelectOne
 	Wend
 	Return
@@ -1866,9 +1866,9 @@ SelectAll:
 ; ** DeselectAll
 ; **
 DeselectAll:
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected = True Then Gosub SelectOne
 	Wend
 	Return
@@ -1877,18 +1877,18 @@ DeselectAll:
 ; ** EndOperation
 ; **
 .EndOperation
-	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
-	##[$80CA] *PastePtr
+	Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+	USEPATH *PastePtr
 	Select Mode
-		Case #MODE_Draw		: freelast	Gadgets()
+		Case #MODE_Draw		: KillItem	Gadgets()
 												 BoundBox {\X1,\Y1,\X2,\Y2}
 		Case #MODE_Move		: ClearList GadgBuf()
 												 BoundBox {\X1,\Y1,\X2,\Y2}
 		Case #MODE_Resize	: BoundBox {\X1,\Y1,\X2,\Y2}
-												 ##[$80CA] *GadgetPtr
+												 USEPATH *GadgetPtr
 												 BoundBox {\X,\Y,\X+\Width-1,\Y+\Height-1}
-		Case #MODE_AddText : freelast	Texts()
-												 freelast	TextList()
+		Case #MODE_AddText : KillItem	Texts()
+												 KillItem	TextList()
 												 Gosub UpdateWindow
 	End Select
 	Mode = #MODE_None
@@ -1909,17 +1909,17 @@ DeselectAll:
 ; ** CutGadgets
 ; **
 .CutGadgets
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	ClearList GadgBuf()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected
 			If AddLast(GadgBuf())
 				Dummy = ##[$FEDB](&Gadgets(),&GadgBuf(),#GadgetInfo_DataSZ)
 				GadgBuf()\Text	 = \Text
 				GadgBuf()\Label	= \Label
 				GadgBuf()\String = \String
-				freelast Gadgets()
+				KillItem Gadgets()
 				ProjectChanged = True
 			EndIf
 		EndIf
@@ -1931,10 +1931,10 @@ DeselectAll:
 ; ** CopyGadgets
 ; **
 .CopyGadgets
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	ClearList GadgBuf()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected
 			If AddLast(GadgBuf())
 				Dummy = ##[$FEDB](&Gadgets(),&GadgBuf(),#GadgetInfo_DataSZ)
@@ -1953,13 +1953,13 @@ DeselectAll:
 ; ** InitPaste
 ; **
 .InitPaste
-	Use localstat 1
+	Use Window 1
 	*PastePtr\X1 = InnerWidth,InnerHeight,0,0,False
 
 	Gadgets = 0
-	##[$80CA] GadgBuf()
-	newmem GadgBuf()
-	While globfree(GadgBuf())
+	USEPATH GadgBuf()
+	ResetList GadgBuf()
+	While NextItem(GadgBuf())
 		Gadgets+1
 		If \X < *PastePtr\X1 Then *PastePtr\X1 = \X
 		If \Y < *PastePtr\Y1 Then *PastePtr\Y1 = \Y
@@ -1968,8 +1968,8 @@ DeselectAll:
 	Wend
 
 	If Gadgets
-		newmem GadgBuf()
-		While globfree(GadgBuf())
+		ResetList GadgBuf()
+		While NextItem(GadgBuf())
 			\X-*PastePtr\X1
 			\Y-*PastePtr\Y1
 		Wend
@@ -1985,9 +1985,9 @@ DeselectAll:
 ; ** PasteGadgets
 ; **
 PasteGadgets:
-	##[$80CA] GadgBuf()
-	newmem GadgBuf()
-	While globfree(GadgBuf())
+	USEPATH GadgBuf()
+	ResetList GadgBuf()
+	While NextItem(GadgBuf())
 		If AddLast(Gadgets())
 			Dummy = ##[$FEDB](&GadgBuf(),&Gadgets(),#GadgetInfo_DataSZ)
 			Gadgets()\Text	 = \Text
@@ -2011,11 +2011,11 @@ PasteGadgets:
 ; ** MoveGadgets
 ; **
 .MoveGadgets
-	##[$80CA] Gadgets()
-	newmem GadgBuf()
-	While globfree(GadgBuf())
-		newmem Gadgets()
-		While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList GadgBuf()
+	While NextItem(GadgBuf())
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			If \ID = GadgBuf()\ID
 				\Selected = False
 				\X = GadgBuf()\X+*PastePtr\X1
@@ -2023,7 +2023,7 @@ PasteGadgets:
 				ProjectChanged = True
 			EndIf
 		Wend
-		freelast GadgBuf()
+		KillItem GadgBuf()
 	Wend
 
 	Mode = #MODE_None
@@ -2034,11 +2034,11 @@ PasteGadgets:
 ; ** DeleteGadgets
 ; **
 .DeleteGadgets
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected
-			freelast Gadgets()
+			KillItem Gadgets()
 			ProjectChanged = True
 		EndIf
 	Wend
@@ -2049,10 +2049,10 @@ PasteGadgets:
 ; ** RenumberGadgets
 ; **
 .RenumberGadgets
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	NextID = *WindowPtr\StartID
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		\ID = NextID:NextID+1
 	Wend
 	Gosub UpdateWindow
@@ -2074,14 +2074,14 @@ PasteGadgets:
 ; **
 .SourceSettings
 	MenusOff
-	##[$80CA] *SettingsPtr
+	USEPATH *SettingsPtr
 	IDLabels		 = \IDLabels
 	TAGLabels		= \TAGLabels
 	IDCMPLabels	= \IDCMPLabels
 	GenEventCode = \GenEventCode
 	IDSortType	 = \IDSortType
 
-	localstat				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-123)/2,320,123,#REQ_Flags,"Source Settings",DPen,BPen
+	Window				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-123)/2,320,123,#REQ_Flags,"Source Settings",DPen,BPen
 	Use IntuiFont 1
 	GTCycle			 2,0,72,4,232,14,"ID:",$0021,"NO LABELS|GENERATE LABELS",IDLabels
 	GTCycle			 2,1,72,18,232,14,"TAGS:",$0021,"NO LABELS|GENERATE LABELS",TAGLabels
@@ -2134,10 +2134,10 @@ PasteGadgets:
 ; **
 .DefaultGrid
 	MenusOff
-	##[$80CA] *SettingsPtr
+	USEPATH *SettingsPtr
 	GridEnabled = \GridEnabled
 
-	localstat				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-118)/2,320,118,#REQ_Flags,"Default Grid Settings",DPen,BPen
+	Window				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-118)/2,320,118,#REQ_Flags,"Default Grid Settings",DPen,BPen
 	Use IntuiFont 1
 	GTInteger		 2,0,72,4,232,14,"Grid X:",$0021,\GridX
 	GTInteger		 2,1,72,18,232,14,"Grid Y:",$0021,\GridY
@@ -2186,7 +2186,7 @@ PasteGadgets:
 	DEFTYPE .l ViewM
 
 	MenusOff
-	##[$80CA] *SettingsPtr
+	USEPATH *SettingsPtr
 	ScrSelect	= \ScrSelect
 	Width	= \ScrWidth
 	Height = \ScrHeight
@@ -2194,7 +2194,7 @@ PasteGadgets:
 	ViewM	= \ScrViewMode
 	ViewMode.s = "$"+Hex$(\ScrViewMode)
 
-	localstat				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-134)/2,320,134,#REQ_Flags,"Default Screen Mode",DPen,BPen
+	Window				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-134)/2,320,134,#REQ_Flags,"Default Screen Mode",DPen,BPen
 	Use IntuiFont 1
 	GTCycle			 2,0,88,4,216,14,"Default:",$0021,"USE REQUESTER|SAME AS WORKBENCH|CUSTOM",ScrSelect
 	GTButton			2,1,88,20,216,14,"Screen Mode...",$0010
@@ -2268,10 +2268,10 @@ PasteGadgets:
 ; **
 .ScreenSettings
 	MenusOff
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 
 	Display.s = "$"+Hex$(\ViewMode)
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-151)/2,320,151,#REQ_Flags,"Screen Settings",DPen,BPen
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-151)/2,320,151,#REQ_Flags,"Screen Settings",DPen,BPen
 	Use IntuiFont 1
 	GTString	2,0,88,4,216,14,"Title:",$0021,#LEN_Title,\Title
 	GTString	2,1,88,18,216,14,"Label:",$0021,#LEN_Label,\Label
@@ -2309,7 +2309,7 @@ PasteGadgets:
 		\Title		= GTGetString(2,0)
 		\Label		= GTGetString(2,1)
 		\ScreenNo = GTGetInteger(2,2)
-		Dummy		 = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&\Title)
+		Dummy		 = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&\Title)
 		ProjectChanged = True
 	EndIf
 	Free GTList 2
@@ -2322,8 +2322,8 @@ PasteGadgets:
 ; **
 .GridSettings
 	MenusOff
-	##[$80CA] *GridPtr
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-105)/2,320,105,#REQ_Flags,"Grid Settings",DPen,BPen
+	USEPATH *GridPtr
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-105)/2,320,105,#REQ_Flags,"Grid Settings",DPen,BPen
 	Use IntuiFont 1
 	GTInteger 2,0,72,4,232,14,"Grid X:",$0021,\X
 	GTInteger 2,1,72,18,232,14,"Grid Y:",$0021,\Y
@@ -2354,7 +2354,7 @@ PasteGadgets:
 	CloseWindow 2
 
 	If OK
-		Use localstat 1
+		Use Window 1
 		\X		= QLimit(GTGetInteger(2,0),1,InnerWidth-1)
 		\Y		= QLimit(GTGetInteger(2,1),1,InnerHeight-1)
 		\HBdr = QLimit(GTGetInteger(2,2),0,InnerWidth/4)
@@ -2370,8 +2370,8 @@ PasteGadgets:
 ; **
 .WindowSettings
 	MenusOff
-	##[$80CA] *WindowPtr
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-193)/2,320,193,#REQ_Flags,"Window Settings",DPen,BPen
+	USEPATH *WindowPtr
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-193)/2,320,193,#REQ_Flags,"Window Settings",DPen,BPen
 	Use IntuiFont 1
 	GTString	2,0,88,4,216,14,"Title:",$0021,#LEN_Title,\Title
 	GTString	2,1,88,18,216,14,"WinLabel:",$0021,#LEN_Label,\Label
@@ -2453,8 +2453,8 @@ PasteGadgets:
 ; **
 .WindowFlags
 	MenusOff
-	##[$80CA] *WindowPtr
-	localstat 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-159)/2,320,159,#REQ_Flags,"Window Flags",DPen,BPen
+	USEPATH *WindowPtr
+	Window 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-159)/2,320,159,#REQ_Flags,"Window Flags",DPen,BPen
 	Use IntuiFont 1
 	GTCheckBox 2,0,8,4,26,11,"SIZEGADGET",$0002
 	GTCheckBox 2,1,168,4,26,11,"DRAGBAR",$0002
@@ -2573,8 +2573,8 @@ PasteGadgets:
 ; **
 .WindowIDCMP
 	MenusOff
-	##[$80CA] *WindowPtr
-	localstat 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-192)/2,320,192,#REQ_Flags,"Window IDCMP",DPen,BPen
+	USEPATH *WindowPtr
+	Window 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-192)/2,320,192,#REQ_Flags,"Window IDCMP",DPen,BPen
 	Use IntuiFont 1
 	GTCheckBox 2,0,8,4,26,11,"SIZEVERIFY",$0002
 	GTCheckBox 2,1,176,4,26,11,"NEWSIZE",$0002
@@ -2656,13 +2656,13 @@ PasteGadgets:
 ; **
 .WindowPens
 	MenusOff
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	CyclePens.s = "DETAILPEN|BLOCKPEN|TEXTPEN|SHINEPEN|SHADOWPEN|FILLPEN|FILLTEXTPEN|BACKGROUNDPEN|HIGHLIGHTPEN"
 	PenNo = 0
 	Dim Pens.b(8)
 	Dummy = ##[$FEDB](&\Pens[0],&Pens(0),SizeOf.b*9)
 
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-95)/2,320,95,#REQ_Flags,"Pens",DPen,BPen
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-95)/2,320,95,#REQ_Flags,"Pens",DPen,BPen
 	Use IntuiFont 1
 	GTCycle	 2,0,75,4,229,14,"Pen:",$0021,CyclePens,0
 	GTPalette 2,1,75,18,229,32,"Colour:",$0021,\Depth,Pens(0)
@@ -2710,7 +2710,7 @@ PasteGadgets:
 ; **
 .WindowPalette
 	MenusOff
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	CPalName = SwapFileExtension {FileName,".palette"}
 	RedVal=Blue(0):GreenVal=Palette(0):BlueVal=PalRGB(0)
 	ColourNo = 0
@@ -2722,7 +2722,7 @@ PasteGadgets:
 	Next ColourReg
 	FadePalette 1
 
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-150)/2,320,150,#REQ_Flags,"Palette",DPen,Bpen
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-150)/2,320,150,#REQ_Flags,"Palette",DPen,Bpen
 	Use IntuiFont 1
 	GTTags		#GTSL_LevelFormat,&LevFmt,#GTSL_MaxLevelLen,2,#GTSL_LevelPlace,#PLACETEXT_RIGHT
 	GTSlider	2,0,64,4,216,14,"Red:",$0021,0,15,RedVal
@@ -2759,7 +2759,7 @@ PasteGadgets:
 										 GTSetAttrs 2,2,#GTSL_Level,BlueVal
 						Case 4 : FPalName = ASLFileRequest$("Load ILBM Palette"+Chr$(0),PathName,CPalName,"#?.palette")
 										 If FPalName
-											 casestrcomp 1,FPalName
+											 LoadPalette 1,FPalName
 											 FadePalette 1
 											 RedVal=Blue(ColourNo):GreenVal=Palette(ColourNo):BlueVal=PalRGB(ColourNo)
 											 GTSetAttrs 2,0,#GTSL_Level,RedVal
@@ -2821,7 +2821,7 @@ PasteGadgets:
 .Font
 	DEFTYPE .FontRequest *FontInfo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-137)/2,320,137,#REQ_Flags,"Fonts",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-137)/2,320,137,#REQ_Flags,"Fonts",DPen,BPen
 	Use IntuiFont 1
 	GTListView 2,0,8,4,296,100,"",0,FontList(),CurrentFont
 	GTButton	 2,1,8,106,60,14,"Add",$0010
@@ -2830,7 +2830,7 @@ PasteGadgets:
 	GTButton	 2,4,204,106,100,14,"OK",$0010
 	AttachGTList 2,2
 
-	##[$80CA] Fonts()
+	USEPATH Fonts()
 	CloseWin = False
 	GadgetsChanged = False
 	Repeat
@@ -2854,34 +2854,34 @@ PasteGadgets:
 													 GTChangeList 2,0,FontList()
 													 GTSetAttrs 2,2,#GA_Disabled,False
 												 Else
-													 freelast Fonts()
+													 KillItem Fonts()
 												 EndIf
 											 Else
-												 freelast Fonts()
+												 KillItem Fonts()
 											 EndIf
 										 Else
 											 ReqGadget = Requester {"","Font limit has been reached.","OK"}
 										 EndIf
 
-						Case 2 : newmem Fonts()
-										 newmem FontList()
+						Case 2 : ResetList Fonts()
+										 ResetList FontList()
 										 For FontNo = 0 To CurrentFont
-											 Dummy = globfree(Fonts())
-											 Dummy = globfree(FontList())
+											 Dummy = NextItem(Fonts())
+											 Dummy = NextItem(FontList())
 										 Next FontNo
-										 freelast Fonts()
-										 freelast FontList()
+										 KillItem Fonts()
+										 KillItem FontList()
 
-										 newmem Gadgets()
-										 While globfree(Gadgets())
+										 ResetList Gadgets()
+										 While NextItem(Gadgets())
 											 If Gadgets()\FontNo >= CurrentFont Then Gadgets()\FontNo = QLimit(Gadgets()\FontNo-1,0,FontsLoaded-1)
 										 Wend
-										 newmem GadgBuf()
-										 While globfree(GadgBuf())
+										 ResetList GadgBuf()
+										 While NextItem(GadgBuf())
 											 If GadgBuf()\FontNo >= CurrentFont Then GadgBuf()\FontNo = QLimit(GadgBuf()\FontNo-1,0,FontsLoaded-1)
 										 Wend
-										 newmem Texts()
-										 While globfree(Texts())
+										 ResetList Texts()
+										 While NextItem(Texts())
 											 If Texts()\FontNo >= CurrentFont Then Texts()\FontNo = QLimit(Texts()\FontNo-1,0,FontsLoaded-1)
 										 Wend
 										 If *MenuPtr\FontNo >= CurrentFont Then *MenuPtr\FontNo = QLimit(*MenuPtr\FontNo-1,0,FontsLoaded-1)
@@ -2907,9 +2907,9 @@ PasteGadgets:
 		EndIf
 		If CloseWin AND FontsLoaded = 0
 			Select Requester {"ERROR","You must have at least one font loaded.","OK|Load Default"}
-				Case 0 : If globalloc(Fonts())
+				Case 0 : If AddItem(Fonts())
 									 \Size = 8,0,DefFontName
-									 If globalloc(FontList())
+									 If AddItem(FontList())
 										 FontList()\Text = LSet$(Left$(\Name,Instr(\Name,".font")-1),31)+RSet$(Str$(\Size),3)
 									 EndIf
 									 FontsLoaded = 1
@@ -2923,10 +2923,10 @@ PasteGadgets:
 	Free GTList 2
 
 	FontNo = 2
-	newmem Fonts()
-	While globfree(Fonts())
+	ResetList Fonts()
+	While NextItem(Fonts())
 		If FontNo = CurrentFont+2 Then *FontPtr = Fonts()
-		remline FontNo,\Name,\Size
+		LoadFont FontNo,\Name,\Size
 		FontNo+1
 	Wend
 
@@ -2955,21 +2955,21 @@ PasteGadgets:
 ; **
 .EditGadget
 	If Mode = #MODE_Draw OR Mode = #MODE_Resize
-		##[$80CA] *PastePtr
+		USEPATH *PastePtr
 		BoundBox {\X1,\Y1,\X2,\Y2}
 		If \X1 > \X2 Then Exchange \X1,\X2
 		If \Y1 > \Y2 Then Exchange \Y1,\Y2
 		*GadgetPtr\X = \X1,\Y1,\X2-\X1+1,\Y2-\Y1+1
 
-		Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+		Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
 		If Mode = #MODE_Resize Then Gosub UpdateWindow
 	EndIf
 
 	If Mode = #MODE_Draw OR Mode = #MODE_Edit
 		GadgetsChanged = False
-		##[$80CA] Gadgets()
-		newmem Gadgets()
-		While globfree(Gadgets())
+		USEPATH Gadgets()
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			If \Selected
 				If Mode = #MODE_Draw Then \Selected = False Else Gosub SelectOne
 				Select \GadgetType
@@ -3002,21 +3002,21 @@ PasteGadgets:
 .EditGadgetSize
 	DEFTYPE .s WindowTitle
 
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	Selected = 0
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected Then Selected+1
 	Wend
 	If Selected = 0 Then Return
 
-	Use localstat 1
+	Use Window 1
 	ClipLeft	 = 0
 	ClipRight	= InnerWidth-1
 	ClipTop		= 0
 	ClipBottom = InnerHeight-1
 
-	localstat		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-135)/2,320,135,#REQ_Flags,"",DPen,BPen
+	Window		2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-135)/2,320,135,#REQ_Flags,"",DPen,BPen
 	Use IntuiFont 1
 	GTText		2,0,72,4,232,14,"Text:",$0001,""
 	GTText		2,1,72,18,232,14,"Label:",$0001,""
@@ -3028,9 +3028,9 @@ PasteGadgets:
 	GTButton	2,7,204,104,100,14,"Cancel",$0010
 	AttachGTList 2,2
 
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \Selected
 			\Selected = False
 
@@ -3043,7 +3043,7 @@ PasteGadgets:
 			EndIf
 
 			WindowTitle = "Edit "+GTNames(\GadgetType)+" Gadget Size"
-			Dummy = ##[$FFAA](Peek.l(Addr localstat(2)),&WindowTitle,&*ScreenPtr\Title)
+			Dummy = ##[$FFAA](Peek.l(Addr Window(2)),&WindowTitle,&*ScreenPtr\Title)
 			GTSetString	2,0,\Text
 			GTSetString	2,1,\Label
 			GTSetInteger 2,2,\X
@@ -3095,12 +3095,12 @@ PasteGadgets:
 ; ** GADButton
 ; **
 GADButton:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText	= \Flags & #PLACETEXT_MASK
 	NG_Disable = \Flags & #NG_DISABLE
 	FontNo		 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-104)/2,320,104,#REQ_Flags,"Edit Button Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-104)/2,320,104,#REQ_Flags,"Edit Button Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3144,7 +3144,7 @@ GADButton:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3153,14 +3153,14 @@ GADButton:
 ; ** GADCheckBox
 ; **
 GADCheckBox:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_Disable	 = \Flags & #NG_DISABLE
 	NG_HighLabel = \Flags & #NG_HIGHLABEL
 	NG_BoolValue = \Flags & #NG_BOOLVALUE
 	FontNo			 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-115)/2,320,115,#REQ_Flags,"Edit CheckBox Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-115)/2,320,115,#REQ_Flags,"Edit CheckBox Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3208,7 +3208,7 @@ GADCheckBox:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3220,7 +3220,7 @@ GADCycle:
 	DEFTYPE .List *ListPtr
 	DEFTYPE .s CItem, Character
 
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_Disable	 = \Flags & #NG_DISABLE
 	NG_HighLabel = \Flags & #NG_HIGHLABEL
@@ -3232,7 +3232,7 @@ GADCycle:
 	Repeat
 		Pos = Instr(\Options,"|",CPos)
 		If Right$(\Options,CPos) <> ""
-			If globalloc(CycleList())
+			If AddItem(CycleList())
 				Labels+1
 				If Pos
 					CycleList()\Text = Mid$(\Options,CPos,Pos-CPos)
@@ -3245,7 +3245,7 @@ GADCycle:
 	Until Pos = 0
 	*ListPtr = 0
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-180)/2,320,180,#REQ_Flags,"Edit Cycle Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-180)/2,320,180,#REQ_Flags,"Edit Cycle Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3279,8 +3279,8 @@ GADCycle:
 						Case	5 : If NG_HighLabel Then NG_HighLabel = 0 Else NG_HighLabel = #NG_HIGHLABEL
 						Case	6 : ItemNo = 0
 											*ListPtr = 0
-											newmem CycleList()
-											While globfree(CycleList()) AND *ListPtr = 0
+											ResetList CycleList()
+											While NextItem(CycleList()) AND *ListPtr = 0
 												If ItemNo = EventCode
 													*ListPtr = CycleList()
 													GTSetString 2,9,*ListPtr\Text
@@ -3290,10 +3290,10 @@ GADCycle:
 												EndIf
 												ItemNo+1
 											Wend
-						Case	7 : newmem CycleList()
-											While globfree(CycleList()) AND *ListPtr
+						Case	7 : ResetList CycleList()
+											While NextItem(CycleList()) AND *ListPtr
 												If CycleList() = *ListPtr
-													freelast CycleList()
+													KillItem CycleList()
 													*ListPtr = 0
 													Labels-1
 												EndIf
@@ -3306,10 +3306,10 @@ GADCycle:
 						Case	8 : If *ListPtr
 												If GTGetString(2,9) <> ""
 													NoItem = True
-													newmem CycleList()
-													While globfree(CycleList()) AND NoItem
+													ResetList CycleList()
+													While NextItem(CycleList()) AND NoItem
 														If *ListPtr = CycleList()
-															If globalloc(CycleList())
+															If AddItem(CycleList())
 																*ListPtr = CycleList()
 																NoItem = False
 																Labels+1
@@ -3338,10 +3338,10 @@ GADCycle:
 											EndIf
 						Case	9 : *ListPtr\Text = StripTrail$(GTGetString(2,9),32)
 											If *ListPtr\Text = ""
-												newmem CycleList()
-												While globfree(CycleList()) AND *ListPtr
+												ResetList CycleList()
+												While NextItem(CycleList()) AND *ListPtr
 													If *ListPtr = CycleList()
-														freelast CycleList()
+														KillItem CycleList()
 														*ListPtr = 0
 														Labels-1
 													EndIf
@@ -3375,8 +3375,8 @@ GADCycle:
 		\Flags	 = PlaceText|NG_Disable|NG_HighLabel
 		\FontNo	= FontNo
 		\Options = ""
-		newmem CycleList()
-		While globfree(CycleList())
+		ResetList CycleList()
+		While NextItem(CycleList())
 			\Options+CycleList()\Text+"|"
 		Wend
 		\Options = Left$(\Options,Len(\Options)-1)
@@ -3384,7 +3384,7 @@ GADCycle:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3393,7 +3393,7 @@ GADCycle:
 ; ** GADInteger
 ; **
 GADInteger:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw Then \TagFlags = #TF_TABCYCLE
 
 	PlaceText		= \Flags & #PLACETEXT_MASK
@@ -3402,7 +3402,7 @@ GADInteger:
 	TF_TabCycle	= \TagFlags
 	FontNo			 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-131)/2,320,131,#REQ_Flags,"Edit Integer Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-131)/2,320,131,#REQ_Flags,"Edit Integer Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3453,7 +3453,7 @@ GADInteger:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3462,7 +3462,7 @@ GADInteger:
 ; ** GADListView
 ; **
 GADListView:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText		= \Flags		& #PLACETEXT_MASK
 	NG_Disable	 = \Flags		& #NG_DISABLE
 	NG_HighLabel = \Flags		& #NG_HIGHLABEL
@@ -3475,7 +3475,7 @@ GADListView:
 	Repeat
 		Pos = Instr(\ListView,Chr$(#LV_Seperator),CPos)
 		If Right$(\ListView,CPos) <> ""
-			If globalloc(ListView())
+			If AddItem(ListView())
 				Labels+1
 				If Pos
 					ListView()\Text = Mid$(\ListView,CPos,Pos-CPos)
@@ -3488,7 +3488,7 @@ GADListView:
 	Until Pos = 0
 	*ListPtr = 0
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-191)/2,320,191,#REQ_Flags,"Edit ListView Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-191)/2,320,191,#REQ_Flags,"Edit ListView Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3524,8 +3524,8 @@ GADListView:
 						Case	6 : If TF_ReadOnly	Then TF_ReadOnly	= 0 Else TF_ReadOnly	= #TF_READONLY
 						Case	7 : ItemNo = 0
 											*ListPtr = 0
-											newmem ListView()
-											While globfree(ListView()) AND *ListPtr = 0
+											ResetList ListView()
+											While NextItem(ListView()) AND *ListPtr = 0
 												If ItemNo = EventCode
 													*ListPtr = ListView()
 													GTSetString 2,10,*ListPtr\Text
@@ -3535,10 +3535,10 @@ GADListView:
 												EndIf
 												ItemNo+1
 											Wend
-						Case	8 : newmem ListView()
-											While globfree(ListView()) AND *ListPtr
+						Case	8 : ResetList ListView()
+											While NextItem(ListView()) AND *ListPtr
 												If ListView() = *ListPtr
-													freelast ListView()
+													KillItem ListView()
 													*ListPtr = 0
 													Labels-1
 												EndIf
@@ -3551,10 +3551,10 @@ GADListView:
 						Case	9 : If *ListPtr
 												If StripTrail$(GTGetString(2,10),32) <> ""
 													NoItem = True
-													newmem ListView()
-													While globfree(ListView()) AND NoItem
+													ResetList ListView()
+													While NextItem(ListView()) AND NoItem
 														If *ListPtr = ListView()
-															If globalloc(ListView())
+															If AddItem(ListView())
 																*ListPtr = ListView()
 																NoItem = False
 																Labels+1
@@ -3583,10 +3583,10 @@ GADListView:
 											EndIf
 						Case 10 : *ListPtr\Text = GTGetString(2,10)
 											If *ListPtr\Text = ""
-												newmem ListView()
-												While globfree(ListView()) AND *ListPtr
+												ResetList ListView()
+												While NextItem(ListView()) AND *ListPtr
 													If *ListPtr = ListView()
-														freelast ListView()
+														KillItem ListView()
 														*ListPtr = 0
 														Labels-1
 													EndIf
@@ -3617,8 +3617,8 @@ GADListView:
 		\ListView = ""
 		\Height	 = ((\Height/*FontPtr\Size) * *FontPtr\Size)+4
 		If Labels
-			newmem ListView()
-			While globfree(ListView())
+			ResetList ListView()
+			While NextItem(ListView())
 				\ListView+ListView()\Text+Chr$(#LV_Seperator)
 			Wend
 			\ListView = Left$(\ListView,Len(\ListView)-1)
@@ -3627,7 +3627,7 @@ GADListView:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3639,7 +3639,7 @@ GADMX:
 	DEFTYPE .List *ListPtr
 	DEFTYPE .s CItem, Character
 
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw Then \Spacing = 1
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_Disable	 = \Flags & #NG_DISABLE
@@ -3652,7 +3652,7 @@ GADMX:
 	Repeat
 		Pos = Instr(\Options,"|",CPos)
 		If Right$(\Options,CPos) <> ""
-			If globalloc(CycleList())
+			If AddItem(CycleList())
 				Labels+1
 				If Pos
 					CycleList()\Text = Mid$(\Options,CPos,Pos-CPos)
@@ -3665,7 +3665,7 @@ GADMX:
 	Until Pos = 0
 	*ListPtr = 0
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-196)/2,320,196,#REQ_Flags,"Edit MX Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-196)/2,320,196,#REQ_Flags,"Edit MX Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3700,8 +3700,8 @@ GADMX:
 						Case	5 : If NG_HighLabel Then NG_HighLabel = 0 Else NG_HighLabel = #NG_HIGHLABEL
 						Case	7 : ItemNo = 0
 											*ListPtr = 0
-											newmem CycleList()
-											While globfree(CycleList()) AND *ListPtr = 0
+											ResetList CycleList()
+											While NextItem(CycleList()) AND *ListPtr = 0
 												If ItemNo = EventCode
 													*ListPtr = CycleList()
 													GTSetString 2,10,*ListPtr\Text
@@ -3711,10 +3711,10 @@ GADMX:
 												EndIf
 												ItemNo+1
 											Wend
-						Case	8 : newmem CycleList()
-											While globfree(CycleList()) AND *ListPtr
+						Case	8 : ResetList CycleList()
+											While NextItem(CycleList()) AND *ListPtr
 												If CycleList() = *ListPtr
-													freelast CycleList()
+													KillItem CycleList()
 													*ListPtr = 0
 													Labels-1
 												EndIf
@@ -3727,10 +3727,10 @@ GADMX:
 						Case	9 : If *ListPtr
 												If StripTrail$(GTGetString(2,10),32) <> ""
 													NoItem = True
-													newmem CycleList()
-													While globfree(CycleList()) AND NoItem
+													ResetList CycleList()
+													While NextItem(CycleList()) AND NoItem
 														If *ListPtr = CycleList()
-															If globalloc(CycleList())
+															If AddItem(CycleList())
 																*ListPtr = CycleList()
 																NoItem = False
 																Labels+1
@@ -3759,10 +3759,10 @@ GADMX:
 											EndIf
 						Case 10 : *ListPtr\Text = GTGetString(2,10)
 											If *ListPtr\Text = ""
-												newmem CycleList()
-												While globfree(CycleList()) AND *ListPtr
+												ResetList CycleList()
+												While NextItem(CycleList()) AND *ListPtr
 													If *ListPtr = CycleList()
-														freelast CycleList()
+														KillItem CycleList()
 														*ListPtr = 0
 														Labels-1
 													EndIf
@@ -3797,8 +3797,8 @@ GADMX:
 		\Flags	 = PlaceText|NG_Disable|NG_HighLabel
 		\FontNo	= FontNo
 		\Options = ""
-		newmem CycleList()
-		While globfree(CycleList())
+		ResetList CycleList()
+		While NextItem(CycleList())
 			\Options+CycleList()\Text+"|"
 		Wend
 		\Options = Left$(\Options,Len(\Options)-1)
@@ -3807,7 +3807,7 @@ GADMX:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3816,12 +3816,12 @@ GADMX:
 ; ** GADNumber
 ; **
 GADNumber:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_HighLabel = \Flags & #NG_HIGHLABEL
 	FontNo			 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-120)/2,320,120,#REQ_Flags,"Edit Number Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-120)/2,320,120,#REQ_Flags,"Edit Number Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3866,7 +3866,7 @@ GADNumber:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3875,7 +3875,7 @@ GADNumber:
 ; ** GADPalette
 ; **
 GADPalette:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw Then \Depth = *ScreenPtr\Depth
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_Disable	 = \Flags & #NG_DISABLE
@@ -3884,7 +3884,7 @@ GADPalette:
 	Depth				= \Depth
 	LevFmt.s		 = "%ld"
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-121)/2,320,121,#REQ_Flags,"Edit Palette Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-121)/2,320,121,#REQ_Flags,"Edit Palette Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -3936,7 +3936,7 @@ GADPalette:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -3945,7 +3945,7 @@ GADPalette:
 ; ** GADScroller
 ; **
 GADScroller:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw Then \Visible = 2
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_Disable	 = \Flags & #NG_DISABLE
@@ -3955,7 +3955,7 @@ GADScroller:
 	FontNo			 = \FontNo
 	If \Flags & #NG_VERTICAL Then CY_Scroll = 1 Else CY_Scroll = 0
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-173)/2,320,173,#REQ_Flags,"Edit Scroller Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-173)/2,320,173,#REQ_Flags,"Edit Scroller Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -4014,7 +4014,7 @@ GADScroller:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -4023,7 +4023,7 @@ GADScroller:
 ; ** GADSlider
 ; **
 GADSlider:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw
 		\Max = 15
 		\MaxLevelLen = 2
@@ -4037,7 +4037,7 @@ GADSlider:
 	FontNo			 = \FontNo
 	If \Flags & #NG_VERTICAL Then CY_Scroll = 1 Else CY_Scroll = 0
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-215)/2,320,215,#REQ_Flags,"Edit Slider Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-215)/2,320,215,#REQ_Flags,"Edit Slider Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -4101,7 +4101,7 @@ GADSlider:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -4110,7 +4110,7 @@ GADSlider:
 ; ** GADString
 ; **
 GADString:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	If Mode = #MODE_Draw Then \TagFlags = #TF_TABCYCLE
 
 	PlaceText		= \Flags & #PLACETEXT_MASK
@@ -4119,7 +4119,7 @@ GADString:
 	TF_TabCycle	= \TagFlags
 	FontNo			 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-145)/2,320,145,#REQ_Flags,"Edit String Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-145)/2,320,145,#REQ_Flags,"Edit String Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -4172,7 +4172,7 @@ GADString:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -4181,12 +4181,12 @@ GADString:
 ; ** GADText
 ; **
 GADText:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	PlaceText		= \Flags & #PLACETEXT_MASK
 	NG_HighLabel = \Flags & #NG_HIGHLABEL
 	FontNo			 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-120)/2,320,120,#REQ_Flags,"Edit Text Gadget",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-120)/2,320,120,#REQ_Flags,"Edit Text Gadget",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,64,4,240,14,"Text:",$0021,#LEN_Text,\Text
 	GTString	 2,1,64,18,240,14,"Label:",$0021,#LEN_Label,\Label
@@ -4231,7 +4231,7 @@ GADText:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -4240,10 +4240,10 @@ GADText:
 ; ** GADBevelBox
 ; **
 GADBevelBox:
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	BevelType = \Flags
 
-	localstat	 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-63)/2,320,63,#REQ_Flags,"Edit BevelBox",DPen,BPen
+	Window	 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-63)/2,320,63,#REQ_Flags,"Edit BevelBox",DPen,BPen
 	Use IntuiFont 1
 	GTCycle	2,0,56,4,248,14,"Type:",$0021,"RAISED|RECESSED",BevelType
 	GTButton 2,1,8,32,100,14,"OK",$0010
@@ -4276,7 +4276,7 @@ GADBevelBox:
 		GadgetsChanged = True
 		ProjectChanged = True
 	Else
-		If Mode = #MODE_Draw Then freelast Gadgets()
+		If Mode = #MODE_Draw Then KillItem Gadgets()
 	EndIf
 	Free GTList 2
 	Return
@@ -4296,7 +4296,7 @@ GADBevelBox:
 ; **
 .EditText
 	MenusOff
-	##[$80CA] Texts()
+	USEPATH Texts()
 	JAM_Inversid	 = \JAM	 & #JAM_Inversid
 	JAM_Complement = \JAM	 & #JAM_Complement
 	JAM_Mode			 = \JAM	 & #JAM_2
@@ -4307,7 +4307,7 @@ GADBevelBox:
 	BgndPen				= \BPen
 	FontNo				 = \FontNo
 
-	localstat		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-175)/2,320,175,#REQ_Flags,"Edit Text",DPen,BPen
+	Window		 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-175)/2,320,175,#REQ_Flags,"Edit Text",DPen,BPen
 	Use IntuiFont 1
 	GTString	 2,0,56,4,172,14,"Text:",$0021,#LEN_TextItem,\Text
 	GTButton	 2,1,228,4,76,14,"Font...",$0010
@@ -4374,8 +4374,8 @@ GADBevelBox:
 		ProjectChanged = True
 	Else
 		If Mode = #MODE_AddText
-			freelast Texts()
-			freelast TextList()
+			KillItem Texts()
+			KillItem TextList()
 			Mode = #MODE_None
 		EndIf
 	EndIf
@@ -4388,7 +4388,7 @@ GADBevelBox:
 ; ** AddText
 ; **
 AddText:
-	##[$80CA] Texts()
+	USEPATH Texts()
 	If AddLast(Texts())
 		\Text	 = ""
 		\DPen	 = DPen,BPen
@@ -4422,8 +4422,8 @@ MoveText:
 	EndIf
 
 	If Mode <> #MODE_None
-		Use localstat 1
-		##[$80CA] *PastePtr
+		Use Window 1
+		USEPATH *PastePtr
 		WindowFont 2+Texts()\FontNo,Texts()\Style
 		WJam #JAM_Complement
 		If *PastePtr\Init
@@ -4438,7 +4438,7 @@ MoveText:
 		Format "0000"
 		Info.s = "X="+Str$(\X1)+" Y="+Str$(\Y1)
 		Format ""
-		Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&Info)
+		Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&Info)
 	EndIf
 	Return
 
@@ -4446,8 +4446,8 @@ MoveText:
 ; ** PlaceText
 ; **
 .PlaceText
-	Use localstat 1
-	##[$80CA] *PastePtr
+	Use Window 1
+	USEPATH *PastePtr
 	WindowFont 2+Texts()\FontNo,Texts()\Style
 	WJam #JAM_Complement
 	WLocate \X1,\Y1:NPrint Texts()\Text
@@ -4456,7 +4456,7 @@ MoveText:
 	Mode = #MODE_None
 
 	MenusOn
-	Dummy = ##[$FFAA](Peek.l(Addr localstat(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
+	Dummy = ##[$FFAA](Peek.l(Addr Window(1)),&*WindowPtr\Title,&*ScreenPtr\Title)
 	Gosub UpdateWindow
 	Return
 
@@ -4465,8 +4465,8 @@ MoveText:
 ; **
 DeleteText:
 	If SelectText {"Delete Text"}
-		freelast Texts()
-		freelast TextList()
+		KillItem Texts()
+		KillItem TextList()
 		ProjectChanged = True
 		Gosub UpdateWindow
 	EndIf
@@ -4488,10 +4488,10 @@ DeleteText:
 ; **
 .MenuSettings
 	MenusOff
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	FontNo = \FontNo
 
-	localstat				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-183)/2,320,183,#REQ_Flags,"Menu Settings",DPen,BPen
+	Window				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-183)/2,320,183,#REQ_Flags,"Menu Settings",DPen,BPen
 	Use IntuiFont 1
 	GTString			2,0,72,4,232,14,"Label:",$0021,#LEN_Label,\Label
 	GTInteger		 2,1,72,18,140,14,"Menu #:",$0021,\MenuNo
@@ -4562,7 +4562,7 @@ DeleteText:
 
 	MenusOff
 	MenuTitles = 0
-	##[$80CA] MenuTitles()
+	USEPATH MenuTitles()
 	ClearList MenuTitles()
 	*Title = *MenuBase
 	While *Title
@@ -4573,7 +4573,7 @@ DeleteText:
 		*Title = *Title\NextMenuItem
 	Wend
 
-	localstat				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-161)/2,320,161,#REQ_Flags,"Edit Menu Titles",DPen,BPen
+	Window				2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-161)/2,320,161,#REQ_Flags,"Edit Menu Titles",DPen,BPen
 	Use IntuiFont 1
 	GTListView		2,0,8,4,296,84,"",$0001,MenuTitles(),0
 	GTButton			2,1,8,102,98,14,"Add",$0010
@@ -4604,9 +4604,9 @@ DeleteText:
 				Case #IDCMP_GADGETUP
 					Select GadgetHit
 						Case	0 : SelectedTitle = EventCode
-											newmem MenuTitles()
+											ResetList MenuTitles()
 											For ItemNo = 0 To SelectedTitle
-												Dummy = globfree(MenuTitles())
+												Dummy = NextItem(MenuTitles())
 											Next ItemNo
 											*CurTitle = FindMenuItem {*MenuBase,SelectedTitle}
 											For GadgetNo = 2 To 4
@@ -4615,7 +4615,7 @@ DeleteText:
 											GTSetString		2,2,\Text
 											ClearString 2,2
 						Case	1 : If NOT (*CurTitle <> 0 AND GTGetString(2,2) = "")
-												If globalloc(MenuTitles())
+												If AddItem(MenuTitles())
 													*CurTitle = AddMenuItem {&*MenuBase,*CurTitle}
 													If *CurTitle
 														GTSetAttrs		 2,2,#GA_Disabled,False
@@ -4623,7 +4623,7 @@ DeleteText:
 														ClearString 2,2
 														MenuTitles+1
 													Else
-														freelast MenuTitles()
+														KillItem MenuTitles()
 														ReqGadget = Requester {"ERROR","Out of memory.","OK"}
 													EndIf
 												Else
@@ -4634,7 +4634,7 @@ DeleteText:
 											EndIf
 						Case	2 : \Text = StripTrail$(GTGetString(2,2),32)
 											If \Text = ""
-												freelast MenuTitles()
+												KillItem MenuTitles()
 												*CurTitle = RemoveMenuItem {&*MenuBase,*CurTitle}
 												MenuTitles-1
 											Else
@@ -4645,13 +4645,13 @@ DeleteText:
 											EndIf
 											GTChangeList 2,0,MenuTitles()
 											ProjectChanged = True
-						Case	3 : freelast MenuTitles()
+						Case	3 : KillItem MenuTitles()
 											*CurTitle = RemoveMenuItem {&*MenuBase,*CurTitle}
 											MenuTitles-1
 											If SelectedTitle
 												SelectedTitle-1
 											Else
-												Dummy = locfree(MenuTitles())
+												Dummy = FirstItem(MenuTitles())
 											EndIf
 											GTChangeList 2,0,MenuTitles()
 											If MenuTitles
@@ -4692,7 +4692,7 @@ EditMenuItems:
 
 	*CurItem	= 0
 	MenuItems = 0
-	##[$80CA] MenuItems()
+	USEPATH MenuItems()
 	ClearList MenuItems()
 	*Item = *CurTitle\FirstSubItem
 	While *Item
@@ -4703,7 +4703,7 @@ EditMenuItems:
 		*Item = *Item\NextMenuItem
 	Wend
 
-	localstat				3,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-202)/2,320,202,#REQ_Flags,"Edit Menu Items",DPen,BPen
+	Window				3,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-202)/2,320,202,#REQ_Flags,"Edit Menu Items",DPen,BPen
 	Use IntuiFont 1
 	GTListView		3,0,8,4,296,84,"",$0001,MenuItems(),0
 	GTButton			3,1,8,102,74,14,"Add",$0010
@@ -4753,9 +4753,9 @@ EditMenuItems:
 				Case #IDCMP_GADGETUP
 					Select GadgetHit
 						Case	0 : SelectedItem = EventCode
-											newmem MenuItems()
+											ResetList MenuItems()
 											For ItemNo = 0 To SelectedItem
-												Dummy = globfree(MenuItems())
+												Dummy = NextItem(MenuItems())
 											Next ItemNo
 											*CurItem = FindMenuItem {*CurTitle\FirstSubItem,SelectedItem}
 											If *CurItem\Flags & #MENU_MenuBar
@@ -4775,7 +4775,7 @@ EditMenuItems:
 												ClearString 3,2
 											EndIf
 						Case	1 : If NOT (*CurItem <> 0 AND GTGetString(3,2) = "")
-												If globalloc(MenuItems())
+												If AddItem(MenuItems())
 													*CurItem = AddMenuItem {&*CurTitle\FirstSubItem,*CurItem}
 													If *CurItem
 														GTSetAttrs		 3,2,#GA_Disabled,False
@@ -4785,7 +4785,7 @@ EditMenuItems:
 														ClearString 3,2
 														MenuItems+1
 													Else
-														freelast MenuItems()
+														KillItem MenuItems()
 														ReqGadget = Requester {"ERROR","Out of memory.","OK"}
 													EndIf
 												Else
@@ -4796,7 +4796,7 @@ EditMenuItems:
 											EndIf
 						Case	2 : \Text = StripTrail$(GTGetString(3,2),32)
 											If \Text = ""
-												freelast MenuItems()
+												KillItem MenuItems()
 												*CurItem = RemoveMenuItem {&*CurTitle\FirstSubItem,*CurItem}
 												MenuItems-1
 												If MenuItems = 0
@@ -4813,13 +4813,13 @@ EditMenuItems:
 											EndIf
 											GTChangeList 3,0,MenuItems()
 											ProjectChanged = True
-						Case	3 : freelast MenuItems()
+						Case	3 : KillItem MenuItems()
 											*CurItem = RemoveMenuItem {&*CurTitle\FirstSubItem,*CurItem}
 											MenuItems-1
 											If SelectedItem
 												SelectedItem-1
 											Else
-												Dummy = locfree(MenuItems())
+												Dummy = FirstItem(MenuItems())
 											EndIf
 											GTChangeList 3,0,MenuItems()
 											GTSetString	3,2,""
@@ -4882,7 +4882,7 @@ EditMenuItems:
 												Default						 : NewFlags = #MENU_XToggle
 											End Select
 											*CurItem\Flags&(NOT $7)|NewFlags
-						Case 11 : If globalloc(MenuItems())
+						Case 11 : If AddItem(MenuItems())
 												*CurItem = AddMenuItem {&*CurTitle\FirstSubItem,*CurItem}
 												If *CurItem
 													\Text = MenuBarTxt
@@ -4891,7 +4891,7 @@ EditMenuItems:
 													MenuItems+1
 													SelectedItem+1
 												Else
-													freelast MenuItems()
+													KillItem MenuItems()
 													ReqGadget = Requester {"ERROR","Out of memory.","OK"}
 												EndIf
 											Else
@@ -4929,7 +4929,7 @@ EditMenuSubItems:
 
 	*CurSubItem	= 0
 	MenuSubItems = 0
-	##[$80CA] MenuSubItems()
+	USEPATH MenuSubItems()
 	ClearList MenuSubItems()
 	*MSubItem = *CurItem\FirstSubItem
 	While *MSubItem
@@ -4940,7 +4940,7 @@ EditMenuSubItems:
 		*MSubItem = *MSubItem\NextMenuItem
 	Wend
 
-	localstat				4,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-202)/2,320,202,#REQ_Flags,"Edit Menu SubItems",DPen,BPen
+	Window				4,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-202)/2,320,202,#REQ_Flags,"Edit Menu SubItems",DPen,BPen
 	Use IntuiFont 1
 	GTListView		4,0,8,4,296,84,"",$0001,MenuSubItems(),0
 	GTButton			4,1,8,102,74,14,"Add",$0010
@@ -4991,9 +4991,9 @@ EditMenuSubItems:
 				Case #IDCMP_GADGETUP
 					Select GadgetHit
 						Case	0 : SelectedSubItem = EventCode
-											newmem MenuSubItems()
+											ResetList MenuSubItems()
 											For SubItemNo = 0 To SelectedSubItem
-												Dummy = globfree(MenuSubItems())
+												Dummy = NextItem(MenuSubItems())
 											Next SubItemNo
 											*CurSubItem = FindMenuItem {*CurItem\FirstSubItem,SelectedSubItem}
 											If *CurSubItem\Flags & #MENU_MenuBar
@@ -5014,7 +5014,7 @@ EditMenuSubItems:
 												ClearString 4,2
 											EndIf
 						Case	1 : If NOT (*CurSubItem <> 0 AND GTGetString(4,2) = "")
-												If globalloc(MenuSubItems())
+												If AddItem(MenuSubItems())
 													*CurSubItem = AddMenuItem {&*CurItem\FirstSubItem,*CurSubItem}
 													If *CurSubItem
 														GTSetAttrs		 4,2,#GA_Disabled,False
@@ -5024,7 +5024,7 @@ EditMenuSubItems:
 														ClearString 4,2
 														MenuSubItems+1
 													Else
-														freelast MenuSubItems()
+														KillItem MenuSubItems()
 														ReqGadget = Requester {"ERROR","Out of memory.","OK"}
 													EndIf
 												Else
@@ -5035,7 +5035,7 @@ EditMenuSubItems:
 											EndIf
 						Case	2 : \Text = StripTrail$(GTGetString(4,2),32)
 											If \Text = ""
-												freelast MenuSubItems()
+												KillItem MenuSubItems()
 												*CurSubItem = RemoveMenuItem {&*CurItem\FirstSubItem,*CurSubItem}
 												MenuSubItems-1
 												If MenuSubItems = 0
@@ -5053,13 +5053,13 @@ EditMenuSubItems:
 											EndIf
 											GTChangeList 4,0,MenuSubItems()
 											ProjectChanged = True
-						Case	3 : freelast MenuSubItems()
+						Case	3 : KillItem MenuSubItems()
 											*CurSubItem = RemoveMenuItem {&*CurItem\FirstSubItem,*CurSubItem}
 											MenuSubItems-1
 											If SelectedSubItem
 												SelectedSubItem-1
 											Else
-												Dummy = locfree(MenuSubItems())
+												Dummy = FirstItem(MenuSubItems())
 											EndIf
 											GTChangeList 4,0,MenuSubItems()
 											GTSetString	4,2,""
@@ -5123,7 +5123,7 @@ EditMenuSubItems:
 											End Select
 											*CurSubItem\Flags&(NOT $7)|NewFlags
 											ProjectChanged = True
-						Case 11 : If globalloc(MenuSubItems())
+						Case 11 : If AddItem(MenuSubItems())
 												*CurSubItem = AddMenuItem {&*CurItem\FirstSubItem,*CurSubItem}
 												If *CurSubItem
 													\Text = MenuBarTxt
@@ -5132,7 +5132,7 @@ EditMenuSubItems:
 													MenuSubItems+1
 													SelectedSubItem+1
 												Else
-													freelast MenuSubItems()
+													KillItem MenuSubItems()
 													ReqGadget = Requester {"ERROR","Out of memory.","OK"}
 												EndIf
 											Else
@@ -5167,7 +5167,7 @@ EditMenuSubItems:
 .TestMenu
 	DEFTYPE .s ItemText
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	If *MenuBase
 		MenuGap \SpacingX,\SpacingY
 		SubItemOff \SubOffX,\SubOffY
@@ -5176,7 +5176,7 @@ EditMenuSubItems:
 		TitleID = 0
 		*CurTitle = *MenuBase
 		While *CurTitle
-			newlocarr 1,TitleID,Peek$(&*CurTitle\ItemText)
+			MenuTitle 1,TitleID,Peek$(&*CurTitle\ItemText)
 			If *CurTitle\FirstSubItem
 				ItemID		= 0
 				*CurItem	= *CurTitle\FirstSubItem
@@ -5215,12 +5215,12 @@ EditMenuSubItems:
 			*CurTitle = *CurTitle\NextMenuItem
 		Wend
 
-		Dummy = ##[$FF85](Peek.l(Addr localstat(1)))
+		Dummy = ##[$FF85](Peek.l(Addr Window(1)))
 
 		Flags = #REQ_Flags
 		If *WindowPtr\Flags & #WFLG_NEWLOOKMENUS Then Flags | #WFLG_NEWLOOKMENUS
-		localstat 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-11)/2,320,11,Flags,"Close Me to Kill Menu",DPen,BPen
-		arrmult 1
+		Window 2,(*ScreenPtr\Width-320)/2,(*ScreenPtr\Height-11)/2,320,11,Flags,"Close Me to Kill Menu",DPen,BPen
+		SetMenu 1
 
 		Repeat
 			EventType.l = WaitEvent
@@ -5229,7 +5229,7 @@ EditMenuSubItems:
 		Free ##[$C40D] 1
 
 		Activate 1
-		Dummy = ##[$FFA8](Peek.l(Addr localstat(1)),Peek.l(Addr ##[$C40D](0)))
+		Dummy = ##[$FFA8](Peek.l(Addr Window(1)),Peek.l(Addr ##[$C40D](0)))
 	Else
 		ReqGadget = Requester {"","No menus have been created !","OK"}
 	EndIf
@@ -5292,42 +5292,42 @@ EditMenuSubItems:
 		RecordNo = #REC_Font
 		Exists 0,&RecordNo,SizeOf.w
 		Exists 0,&FontsLoaded,SizeOf.w
-		##[$80CA] Fonts()
-		newmem Fonts()
-		While globfree(Fonts())
+		USEPATH Fonts()
+		ResetList Fonts()
+		While NextItem(Fonts())
 			Exists 0,&Fonts(),#FontInfo_DataSZ
 			DiskWriteString {0,\Name}
 		Wend
 
 		Texts = 0
-		##[$80CA] Texts()
-		newmem Texts()
-		While globfree(Texts())
+		USEPATH Texts()
+		ResetList Texts()
+		While NextItem(Texts())
 			Texts+1
 		Wend
 		If Texts
 			RecordNo = #REC_Text
 			Exists 0,&RecordNo,SizeOf.w
 			Exists 0,&Texts,SizeOf.w
-			newmem Texts()
-			While globfree(Texts())
+			ResetList Texts()
+			While NextItem(Texts())
 				Exists 0,&Texts(),#TextInfo_DataSZ
 				DiskWriteString {0,\Text}
 			Wend
 		EndIf
 
 		Gadgets = 0
-		##[$80CA] Gadgets()
-		newmem Gadgets()
-		While globfree(Gadgets())
+		USEPATH Gadgets()
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			Gadgets+1
 		Wend
 		If Gadgets
 			RecordNo = #REC_Gadget
 			Exists 0,&RecordNo,SizeOf.w
 			Exists 0,&Gadgets,SizeOf.w
-			newmem Gadgets()
-			While globfree(Gadgets())
+			ResetList Gadgets()
+			While NextItem(Gadgets())
 				Exists 0,&Gadgets(),#GadgetInfo_DataSZ
 				DiskWriteString {0,\Text}
 				DiskWriteString {0,\Label}
@@ -5450,14 +5450,14 @@ EditMenuSubItems:
 				##[$BE14] 0,&ItemCount,SizeOf.w
 				Select RecordNo
 					Case #REC_Font
-						##[$80CA] Fonts()
+						USEPATH Fonts()
 						While ItemCount
 							If AddLast(Fonts())
 								##[$BE14] 0,&Fonts(),#FontInfo_DataSZ
 								\Name = DiskReadString {0}
 								If ##[$BE15]("FONTS:"+\Name)
-									remline 2+FontsLoaded,\Name,\Size
-									If globalloc(FontList())
+									LoadFont 2+FontsLoaded,\Name,\Size
+									If AddItem(FontList())
 										FontList()\Text = LSet$(Left$(\Name,Instr(\Name,".font")-1),31)+RSet$(Str$(\Size),3)
 									EndIf
 									FontsLoaded+1
@@ -5474,7 +5474,7 @@ EditMenuSubItems:
 						Wend
 
 					Case #REC_Text
-						##[$80CA] Texts()
+						USEPATH Texts()
 						While ItemCount
 							If AddLast(Texts())
 								##[$BE14] 0,&Texts(),#TextInfo_DataSZ
@@ -5484,7 +5484,7 @@ EditMenuSubItems:
 						Wend
 
 					Case #REC_Gadget
-						##[$80CA] Gadgets()
+						USEPATH Gadgets()
 						While ItemCount
 							If AddLast(Gadgets())
 								##[$BE14] 0,&Gadgets(),#GadgetInfo_DataSZ
@@ -5576,26 +5576,26 @@ LoadDone:
 			CloseFile 0
 
 			If FontsLoaded = 0
-				##[$80CA] Fonts()
-				newmem Fonts()
-				If globalloc(Fonts())
+				USEPATH Fonts()
+				ResetList Fonts()
+				If AddItem(Fonts())
 					\Size = 8,0,DefFontName
-					remline 2,\Name,\Size
-					If globalloc(FontList())
+					LoadFont 2,\Name,\Size
+					If AddItem(FontList())
 						FontList()\Text = LSet$(Left$(\Name,Instr(\Name,".font")-1),31)+RSet$(Str$(\Size),3)
 					EndIf
 					FontsLoaded = 1
 				EndIf
 			Else
-				##[$80CA] Gadgets()
-				newmem Gadgets()
-				While globfree(Gadgets())
+				USEPATH Gadgets()
+				ResetList Gadgets()
+				While NextItem(Gadgets())
 					If \FontNo >= FontsLoaded Then \FontNo = 0
 				Wend
 				If *MenuPtr\FontNo >= FontsLoaded Then *MenuPtr\FontNo = 0
 			EndIf
 
-			Dummy = locfree(Fonts())
+			Dummy = FirstItem(Fonts())
 			*FontPtr = Fonts()
 			CurrentFont = 0
 
@@ -5627,7 +5627,7 @@ LoadDone:
 	FullName = "":FileName = DefFileName
 	FSrcName = "":CSrcName = ""
 
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	\ScreenNo = 0
 	\Title		= GTBTitle
 	*WindowPtr\X = 20,20,\Width-40,\Height-40
@@ -5640,7 +5640,7 @@ LoadDone:
 	Next PenNo
 	DPen=\Pens[0]:BPen=\Pens[1]
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	\MenuNo = 0,2,1,100,0,2,127,187,0,""
 
 	ClearList Texts()
@@ -5726,7 +5726,7 @@ LoadDone:
 	EndIf
 	FileOutput 0
 
-	##[$80CA] *SettingsPtr
+	USEPATH *SettingsPtr
 	IDLabels		 = \IDLabels
 	TAGLabels		= \TAGLabels
 	IDCMPLabels	= \IDCMPLabels
@@ -5747,9 +5747,9 @@ LoadDone:
 		If Len(*WindowPtr\GTLabel) > MaxLabelLen Then MaxLabelLen = Len(*WindowPtr\GTLabel)
 		If Len(*MenuPtr\Label)		 > MaxLabelLen Then MaxLabelLen = Len(*MenuPtr\Label)
 
-		##[$80CA] Gadgets()
-		newmem Gadgets()
-		While globfree(Gadgets())
+		USEPATH Gadgets()
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			If Len(\Label) > MaxLabelLen Then MaxLabelLen = Len(\Label)
 		Wend
 
@@ -5783,8 +5783,8 @@ LoadDone:
 			GTListLabel = Str$(*WindowPtr\GTListNo)
 		EndIf
 
-		newmem Gadgets()
-		While globfree(Gadgets())
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			If \Label
 				NPrint LSet$(\Label,MaxLabelLen)," = ",\ID
 				LabelNo+1
@@ -5799,9 +5799,9 @@ LoadDone:
 	EndIf
 
 	ListViewNo = 0
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \GadgetType = #GAD_ListView
 			If ListViewNo = 0
 				NPrint "NEWTYPE .LVList"
@@ -5824,8 +5824,8 @@ LoadDone:
 
 	ListViewNo = 0
 	CodeWritten = False
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \GadgetType = #GAD_ListView
 			ListItems = 0
 			For CharNo = 1 To Len(\ListView)
@@ -5845,15 +5845,15 @@ LoadDone:
 	If CodeWritten Then NPrint ""
 
 	FontNo = 0
-	##[$80CA] Fonts()
-	newmem Fonts()
-	While globfree(Fonts())
+	USEPATH Fonts()
+	ResetList Fonts()
+	While NextItem(Fonts())
 		NPrint "	LoadFont ",FontNo,",",Chr$(34)+\Name+Chr$(34),",",\Size
 		FontNo+1
 	Wend
 	If FontNo Then NPrint ""
 
-	##[$80CA] *MenuPtr
+	USEPATH *MenuPtr
 	If *MenuBase
 		If FontNo <> \FontNo
 			NPrint "	","Use IntuiFont ",\FontNo
@@ -5933,7 +5933,7 @@ LoadDone:
 		NPrint ""
 	EndIf
 
-	##[$80CA] *ScreenPtr
+	USEPATH *ScreenPtr
 	Print "	",LSet$("ScreenPens",14)
 	For PenNo = 2 To 7
 		Print \Pens[PenNo],","
@@ -5944,7 +5944,7 @@ LoadDone:
 	Print	",",\X,",",\Y,",",\Width,",",\Height,",",\Depth,","
 	NPrint "$"+Hex$(\ViewMode),",",Chr$(34)+\Title+Chr$(34),",",DPen,",",BPen
 
-	##[$80CA] *WindowPtr
+	USEPATH *WindowPtr
 	If \IDCMP Then NPrint "	",LSet$("DefaultIDCMP",14),"$",Hex$(\IDCMP)
 	Print	"	",LSet$("Window",14),WindowLabel
 	Print	",",\X,",",\Y,",",\Width,",",\Height,",","$"+Hex$(\Flags),","
@@ -5953,9 +5953,9 @@ LoadDone:
 
 	GadgetNo	 = 0
 	ListViewNo = 0
-	##[$80CA] Gadgets()
-	newmem Gadgets()
-	While globfree(Gadgets())
+	USEPATH Gadgets()
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \FontNo <> FontNo
 			FontNo = \FontNo
 			NPrint "	",LSet$("Use IntuiFont",14),FontNo
@@ -6039,9 +6039,9 @@ LoadDone:
 
 	TextNo = 0
 	FontNo = -1:Jam = -1:Style = 0:FgndPen = 1:BgndPen = 0
-	##[$80CA] Texts()
-	newmem Texts()
-	While globfree(Texts())
+	USEPATH Texts()
+	ResetList Texts()
+	While NextItem(Texts())
 		If \FontNo <> FontNo OR \Style <> Style
 			FontNo = \FontNo
 			Style	= \Style
@@ -6069,7 +6069,7 @@ LoadDone:
 	If TextNo Then NPrint ""
 
 	If GenEventCode
-		##[$80CA] *WindowPtr
+		USEPATH *WindowPtr
 		NPrint String$(" ",2),"CloseWin = False"
 		NPrint String$(" ",2),"Repeat"
 		NPrint String$(" ",4),"EventType.l = WaitEvent"
@@ -6132,9 +6132,9 @@ LoadDone:
 		EndIf
 
 		GadgetNo = 0
-		##[$80CA] Gadgets()
-		newmem Gadgets()
-		While globfree(Gadgets())
+		USEPATH Gadgets()
+		ResetList Gadgets()
+		While NextItem(Gadgets())
 			If GadgetNo = 0
 				Print String$(" ",6),"Case "
 				If IDCMPLabels
@@ -6150,7 +6150,7 @@ LoadDone:
 		Wend
 		If GadgetNo Then NPrint String$(" ",8),"End Select"
 
-		##[$80CA] *WindowPtr
+		USEPATH *WindowPtr
 		NPrint "		End Select"
 		NPrint "	Until CloseWin"
 		NPrint "	CloseWindow ",WindowLabel
@@ -6162,10 +6162,10 @@ LoadDone:
 	NPrint "	","End"
 	NPrint ""
 
-	##[$80CA] Gadgets()
+	USEPATH Gadgets()
 	ListViewNo = 0
-	newmem Gadgets()
-	While globfree(Gadgets())
+	ResetList Gadgets()
+	While NextItem(Gadgets())
 		If \GadgetType = #GAD_ListView
 			If \ListView
 				If ListViewNo = 0 Then NPrint "ListViewData:"

@@ -81,7 +81,7 @@ End NEWTYPE
 
 Statement TextEntry_SETUP{GList,Fl$,Shap1}
 Shared TextEntryInfo.TextEntryInfo
-##[$80CA] TextEntryInfo
+USEPATH TextEntryInfo
 	If Fl$<>""
 		LoadShapes Shap1,Shap1+1,Fl$
 	EndIf
@@ -92,8 +92,8 @@ Shared TextEntryInfo.TextEntryInfo
 	\Winy=0			;
 	\Winw=300		;
 	\Winh=100		;
-	workstart GList,10,-15,%100,1,"	 Ok	 "			; Two text gadgets
-	workstart GList,-77,-15,%110,0," Cancel "		 ;
+	TextGadget GList,10,-15,%100,1,"	 Ok	 "			; Two text gadgets
+	TextGadget GList,-77,-15,%110,0," Cancel "		 ;
 	PropGadget GList,-15,7,%010010010,4,6,-46			; Proportional Gadg
 	SetVProp GList,4,0,1													 ; Set it..
 	ShapeGadget GList,-19,-36,%110,5,Shap1				 ; Up
@@ -102,7 +102,7 @@ End Statement
 
 Statement TextEntryPosition{x,y,w,h}
 Shared TextEntryInfo
-##[$80CA] TextEntryInfo
+USEPATH TextEntryInfo
 	If x>=0 Then \Winx=x						 ; Simple really - can be done manually
 	If y>=0 Then \Winy=y						 ; Just make sure you change Winx,Winy
 	If w>=200 Then \Winw=w					 ; and NOT just x and y!!!!!
@@ -119,8 +119,8 @@ Statement TextEntryUpdate{Full}
 ; Let me know if it is really too slow on other configs and suggestions for
 ; improvements.
 Shared TextEntryInfo.TextEntryInfo,TextEntry_op
-##[$80CA] TextEntryInfo
-	*W.Window=Peek.l(Addr localstat(\inwindow))
+USEPATH TextEntryInfo
+	*W.Window=Peek.l(Addr Window(\inwindow))
 	*F.TextFont=*W\IFont
 	FONTWIDTH=*F\tf_XSize
 	FONTHEIGHT=*F\tf_YSize
@@ -128,7 +128,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 	MissedChars=((\pos-1)*\w)
 	l=((\CursPos-MissedChars)/\w)-1
 	If l<1 Then l=1
-	Use localstat \inwindow
+	Use Window \inwindow
 	WindowOutput \inwindow
 	t$=\Text
 	If \pos>1
@@ -167,7 +167,7 @@ End Statement
 
 Function.s TextEntry{n,Titl$,t$,MaxChars}
 Shared TextEntryInfo.TextEntryInfo,TextEntry_op
-##[$80CA] TextEntryInfo
+USEPATH TextEntryInfo
 
 	\Text=StripTrail$(t$,Asc(" "))
 	ot$=\Text
@@ -182,14 +182,14 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 	If \Winh>##[$B79E] Then \Winh=##[$B79E]
 	If \Winx+\Winw>##[$B79D] Then \Winx=##[$B79D]-\Winw
 	If \Winy+\Winh>##[$B79E] Then \Winy=##[$B79E]-\Winh
-	localstat n,\Winx,\Winy,\Winw,\Winh,$1000|$1|$2|$8|$400,Titl$,1,2,\GList
-	*W.Window=Peek.l(Addr localstat(n))
+	Window n,\Winx,\Winy,\Winw,\Winh,$1000|$1|$2|$8|$400,Titl$,1,2,\GList
+	*W.Window=Peek.l(Addr Window(n))
 	*F.TextFont=*W\IFont
 	FONTWIDTH=*F\tf_XSize
 	FONTHEIGHT=*F\tf_YSize
 	*W\MinWidth=200
 	*W\MinHeight=70
-	Use localstat n
+	Use Window n
 	WOutline{10,5,WindowWidth-50,WindowHeight-24-WTopOff,1,2}
 	ResetString WindowWidth-38,7,6,WindowHeight-48-WTopOff
 	fin=False
@@ -208,7 +208,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 		Case n
 			Select Ev
 				Case $2
-					Use localstat \inwindow
+					Use Window \inwindow
 					wi=0:he=0
 					If WindowHeight<70 Then he=70:wi=WindowWidth
 					If WindowWidth<200 Then wi=200:If he=0 Then he=WindowHeight
@@ -229,7 +229,7 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 					EndIf
 				Case $8
 					If Joyb(0)=1
-						Use localstat n
+						Use Window n
 						mx=WMouseX
 						my=WMouseY
 						If mx>\x AND mx<\x+(\w*FONTWIDTH)
@@ -316,19 +316,19 @@ Shared TextEntryInfo.TextEntryInfo,TextEntry_op
 					If TextEntry_op=\pos Then TextEntryUpdate{False} Else TextEntryUpdate{True}
 				Case $80000
 					Activate \inwindow
-					##[$FFB0](Peek.l(Addr localstat(\inwindow)))
+					##[$FFB0](Peek.l(Addr Window(\inwindow)))
 			End Select
 		Default
 			Activate \inwindow
-			##[$FFB0](Peek.l(Addr localstat(\inwindow)))
+			##[$FFB0](Peek.l(Addr Window(\inwindow)))
 		End Select
 	Until fin
 	\Winx=WindowX
 	\Winy=WindowY
 	\Winw=WindowWidth
 	\Winh=WindowHeight
-	Free localstat \inwindow
-	Use localstat 1
+	Free Window \inwindow
+	Use Window 1
 	Function Return \Text
 End Function
 

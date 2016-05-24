@@ -30,8 +30,8 @@
 
 
 WBStartup
-##[$80CB]
-##[$80CC]
+CloseEd
+NoCli
 
 If NOT ##[$9B1A] Then Gosub ExitFire
 
@@ -116,7 +116,7 @@ End Statement
 
 Statement SetUpProgress{}
 	GTButton #W2,1,134,73,76,14,"Cancel",16
-	localstat #W2,WindowX+140,WindowY+47,360,106,$2|$4,"Generating Fire",0,1
+	Window #W2,WindowX+140,WindowY+47,360,106,$2|$4,"Generating Fire",0,1
 	AttachGTList #W2,#W2
 	Activate #W2
 	WLocate 116,8 : Print "Current Frame:"
@@ -169,7 +169,7 @@ End Statement
 
 Statement MakeBlits{}
 	Shared fire
-	Use lmaxlen 0
+	Use BitMap 0
 	BlockScroll
 	For i=0 To 127
 		Boxf 100,100,99+fire\chunky,99+fire\chunky,i
@@ -251,21 +251,21 @@ Statement DisplayPixels{}
 	For y=0 To fire\height
 		UpdateProgress{}
 		For x=0 To fire\width
-			longdiv QLimit(oldarray(x,y) ASR 1,0,127),x * fire\chunky,y * fire\chunky
+			Blit QLimit(oldarray(x,y) ASR 1,0,127),x * fire\chunky,y * fire\chunky
 		Next
 	Next
 End Statement
 
 ;LoadPalette 0,"PROG:fire.pal"
 ##[$A484] ?pal_data,0
-lmaxlen 0,320,256,7
+BitMap 0,320,256,7
 
-allocst 1,0,0,320,256,7,0,"",0,0,0
-Use allocst 1
+Screen 1,0,0,320,256,7,0,"",0,0,0
+Use Screen 1
 Use SetCycle 0
-freest 0
+WbToScreen 0
 ##[$FFB5]
-Use allocst 0
+Use Screen 0
 
 
 AddIDCMP #MOUSEMOVE+#INTUITICKS
@@ -302,10 +302,10 @@ GTInteger #W1,29,92,133,48,16,"Frames:",1,1
 GTInteger #W1,30,236,133,48,16,"Step:",1,1
 GTInteger #W1,31,92,153,48,16,"Offset:",1,0
 GTButton #W1,32,156,153,128,16,"Calculate",16
-localstat #W1,0,12,640,188,4110+#NEWLOOK,"Fire AGA v0.9",1,2:AttachGTList #W1,#W1
+Window #W1,0,12,640,188,4110+#NEWLOOK,"Fire AGA v0.9",1,2:AttachGTList #W1,#W1
 
-newlocarr 0,0,"Project"
-newlocarr 0,1,"Config"
+MenuTitle 0,0,"Project"
+MenuTitle 0,1,"Config"
 MenuItem 0,0,0,0,"Open Project			","O"
 MenuItem 0,0,0,1,"Close Project		 ","C"
 MenuItem 0,0,0,2,"About						 ","A"
@@ -327,7 +327,7 @@ SubItem 0,4,1,2,1,"	 0"
 SubItem 0,2,1,2,2,"	 1"
 
 MenuColour 0,0,1,Off
-arrmult 0
+SetMenu 0
 ;GTDisable 0,32
 
 Gosub SetDefaults ;--- Should kill these
@@ -587,8 +587,8 @@ Return
 		s$="Rendering frame: "+Str$(1)+"/"+Str$(fireanim\frame)
 		Progress{0,1,s$}
 	EndIf
-	Use allocst 1
-	Use lmaxlen 0
+	Use Screen 1
+	Use BitMap 0
 	Use SetCycle 0
 
 	InitArrays{}
@@ -624,10 +624,10 @@ Return
 	Format ""
 	VWait 50
 	##[$9B0D] #W1,winlock
-	Free localstat #W2
-	Use localstat #W1
+	Free Window #W2
+	Use Window #W1
 	##[$FFB5]
-	Use allocst 0
+	Use Screen 0
 Return
 
 .MatrixData

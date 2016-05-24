@@ -51,7 +51,7 @@ signshape=1		;needs two
 signflip=0
 
 Gosub initsign
-allocst 0,1:ScreensBitMap 0,0
+Screen 0,1:ScreensBitMap 0,0
 BitMapOutput signbmap:NPrint "LAP1":NPrint "23.5"
 
 testsign:
@@ -59,11 +59,11 @@ testsign:
 		VWait
 		signframe=(signframe+1)&3
 		dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
-		Use lmaxlen 0
+		Use BitMap 0
 		If signflip
-			longdiv signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+			Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
 		Else
-			longdiv signshape,signx+signframe ASL 4,signy-signframe ASL 3
+			Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
 		EndIf
 	Wend
 	End
@@ -81,7 +81,7 @@ initsign:
 		If i AND $01 Then signl(e+7)=$0002
 	Next
 	signtable.l=&signl(0)
-	lmaxlen signbmap,64,16,1:ssign.l=Peek.l(Addr lmaxlen(signbmap)+8)
+	BitMap signbmap,64,16,1:ssign.l=Peek.l(Addr BitMap(signbmap)+8)
 	LoadShape signshape,"sign.iff"
 	CopyShape signshape,signshape+1:XFlip signshape
 	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)

@@ -10,7 +10,7 @@ End NEWTYPE
 
 Dim ab.ablocks(32)
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
 ;LoadScreen 0,"people2.iff",0
 LoadScreen 0,"rod/ranch.iff",0

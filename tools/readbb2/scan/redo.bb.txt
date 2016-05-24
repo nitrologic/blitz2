@@ -1,14 +1,14 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/redo.bb
 LoadShapes 0,"overlays/shapes.shapes"
-casestrcomp 0,"overlays/shapes.iff"
+LoadPalette 0,"overlays/shapes.iff"
 
-lmaxlen 0,320,512,4
-allocst 0,0,0,320,512,4,0,"",1,2,0
+BitMap 0,320,512,4
+Screen 0,0,0,320,512,4,0,"",1,2,0
 FadePalette 0
 BlockScroll
 For i=0 To 31
-	Boxf i*9,0,i*9+7,7,2:longdiv i,i*9,0
-	Boxf i*9,9,i*9+7,16,2:longdiv i+32,i*9,9
+	Boxf i*9,0,i*9+7,7,2:Blit i,i*9,0
+	Boxf i*9,9,i*9+7,16,2:Blit i+32,i*9,9
 	For y=0 To 5
 		Boxf i*9,18+y*17,i*9+7,33+y*17,2
 
@@ -22,7 +22,7 @@ For i=0 To 31
 ;		sh=64+f0*48+f2*12+f3*4+f1
 		sh=64+f0*48+f3*4+f2*16+f1
 
-		longdiv sh,i*9,18+y*17-ShapeHeight(sh)+16
+		Blit sh,i*9,18+y*17-ShapeHeight(sh)+16
 	Next
 Next
 
@@ -34,7 +34,7 @@ While Peek.w(Addr MidHandle(sh))>0
 		x=0:y+oh+1:oh=h
 	EndIf
 	Boxf x,y,x+w-1,y+h-1,2
-	longdiv sh,x,y
+	Blit sh,x,y
 	x+w+1:sh+1
 Wend
 

@@ -5,7 +5,7 @@ Goto blockout
 
 AMIGA
 
-lmaxlen 0,32,32,8
+BitMap 0,32,32,8
 DecodePalette 0,256
 ##[$CE18] 0,0,63,	 0,64,0,0,240,0						 ;greens = 0..12
 ##[$CE18] 0,64,127, 64,32,0,192,128,64				 ;browns = 13..25
@@ -14,7 +14,7 @@ DecodePalette 0,256
 SaveBitmap 0,"palette.999",0
 End
 
-lmaxlen 0,1024,512,8
+BitMap 0,1024,512,8
 LoadBitMap 0,"f1.aff",0
 ##[$CE18] 0,0,127,0,64,0,0,240,0
 ##[$CE18] 0,128,255,64,32,0,192,128,64
@@ -102,13 +102,13 @@ nxchk:
 	CMP.l a1,a2:BNE dochk:MOVEM.l d0-d7,(a1):MOVE a3,d0:ADDQ#1,d0:AsmExit
 End Function
 
-lmaxlen 0,1024,516,4
+BitMap 0,1024,516,4
 LoadBitMap 0,"f1.ami",0
 
 InitBank 0,64,0
 InitBank 1,8192*32,0
 n.w=0:nn.w=0
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 
 For y=0 To 383 Step 8				;515 Step 8
 	For x=0 To 767 Step 8			;1023 Step 8
@@ -126,10 +126,10 @@ End
 
 hereboy
 
-casestrcomp 0,"sega.palette"
+LoadPalette 0,"sega.palette"
 
-lmaxlen 0,768,384,8
-lmaxlen 1,768,384,4
+BitMap 0,768,384,8
+BitMap 1,768,384,4
 
 LoadBitMap 0,"f1.256"
 
@@ -150,7 +150,7 @@ For y=0 To 383
 	oddy=y&1
 	For x=0 To 767
 		oddx=x&1
-		Use lmaxlen 0:p=Cls(x,y)
+		Use BitMap 0:p=Cls(x,y)
 ;		p=(y/16)
 		c=0
 		If p>63 AND p<128 Then c=1:p-64
@@ -197,7 +197,7 @@ For y=0 To 383
 ;			p=11-c*8+Int(p/2)+dith
 		EndIf
 
-		Use lmaxlen 1:Point x,y,p
+		Use BitMap 1:Point x,y,p
 	Next
 Next
 
@@ -212,7 +212,7 @@ End
 
 AMIGA
 
-lmaxlen 0,32,32,5
+BitMap 0,32,32,5
 DecodePalette 0,32
 ##[$CE18] 0,0,12,	 0,64,0,0,240,0					 ;greens = 0..12
 ##[$CE18] 0,13,25, 64,32,0,192,128,64			 ;browns = 13..25
@@ -221,7 +221,7 @@ DecodePalette 0,32
 SaveBitmap 0,"palette.999",0
 End
 
-lmaxlen 0,1024,512,8
+BitMap 0,1024,512,8
 LoadBitMap 0,"f1.aff",0
 ##[$CE18] 0,0,127,0,64,0,0,240,0
 ##[$CE18] 0,128,255,64,32,0,192,128,64

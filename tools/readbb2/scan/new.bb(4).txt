@@ -779,7 +779,7 @@ End NEWTYPE
 	CEND
 
 	CNIF #c=#a
-		allocst 0,4
+		Screen 0,4
 		ScreensBitMap 0,0
 		BitMapOutput 0:Locate 0,0
 	CEND
@@ -1120,7 +1120,7 @@ End Macro
 
 
 
-	##[$80CA] *p
+	USEPATH *p
 Statement UpDateNuPlayer{lup.l} ;	 ;,diff.w ,slidmod.w,speedmod.w,accelmod.w
 	Shared cvh(),Pl(),newp();*p0,*p7
 
@@ -2199,7 +2199,7 @@ Return
 
 
 
-	##[$80CA] *p
+	USEPATH *p
 	For ipl.w=0 To #maxcar
 		*p=Pl(ipl)
 		\carnum=newp(\newp)\car
@@ -2404,7 +2404,7 @@ CNIF #race
 	Gosub DoSignStart
 
 
-	##[$80CA] *p
+	USEPATH *p
 	reduce.w=-1
 	For pl=0 To #uscar
 		*p=Pl(pl)
@@ -3791,7 +3791,7 @@ Return
 .
 
 
-##[$80CA] *p
+USEPATH *p
 .SpinIt
 
 ;	If jox=2 Then chan(\channel)\reqsam=3:jox=0
@@ -3855,7 +3855,7 @@ Macro FindScr
 End Macro
 
 
-##[$80CA] *p
+USEPATH *p
 .DrawShadow
 
 	CNIF #c=#s
@@ -3937,7 +3937,7 @@ End Statement	;end of Damage
 #mung=On
 #clip=On
 
-##[$80CA] *p
+USEPATH *p
 .MoveIndiv
 CNIF #race
 
@@ -4166,7 +4166,7 @@ CEND
 	CEND
 
 	Else
-		##[$80CA] *p
+		USEPATH *p
 		If \idle=1
 
 			\traction=0
@@ -4305,7 +4305,7 @@ Return
 
 CheckWallLatent
 CNIF #race
-	##[$80CA] *p
+	USEPATH *p
 	For *p=Pl(0) To Pl(#uscar) Step SizeOf.car	; if in a collision, \movi=0=\movj
 
 		*p\rev+*p\nrev
@@ -4770,7 +4770,7 @@ Return
 Return
 
 
-##[$80CA] *p
+USEPATH *p
 .HandleHeader
 		If \idle=1
 			\disc-1
@@ -4813,7 +4813,7 @@ Return
 
 
 
-##[$80CA] *p
+USEPATH *p
 .SetStartCar
 	\idle=0:\drop=Off:\inair=On
 	\coll=-1:\warp=0:\lap=0:\jox=0
@@ -5117,7 +5117,7 @@ CEND
 
 
 
-##[$80D3]
+Runerrsoff
 	champs
 	mini:Dc.w	-8, 15, 20,-13,-10,-24
 	pors:Dc.w	 7, -5,	4,	3,-18, -9
@@ -5253,7 +5253,7 @@ CEND
 
 		SUB Init
 		peat
-		VWait:DisplayBitMap 0,db:db=1-db:Use lmaxlen db:BlockScroll
+		VWait:DisplayBitMap 0,db:db=1-db:Use BitMap db:BlockScroll
 		BitMapOutput db
 		 sx3=MouseX:sy3=MouseY
 		Gosub Make
@@ -5277,7 +5277,7 @@ CEND
 
 Return
 
-##[$80D3]
+Runerrsoff
 
 CNIF #c<>#s
 	Event

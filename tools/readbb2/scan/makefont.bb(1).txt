@@ -19,16 +19,16 @@ End Function
 
 Goto getfence
 
-allocst 0,4
+Screen 0,4
 ScreensBitMap 0,0
 LoadBitMap 0,"font.iff",0
 Use SetCycle 0
-Use lmaxlen 0
+Use BitMap 0
 
 InitBank 0,32768,0
 
 blok.l=Bank(0)
-bm.l=Addr lmaxlen(0)
+bm.l=Addr BitMap(0)
 
 LoadBitMap 0,"font.iff"
 Gosub getfont
@@ -51,14 +51,14 @@ End
 
 
 getfence:
-	allocst 0,4
+	Screen 0,4
 	ScreensBitMap 0,0
 	LoadBitMap 0,"frontend.iff",0
 	Use SetCycle 0
-	Use lmaxlen 0
+	Use BitMap 0
 	InitBank 0,32768,0
 	blok.l=Bank(0)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 
 	h=4:yy=5
 	For y=0 To 3

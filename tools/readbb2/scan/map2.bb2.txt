@@ -98,8 +98,8 @@ y.w
 t$
 End NEWTYPE
 
-remline 1,"topaz.font",8
-remline 0,"microscopic.font",5
+LoadFont 1,"topaz.font",8
+LoadFont 0,"microscopic.font",5
 
 Dim List t.text(100)
 
@@ -111,7 +111,7 @@ Repeat
 		Case "*"
 			gf=512:SelectMode 2
 		Default
-			workstart 0,x,y,gf,n,Centre$(t$,8)
+			TextGadget 0,x,y,gf,n,Centre$(t$,8)
 			n+1:y+9
 		End Select
 	EndIf
@@ -123,9 +123,9 @@ Data$ ""
 
 Borders 0,7,On
 
-lmaxlen 1,map_vw,map_vh,3
-allocst 0,3:ScreensBitMap 0,0:BlockScroll
-localstat 0,0,0,320,256,$1800,"",0,0,0:Menus Off:WindowFont 1
+BitMap 1,map_vw,map_vh,3
+Screen 0,3:ScreensBitMap 0,0:BlockScroll
+Window 0,0,0,320,256,$1800,"",0,0,0:Menus Off:WindowFont 1
 
 Green 0,10,10,10
 Green 1,15,15,15
@@ -150,11 +150,11 @@ Repeat
 	;
 	If ref
 		If ref<0
-			Use lmaxlen 1
+			Use BitMap 1
 			Gosub map_drawgrid
 			Gosub showparts
 			Gosub showtexts
-			Use lmaxlen 0
+			Use BitMap 0
 		EndIf
 		Scroll 0,0,map_vw,map_vh,0,0,1
 		ref=0
@@ -242,9 +242,9 @@ Forever
 ;
 If AddLast(g())
 	g()\p=sel,map_x,map_y,se_r,co,nxy
-	Use lmaxlen 1
+	Use BitMap 1
 	drawshape{parts(sel*64),se_x,se_y,se_sc,se_r}
-	Use lmaxlen 0
+	Use BitMap 0
 	For k=0 To nxy-1
 		map_x=xy(k)\x:map_y=xy(k)\y:Gosub map_xyfromscreen
 		c(co)\x=map_x,map_y
@@ -256,8 +256,8 @@ EndIf
 Return
 
 .showparts
-newmem g()
-While globfree(g())
+ResetList g()
+While NextItem(g())
 	map_x=g()\x:map_y=g()\y
 	Gosub map_xytoscreen
 	drawshape{&parts(g()\p LSL 6),map_x,map_y,se_sc,g()\r}
@@ -339,9 +339,9 @@ Return
 .addtext
 If AddLast(t())
 	t()\x=map_x,map_y,tx_t$
-	Use lmaxlen 1
+	Use BitMap 1
 	tx_x=se_x:tx_y=se_y:col=4:Gosub showatext:col=0
-	Use lmaxlen 0
+	Use BitMap 0
 	ref=1
 EndIf
 Return
@@ -350,8 +350,8 @@ Return
 ;
 ;show all user text
 ;
-newmem t():col=4
-While globfree(t())
+ResetList t():col=4
+While NextItem(t())
 	map_x=t()\x:map_y=t()\y:tx_t$=t()\t
 	Gosub map_xytoscreen:tx_x=map_x:tx_y=map_y:Gosub showatext
 Wend

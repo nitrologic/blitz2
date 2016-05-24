@@ -50,11 +50,11 @@ hi=304
 .doselect
 	InitBank 0,32768,65536
 	InitBank 1,256,65536
-	allocst 0,0,0,512,304,4,0,"",1,2
+	Screen 0,0,0,512,304,4,0,"",1,2
 	ScreensBitMap 0,0:BlockScroll
 	blok.l=Bank(0)
 	blok2.l=Bank(1)
-	bm.l=Addr lmaxlen(0)
+	bm.l=Addr BitMap(0)
 	LoadBitMap 0,f$+".iff",0
 	StopCycle 0,0,0,0,0
 	Use SetCycle 0

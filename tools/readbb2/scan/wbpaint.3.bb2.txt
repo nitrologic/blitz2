@@ -50,8 +50,8 @@ VER$="V3.5"
 ;*																									 *
 ;*****************************************************
 
-WBStartup:##[$80CC]
-##[$FFB5]:freest 0:ScreensBitMap 0,0
+WBStartup:NoCli
+##[$FFB5]:WbToScreen 0:ScreensBitMap 0,0
 
 Include "data/myfunctions.i"
 Include "data/mystatements.i"
@@ -220,8 +220,8 @@ For N=0 To 4
 	ShapeGadget 0,10+12*N,24,0,30+N,23+N
 Next
 
-workstart 0,13,31,0,1,"Shape "
-workstart 0,13,43,0,2,"Custom"
+TextGadget 0,13,31,0,1,"Shape "
+TextGadget 0,13,43,0,2,"Custom"
 
 ;----BORDER MOVING ARROWS----
 
@@ -250,7 +250,7 @@ MenuGap 10,2
 SubItemOff 90,8
 MenuChecked 0
 
-newlocarr 0,0,"Project"
+MenuTitle 0,0,"Project"
 MenuItem 0,0,0,0,"Load		","L"
 MenuItem 0,0,0,1,"Save		","S"
 MenuItem 0,0,0,2,"-----------":MenuColour 0,0,2,Off
@@ -261,7 +261,7 @@ MenuItem 0,0,0,6,"Help		","H"
 MenuItem 0,0,0,7,"-----------":MenuColour 0,0,7,Off
 MenuItem 0,0,0,8,"Quit		","Q"
 
-newlocarr 0,1,"Brush"
+MenuTitle 0,1,"Brush"
 
 MenuItem 0,0,1,0,"Load		"
 MenuItem 0,0,1,1,"Save		"
@@ -289,7 +289,7 @@ EndIf
 AddIDCMP $10
 
 ;--OPEN THE NICE WINDOW--
-localstat 0,64,32,512,192,$100E,"WBPaint"+VER$,2,1,0
+Window 0,64,32,512,192,$100E,"WBPaint"+VER$,2,1,0
 
 If REGISTERED=True
 	WTitle "WBPaint "+VER$,"Registered To: "+REGNAME$
@@ -573,7 +573,7 @@ GTInteger 1,3,88,37,40,14,"COPIES	:",1,1:PRNCOPIES=1
 GTCycle 1,2,88,25,152,12,"ASPECT	:",1,"LEFT|CENTRE"
 GTCycle 1,1,88,13,152,12,"QUALITY :",1,"POOR|AVERAGE|GOOD|V. GOOD"
 GTCycle 1,0,88,1,152,12,"SIZE		:",1,"SMALL|MEDIUM|LARGE "
-localstat 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
+Window 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
 
 Repeat
 
@@ -601,11 +601,11 @@ If EV=$40
 			PRNSTATUS=##[$A304]
 
 			If PRNSTATUS=-4
-				CloseWindow 1:Use localstat 0
+				CloseWindow 1:Use Window 0
 				For N=1 To PRNCOPIES
 					##[$A302] 0,WindowX+PRNX,WindowY+PRNY,PRNW,PRNH,PRNW*PRNXS,PRNH*PRNYS,PRNF
 				Next
-				localstat 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
+				Window 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
 			Else
 				BeepScreen 0
 				MYREQUEST{"Error","Printer Not Responding","Check OnLine, Paper"," OK ",""}
@@ -621,7 +621,7 @@ EndIf
 Until DONE=True:DONE=False
 
 CloseWindow 1:Free GTList 1
-Use localstat 0:Activate 0
+Use Window 0:Activate 0
 
 Return
 
@@ -631,9 +631,9 @@ Return
 For N=0 To 4
 	ShapeGadget 1,25+(30*N),15,0,0+N,30+N
 Next
-workstart 1,74,26,0,5," OK "
+TextGadget 1,74,26,0,5," OK "
 
-localstat 1,255,90,180,42,$1006,"Select Brush Shape",2,1,1
+Window 1,255,90,180,42,$1006,"Select Brush Shape",2,1,1
 
 Repeat
 
@@ -644,7 +644,7 @@ If EV=$40 AND GadgetHit<5 Then BRUSHAPE=GadgetHit
 Until EV=$40 AND GadgetHit=5
 
 CloseWindow 1:Free GadgetJam 1
-Use localstat 0:Activate 0
+Use Window 0:Activate 0
 
 Return
 ;--------------------------------------------------
@@ -710,7 +710,7 @@ If MX>DXOFFS-1 AND MX<MAXX AND MY>DYOFFS-1 AND MY<MAXY
 	Else
 
 		;--CUSTOM BRUSH--
-		longdiv CBRUSHNUM,WindowX+MX-(ShapeWidth(CBRUSHNUM)/2),WindowY+MY-(ShapeHeight(CBRUSHNUM)/2)
+		Blit CBRUSHNUM,WindowX+MX-(ShapeWidth(CBRUSHNUM)/2),WindowY+MY-(ShapeHeight(CBRUSHNUM)/2)
 
 	EndIf
 
@@ -1006,7 +1006,7 @@ For Y=1 To ZOOMHEIGHT
 Next
 
 ;--OPEN A WINDOW--
-localstat 1,0,0,240+9,120+14,$140E,"ZOOM",2,1
+Window 1,0,0,240+9,120+14,$140E,"ZOOM",2,1
 WPointer 29
 
 ;--DRAW ENLARGEMENT--
@@ -1044,25 +1044,25 @@ If JB<>0 AND EventWindow=1
 		If JB=1 Then ZOOM(X,Y)=C
 		If JB=2 Then ZOOM(X,Y)=0
 		WBox X*ZSCALE-ZSCALE,Y*ZSCALE-ZSCALE,X*ZSCALE-1,Y*ZSCALE-1,ZOOM(X,Y)
-		Use localstat 0
+		Use Window 0
 		WPlot ZOOMSTARTX+X,ZOOMSTARTY+Y,ZOOM(X,Y)
-		Use localstat 1
+		Use Window 1
 	EndIf
 EndIf
 
 ;--CHANGE COLOUR--
 If EV=$40 AND GadgetHit=0
 	C=EventCode
-	Use localstat 0
+	Use Window 0
 	WBox 81,175,123,185,C
-	Use localstat 1
+	Use Window 1
 EndIf
 
 VWait:Until EV=$200
 
 ;--CLEAN UP--
 CloseWindow 1
-Activate 0:Use localstat 0
+Activate 0:Use Window 0
 Menus On
 
 EV=0
@@ -1182,7 +1182,7 @@ Return
 GSHAPE{5}
 
 ;--OPEN A SMALL WINDOW--
-localstat 1,0,0,115,11,$100E,"WBPaint",2,1
+Window 1,0,0,115,11,$100E,"WBPaint",2,1
 
 ;--CLOSE LARGE ONE--
 CloseWindow 0
@@ -1191,7 +1191,7 @@ CloseWindow 0
 ##[$B592] $200
 
 ;--OPEN LARGE WINDOW--
-localstat 0,64,32,512,192,$100E,"WBPaint "+VER$,2,1,0
+Window 0,64,32,512,192,$100E,"WBPaint "+VER$,2,1,0
 
 ;--CLOSE SMALL--
 CloseWindow 1
@@ -1216,7 +1216,7 @@ Return
 ;WJam 0
 
 ;--SET UP MENU--
-arrmult 0
+SetMenu 0
 
 ;--OUTIE BORDERS--
 SetString 2,1
@@ -1345,7 +1345,7 @@ Else
 			NEWMODE=False
 		EndIf
 		BSHAPE{OTHERBUFF}
-		longdiv CBRUSHNUM,WindowX+SELX-CBW,WindowY+SELY-CBH
+		Blit CBRUSHNUM,WindowX+SELX-CBW,WindowY+SELY-CBH
 
 		;--CHANGE VERIABLES--
 		OLDSELX=SELX:OLDSELY=SELY:SELDEL=True:FlushEvents $10

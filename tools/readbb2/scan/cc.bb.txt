@@ -52,7 +52,7 @@ Statement showchunky{cp.l,ch.l}
 End Statement
 
 builddisplay:
-	lmaxlen 0,320,256,7
+	BitMap 0,320,256,7
 	For x=0 To #chw-1:xx=x*2:Boxf xx,3,xx+2,2+#chh*2,x+32:Next
 	Box 0,0,319,255,1
 	Box 0,2,#chw*2.5+2,#chh*2+3,1

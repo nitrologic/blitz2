@@ -23,7 +23,7 @@ If NumPars=1
 			l+1:t$(l)=Edit$(256)
 			If Left$(t$(l),1)="\"
 				g+1:l(g-5)=l
-				workstart 0,x,y,0,g,Mid$(t$(l),2)
+				TextGadget 0,x,y,0,g,Mid$(t$(l),2)
 				x+Len(t$(l))*8+8
 				l-1
 			EndIf
@@ -35,22 +35,22 @@ Else
 	##[$FF8C] 0:End
 EndIf
 
-workstart 0,624,dh-32,0,1,"^"
-workstart 0,624,dh-22,0,2,"v"
+TextGadget 0,624,dh-32,0,1,"^"
+TextGadget 0,624,dh-22,0,2,"v"
 
 PropGadget 0,627,14,128|256,3,10,dh-46
-workstart 0,592,dh-12,0,4,"EXIT!"
+TextGadget 0,592,dh-12,0,4,"EXIT!"
 
 bod=.9999:If l>vl Then bod=vl/l
 
 SetVProp 0,3,0,bod
 
 bc=3
-allocst 0,0,0,640,dh,2,$8000,"TEXT VIEW",1,2
+Screen 0,0,0,640,dh,2,$8000,"TEXT VIEW",1,2
 Green 0,6,6,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,4,2,10 ;15,15,15
 ScreensBitMap 0,0
 AddIDCMP 16
-localstat 0,0,0,640,dh,$1900,"",0,1,0
+Window 0,0,0,640,dh,$1900,"",0,1,0
 WLocate 0,dh-10:Print "Topics:"
 BitMapOutput 0:Colour 1,bc
 ResetString 628,14,8,dh-46

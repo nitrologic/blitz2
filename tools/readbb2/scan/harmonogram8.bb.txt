@@ -7,7 +7,7 @@ For i=0 To 2096
 	s(i)=Int(1023*(HSin((2*Pi*i)/1024)))
 Next
 
-For i=0 To 15:lmaxlen i,320,256,2:Next
+For i=0 To 15:BitMap i,320,256,2:Next
 BLITZ
 Slice 0,44,320,256,$fff8,2,8,4,320,320
 Repeat
@@ -35,7 +35,7 @@ Repeat
 	ibyarg1=QWrap(ibxarg1+yinc1,0,1024)
 	ibyarg2=QWrap(ibxarg2+yinc2,0,1024)
 	bxarg1=ibxarg1:bxarg2=ibxarg2:byarg1=ibxarg1:byarg2=ibyarg2
-	Use lmaxlen j:VWait:Show j
+	Use BitMap j:VWait:Show j
 		BlockScroll 0
 		For r=1024 To 192 Step -32
 			cc=QWrap(cc+1,0,4)
@@ -61,7 +61,7 @@ Repeat
 				ibyarg1=QWrap(ibxarg1+yinc1,0,1024)
 				ibyarg2=QWrap(ibxarg2+yinc2,0,1024)
 				bxarg1=ibxarg1:bxarg2=ibxarg2:byarg1=ibxarg1:byarg2=ibyarg2
-			Use lmaxlen (si+15) MOD 16:BlockScroll 0
+			Use BitMap (si+15) MOD 16:BlockScroll 0
 			bi=si:r=1056:cc=0:ccc=1
 			For kk=0 To 14
 				cc=QWrap(cc+1,0,4)

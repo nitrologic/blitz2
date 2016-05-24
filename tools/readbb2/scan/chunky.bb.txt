@@ -57,7 +57,7 @@ End
 
 .setupbitmap:
 	;
-	Use lmaxlen 0:Use CopList 0
+	Use BitMap 0:Use CopList 0
 	;
 	For x=0 To chw-1
 		 dx=x*ps+ox
@@ -71,7 +71,7 @@ End
 	; CustomChunkySize calculates number of copper instructions needed
 	; CustomChunky creates fills in the copper list
 	;
-	lmaxlen 0,320,256,7:Box 0,0,319,255,1
+	BitMap 0,320,256,7:Box 0,0,319,255,1
 	;
 	ccc.l=CustomChunkySize(chw,chh)
 	InitCopList 0,44,256,$13007,8,256,ccc

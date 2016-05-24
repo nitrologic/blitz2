@@ -1,14 +1,14 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/test.bb
 
-lmaxlen 0,640+64+32,512+64+32,4
-lmaxlen 1,640+64+32,512+64+32,4
+BitMap 0,640+64+32,512+64+32,4
+BitMap 1,640+64+32,512+64+32,4
 
 InitCopList 0,44,256,$10414,8,256,0
 
 BLITZ
 CreateDisplay 0,0
 DisplayBitMap 0,0,0,0
-Use lmaxlen 0
+Use BitMap 0
 BitMapOutput 0
 
 ;Boxf 0,0,32,32,10
@@ -35,7 +35,7 @@ NPrint "abcdefghijklmnopqrstuvwxyzbuggeroffgit."
 NPrint "-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-"
 Next
 
-##[$80D3]
+Runerrsoff
 For y=0 To 255
 		For x=0 To 319
 				map(x,y)=0
@@ -44,7 +44,7 @@ For y=0 To 255
 		Line 0,y,319,y,0
 Next
 BlockScroll
-##[$80D2]
+Runerrson
 
 #SWIDTH=320
 #SHEIGHT=256		;visible width and height
@@ -56,13 +56,13 @@ Gosub drawmap	 ;draw initial screen
 
 For y=0 To 255 Step 16
 For x=0 To 319 Step 16
-		Use lmaxlen 0
+		Use BitMap 0
 		Boxf x,y,x+7,y+7,2
-		Use lmaxlen 1
+		Use BitMap 1
 		Boxf x,y+8,x+7,y+15,2
-		Use lmaxlen 1
+		Use BitMap 1
 		Boxf x+8,y,x+7+8,y+7,2
-		Use lmaxlen 0
+		Use BitMap 0
 		Boxf x+8,y+8,x+7+8,y+15,2
 Next
 Next
@@ -75,7 +75,7 @@ VWait
 Poke.w	$dff180,$0
 DisplayBitMap 0,db,sx,sy
 db=1-db
-Use lmaxlen db
+Use BitMap db
 BitMapOutput db
 
 ax=Joyx(1)/4
@@ -109,12 +109,12 @@ yy=Int(my/32)
 
 For y=yy To yy+8				;one extra!!
 		For x=xx To xx+10			 ;one extra row!!!
-				Use lmaxlen 0
+				Use BitMap 0
 				BlitColl map(x,y),x*32,y*32
 				BlitColl map(x,y),(x+11)*32,y*32
 				BlitColl map(x,y),x*32,(y+9)*32
 				BlitColl map(x,y),(x+11)*32,(y+9)*32
-				Use lmaxlen 1
+				Use BitMap 1
 				BlitColl map(x,y),x*32,y*32
 				BlitColl map(x,y),(x+11)*32,y*32
 				BlitColl map(x,y),x*32,(y+9)*32

@@ -1,9 +1,9 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKESCALEPIC.BB
 
-lmaxlen 0,640,402,3
+BitMap 0,640,402,3
 LoadBitMap 0,"scaleypic.iff"
 
-ad.l=Addr lmaxlen(0)
+ad.l=Addr BitMap(0)
 
 p.l=ad+8
 p1.l=Peek.l(p)

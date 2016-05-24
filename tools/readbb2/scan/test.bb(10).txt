@@ -26,16 +26,16 @@ GetaSprite 0,0
 
 DecodePalette 0,32
 
-lmaxlen 0,1024,516,5
+BitMap 0,1024,516,5
 LoadBitMap 0,"track.iff",0
 
 ##[$CD10] 2,64,128,5
 CludgeBitMap 2,2
 shapetosprite{Addr MidHandle(2),Addr Sprite(0)}
-Use lmaxlen 2:ReMap 1,17:ReMap 2,18:ReMap 3,19
-MakeCookie 2:longdiv 2,10,10
+Use BitMap 2:ReMap 1,17:ReMap 2,18:ReMap 3,19
+MakeCookie 2:Blit 2,10,10
 
-lmaxlen 1,608,38,4:Box 0,0,607,37,1:Box 0,0,639,37,1
+BitMap 1,608,38,4:Box 0,0,607,37,1:Box 0,0,639,37,1
 
 InitCopList 0,44,38,$904,8,32,0
 DisplayAdjust 0,-4,8,0,16,32

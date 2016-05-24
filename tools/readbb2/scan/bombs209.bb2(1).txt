@@ -227,8 +227,8 @@ End If
 ; ---------------------------------------
 
 WBStartup
-##[$80CB]
-##[$80CC]
+CloseEd
+NoCli
 
 ; ---------------------------------------
 
@@ -243,7 +243,7 @@ Statement GetUserInput{ *biptr.OSInput}
 ; Input via "WaitEvent" for the main program loop
 ; Keeping it system friendly
 .GetUserInput
-##[$80CA] *biptr
+USEPATH *biptr
 		\iMouseX=0
 		\iMouseY=0
 		\ev=0
@@ -265,7 +265,7 @@ Statement GetGameInput{ *biptr.OSInput}
 ; For easy time updates
 ; Should get by with only mouse-clicks
 .GetGameInput
-##[$80CA] *biptr
+USEPATH *biptr
 		\iMouseX=0
 		\iMouseY=0
 		\ev=0
@@ -299,7 +299,7 @@ Statement CleanExit{ *bombptr.gameVars}
 ; Reset the default values in "BombsDefaults"
 ; Essential for executables
 .CleanExit
-##[$80CA] *bombptr
+USEPATH *bombptr
 		If \wide<>\oldWide Then Gosub WritingDefaults
 		If (NOT alreadyDone.b) AND (\high<>\oldHigh) Then Gosub WritingDefaults
 		If (NOT alreadyDone) AND (\displayWide<>\oldDisplayWide) Then Gosub WritingDefaults
@@ -308,8 +308,8 @@ Statement CleanExit{ *bombptr.gameVars}
 		If (NOT alreadyDone) AND (\progressiveGame<>\oldProgressiveGame) Then Gosub WritingDefaults
 		If \rewriteRatings Then Gosub WritingRatings
 
-		Free localstat 0
-		Free allocst 0
+		Free Window 0
+		Free Screen 0
 		For i.l=0 To 51
 				Free MidHandle i
 		Next i
@@ -398,7 +398,7 @@ Return
 ; -------------------------------------------------------------
 
 .HandleMouseButton
-##[$80CA] *bombptr
+USEPATH *bombptr
 		Select *biptr\code
 			Case $68											; LMB Down
 			Case $E8											; LMB Up
@@ -455,32 +455,32 @@ AMIGA
 		End If
 		StringText$ 2,1
 ; GADGETLIST 0 -- Gadgets for Main Menu
-		workstart 0, -372, 70-DispHeight, 0|1|2|5, #gameGad, "	Play			 "
-		workstart 0, -372, 90-DispHeight, 0|1|2|5, #settingsGad, "	Settings	 "
-		workstart 0, -372, 110-DispHeight, 0|1|2|5, #scoresGad, "	Scores		 "
-		workstart 0, -372, 130-DispHeight, 0|1|2|5, #helpGad, "	Help File	"
-		workstart 0, -372, 150-DispHeight, 0|1|2|5, #exitGad, "	Exit			 "
+		TextGadget 0, -372, 70-DispHeight, 0|1|2|5, #gameGad, "	Play			 "
+		TextGadget 0, -372, 90-DispHeight, 0|1|2|5, #settingsGad, "	Settings	 "
+		TextGadget 0, -372, 110-DispHeight, 0|1|2|5, #scoresGad, "	Scores		 "
+		TextGadget 0, -372, 130-DispHeight, 0|1|2|5, #helpGad, "	Help File	"
+		TextGadget 0, -372, 150-DispHeight, 0|1|2|5, #exitGad, "	Exit			 "
 
-		workstart 4, -460, 185-DispHeight, 0|1|2|5, #nextGad, "	NEXT	"
-		workstart 4, -360, 185-DispHeight, 0|1|2|5, #menuGad, "	MENU	"
-		workstart 4, -260, 185-DispHeight, 0|1|2|5, #returnGad, "	EXIT	"
+		TextGadget 4, -460, 185-DispHeight, 0|1|2|5, #nextGad, "	NEXT	"
+		TextGadget 4, -360, 185-DispHeight, 0|1|2|5, #menuGad, "	MENU	"
+		TextGadget 4, -260, 185-DispHeight, 0|1|2|5, #returnGad, "	EXIT	"
 
 		LoadMedModule 1,"BombsExplo.med"
 
 		LoadShapes 0,71,"bombsdata15"
-		casestrcomp 0,"BombsObjects20"
+		LoadPalette 0,"BombsObjects20"
 
-		allocst 0, 10, "BOMBS v1.0 by ARV		Written in BLITZ BASIC 2 v1.70"
+		Screen 0, 10, "BOMBS v1.0 by ARV		Written in BLITZ BASIC 2 v1.70"
 
 		DefaultIDCMP $8| $20| $40| $200| $40000| $80000
-		localstat 0, 0, 10, 640, DispHeight-10, $8| $1000, "BOMBS", 0, 1, 0
+		Window 0, 0, 10, 640, DispHeight-10, $8| $1000, "BOMBS", 0, 1, 0
 		WLocate 284,25:Print "MAIN MENU"
 Return
 
 ; ---------------------------------------
 
 .InitialiseVars
-##[$80CA] *bombptr
+USEPATH *bombptr
 AMIGA
 ; This may look clumsy, but it covers all error cases
 		If ##[$BE15]("BombsDefaults")
@@ -545,10 +545,10 @@ AMIGA
 Return
 
 .HelpLabel
-##[$80CA] *biptr
-		Use allocst 0
+USEPATH *biptr
+		Use Screen 0
 		DefaultIDCMP $8| $20| $40| $200| $40000| $80000
-		localstat 4, 0, 10, 640, DispHeight-10, $8| $1000, "BOMBS HELP", 0, 1, 4
+		Window 4, 0, 10, 640, DispHeight-10, $8| $1000, "BOMBS HELP", 0, 1, 4
 
 		Gosub WriteMenu
 		helpPage.b = 0
@@ -565,7 +565,7 @@ Return
 				keepHelp = False
 		End Select
 		Until NOT keepHelp
-		Free localstat 4
+		Free Window 4
 Return
 
 .HandleHelpGadgets

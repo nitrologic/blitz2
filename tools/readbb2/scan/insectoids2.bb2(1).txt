@@ -1,5 +1,5 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/afold/insectoids2/insectoids2.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/insectoids2/insectoids2.bb2
-##[$80CB]:##[$80CC]
+CloseEd:NoCli
 
 #final=1
 
@@ -106,12 +106,12 @@ CNIF #final=1
 
 ;*** patch here ***
 For i = 0 To 8
- casestrcomp i,"pal"+Chr$(48+i)
+ LoadPalette i,"pal"+Chr$(48+i)
 Next i
 
 
 CELSE
-LoadShape 0,"ship1":DecodeShapes 0:GetaSprite 0,0:casestrcomp 0,"ship1",16
+LoadShape 0,"ship1":DecodeShapes 0:GetaSprite 0,0:LoadPalette 0,"ship1",16
 LoadShape 0,"ship2":DecodeShapes 0:GetaSprite 1,0
 LoadShape 0,"shipexp"
 For k=0 To 3:DecodeShapes k:GetaSprite k+2,k:Next
@@ -155,16 +155,16 @@ EndIf
 VWait 250:BLITZ
 
 .allox
-longmult 0,64:longmult 1,64
-lmaxlen 0,w2,256+64,3:lmaxlen 1,w2,256+64,3		;foregrounds
-lmaxlen 2,w,512,2		;starfield - background
+Queue 0,64:Queue 1,64
+BitMap 0,w2,256+64,3:BitMap 1,w2,256+64,3		;foregrounds
+BitMap 2,w,512,2		;starfield - background
 For k=1 To 200
 x=Rnd(320):y=Rnd(256):c=Rnd(3)+1:Point x,y,c:Point x,y+256,c
 Next
 ;Line 0,0,0,511,1:Line w-1,0,w-1,511,1
-lmaxlen 3,176,128,3:lmaxlen 4,176,128,3		;formation anim!
+BitMap 3,176,128,3:BitMap 4,176,128,3		;formation anim!
 GetaShape 95,0,0,20,20:DecodeShapes 95
-lmaxlen 5,w,16,3	 ;scorebar...
+BitMap 5,w,16,3	 ;scorebar...
 GetaShape 69,0,0,15,15:DecodeShapes 69
 Boxf 0,0,15,15,1:GetaShape 67,0,0,16,16:BlockScroll
 
@@ -248,7 +248,7 @@ hi$(10)="end"
 .intro
 DisplayOff
 db=1:Gosub makehiscores
-db=0:Use lmaxlen db:BlockScroll:DisplayOn
+db=0:Use BitMap db:BlockScroll:DisplayOn
 
 die=-1:sa=-4
 Repeat
@@ -264,8 +264,8 @@ Forever
 .newgame
 sc=0:scf=2000:drpf=0
 sd=0:For k=0 To 4:bo(k)=0:Next:bo(5)=2
-BlockScroll:Use lmaxlen 1:BlockScroll
-Use lmaxlen 5:BlockScroll:For k=1 To 5:Gosub updatescore:Next:Gosub drawbonuss
+BlockScroll:Use BitMap 1:BlockScroll
+Use BitMap 5:BlockScroll:For k=1 To 5:Gosub updatescore:Next:Gosub drawbonuss
 Use SetCycle 0
 Restore pattern1
 wa=0
@@ -315,9 +315,9 @@ If bag<1.5 Then bag+.125
 fst=2:ado=3:fst2=1:as3=as
 If wa>16 Then fst=3:fst2=2:ado=2:as3+ast3
 ;
-Use lmaxlen 3:BlockScroll:Use lmaxlen 4:BlockScroll
+Use BitMap 3:BlockScroll:Use BitMap 4:BlockScroll
 ;
-Use lmaxlen db:k$="attack wave "+Str$(wa):y=128:Gosub printit
+Use BitMap db:k$="attack wave "+Str$(wa):y=128:Gosub printit
 y=152:If chw Then k$="challenging wave":Gosub printit
 If glw Then k$="flashback{":Gosub printit
 ;
@@ -388,8 +388,8 @@ If glw
 	For x=0 To 9
 	x2=x LSL 4+9:y2=y LSL 4+7+fya
 	AddLast a3():a3()\px=x2,y2,s:aif+1
-	Use lmaxlen 3:longdiv s,x2,y2
-	Use lmaxlen 4:longdiv s+1,x2,y2
+	Use BitMap 3:Blit s,x2,y2
+	Use BitMap 4:Blit s+1,x2,y2
 	Next:If s<52 Then s+2
 	Next
 	fya=2:ta=aif:atw=1:aaa=-1:nrf=0:div=-1:fst=fst2:as2=as
@@ -433,7 +433,7 @@ While aok
 Wend
 
 If die
-	If afa>0 OR locfree(b())<>0 OR ab>0 Then Goto main2
+	If afa>0 OR FirstItem(b())<>0 OR ab>0 Then Goto main2
 	;
 	If grw
 		If bo(5) Then k$="get ready{" Else k$="game over"
@@ -464,11 +464,11 @@ If die
 			cloop2
 			c2=Asc(Mid$(hi$(he),x,1)):c=c2:x2=x LSL 4+56
 			If c>96 Then c+3 Else If c>47 Then c+22
-			cloop:If c2<>32 Then longdiv c,x2,y:If j Then VWait 10
-			Gosub getjoy:If j<3 Then BlitMode EraseMode:longdiv 67,x2,y:BlitMode CookieMode
+			cloop:If c2<>32 Then Blit c,x2,y:If j Then VWait 10
+			Gosub getjoy:If j<3 Then BlitMode EraseMode:Blit 67,x2,y:BlitMode CookieMode
 			If j=0
 				Gosub getjoy:If j=0 Then Goto cloop
-				If j>2 AND c2<>32 Then longdiv c,x2,y
+				If j>2 AND c2<>32 Then Blit c,x2,y
 			EndIf
 			;
 			If j=3 Then If x>1 Then x-1:Goto cloop2 Else Goto cloop
@@ -499,7 +499,7 @@ If die
 EndIf
 
 If ta=0
-	If locfree(b())<>0 Then Goto main2
+	If FirstItem(b())<>0 Then Goto main2
 	If chw=0 Then If ux<>0 Then Goto main2
 	If grw
 		grw-1:If grw Then Goto main2
@@ -520,7 +520,7 @@ If ta=0
 		y=176:Gosub printit
 		Sound 8,2,32
 		sc+scb:For k=1 To 10:Gosub updatescore:Next
-		Use lmaxlen db:VWait 150:UnQueue db
+		Use BitMap db:VWait 150:UnQueue db
 	EndIf
 	Goto newwave
 EndIf
@@ -539,7 +539,7 @@ If j Then Pop For:Return
 Next:Return
 
 .makehiscores
-Use lmaxlen db:BlockScroll:FlushQueue db
+Use BitMap db:BlockScroll:FlushQueue db
 y=64:k$="high scores":Gosub printit:FlushQueue db:y+8
 For hi=1 To 10
 k$=hi$(hi)+RSet$(Str$(hi(hi)),8)
@@ -561,12 +561,12 @@ Return
 If sd=0 Then sc2=sc:sux=w-80:suz=0
 s=sc2/sd(sd)
 If s<>0 OR suz<>0 OR sd=4
-	Use lmaxlen 5:sc2-s*sd(sd):suz=-1:BlitColl s+70,sux,0
+	Use BitMap 5:sc2-s*sd(sd):suz=-1:BlitColl s+70,sux,0
 EndIf
 sd=QWrap(sd+1,0,5):sux+16:Return
 
 .drawbonuss
-Use lmaxlen 5:x=7:y=7:k=5
+Use BitMap 5:x=7:y=7:k=5
 While k>=0
 	j=0
 	While j<bo(k)
@@ -585,11 +585,11 @@ Return
 .bullcheck
 hf=0
 If bf
-	newmem c()
-	While globfree(c())
+	ResetList c()
+	While NextItem(c())
 		If c()\f
 			If SpritesHit(s,x,y,c()\s,c()\x,c()\y)
-				freelast c():ab-1:bf-1:hf=-1:Return
+				KillItem c():ab-1:bf-1:hf=-1:Return
 			EndIf
 		EndIf
 	Wend
@@ -610,15 +610,15 @@ ta-1:If ta=0 Then aok=0
 sfx3=-1
 ;
 bang3
-##[$80CA] e()
+USEPATH e()
 AddLast e():\x=x,y,s+6,.25,s+8
 Return
 
 .movebangs
-##[$80CA] e()
-newmem e()
-While globfree(e())
-	QBlit db,\s,\x,\y:\s+\a:If \s>=\f Then freelast e()
+USEPATH e()
+ResetList e()
+While NextItem(e())
+	QBlit db,\s,\x,\y:\s+\a:If \s>=\f Then KillItem e()
 Wend
 Return
 
@@ -635,7 +635,7 @@ If vf=0
 	EndIf
 EndIf
 ;
-vf=0:db=1-db:Use lmaxlen db:UnQueue db
+vf=0:db=1-db:Use BitMap db:UnQueue db
 ;
 Return
 
@@ -667,7 +667,7 @@ If ##[$B40B](0)
 				Case 68
 					bo(5)+1:ub=-1
 				End Select
-				If ub Then Gosub drawbonuss:Use lmaxlen db
+				If ub Then Gosub drawbonuss:Use BitMap db
 				ux=0:buy=0:di=0:busc=4:sfx5=-1
 			EndIf
 		EndIf
@@ -685,7 +685,7 @@ EndIf
 Return
 
 .addaliens
-##[$80CA] a()
+USEPATH a()
 ;
 If aaa|awd Then Return				;all aliens added flag!
 ;
@@ -748,9 +748,9 @@ Return
 
 .movealiens
 ;
-##[$80CA] a():newmem a()
+USEPATH a():ResetList a()
 ;
-While globfree(a())
+While NextItem(a())
 	p=\p
 	If px(p)
 		;
@@ -764,17 +764,17 @@ While globfree(a())
 		Gosub dropbomb
 		;
 		Gosub bullcheck
-		If hf Then freelast a():Gosub killflyer:Gosub bang2
+		If hf Then KillItem a():Gosub killflyer:Gosub bang2
 		;
 	Else
 		If chw
-			freelast a():ta-1:If ta=0 Then aok=0
+			KillItem a():ta-1:If ta=0 Then aok=0
 			nrf=0:Gosub killflyer
 		Else
 			Repeat:p-1:Until px(p)
 			x=px(p)+\xo:y=py(p)+\yo:If \m Then x=w2-x
 			px=\px:py=\py:s=\s
-			freelast a():globalloc a2()
+			KillItem a():AddItem a2()
 			a2()\x=x,y,pd(p),px,py,s
 		EndIf
 	EndIf
@@ -797,8 +797,8 @@ EndIf
 Return
 
 .movealiens2
-##[$80CA] a2():newmem a2()
-While globfree(a2())
+USEPATH a2():ResetList a2()
+While NextItem(a2())
 	;
 	dd.q=\d:If dd Then dd=QWrap(dd+.25,0,nr)
 	;
@@ -809,10 +809,10 @@ While globfree(a2())
 		;
 		s=\s+dd:QBlit db,s,px,py
 		s LSR 4:s+s+48:px=\px:py=\py
-		Use lmaxlen 3:longdiv s,px,py
-		Use lmaxlen 4:longdiv s+1,px,py
-		Use lmaxlen db:freelast a2():nrf=0:Gosub killflyer
-		globalloc a3():a3()\px=px,py,s:aif+1
+		Use BitMap 3:Blit s,px,py
+		Use BitMap 4:Blit s+1,px,py
+		Use BitMap db:KillItem a2():nrf=0:Gosub killflyer
+		AddItem a3():a3()\px=px,py,s:aif+1
 		;
 	Else
 		;
@@ -831,14 +831,14 @@ While globfree(a2())
 		\x=x,y,dd:s=\s+dd:QBlit db,s,x,y
 		;
 		Gosub bullcheck
-		If hf Then freelast a2():Gosub killflyer:Gosub bang2
+		If hf Then KillItem a2():Gosub killflyer:Gosub bang2
 		;
 	EndIf
 Wend
 Return
 
 .movealiens3
-##[$80CA] a3()
+USEPATH a3()
 If div
 	If divc
 		divc-1
@@ -846,62 +846,62 @@ If div
 		If die Then Return
 		;make an alien dive
 		If aif
-			newmem a3():For k=0 To Rnd(aif):globfree a3():Next
+			ResetList a3():For k=0 To Rnd(aif):NextItem a3():Next
 			k=f(Rnd(naw)+atw)		;attack wave to use!
 			x=\px:y=\py:m=0:If x+fx>w3 Then m=-1
 			xo=x+fx:If m Then xo=w2-xo
 			xo-px(k):yo=y+fy-py(k)
 			BlitMode EraseMode
-			Use lmaxlen 3:longdiv \s,x,y
-			Use lmaxlen 4:longdiv \s+1,x,y
-			BlitMode CookieMode:Use lmaxlen db
+			Use BitMap 3:Blit \s,x,y
+			Use BitMap 4:Blit \s+1,x,y
+			BlitMode CookieMode:Use BitMap db
 			AddLast a():afa+1:a()\px=x,y,xo,yo
 			a()\s=(\s-48) LSR 1 LSL 4,k,m
-			freelast a3():aif-1:divc=Rnd(32)+32:sfx4=-1
+			KillItem a3():aif-1:divc=Rnd(32)+32:sfx4=-1
 		EndIf
 		Return
 	EndIf
 EndIf
 ;
 If bf
-	newmem a3()
-	While globfree(a3())
+	ResetList a3()
+	While NextItem(a3())
 		s=\s:x=\px+fx:y=\py+fy:Gosub bullcheck
 		If hf
 			Gosub bang
 			BlitMode EraseMode
-			Use lmaxlen 3:longdiv s,\px,\py
-			Use lmaxlen 4:longdiv s+1,\px,\py
-			Use lmaxlen db:BlitMode CookieMode
-			freelast a3():aif-1:If bf=0 Then Return
+			Use BitMap 3:Blit s,\px,\py
+			Use BitMap 4:Blit s+1,\px,\py
+			Use BitMap db:BlitMode CookieMode
+			KillItem a3():aif-1:If bf=0 Then Return
 		EndIf
 	Wend
 EndIf
 Return
 
 .movebombs
-##[$80CA] b():newmem b()
-While globfree(b())
+USEPATH b():ResetList b()
+While NextItem(b())
 	\x+\xs
 	\y+4
 	If \y<296
 		QBlit db,99,QLimit(\x,16,w+48),\y
 	Else
-		freelast b()
+		KillItem b()
 	EndIf
 Wend
 Return
 
 .movebulls
-##[$80CA] c():newmem c()
+USEPATH c():ResetList c()
 bf=0
-While globfree(c())
+While NextItem(c())
 	\y-bs
 	If \y>23
 		If ##[$CB09](\s,\x,\y) Then bf+1:\f=-1 Else \f=0
 		QBlit db,\s,\x,\y
 	Else
-		freelast c():ab-1
+		KillItem c():ab-1
 	EndIf
 Wend
 Return

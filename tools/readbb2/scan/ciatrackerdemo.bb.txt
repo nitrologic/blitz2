@@ -8,7 +8,7 @@ Statement MemSave{a$,s.l,l.l} ;hmmm no support lib sorry, Simon
 	If ReadMem(0,a$) Then Exists 0,s,l:CloseFile 0
 End Statement
 
-WBStartup:##[$80CC]
+WBStartup:NoCli
 MaxLen fi$=108
 
 ThisTask.l=##[$FEA7](0)
@@ -33,7 +33,7 @@ Select Processor
 	Case 4: ##[$9C02] 1200 ;68040 - 900 is too short
 End Select
 
-freest 0
+WbToScreen 0
 *vp.ViewPort=ViewPort(0)
 *myview.View=##[$FFAD]
 
@@ -41,7 +41,7 @@ freest 0
 ;will be, so my WBox, GTBevelBox etc commands render correctly, and
 ;so I can have a window big enough to fit everything.
 
-*WScreen.screen=Addr allocst(0)
+*WScreen.screen=Addr Screen(0)
 *WBScreen.Screen=*WScreen\_screen
 AddHeight.w=*WBScreen\WBorTop+*WBScreen\Font\ta_YSize+1
 
@@ -174,7 +174,7 @@ q6.w=68+AddHeight
 id.l=1
 userdata.l=0
 *awport.MsgPort=##[$FEE2]
-*mywin.window=Addr localstat(0)
+*mywin.window=Addr Window(0)
 *win.Window=*mywin\_window
 *appwin=##[$EE01](id,userdata,*win,*awport,0)
 
@@ -383,7 +383,7 @@ Repeat
 							GTNumber 1,38,460,120,80,11,"",1,sPeriod((12*Octave)+Note)
 							GTText 1,39,482,150,120,11,"",0,sName$
 							GTButton 1,40,380,150,100,11,"Save as",$10
-							localstat 1,(WBWidth-620)/2,(WBHeight-200)/2,620,189+AddHeight,$2|$4|$8|$1000,"Blitz II Sample Lab",2,1
+							Window 1,(WBWidth-620)/2,(WBHeight-200)/2,620,189+AddHeight,$2|$4|$8|$1000,"Blitz II Sample Lab",2,1
 							AttachGTList 1,1
 							GTBevelBox 1,189,181,180,11,0
 							Repeat
@@ -429,10 +429,10 @@ Repeat
 										EndIf
 								End Select
 							Until slev=$200
-							Free localstat 1
+							Free Window 1
 							Free GTList 1
 							##[$9B0D] 0,MyLock
-							Use localstat 0
+							Use Window 0
 							GTSetString 0,3,"Waiting..."
 						EndIf
 						Gosub makecop
@@ -532,7 +532,7 @@ Until ev=$200
 ##[$9C08] 0
 ##[$EE02](*appwin)
 ##[$FEE3](*awport)
-Free localstat 0
+Free Window 0
 Free GadgetJam 0
 Gosub freecop
 End

@@ -1,6 +1,6 @@
 ; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/brcircle.bb2
 
-allocst 0,1:ScreensBitMap 0,0
+Screen 0,1:ScreensBitMap 0,0
 
 cr=100:cx=160:cy=128
 

@@ -27,7 +27,7 @@ End If
 ##[$C099] "togg1",1
 Repeat:
 ev.l=##[$C0A1]
-Use localstat EventWindow
+Use Window EventWindow
 WLocate 10,12
 Format "##############"
 Select EventWindow

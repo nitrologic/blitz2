@@ -169,7 +169,7 @@ countdown:									 ;9x16
 
 End Statement
 
-allocst 0,1
+Screen 0,1
 ScreensBitMap 0,0
 LoadBitMap 0,"count.iff"
 

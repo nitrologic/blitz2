@@ -141,8 +141,8 @@ For h=1 To #num
 	plots(h)\spd=Int(Rnd(6))+1
 Next h
 
-lmaxlen 0,320,256,2
-lmaxlen 1,320,256,2
+BitMap 0,320,256,2
+BitMap 1,320,256,2
 BLITZ
 Slice 0,44,2
 Show 0
@@ -152,12 +152,12 @@ Green 1,15,15,15
 Green 2,15,0,0
 
 dbuffer=0
-Use lmaxlen 0 : BitMapOutput 0
+Use BitMap 0 : BitMapOutput 0
 Repeat
 	VWait
 	Show dbuffer
 	dbuffer=1-dbuffer
-	assembler_cls{Peek.l(Addr lmaxlen(dbuffer)+8)}
-	Drawfield{&plots(0),Addr lmaxlen(dbuffer),-1,0}
+	assembler_cls{Peek.l(Addr BitMap(dbuffer)+8)}
+	Drawfield{&plots(0),Addr BitMap(dbuffer),-1,0}
 Until Joyb(0)
 End

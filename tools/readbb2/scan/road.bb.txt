@@ -32,7 +32,7 @@ For i=0 To 2047
 	If i=256+128*4 Then b=0
 Next
 
-allocst 0,9
+Screen 0,9
 ScreensBitMap 0,0
 BlockScroll
 

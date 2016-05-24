@@ -110,7 +110,7 @@ BRA inittool
 Statement message{*toolv.toolvar,w2}
 Shared w,wintab(),lock,*functions.functions
 Shared ftab(),qtab(),q$()
-##[$80CA] *toolv
+USEPATH *toolv
 MaxLen pa$=192
 MaxLen fi$=192
 rate=32000
@@ -121,7 +121,7 @@ ev.l=##[$C0A1]
 ##[$C0A8]
 If ev=$200 Then Goto closewin
  If EventWindow=w2
-	 Use localstat w2
+	 Use Window w2
 	 Select ev
 ;***************************Message begin*****************
 .messageloop
@@ -155,7 +155,7 @@ closewin:
 \tool\height=Peek.w(*i+$a)
 \tool\left=Peek.w(*i+4)
 \tool\top=Peek.w(*i+6)
-Use localstat w2
+Use Window w2
 !freenewidcmp
 \tool\_Window=0
 ##[$C083] w2
@@ -425,7 +425,7 @@ MOVE.l functions,d0
 *functions.functions=##[$C0A0]
 If (*toolvars\tool\touched AND 1) =0
 *toolvars\tool\touched OR 1
-##[$80CA] *toolvars
+USEPATH *toolvars
 *temp.toolvar=*toolvars
 ;**************************Initialize the first Time
 .setdefaultuser ;For Edit
@@ -433,7 +433,7 @@ If (*toolvars\tool\touched AND 1) =0
 \tool\left=20,20,300,180
 ;**************************
 End If
-##[$80CA] *toolvars
+USEPATH *toolvars
 .begin
 FindScreen 0
 	s=0
@@ -504,7 +504,7 @@ taskname :Dc.b "soundengine001",0
 #y1r =	20
 #y2r =	21
 #tmp =	22
-##[$80CA] *toolvars
+USEPATH *toolvars
 ##[$EC89]
 _data
 fptemp: Dc.l $43300000,$80000000

@@ -137,12 +137,12 @@ Next
 
 ;setup display
 
-lmaxlen 0,320,256,3
-lmaxlen 1,320,256,3
+BitMap 0,320,256,3
+BitMap 1,320,256,3
 
 CNIF 1=0
 For i=0 To 7
-	lmaxlen 2+i,320,256,1
+	BitMap 2+i,320,256,1
 	BitMapOutput 2+i:Locate 2,0
 	NPrint "BLITZ DARTS BY SIMON	 ESC TO EXIT"
 	For r=0 To 2*Pi-Pi/32 Step Pi/32
@@ -165,11 +165,11 @@ Mouse On:MouseArea -150,-150,120,120:BlitzKeys On
 .mainloop
 
 Repeat
-	VWait:Show db:db=1-db:Use lmaxlen db	;double buffer
+	VWait:Show db:db=1-db:Use BitMap db	;double buffer
 ;	ShowB f:f+1:If f=10 Then f=2
-	 mycls{Peek.l (Addr lmaxlen(db)+8)}
-	 mycls{Peek.l (Addr lmaxlen(db)+12)}
-	 mycls{Peek.l (Addr lmaxlen(db)+16)}
+	 mycls{Peek.l (Addr BitMap(db)+8)}
+	 mycls{Peek.l (Addr BitMap(db)+12)}
+	 mycls{Peek.l (Addr BitMap(db)+16)}
 ;do you
 	x=MouseX:y=MouseY
 	Line x+155,y+128,x+165,y+128,1:Line x+160,y+123,x+160,y+133,1
@@ -199,28 +199,28 @@ Macro mypoly
 	Polyf 3,&t,`4,`5
 End Macro
 
-##[$80CA] bang()
+USEPATH bang()
 
 .dobang
-	newmem bang()
-	While globfree(bang())
+	ResetList bang()
+	While NextItem(bang())
 		\x+\vx:\y+\vy:\z+\vz
 		\rotx+\rvx:\roty+\rvy:\rotz+\rvz
 		calcid{bang(),rt}
 		If genstar{bang()}
 			For i=0 To 4 Step 2:!myline {i,i+1}:Next
 		Else
-			freelast bang()
+			KillItem bang()
 		EndIf
 	Wend
 	Return
 
-##[$80CA] nme()
+USEPATH nme()
 
 .addnme:
 	newnme-1
 	If newnme<0
-		If globalloc(nme())
+		If AddItem(nme())
 			newnme=5
 			\x=Rnd(8000)-4000,Rnd(24000)-12000,6000
 			\rotx=0,Rnd(4096),512
@@ -231,8 +231,8 @@ End Macro
 	Return
 
 .movenme:
-	newmem nme()
-	While globfree(nme())
+	ResetList nme()
+	While NextItem(nme())
 		calcid{nme(),rt}
 		moveonz{nme(),\thrust}
 		\x+\vx:\y+\vy:\z+\vz:
@@ -255,16 +255,16 @@ End Macro
 ;				For i=1 To 5:!myline {0,i}:Next
 ;				!myline {2,3}:!myline {1,4}:!myline {1,5}
 
-				newmem fire()
-				While globfree(fire())
+				ResetList fire()
+				While NextItem(fire())
 					If Abs(\x-fire()\x)<1000
 						If Abs(\y-fire()\y)<1000
 							If Abs(\z-fire()\z)<1000
-								If globalloc(bang())
+								If AddItem(bang())
 									bang()\x=\x,\y,\z,\vx,\vy,\vz
 									bang()\rvx=100,130,90
 								EndIf
-								freelast nme():freelast fire():Goto popout
+								KillItem nme():KillItem fire():Goto popout
 							EndIf
 						EndIf
 					EndIf
@@ -272,15 +272,15 @@ End Macro
 
 			EndIf
 		Else
-			freelast nme()
+			KillItem nme()
 		EndIf
 	Wend
 	Return
 
-##[$80CA] fire()
+USEPATH fire()
 
 .addfire:
-	If globalloc(fire())
+	If AddItem(fire())
 		xo=-xo
 		\x=xo,1000,1000
 		calcid{fire(),rt}
@@ -291,13 +291,13 @@ End Macro
 	Return
 
 .dofire:
-	newmem fire()
-	While globfree(fire())
+	ResetList fire()
+	While NextItem(fire())
 		\x+\vx:\y+\vy:\z+\vz
 		If \z<16000
 			genline{fire()}:!myline{0,7}
 		Else
-			freelast fire()
+			KillItem fire()
 		EndIf
 	Wend
 	Return

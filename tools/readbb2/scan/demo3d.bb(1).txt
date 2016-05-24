@@ -26,7 +26,7 @@ End NEWTYPE
 
 .initialise
 	Dim List shapes.part3d(100)
-	##[$80CA] shapes()
+	USEPATH shapes()
 	BLITZ
 	Gosub setupshapes
 	If #iso=0 Then Gosub setuprgb Else Gosub setuprb
@@ -69,8 +69,8 @@ End NEWTYPE
 	Return
 
 .setuprgb
-	lmaxlen 0,320,192,3
-	lmaxlen 1,320,192,3
+	BitMap 0,320,192,3
+	BitMap 1,320,192,3
 	##[$AB02] 0,0,1,0,50,40			;,64,0,320-128,150
 	##[$AB04] 1,6								;3,2
 	Slice 0,54,320,192,$fff8,3,8,8,320,320
@@ -78,8 +78,8 @@ End NEWTYPE
 	Return
 
 .setuprb
-	lmaxlen 0,320,192*2,4
-	lmaxlen 1,320,192*2,4
+	BitMap 0,320,192*2,4
+	BitMap 1,320,192*2,4
 	##[$AB02] 0,0,1,1,50,40	;,64,0,320-128,150
 	##[$AB04] 0,0			 ;3,2
 	##[$AB06] 0,2000,12
@@ -89,8 +89,8 @@ End NEWTYPE
 
 .setupshapes
 	For i=1 To 16								;16 boxes
-		If globalloc(shapes())
-			##[$80CA] shapes()
+		If AddItem(shapes())
+			USEPATH shapes()
 			\pos\x=Rnd(10000),0,Rnd(10000)
 			\rot\x=2048,0,0
 			\rotv\x=0,Rnd(50)-25,0	;whack all these up for spinning
@@ -100,8 +100,8 @@ End NEWTYPE
 	Next
 
 	For i=1 To 10								;10 pyramids
-		If globalloc(shapes())
-			##[$80CA] shapes()
+		If AddItem(shapes())
+			USEPATH shapes()
 			\pos\x=Rnd(20000),-512,Rnd(20000)
 			\rot\x=0,0,0
 			\rotv\x=0,0,0
@@ -110,7 +110,7 @@ End NEWTYPE
 		EndIf
 	Next
 
-	globalloc shapes()							;viewer
+	AddItem shapes()							;viewer
 	Return
 
 .palettergb

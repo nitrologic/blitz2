@@ -7,7 +7,7 @@ WBStartup
 MaxLen pa$=192
 MaxLen fil$=192
 fil$="Hangman.hdb":db$=fil$
-freest 0 : ##[$FFB5]
+WbToScreen 0 : ##[$FFB5]
 LoadSound 10,"OhNo.iff"
 LoadSound 1,"Cool.iff"
 LoadSound 3,"MacPuke.iff"
@@ -26,19 +26,19 @@ LoadSound 9,"Ragger.iff"
 ;	PlayMed
 ;End SetInt
 SetString 2,1
-##[$80CC]
-newlocarr 0,0,"Files"
+NoCli
+MenuTitle 0,0,"Files"
 MenuItem 0,0,0,0,"About...		 ","A"
 MenuItem 0,0,0,1,"Quit","Q"
-newlocarr 0,1,"Database"
+MenuTitle 0,1,"Database"
 MenuItem 0,0,1,0,"Edit		 ","E"
 
 For i = 0To25
-	workstart 0,7+i*18,173,0,i,Chr$(65+i)
+	TextGadget 0,7+i*18,173,0,i,Chr$(65+i)
 Next i
-workstart 0,22,61,0,26,"New game"
+TextGadget 0,22,61,0,26,"New game"
 ##[$C620] 0,26
-workstart 0,22,76,0,27,"Clear ->"
+TextGadget 0,22,76,0,27,"Clear ->"
 ##[$C620] 0,27
 
 z=OpenFile(0,db$)
@@ -48,8 +48,8 @@ Fields 0,c$
 For i = 0 To 7:LoadShape i,"bild"+Str$(i)+".brush":Next i
 LoadShape 8,"logo.brush"
 
-localstat 0,30,30,480,189,$100e,"H A N G M A N"+ver$,1,2,0
-arrmult 0
+Window 0,30,30,480,189,$100e,"H A N G M A N"+ver$,1,2,0
+SetMenu 0
 sistaord = Abs(FileSeek(0)/26)
 tothitr=0:totrak=0:turns=0:new=1:allt=0
 
@@ -180,10 +180,10 @@ Return
 ; Database-Editor v1.15 20.1.1994
 vere$ = " v1.15"
 
-newlocarr 1,0,"Files"
+MenuTitle 1,0,"Files"
 MenuItem 1,0,0,0,"Update		 ","U"
 MenuItem 1,0,0,1,"Quit","Q"
-newlocarr 1,1,"Edit"
+MenuTitle 1,1,"Edit"
 MenuItem 1,0,1,0,"New Word				","N"
 MenuItem 1,0,1,1,"Delete Word","D"
 
@@ -194,21 +194,21 @@ StringGadget 1,20,80,0,3,20,170	 ;bw
 StringGadget 1,133,50,0,7,5,50		;bw
 SetString 2,1
 StringText$ 4,3
-workstart 1,45,20,0,0,"<<"
-workstart 1,227,20,0,2,">>"
-workstart 1,20,20,0,5,"<="
-workstart 1,252,20,0,6,"=>"
-workstart 1,70,20,0,1,"Get"
-workstart 1,20,106,0,10,"Update"
-workstart 1,131,106,0,4," Use "
-workstart 1,235,106,0,11,"Cancel"
+TextGadget 1,45,20,0,0,"<<"
+TextGadget 1,227,20,0,2,">>"
+TextGadget 1,20,20,0,5,"<="
+TextGadget 1,252,20,0,6,"=>"
+TextGadget 1,70,20,0,1,"Get"
+TextGadget 1,20,106,0,10,"Update"
+TextGadget 1,131,106,0,4," Use "
+TextGadget 1,235,106,0,11,"Cancel"
 StringText$ 4,2
 
 Dim ordlist$(4000)
 
 ;WbToScreen 0
-localstat 1,36,42,310,130,$100e,"DatabaseEditor"+vere$,1,2,1
-arrmult 1
+Window 1,36,42,310,130,$100e,"DatabaseEditor"+vere$,1,2,1
+SetMenu 1
 ex = 1
 ordnr=0
 WLocate 19,41:Print "Editing word"
@@ -297,7 +297,7 @@ End Select
 
 Until ex = 0
 CloseWindow 1:ex=1:CloseFile 2
-Use localstat 0
+Use Window 0
 Activate 0
 Return
 
@@ -348,9 +348,9 @@ Gosub hamtaord:
 Return
 
 .about
-workstart 2,135,120,0,0,"OKAY"
-freest 0
-localstat 2,50,50,310,150,$1000,"About Hangman"+ver$,1,2,2
+TextGadget 2,135,120,0,0,"OKAY"
+WbToScreen 0
+Window 2,50,50,310,150,$1000,"About Hangman"+ver$,1,2,2
 SetString 2,1
 ResetString 11,15,288,129
 SetString 1,2
@@ -364,6 +364,6 @@ Repeat
 	mse.l=WaitEvent
 Until mse = $40 AND GadgetHit = 0 OR mse = $400
 CloseWindow 2
-Use localstat 0
+Use Window 0
 Activate 0
 Return

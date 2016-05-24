@@ -5,9 +5,9 @@
 
 #_BitMap=$8000002E:#_Overscan=$80000034:#_Width=$80000023:#_Height=$80000024
 
-lmaxlen 0,1280,512,2:Circlef 320,256,256,1
+BitMap 0,1280,512,2:Circlef 320,256,256,1
 
-ScreenTags 0,"TEST",#_BitMap,Addr lmaxlen(0),#_Overscan,1,#_Width,640,#_Height,512
+ScreenTags 0,"TEST",#_BitMap,Addr BitMap(0),#_Overscan,1,#_Width,640,#_Height,512
 
 *vp.ViewPort=ViewPort(0)
 

@@ -104,22 +104,22 @@ emulate
 ;find lowest delay amount in 'todo' list
 ;
 md=32767
-newmem do():n=-1
-While globfree(do())
+ResetList do():n=-1
+While NextItem(do())
 	If do()\d<md Then md=do()\d
 Wend
 If md=32767 Then Return
 
-newmem do()
-While globfree(do())
+ResetList do()
+While NextItem(do())
 If do()\d=md Then Goto got
 Wend
 got
 
-g=do()\g:freelast do()
+g=do()\g:KillItem do()
 ;
-newmem do()
-While globfree(do())
+ResetList do()
+While NextItem(do())
 	do()\d-md
 Wend
 
@@ -155,9 +155,9 @@ If o<>oo AND o>=0 ;changed? and not tristated?
 	If og
 		oi=g(g)\oi[k]	;bit number of input
 		If o
-			g(og)\i ##[$80CE] oi
+			g(og)\i BitSet oi
 		Else
-			g(og)\i ##[$80CF] oi
+			g(og)\i BitClr oi
 		EndIf
 		AddLast do()
 		do()\g=og,g(og)\p
