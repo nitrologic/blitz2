@@ -1,6 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Instr.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Instr.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Instr.bb
-
-Print Instr("Hello there all","all"): ; Will print 13 
-
-Print Instr("Hello Hello","Hello",2): ; Will print 7
-

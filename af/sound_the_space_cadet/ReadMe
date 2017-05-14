@@ -1,0 +1,56 @@
+
+		           SOUND THE SPACE CADET
+			   ---------------------
+
+			(C)Copyright Scott Hayne 1994.
+			------------------------------
+		
+    			  Written in Blitz Basic II.
+			  --------------------------
+
+	      Programming, Graphics, Sound And Design By Scott Hayne.
+	      -------------------------------------------------------
+
+1mb Min, and remove externial devices!
+
+
+Sound The Space Cadet was written completly in Blitz Basic 2, It was
+written for the Amiga Format Blitz Basic 2 competition. Features include
+seven totally different types of badie, each with there own different
+types of attack, movement and levels of inteligence, 15 levels of
+excelent platform action, 50 frames a second 8 way scrolling, more
+than 150 colours on screen, a control Govener for emense playability,
+moveing platforms, dissolving platforms, magnetic platforms, jelly,
+ice and lots more!!
+
+The Govener helps you control Sound. If you select the UP-DOWN mode,
+then when you come to a ladder pressing up will make you go up the
+ladder, but pressing Left or Right wont do anything!! Weird?? - Just
+experiment and see which one you like best!!
+To use the Govener, press space on the title screen, this will bring
+up the options menu.  Select which mode by pressing fire, then select
+the OK option to return to the title screen, then start the game.
+
+The only other thing to point out is that the score is only updated
+at the beginging of each level, this is because it was a choice of
+playability or having the score update throughout each level, so
+I think the choice was obvious.
+
+As this is P.D, and no-one ever bothers to send shareware money,
+I am not asking any price, just send what you think it's worth! If you 
+would like the source code(in Blitz Basic 2), then please send a cheque
+or postal order for 3 pounds to:-
+
+			S.Hayne
+			29 Argyle Road,
+			Weymouth,
+			Dorset,
+			DT4 7LX.
+
+Please Make Cheques/Postal Orders made payable to S.Hayne. Thanks.
+
+Feel free to contact me or tell me what you think of Sound The Space
+Cadet, at the address above.
+
+Scott.
+

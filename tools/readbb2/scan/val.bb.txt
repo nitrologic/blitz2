@@ -1,8 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Val.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Val.bb
-
-Print Val("1234") ; Will Print 1234 
-Print Val("-23") ; Prints -23 
-Print Val("One hundred") ; Will Print 0 
-
-
-

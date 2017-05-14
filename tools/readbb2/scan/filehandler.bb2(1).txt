@@ -1,6 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/libraries/filehandler.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/filehandler.bb2
-;
-; $VER: filehandler.bb2 40.0 (02.03.94)
-;
-
-XInclude"dos/filehandler.bb2"

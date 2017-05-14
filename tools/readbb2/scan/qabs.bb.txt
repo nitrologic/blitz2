@@ -1,4 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/QAbs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/QAbs.bb
-
-Print QAbs(-23) ; Prints 23 
-

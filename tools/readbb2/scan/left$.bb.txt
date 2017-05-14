@@ -1,4 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Left$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Left$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Left$.bb
-
-Print Left$("Hello there.",5): ; Will only print Hello
-

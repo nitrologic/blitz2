@@ -1,0 +1,138 @@
+
+                             Blitzeroids V1.0
+                 A freely distributable game for the Amiga
+
+                          Written by Andrea Doimo
+                                  for the
+                - BLITZ BASIC 2 - AMIGA FORMAT COMPETITION
+                             WIN TWO  A4000-30
+
+                       Copyright © 1993 Andrea Doimo
+                            All Rights Reserved
+
+
+INTRODUCTION
+~~~~~~~~~~~~
+   This game is based on the popular arcade Asteroids.
+A lot of enhancements have been done, however. The most obvious one is the
+graphic.
+   All objects in the game except the missiles and the font have been
+rendered on a 3D raytracing package using 32 colors.
+   Your spaceship is fixed in the center of the screen and all the nasties
+scrolls around it. This makes it more playable.
+   This time not only rocks will attempt to your life, even exploding mines
+and killer UFOs too.
+   Developed on a standard A1200, works with all the Amiga computers,
+(tested on A500+,A1200 and A4000).
+   It seem that A4000 users have to disable "cache memory" before loading
+the game, sorry.
+
+
+
+CAUTION!
+~~~~~~~~
+   This program doesn't multitasks, so don't try it while using modems, for
+example.
+   I want al the avaiable speed for my games!
+In the future I will try to make it works in a Intuition 256 colors screen
+(originally the graphic had 256 colors!), enabling multitasking, and
+parhaps, it still will be fast enough on a A4000.
+So look out for BlitzeroidsAGA !
+
+
+
+DISTRIBUTION
+~~~~~~~~~~~~
+   Blitzeroids is being distributed as Freeware.  It may be freely
+distributed to any bulletin board service, network, public domain
+collection and obviously, the wonderful mag Amiga Format.
+   I'm not asking for donations on this one, but feel free to drop me a
+note on e-mail in FidoNet if you can.
+   Note, however, that Blitzeroids is NOT public domain.  The author
+retains all rights to the program.
+
+
+
+INSTALLATION
+~~~~~~~~~~~~
+   Blitzeroids requires no special libraries or fonts or anything to run.
+Simply drag the Blitzeroids icon to wherever you wish to install it.
+   It may be run from a Shell, Workbench, or even your favorite dirutil.
+
+
+
+THE GAME
+~~~~~~~~
+   The objective for each stage is to destroy anything there is on screen.
+There are three kinds of situations, however.
+
+METEORS  You have to clear out the zone from dangerous meteors.  Hit them a
+         number of times and these will break in two smaller meteors, break
+         them again in two even smaller meteors each...
+
+MINES    These objects are amaller and slower than a mormal meteor, but
+         when shooted a lot of times, a dangerous explosion spreads away,
+         risking to hit and destroy your ship.
+
+TRAP     In this stage you have to destroy a "flying saucer" ship type.
+         This is very fast and shoots at you, too!
+
+The various stages are a little mixed, so it's easy to find a couple of
+mines in the meteors stage, or meteors in the trap one.
+
+A bonus live every 10 completed stages.
+
+To play you have to use the joystick:
+
+LEFT     Rotates your ship counter-clockwise.
+RIGHT    Rotates your ship clockwise.
+UP       Thrusts forward your ship.
+DOWN     Go in hyperspace for a few of seconds, if in real troubles!
+         You don't know where your ship will appear, however...
+FIRE     Shoots missiles where you are aiming.
+
+
+
+BUGS NOT YET FIXED
+~~~~~~~~~~~~~~~~~~
+   - My games have no bugs at all! Or not?
+   - If you want to Guru your machine, try to go faster than light with
+     your ship. (i.e. keep pressing up jour joystick for a couple of
+     minutes...)
+
+
+
+THE AUTHOR
+~~~~~~~~~~
+   I can be reached on FIDONET at 2:333/714.8 as "Andrea Doimo" if you want
+to email me about bugs found, new features to include, etc.
+
+   You can also reach me on the ToTaLLy WiReD BBS (++39-41-5269419 Fido
+address 2:333/714.0) as Andrea Doimo.
+
+
+
+MANY THANKS TO:
+~~~~~~~~~~~~~~~
+(on alphabetical order)
+
+Tommaso Dabalà, for betatesting and thinking of and drawing those nice missiles
+
+Davide Fadda, for betatesting and my new 2 buttons joystick!  (not used in
+              the game, sorry.
+
+Claudio Mazzuco, for some nice advices. Sorry no betatesting, next time...
+
+Andrea Modenese, for betatesting, "mouse mode" idea and for being my Fido
+                 Boss (sysop of ToTaLLy WiReD, se below).
+
+Livio Rossani, for betatesting, "keyboard mode" idea and all the
+               beautifully raytraced graphics created.
+
+
+
+REVISION HISTORY
+~~~~~~~~~~~~~~~~
+1.0      03/01/94    First version.
+
+1.0.1    06/01/94    Added a LOT of minor features

@@ -1,0 +1,61 @@
+
+     Dice-Fall  V1.2b
+  (c) 1993  By M.Stewart
+ Written in Blitz Basic 2
+
+
+Version 1.2 had an error in the loading routine
+this has now been fixed.
+
+In newer versions there will be music and a few other surprises
+I`ll also get the two player game playing better & faster and
+I`ll update the graphics.
+
+
+
+ Instructions
+
+   You (or you and a friend) direct a little dice sitting at the
+ bottom of the screen, while at the top rows of dice start appearing
+ and descending. Let them come down to far and you`ll get knocked
+ off, So your job is to stop them. You do this with the dice you
+ are controlling. By turning it so that it displays the same face as
+ the dice you are aiming at, You can shoot one at the other and 
+ make it dissappear.
+
+  You can do this in various orders for greater effect
+
+
+ Controls
+
+  The left sided player is controlled with a joystick connected
+ to port 2.
+
+  The right sided player is controlled either by a joystick
+ connected to port 1 or the keyboard.
+
+   (`A` Up     `Z` Down     `O` Left     `P` Right     `Space` Fire)
+
+
+  Press Up & Down to change the value of dice
+
+  Press Left & Right to change posistion
+
+  Press Fire to shoot dice
+
+
+
+ Thanks
+
+  Thanks must certainly go to Acid Software for Releasing Blitz Basic
+ and to Amiga Format for supplying it on one of there coverdisks
+
+
+ Address
+
+ M.Stewart
+ 85 Owenroe Drive
+ Bangor
+ Co Down
+ N.Ireland
+ BT20 1QT

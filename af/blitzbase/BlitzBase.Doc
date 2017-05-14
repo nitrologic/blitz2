@@ -1,0 +1,278 @@
+
+BlitzBase V1.0
+==============
+
+A database program written by Steven Pugh, Oct 1993 - Feb 1994, in Blitz
+Basic 2.
+
+Introduction
+------------
+
+BlitzBase is a database program that displays information in the form of a
+table.  The fields are represented by columns, and the records by rows.
+Databases may have upto 15 fields, and the number of records is limited
+only by memory.
+
+Many types of data can be stored in BlitzBase databases.  Text, Numeric
+Formula, Picture, and Sound field types are possible.  Editing is simple
+and easy.
+
+Databases can be sorted in alphabetical or numerical order, and certain
+portions of the database can be selected, thereby creating a sub-database.
+It is also possible to create graphs and charts for numeric fields.
+
+Instructions
+------------
+
+BlitzBase is controlled using standard Amiga pull-down menus and gadgets.
+Many menu items also have keyboard shortcuts.
+
+1.  BlitzBase Files
+
+Loading, saving, and deleting files can be achieved using the Project Menu.
+Note that each database actually consists of two files.  The first has a
+".BBF" extension.  This file contains information on the number of fields,
+the field names and types, etc.  The other file has a ".BBR" extension and
+contains the database proper - that is, the list of records.  Loading and
+Saving a database is achieved by clicking on _either_ of these files.  Both
+files are ASCII, and can be edited with a text editor if necessary.
+
+There are some example databases included in the Databases drawer. These
+are:
+
+Britain  -  A database of all the counties in Mainland Britain with
+population and area statistics.
+
+Planets  -  A database of the nine planets in the solar system
+
+2.  The Display
+
+Once a database has been loaded, it will be shown as a table.  If the
+database has many fields, it may be too wide to fit on the screen.  If this
+happens, the database can be scrolled to the right by pressing the right
+arrow key.  Not surprisingly, the left arrow key scrolls left.
+
+There is one record in the database that is highlighted in black.  This is
+the "current record".  It is possible to perform operations on this record.
+By pressing the up and down arrow keys, the previous and next records can
+be highlighted.  Holding down the SHIFT key at the same time will highlight
+a record further up/down the database.  This method is used to scroll
+through the database.
+
+There is a Goto menu which allows a specific record to be highlighted.
+Goto #n will bring up a requester asking you to enter the number of the
+record you wish to highlight.  Find will bring up a requester asking you
+for a search string.  The next record which contains that string (in any
+field) will be highlighted.
+
+There are other options such as page up and page down which are equivalent
+to holding SHIFT and pressing the up & down arrow keys.
+
+3.  Sorting
+
+The first item in the sort menu defines the "sort direction", and can be
+"large to small" or "small to large".  For numeric fields this is
+self-explanatory.  For text fields, "small to large" means the records will
+be sorted in alphabetical order A ...  Z, whereas "large to small" means
+reverse alphabetical order Z ...  A.
+
+Each field has a item in the sort menu.  By selecting an item, the database
+will be sorted using the corresponding field.  Pressing the "Esc" key
+during a search will cancel the operation.
+
+4.  Selecting
+
+The select menu enables a number of records within the database to be
+"selected".  Only the selected records then appear in the table.  This
+effectively makes a sub-database, which can be edited, saved, sorted, etc.
+
+There are a number of ways this can be achieved.  The most common is
+through a search.  Selecting the menu item, will bring up a requester
+asking what to search for.  If you have chosen to search through a numeric
+field, you will be asked to enter the search number.  Any records whose
+selected field equal, are greater than, or are less than, the search number
+will then be selected.  If it is a text field, the procedure is similar,
+except you can also choose to select records which "contain" the search
+text.
+
+The selected and unselected records can be swapped by choosing the Swap All
+menu item.  To return to the original database, choose "select all"
+
+It is possible to have both pictures and sounds associated with each
+record.  If one of your fields is a "picture" or "sound" type, then each
+record will be examined to see if there is an associated picture/sound.  If
+there is, it will be selected.
+
+Searches can be combined in any way.  For example, selecting by search, and
+then selecting by picture will only select those records which were
+selected by _both_ searches.
+
+5.  Editing
+
+The functions in this menu either change the field stats, or the database
+items themselves.
+
+Amend Record will allow the user to amend the current (highlighted) record.
+Add New Record will add a new record to the end of the database.  If you do
+not want it to be at the end, you can later do a sort.
+
+Delete Record will delete the current record.  The following records then
+move up one position.
+
+With Fill Field you can flood-fill every selected record with the same text
+or number.  This overwrites the entire field so should be used carefully.
+
+Calculate Formulas will fill any fields that are of formula type, with the
+correct value as defined by the formula.  This should be done after an
+amendment has been made to a field on which the formula depends.
+
+Amend Field bring up a screen which shows the list of fields on the left
+hand side of the screen, and various information on the right.  Clicking on
+a field brings up the corresponding information.  To change any aspect of a
+field, just make the changes, then click on O.K.  If you select another
+field before clicking on O.K, the changes will be lost.
+
+The type of field may be Text, Numeric, Formula, Picture, or Sound.  The
+field length gadget defines how wide the field should be in the table.  All
+field types may be left, right or centre justified.  It is also possible to
+hide a field so that it does not appear in the table.  Such a field can
+still be used to sort, search, calculate formulas etc.  Numeric and Formula
+fields have an additional gadget for defining the number of decimal places
+the value is to appear in.  There is one more gadget.  This is left simply
+for information for the text, numeric types, but has a special purpose for
+Picture, Sound and Formula field types.  See "Working with Picture, Sound,
+and Formula field types" (Section 9) for more information.
+
+Add New Field will create a field, then display the "Amend Field" screen.
+After making the changes, again click on O.K.  If you select cancel, the
+field will not disappear - just any changes will not be saved.  To delete a
+field you must select the Delete Field option.
+
+6.  Show
+
+The Show menu contains the following items:
+
+Picture:  If the current record has an associated picture, this option will
+display it.  The filename of the picture is the same as the contents of the
+picture field.  For more information on this, see Section 9.
+
+Sound:  Similarly, will allow you to hear an associated sound.
+
+Maths:  Will bring up a list of fields.  Select one of Numeric or Formula
+type.  Some basic mathematical stats such as the mean and standard
+deviation will then be calculated, base on the values contained that field.
+NB - only selected records are taken into account, making it possible to
+obtain statistics on a certain part of the data.
+
+Bar Chart:  Again requires a field of Numeric or Formula type.  This option
+will draw a bar chart showing the relative size of the field's contents.
+If there are a large number of bars, then not all will be labelled, but the
+bars run from left to right in the same order as the records in the table.
+
+Pie Chart:  Similar to Bar Chart, but the values are represented by sectors
+of a pie rather than bars.  Any values that correspond to less than 8% of
+the total will collectively form part of the sector labelled as "Other"
+
+After either type of chart has been drawn, the screen can be saved as an
+IFF file.  If you want to save the screen, press P, and you will be asked
+for the filename.  Otherwise, clicking the left mouse button returns you
+the the main screen.
+
+7.  Printing
+
+It is possible to print out to PRT:  or PAR:  devices, or to a specified
+file.  Either the current record can be printed alone, or the entire list
+of selected records.
+
+8.  Other Options
+
+There are a number of other options available, in the final menu.  These
+are:
+
+Default Pathname:  is the disk and/or directory that the computer will look
+in when you select Load, Save, or Delete File.
+
+Record No:  Can be set to SHOW or HIDE.  Refers to whether the records
+should be numbered on the left hand side of the table.
+
+Table Size:  Can be Small (8 rows) Medium (12 rows) or Large (16 rows).
+The default is medium.  Note that, in interlace mode, the number of rows is
+doubled.
+
+Screen Mode:  Allows the BlitzBase screen to be Interlaced (Double Height)
+and/or Super Hi-Res (Double Width).  NB - Super Hi-Res Requires Amigas with
+Workbench 2.0 or greater.
+
+9.  Working with Picture, Sound and Formula field-types
+
+This section contains futher information on these types of field.
+
+All formula fields have a corresponding formula.  This is shown on the
+"Amend Field" screen.  The formula must only contain numbers, operators (+,
+-, *, and /), and field numbers.  A typical formula would look like
+
+10 * f3 / f2
+
+This means "multiply 10 by the contents of field 3 and divide by the
+contents of field 2".  Note that there is no operator hierarchy.  That is,
+operators are processed from left to right, so
+
+f2 + f3 * f4
+
+would add f3 to f2, THEN multiply that by f4.  In conventional algebra of
+course, the f3 * f4 would be calculated first, then f2 added on.  Sorry, it
+is not possible to use brackets within formulas in this version of
+Blitzbase.
+
+For Picture and Sound field-types, instead of a space for the formula,
+there is a space for the "path name".  This defines the disk path name of
+the drawer on which the picture/sound files are to found.  The filenames of
+the pictures/sounds are taken to the the contents of the fields themselves.
+For example a picture field whose path name was "DF0:Pictures/" and which
+contained the records:
+
+--+----------+--
+  | Field #1 |
+--+----------+--
+1 | Alice.Pic|
+2 | Betty.Pic|
+3 | Carla.Pic|
+--+----------+--
+
+Would then look for the files "DF0:Pictures/Alice.Pic"
+                              "DF0:Pictures/Betty.Pic"
+                              "DF0:Pictures/Carla.Pic"
+                                            for each record respectively.
+
+Pictures must be of ILBM IFF type, although AGA pictures should be O.K.
+Sounds also must be IFF samples.
+
+10.  Creating a New Database
+
+There is no separate option to create a new database.  To achieve this,
+simply ensure there is no database already in memory (Select the "New"
+option from the Projects menu if necessary), and select Add New Field.
+Repeat this until you have the correct number of fields.  The Table should
+now have the field names at the top, but no records underneath.  The
+database is now ready for you to add as many records as is required.
+
+When saving a database for the first time, it is not necessary to add the
+".BBF" or ".BBR" extensions.  Just type the filename you want, and the
+extensions will be added automatically.
+
+Author
+------
+
+BlitzBase V1.0 written in Blitz Basic 2 on an Amiga 1200, with 60MB HD.
+This program is shareware. To become a registered user, send a 5 pound
+donation.
+
+Steven Pugh
+10 Wellington Close
+Sandhurst Green
+Sundorne
+Shrewsbury
+England
+SY1 4SP
+
+Typed by Steve P, Jan/Feb 1994.

@@ -1,9 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/guru.bb2
-
-;
-;GURU finder prog
-;
-;usage: GURU progname (prog should have debug symbols)
-;
-
-

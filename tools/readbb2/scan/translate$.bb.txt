@@ -1,7 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Translate$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Translate$.bb
-
-Print "Enter a Sentence ":a$=Edit$(80)
-NPrint "Phonetic=",Translate$(a$) 
-MouseWait 
-
-

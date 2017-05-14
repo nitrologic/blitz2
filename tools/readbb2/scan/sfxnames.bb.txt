@@ -1,7 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/SfxNames.bb
-SLOAD "sfx/cannon",0
-SLOAD "sfx/slam",1
-SLOAD "sfx/inferno",2
-SLOAD "sfx/hammer",3
-SLOAD "sfx/demol",4
-SLOAD "sfx/cy",5

@@ -1,6 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/QWrap.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/QWrap.bb
-
-Print QWrap(-5,0,320) ; Prints 315
-
-Print QWrap(325,0,320) ; Prints 5 
-

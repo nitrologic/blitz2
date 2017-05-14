@@ -1,0 +1,3693 @@
+@database "FutureSonic.guide"
+
+##
+## FutureSonic.guide Hypertext Help System for the FutureSonic software
+## This file must be distributed with the FutureSonic program. See 
+## the "Legals" node in this file.
+##
+## Version string: $VER: FutureSonic.guide 0.90
+##
+
+@node main "FutureSonic - Contents"
+@next oview
+		FutureSonic - Version 0.9: Documentation
+     To view this manual, please select one of the topics below with
+     the mouse...
+                    @{" Overview              " link oview }
+                    @{" Legalities            " link legals }
+                    @{" Installation          " link install }
+                    @{" Using FutureSonic     " link use }
+                    @{" The Editing Screen    " link screen }
+                    @{" Loading/Saving        " link diskio } 
+                    @{" The Selection Panel   " link maingad }
+                    @{" The Play Panel        " link playpanel }
+                    @{" The Instrument Panel  " link instrpanel }
+                    @{" The SongEdit Panels   " link songpanel }
+                    @{" The SoundEdit Panel   " link sndpanel }
+                    @{" The Effect-Commands   " link cmd }
+                    @{" Editing A Track       " link tracks }
+                    @{" Editing A Sequence    " link sequence }
+                    @{" Credits               " link credits }
+                    @{" Future Revisions      " link future }
+  *NOTE: Please read the @{"Legalities" link legals } section before using FutureSonic.
+
+  
+@endnode main
+
+@node oview "FutureSonic - A Brief Overview"
+@toc main
+@next legals
+
+	FutureSonic is a 4-track music editor program, designed loosely
+ around Tracker-type music editors, but with a number of added features
+ which greatly increase the power of this type of music editing. It is
+ designed primarily for creating game and demo music, where memory
+ restrictions and execution speed are major considerations, although it
+ does lend itself to other applications.
+
+	Anyone who has seen a Tracker-type program ( SoundTracker,
+ ProTracker, OctaMed, etc.) will instantly recognise the Track-Editor in
+ FutureSonic. The most noticeable difference, however, is that Tracker
+ programs display 4 tracks which comprise one "block" or "pattern",
+ usually 64 lines (or 4 bars of 4/4 music to the music buffs) long. These
+ blocks are then arranged into a "sequence", or pattern list, to form a
+ complete song. The drawback to this system is, of course, that when
+ writing tunes that use a repetitive bass, drum or harmony track while
+ varying the lead track, a lot of these tracks are repeated in memory
+ because they have to be entered separately into every block that uses
+ them - meaning a lot of unnecessary memory wastage and a lot of
+ cutting and pasting when editing a song.
+	FutureSonic solves this problem by allowing you to edit individual
+tracks on their own, instead of in blocks of four, so that when you come
+to setting up the actual sequence, you set up the tracks in a four-track 
+sequence editor rather than just a single pattern list. The advantages of
+this system should be immediately obvious to Tracker users, especially 
+those who write rave and party songs, which usually have repetitive tracks.
+
+	FutureSonic also incorporates an @{"ADSR" link _instadsr } (Attack,Decay,Sustain,
+ Release) modulation function which can be easily set for each instrument.
+ This feature allows you to make a flat strings instrument, for example,
+ fade in quickly or gradually, and fade out, without having to type in
+ reams of volume commands into the tracks. In addition, you can have the
+ same sample as several different instruments, all with different
+ settings, while only having one copy of the actual sample in memory.
+
+	There is also a @{"Sound-Editor" link sndpanel }, in which a sample may be modified in
+ a number of different ways, including Reverse, Echo, Resample, and Loop.
+ This does not yet support sampling from a digitiser, however this will be
+ supported in the next release.
+
+	Finally, the 3-digit effect-commands commonly used in Tracker
+ programs have been optimised and extended to allow more varied effects in
+ songs. The well-used @{"Arpeggio" link _cmd1 } command, which plays notes as fast arpeggios
+ instead of single notes, can now play descending as well as ascending
+ arpeggios, and there is now a @{"Tremolo" link _cmdc } command which functions in much the
+ same way as the standard Tracker @{"Vibrato" link _cmdb } command.
+
+	We hope FutureSonic will be the next generation in Tracker
+ programs, defining game music as a separate field to performance music,
+ and will allow greater versatility and power while conserving memory and
+ speed.
+
+
+@endnode oview
+
+@node legals "FutureSonic - Copyright and Disclaimer"
+@prev oview
+@toc main
+@next install
+
+	This release of FutureSonic (V0.9) is Public Domain. You may copy
+ it, distribute it, even mail it to the moon, as long as this guidefile,
+ the demo song, and the supplied datafiles, are all distributed unchanged
+ with it.
+	 You may not make any money from the sale of this program ( for
+ this release, Future Publishing/Amiga Format are given express permission
+ to include this program on a coverdisk supplied with their magazine. )
+
+	Fred Fish is hereby given permission to include this software
+ in his Fish Disk libraries and to distribute same.
+
+	The Authors, Commodore-Amiga, Inc., and any third-party
+ distributors of FutureSonic ( unless otherwise specified ) assume no
+ liabilities for any loss or damages incurred by the use of this program
+ or any attendant files supplied with it. Your possession of this program
+ is taken as your agreement that you accept the program "as is" and that
+ you therefore assume any and all responsibility for such loss or damages
+ arising out of any use or installation thereof.
+
+	Future releases of this program will be Shareware. You may register
+ now as a user, which means that you will recieve upgrades as they are
+ completed. If you wish to register, please send SAE and $A20.00 ( please
+ make crossed cheques and money orders payable to David Hansen ) to
+	
+	David Hansen 
+	c/o Highbury Post Office
+	Highbury, South Australia 5096
+	Australia
+
+ Any queries, suggestions, bug reports etc. are most welcome. Please
+ forward correspondence to the above address, or leave a message for
+ David Hansen on:
+ The Distributor BBS ( Nat'l. (08) 341 5255  Int'l. +618 341 5255 )
+
+ 	The names "Commodore", "Amiga", and "AmigaDOS" are registered
+ trademarks of Commodore-Amiga, Inc. All rights reserved.
+
+ AmigaGuide, AmigaGuide.info, amigaguide.library, WDisplay, WDisplay.info
+ (c) Copyright 1991-93 Commodore-Amiga, Inc. All rights reserved.
+ Reproduced and distributed under license from Commodore.
+
+ AmigaGuide software is provided "as-is" and subject to change; no
+ warranties are made. All use is at your own risk; no liability or
+ responsibility is assumed either by the Authors of FutureSonic, any
+ third-party distributors, or by Commodore-Amiga, Inc.
+
+ The sound sample "revsynth" supplied on this disk was digitised with
+ AudioTech V1.0 (our 1987 sound-sampling software) from the Jean-Michel
+ Jarre album "Revolutions". ( In the music universe, Jean-Michel Jarre
+ is God! If you don't have any of his albums, get some NOW!! The best
+ ones [in our opinion] are "Oxygene", "Revolutions" and his latest,
+ "Chronologie". )
+
+
+@endnode legals
+
+@node install "FutureSonic - Installation"
+@prev legals
+@toc main
+@next use
+
+	FutureSonic is contained, along with its data files, in a directory
+ named, curiously enough, FutureSonic. The contents of this directory
+ should be as follows:
+
+ FutureSonic (dir)
+	FutureSonic             (the FutureSonic editor program)
+	FutureSonic.info        (its icon)
+	FS.main	                (its support file)
+	FutureSonic.guide       (this Amigaguide file)
+	FutureSonic.guide.info  (its icon)
+	Instruments (dir)
+		digdug          \
+		tense           |
+		ultrastringloud |
+		snare19         |
+		bassdrum10      |--- (the instruments for the demo song)
+	*	revsynth1       |
+		zifsynth2       |
+		fenderbass      |
+		buzzstring      /
+		
+	Songs (dir)
+		GalaxyFlight.fs	     (the demo song)	    	
+
+
+	FutureSonic requires at least 1MB of memory and Kickstart version
+ 1.3 or higher. It is designed to display only on PAL Amigas; NTSC displays
+ will lose the bottom of the screen.
+
+	If you are a Workbench user, you can install FutureSonic simply by
+ dragging the FutureSonic drawer icon over the required destination icon.
+ It requires about 300 KB of disk space. CLI and Shell users with two
+ drives may install it by putting the FutureSonic disk in DF0:, putting a
+ destination disk with enough free space in DF1:, and typing:
+
+	Copy DF0:FutureSonic to DF1: [RETURN]
+
+ Hard drive users may install FutureSonic on their hard drives by typing
+ the above copy command, replacing DF1: with the device name of the hard
+ drive e.g. DH0:, HD0:, SDH0: etc.
+
+ Single floppy drive users ( get another drive! ) should have a formatted
+ blank disk. This should be referred to by name, not device, so if, for
+ example, the disk is called "MusicEds", you would copy FutureSonic
+ to it by placing your Workbench disk in DF0: and typing:
+
+	Copy FutureSonic:FutureSonic to MusicEds:  [RETURN]
+
+ At this point a requester will appear asking for volume FutureSonic:, you
+ should remove the Workbench disk and insert the FutureSonic disk.
+ After a little while, the requester will return asking for volume
+ MusicEds:. Insert the destination disk, and FutureSonic will be copied
+ to it.
+
+Footnote:
+
+ * See bottom of @{"Legalities" link legals } page for the origins of this sound sample.
+
+
+@endnode install
+
+@node use " FutureSonic - Using the Program"
+@prev install
+@toc main
+@next screen
+	Please drag side slider down for more information: --->
+
+	@{"The Buttons        " link _usebutt }
+	@{"The Keyboard       " link _usekeys }
+	@{"Keyboard Shortcuts " link _usescut }
+	@{"Display Gadgets    " link _usestrg }
+
+
+	FutureSonic is a music editor which combines the straightforward
+ editing of Tracker type programs with the versatility of being
+ able to set up sequences with individual tracks, rather than blocks
+ or patterns of 4 tracks. To make the editing as easy and intuitive as
+ possible, and to leave room for future expansion, we have incorporated
+ editing techniques into the program which in some cases deviate from
+ Amiga standards. Where the Amiga standards are appropriate, we have
+ retained them as far as possible, but we have also introduced new
+ and innovative ideas, such as multi-function gadget buttons, and
+ there are no menus anywhere in the program - it is all gadget and
+ keyboard controlled. The editing functions are all listed above; to
+ retrieve information on a function, click the mouse on it to bring up
+ the appropriate page.
+
+@endnode use
+
+@node _usebutt " FutureSonic - Using the Buttons"
+@toc use
+@next _usekeys
+
+	There are 2 types of buttons in FutureSonic; Activate buttons,
+ and Adjust buttons. The Activate buttons in most cases have a little
+ LED type indicator in the top right corner to show that they have been
+ activated. The Adjust buttons are the small square ones with dual
+ symbols on them such as up/down arrows ( which are depicted in this
+ guidefile as "^v" ), +/- signs, up/down arrows with terminator marks
+ ( depicted in this file as " -_" ), and the like.
+
+	The Activate buttons may work in one of two ways. If the function
+ being activated can't lose or change the data in any way ( such as the
+ Play Song button ) then when it is clicked, the indicator light in the
+ top right corner will light up in red to show that the button has been
+ clicked and is doing its stuff. However, if the function being activated
+ will change or delete the data in any way ( such as the Delete Track
+ button ), clicking the mouse on this button once will cause the
+ the indicator light to flash, or rather pulse, in yellow, and a message
+ will appear in the status bar at the top of the screen saying something
+ like " Click left button to confirm, right button to abort ". Clicking
+ the left mousebutton again at this stage will cause FutureSonic to 
+ proceed with the operation, while clicking the right mousebutton will
+ abort it and leave the data unchanged.
+
+	The Adjust buttons are multi-function gadgets. That is, they use
+ both the left and right mousebuttons, or both at the same time, to
+ effect different modes of their operation. While this may sound nasty,
+ the nature of the mode changes actually makes their use much easier.
+ For instance, consider the Track-display scrolling button. Using normal
+ Amiga standards, this function would be controlled by 4 different 
+ buttons - scroll up, scroll down, scroll up fast, and scroll down fast.
+ In FutureSonic, these four modes of scrolling are embodied in the one
+ button, meaning you don't have to move the mouse to change scrolling
+ speed or direction. Instead, to scroll down, you hold the left mouse
+ button down on this gadget to scroll at normal speed. Still holding
+ the left button, pressing the right one at the same time will scroll
+ down fast. To scroll up, hold down the right mousebutton on its own
+ on this gadget. Now, while holding the right button, pressing the 
+ left one at the same time will scroll up fast. All of the Adjust
+ buttons work in this manner, which makes editing large songs much
+ quicker and easier once you get used to it - and it doesn't take
+ much to get used to.
+
+
+@endnode _usebutt
+
+@node _usekeys " FutureSonic - The Keyboard Layout"
+@prev _usebutt
+@toc use
+@next _usescut
+
+	In FutureSonic, the keyboard is used to simulate a piano keyboard
+ in much the same way as Tracker programs do. However, there is one big
+ difference; Tracker programs set up a two-octave keyboard, while
+ FutureSonic sets up a three-octave one. Tracker keyboards use the keys
+ like this:
+
+	Bottom 2 rows: Z=C-1, S=C#1, X=D-1, D=D#1 etc, up to /=E-2.
+
+	Top 2 rows: Q=C-2, 2=C#2, W=D-2 etc, up to ]=G-3
+
+	To play a note higher than G-3, in Tracker programs, you need to
+	press an F-key to choose a higher octave. The keyboard then plays
+	one octave higher. You then have to press another F-key to come
+	back down to the lower notes.
+
+	FutureSonic sets up the keyboard slightly differently. As a
+ result, users familiar with Tracker programs may be a little confused
+ for a while, but once you are used to it, you will find it much easier
+ to enter notes across the Amiga's full octave range, without having to
+ jump octaves with F-keys. The keyboard layout in FutureSonic is
+ reproduced below:
+
+ |-----------------------------------------------------------------|
+ |       F#2 G#2 A#2  -  C#3 D#3  -  F#3 G#3 A#3                   |
+ | tilde  1   2   3   4   5   6   7   8   9   0   -   =   \   BSPC |
+ |                                                                 |
+ |        F-2 G-2 A-2 B-2 C-3 D-3 E-3 F-3 G-3 A-3 B-3              |
+ | TAB     Q   W   E   R   T   Y   U   I   O   P   [   ]           |
+ |                                                                 |
+ |             C#1 D#1  -  F#1 G#1 A#1  -  C#2 D#2                 |
+ |Ctrl  CL  A   S   D   F   G   H   J   K   L   ;   '   RETURN     |
+ |                                                                 |
+ |          C-1 D-1 E-1 F-1 G-1 A-1 B-1 C-2 D-2 E-2                |
+ |Shift      Z   X   C   V   B   N   M   ,   .   /   Shift         |
+ |-----------------------------------------------------------------|
+
+	So, the FutureSonic keyboard continues on in the top two rows,
+ from the end of the bottom two rows, rather than starting from C-2 in
+ the top rows in the way that Tracker programs do.
+
+
+@endnode _usekeys
+
+@node _usescut " FutureSonic - Keyboard Shortcuts"
+@prev _usekeys
+@toc use
+@next _usestrg
+
+	Many of FutureSonic's functions can be activated by pressing
+ certain keys on the keyboard. These keyboard shortcuts are listed
+ here as a reference:
+
+ -------------------------------------------------------------------------
+ | Function                              | Keyboard shortcut             |
+ -------------------------------------------------------------------------
+ | Go to top of Track                    | F1                            |
+ | Go to 1/4 way through Track           | F2                            |
+ | Go to 1/2 way through Track           | F3                            |
+ | Go to 3/4 way through Track           | F4                            |
+ | Go to bottom of Track                 | F5                            |
+ | Show Play Panel                       | F6                            |
+ | Show Instrument Panel                 | F7                            |
+ | Play Song                             | F8                            |
+ | Continue Song                         | Shift-F8                      |
+ | Play Block                            | F9                            |
+ | Continue Block                        | Shift-F9                      |
+ | Play Track                            | F10                           |
+ | Continue Track                        | Shift-F10                     |
+ | Increase Track No. in Sequence Editor | +  (Edit on, in Sequence Ed)  |
+ | Decrease Track No. in Sequence Editor | -  (Edit on, in Sequence Ed)  |
+ | Scroll up in both Editors             | Cursor up                     |
+ | Scroll down in both Editors           | Cursor down                   |
+ | Next instrument                       | Shift-Cursor up               |
+ | Previous instrument                   | Shift-Cursor down             |
+ | Move cursor left (Track and Sequence) | Cursor left                   |
+ | Move cursor right (Track and Sequence)| Cursor right                  |
+ | Previous Track in Track Editor        | Shift-Cursor left             |
+ | Next Track in Track Editor            | Shift-Cursor right            |
+ | Delete line in Track                  | Backspace                     |
+ | Insert line in Track                  | Shift-Backspace               |
+ | Erase note,instr. and cmd in Track    | Del                           |
+ | Edit mode off/on                      | Esc                           |
+ | Quit FutureSonic                      | LeftAmiga-Q                   |
+ -------------------------------------------------------------------------
+
+
+@endnode _usescut
+
+@node _usestrg " FutureSonic - Display Gadgets"
+@prev _usescut
+@toc use
+
+	All the numeric and status displays in FutureSonic resemble
+ string-entry gadgets. Most, however, are altered by their accompanying
+ buttons and cannot be edited directly. There are, however, some
+ exceptions, such as the Instrument Name display on the Instrument
+ panel. To edit these, simply click the mouse anywhere in the gadget
+ and type in the new data when the cursor appears. Press return when
+ finished to input the new data.
+
+
+@endnode _usestrg
+
+@node screen "FutureSonic - The Editor Screen"
+@prev use
+@toc main
+@next diskio
+
+	The FutureSonic Editor Screen is divided into 4 sections:
+
+  1) The Status Bar       ( the long strip at the top of the screen )
+
+  2) The Selection Panel  ( the top left-hand panel with 4 big buttons )
+
+  3) The Controller Panel ( the top right-hand panel with lots of buttons )
+
+  4) The Editor Panel     ( the bottom half of the screen )
+
+	The Status bar displays system messages and errors on the left-hand
+ side, and displays the current instrument name on the right-hand side. If
+ no messages or errors are being displayed, the song name will appear on
+ the left-hand side.
+
+	The @{"Selection" link maingad } panel is visible at all times. It allows you to
+ select which mode the other two panels are operating in.
+
+	The Controller panel has two modes of operation: @{"Play" link playpanel } Control, and
+ @{"Instrument" link instrpanel } Control, which govern the song-playing and
+ editing functions, and the instrument settings, respectively.
+
+	The Editor panel likewise has two modes of operation: @{"Sequencer" link songpanel } and
+ @{"SoundEditor" link sndpanel }, which allow you to edit the tracks and the pattern-sequence,
+ and the sample attributes, respectively.
+
+	The Sequencer panel also includes the @{"Saving" link diskio } and @{"Loading" link diskio } gadgets
+ which allow you to save and load song files and sound samples to and from
+ the disk.
+
+ |------------------------------------------------------------------------|
+ | Status bar    | (messages/errors or song name)   (instrument name )    |
+ |------------------------------------------------------------------------|
+ |                          |                                             |
+ |                          |        Controller Panel                     |
+ |                          |                                             |
+ |       Selection          |       (Play / Instrument                    |
+ |         Panel            |             Panel)                          |
+ |                          |                                             |
+ |                          |                                        __   |
+ |                          | Editor Panel (Sequencer / Sound Editor   |  |
+ |                          |                         Panel)           V  |
+ |--------------------------+----------------------|----------------------|
+ |                          !    |-------------|   ||-------------------| |
+ |                          !    |00:C-2 01 000|   ||000:001 009 005 020| |
+ |                          !    |01:--- -- 000|   ||001: -   -  005  - | |
+ |      Load / Save         !    |02:--- -- 000|   ||002: -  009 005  - | |
+ |         Panel            !    |03:--- -- 000|   ||003: -   -  005  - | |
+ |                          !    |04:E-2 01 000|   ||004:002 010 006 021| |
+ |                          !    |05:--- -- 000|   ||005: -   -  006  - | |
+ | ( part of Sound Editor   !    |06:--- -- 000|   ||006: -  010 006 022| |
+ | panel when in Sound      !    |07:--- -- 000|   ||007: -   -  006  - | |
+ | edit mode )              !    |08:A#2 01 000|   ||008:003 009 030 020| |
+ |                          !    |09:--- -- 000|   ||009: -   -  032  - | |
+ |                          !    |10:G-2 01 000|   ||010:004 010 033  - | |
+ |                          !    |11:--- -- 000|   ||011: -   -  034  - | |
+ |                          !    |-------------|   ||-------------------| |
+ |--------------------------|----------------^------|-----------------^---|
+                                Track Editor_|        Sequence Editor_|
+                                ( These disappear and the area forms part
+                                  of the Sample Editor when Sample Edit
+                                  mode is active. )
+
+
+@endnode screen
+
+@node diskio "Loading and Saving Data"
+@prev screen
+@toc main
+@next maingad
+	Please drag side slider down for more information: --->
+
+^                                                 ^
+|                                                 | 
+|-------------------------------------------------|---->
+|                                                 |
+|       Load                   Save               |
+|                                                 |
+|       @{"Song            " link diskiolsng }      @{"Song            " link diskiossng }    |
+|                                                 |
+|       @{"Song+Instruments" link diskiolsni }      @{"Song+Instruments" link diskiossni }    |
+|                                                 |
+|       @{"Instrument      " link diskiolins }      @{"Instrument      " link diskiosins }    |
+|                                                 |
+|       @{"Module          " link diskiolmod }      @{"Module          " link diskiosmod }    |
+|                                                 |
+|                      @{"AutoSave" link diskioasve }                   |
+|                                                 |
+|-------------------------------------------------|---->
+
+
+	The eight buttons located to the right of the Sequencer panel
+ control the loading and saving of songs and instruments. They are arrayed
+ in two vertical columns of four, under the headings of "Load" and "Save".
+ The Load/Save panel is replicated here; to find out about any function,
+ click the button relevant to the function you wish to examine:
+
+@endnode diskio
+
+@node diskiolsng "FutureSonic - Loading a Song"
+@toc diskio
+@next diskiossng
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to load. If the selected file is not a FutureSonic song, the program will
+ return to the editor screen and an error message will be displayed in the
+ status bar. If the selected file is a FutureSonic song with instruments,
+ or a FutureSonic optimised  module, it will be loaded as such
+ automatically.
+
+	Once a file has been selected, either double-click its entry in the
+ directory list or click OK in the file requester to load it. If a song
+ already exists in memory, the yellow light in the top right corner of the
+ Load - Song button will flash, and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the load, or click the right mousebutton to abort
+ and keep the current song in memory.
+
+
+@endnode diskiolsng
+
+@node diskiossng "FutureSonic - Saving a Song"
+@prev diskiolsng
+@toc diskio
+@next diskiolsni
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to save or type in a filename. 
+
+	Once a filename has been chosen, either double-click its entry in
+ the directory list, press return (if the cursor is on the filename entry)
+ or click OK in the file requester to save it.
+
+	The file will then be saved automatically, without the instruments.
+ These will be loaded back in through whatever path they are specified as
+ coming from within the song file's instrument list, when the song is
+ reloaded. If the filename you specified already exists on the disk, the
+ yellow light in the top right corner of the Save - Song button will flash,
+ and a message will appear in the status bar asking you to click the left
+ or right mousebutton. Click the left mousebutton to confirm the save, or
+ click the right mousebutton to abort and preserve the file currently on
+ the disk.
+
+@endnode diskiossng
+
+@node diskiolsni "FutureSonic - Loading a Song with Instruments"
+@prev diskiossng
+@toc diskio
+@next diskiossni
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to load. If the selected file is not a FutureSonic song, the program will
+ return to the editor screen and an error message will be displayed in the
+ status bar. If the selected file is a FutureSonic song without
+ instruments, or a FutureSonic optimised  module, it will be loaded as
+ such automatically.
+
+	Once a file has been selected, either double-click its entry in the
+ directory list or click OK in the file requester to load it. If a song
+ already exists in memory, the yellow light in the top right corner of the
+ Load - Song+Instruments button will flash, and a message will appear in
+ the status bar asking you to click the left or right mousebutton. Click
+ the left mousebutton to confirm the load, or click the right mousebutton
+ to abort and keep the current song in memory.
+
+
+@endnode diskiolsni
+
+@node diskiossni "FutureSonic - Saving a Song with Instruments"
+@prev diskiolsni
+@toc diskio
+@next diskiolins
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to save or type in a filename. 
+
+	Once a filename has been chosen, either double-click its entry in
+ the directory list, press return (if the cursor is on the filename entry),
+ or click OK in the file requester to save it.
+
+	The file will then be saved automatically, with the instruments.
+ These will thus form part of the song file, which in consequence will be
+ somewhat larger than a song saved without instruments, but which means
+ that FutureSonic will not try to seek the paths of the instruments. If the
+ filename you specified already exists on the disk, the yellow light in the
+ top right corner of the Save - Song+Instruments button will flash, and a
+ message will appear in the status bar asking you to click the left or
+ right mousebutton. Click the left mousebutton to confirm the save, or
+ click the right mousebutton to abort and preserve the file currently on
+ the disk.
+
+
+@endnode diskiossni
+
+@node diskiolins "FutureSonic - Loading an Instrument"
+@prev diskiossni
+@toc diskio
+@next diskiosins
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to load. FutureSonic loads both IFF 8SVX instruments and RAW instruments.
+ Thus, it will attempt to load any file specified, except a FutureSonic
+ song file, as an instrument; if it does not recognise an 8SVX file it
+ will load the file in as a raw instrument. The maximum instrument size
+ you can load is 128 K ( 131072 bytes ). FutureSonic will not allow
+ loading of its song files as instruments. 
+
+ 	It should be noted that any file you load here will occupy the
+ current instrument in the instruments list. Check the instrument name at
+ the right of the status bar or check the Instrument panel to make sure
+ the desired instrument number is current. If an instrument already exists
+ in the current instrument number, the yellow light in the top right corner
+ of the Load - Instrument button will flash, and a message will appear in
+ the status bar asking you to click the left or right mousebutton. Click
+ the left mousebutton to confirm the load, or click the right mousebutton
+ to abort and keep the current instrument in memory.
+
+@endnode diskiolins
+
+@node diskiosins "FutureSonic - Saving an Instrument"
+@prev diskiolins
+@toc diskio
+@next diskiolmod
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to save or type in a filename. 
+
+	Once a filename has been chosen, either double-click its entry in
+ the directory list, press return (if the cursor is on the filename entry),
+ or click OK in the file requester to save it.
+
+	The file will then be saved automatically. FutureSonic saves
+ instruments in the IFF 8SVX format.If the filename you specified already
+ exists on the disk, the yellow light in the top right corner of the
+ Save - Instrument button will flash, and a message will appear in the
+ status bar asking you to click the left or right mousebutton. Click
+ the left mousebutton to confirm the save, or click the right mousebutton
+ to abort and preserve the file currently on the disk.
+
+@endnode diskiosins
+
+@node diskiolmod "FutureSonic - Loading an Optimised Module"
+@prev diskiosins
+@toc diskio
+@next diskiosmod
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to load. If the selected file is not a FutureSonic song, the program will
+ return to the editor screen and an error message will be displayed in the
+ status bar. If the selected file is a FutureSonic song without
+ instruments, or a FutureSonic song with instruments, it will be loaded as
+ such automatically.
+
+	Once a file has been selected, either double-click its entry in the
+ directory list or click OK in the file requester to load it. If a song
+ already exists in memory, the yellow light in the top right corner of the
+ Load - Module button will flash, and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the load, or click the right mousebutton to abort
+ and keep the current song in memory.
+
+
+@endnode
+
+@node diskiosmod "FutureSonic - Saving an Optimised Module"
+@prev diskiolmod
+@toc diskio
+@next diskioasve
+
+	This button brings up a file requester. If you have AmigaDOS 2.04
+ or higher, and have asl.library in your LIBS drawer, this requester will
+ be the standard Commodore file request. Amigados 1.3 users, or users who
+ do not have the asl.library, will see the inherent requester, which is
+ the standard Blitz 2 file request.
+
+	Once the requester has loaded the directory, you can select a file
+ to save or type in a filename. 
+
+	Once a filename has been chosen, either double-click its entry in
+ the directory list, press return (if the cursor is on the filename entry),
+ or click OK in the file requester to save it.
+
+	The file will then be saved automatically, as an optimised module.
+ This means that FutureSonic will strip out all extraneous information; 
+ that is, instrument names and paths, and any other text which may form
+ part of a song but which is not needed to play back the module. In
+ other words, a module is the same as a Song+Instruments file, stripped
+ to the bare bones. This is for creating compact files for inclusion
+ in other programs.  You should only save the final version of the song
+ in ths format, as the instrument paths and names will not be present
+ when you load the file again. If the filename you specified already
+ exists on the disk, the yellow light in the top right corner of the
+ Save - Module button will flash, and a message will appear in the
+ status bar asking you to click the left or right mousebutton. Click the
+ left mousebutton to confirm the save, or click the right mousebutton to
+ abort and preserve the file currently on the disk.
+
+
+@endnode diskiosmod
+
+@node diskioasve "FutureSonic - AutoSave Option"
+@prev diskiosmod
+@toc diskio
+
+	This button activates the AutoSave feature. This function counts
+ down from 20 minutes. Once this time has elapsed, FutureSonic will stop
+ all editing, flash the background red, and display a message in the
+ status bar asking you to click the left or right mousebutton. Click the
+ left mousebutton to save. No requester will appear unless there is no 
+ filename specified - if a song was loaded or saved before, a filename
+ has thus been specified and FutureSonic will save over this filename. If
+ no filename has been specified, the Save Song+Instruments requester
+ will appear, where you can type in a filename to save the song under.
+ Regardless of whether the requester appears or not, the song will be
+ saved as a Song+Instruments file.
+ 	Click the right mousebutton to abort the autosave and continue
+ editing. Once you have either saved the song or aborted, the autosave
+ time resets to 20 minutes and begins counting down again.
+
+	Naturally, normal loading and saving operations are still
+ possible with this feature active. However, if you do not wish to
+ be interrupted with a save request every 20 minutes, you can disable
+ the autosave by clicking the AutoSave button until the red light in its
+ top right corner goes out. 
+
+
+@endnode diskioasve
+
+@node maingad "FutureSonic - The Selection Panel
+@prev diskio
+@toc main
+@next playpanel
+	Please drag side slider down for more information: --->
+
+ |------------------------------------------|---->
+ |                                          |
+ |     @{" Song-Editor " link songpanel }        @{"     Play    " link playpanel }   |
+ |                                          |
+ |     @{"Sample-Editor" link sndpanel }        @{"  Instrument " link instrpanel }   |
+ |                                          |
+ ||----------------------------------------||
+ ||              (c) 1994                  ||
+ ||              Dave Hansen               ||
+ ||              Steve Roper               ||
+ ||----------------------------------------||
+ |------------------------------------------|---->
+ |                                          |
+ V                                          V
+
+
+	The Selection Panel is the panel at the top left-hand corner of the
+ screen. It has four buttons; the two on the left control the mode of the
+ Editor panel in the bottom half of the screen, and the two on the right
+ control the mode of the Controller panel on the top right-hand section
+ of the screen. The Selection panel is replicated here; to find out about
+ any function, click the button relevant to the function you wish to
+ examine: 
+
+
+@endnode maingad
+
+@node playpanel "FutureSonic - The Play Control Panel"
+@prev maingad
+@toc main
+@next instrpanel
+	Please drag side slider down for more information: --->
+
+ <----|------------------------------------------------------------------|
+      |                                                                  |
+      |  @{"Play Song " link _playsong }   @{"Cont Song " link _playcsng }   @{"Stop      " link _playstop }   @{"Edit      " link _playedit }   @{"Del Track " link _playdelt }  |
+      |  @{"Play Block" link _playblck }   @{"Cont Block" link _playcblk }                             @{"Copy Track" link _playcopt }  |
+      |  @{"Play Track" link _playtrck }   @{"Cont Track" link _playctrk }   @{"Spacing   " link _playspce }   @{"Clear Inst" link _playcins }   @{"PasteTrack" link _playpast }  |
+      |                                         @{"Clear Song" link _playclrs }   @{"Del Block " link _playdelb }  |
+      |  Speed       Volume       Position      @{"Clear All " link _playclra }   @{"Copy Block" link _playcopb }  |
+      |  |-|20   @{"06" link _playspda }  |-|40    @{"40" link _playvola }   @{"000/000" link _playposa }      @{"Quit      " link _playquit }   @{"Ins Block " link _playinsb }  |
+      |  | |18       | |30        Track                                  |
+      |   @{"-" link _playspda } 10   @{"^v" link _playspda }   @{"-" link _playvola } 20    @{"^v" link _playvola }   @{"001/001" link _playposb }                        Filter |
+      |  | |08       | |10        Space                                  |
+      |  |_|00   @{"def" link _playspda } |_|00    @{"-_" link _playvola }   @{"00" link _playspce }        @{"+/-" link _playspce }    @{"1" link _playtrs1 }   @{"2" link _playtrs1 }   @{"3" link _playtrs1 }   @{"4" link _playtrs1 }    @{" " link _playfilt }   |
+      |                                                                  |
+ <----+------------------------------------------------------------------|
+      |                                                                  |
+      V                                                                  V
+
+
+	This panel is where you control the playing back of the song, a
+block within the song, or an individual track. The general track-editing
+functions, and speed and volume controls, are also arrayed here.  
+	The Play Control Panel is replicated above; to find out about
+ any function, click the button relevant to the function you wish to
+ examine: 
+
+@endnode playpanel
+
+@node _playsong "FutureSonic - Play Song"
+@toc playpanel
+@next _playcsng
+
+	This button begins playback of the song in the @{"Sequence Editor" link seqpanel } from
+ the beginning. When the button is clicked, a little red light in the top
+ right corner will light indicating that the button has been selected.
+ The @{"Track Editor" link trkpanel } display is not affected, but the Sequence
+ display will scroll through the song as it plays; at the default speed of
+ 6, the Sequence display will advance once every 2 seconds. The song will
+ continue playing until it reaches the end or until the @{"Stop" link _playstop } button is
+ pressed. If a @{"Jump" link _cmd8 } command to a previous track exists in the song, it will
+ repeat play indefinitely between the track referred to by the Jump command
+ and the track containing the Jump command.
+
+	The editor functions become inoperative during playback of a song.
+ However,the @{"ADSR" link _instadsr }, @{"Transpose" link _insttran }, @{"Finetune" link _instfint } and @{"Volume" link _instvols } settings on the
+ @{"Instrument" link instrpanel } panel may be altered to affect an instrument during song
+ playback. Other instruments may also be selected and the above settings
+ altered for each instrument during song playback.
+
+      Pressing the F6 key will have the same effect as clicking this
+ button.
+
+
+@endnode _playsong
+
+@node _playcsng "FutureSonic - Continue Song"
+@prev _playsong
+@toc playpanel
+@next _playblck
+
+	This button begins playback of the song in the @{"Sequence Editor" link seqpanel } from
+ the current cursor position in the Sequence display. If the cursor
+ position places it in the middle of a track, play will commence from this
+ point in the track, so if this track only has a sustained note at its
+ beginning, this note will not be played. The effect of this is that for
+ the first few seconds, only part of the song may be heard. As soon as a
+ new note is reached, play will resume normally.
+
+	Aside from this, the Continue Song button functions exactly the
+ same as the @{"Play Song" link _playsong } button.
+
+      Holding down the SHIFT key and pressing F6 will have the same effect
+ as clicking this button.
+
+
+@endnode _playcsng
+
+@node _playblck  " FutureSonic - Play Block"
+@prev _playcsng
+@toc playpanel
+@next _playcblk
+
+	This button begins playback of the current block of the song in
+ the Sequence Editor. When the button is clicked, a little red light in
+ the top right corner will light indicating that the button has been
+ selected. A block is a section of the song between 2 lines of the song
+ which have the beginning of a track in all four positions. The
+ illustration below should give a good idea a how a block is defined.
+
+	Say you have created 16 different tracks. Tracks 1 - 4 are 64
+ lines long ( this might be the lead section ), tracks 5 - 8 are 32 lines
+ long ( perhaps the bass section ), and tracks 9 - 16 are 16 lines long
+ ( maybe the drums ). The Sequence display might therefore look like this:
+
+                   |-------------------|
+                   |000:001 002 005 009| -\
+                   |001: -   -   -  010|  |\ This section, between 0
+                   |002: -   -  006 011|  |/ and 3 inclusive, is a
+                   |003: -   -   -  012| -/  block definition.
+                   |004:003 004 007 013| -\
+                   |005: -   -   -  014|  |\ This section, between 4
+                   |006: -   -  008 015|  |/ and 7 inclusive, is a
+                   |007: -   -   -  016| -/  block definition.
+                   |008:005 005 007 009| -|\ This section, between 8
+                   |009: -   -   -  010| -|/ and 9 inclusive, is a
+                   |010:006 006 008 011|     block difinition.
+                   |011: -   -   -  012|
+                   |012:001 002 005 009|
+                   |013:...etc         
+
+	Thus, if the cursor was currently on line 5 of the Sequence
+ display above, pressing the Play Block button would cause playback of
+ the song starting at line 4 ( the start of the block ), and continue
+ playing until it reaches the end of line 7, when it would loop back to
+ line 4 and repeat over. This is useful for repeated playback of a small
+ piece when trying different melodies or other effects in the tracks
+ to see what sounds better.
+
+	So, a FutureSonic block is almost the same as a normal Tracker
+ pattern, except of course that the block is made up of individual tracks
+ kept separately instead having the notes listed directly in the pattern
+ as Tracker programs have.
+
+      Pressing the F7 key will have the same effect as clicking this
+ button.
+
+
+@endnode _playblck
+
+@node _playcblk "FutureSonic - Continue Block"
+@prev _playblck
+@toc playpanel
+@next _playtrck
+
+	This button continues playback of the block where the cursor is
+ currently positioned, from the current cursor position instead of from
+ the beginning of the block definition. Otherwise, it functions exactly
+ the same as the Play Block button. See the @{"Play Block" link _playblck } page for a full
+ explanation of block definitions.
+
+      Holding down the SHIFT key and pressing F7 will have the same effect
+ as clicking this button.
+
+@endnode _playcblk
+
+@node _playtrck "FutureSonic - Play Track"
+@prev _playcblk
+@toc playpanel
+@next _playctrk
+
+	This button, unlike the @{"Play Song" link _playsong } and @{"Play Block" link _playblck } buttons, does
+ not play back the song in the @{"Sequence Editor" link seqpanel }. Instead, it will cause
+ the current track in the @{"Track Editor" link trkpanel } display to play on its own from
+ the beginning of the track. The track will continue playing over until
+ the @{"Stop" link _playstop } button is pressed. Note that any @{"Jump" link _cmd8 } commands contained in
+ the track will be ignored in this mode of playback, as Jump commands
+ refer to a position in the sequence, not a track, and the song itself
+ is not actually being played at this time.
+
+	The Sequence display is unaffected by pressing this button.
+ However, the Track display will scroll up to display the notes as they
+ are played. The scroll will wrap back to the top when the track 
+ playback loops back to the beginning of the track. At the default speed
+ of 6, the cursor will advance about 8 track lines per second.
+
+      Pressing the F8 key will have the same effect as clicking this
+ button.
+
+
+@endnode _playtrck
+
+@node _playctrk "FutureSonic - Continue Track"
+@prev _playtrck
+@toc playpanel
+@next _playstop
+
+	This button has exactly the same effect as the Play Track button,
+ with the exception that play begins from the current cursor position in
+ the @{"Track Editor" link trkpanel } rather than from the beginning of the track. See the
+ @{"Play Track" link _playctrk } page for a full explanation of the track playback function.
+
+      Holding down the SHIFT key and pressing F8 will have the same effect
+ as clicking this button.
+
+
+@endnode _playctrk
+
+@node _playstop "FutureSonic - Stop"
+@prev _playctrk
+@toc playpanel
+@next _playedit
+
+	This button simply stops a song, a block, or a track, from playing.
+ Any instrument playing will also be silenced. Pressing the Space bar will
+ have the same effect as clicking this button.
+
+
+@endnode _playstop
+
+@node _playedit "FutureSonic - Edit"
+@prev _playstop
+@toc playpanel
+@next _playspce
+
+	This button enables the song-editing functions of the @{"Song Panel" link songpanel }.
+ When the button is clicked, a little red light in the top right corner
+ will light indicating that the button has been selected. You can now start
+ entering notes into the @{"Track Editor" link trkpanel }, edit or delete existing tracks
+ or create new ones. The song in the @{"Sequence Editor" link seqpanel } can also be altered,
+ and the Copy/Paste buttons on the right of the Play panel become active.
+ 	See the @{"Editing Tracks" link tracks } section for a full explanation of track
+ editing operations.
+
+
+@endnode _playedit
+
+@node _playspce "FutureSonic - Spacing"
+@prev _playedit
+@toc playpanel
+@next _playcins
+
+	The Spacing button immediately below the Stop button activates
+ the cursor advance spacing feature in the @{"Track Editor" link trkpanel }. When the button
+ is clicked, a little red light in the top right corner will light
+ indicating that the button has been selected. The +/- button controls
+ the number of lines the cursor will advance up and down the track after
+ a note is entered or an up/down cursor key pressed. This number is
+ displayed in the box immediately to the right of the +/- button.
+
+	Without this function, the track display advances only one
+ line down after a note is entered or an up/down cursor key is
+ pressed. With this function activated, the track display will scroll
+ down the displayed number of lines after a note is entered or a
+ cursor key pressed. This is useful for entering repetitive notes that
+ are spaced more than one line apart, since you do not have to press
+ the cursor keys to space the notes out; just play the melody and the
+ notes will be spaced automatically. See the @{"Editing Tracks" link tracks } section
+ for a full explanation of track editing operations.
+
+@endnode _playspce
+
+@node _playcins "FutureSonic - Clear Instruments"
+@prev _playspce
+@toc playpanel
+@next _playclrs
+
+	This button clears ALL the instruments from memory. It does not
+ affect song or track information; it just clears the instruments
+ themselves. Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+	
+
+@endnode _playcins
+
+@node _playclrs "FutureSonic - Clear Song"
+@prev _playcins
+@toc playpanel
+@next _playclra
+
+	This button clears ALL the song and track data from memory. It
+ does not affect the instruments, but the song and track data is cleared
+ allowing you to use the same instruments in a new song. Clicking once
+ on this button will cause the yellow light in the top right corner to
+ flash and a message will appear in the status bar asking you to click
+ the left or right mousebutton. Click the left mousebutton to confirm
+ the operation, or click the right mousebutton to abort it.
+
+
+@endnode _playclrs
+
+@node _playclra "FutureSonic - Clear All"
+@prev _playclrs
+@toc playpanel
+@next _playquit
+
+	This button clears EVERYTHING. Song data and instruments are all
+ flushed, returning FutureSonic to its initial state ready for a new
+ song. Clicking once on this button will cause the yellow light in the
+ top right corner to flash and a message will appear in the status bar
+ asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _playclra
+
+@node _playquit "FutureSonic - Quit"
+@prev _playclra
+@toc playpanel
+@next _playdelt
+
+	This button exits FutureSonic and returns you to the Workbench.
+ If there is any unsaved work on FutureSonic the screen will pulse red
+ and a message will appear in the status bar asking you to click the 
+ left or right mousebutton. Click the left mousebutton to activate
+ the Save requester, or click the right mousebutton to quit without
+ saving. If the work has been saved and no changes made since, then
+ clicking once on this button will cause the yellow light in the top
+ right corner to flash and a message will appear in the status bar
+ asking you to click the left or right mousebutton. Click the left
+ mousebutton to quit back to Workbench, or click the right mousebutton
+ to abort the quit and remain in FutureSonic.
+
+
+@endnode _playquit 
+
+@node _playdelt "FutureSonic - Delete Track"
+@prev _playquit
+@toc playpanel
+@next _playcopt
+
+	This button deletes the current track displayed in the
+ Track Editor from the track list. Any occurrences of the deleted track
+ in the @{"Sequence Editor" link seqpanel } will be replaced by empty spaces ( represented
+ by three dashes ) and all tracks above it will be renumbered to fill
+ the gap; the sequence data will be automatically updated accordingly.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+@endnode _playdelt
+
+@node _playcopt "FutureSonic - Copy Track"
+@prev _playdelt
+@toc playpanel
+@next _playpast
+
+	This button copies the current track to a copy buffer. The
+ track itself is not affected, it is just copied. The red light in
+ the top right corner of the button will flash once to confirm the
+ operation. Only one click of this button is required, since it
+ does not affect the actual data in any way.
+
+
+@endnode _playcopt
+
+@node _playpast "FutureSonic - Paste Track"
+@prev _playcopt
+@toc playpanel
+@next _playdelb
+
+	This button copies the contents of the track copy buffer to
+ the current track starting at the current cursor position in the track.
+ This is a replace operation; the data pasted to the track will overwrite
+ any data which already exists there. If the track being written to is
+ longer than the copy buffer, only the length of the copy buffer from the
+ cursor position downward is replaced - the rest of the track will remain
+ unaltered. If the length of the copy buffer exceeds the remaining length
+ of the track, the replace operation will be truncated by the end of the
+ track. That is, the entire contents of the copy buffer would not be
+ pasted down in this instance.
+ 	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+@endnode _playpast
+
+@node _playdelb " FutureSonic - Delete Block"
+@prev _playpast
+@toc playpanel
+@next _playcopb
+
+	This button deletes a block from the @{"Sequence Editor" link seqpanel } ( See the
+ @{"Play Block" link _playblck } page for a full explanation of what a block is ) The entire
+ block is deleted regardless of the cursor position within the block.
+ All entries in the sequence are moved up to fill the gap left by the
+ deleted block. Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+@endnode _playdelb
+
+@node _playcopb " FutureSonic - Copy Block"
+@prev _playdelb
+@toc playpanel
+@next _playinsb
+
+	This button copies the block currently occupied by the cursor in
+ the @{"Sequence Editor" link seqpanel } to a block copy buffer. This copy buffer is separate
+ to the track copy buffer, so copying a block will not affect the track
+ copy buffer. The block itself is not affected by this operation. The red
+ light in the top right corner of the button will flash once to confirm
+ the operation. Only one click of this button is required, since it
+ does not affect the actual data in any way. See the @{"Play Block" link _playblck } page
+ for a full explanation of what a block is.
+
+
+@endnode _playcopb
+
+@node _playinsb " FutureSonic - Insert Block"
+@prev _playcopb
+@toc playpanel
+@next _playtrs1
+
+	This button inserts the contents of the block copy buffer into the
+ song in the @{"Sequence Editor" link seqpanel } starting at the beginning of the block that
+ is occupied by the cursor. If the cursor is in the middle of a block,
+ FutureSonic will insert the new block at the beginning of the current
+ block, not at the current cursor position. Thus, the current block and
+ all subsequent blocks are shifted down by the length of the block in
+ the copy buffer, and the contents of the copy buffer are then inserted
+ into the resulting gap.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _playinsb
+
+@node _playtrs1 " FutureSonic - Track Enable/Disable"
+@prev _playinsb
+@toc playpanel
+@next _playfilt
+
+	These four buttons determine which channels are active; that is,
+ which of the Amiga's four sound channels can output sound. The red
+ light in the top right corner of each button is lit if that channel is
+ enabled. If a channel is disabled, the respective button's light will
+ be extinguished and no sound will be played through that channel. The
+ buttons correspond to the tracks in the Sequence Editor immediately
+ below them.
+
+
+@endnode playtrs1
+
+@node _playfilt " FutureSonic - Filter On/Off"
+@prev _playtrs1
+@toc playpanel
+@next _playspda
+
+	This button simply turns the Amiga's built in sound filter on
+ and off. It is overridden by any @{"Filter On/Off" link _cmdf } commands contained in the
+ tracks of the song when playing. The red light in the button's top right
+ corner is lit if the filter is on. ( The Amiga's power led will go out
+ or become dim when the filter is switched off. ) The button toggles
+ the state of the filter when clicked.
+
+
+@endnode _playfilt
+
+@node _playspda " FutureSonic - Playback Speed Settings"
+@prev _playfilt
+@toc playpanel
+@next _playvola
+
+	These controls set the playback speed of the song or tracks. They
+ are overridden by any @{"Speed Set" link _cmda } commands contained in the tracks of the
+ song. The speed of the song is defined in screen updates per line of a
+ track; Tracker program users will be familiar with this form of control.
+ For the uninitiated, a screen update is one fiftieth of a second, which
+ is the time the computer takes to draw the whole screen. Therefore, a
+ speed of 6 means that the song will play back at the rate of advancing
+ one track line every 6 fiftieths of a second ( about every fifth of a
+ second ). Consequently, the lower this number is, the less updates
+ elapse between advances of the song and therefore the song plays faster.
+ A higher number will thus cause the song to play back slower.
+
+	The vertical slider with the numbers 00 to 20 to the right of it
+ changes the speed. Drag it up or down with the mouse for coarse speed
+ setting, or click the button in the slider area above or below the actual
+ slider button to increase/decrease it in single increments.
+
+	The current song speed is shown in the display to the right of
+ the top of the speed slider. It defaults to 6 when FutureSonic is first
+ activated.
+
+	The slider can also be incremented or decremented with the "^v"
+ button ( this is as close as we could get to depicting up/down arrows
+ with normal characters ). This button is actually a 4-function gadget
+ that uses both mousebuttons. Hold the left mousebutton on this
+ gadget to increase the speed slowly; still holding the left mousebutton,
+ press the right mousebutton to increase quickly. To decrease the speed 
+ slowly, hold down the right mousebutton; to decrease quickly, keep the
+ right mousebutton held down while pressing the left one. See the Using
+ FutureSonic - @{"Buttons" link _usebutt } page for a full explanation of these gadgets.
+
+	The DEF button sets the speed back to the default value of 6.
+ This is a fairly commonly used speed in Tracker  program modules and sets
+ a good funky pace.
+
+
+@endnode _playspda
+
+@node _playvola " FutureSonic - Playback Volume Settings"
+@prev _playspda
+@toc playpanel
+@next _playposa
+
+	These controls set the playback volume of the song or tracks. They
+ are overridden by any @{"Volume Set" link _cmd7 } commands contained in the tracks of the
+ song. The volume of the song is a value between 0 and 40 hexadecimal.
+
+	The vertical slider with the numbers 00 to 40 to the right of it
+ changes the volume. Drag it up or down with the mouse for coarse volume
+ setting, or click the button in the slider area above or below the actual
+ slider button to increase/decrease it in single increments.
+
+	The current song volume is shown in the display to the right of
+ the top of the volume slider. It defaults to 40 when FutureSonic is first
+ activated.
+
+	The slider can also be incremented or decremented with the "^v"
+ button. This button is actually a 4-function gadget that uses both
+ mousebuttons. Hold the left mousebutton on this gadget to increase
+ the volume slowly; still holding the left mousebutton, press the right
+ mousebutton to increase quickly. To decrease the volume slowly, hold down
+ the right mousebutton; to decrease quickly, keep the right mousebutton
+ held down while pressing the left one. See the Using FutureSonic -
+ @{"Buttons" link _usebutt } page for a full explanation of these gadgets.
+
+	The "-_" button sets the volume to its extremes. Click the left
+ mousebutton on this button to set the volume to maximum. Click the right
+ mousebutton on this button to set the volume to zero.
+
+
+@endnode _playvola
+
+@node _playposa " FutureSonic - Sequence Position Display"
+@prev _playvola
+@toc playpanel
+@next _playposb
+
+	This display shows the current cursor position on the song in the
+ @{"Sequence Editor" link seqpanel } and the total number of lines in the song. The display
+ contains 2 three-digit numbers separated by a slash (/). The first of
+ these numbers is the current line number in the Sequence Editor occupied
+ by the cursor. The second number is the total number of lines taken up by
+ the song in the Sequence Editor. So, if the cursor is on line 35 of a
+ song, and there are 48 lines in the whole song, then this display
+ would show:
+
+                              |-------|
+                              |035/048|
+                              |-------|
+
+
+@endnode _playposa
+
+@node _playposb " FutureSonic - Allocated Tracks Display"
+@prev _playposa
+@toc playpanel
+
+	This display shows the current track displayed in the @{"Track Editor" link trkpanel }
+ and the total number of different tracks allocated for the song. The
+ display contains 2 three-digit numbers separated by a slash (/). The
+ first of these numbers is the current track number in the Track Editor
+ display. The second number is the total number of different tracks
+ that exist and can be called up in the Track Editor. So, if the current
+ track in the Track Editor display is Track 12, and the total number
+ of tracks listed is 74, then this display would show:
+
+                              |-------|
+                              |012/074|
+                              |-------|
+
+
+@endnode _playposb
+
+@node instrpanel " FutureSonic - The Instrument Panel"
+@prev playpanel
+@toc main
+@next songpanel
+	Please drag side slider down for more information: --->
+
+ <----|------------------------------------------------------------------|
+      |             |-|40   |-|40   |-|40   |-|40 Transpose |-|40 Instr. |
+      |      @{"Save "link _instsave }  | |     | |     | |     | |       @{"00" link _insttran }    | |     @{"00" link _instnmbr }   |
+      |             | |30   | |30   | |30   | |30           | |30        |
+      |      @{"Load "link _instload }  | |     | |     | |     | |       @{"^v" link _insttran }    | |     @{"^v" link _instnmbr }   |
+      |              @{"-" link _instadsr }20     @{"-" link _instadsr }20     @{"-" link _instadsr }20     @{"-" link _instadsr }20             @{"-" link _instvols }20         |
+      |      @{"Clear"link _instclra }  | |     | |     | |     | |   Finetune  | |     @{"-_" link _instnmbr }   |
+      |             | |10   | |10   | |10   | |10     @{"00" link _instfint }    | |10        |
+      |      @{"ADSR "link _instadsr }  | |     | |     | |     | |             | |          |
+      |             |_|00   |_|00   |_|00   |_|00     @{"^v" link _instfint }    |_|00        |
+      |              @{"01" link _instadsr }      @{"01" link _instadsr }      @{"01" link _instadsr }      @{"01" link _instadsr }              @{"40" link _instvols }          |
+      |                                                                  |
+      |       Length  @{"00000" link _instleng }   Repeat @{"00000" link _instrept }   Replen @{"00000" link _instrepl }                |
+      |                                                                  |
+      |       Name:  @{"                                             " link _instname }       |
+      |                                                                  |
+ <----+------------------------------------------------------------------|
+      |                                                                  |
+      V                                                                  V
+
+
+	This panel is where you control all the individual instrument
+ settings for each instrument used in the song.	The Instrument Control
+ Panel is replicated above; to find out about any function, click the
+ button relevant to the function you wish to examine: 
+
+@endnode instrpanel
+
+@node _instsave "FutureSonic - Saving an Instrument from the Instrument Panel"
+@toc instrpanel
+@next _instload
+
+	This button saves the current instrument to the path and filename
+ shown in the @{"Name" link _instname } display. No file requester will appear for this
+ operation, but if the file being saved to already exists on the disk, 
+ clicking once on this button will cause the yellow light in the top right
+ corner to flash and a message will appear in the status bar asking you to
+ click the left or right mousebutton. Click the left mousebutton to
+ confirm the save, or click the right mousebutton to abort it.
+	If no path has been specified in the Name display, the instrument
+ will be saved to the current Instrument directory.
+	If an error occurs, a message will appear in the Status bar
+ apprising you of the condition.
+
+
+@endnode _instsave
+
+@node _instload "FutureSonic - Loading an Instrument from the Instrument Panel"
+@prev _instsave
+@toc instrpanel
+@next _instclra
+
+	This button loads the current instrument from the path and filename
+ shown in the @{"Name" link _instname } display. No file requester will appear for this
+ operation, but if an instrument already exists in this instrument entry, 
+ clicking once on this button will cause the yellow light in the top right
+ corner to flash and a message will appear in the status bar asking you to
+ click the left or right mousebutton. Click the left mousebutton to
+ confirm the load, or click the right mousebutton to abort it.
+
+ 	You can load an instrument into memory and load the same instrument
+ to another place in the instrument list ( when you do this, the sample is
+ not actually loaded twice, the first sample is also pointed to in memory
+ by the second instrument ) and set up completely different @{"ADSR" link _instadsr } settings
+ on that same sample. Thus, you can have several different instruments, all
+ with different ADSR settings, and all using just the one sample in memory.
+ These are called "linked" instruments because they are all linked to
+ the one sample. The instrument in which you first loaded the sample
+ is called the "parent" instrument.
+ 	Now if later on you decide that this instrument is not right
+ for the song, it can be changed just by loading a new sample into the
+ parent instrument. If this is done, all of the linked instruments
+ attached to that parent naturally enough use the new sample as well. If
+ a new sample is loaded into any other linked instrument than the parent
+ one, the new sample will replace just that linked instrument without
+ affecting any of the others. It will simply become "unlinked"
+ automatically. The linked instruments can all have different settings in
+ the instrument panel from each other and from the parent instrument. 
+
+	If no path has been specified in the Name display, the instrument
+ will be loaded from the current Instrument directory.
+	If an error occurs, a message will appear in the Status bar
+ apprising you of the condition.
+
+
+@endnode _instload
+
+@node _instclra "FutureSonic - Clear Current Instrument"
+@prev _instload
+@toc instrpanel
+@next _instadsr
+
+	This button clears the current instrument from memory. This
+ instrument is the only thing affected by this operation; nothing else
+ is affected. 	
+ 	Clicking once on this button will cause the yellow light in the
+ top right corner to flash and a message will appear in the status bar
+ asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the clear operation, or click the right
+ mousebutton to abort it.
+
+
+@endnode _instclra
+
+@node _instadsr "FutureSonic - ADSR Function"
+@prev _instclra
+@toc instrpanel
+@next _insttran
+
+	ADSR is a commonly-used technique of dynamically altering the
+ volume of a sound as it is played, allowing an instrument to be slowly
+ or quickly faded in or out during play. It is actually an acronym for
+ Attack, Decay, Sustain, Release. This is a description of the four
+ "phases" the ADSR cycle consists of, which determine how quickly it
+ fades in from silence and fades out again:
+
+ 1.   Attack: During this stage, the instrument fades in from silence
+    to full volume. The Attack setting determines the length of time
+    over which this occurs.
+
+ 2.   Decay: During this stage, the instrument fades back down to a
+    sustained lower level. The Decay setting determines the length
+    of time over which this occurs.
+
+ 3.   Sustain: During this stage, the volume is held at a constant
+    level after the Decay stage has faded the instrument to it. The
+    Sustain setting determines how loud or soft this level is.
+
+ 4.   Release: During this stage, the instrument is faded back down
+    to silence. This emulates the release of a key on a keyboard, so
+    in instrument will sustain until its key is released. The Release
+    setting determines the length of time over which this occurs.
+
+	The four vertical sliders in the middle of the Instrument Panel
+ control the Attack, Decay, Sustain, and Release settings. They are
+ labelled at the top to denote what phase each one controls. 
+
+	The Attack slider sets the Attack time in screen updates. For an
+ explanation of what a screen update is, see the @{"Playback Speed" link _playspda } page.
+ The slider can vary the Attack time between 1/50th of a second (one
+ screen update) to just over 1 second (hex 40 or decimal 64 screen
+ updates). A low value here will give a sharp, abrupt quality to the
+ instrument; a higher value will give it a smooth, round quality.
+
+	The Decay slider sets the Decay time in screen updates. The slider
+ can vary the Decay time between 1/50th of a second to just over 1 second.
+ A low value here, depending on the Sustain level, will cause the initial
+ volume to drop abruptly, resulting in a "staccato" sound like a piano
+ or guitar. A higher value will create a "pulse" effect similar to that
+ used by Jean-Michel Jarre in "Equinoxe" - Part 4.
+
+	The Sustain slider sets the Sustain volume, which it can vary from
+ zero to hex 40 - the limits of the Amiga's volume control in its sound
+ chip. A low value here will increase the effect of the Decay setting
+ because there is a noticeable difference between the Decay peak at its
+ start and the Sustain level. A higher value will decrease this difference,
+ resulting in a reduced Decay effect and causing the sound to have a more
+ "strings" like quality.
+
+	The Release slider sets the Release time in screen updates. The
+ slider can vary the Release time between 1/50th of a second to just over
+ 1 second. A low value here will cause a sharp dropoff of volume when
+ the instrument is released, while a high value will cause the instrument
+ to fade softly. This function actually works in a song with the Release
+ command; the instrument, once played in a song, if it is looped to play
+ indefinitely, will stay at the sustain level until a @{"Release" link _cmdf } command
+ is encountered in that track. When playing the instruments yourself via
+ the Amiga keyboard, the instrument will sustain as long as you hold the
+ key down; when you release the key, the Release stage will cut in and
+ fade the instrument according to the Release setting.
+
+	The ADSR button activates the ADSR feature. If it is activated,
+ a red light in the top right corner will be lit. With this feature
+ deactivated, the ADSR settings are ignored and the instrument sample
+ is played normally. Once activated, the ADSR settings will modulate
+ the instrument sample.
+
+	The 2-digit numbers immediately below the ADSR sliders display
+ the current value for the relevant ADSR setting in hexadecimal. They
+ increase and decrease as you move the sliders up and down.
+
+
+	The ADSR feature has a number of uses. Besides just varying
+ the sound of the instrument to create different sounds, it can be
+ used  to reduce the "popping" sound that often occurs with Amiga
+ samples in Tracker-type sequences as they play. Setting the Attack to
+ about 4 - 8, the Decay to minimum, the Sustain to maximum, and the
+ Release to minimum, the sample will sound as if it is playing normally,
+ but the "pop" noise that occurs as the sample starts playing is
+ practically eliminated.
+
+	Note that because ADSR is a Volume modulation, the @{"Volume Slide" link _cmd5 },
+ @{"Volume Set" link _cmd7 } and @{"Tremolo" link _cmdc } effect-commands will not work with an instrument
+ that has ADSR active. They will only work with instruments that have ADSR
+ deactivated. This is because ADSR modulation takes priority over the
+ effect-commands when determining an instrument's volume.
+
+	The best understanding of the ADSR feature is gained through
+ experimentation. Play around with the sliders and listen to how the
+ sound changes, and you will quickly learn the techniques of getting
+ new effects out of otherwise boring samples.
+
+
+@endnode _instadsr
+
+@node _insttran "FutureSonic - Transpose"
+@prev _instadsr
+@toc instrpanel
+@next _instfint
+
+	This function varies the pitch of the instrument relative to
+ the key which plays it. Thus, an instrument which plays at middle C
+ when the middle C key is pressed is at the normal transpose setting of
+ zero. Setting the transpose value to, say, 4, will cause the instrument
+ to play 4 semitones higher ( E above middle C if the middle C key is
+ pressed ). This is useful for sound samples that have been recorded
+ out of key to other samples, to bring them back into key and make sure
+ they all play at the same pitch when the same key is pressed.
+
+	The 2-digit number below the Transpose label shows the current
+ Transpose value. This can vary between -12 ( transposed down one octave )
+ and +12 ( transposed up one octave ).
+
+	The "^v" button adjusts the Transpose value.  This button is
+ actually a 4-function gadget that uses both mousebuttons. Hold the left
+ mousebutton on this gadget to increase the value slowly; still holding the
+ left mousebutton, press the right mousebutton to increase quickly. To
+ decrease the value slowly, hold down the right mousebutton; to decrease
+ quickly, keep the right mousebutton held down while pressing the left one.
+ See the Using FutureSonic - @{"Buttons" link _usebutt } page for a full
+ explanation of these gadgets.
+
+@endnode _insttran
+
+@node _instfint "FutureSonic - Finetune"
+@prev _insttran
+@toc instrpanel
+@next _instvols
+
+	This function varies the pitch of the instrument, similar to
+ the @{"Transpose" link _insttran } function, but to a finer degree. This is useful for
+ samples that have been recorded at odd sampling rates and may therefore
+ be something like half a semitone out of key.
+
+	The 2-digit number below the Finetune label shows the current
+ Finetune value. This can vary between -99 ( finetuned down )
+ and +99 ( finetuned up ).
+
+	The "^v" button adjusts the Finetune value. This button is
+ actually a 4-function gadget that uses both mousebuttons. Hold the left
+ mousebutton on this gadget to increase the value slowly; still holding the
+ left mousebutton, press the right mousebutton to increase quickly. To
+ decrease the value slowly, hold down the right mousebutton; to decrease
+ quickly, keep the right mousebutton held down while pressing the left one.
+ See the Using FutureSonic - @{"Buttons" link _usebutt } page for a full
+ explanation of these gadgets.
+
+
+@endnode _instfint
+
+@node _instvols "FutureSonic - Instrument Volume"
+@prev _instfint
+@toc instrpanel
+@next _instleng
+
+	This function controls the instrument's individual volume. Some
+ samples are recorded louder than others, so this can be used to make
+ a too-loud sample play more quietly. Over all the instruments, this
+ function acts like an equaliser, allowing you to have some instruments
+ louder than other, or to make them all play at the same volume
+ regardless of their recorded levels.
+
+	The vertical slider adjusts the instrument volume setting. The
+ closer this slider is to the top, the louder the instrument volume is.
+
+	The 2-digit number below the volume slider shows the current
+ instrument volume. This can vary between zero and hex 40 - the limits
+ of the volume control in the Amiga's sound chip.
+ 
+
+@endnode _instvols
+
+@node _instleng "FutureSonic - Instrument Length Display"
+@prev _instvols
+@toc instrpanel
+@next _instrept
+
+	This display shows the memorylength of the current instrument
+ in bytes. The maximum memory that can be taken by any one instrument
+ is limited to 128 K ( 131072 bytes ). Any instrument larger than this
+ will have any excess over this truncated upon loading. The reason
+ for this limitation is that the routines used to play the song use a
+ certain technique to maximise the speed and efficiency of execution.
+ Since the nature of the editor is that it plays tunes based on
+ single-note samples, this limitation should not pose a problem.
+
+
+@endnode _instleng
+
+@node _instrept "FutureSonic - Instrument Repeat Point Display"
+@prev _instleng
+@toc instrpanel
+@next _instrepl
+
+	This display shows the offset (in bytes) from the beginning
+ of the sample to the first loop repeat point in the sample. This
+ corresponds to the position of the left-hand @{"Loop marker" link _sndloop } in
+ the @{"Sound Editor" link sndpanel }. Samples that have looping switched on will play
+ indefinitely, repeating from this point in the sample to the @{"Replen" link _instrepl }
+ point.
+
+
+@endnode _instrept
+
+@node _instrepl "FutureSonic - Instrument Repeat Length Display"
+@prev _instrept
+@toc instrpanel
+@next _instnmbr
+
+
+	This display shows the offset (in bytes) from the first repeat
+ point of the sample to the second repeat point. In other words, this
+ is the length of the sample that repeats indefinitely in looped playback.
+ It corresponds to the position of the right-hand @{"Loop marker" link _sndloop } in the
+ @{"Sound Editor" link sndpanel }. Samples that have looping switched on will play
+ indefinitely, repeating from the first @{"Repeat" link _instrept } point to this point in the
+ sample.
+
+
+@endnode _instrepl
+
+@node _instnmbr "FutureSonic - Instrument Selector"
+@prev _instrepl
+@toc instrpanel
+@next _instname
+
+	This function shifts up and down the instrument list to select
+ which one is the current instrument. You can have up to 63 instruments
+ in memory at one time, and shift through them using this control.
+
+	The 2-digit number directly below the Instrument label is the
+ current instrument number. It can vary between instrument # 1 and 
+ instrument # 63 inclusive.
+
+	The "^v" button shifts the instrument number up and down,
+ allowing you to see and edit different instruments. This button is
+ actually a 4-function gadget that uses both mousebuttons. Hold the left
+ mousebutton on this gadget to increase the number slowly; still holding
+ the left mousebutton, press the right mousebutton to increase quickly. To
+ decrease the number slowly, hold down the right mousebutton; to decrease
+ quickly, keep the right mousebutton held down while pressing the left one.
+ See the Using FutureSonic - @{"Buttons" link _usebutt } page for a full
+ explanation of these gadgets.
+
+	The "-_" button shifts to either the first or last instrument in
+ the list. Click the left mousebutton on this to shift to the last
+ instrument in the list, or click the right mousebutton to shift to the
+ first one. The last instrument is the highest-numbered one that
+ you loaded. So if there are 10 instruments in memory, this button
+ will shift between instrument #1 and instrument #10.
+
+@endnode _instnmbr
+
+@node _instname "FutureSonic - Instrument Name Display"
+@prev _instnmbr
+@toc instrpanel
+
+	This display shows the current instrument's name and the path from
+ which it was loaded. Clicking on the @{"Load" link _instload } button on this panel will
+ cause FutureSonic to try to load the name in this display from the path
+ shown in the display. Clicking @{"Save" link _instsave } will cause FutureSonic to try to save
+ the current instrument to the path and filename in this display. This
+ display also allows you to identify what the current instrument is.
+
+
+@endnode _instname
+
+@node songpanel " FutureSonic - The Song Editor"
+@prev instrpanel
+@toc main
+@next sndpanel
+
+	This panel is the heart of FutureSonic's sound editing functions.
+ It is on this panel that the track and song data are edited. Tracks
+ are assembled in the Track Editor, with individual notes being placed
+ appropriately into the single tracks, which are then assembled into a
+ complete song in the Sequence Editor. The many different functions of
+ this panel are too numerous to list on this screen, but the information
+ on the functions can be selected from the list below.
+
+
+	1. @{"The Track Editor   " link trkpanel }      - Shows the Track Editor functions
+
+	2. @{"The Sequence Editor" link seqpanel }      - Shows the Sequence Editor functions
+
+	3. @{"Editing a Track    " link tracks }      - How to set up and edit track data
+
+	4. @{"Editing a Sequence " link sequence }      - How to set up and edit sequence data
+
+	
+
+@endnode songpanel
+
+@node trkpanel " FutureSonic - The Track Editor"
+@toc songpanel
+@next seqpanel
+	Please drag side slider down for more information: --->
+
+              Track  Editor                 Sequence  Editor...
+ <---+-------------------------------+----->
+     | Pos Note Ins Cmd              |
+     | |---------------|             |
+     | | 00 --- -- 000 |  @{"^v" link _trkposa }  @{"00/3F" link _trkposa }  |
+     | | 01 --- -- 000 |  Position   |
+     | | 02 --- -- 000 |             |
+     | | 03 --- -- 000 |  @{"^v" link _trkchan }  @{"0" link _trkchan }      |
+     | | 04 --- -- 000 |  Channel    |
+     | | 05 --- -- 000 |             |
+     | | 06 --- -- 000 |  @{"^v" link _trknmbr }  @{"001" link _trknmbr }    |
+     | | @{"07" link _trkline } @{"---" link _trknote } @{"--" link _trkinst } @{"000" link _trkcmds } |  Track-No.  |
+     | | 08 --- -- 000 |             |
+     | | 09 --- -- 000 |  @{"16 " link _trkleng }  @{"12 " link _trkleng }   |
+     | | 0A --- -- 000 |             |
+     | | 0B --- -- 000 |  @{"32 " link _trkleng }  @{"24 " link _trkleng }   |
+     | | 0C --- -- 000 |             |
+     | | 0D --- -- 000 |  @{"64 " link _trkleng }  @{"48 " link _trkleng }   |
+     | | 0E --- -- 000 |             |
+     | | 0F --- -- 000 |  @{"128" link _trkleng }  @{"96 " link _trkleng }   |
+     | |---------------|             | 
+ <----------------------------------------->
+
+
+	The Track Editor is where you enter individual notes into a track.
+ It is replicated here; to access information on any of its functions,
+ simply click the mouse on the desired function to display the relevant
+ page.
+
+	See the @{"Editing Tracks" link tracks } section for full information on how to
+ enter notes and commands into the tracks.
+
+
+@endnode trkpanel
+
+@node _trkline " FutureSonic - Track Line Numbers"
+@toc trkpanel
+@next _trknote
+
+	 The first column of numbers on the Track display are the
+ line numbers on the track. These are in hex, not decimal, so it is easy
+ to identify the length of a bar. If you assume there are 16 lines to
+ a bar of music ( 16 semiquavers, 8 quavers, 4 crotchets, 2 minims or
+ 1 whole note ) then you will see that lines 00 - 0F make up bar 1,
+ lines 10 - 1F are bar 2, etc. This is true for 4/4 timecount music
+ ( the most common time signature used in Tracker-type modules )
+ but for 3/4 timecount music like waltzes, 12-beat blues etc., a bar
+ becomes a multiple of 12 lines, not 16 - so a bar now has 12 semiquavers,
+ 6 quavers, 3 crotchets, 1 minim and a crotchet, or 1 dotted minim.
+ FutureSonic supports both 4/4 and 3/4 music, and you can select track
+ lengths to suit - 16, 32, 64, and 128 line tracks ( 1, 2, 4, or 8 bars )
+ for 4/4 music; 12, 24, 48, and 96 line tracks ( 1, 2, 4, or 8 bars ) for
+ 3/4 music.
+
+
+@endnode _trkline
+
+@node _trknote " FutureSonic - Track Note Entries"
+@prev _trkline
+@toc trkpanel
+@next _trkinst
+
+	The second column, initially a column of three dashes ( --- )
+ is where the actual notes go. So if a middle C is placed in the track,
+ the three dashes at the point of that note would be replaced by the note,
+ in this case, C-2. Flats are not displayed; all semitone notes ( the
+ black keys on a piano ) are represented as sharps, with a hash sign. So,
+ B-flat below middle C is represented as A-sharp ( A#1 ). 
+
+
+@endnode _trknote
+
+@node _trkinst " FutureSonic - Track Instrument Entries"
+@prev _trknote
+@toc trkpanel
+@next _trkcmds
+
+	The third column, of two-digit numbers, is initially displayed as
+ a column of two dashes ( -- ). This becomes the instrument number for
+ the note that is being played, so wherever a note appears in the @{"Note" link _trknote }
+ column, a corresponding instrument number will appear in this column.
+ When editing, the current instrument is the one which will appear here
+ as the notes are entered.
+
+
+@endnode _trkinst
+
+@node _trkcmds " FutureSonic - Track Command Entries"
+@prev _trkinst
+@toc trkpanel
+@next _trkposa
+
+	The fourth column, of three-digit numbers, is initially displayed
+ as zeros ( 000 ). This is the Effect-commands column, and is where you
+ place effect commands such as volume settings, vibrato, and release
+ commands. See the @{"Effect Commands" link cmd } section for a full explanation of
+ these commands and their functions.
+
+
+@endnode _trkcmds
+
+@node _trkposa " FutureSonic - Track Cursor-Position Function"
+@prev _trkcmds
+@toc trkpanel
+@next _trkchan
+
+	This function scrolls the track up and down in the track display.
+ If either end of the track is reached, the track will wrap around to
+ display its opposite end. Pressing the up/down cursor keys in @{"Edit" link _playedit } mode
+ with the yellow pulsing cursor in the Track Editor will emulate the
+ effect of using this function.
+
+	The Numeric Display contains two 2-digit numbers. The first of
+ these is the current cursor line number on the track. The second number
+ is the total number of lines in the track. Both of these numbers are in
+ hex.
+
+	The "^v" button scrolls the track display when clicked with the
+ mouse. This button is actually a 4-function gadget that uses both
+ mousebuttons. Hold the left mousebutton on this gadget to scroll the
+ display down slowly; still holding the left mousebutton, press the right
+ mousebutton to scroll down quickly. To scroll the display up slowly, hold
+ down the right mousebutton; to scroll up quickly, keep the right
+ mousebutton held down while pressing the left one. See the Using
+ FutureSonic - @{"Buttons" link _usebutt } page for a full explanation of
+ these gadgets. 
+
+
+@endnode _trkposa
+
+@node _trkchan " FutureSonic - Track Output Channel Function"
+@prev _trkposa
+@toc trkpanel
+@next _trknmbr
+
+	This function simply changes the hardware output channel (0-3)
+ that the track plays through when @{"Play Track" link _playtrck } is clicked. The instruments
+ played from the keyboard also play through this channel. 
+
+	The single-digit numeric display is the output channel number. It
+ will display 0, 1, 2, or 3 corresponding to the output channel of the
+ track.
+
+	The "^v" button simply changes the output channel. Click the
+ left mousebutton to go up a channel; click the right one to go down
+ a channel.
+
+
+@endnode _trkchan
+
+@node _trknmbr " FutureSonic - Track Number Select Function"
+@prev _trkchan
+@toc trkpanel
+@next _trkleng
+
+	This function changes the current track number. The track
+ corresponding to this number will appear in the track display as it is
+ changed, and the new track that appears can now be edited. The track
+ numbers are used in the @{"Sequence Editor" link seqpanel } to assemble the tracks into the
+ sequence.
+
+	The Numeric Display contains a 3-digit number. This number is the
+ current track number in decimal. It ranges betwee zero up to a maximum
+ of 999 - the maximum amount of tracks available in FutureSonic.
+
+	The "^v" button shifts the track number up and down, allowing you
+ to see and edit different tracks. This button is actually a 4-function
+ gadget that uses both mousebuttons. Hold the left mousebutton on this
+ gadget to increase the number slowly; still holding the left mousebutton,
+ press the right mousebutton to increase quickly. To decrease the number
+ slowly, hold down the right mousebutton; to decrease quickly, keep the
+ right mousebutton held down while pressing the left one. See the Using
+ FutureSonic - @{"Buttons" link _usebutt } page for a full explanation of
+ these gadgets.
+
+
+@endnode _trknmbr
+
+@node _trkleng " FutureSonic - New Track Buttons"
+@prev _trknmbr
+@toc trkpanel
+
+	The eight buttons in two vertical rows at the bottom right of the
+ Track Editor panel are for creating new tracks. When one is clicked with
+ the mouse, a track with a length equal to the number on the button is
+ created at the current point in the track list. For instance, if the
+ current track being displayed is Track # 10, and the "16" button is
+ clicked, all tracks above track 10 are shunted up one number and a new
+ empty track of 16 lines is inserted to occupy Track # 11, which then
+ becomes the currently displayed track. 
+
+	The four buttons in the first vertical column, numbered 16, 32,
+ 64, and 128, generate tracks in 4/4 time as follows:
+
+	16 -	creates a new track of 16 lines ( 1 bar in 4/4 time )
+	32 -	creates a new track of 32 lines ( 2 bars in 4/4 time )
+	64 -	creates a new track of 64 lines ( 4 bars in 4/4 time )
+	128-	creates a new track of 128 lines ( 8 bars in 4/4 time )
+
+	The four buttons in the second vertical column, numbered 12, 24,
+ 48, and 96, generate tracks in 3/4 time as follows:
+
+	12 -	creates a new track of 12 lines ( 1 bar in 3/4 time )
+	24 -	creates a new track of 24 lines ( 2 bars in 3/4 time )
+	48 -	creates a new track of 48 lines ( 4 bars in 3/4 time )
+	96 -	creates a new track of 96 lines ( 8 bars in 3/4 time )
+
+	Once a track is defined, its length remains constant and cannot
+ be changed. For the techies, this is to reduce the memory fragmentation
+ caused by the de-allocation and re-allocation of memory that occurs when
+ changing track sizes when the track is in the middle of the list, and
+ also ensures that the listing in the @{"Sequence Editor" link seqpanel } remains tidy.
+
+
+@endnode _trkleng
+
+@node seqpanel " FutureSonic - The Sequence Editor"
+@prev trkpanel
+@toc songpanel
+@next tracks
+	Please drag side slider down for more information: --->
+
+                                              ^
+                                              |
+ <--------------------------------------------|
+      |          Tracks                       |
+      |  Pos  1   2   3   4                   |
+      ||---------------------|                |
+      || 000:001 009 020 030 |   @{"^v" link _seqposn }  @{"-_" link _seqposn }       |
+      || 001: -   -  020 030 |   Position     |
+      || 002: -  010 021 030 |                |
+      || 003: -   -  021 031 |   @{"+-" link _seqtrkn }  @{"se" link _seqtrkn }       |
+      || 004:002 009 020 030 |   Track No.    |
+      || 005: -   -  020 030 |                |
+      || 006: -  011 022 030 |                |
+      || @{"007: -   -  022 031" link _seqtrkl } |                |
+      || 008:003 009 020 030 |                |
+      || 009: -   -  023 030 |                |
+      || 010:004 012 024 032 |                |
+      || 011: -   -  025 031 |                |
+      || 012:005 013 019 030 |                |
+      || 013:006 012  -  034 |                |
+      || 014:--- --- --- --- |                |
+      || 015:--- --- --- --- |                |
+      ||---------------------|                |
+ <---------------------------------------------
+
+	The Sequence Editor is where you assemble the tracks created in
+ the Track Editor into a song sequence. It is replicated here; to access
+ information on any of its functions, simply click the mouse on the
+ desired function to display the relevant page.
+	See the @{"Editing Sequences" link sequence } section for full information on how to
+ enter notes and commands into the tracks.
+
+
+@endnode seqpanel
+
+@node _seqposn " FutureSonic - Sequence Cursor-Position Function"
+@toc seqpanel
+@next _seqtrkn
+
+	This function allows you to shift around the song sequence. The
+ Sequence display will scroll up or down as you move through the
+ sequence; if the beginning of the sequence is reached scrolling up, the
+ display will wrap around to the last possible line in the sequence,
+ which is line 999. Scrolling down will continue until line 999 is
+ reached, regardless of whether the actual sequence data is this long or
+ not. Once line 999 is reached, the display will wrap around to the
+ beginning.  Using the cursor keys while @{"Edit" link _playedit } mode is on and the yellow
+ pulsing cursor is in the Sequence Editor, will cause the sequence to
+ scroll up and down the same as using this function. The left/right
+ cursor keys will move the cursor left or right to choose which track
+ channel you wish to edit.
+
+	The "^v" button scrolls the sequence display when clicked with the
+ mouse. This button is actually a 4-function gadget that uses both
+ mousebuttons. Hold the left mousebutton on this gadget to scroll the
+ display down slowly; still holding the left mousebutton, press the right
+ mousebutton to scroll down quickly. To scroll the display up slowly, hold
+ down the right mousebutton; to scroll up quickly, keep the right
+ mousebutton held down while pressing the left one. See the Using
+ FutureSonic - @{"Buttons" link _usebutt } page for a full explanation of
+ these gadgets. 
+
+	The "-_" button moves the display to the beginning or end of the
+ sequence. Click the left mousebutton to go to the end of the sequence
+ data, or click the right one to go to the beginning.
+
+
+@endnode _seqposn
+
+@node _seqtrkn " FutureSonic - Sequence Track Selection Function"
+@prev _seqposn
+@toc seqpanel
+@next _seqtrkl
+
+	This function changes the track number under the cursor. This
+ is used to set up the tracks in sequence to form a song. See the 
+ @{"Editing Sequences" link sequence } section for more information on editing a sequence.
+
+	The "+/-" button increases and decreases the track number under
+ the cursor. This button is actually a 4-function gadget that uses both
+ mousebuttons. Hold the left mousebutton on this gadget to increase the
+ number slowly; still holding the left mousebutton, press the right
+ mousebutton to increase quickly. To decrease the number slowly, hold
+ down the right mousebutton; to decrease quickly, keep the right
+ mousebutton held down while pressing the left one. See the Using
+ FutureSonic - @{"Buttons" link _usebutt } page for a full explanation of
+ these gadgets.
+
+	The "S/E" button brings up the starting or ending track number
+ under the cursor. If you have 10 tracks, for example, then clicking
+ the left mousebutton here will bring up the last track (10). Clicking
+ the right mousebutton will bring up track 1.
+
+
+@endnode _seqtrkn
+
+@node _seqtrkl " FutureSonic - The Sequence Display"
+@prev _seqtrkn
+@toc seqpanel
+
+	The Sequence display is where the individual tracks are 
+ assembled to form a 4-track song. See the @{"Editing Sequences" link sequence } section for
+ more information on editing a sequence.
+
+	The first column of numbers are the sequence line numbers, which
+ run from 001 to 999. Each line represents 1 bar of music; that is, 16
+ lines in a 4/4 track, or 12 lines in a 3/4 track. FutureSonic will not
+ allow you to mix 4/4 and 3/4 tracks in the same line. Consequently, a
+ track of 16 or 12 lines will take up 1 line in the Sequence Editor, a
+ track of 32 or 24 lines will take up 2 lines in the Sequence Editor.
+ Any extra lines taken up by a track whose length is greater than 16
+ or 12 lines, are filled with single dashes to denote that the track
+ occupies more than one bar; obviously, you cannot add a track to these
+ lines since they are already occupied. FutureSonic will only allow you
+ to add tracks to lines portrayed as "---", or to change a track number
+ already set.
+
+	The remaining four columns, initially depicted as "---", are
+ the sequence lists for the Amiga's four audio channels. Each column
+ is edited to store a sequence of track numbers which can then be played
+ back as a song. The @{"Track Selection" link _seqtrkn } function changes these track numbers
+ as previously described.
+
+
+@endnode seqtrkl
+
+@node sndpanel " FutureSonic - The Sound Editor"
+@prev songpanel
+@next tracks
+	Please drag side slider down for more information: --->
+
+^                        ^                                               ^
+|                        |                                               |
+|------------------------+-----------------------------------------------|
+|@{"#" link _sndloop }|                                   @{"   " link _snddisp }                              |@{"#" link _sndloop }|
+| | /\                                                                 | |
+| |/  \    /\  /\/\/\/\/\/\--------------------------------------------| |
+| |    \  /  \/                                                        | |
+|@{"#" link _sndrnge }|     \/                                                             |@{"#" link _sndrnge }|
+|------------------------------------------------------------------------|
+| [======================@{"######" link _sndsldr }========================================] |
+|------------------------------------------------------------------------|
+| @{"Play All  " link _sndplya } @{"Cut       " link _sndbcut } @{"Zoom Out  " link _sndzoom }   @{"LP <> {} SE LR LS" link _sndlpc1 }                   |
+| @{"PlayScreen" link _sndplys } @{"Copy      " link _sndbcop } @{"Zoom In   " link _sndzoom }      Start% End%                      |
+| @{"Play Range" link _sndplyr } @{"Insert    " link _sndbins } @{"Range All " link _sndrnga }   @{"VL +- 100 +- 100 Bst" link _sndvol1 }                |
+| @{"Show All  " link _sndshoa } @{"Paste     " link _sndbpas } @{"Mix BfMain" link _sndmxbm }      Qty    Dec                       |
+| @{"Show Range" link _sndshor } @{"Del Buffer" link _sndbdel } @{"Reverse   " link _sndrevs }   @{"Ec +- 10 +- 10 " link _sndecho }   @{"OCT" link _sndoctv } @{"D/L" link _snddtol } @{"Rn]" link _sndrngl } @{"00000" link _sndrbeg } |
+| @{"BufferMain" link _sndbfmn } @{"Del Range " link _sndrdel }              @{"Rv +- 10 +- 10 " link _sndrvrb }   @{"|--" link _sndzero } @{"R-S" link _sndrnsc } @{"Rn[" link _sndrngr } @{"00000" link _sndrend } |
+--------------------------------------------------------------------------
+
+	This panel is where you can edit or modify the actual instrument
+ samples. The samples can be cut and pasted, mixed, or have interesting
+ effects applied to them. The sample looping function is also set here,
+ for samples such as sustained strings, which have to play indefinitely.
+ The Sound Editor panel is replicated above; to access information on
+ any of its functions simply click the mouse on the relevant gadget.
+
+	 Note: This Sound Panel is derived from a sample editor we
+ released in 1987 known as AudioTech. This program enjoyed a brief
+ popularity on the PD circuit before fading into obscurity. AudioTech was
+ originally written in machine code but the editor was rewritten in Blitz
+ Basic 2 for FutureSonic. The methods used in editing the sample, in
+ particular the ability to zoom all the way into the sample to show
+ individual bytes as lines and marking a range the same way as marking a
+ loop on a sample, with drag markers, are our own ideas and were present
+ in AudioTech in 1987. Any similarity between this Sample Editor and the
+ sample editors in certain other sound programs that have been made since,
+ is therefore coincidental and no inference is made that FutureSonic's
+ Sound Editor is in any way a duplication of any other particular
+ sound-editing program.
+
+@endnode sndpanel
+
+@node _sndloop " FutureSonic - The Loop Markers"
+@toc sndpanel
+@next _sndrnge
+
+	These are the two blue Loop markers. They mark the section of
+ the sample which repeats endlessly when the loop function is activated.
+ This is so that a note can be sustained indefinitely within a song, and
+ is usually used with string, wind and synth-lead instruments that do not
+ change their volume over the sample. Samples that start loud and finish
+ softly, or short sharp-sounding samples, don't loop well - there is
+ often a "pop" or jumping effect every time the loop occurs.
+	The Loop markers can be shifted around the sample to find the
+ best place for a loop. Used in conjunction with the @{"Range" link _sndrnge } and @{"Zoom" link _sndzoom }
+ functions, they can be easily placed to an accuracy of 2 bytes. When
+ dragging them with the mouse, position the pointer over the blue squares
+ at the top of each marker. Note that these markers are only visible when
+ the Loop function is active.
+
+	The best way to find a good loop section is to zoom right in
+ at the end of the sample until you can see the individual bytes as
+ short horizontal lines. It helps if you click the @{"|--" link _sndzero } button to
+ show the zero line in red. Now, find a spot where the waveform
+ descends and crosses the zero line and move the right-hand Loop marker
+ onto it. Click @{"Show All" link _sndshoa }, and find a point toward the beginning of the
+ sample that looks similar to where the right-hand loop marker is. Set
+ the Range markers to either side of this point and click @{"Show Range" link _sndshor }.
+ Now click @{"Zoom In" link _sndzoom } to show the individual bytes and place the left-
+ hand Loop marker at a point where the waveform crosses the zero line
+ in a similar manner to the other loop marker. You may have to experiment
+ to find a smooth-sounding loop point, and you'll find that in some
+ samples, it is just not possible to get a smooth loop. Bear in mind that
+ when the sample is playing in a song with other samples, the jumping
+ effect is effectively disguised particularly with drums or a fast bass
+ track playing. Don't be too fussy in getting a sample to loop smoothly
+ unless you are going to play it on its own.
+ 
+
+@endnode _sndloop
+
+@node _sndrnge " FutureSonic - The Range Markers"
+@prev _sndloop
+@toc sndpanel
+@next _snddisp
+
+	These are the two orange Range markers. They are used to mark the
+ beginning and end of a smaller section of the sample than is displayed
+ the screen. Once these are positioned, the section between becomes the
+ current Range. Many of the functions on the Sound Editor use the range
+ to view or edit a small part of the sample. For instance, the Copy
+ Range button copies the area of the sample between the Range markers
+ into a buffer, where it can be pasted or mixed back into the main sample.
+	When dragging them with the mouse, position the pointer over the
+ orange squares at the bottom of each marker.
+
+
+@endnode _sndrnge
+
+@node _snddisp " FutureSonic - The Sample Display"
+@prev _sndrnge
+@toc sndpanel
+@next _sndsldr
+
+	This area is where the instrument sample waveform is displayed.
+ The @{"Loop" link _sndloop } and @{"Range" link _sndrnge } markers can be moved over this area to mark looping
+ points and range sections. The Zeroline function (@{"|--" link _sndzero }) also displays a
+ red line in this area. The Sample display can show the whole sample or
+ any part of it magnified to fill the display area.
+
+
+@endnode _snddisp
+
+@node _sndsldr " FutureSonic - The Sample Display Slider"
+@prev _snddisp
+@toc sndpanel
+@next _sndplya
+
+	This slider spans the bottom of the @{"Sample display" link _snddisp }. If only a
+ small part of the sample is visible in the display, this slider shrinks
+ to show how much of the sample is being displayed as a portion of the
+ whole. The slider can then be moved to scroll the other parts of the
+ sample into view. Simply click and drag the slider with the mouse to
+ move it. If the entire sample is being displayed, the slider fills the
+ entire slider bar and so of course cannot be moved.
+
+
+@endnode _sndsldr
+
+@node _sndplya " FutureSonic - The Play All Button"
+@prev _sndsldr
+@toc sndpanel
+@next _sndplys
+
+	This button plays the entire sample from beginning to end 
+ regardless of what part is visible in the display. If the @{"Loop" link _sndloop }
+ function is active, the sample will loop indefinitely until it is
+ stopped by pressing the space bar.
+	When this button is clicked, a red light in the top right
+ corner will be lit to show that the function is active.
+
+
+@endnode _sndplya
+
+@node _sndplys " FutureSonic - Play Sample Display Button"
+@prev _sndplay
+@toc sndpanel
+@next _sndplyr
+
+	This button plays only the part of the sample that is visible
+ in the @{"Sample display" link _snddisp }. It will only play once and the @{"Loop" link _sndloop } function
+ is ignored. When this button is clicked, a red light in the top right
+ corner will be lit to show that the function is active.
+
+
+@endnode _sndplys
+
+@node _sndplyr " FutureSonic - Play Range Button"
+@prev _sndplys
+@toc sndpane
+@next _sndshoa
+
+	This button plays only the part of the sample that is between the
+ two @{"Range" link _sndrnge } markers. It will only play once and the @{"Loop" link _sndloop } function is
+ ignored. If the Range markers are outside of the visible sample display,
+ the entire range will still be played.
+	When this button is clicked, a red light in the top right
+ corner will be lit to show that the function is active.
+
+
+@endnode _sndplyr
+
+@node _sndshoa " FutureSonic - Show All Button"
+@prev _sndplyr
+@toc sndpanel
+@next sndshor
+
+	This button causes the @{"Sample display" link _snddisp } to show the entire sample,
+ from beginning to end, so that the entire sample completely fills the
+ display area.
+
+
+@endnode _sndshoa
+
+@node _sndshor " FutureSonic - Show Range Button"
+@prev _sndshoa
+@toc sndpanel
+@next _sndbfmn
+
+	This button causes the @{"Sample display" link _snddisp } to show the Range part of
+ the sample such that it now fills the display area from end to end. The
+ @{"Range" link _sndrnge } markers are moved to the sides of the display accordingly, and
+ the Sample display slider shrinks to allow you to scroll through the
+ rest of the sample.
+
+
+@endnode _sndshor
+
+@node _sndbfmn " FutureSonic - Swap Buffer and Main Buttton"
+@prev _sndshor
+@toc sndpanel
+@next _sndbcut
+
+	This button swaps the @{"Sample display" link _snddisp } between showing the main
+ sample and the contents of the copy buffer. The main sample now
+ becomes the copy buffer and any buffer operations ( Cut, Copy etc ) will
+ affect this sample. Conversely, the copy buffer also becomes the
+ main sample and if you exit the Sample Editor at this point will also
+ be the current instrument.
+
+
+@endnode sndbfmn
+
+@node _sndbcut " FutureSonic - Cut Range Button"
+@prev _sndbfmn
+@toc sndpanel
+@next _sndbcop
+
+	This button copies the current @{"Range" link _sndrnge } to the copy buffer. Anything
+ previously in the copy buffer will be erased. Once the range has been
+ copied, it is removed from the sample and the part of the sample to the
+ right of the range is shifted back to join the remaining part of the
+ sample and fill the gap left by the removed Range.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+@endnode _sndbcut
+
+@node _sndbcop " FutureSonic - Copy Range Button"
+@prev _sndbcut
+@toc sndpanel
+@next _sndbins
+
+	This button copies the current @{"Range" link _sndrnge } to the copy buffer. Anything
+ previously in the copy buffer will be erased. However, the sample itself
+ is not affected by this operation; the Range is merely duplicated in the
+ copy buffer.
+	When this button is clicked, the red light in the top right
+ corner will flash once to indicate that the operation was carried out.
+
+
+@endnode _sndbcop
+
+@node _sndbins " FutureSonic - Insert Range Button"
+@prev _sndbcop
+@toc sndpanel
+@next _sndbpas
+
+	This button inserts the contents of the copy buffer into the
+ sample starting at the left-hand @{"Range marker" link _sndrnge }. The rest of the sample
+ to the right of this Range marker is shifted right to make room for
+ the contents of the copy buffer.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _sndbins
+
+@node _sndbpas " FutureSonic - Paste Range Button"
+@prev _sndbins
+@toc sndpanel
+@next _sndbdel
+
+	This button pastes the contents of the copy buffer onto the
+ sample starting at the left-hand @{"Range marker" link _sndrnge }. Anything to the right
+ of this Range marker is overwritten by the contents of the copy
+ buffer, but if the remainder of the sample is longer than the copy
+ buffer, the part of it that is past the end of the copy buffer once
+ it has been pasted will remain unchanged. If the copy buffer is longer
+ than the rest of the sample, the sample will be extended to accomodate
+ the extra length and everything to the right of the Range marker will
+ be overwritten.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _sndbpas
+
+@node _sndbdel " FutureSonic - Delete Buffer Button"
+@prev _sndbpas
+@toc sndpanel
+@next _sndrdel
+
+	This button simply erases the copy buffer. Anything in the
+ copy buffer will therefore be lost. The sample on the display, however,
+ will not be affected in any way.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _sndbdel
+
+@node _sndrdel " FutureSonic - Delete Range Button"
+@prev _sndbdel
+@toc sndpanel
+@next _sndzoom
+
+	This button deletes the current @{"Range" link _sndrnge } from the sample. It has
+ the same effect on the sample as the @{"Cut" link _sndbcut } button; however, the range
+ is NOT copied to the copy buffer. Anything between the Range markers
+ will therefore be lost.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+@endnode _sndrdel
+
+@node _sndzoom " FutureSonic - The Zoom Function"
+@prev _sndrdel
+@toc sndpanel
+@next _sndrnga
+
+	The Zoom Out and Zoom In buttons allow you to view a small
+ section of the sample under high magnification. The Zoom In function
+ magnifies the centre half of the sample in the @{"Sample display" link _snddisp } to fill
+ the entire display. The Zoom out function causes the entire display
+ to fill only the centre half of the display, exposing more of the
+ sample on either side. You can Zoom In until the entire display is
+ filled by only two bytes of the sample; and you can Zoom Out until
+ the entire sample is visible in the display.
+
+
+@endnode _sndzoom
+
+@node _sndrnga " FutureSonic - The Range All Button"
+@prev _sndzoom
+@toc sndpanel
+@next _sndmxbm
+
+	This button sets the @{"Range" link _sndrnge } markers to the beginning and
+ end of the entire sample, regardless of what part of the sample is
+ being shown in the @{"Sample display" link _snddisp }. Thus, the entire sample becomes
+ the current Range.
+
+
+@endnode _sndrnga
+
+@node _sndmxbm " FutureSonic - The Mix Buffer and Main Function"
+@prev _sndrnga
+@toc sndpanel
+@next _sndrevs
+
+	This button mixes the sample on the main screen with the contents
+ of the copy buffer, starting at the left @{"Range" link _sndrnge } marker. The result is a
+ combination of the sample on the @{"Sample display" link _snddisp } and the sample
+ in the copy buffer. Any part of the sample to the left of the Range
+ marker will not be affected, neither will any part of the sample that may
+ extend past the length of the copy buffer from the left Range marker.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _sndmxbm
+
+@node _sndrevs " FutureSonic - The Reverse Function"
+@prev _sndmxbm
+@toc sndpanel
+@next _sndlpc1
+
+	This button reverses the @{"Range" link _sndrnge } portion of the sample in the
+ @{"Sample display" link _snddisp }. Only the Range is reversed; any part of the sample
+ that is not between the Range markers will not be affected.
+	Clicking once on this button will cause the yellow light
+ in the top right corner to flash and a message will appear in the status
+ bar asking you to click the left or right mousebutton. Click the left
+ mousebutton to confirm the operation, or click the right mousebutton
+ to abort it.
+
+
+@endnode _sndrevs
+
+@node _sndlpc1 " FutureSonic - The Loop Controls"
+@prev _sndrevs
+@toc sndpanel
+@next _sndvol1
+
+	This function controls the @{"Loop" link _sndloop } settings in the Sample. There
+ are several buttons and displays, which are explained below:
+
+ 1. "LP"  Activate Loop Function
+          In FutureSonic, this button is labelled "LOOP". When clicked,
+          the Loop function becomes active, the two blue loop markers 
+          appear in the Sample display, and the red light in the top
+          right corner lights up to show that the Loop function is active.
+          Click this button again to disable the Loop function.
+
+ 2. "<>"  Move Current Loop Marker
+          In FutureSonic, this button has a left-right arrow icon on it.
+          It moves the currently selected Loop marker one byte at a time.
+          This button is actually a 4-function gadget that uses both
+          mousebuttons. Hold the left mousebutton on this gadget to
+          move the Loop marker left slowly; still holding the left
+          mousebutton, press the right mousebutton to move left quickly.
+          To move the Loop marker right slowly, hold down the right
+          mousebutton; to move right quickly, keep the right mousebutton
+          held down while pressing the left one. See the Using
+          FutureSonic - @{"Buttons" link _usebutt } page for a full
+          explanation of these gadgets.
+
+ 3. "{}"  Move Current Loop Marker to Seek Zero
+          In FutureSonic, this button has a left-right arrow icon with
+          two small zeros on it ( like "0<>0" ) It moves the Loop marker
+          left or right to the next point in the sample where the wave
+          is equal to zero. It is useful for quickly finding good loop
+          points in the sample, because positioning both loop markers
+          on zero points in a sample will often make a good loop without
+          the jumping effect often heard in looped samples.
+          This button is actually a 4-function gadget that uses both
+          mousebuttons. Hold the left mousebutton on this gadget to
+          move the Loop marker left slowly; still holding the left
+          mousebutton, press the right mousebutton to move left quickly.
+          To move the Loop marker right slowly, hold down the right
+          mousebutton; to move right quickly, keep the right mousebutton
+          held down while pressing the left one. See the Using
+          FutureSonic - @{"Buttons" link _usebutt } page for a full
+          explanation of these gadgets.
+
+ 4. "SE"  Select Current Loop Marker
+          In FutureSonic, this button is marked S/E and has two red
+          lights in its top right corner. This is used to select a
+          Loop marker as the current Loop marker, so that the Move
+          Current Loop marker buttons mentioned above know which 
+          Loop marker to affect. If the left-hand light is lit, the
+          left Loop marker is the one which will be moved by the buttons.
+          If the right-hand light is lit, the right Loop marker will be
+          affected. Clicking this button with the mouse swaps between the
+          two Loop markers.
+
+ 5. "LR"  Make Loop and Range Equal
+          In FutureSonic, this button is marked L<>R and is a two
+          function gadget. Clicking the left mousebutton on this will
+          make the @{"Range" link _sndrnge } equal to the Loop; that is, the Range markers
+          will be moved so that they are in the same places as the 
+          corresponding Loop markers. Clicking the right mousebutton
+          on this will make the Loop equal to the Range; that is, the
+          Loop markers will be moved to occupy the same positions as
+          the corresponding Range markers.
+
+ 6. "LS"  Make Loop and Sample Display Equal
+          In FutureSonic, this button is marked L<>S and is a two
+          function gadget. Clicking the left mousebutton on this will
+          make the Loop equal to the length of sample in the Sample
+          display; that is, the Loop markers will be moved to the sides
+          of the @{"Sample display" link _snddisp }. Clicking the right mousebutton on this
+          will cause the section of the sample between the Loop markers
+          to be magnified to fill the entire Sample display. The Loop
+          markers will be moved to the sides of the Sample display
+          accordingly, but the Loop settings themselves are not altered.
+
+
+@endnode sndlpc1
+
+@node _sndvol1 " FutureSonic - The Ramp Volume Function"
+@prev _sndlpc1
+@toc sndpanel
+@next _sndecho
+
+	This function modifies the sample by changing the volume over the
+ range. It uses 2 parameters, Start percentage and End percentage. The
+ volume change only affects the current @{"Range" link _sndrnge }; any part of the sample that
+ is not between the Range markers will not be affected. The Start value
+ is the percentage of change of the volume at the left Range marker; this
+ then follows a smooth transition to the End value, at the right Range
+ marker. You can vary these values between 0% ( silence ), 100% ( no
+ change in volume ), and 200% ( twice as loud as original ). For instance,
+ if you set the Start value to 200%, and the End value to 10%, then the
+ result is that at the left Range marker, the sample will be increased to
+ twice its previous volume, and smoothly fade down until it reaches the
+ right Range marker, by which point it will only have 10% of the volume
+ it originally had. This operation is NOT like the @{"ADSR" link _instadsr } function on
+ the instrument panel, because it physically changes the sample data to
+ alter the volume. The Ramp Volume function uses several buttons and
+ displays, as explained below:
+
+ 1. "VL"   Activate Ramp Volume Function
+           In FutureSonic, this button is labelled "VOL" and has a light
+           in the top right corner that serves 2 purposes. This button
+           uses the values in the displays to the right of it and actually
+           initiates the Ramp Volume operation. When clicked once, the
+           light flashes yellow and a message appears in the status bar
+           asking you to press the left or right mousebutton. Click the
+           left mouse button to confirm the operation, or click the right
+           one to abort it and leave the sample unchanged. If you confirm
+           the operation, the yellow flashing light will change to a
+           steady red one, and a "Please Wait" message will appear in
+           the status bar while the operation is taking place.
+
+ 2. "+-"   Start Percentage Button
+           In FutureSonic, this button is labelled "+/-" and is under
+           the "Start%" label. This button increases and decreases the
+           Start Volume value between 0% and 200%. It is a 4-function
+           gadget that uses both mousebuttons. Hold the left mousebutton
+           on this gadget to increase the number slowly; still holding
+           the left mousebutton, press the right mousebutton to increase
+           quickly. To decrease the number slowly, hold down the right
+           mousebutton; to decrease quickly, keep the right mousebutton
+           held down while pressing the left one. See the Using
+           FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 3. "10"   Start Percentage Display
+           This display shows the Start percentage value, controlled
+           by the Start% +/- button mentioned above.
+
+ 4. "+-"   End Percentage Button
+           In FutureSonic, this button is labelled "+/-" and is under
+           the "End%" label. This button increases and decreases the
+           End Volume value between 0% and 200%. It is a 4-function
+           gadget that uses both mousebuttons. Hold the left mousebutton
+           on this gadget to increase the number slowly; still holding
+           the left mousebutton, press the right mousebutton to increase
+           quickly. To decrease the number slowly, hold down the right
+           mousebutton; to decrease quickly, keep the right mousebutton
+           held down while pressing the left one. See the Using
+           FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 3. "10"   End Percentage Display
+           This display shows the End percentage value, controlled
+           by the End% +/- button mentioned above.
+
+
+@endnode _sndvol1
+
+@node _sndecho " FutureSonic - The Echo Effect Function"
+@prev _sndvol1
+@toc sndpanel
+@next _sndrvrb
+
+	This function modifies the sample to produce an echo effect.
+ It uses 2 parameters, Quantity and Decay Rate, to create the effect.
+ The function uses the contents of the copy buffer to make the echoes,
+ so you can echo a small part of the whole sample ( usually the end of
+ the sample ) by setting the @{"Range" link _sndrnge } markers to the portion of the sample
+ you want to echo and clicking the @{"Copy" link _sndbcop } button. Now, the Quantity
+ parameter is the number of times the copy buffer is appended to the
+ end of the sample to create the echo, and the Decay parameter is the
+ percentage of how much quieter each successive echo is. For instance,
+ if you set the Quantity parameter to 8 and the Decay parameter to 40, 
+ then 8 copies of the copy buffer will be appended to the original
+ sample to make the echo, and each echo will be 40 percent quieter
+ than the previous one. If the copy buffer is empty, the current Range
+ of the sample will be used. Also, it is possible to copy part of one
+ sample into the copy buffer, and then use it to apply as an echo to
+ another instrument. Often, this will produce some strange effects,
+ but when the two samples used are similar in sound, doing this can
+ create some very interesting new instruments. Experimentation is
+ the key with this function; don't be afraid to try out different
+ instruments and settings. The Echo function has several buttons
+ and displays, which are explained below:
+
+ 1. "Ec"   Activate Echo Operation.
+           In FutureSonic, this button is labelled "ECHO" and has a light
+           in the top right corner that serves 2 purposes. This button
+           uses the values in the displays to the right of it and actually
+           initiates the Echo operation. When clicked once, the light
+           flashes yellow and a message appears in the status bar asking
+           you to press the left or right mousebutton. Click the left
+           mouse button to confirm the operation, or click the right one
+           to abort it and leave the sample unchanged. If you confirm
+           the operation, the yellow flashing light will change to a
+           steady red one, and a "Please Wait" message will appear in
+           the status bar while the operation is taking place.
+
+ 2. "+-"   Echo Quantity Button
+           In FutureSonic, this button is labelled "+/-" and has the
+           wod "Qty" on it. This button increases and decreases the
+           Echo Quantity value between 0 and 99. (but if you set 99
+           echoes, you had better have a lot of memory!) It is a
+           4-function gadget that uses both mousebuttons. Hold the left
+           mousebutton on this gadget to increase the number slowly;
+           still holding the left mousebutton, press the right mousebutton
+           to increase quickly. To decrease the number slowly, hold down
+           the right mousebutton; to decrease quickly, keep the right
+           mousebutton held down while pressing the left one. See the
+           Using FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 3. "10"   Echo Quantity Display
+           This display shows the Echo Quantity value, controlled
+           by the Echo Quantity +/- button mentioned above.
+
+ 4. "+-"   Echo Decay Button
+           In FutureSonic, this button is labelled "+/-" and has the
+           word "Dec" on it. This button increases and decreases the
+           Echo Decay value between 0% and 99%. It is a 4-function
+           gadget that uses both mousebuttons. Hold the left mousebutton
+           on this gadget to increase the number slowly; still holding
+           the left mousebutton, press the right mousebutton to increase
+           quickly. To decrease the number slowly, hold down the right
+           mousebutton; to decrease quickly, keep the right mousebutton
+           held down while pressing the left one. See the Using
+           FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 5. "10"   Echo Decay Display
+           This display shows the Echo Decay value, controlled
+           by the Echo Decay +/- button mentioned above.
+
+
+@endnode _sndecho
+
+@node _sndrvrb " FutureSonic - The Reverb Effect Function"
+@prev _sndecho
+@toc sndpanel
+@next _sndoctv
+
+	This function modifies the sample to produce a pseudo-reverb
+ effect. It uses 2 parameters, Delay and Volume, to produce this effect.
+ What it actually does is to copy the sample, shift the copy to the
+ right using the Delay value, and mixes it back in. The effect of this
+ is to make the sample sound fuller, as if several identical instruments
+ were playing it simultaneously instead of just one. With abrupt-sounding
+ samples, this effect will make it sound as if it is playing two quick
+ notes instead of one. The Delay value determines how far the sample
+ is shifted before being mixed back. The higher this value, the longer
+ the interval is  between the start of the sample and the start of the
+ mixback effect. The Volume value determines how loud the mixback sample
+ is relative to the main sample. A low value here will make hardly any
+ difference to the sample, while a high value will produce a very full
+ bodied sound. Experimentation is the key to this function; don't be
+ afraid to try out different samples and values with it. The Reverb
+ function uses several buttons and displays, which are explained
+ below:
+
+ 1. "Rv"   Activate Reverb Function
+           In FutureSonic, this button is labelled "RVRB" and has a light
+           in the top right corner that serves 2 purposes. This button
+           uses the values in the displays to the right of it and actually
+           initiates the Reverb operation. When clicked once, the light
+           flashes yellow and a message appears in the status bar asking
+           you to press the left or right mousebutton. Click the left
+           mouse button to confirm the operation, or click the right one
+           to abort it and leave the sample unchanged. If you confirm
+           the operation, the yellow flashing light will change to a
+           steady red one, and a "Please Wait" message will appear in
+           the status bar while the operation is taking place.
+
+ 2. "+-"   Reverb Delay Button
+           In FutureSonic, this button is labelled "+/-" and has the
+           word "Dly" on it. This button increases and decreases the
+           Reverb Delay value between 0 and 99.  It is a 4-function
+           gadget that uses both mousebuttons. Hold the left mousebutton
+           on this gadget to increase the number slowly; still holding
+           the left mousebutton, press the right mousebutton to increase
+           quickly. To decrease the number slowly, hold down the right
+           mousebutton; to decrease quickly, keep the right mousebutton
+           held down while pressing the left one. See the Using
+           FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 3. "10"   Reverb Delay Display
+           This display shows the Reverb Delay value, controlled
+           by the Reverb Delay +/- button mentioned above.
+
+ 4. "+-"   Reverb Volume Button
+           In FutureSonic, this button is labelled "+/-" and has the
+           word "Vol" on it. This button increases and decreases the
+           Reverb Volume value between 0 and 99.  It is a 4-function
+           gadget that uses both mousebuttons. Hold the left mousebutton
+           on this gadget to increase the number slowly; still holding
+           the left mousebutton, press the right mousebutton to increase
+           quickly. To decrease the number slowly, hold down the right
+           mousebutton; to decrease quickly, keep the right mousebutton
+           held down while pressing the left one. See the Using
+           FutureSonic - @{"Buttons" link _usebutt } page for a full
+           explanation of these gadgets.
+
+ 5. "10"   Reverb Volume Display
+           This display shows the Reverb Volume value, controlled
+           by the Reverb Volume +/- button mentioned above.
+
+
+@endnode _sndrvrb
+
+@node _sndoctv " FutureSonic - Resample Up/Down Function"
+@prev _sndrvrb
+@toc sndpanel
+@next _snddtol
+
+	This function resamples the sample data up or down one octave.
+ Since an octave higher is twice the frequency, the sample, if resampled
+ up an octave, will take up half the memory space, but will sound
+ an octave higher than normal. This process can be repeated a number
+ of times, but due to the mathematical nature of the process, resampling
+ more than 2 or 3 octaves away from the original sample will introduce
+ noticeable amounts of distortion. The sample can also be resampled
+ down an octave repeatedly; but again, the interpolation formulas
+ used to effect this introduce noticeable distortion after two or
+ three operations.
+	The gadget has an indicator light in its top right corner and
+ is marked "OCT" with up/down arrows. It uses both mousebuttons to effect
+ its functions. Clicking the left mousebutton will resample the sound
+ data up one octave after getting confirmation. Clicking the right one
+ will resample the sound data down one octave after getting confirmation.
+ When clicked once with either mousebutton, the light flashes yellow and
+ a message appears in the status bar asking you to press the left or right
+ mousebutton. Click the left mouse button to confirm the operation, or
+ click the right one to abort it and leave the sample unchanged. If you
+ confirm the operation the yellow flashing light will change to a steady
+ red one, and a "Please Wait" message will appear in the status bar while
+ the operation is taking place.
+
+
+@endnode _sndoctv
+
+@node _snddtol " FutureSonic - Sample Display Dot/Line Mode"
+@prev _sndoctv
+@toc sndpanel
+@next _sndrngl
+
+	This function changes the @{"Sample display" link _snddisp } mode. Normally, the
+ sample is drawn on the screen by connecting all the sample points
+ with straight lines, creating an oscilloscope-like waveform display.
+ However, this can be time-consuming for some Amigas, with an A500
+ sometimes taking over a second to redraw the sample. However, by
+ clicking this button, you tell FutureSonic to only plot the sample
+ points as dots, without drawing the joining lines. This makes the
+ sample image a bit harder to see, but it also gives a dramatic increase
+ in the drawing speed. You will appreciate this if you are swapping
+ around different samples in the display.
+	The button in FutureSonic has a small icon depicting a dotted
+ wave, a slash, and a solid wave. Click it once to switch dot-plot mode
+ on, click it again to switch back to line-draw mode.
+
+
+@endnode _snddtol
+
+@node _sndrngl " FutureSonic - Move Left Range Marker Button"
+@prev _snddtol
+@toc sndpanel
+@next _sndrbeg
+
+	This button moves the left-hand @{"Range" link _sndrnge } marker left or right
+ one byte at a time. This button is actually a 4-function gadget that
+ uses both mousebuttons. Hold the left mousebutton on this gadget to
+ move the Range marker left slowly; still holding the left mousebutton,
+ press the right mousebutton to move left quickly. To move the Range
+ marker right slowly, hold down the right mousebutton; to move right
+ quickly, keep the right mousebutton held down while pressing the left
+ one. See the Using FutureSonic - @{"Buttons" link _usebutt } page for a full explanation
+ of these gadgets.
+
+
+@endnode _sndrngl
+
+@node _sndrbeg " FutureSonic - Left Range Marker Position"
+@prev _sndrngl
+@toc sndpanel
+@next _sndzero
+
+	This display shows the offset, in bytes, of the left-hand @{"Range" link _sndrnge }
+ marker from the beginning of the sample. The number is in hexadecimal.
+
+
+@endnode _sndrbeg
+
+@node _sndzero " FutureSonic - Draw Zeroline Function"
+@prev _sndrbeg
+@toc sndpanel
+@next _sndrnsc
+
+	This button draws a red line along the zero line in the @{"Sample" link _snddisp }
+ display. This is useful for setting @{"Loop" link _sndloop } points, where it is good to
+ be able to see where the zero level is to find good loop positions.
+ The button has an icon on it which looks like "|--". Click it once
+ to show the zeroline; click again to remove it.
+
+
+@endnode _sndzero
+
+@node _sndrnsc " FutureSonic - Make Range and Display Equal"
+@prev _sndzero
+@toc sndpanel
+@next _sndrngr
+
+	This button, marked "R-S", is a two function gadget. Clicking the
+ left mousebutton on this will make the @{"Sample display" link _snddisp } equal to the @{"Range" link _sndrnge };
+ that is, the range will be magnified to fill the entire display. Clicking
+ the right mousebutton on this will make the Range equal to the Sample
+ display; that is, the Range markers will be moved to the sides of the
+ display.
+
+
+@endnode _sndrnsc
+
+@node _sndrngr " FutureSonic - Move Right Range Marker Button"
+@prev _sndrnsc
+@toc sndpanel
+@next _sndrend
+
+	This button moves the right-hand @{"Range" link _sndrnge } marker left or right
+ one byte at a time. This button is actually a 4-function gadget that
+ uses both mousebuttons. Hold the left mousebutton on this gadget to
+ move the Range marker left slowly; still holding the left mousebutton,
+ press the right mousebutton to move left quickly. To move the Range
+ marker right slowly, hold down the right mousebutton; to move right
+ quickly, keep the right mousebutton held down while pressing the left
+ one. See the Using FutureSonic - @{"Buttons" link _usebutt } page for a full explanation
+ of these gadgets.
+
+
+@endnode _sndrngr
+
+@node _sndrend " FutureSonic - Right Range Marker Position"
+@prev _sndrngr
+@toc sndpanel
+
+	This display shows the offset, in bytes, of the right-hand @{"Range" link _sndrnge }
+ marker from the beginning of the sample. The number is in hexadecimal.
+
+
+@endnode _sndrend
+
+@node tracks " FutureSonic - Editing Tracks"
+@prev sndpanel
+@toc main
+@next sequence
+
+	Editing tracks in FutureSonic is very similar to editing tracks
+ in Tracker programs. The track display can show a maximum of 1 whole
+ bar of 4/4 music ( lines 0-F, 10-1F etc.).  Halfway down the Track
+ editor display, you will see that one line is marked out from the rest
+ by two horizontal green lines. These are the Cursor lines and show
+ that any data entered by you will appear at this point in the track.
+
+	To enter notes into a track, you need to activate the @{"Edit" link _playedit } mode
+ by clicking on the Edit button or pressing the Esc key. When you do this,
+ the section of the green cursor lines over the Notes column will pulse
+ yellow. This yellow pulsing mark is the editing cursor and shows where
+ the next data entered by you will appear. Since it is now in the Notes
+ column, FutureSonic will interpret any keypresses as playing a note
+ ( see the @{"Keyboard Layout" link _usekeys } section ). At this point, pressing a note key
+ on the keyboard will cause the relevant note to appear in the Track,
+ along with the current instrument number. To play a note in a different
+ instrument, you can either change the instrument through the @{"Instrument" link instrpanel }
+ panel controls or use the Shift-Cursor Up/Down keys to cycle through
+ the instruments. 
+
+	Pressing the Cursor Right key will move the cursor over to the
+ three-digit Effect-Command column. This column is where you enter
+ commands to dynamically alter the sound of the instruments as they are
+ played. See the @{"Effect Commands" link cmd } section for more information on the
+ Effect-Commands. You can press Cursor Left to return to the Notes column,
+ or press Cursor Right again to edit the other digits in the Commands
+ column. Pressing Cursor Right until the cursor leaves the Commands
+ column will move the cursor into the @{"Sequence Editor" link seqpanel }. You can return to
+ the @{"Track Editor" link trkpanel } at any time by pressing Cursor Left until the cursor
+ returns to the Track Editor.
+
+	Pressing the Cursor Up/Down keys will scroll the track display
+ up and down in the Track Editor. So, you can enter a note by playing
+ on the keyboard, then skip down a few lines with the Cursor Down key,
+ and enter another note. Keep doing this until the track is filled
+ and you have one complete track.
+
+	To create a new track, you have to decide how many bars the
+ new track is to be. For one bar of 4/4 music, click the 16 button,
+ for 2 bars of 4/4 music, click the 32 button; for one bar of
+ 3/4 music, click the 12 button, for 2 bars of 3/4 music, click the
+ 24 button. The other numbered buttons create 4 bars and 8 bars
+ respectively. The new track is created at that point in the track
+ list; all tracks above it will be shoved up a number to make room
+ for the new track.
+
+	Experience is the best teacher here; don't be afraid to
+ experiment with entering notes. Take a look at the demo module to get
+ an idea of how the notes are arranged in the tracks. Ultimately, as
+ with any artistic application program, the results you get depend
+ on how much you play around with the program and how good your
+ innate musical talents are.
+ 
+
+@endnode tracks
+
+@node cmd "FutureSonic - Effect Commands"
+@prev tracks
+@toc main
+@next sequence
+	Please drag side slider down for more information: --->
+
+	0. @{" The Flags Command             " link _cmdf }
+	1. @{" The Arpeggio Up Command       " link _cmd1 }
+	2. @{" The Arpeggio Down Command     " link _cmd2 }
+	3. @{" The Portamento Up Command     " link _cmd3 }
+	4. @{" The Portamento Down Command   " link _cmd4 }
+	5. @{" The Volume Slide Up Command   " link _cmd5 }
+	6. @{" The Volume Slide Down Command " link _cmd6 }
+	7. @{" The Volume Set Command        " link _cmd7 }
+	8. @{" The Absolute Jump Command     " link _cmd8 }
+	9. @{" The Relative Jump Command     " link _cmd9 }
+	A. @{" The Speed Set Command         " link _cmda }
+	B. @{" The Vibrato Command           " link _cmdb }
+	C. @{" The Tremolo Command           " link _cmdc }
+	D. @{" The Repeat Command            " link _cmdd }
+
+	The Effect Commands are a well-known means of adding dynamic
+ effects to Tracker tunes. Those familiar with Tracker programs will
+ recognise these instantly - although they are different to the
+ usual Tracker commands and there are some commands in FutureSonic
+ that are not implemented in any other Tracker program.
+	The Commands take the form of three-digit numbers that
+ are placed in the Commands column in the @{"Track Editor" link trkpanel }. The first
+ digit is the command itself; take a look at the hex numbers alongside
+ the buttons above - they correspond to this first digit that represents
+ the command. 
+	The remaining two digits are the parameters used by the command.
+ These are known as the databyte, since they are used to hold the data
+ for the command. They can be anything from a volume value to a series
+ of flags to set certain states in the program.
+	The commands are entered by moving the cursor onto the Commands
+ column as described in the @{"Editing Tracks" link tracks } section. Once the cursor
+ is over the first digit, you enter the command by typing the digit
+ directly from the keyboard. The cursor automatically moves down a line
+ when you enter a digit. Move the cursor right to the next digit, and
+ up again to be on the same line as the first digit you entered, and
+ enter the second and third digits the same way. If you are entering
+ many commands down the track, it is easier to enter the digits one
+ column at a time instead of entering the whole command at once on
+ one line.
+	Each command is described in detail; to access information on
+ any one command, click the mouse on one of the buttons above.
+
+
+@endnode cmd
+
+@node _cmdf " FutureSonic - The Flags Command"
+@toc cmd
+@next _cmd1
+
+	The Flags Command is used to tell FutureSonic to toggle the
+ Amiga's hardware filter, or to Release an @{"ADSR" link _instadsr }-modulated instrument.
+ The command is usually not repeated, since it is only need to trigger
+ a one-off function. The command number is 0, and the various functions
+ are as follows:
+
+	001  ( turn hardware filter on )
+	002  ( turn hardware filter off  )
+	003  ( stop current instrument from playing )
+	004  ( Release ADSR effect on instrument)
+
+	The Stop instrument flag (003) tells Futuresonic to stop the
+ currently playing instrument in the track. This is different to
+ stopping it with a zero Volume Set command, because with the Volume
+ command, the note still keeps playing, albeit at zero volume. Thus, when
+ any other Volume commands are given after the note has apparently
+ stopped, the note will again become audible. The Stop instrument flag
+ on this command prevents this from occurring by actually resetting the
+ audio channel, not just zeroing the volume.
+
+	The ADSR Release flag (004) simulates a keyboard player letting go
+ of a key. In this way, looping samples playing as sustained notes can
+ be Released to fade to silence without having to use reams of Volume
+ commands. In a track, it might be used like this:
+
+ (Assume ADSR is active for instrument 1)
+
+			000:C-2 01 000 ( Note starts playing and goes
+			001:--- -- 000   through its Attack, Decay and
+			002:--- -- 000   Sustain cycle, and holds at the
+			/\/\/\/\/\/\/\   Sustain level. )
+			00F:--- -- 004 ( Note is Released and fades to
+			010:--- -- 000   silence at the rate set by the
+			011:--- -- 000   Release slider in the Instrument
+			012:--- -- 000   panel. )
+			         ...etc.
+
+
+@endnode _cmdf
+
+@node _cmd1 " FutureSonic - The Arpeggio Up Command"
+@prev _cmdf
+@toc cmd
+@next _cmd2
+
+	The Arpeggio Up Command will be familiar to Tracker users.
+ What it does is, instead of just playing the note it is attached to,
+ it plays a rapidly ascending arpeggio of 3 notes in quick succession.
+ The first digit in the Commands column must be 1 for this command.
+ The second and third digits tell the command how much higher the
+ second and third notes in the arpeggio are from the original note.
+ For instance, say you have a line in a track which looks like this:
+
+                        001:C-3 01 147
+
+	Now this tells us that Line 1 of the track is playing note C-3
+ with instrument 01 with an Arpeggio Up command. The command breaks down
+ like this:
+
+	1 = Arpeggio Up command
+
+	4 = Play the second arpeggio note 4 semitones up from C-3.
+
+	7 = Play the third arpeggio note 7 semitones up from C-3
+
+	In this case, the arpeggio played is a C-major arpeggio,
+ because it plays C, then E ( 4 semitones up ) then G ( 7 semitones up ).
+ The effect happens very quickly, because the entire arpeggio happens
+ in the time taken to pass that one line in the track. Try running the
+ effect at a slooow speed (like speed 20) to clearly hear what the
+ command does to a note.
+	An interesting warbling effect is imparted to sustained notes
+ if this command is repeated for the duration of the note, like this:
+
+			001:C-3 01 147
+			002:--- -- 147
+			003:--- -- 147
+				......etc
+
+	Some good arpeggios to try are listed below:
+
+	Major                 147 ( e.g. C -up E -up G )
+	Minor                 137 ( e.g. C -up D#-up G )
+        Major 7th             14B
+	Minor 7th             14A
+	Augmented             148
+	Diminished            136
+
+
+@endnode _cmd1
+
+@node _cmd2 " FutureSonic - The Arpeggio Down Command"
+@prev _cmd1
+@toc cmd
+@next _cmd3
+
+	The Arpeggio Down Command is one which, to the best of our
+ knowledge, is unique to FutureSonic. It functions in exactly the
+ same way as the @{"Arpeggio Up" link _cmd1 } Command, except that the second and
+ third notes in the arpeggio are played downwards. At high speeds,
+ this effect sounds similar to Arpeggio Up, but play the two effects
+ one after the other and you will hear a subtle difference. At lower
+ speeds the difference is much more pronounced.
+	This command is invoked by placing a 2 as the first digit on
+ the Commands column. Because of the way piano keyboards are laid out,
+ the values used in the second and third digits differ from their
+ Arpeggio Up counterparts. In the Arpeggio Up section, we listed
+ a number of different arpeggios to try. Here they are again, converted
+ to the Arpeggio Down command.
+
+	Major                258  ( e.g. C -down G -down E )
+	Minor                259  ( e.g. C -down G -down D#)
+	Major 7th            218
+	Minor 7th            229
+	Augmented            248
+	Diminished           269
+
+
+@endnode _cmd2
+
+@node _cmd3 " FutureSonic - The Portamento Up Command"
+@prev _cmd2
+@toc cmd
+@next _cmd4
+
+	The Portamento Up Command is simply a frequency slide up.
+ It causes the pitch of the note to rise smoothly at the rate determined
+ by the databyte. As with most other Tracker programs, this command must
+ be repeated on successive lines to continue the effect; if this is not
+ done, the pitch will only rise so long as there is a Portamento Up
+ command in the Commands column on the currently playing line. The command
+ number is 3, and it looks like this:
+
+			000:C-2 01 304
+			001:--- -- 304
+			002:--- -- 304
+			         ...etc.
+
+	The higher the databyte value, the quicker the pitch will rise.
+ The pitch will not rise above the highest possible note ( B-3 ).
+
+
+@endnode _cmd3
+
+@node _cmd4 " FutureSonic - The Portamento Down Command"
+@prev _cmd3
+@toc cmd
+@next _cmd5
+
+	The Portamento Down Command works exactly the same way as the
+ @{"Portamento Up" link _cmd3 } command, except that it slides the pitch downwards. The
+ command number is 4, and it looks like this:
+
+			000:C-2 01 404
+			001:--- -- 404
+			002:--- -- 404
+			         ...etc.
+
+	The higher the databyte value, the quicker the pitch will drop.
+ The pitch will not drop below the lowest possible note ( C-1 ).
+
+
+@endnode _cmd4
+
+@node _cmd5 " FutureSonic - The Volume Slide Up Command"
+@prev _cmd4
+@toc cmd
+@next _cmd6
+
+	The Volume Slide Up Command is simply a smooth volume increase.
+ It causes the volume of the note to rise smoothly at the rate determined
+ by the databyte. Unlike most other Tracker programs, this command does
+ not have to be repeated on successive lines to continue the effect;
+ the volume will rise until it reaches maximum ( 40 ) or until a Volume
+ Slide Up command of 00 is reached. The command number is 5, and it looks
+ like this:
+
+			000:C-2 01 504 ( start volume slide }
+			001:--- -- 000
+			002:--- -- 000
+			/\/\/\/\/\/\/\
+			00F:--- -- 500 ( end volume slide )
+			         ...etc.
+
+	The higher the databyte value, the quicker the volume will rise.
+ The volume will not rise above the highest possible level ( 40 ).
+
+	Note: This command will not work with instruments that have ADSR
+ activated. See the @{"ADSR" link _instadsr } section for more information.
+
+
+@endnode _cmd5
+
+@node _cmd6 " FutureSonic - The Volume Slide Down Command"
+@prev _cmd5
+@toc cmd
+@next _cmd7
+
+	The Volume Slide Down Command works exactly the same way as the
+ @{"Volume Slide Up" link _cmd5 } command, except that it slides the volume downwards. The
+ command number is 6, and it looks like this:
+
+			000:C-2 01 604 ( start volume slide )
+			001:--- -- 000
+			002:--- -- 000
+			/\/\/\/\/\/\/\
+			00F:--- -- 600 ( end colume slide )
+			         ...etc.
+
+	The higher the databyte value, the quicker the volume will drop.
+ The volume will drop until it reaches zero ( silence ).
+
+	Note: This command will not work with instruments that have ADSR
+ activated. See the @{"ADSR" link _instadsr } section for more information.
+
+
+@endnode _cmd6
+
+@node _cmd7 " FutureSonic - The Volume Set Command"
+@prev _cmd6
+@toc cmd
+@next _cmd8
+
+	The Volume Set Command simply sets the note volume to the level
+ specified in the databyte. This can be a hex number between 00 and 40
+ inclusive. 00 is silence; if this is set, the note will not sound,
+ technically, FutureSonic still plays it. 40 is full volume; any note
+ without a command attached plays at this level by default. The command
+ number is 7, and it looks like this:
+
+			000:C-2 01 720
+			001:--- -- 000
+			         ...etc.
+
+	In this case, FutureSonic will play the note at half volume
+ (hex 20).
+
+	Note: This command will not work with instruments that have ADSR
+ activated. See the @{"ADSR" link _instadsr } section for more information.
+
+
+@endnode _cmd7
+
+@node _cmd8 " FutureSonic - The Absolute Jump Command"
+@prev _cmd7
+@toc cmd
+@next _cmd9
+
+	The Absolute Jump Command will cause playback to jump to the
+ Sequence editor line number specified in the databyte. Since this can
+ only be a number between 00 and FF ( 0 - 255 ) inclusive, this command
+ can only jump to a line which is in the first 255 lines of the Sequence
+ editor. It is generally used to make a song loop back to the beginning
+ when it reaches the end, since unlike other Tracker programs, FutureSonic
+ does not automatically restart a song once it is finished. The
+ command number is 8, and it looks like this:
+
+			03E:G-3 01 000
+			03F:--- -- 800 ( jump to Sequence line 00 )
+
+
+@endnode _cmd8
+
+@node _cmd9 " FutureSonic - The Relative Jump Command"
+@prev _cmd8
+@toc cmd
+@next _cmda
+
+	The Relative Jump command will cause playback to jump to the
+ Sequence editor line number by the number of lines specified in the
+ databyte. The limitation is that you can only jump forward 127 lines,
+ or backward 128 lines. A value between 01 and 7F in the databyte
+ will cause play to jump forward by that number of lines; a value
+ between 80 and FF will cause play to jump backward by that number
+ of lines minus 80. For example, a value of 20 will cause play to
+ jump forward hex 20 ( dec. 32 ) lines, and a value of A0 will cause
+ play to jump backward hex 20 lines ( A0 - 80 = 20 ). The command
+ number is 9, and it looks like this:
+
+		       03E:G-3 01 000
+		       03F:--- -- 920 (jump forward hex 20 Sequence lines)
+ 
+
+@endnode _cmd9
+
+@node _cmda " FutureSonic - The Speed Set Command"
+@prev _cmd9
+@toc cmd
+@next _cmdb
+
+	The Speed Set Command sets the song playback speed to the value
+ contained in the databyte. The speed is specified in 50ths of a second
+ ( screen updates ). Hence, a speed of 6 means that during playback, the
+ song will advance 1 track line every 6/50ths of a second. The higher
+ this value is, therefore, the slower the song will play. The best speeds
+ are in the range of 4 ( fast running pace ) to 8 ( good for Ambient
+ music ). The command number is A, and it looks like this:
+
+			000:C-2 01 A05 ( set play speed to 5 )
+			001:--- -- 000
+			002:--- -- 000
+                                 ...etc.
+
+
+@endnode _cmda
+
+@node _cmdb " FutureSonic - The Vibrato Command"
+@prev _cmda
+@toc cmd
+@next _cmdc
+
+	The Vibrato Command imparts a "waver" effect to a note. It uses
+ the databyte in two parts; the first digit is depth of vibrato, and
+ the second digit is the speed of vibrato. The higher the depth value
+ is, the more pronounced the vibrato effect will be. The higher the
+ speed value, the more quickly the note will "waver". Unlike most other
+ Tracker programs, this command does not have to be repeated on successive
+ lines to continue the effect; the vibrato will continue until a Vibrato
+ command of 00 is reached. The command number is B, and it looks
+ like this:
+
+			000:C-2 01 B48 ( start vibrato, depth=4 speed=8 )
+			001:--- -- 000
+			002:--- -- 000
+			/\/\/\/\/\/\/\
+			00F:--- -- B00 ( end vibrato )
+			         ...etc.
+
+
+@endnode _cmdb
+
+@node _cmdc " FutureSonic - The Tremolo Command"
+@prev _cmdb
+@toc cmd
+@next _cmdd
+
+	The Tremolo command is another one unique to FutureSonic. It
+ uses the databyte in a similar fashion to the @{"Vibrato" link _cmdb } command, with
+ the first digit being Tremolo depth, the second being Tremolo speed.
+ This effect varies the volume in much the same way as Vibrato varies
+ frequency or pitch. It can impart a "rustling" effect to string
+ instruments, creating a tense or wary musical atmosphere. It also
+ works well with human voice samples, because it makes them sound
+ like a Dalek from Doctor Who. Unlike most other Tracker programs, this
+ command does not have to be repeated on successive lines to continue the
+ effect; the tremolo will continue until a Tremolo command of 00 is
+ reached. The command number is C, and it looks like this:
+
+			000:C-2 01 C48 ( start tremolo, depth=4 speed=8 )
+			001:--- -- 000
+			002:--- -- 000
+			/\/\/\/\/\/\/\
+			00F:--- -- C00 ( end tremolo )
+			         ...etc.
+
+	Note: This command will not work with instruments that have ADSR
+ activated. See the @{"ADSR" link _instadsr } section for more information.
+
+
+@endnode _cmdc
+
+@node _cmdd " FutureSonic - The Note Repeat Command"
+@prev _cmdc
+@toc cmd
+
+	The Note Repeat Command allows you to play repeating notes faster
+ than the current playback speed. The databyte contains the delay in 50ths
+ of a second between repeated notes. Thus, if you were playing a song at
+ a speed of 8, and this command was executed with a speed of 4, the
+ attached note would sound twice with only 4 updates between ( since
+ 8 divided by 4 is 2 ) . This allows for rapid bass riffs to be played
+ alongside slow lead riffs.
+	 As with most other Tracker programs, this command must be
+ repeated on successive lines to continue the effect; if this is not done,
+ the note will only repeat so long as there is a Note Repeat command in
+ the Commands column on the currently playing line. The command number is
+ D, and it looks like this: ( assume play speed is set to 8 )
+
+			000:C-2 01 D04 (note repeats twice on this line)
+			001:--- -- D02 (note repeats 4 times on this line)
+			002:--- -- D04 (note repeats twice on this line)
+			         ...etc.
+
+@endnode _cmdd
+
+@node sequence "FutureSonic - Editing Sequences"
+@prev cmd
+@toc main
+@next credits
+
+	FutureSonic's Sequence Editor is what sets it apart from other
+ Tracker programs. This editor is the equivalent of the single Pattern
+ List editors found in Trackers; but where the Trackers list a single
+ sequence of 4-track blocks, FutureSonic lists 4 sequences of single
+ tracks. The versatility inherent in this form of editing should be
+ immediately obvious to the seasoned Tracker user - no more pasting
+ endless copies of a standard bass and drum riff to block after block,
+ wasting time and memory. Instead, FutureSonic allows you to create a
+ single standard bass track, and then list it repeatedly within the song
+ sequence.
+
+	To set up a sequence, you must first create some tracks in the
+ @{"Track editor" link trkpanel }. Having done this, you can then cursor across to the
+ Sequence editor and begin arranging the tracks. Let's say you created
+ 6 different bass tracks numbered 1 to 6, 2 different drum tracks
+ numbered 7 and 8, 4 chord tracks numbered 9 to 12, and 8 lead tracks
+ numbered 13 to 20. The 2 drum tracks might be a running riff and a
+ break, of one bar ( 16 lines ) each, so they might be arranged like this:
+
+				007
+				007
+				007
+				008
+				007
+				007
+				007
+				008, etc.
+
+	Now, the bass tracks might be a quick running bass playing in
+ E, D, C, B, A, and G. They might be of 2 bars ( 32 lines each ) so they
+ would be arranged like this:
+
+				001
+				 -
+				002
+				 -
+				003
+				 -
+				004
+				 -
+				006
+				 -
+				005
+				 -
+				003
+				 -
+				004
+				 - , etc.
+
+	The Chord tracks might use two instruments as major and minor
+ chord samples, in tracks of also 2 bars each. They would go like this:
+
+				009
+				 -
+				009
+				 -
+				010
+				 -
+				009
+				 -
+				012
+				 -
+				011
+				 -
+				009
+				 -
+				010
+				 -			
+
+	Finally, the Lead tracks might be 4 bars ( 64 lines each ).
+ So they would be arranged like this:
+
+				013
+				 -
+				 -
+				 -
+				014
+				 -
+				 -
+				 -
+				015
+				 -
+				 -
+				 - , etc.
+
+	Since this makes 4 collections of tracks, let's take a look at
+ what the whole sequence would look like in the Sequence Editor:
+
+		Pos  1   2   3   4 
+		000:007 001 009 013  ( 1st bar of music )
+		001:007  -   -   -   ( 2nd bar of music )
+		002:007 002 009  -   ( 3rd bar of music )
+		003:008  -   -   -   ( 4th bar; this is one "block")
+		004:007 003 010 014
+		005:007  -   -   - 
+		006:007 004 009  - 
+		007:008  -   -   - 
+		009:007 006 012 015
+		010:007  -   -   - 
+		011:007 005 011  - 
+		012:008  -   -   - 
+		013:007 003 009 016
+		014:007  -   -   - 
+		015:007 004 010  - 
+		016:008  -   -   - 
+				 ...etc.
+
+	From this, it can be easily seen how individual tracks can
+ be set up into a complete sequence. FutureSonic automatically keeps
+ track of how many lines are taken up by each track, and will not allow
+ you to put a new track number on a single dash (-), to help you keep
+ your tracks tidy and synchronised. If you change a track number to
+ a longer track, it may seem to erase a track entry below it. Click the
+ number back down and the "erased" track will reappear. Only when you
+ accept the change by scrolling the display does it become permanent.
+
+	You can move through the sequence by clicking the left mousebutton
+ on any track number entry in the sequence display. This scrolls the
+ display so that the track entry clicked on is moved to the green cursor
+ lines, and the cursor is moved over that track entry regardless of
+ whether it is in the Track Editor or the Sequence Editor.
+
+	You can also change the current track shown in the Track Editor
+ from here as well; simply click on a track entry in the Sequence Editor
+ with the right mousebutton and the track will appear in the Track editor.
+ The track entry clicked on is moved to the cursor lines and the cursor
+ positioned over it as with the left mousebutton.
+
+	The Sequence Editor treats 1 bar of 4/4 music the same as it
+ treats 1 bar of 3/4 music. That is, one bar will be equal to one line
+ in the Sequence editor, even though 1 bar is 16 track lines in 4/4 time
+ and 12 track lines in 3/4 time. For this reason, FutureSonic will not
+ allow you to place a 3/4 track alongside a 4/4 one; in fact, if the
+ cursor is on a sequence line where there is already a 4/4 track present,
+ only other 4/4 tracks will appear there as you click through the track
+ list. Similarly, only 3/4 tracks will appear as you click through the
+ track list with the cursor on a line inhabited by a 3/4 track. You can
+ add either a 3/4 track or a 4/4 track to a line with no tracks already
+ on it, in which case, a block is formed to the length of the longest
+ track starting on that line, and only tracks of the same timecount will
+ appear in that block thenceforth. If the cursor is near the end of a
+ 4/4 block that is followed by a 3/4 one, only the 4/4 tracks that will
+ fit evenly in the rest of the block will appear as you cycle through the
+ track list. So if there are only 2 lines (2 bars) between the cursor and
+ the start of the next block, only 1- and 2-bar tracks will appear on the
+ cursor line as you click through the track list.
+
+	Experience is the best teacher here; don't be afraid to
+ experiment with entering tracks. Take a look at the demo module to get
+ an idea of how the tracks are arranged in the sequence. Ultimately, as
+ with any artistic application program, the results you get depend
+ on how much you play around with the program and how good your
+ innate musical talents are.
+
+
+@endnode sequence
+
+@node credits
+@prev sequence
+@toc main
+@next future
+
+	FutureSonic V0.9 was programmed entirely with Acid Software's
+ Blitz Basic 2 programming language, incorporating some machine code
+ subroutines. All routines were programmed within the Blitz 2 editor,
+ using both the supplied Blitz 2 libraries and our own custom libraries.
+
+            Programming, system design and implementation by
+
+				David Hansen.
+
+ Screen graphics, conceptualization, demo module and documentation by
+
+				Steven Roper.
+
+
+@endnode credits
+
+@node future " FutureSonic - Future Revisions"
+@prev credits
+@toc main
+
+	FutureSonic V0.9 is the first release of this editor. This version
+ was created mainly for the Amiga Format Blitz Basic programming
+ competition, and future releases will contain much enhanced features.
+ The next release of FutureSonic will support live sampling in the
+ Sound editor, so you will be able to use any standard parallel-port
+ digitiser hardware, such as Datel's DSS sampler, to create samples. Also
+ coming is real-time 8-track sequencing ( a feature currently monopolised
+ by OctaMed ), MIDI support, and loads of other original goodies that we
+ won't mention here, just to keep the suspense up. 
+
+	Work on FutureSonic will continue as soon as this version is
+ released for the AF competition, so keep an eye out for...
+       ___ ________________________ ___ ________________         __
+      '                            '                      /|    /  \
+     /___      /_       ___  ___  /__  ___  ___    ___     |    | /|
+    /    /  / /   /  / /  / /__/    / /  / /  / / /        |  * |/ |
+   /    /__/ /__ /__/ /    /__  ___/ /__/ /  / / /__      _|_   \__/
+
+
+@endnode future

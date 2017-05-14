@@ -1,9 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/rotate.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/rotate.bb
-WbToScreen 0:AddIDCMP $10+$400000
-		GTButton 1,0,204,29,104,12," Cancle ",16
-		GTButton 1,1,12,29,104,12," Rotate ",16
-		GTScroller 1,2,98,8,200,12,"Degrees: ",$201,1,360,360
-		Window 1,176,56,328,60,4102,"Rotate",1,2:AttachGTList 1,1
-		ResetString 16,15,296,20
-Repeat:VWait:Until Event=$40 AND GadgetHit=0
-		CloseWindow 1:Use Window 0

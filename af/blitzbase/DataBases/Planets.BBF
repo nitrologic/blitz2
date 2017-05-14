@@ -1,0 +1,11 @@
+BlitzBase V1.0
+9,9
+Planet,10,Text,,Left,0,0
+Dist_Sun,8,Number,in 10^9 m,Right,0,0
+Rev_Sun,8,Number,in Years,Right,2,0
+Rev_Axis,8,Number,in Days,Right,2,0
+Diameter,10,Number,in 10^6 m,Right,2,0
+Volume,8,Formula,4.1888*f5*f5*f5/8,Right,0,0
+Mass,8,Number,in 10^24 kg,Right,2,0
+Density,8,Formula,1000000*f7/f6,Right,0,0
+Gravity,8,Formula,4*66.7259*f7/f5/f5,Right,2,0

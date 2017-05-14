@@ -1,0 +1,90 @@
+
+                             HopalongAD V1.0.1
+       A freely distributable Hopalong fractals viewer for the Amiga
+
+                          Written by Andrea Doimo
+                                  for the
+                - BLITZ BASIC 2 - AMIGA FORMAT COMPETITION
+
+                       Copyright © 1993 Andrea Doimo
+                            All Rights Reserved
+
+
+INTRODUCTION
+~~~~~~~~~~~~
+   This program lets you view and generate the "Hopalong Fractals" series.
+It works in a window on the Workbench screen, so the quality of the
+pictures depends on the number of colours and the size of your Workbench
+uses.
+It works even on non-AGA machines, but if these are found, it uses the
+extra capabilites avaiables.
+
+
+
+FEATURES
+~~~~~~~~
+   - Written in Blitz Basic 2 
+   - Generates pictures up to 256 color.
+   - Should work on any Workbench and 680XX version.
+   - Aspect ratio supported up to 640x512 screens.
+   - Actually you can't input picture's parameters, can only be choosed
+     randomly.
+
+
+
+DISTRIBUTION
+~~~~~~~~~~~~
+   HopalongAD is being distributed as Freeware.  It may be freely
+distributed to any bulletin board service, network, or public domain
+collection.
+   I'm not asking for donations on this one, but feel free to drop me a
+note (preferably e-mail) or something if you want.
+   Note, however, that HopalongAD is NOT public domain.  The author
+retains all rights to the program.
+
+
+
+INSTALLATION
+~~~~~~~~~~~~
+   HopalongAD requires no special libraries or fonts or anything to run.
+Simply drag the HopalongAD icon to wherever you wish to install it.  It may be
+run from a Shell, Workbench, or even your favorite dirutil.
+
+
+
+BUGS NOT YET FIXED
+~~~~~~~~~~~~~~~~~~
+   - I can't know if the screen is opened to 1280x512, Blitz reports only a
+     poor (!) 640x512.  So the aspect ratio control works only with OCS
+     screens.
+
+   - If the system font isn't of the standard size, something could not
+     work propely.  ;) I.e. the image could be written on the window
+     dragbar.
+
+
+
+MENUS
+~~~~~
+
+
+
+THE AUTHOR
+~~~~~~~~~~
+   I can be reached on FIDONET at 2:333/714.8 as "Andrea Doimo" if you want
+to email me about bugs found, new features to include, etc.
+
+   You can also reach me on the ToTaLlY WiReD BBS () as Andrea!!!!!!!!!!!!
+Doimo (user #13).
+
+
+
+REVISION HISTORY
+~~~~~~~~~~~~~~~~
+1.0.1    30/12/93    Writed this DOC
+                     Added the "aspect ratio" routine.
+                     Added the "Variant 3" formula. Very nice.
+
+1.0.0    26/12/93    Initial version.
+                     Uploaded without any DOC!
+

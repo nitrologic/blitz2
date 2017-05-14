@@ -1,9 +1,0 @@
-; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/resources/ciabase.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/ciabase.bb2
-;
-; $VER: ciabase.bb2 40.0 (01.03.94)
-;
-
-
-;/*
-; * There is no public information in CiaBase
-; */

@@ -1,0 +1,227 @@
+****  *     ****  ****  *  *   ****  ****  ****  ****  ****
+*  *  *      **   *     ** *   *     *  *  *  *  *     *
+****  *      **   ****  ** *   ****  ****  ****  *     ****
+*  *  *      **   *     * **      *  *     *  *  *     *
+*  *  ****  ****  ****  *  *   ****  *     *  *  ****  ****
+
+                PROGRAMMED BY MARK PATTRICK           V1.00
+***********************************************************
+
+This game was written in Blitz Basic 2 for the Amiga Format Blitz
+Basic 2 Competition and took up most of my free time in the
+months of November/December and January (which is not a lot!).
+
+Brief instructions can be found within the main game but are
+included here as well in more detail.
+
+SHAREWARE NOTICE :
+
+Alien Space is Shareware. That means if you like playing Alien
+Space then please send a contribution (approx œ3) to Mark
+Pattrick at the address at the bottom of this file. If there is
+enough demand I may write Alien Space 2 which will be bigger and
+better!!!.
+Thank you.      Mark.
+
+****************************************************************
+DO NOT REMOVE THE DISK FROM THE DRIVE WHILST PLAYING THE GAME AS
+DATA IS LOADED FROM IT.
+****************************************************************
+
+Instructions
+************
+
+Icons :-
+********
+
+1. Movement Icons -
+
+These icons (shaped as arrows) control your movement within the
+complexes. The forward and backward icons surprisingly move you
+forwards and backwards. The other two rotate you through 90
+degrees left and right.
+
+2. Teleport Facility -
+
+You are automatically teleported into the planets complex upon
+starting the mission. However you can only teleport out of the
+complex after all the people have either been rescued or killed.
+To activate the teleporter just click on the teleport button.
+
+3. Remote Motion Scanner -
+
+The scanner automatically monitors the view ahead and detects any
+lifeform. The scanner will show a white dot for an alien and red
+for human.
+
+
+
+4. Inventory -
+
+The inventory shows the objects which are being carried. There
+is no interaction between these objects and the cursor (they
+cannot be dropped or activated by clicking on them). They are
+automatically used at the necessary moment.
+
+5. Statistics -
+
+Ammo      - This shows the current level of bullets in the gun.
+Reload    - This is the number of cartridges left (contains 99
+            bullets).
+Energy    - Shows the current energy level and if it reaches 0
+            you die. It is reduced when an alien is attacking
+            you or if you stand in a doorway!
+To Rescue - This is the number of humans left to rescue from the
+            complex.
+Rescued   - This shows the number of humans rescued.
+Deck No   - This shows the current deck that you are on (there
+            can be up to 4 decks in a complex).
+
+Objects :-
+**********
+
+To pick an object up from the floor just click with the left
+mouse button over the object. Some are added to the inventory and
+some are used instantly.
+
+1. First Aid Kit - This kit restores lost energy and is used
+                   straight away. The maximum energy cannot
+                   exceed 99. Some first aid kits restore more
+                   energy than others.
+
+2. Gun Cartridge - This adds another gun cartridge to the current
+                   amount. The maximum number of cartridges that
+                   can be carried is 5. (Important Note!)
+
+3. Air Lock Pass - Located in some complexes, an air lock links
+                   two sections together. A pass is required to
+                   obtain access through the door. The pass is
+                   added to the current inventory. (it is the
+                   grey coloured pass)
+
+4. Security Pass - These operate in the same way as the air lock
+                   pass. There are 5 levels of security door and
+                   each pass has the relevant number on it. (they
+                   are coloured white with a red number on the
+                   right hand side)
+
+Aliens :-
+*********
+
+Aliens are located throughout the complexes and must be killed
+or avoided! They will attack you with their claws as soon as they
+are close enough. It is best to shoot them before they get too
+close.
+
+
+Humans :-
+*********
+
+Humans do not move and have to be teleported back to the mother
+ship. To teleport a human, click with the left mouse button over
+the human and they will be instantly teleported to safety.
+However, humans can be killed by stray bullets so watch where you
+are firing.
+
+Using the Gun :-
+****************
+
+To use the gun position the cursor over the main screen and press
+the right mouse button. 1 bullet will be fired, but the button
+can be held down for prolonged firing. The cursor acts as the
+sight and the bullet will be fired at the current position.
+If the gun runs out of bullets your only alternative is to use
+a small knife which you carry in case of emergencies. Use this
+in the same way as the gun. (right mouse button on enemy). The
+knife can only be used at close range.
+
+Operating Doors :-
+******************
+
+All doors are opened by clicking the left mouse button over the
+door panel. (to the right of the door)
+
+
+Normal Door   - These have no markings on the door itself and can
+                be opened without a pass. (they can also be
+                closed behind you! - remember that.)
+
+Security Door - These are labelled and the level of security is
+                shown on the door. You must have the correct pass
+                in your inventory to open the door.
+
+Air Lock Door - To open the air lock door you must have the air
+                lock pass in your inventory. There is only one
+                pass per complex. Air lock doors close
+                automatically.
+
+Lifts         - Lifts can be opened without a pass and once
+                inside the lift (watch out the doors close
+                automatically) click on the door selector panel.
+                A large panel will be displayed on the screen and
+                a new deck can be selected (with the left mouse
+                button). After a few moments the doors will open
+                at the new level.
+
+Object of the Game
+******************
+
+The aliens have taken over the human colonies on a number of
+planets and there are a number of humans trapped within the
+complexes. It is your job to rescue as many of the humans as
+possible within each of the complexes while killing or avoiding
+the aliens. You must rescue over 70% of humans to be able to
+complete the mission. But all humans have to be accounted for
+(either rescued or shot) before you can teleport back to the ship
+yourself. If you rescue under 70% of humans you are immediately
+taken off the rescue mission and fired!
+There are 10 planets in total to be completed but after each
+planet a password is given to enable you to skip the planets
+already completed.
+
+Credits and Technical Information
+*********************************
+
+Game Idea           :  Mark Pattrick
+Game Design         :  Mark Pattrick
+Programmed          :  Mark Pattrick
+Graphics            :  Mark Pattrick
+Sound Effects       :  Mark Pattrick
+Programmed In       :  Blitz Basic 2
+Graphics In         :  Deluxe Paint
+Sound Effects In    :  MED
+Maps Created In     :  Map Editor - Blitz Basic 2
+Thanks To           :  Lee Robinson (for the Alien/Human
+                       graphics)
+                       Work (for the odd lapse)
+                       College (for not many assignments)
+                       Caroline (for understanding)
+                       Commodore (for the brilliant Amiga)
+                       Amiga Format (for the best magazine)
+                       Acid Software (for Blitz)
+Game Designed On    :  Amiga A1200 - 68020 processor/2MB Chip Ram
+Tested On           :  Amiga A1200/2MB, Amiga A1200/6MB
+Started On          :  20 November 1993
+Completed On        :  20 January 1994
+Compatibility       :  All 1MB Amigas (hopefully). It probably
+                       will not work on 512K Amigas but I was
+                       unable to test it (as every one I know has
+                       an A1200)
+Comments            :  Quickest game I have ever written.
+
+
+Contact Address     :  M N Pattrick
+                       4 Gopher Road
+                       Newark
+                       Notts  NG24 4HH
+
+This is version 1 of the game and could well be expanded in the
+future to include :-
+1. Different types of aliens
+2. More complex puzzles
+3. The ability to pick up and drop objects
+4. More objects including different weapons and armour
+
+There just was no the time to include all these other features
+within the time limit of the competition and hopefully they can
+be incorporated into a later version.
