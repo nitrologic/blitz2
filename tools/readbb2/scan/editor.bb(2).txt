@@ -1,0 +1,3202 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/3D/EDITOR.BB
+;
+; 3d shape editor by Paul Andrews (c) Vision Software 1994
+;
+
+BitMap 1,320,256,5
+BitMap 2,320,256,1
+
+#tags=$80080000
+
+WBStartup
+
+MaxLen pa$=192
+MaxLen na$=192
+
+If ##[$BE15]("S:edpointer.iff")
+		LoadShape 0,"s:edpointer.iff"
+Else
+		LoadShape 0,"edpointer.iff"
+EndIf
+
+Handle 0,-7,-7
+GetaSprite 0,0
+
+NEWTYPE.p3d
+		x.w
+		y.w
+		z.w
+End NEWTYPE
+
+NEWTYPE.p2d
+		sx.w
+		sy.w
+		nx.q
+		ny.q
+		nz.q
+End NEWTYPE
+
+NEWTYPE.face
+		p1.w
+		p2.w
+		p3.w
+		p4.w
+		cc.w
+End NEWTYPE
+
+NEWTYPE.edge
+		sp.w
+		ep.w
+End NEWTYPE
+
+NEWTYPE .pt
+		wx.w				;where is it??
+		wy.w
+		win.w			 ;which window??
+		obj.w			 ;which object does it belong to??
+		typ.w			 ;axis(0),point(1)
+		num.w			 ;which point is it ??
+		xxx.w
+		yyy.w
+		zzz.w			 ;world co-ors...
+End NEWTYPE
+
+NEWTYPE .coor
+		x.w
+		y.w
+End NEWTYPE
+NEWTYPE .poly
+		nz.w
+		x1.w
+		y1.w
+		x2.w
+		y2.w
+		x3.w
+		y3.w
+		x4.w
+		y4.w
+		cc.w
+		oo.w
+		nn.w
+End NEWTYPE
+
+
+MenuChecked 3
+MenuGap 16,1
+
+MenuTitle 0,0,"Project "
+MenuItem	0,0,0,0,"About						"
+MenuItem	0,0,0,1,"Quit","Q"
+MenuItem	0,0,0,2,"Undo","U"
+
+MenuTitle 0,1,"Display "
+MenuItem	0,3,1,0,"Co-Ordinates		 "
+MenuItem	0,0,1,1,""
+MenuItem	0,3,1,2,"Grid On/Off","="
+MenuItem	0,0,1,3,"Grid Size...","-"
+MenuItem	0,0,1,4,"ReDraw","R"
+MenuItem	0,0,1,5,"Zoom In","I"
+MenuItem	0,0,1,6,"Zoom Out","O"
+MenuItem	0,0,1,7,"Set Zoom","/"
+MenuItem	0,0,1,8,"Re-Centre","."
+MenuItem	0,0,1,9,"Perspective	"+Chr$(187)
+SubItem	 0,4,1,9,0,"Wire Frame	 "
+SubItem	 0,2,1,9,1,"Hidden Line"
+SubItem	 0,2,1,9,2,"Solid"
+SubItem	 0,2,1,9,3,"Show Orient"
+MenuItem	0,2,1,10,"Outline?"
+
+MenuTitle 0,2,"Object "
+MenuItem	0,0,2,0,"Load...					","L"
+MenuItem	0,0,2,1,"Save...","S"
+MenuItem	0,0,2,2,"Convert..."
+MenuItem	0,0,2,3,"Group","G"
+MenuItem	0,0,2,4,"Ungroup","Y"
+MenuItem	0,0,2,5,"Cut","K"
+MenuItem	0,0,2,6,"Copy","C"
+MenuItem	0,0,2,7,"Paste","P"
+MenuItem	0,0,2,8,"Attributes..."
+MenuItem	0,0,2,9,"Transform..."
+MenuItem	0,0,2,10,"Mold...","E"
+MenuItem	0,0,2,11,"Save Source..."
+
+MenuColour 0,2,3,Off
+MenuColour 0,2,4,Off
+MenuColour 0,2,5,Off
+MenuColour 0,2,7,Off
+;MenuState 0,2,8,Off
+MenuColour 0,2,9,Off
+MenuColour 0,2,10,Off
+
+MenuTitle 0,3,"Mode	"
+MenuItem 0,2,3,0,"Pick Groups			 ","1"
+MenuItem 0,4,3,1,"Pick Object","2"
+MenuItem 0,2,3,2,"Pick Face","5"
+MenuItem 0,2,3,3,"Pick Edges","4"
+MenuItem 0,2,3,4,"Pick Points","3"
+MenuItem 0,2,3,5,"Add Faces","8"
+MenuItem 0,2,3,6,"Add Edges","7"
+MenuItem 0,2,3,7,"Add Points","6"
+MenuItem 0,2,3,8,"Drag Points","0"
+
+MenuColour 0,3,0,Off
+;MenuState 0,3,2,Off
+MenuColour 0,3,3,Off
+MenuColour 0,3,6,Off
+MenuColour 0,3,8,Off
+
+MenuTitle 0,4,"Functions	"
+MenuItem 0,0,4,0,"Delete						","D"
+MenuItem 0,0,4,1,"Add	"+Chr$(187)
+SubItem	0,0,4,1,0,"Axis"
+SubItem	0,0,4,1,1,"Plane"
+SubItem	0,0,4,1,2,"Triangle"
+SubItem	0,0,4,1,3,"Box"
+SubItem	0,0,4,1,4,"Pyramid"
+MenuItem 0,0,4,2,"Fracture"
+MenuItem 0,0,4,3,"Split"
+MenuItem 0,0,4,4,"Re-Orient","T"
+MenuItem 0,0,4,5,"Join"
+
+AddIDCMP $10+$20				;mouse move+gadget down
+
+Screen 0,0,0,640,256,5,$8000,"3D Edit!	 Written by Paul Andrews (C)1994",0,1
+ScreensBitMap 0,0
+Window 0,0,0,640,256,$1900,"",0,1
+WindowOutput 0
+WindowInput 0
+Activate 0
+SetMenu 0
+WPointer 0
+
+GTTags #tags+18,16			;colour offset 16
+GTPalette 1,0,20,20,160,40,"",0,4,0
+GTTags 0,0
+GTButton	1,1,20,80,60,16,"OK",0
+GTButton	1,2,410,80,60,16,"CANCEL",0
+GTSlider	1,3,200,20,256,10,"R",$80,0,255,0
+GTSlider	1,4,200,40,256,10,"G",$80,0,255,0
+GTSlider	1,5,200,60,256,10,"B",$80,0,255,0
+
+Window 1,18,11,300,116,$1800,"",0,1		 ;top view!!!
+SetMenu 0
+WPointer 0
+
+Window 2,18,129,300,116,$1800,"",0,1		 ;front view!!!
+SetMenu 0
+WPointer 0
+
+Window 3,337,129,300,116,$1800,"",0,1		 ;right view!!!
+SetMenu 0
+WPointer 0
+
+Window 4,337,11,300,116,$11800,"",0,1		 ;perspective
+SetMenu 0
+WPointer 0
+
+Use Window 0
+WindowOutput 0
+
+Green 0,5,5,5
+Green 1,0,0,0		 ;black
+Green 2,15,12,7	 ;lite
+Green 3,11,6,2		;dark
+Green 4,14,9,2		;med
+Green 5,6,6,6		 ;grid
+Green 6,0,0,0		 ;obj
+Green 7,6,9,15
+Green 8,13,13,13
+Green 9,3,3,3
+Green 10,15,0,15
+
+;set palette for 3d shapes...(16-31)
+
+For l=16 To 31
+		Green l,l-16,l-16,l-16
+Next
+
+
+;						 obj,pt
+Dim points.p3d(40,500)
+Dim faces.face(40,500)
+Dim nfaces.face(40,500)
+Dim edges.edge(40,500)
+Dim axis.p3d(40)
+
+Dim persp.p2d(40,500)
+
+Dim opoints.p3d(40,500)
+Dim ofaces.face(40,500)
+Dim onfaces.face(40,500)
+Dim oedges.edge(40,500)
+Dim oaxis.p3d(40)
+
+Dim plots.pt(2000)
+cplot=0
+
+Dim cface(40)
+Dim cnface(40)
+Dim cpoint(40)
+Dim cedge(40)
+cobj=0
+eobj=-1
+leobj=-1
+
+Dim tpoint(40)
+
+Dim allps.p3d(1000)
+Dim allfs.face(1000)
+
+Dim coal(1000)
+
+Dim ff.w(4),fp.w(4)
+
+Dim coors.coor(40)
+
+Dim List polysort.poly(10000)
+
+#WIRE=0
+#HIDDEN=1
+#SOLID=2
+
+showorient=0		;1=show orientation (colour 5=back faceing)
+outline=0
+perspmode=#SOLID
+drawmode.w=0
+grid=On
+gsize.w=10
+gstep.w=4
+coors=On
+zoom=1
+mode=1			;pick objects
+cx=0				;current cursor (i.e. mouse)
+cy=0
+cz=0
+cvx=0			 ;centre of view
+cvz=0
+cvy=0
+view=0			;view all
+cview=0		 ;current view = TOP
+
+lockx=0
+locky=0
+lockz=0
+
+srx=0
+sry=0
+srz=0
+
+Dim picked.w(100)
+Dim pickedf.w(100)
+For l=0 To 100
+		picked(l)=-1
+		pickedf(l)=-1
+Next
+cpick=0
+cpickf=0
+
+Dim mode$(10)
+mode$(0)="Pick Groups		 "
+mode$(1)="Pick Object		 "
+mode$(2)="Pick Face			 "
+mode$(3)="Pick Edges			"
+mode$(4)="Pick Points		 "
+mode$(5)="Add Faces			 "
+mode$(6)="Add Edges			 "
+mode$(7)="Add Points			"
+mode$(8)="Drag Points		 "
+
+Dim cview$(3)
+cview$(0)="(Top)			"
+cview$(1)="(Front)		"
+cview$(2)="(Right)		"
+cview$(3)="(Persp)		"
+
+coor$=""
+
+Gosub redrawall
+
+screentitle$="3D Editor V1.7			"
+
+For l=4 To 0 Step -1
+		Use Window l
+		WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
+Next
+
+;----------------------------------------------------------------
+Statement bevbox{x1,y1,x2,y2}
+
+		WLine x1,y1,x2,y1,9				;light
+		WLine x1,y1+1,x2,y1+1,8		;dark
+
+		WLine x1,y1,x1,y2,9
+		WLine x1+1,y1+1,x1+1,y2,8
+
+		WLine x2,y1,x2,y2,8
+		WLine x2-1,y1,x2-1,y2,9
+
+		WLine x1,y2,x2,y2,8				;dark
+		WLine x1+1,y2-1,x2-1,y2-1,9		;light
+
+End Statement
+;----------------------------------------------------------------
+Statement linew{x1,y1,x2,y2,cc}
+		WLine x1*2,y1,x2*2,y2,cc
+		WLine x1*2+1,y1,x2*2+1,y2,cc
+End Statement
+;----------------------------------------------------------------
+Statement linewq{x1,y1,x2,y2,cc}
+Shared drawmode,eobj,o
+		If drawmode=0							 ;normal
+				WLine x1*2,y1,x2*2,y2,cc
+		EndIf
+		If drawmode=2							 ;blank
+				WLine x1*2,y1,x2*2,y2,0
+		EndIf
+		If drawmode=3 AND cc=7				 ;only draw hi-lited lines..
+				WLine x1*2,y1,x2*2,y2,7
+		EndIf
+		If drawmode=4 AND eobj=o
+				WLine x1*2,y1,x2*2,y2,cc
+		EndIf
+End Statement
+;----------------------------------------------------------------
+Statement plotwq{x1,y1,cc}
+Shared drawmode,eobj,o
+		If drawmode=0
+				WBox x1*2-2,y1-1,x1*2+2,y1+1,cc
+		EndIf
+		If drawmode=2
+				WBox x1*2-2,y1-1,x1*2+2,y1+1,0
+		EndIf
+		If drawmode=3 AND cc=7				 ;only draw hi-lited lines..
+				WBox x1*2-2,y1-1,x1*2+2,y1+1,cc
+		EndIf
+		If drawmode=4 AND eobj=o
+				WBox x1*2-2,y1-1,x1*2+2,y1+1,cc
+		EndIf
+End Statement
+;----------------------------------------------------------------
+Statement mwait{}
+		While Joyb(0)<>0:VWait:Wend
+		MouseWait
+		While Joyb(0)<>0:VWait:Wend
+End Statement
+;----------------------------------------------------------------
+;{x,y,wid,hei,text$,orient(0=l/r,1=u/d)+state (0=norm,16=pressed)
+Statement sexybutton{x,y,w,h,t$,o.w}
+
+		WBox x,y,x+w,y+h,4
+
+		li=2
+		da=3
+		If (o&16)=16 Then li=3:da=2
+
+		WLine x,y,x+w,y,li
+		WLine x,y+1,x+w,y+1,li
+
+		WLine x,y+h,x+w,y+h,da
+		WLine x,y+h-1,x+w,y+h-1,da
+
+		WLine x+w,y,x+w,y+h,li
+		WLine x+w-1,y,x+w-1,y+h-1,li
+
+		WLine x,y,x,y+h,da
+		WLine x+1,y+1,x+1,y+h-1,da
+
+		WColour 1,4
+		If (o&15)=0
+				WLocate x+3,y+3
+				Print t$
+		Else
+				hh=h
+				ll=Len(t$)*8
+				hh=(hh-ll)/2
+				yy=y+hh
+				For l=1 To Len(t$)
+						WLocate x+3,yy
+						Print Mid$(t$,l,1)
+						yy+8
+				Next
+		EndIf
+		WColour 1,0
+End Statement
+;----------------------------------------------------------------
+.eventloop
+VWait
+ev.l=Event
+If ev=0 Then Goto eventloop
+
+Use Window EventWindow
+WindowInput EventWindow
+
+If eobj=-1 AND mode>1	;can't be in these modes with no object
+		mode=1
+		cpick=0:cpickf=0
+		leobj=-1
+		Gosub redrawall
+		Gosub redrawsome
+EndIf
+
+gotev:
+
+If ev=$10	 ;mouse move
+
+		mx=SMouseX
+		my=SMouseY
+
+		If my<11 Then Activate 0:Use Window 0:Goto eventloop
+
+		lcoor$=coor$
+
+		If coors=On
+				If mx=>18 AND mx<=318 AND my=>11 AND my<=127
+						cx=Int(((mx-18)-150)/zoom/2)+cvx
+						cz=Int((58-(my-11))/zoom+cvz)
+						cy=0
+						cx$=Left$(Str$(cx)+"			",6)
+						cy$=Left$(Str$(cy)+"			",6)
+						cz$=Left$(Str$(cz)+"			",6)
+						coor$=cx$+","+cy$+","+cz$
+				EndIf
+				If mx=>18 AND mx<=318 AND my=>129 AND my<=245
+						cx=Int(((mx-18)-150)/zoom/2)+cvx
+						cy=Int((58-(my-129))/zoom+cvy)
+						cz=0
+						cx$=Left$(Str$(cx)+"			",6)
+						cy$=Left$(Str$(cy)+"			",6)
+						cz$=Left$(Str$(cz)+"			",6)
+						coor$=cx$+","+cy$+","+cz$
+				EndIf
+				If mx=>337 AND mx<=637 AND my=>129 AND my<=245
+						cz=Int(((mx-337)-150)/zoom/2)+cvz
+						cy=Int((58-(my-129))/zoom+cvy)
+						cx=0
+						cx$=Left$(Str$(cx)+"			",6)
+						cy$=Left$(Str$(cy)+"			",6)
+						cz$=Left$(Str$(cz)+"			",6)
+						coor$=cx$+","+cy$+","+cz$
+				EndIf
+		EndIf
+
+		If lcoor$<>coor$
+				For l=4 To 0 Step -1
+						Use Window l
+						WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
+				Next
+		EndIf
+
+		Goto eventloop
+EndIf
+
+If ev=256	 ;menu!!!
+		Gosub processmenu
+		Goto eventloop
+EndIf
+
+If ev=1024	;key!!!
+		a$=Inkey$
+		a=Asc(a$)
+
+		If a$="t"
+				If mode=2 AND cpickf=1 AND eobj<>-1
+						o=eobj:n=pickedf(0)
+						p1=faces(o,n)\p1
+						p2=faces(o,n)\p2
+						p3=faces(o,n)\p3
+						p4=faces(o,n)\p4
+						faces(o,n)\p1=p4
+						faces(o,n)\p2=p3
+						faces(o,n)\p3=p2
+						faces(o,n)\p4=p1
+						Gosub redrawall
+						Goto eventloop
+				EndIf
+		EndIf
+
+
+		If a$=Chr$(27) AND ew=4 Then srx=0:sry=0:srz=0:Gosub redrawpersp
+
+		If a$="m"
+				Gosub moveit
+				Gosub redrawall
+				Goto eventloop
+		EndIf
+
+		If a$="s"
+				Gosub scaleit
+				Gosub redrawall
+				Goto eventloop
+		EndIf
+
+		If a$="r"
+				Gosub rotateit
+				Gosub redrawall
+				Goto eventloop
+		EndIf
+
+		If a$="x" Then lockx=1-lockx:Gosub redrawall:Goto eventloop
+		If a$="y" Then locky=1-locky:Gosub redrawall:Goto eventloop
+		If a$="z" Then lockz=1-lockz:Gosub redrawall:Goto eventloop
+
+		If a=28
+				If cview=0 Then cvz=cvz+gstep
+				If cview=1 Then cvy=cvy+gstep
+				If cview=2 Then cvy=cvy+gstep
+				Gosub redrawall
+				ev=$10:Goto gotev
+		EndIf
+		If a=29
+				If cview=0 Then cvz=cvz-gstep
+				If cview=1 Then cvy=cvy-gstep
+				If cview=2 Then cvy=cvy-gstep
+				Gosub redrawall
+				ev=$10:Goto gotev
+		EndIf
+		If a=30
+				If cview=0 Then cvx=cvx+gstep
+				If cview=1 Then cvx=cvx+gstep
+				If cview=2 Then cvz=cvz+gstep
+				Gosub redrawall
+				ev=$10:Goto gotev
+		EndIf
+		If a=31
+				If cview=0 Then cvx=cvx-gstep
+				If cview=1 Then cvx=cvx-gstep
+				If cview=2 Then cvz=cvz-gstep
+				Gosub redrawall
+				ev=$10:Goto gotev
+		EndIf
+
+
+		Goto eventloop
+EndIf
+
+If ev=8				 ;mouse click!!
+
+		mx=SMouseX
+		my=SMouseY
+
+		If mx=>0 AND mx<=318 AND my=>11 AND my<=127
+				cview=0
+		EndIf
+		If mx=>0 AND mx<=318 AND my=>129 AND my<=245
+				cview=1
+		EndIf
+		If mx=>322 AND mx<=637 AND my=>129 AND my<=245
+				cview=2
+		EndIf
+
+		WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
+
+		Gosub processclick
+
+		If mode=2			 ;pick face
+				If cpick>2 AND eobj<>-1
+						ff(0)=plots(picked(0))\num				;point #'s
+						ff(1)=plots(picked(1))\num
+						ff(2)=plots(picked(2))\num
+						hito=-1
+						hitn=-1
+						o=eobj
+						If cface(o)>0
+								For n=0 To cface(o)-1
+										fp(0)=faces(o,n)\p1
+										fp(1)=faces(o,n)\p2
+										fp(2)=faces(o,n)\p3
+										fp(3)=faces(o,n)\p4
+										cn.w=0
+										For fc=0 To 2
+												For pc=0 To 3
+														If ff(fc)=fp(pc) Then cn+1
+												Next
+										Next
+										If cn>2
+												hito=o:hitn=n
+												Pop For:Goto qwe
+										EndIf
+								Next
+						EndIf
+qwe:
+						If hito<>-1 AND hitn<>-1
+								leobj=eobj
+								eobj=o
+								pickedf(0)=hitn
+								cpickf=1
+								drawmode=3:Gosub redrawsome2:drawmode=0
+						Else
+								cpickf=0
+						EndIf
+				EndIf
+		EndIf
+
+		Goto eventloop
+EndIf
+
+Goto eventloop
+
+;----------------------------------------------------------------
+printcopy:
+
+a$="-I.&6?>:%\nynus&Xukz|gwk3"	 ;(c) 1994 vision software.
+d=5
+b$=""
+For l=1 To Len(a$)
+		c$=Mid$(a$,l,1)
+		c.l=Asc(c$)
+		c=c-d
+		b$=b$+Chr$(c)
+		If d=5
+				d=6
+		Else
+				d=5
+		EndIf
+Next
+NPrint b$
+
+Return
+;----------------------------------------------------------------
+.processmenu
+mh=MenuHit
+ih=ItemHit
+sh=SubHit
+
+If mh=0 AND ih=0		;about
+		Window 6,80,40,510,110,$100a,"About...",0,1
+		WLocate 163,4
+		NPrint "Pauls Lovely 3D Editor!"
+		WLocate 180,25
+		Gosub printcopy
+
+		sur=0:pts=0
+		If cobj>0
+				For o=0 To cobj-1
+						sur=sur+cface(o)
+						pts=pts+cpoint(o)
+				Next
+		EndIf
+
+		bevbox{20,28,158,75}
+
+		WLocate 20,20
+		NPrint "Current Shape:"
+		WLocate 40,30
+		NPrint "Objects: ",cobj
+		WLocate 40,40
+		NPrint "Surfaces:",sur
+		WLocate 40,50
+		NPrint "Points:	",pts
+
+
+
+fgh:
+		ev.l=WaitEvent
+		If ev<>$200 Then Goto fgh
+		CloseWindow 6
+		Use Window 1:WindowOutput 1
+		Activate 1
+EndIf
+
+If mh=0 AND ih=1 Then End
+If mh=1 AND ih=4 Then Gosub redrawall:Goto xxpm
+If mh=1 AND ih=2
+		If grid=Off
+				grid=On
+		Else
+				grid=Off
+		EndIf
+		Gosub redrawall
+		Goto xxpm
+EndIf
+
+If mh=1 AND ih=10
+		outline=1-outline
+		Gosub redrawall
+EndIf
+
+If mh=1 AND ih=0
+		If coors=On
+				coors=Off
+		Else
+				coors=On
+		EndIf
+		coor$=""
+		WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
+EndIf
+
+If mh=1 AND ih=5
+		zoom+.2:If zoom>5 Then zoom=5
+		Gosub redrawall
+EndIf
+
+If mh=1 AND ih=6
+		zoom-.2:If zoom<.1 Then zoom=.1
+		Gosub redrawall
+EndIf
+
+If mh=1 AND ih=8		;recentre
+		If cx<>9999 Then cvx=cx
+		If cy<>9999 Then cvy=cy
+		If cz<>9999 Then cvz=cz
+		Gosub redrawall
+EndIf
+
+If mh=1 AND ih=9		;persp mode..
+		If sh=0 Then perspmode=#WIRE
+		If sh=1 Then perspmode=#HIDDEN
+		If sh=2 Then perspmode=#SOLID:showorient=0
+		If sh=3 Then perspmode=#SOLID:showorient=1
+		Gosub redrawall
+EndIf
+
+If mh=2 AND ih=2
+		Gosub loadandconvert
+		Goto xxpm
+EndIf
+If mh=2 AND ih=1
+		Gosub saveobject
+		Goto xxpm
+EndIf
+If mh=2 AND ih=0
+		Gosub loadobject
+		Goto xxpm
+EndIf
+
+If mh=2 AND ih=6		;copy!!
+		If eobj<>-1
+				o=eobj
+				axis(cobj)\x=axis(o)\x
+				axis(cobj)\y=axis(o)\y
+				axis(cobj)\z=axis(o)\z
+				If cpoint(o)>0
+						For n=0 To cpoint(o)-1
+								points(cobj,n)\x=points(o,n)\x
+								points(cobj,n)\y=points(o,n)\y
+								points(cobj,n)\z=points(o,n)\z
+						Next
+						cpoint(cobj)=cpoint(o)
+				EndIf
+				If cface(o)>0
+						For n=0 To cface(o)-1
+								faces(cobj,n)\p1=faces(o,n)\p1
+								faces(cobj,n)\p2=faces(o,n)\p2
+								faces(cobj,n)\p3=faces(o,n)\p3
+								faces(cobj,n)\p4=faces(o,n)\p4
+								faces(cobj,n)\cc=faces(o,n)\cc
+						Next
+						cface(cobj)=cface(o)
+				EndIf
+				cobj+1
+				Gosub redrawall
+				Gosub redrawsome
+		EndIf
+EndIf
+
+If mh=2 AND ih=8 Then Gosub attributes
+
+If mh=2 AND ih=11 Then Gosub savesource
+
+If mh=3				 ;mode!!
+		If ih=2 AND eobj=-1 Then ih=mode:Goto xxpm
+		mode=ih
+		For l=0 To 100
+				picked(l)=-1
+				pickedf(l)=-1
+		Next
+		cpick=0
+		cpickf=0
+		Gosub redrawall
+		Goto xxpm
+EndIf
+
+If mh=4 AND ih=1		;ADD
+
+		If sh=0		 ;add axis
+				axis(cobj)\x=0,0,0
+				leobj=eobj
+				eobj=cobj
+				cobj+1
+		EndIf
+
+		If sh=1		 ;add plane
+				axis(cobj)\x=0,0,0
+				points(cobj,0)\x=-20,20,0
+				points(cobj,1)\x=20,20,0
+				points(cobj,2)\x=20,-20,0
+				points(cobj,3)\x=-20,-20,0
+				cpoint(cobj)=4
+				faces(cobj,0)\p1=0,1,2,3,1
+				cface(cobj)=1
+				leobj=eobj
+				eobj=cobj
+				cobj+1
+		EndIf
+
+		If sh=2		 ;add triangle
+				axis(cobj)\x=0,0,0
+				points(cobj,0)\x=-20,20,0
+				points(cobj,1)\x=20,20,0
+				points(cobj,2)\x=0,-20,0
+				cpoint(cobj)=3
+				faces(cobj,0)\p1=0,1,2,2,1
+				cface(cobj)=1
+				leobj=eobj
+				eobj=cobj
+				cobj+1
+		EndIf
+
+		If sh=3		 ;add box
+				axis(cobj)\x=0,0,0
+				points(cobj,0)\x=-20,20,20
+				points(cobj,1)\x=20,20,20
+				points(cobj,2)\x=20,-20,20
+				points(cobj,3)\x=-20,-20,20
+				points(cobj,4)\x=-20,20,-20
+				points(cobj,5)\x=20,20,-20
+				points(cobj,6)\x=20,-20,-20
+				points(cobj,7)\x=-20,-20,-20
+				cpoint(cobj)=8
+				faces(cobj,0)\p1=0,1,2,3,1
+				faces(cobj,1)\p1=4,7,6,5,1
+				faces(cobj,2)\p1=0,1,5,4,1
+				faces(cobj,3)\p1=2,3,7,6,2
+				faces(cobj,4)\p1=1,2,6,5,2
+				faces(cobj,5)\p1=0,4,7,3,2
+				cface(cobj)=6
+				leobj=eobj
+				eobj=cobj
+				cobj+1
+		EndIf
+
+		If sh=4		 ;add pyramid
+				axis(cobj)\x=0,0,0
+				points(cobj,0)\x=0,-20,0
+				points(cobj,1)\x=20,20,20
+				points(cobj,2)\x=-20,20,20
+				points(cobj,3)\x=20,20,-20
+				points(cobj,4)\x=-20,20,-20
+				cpoint(cobj)=5
+				faces(cobj,0)\p1=1,2,0,0,1
+				faces(cobj,1)\p1=4,3,0,0,1
+				faces(cobj,2)\p1=1,3,4,2,1			;1,2,4,3
+				faces(cobj,3)\p1=3,1,0,0,2
+				faces(cobj,4)\p1=2,4,0,0,2
+				cface(cobj)=5
+				leobj=eobj
+				eobj=cobj
+				cobj+1
+		EndIf
+
+		Gosub redrawall
+		Gosub redrawsome
+		Goto xxpm
+EndIf
+
+deldel:
+If mh=4 AND ih=0 AND mode=1		;DELETE OBJECT
+		If eobj<>-1
+				If eobj=cobj-1
+						cpoint(eobj)=0
+						cface(eobj)=0
+						cobj-1
+						leobj=eobj
+						eobj=-1
+				Else
+						For o=eobj+1 To cobj
+								axis(o-1)\x=axis(o)\x
+								axis(o-1)\y=axis(o)\y
+								axis(o-1)\z=axis(o)\z
+								cpoint(o-1)=cpoint(o)
+								cface(o-1)=cface(o)
+								If cpoint(o)>0
+										For n=0 To cpoint(o)-1
+												points(o-1,n)\x=points(o,n)\x
+												points(o-1,n)\y=points(o,n)\y
+												points(o-1,n)\z=points(o,n)\z
+										Next
+								EndIf
+								If cface(o)>0
+										For n=0 To cface(o)-1
+												faces(o-1,n)\p1=faces(o,n)\p1
+												faces(o-1,n)\p2=faces(o,n)\p2
+												faces(o-1,n)\p3=faces(o,n)\p3
+												faces(o-1,n)\p4=faces(o,n)\p4
+												faces(o-1,n)\cc=faces(o,n)\cc
+										Next
+								EndIf
+						Next
+						cobj-1
+						leobj=eobj
+						eobj=-1
+				EndIf
+				Gosub redrawall
+		EndIf
+EndIf
+
+If mh=4 AND ih=0 AND mode=2		;DELETE FACE
+		If eobj<>-1 AND cpickf=1
+				fn=pickedf(0):cf=cface(eobj)-1
+				If fn=cf
+						cface(eobj)-1
+						leobj=eobj
+						eobj=-1
+				Else
+						o=eobj
+						For n=fn+1 To cf
+								faces(o,n-1)\p1=faces(o,n)\p1
+								faces(o,n-1)\p2=faces(o,n)\p2
+								faces(o,n-1)\p3=faces(o,n)\p3
+								faces(o,n-1)\p4=faces(o,n)\p4
+								faces(o,n-1)\cc=faces(o,n)\cc
+						Next
+						cface(o)-1
+;						leobj=eobj
+;						eobj=-1
+				EndIf
+				Gosub redrawall
+		EndIf
+EndIf
+
+If mh=4 AND ih=2 AND mode=4 AND eobj<>-1 ;fracture (must be in pick points)
+		xxx=0:yyy=0:zzz=0
+		For n=0 To cpick-1
+				pp=picked(n)
+				xxx+plots(pp)\xxx
+				yyy+plots(pp)\yyy
+				zzz+plots(pp)\zzz
+		Next
+		xxx=xxx/cpick
+		yyy=yyy/cpick
+		zzz=zzz/cpick
+		o=eobj
+		n=cpoint(o)
+		points(o,n)\x=xxx,yyy,zzz
+		cpoint(o)+1
+		Gosub redrawsome
+EndIf
+
+If mh=4 AND ih=3 AND mode=2	 ;SPLIT
+		If eobj<>-1 AND cpickf>0
+				o=eobj:n=pickedf(0)
+				p1=faces(o,n)\p1
+				p2=faces(o,n)\p2
+				p3=faces(o,n)\p3
+				p4=faces(o,n)\p4
+				x1=points(o,p1)\x
+				y1=points(o,p1)\y
+				z1=points(o,p1)\z
+				x2=points(o,p2)\x
+				y2=points(o,p2)\y
+				z2=points(o,p2)\z
+				x3=points(o,p3)\x
+				y3=points(o,p3)\y
+				z3=points(o,p3)\z
+				x4=points(o,p4)\x
+				y4=points(o,p4)\y
+				z4=points(o,p4)\z
+
+				points(o,cpoint(o))\x=x1,y1,z1
+				faces(o,n)\p1=cpoint(o)
+				cpoint(o)+1
+				points(o,cpoint(o))\x=x2,y2,z2
+				faces(o,n)\p2=cpoint(o)
+				cpoint(o)+1
+				points(o,cpoint(o))\x=x3,y3,z3
+				faces(o,n)\p3=cpoint(o)
+				cpoint(o)+1
+				points(o,cpoint(o))\x=x4,y4,z4
+				faces(o,n)\p4=cpoint(o)
+				cpoint(o)+1
+				cface(o)+1
+
+				leobj=eobj
+				eobj=0:pickedf(0)=n
+				drawmode=3:Gosub redrawsome2p:drawmode=0
+		EndIf
+EndIf
+
+If mh=4 AND ih=4		;re-orient face..
+		If mode=2 AND cpickf=1 AND eobj<>-1
+				o=eobj:n=pickedf(0)
+				p1=faces(o,n)\p1
+				p2=faces(o,n)\p2
+				p3=faces(o,n)\p3
+				p4=faces(o,n)\p4
+				faces(o,n)\p1=p4
+				faces(o,n)\p2=p3
+				faces(o,n)\p3=p2
+				faces(o,n)\p4=p1
+				Gosub redrawall
+		EndIf
+EndIf
+
+If mh=4 AND ih=5 AND eobj<>-1 AND leobj<>-1	 ;join...
+
+		do=leobj
+		so=eobj		 ;join to "do"
+
+		n=cpoint(do)
+		For nn=0 To cpoint(so)-1
+				points(do,nn+n)\x=points(so,nn)\x
+				points(do,nn+n)\y=points(so,nn)\y
+				points(do,nn+n)\z=points(so,nn)\z
+				cpoint(do)+1
+		Next
+
+		nf=cface(do)
+		For nn=0 To cface(so)-1
+				faces(do,nn+nf)\p1=faces(so,nn)\p1+n
+				faces(do,nn+nf)\p2=faces(so,nn)\p2+n
+				faces(do,nn+nf)\p3=faces(so,nn)\p3+n
+				faces(do,nn+nf)\p4=faces(so,nn)\p4+n
+				faces(do,nn+nf)\cc=faces(so,nn)\cc
+				cface(do)+1
+		Next
+
+		mh=4:ih=0:mode=1:Goto deldel		;delete the other one!!!
+
+EndIf
+
+
+xxpm:
+VWait 1
+WTitle "",screentitle$+mode$(mode)+cview$(cview)
+VWait 1
+Return
+;----------------------------------------------------------------
+.processclick	 ;we clicked, whadda we do now?? (pick/add/drag)
+
+If Joyb(0)=0 Then Return
+
+hit=-1
+ew=EventWindow
+
+If ew=4
+		If Joyb(0)=2 Then Goto lp
+				mx=WMouseX/2
+				my=WMouseY
+				If mode=2
+						ppx=mx*2:ppy=my
+						Gosub pickperspface
+						Return
+				EndIf
+				hito=-1:hitn=-1
+				If cobj>0
+						For o=0 To cobj-1
+								If cpoint(o)>0
+										For n=0 To cpoint(o)-1
+												ssx=persp(o,n)\sx
+												ssy=persp(o,n)\sy
+												If mx>ssx-4 AND mx<ssx+4
+														If my>ssy-3 AND my<ssy+3
+																hito=o:hitn=n
+																Pop For:Pop For:Goto ch
+														EndIf
+												EndIf
+										Next
+								EndIf
+						Next
+ch:				 If hito<>-1
+								hit=-1
+								If cplot>0
+										For l=0 To cplot-1
+												If plots(l)\typ=1 AND plots(l)\obj=hito AND plots(l)\num=hitn
+														hit=l:Pop For:Goto ch2
+												EndIf
+										Next
+								EndIf
+ch2:						If hit<>-1
+										sa=-1
+										For l=0 To cpick
+												If picked(l)=hit Then sa=l
+										Next
+										If sa=-1
+												picked(cpick)=hit
+												leobj=eobj
+												eobj=plots(hit)\obj
+												cpick+1
+												picked(cpick)=-1
+										EndIf
+								EndIf
+						EndIf
+						Gosub redrawsome		;all
+				EndIf
+		Return
+lp: ev.l=WaitEvent
+		If Joyb(0)=0 Then Return
+		mx=EMouseX
+		my=EMouseY
+		srx.q=QWrap(mx*2.5,0,360)
+		sry.q=QWrap(my*2.5,0,360)
+		srz.q=0
+		Gosub redrawpersp
+		FlushEvents
+		Goto lp
+EndIf
+
+If mode=7			 ;add a new point...
+		mx=SMouseX
+		my=SMouseY
+		cx=-1
+		If mx=>18 AND mx<=318 AND my=>11 AND my<=127
+				cx=Int(((mx-18)-150)/zoom/2)+cvx
+				cz=Int((58-(my-11))/zoom+cvz)
+				cy=0
+		EndIf
+		If mx=>18 AND mx<=318 AND my=>129 AND my<=245
+				cx=Int(((mx-18)-150)/zoom/2)+cvx
+				cy=Int((58-(my-129))/zoom+cvy)
+				cz=0
+		EndIf
+		If mx=>337 AND mx<=637 AND my=>129 AND my<=245
+				cz=Int(((mx-337)-150)/zoom/2)+cvz
+				cy=Int((58-(my-129))/zoom+cvy)
+				cx=0
+		EndIf
+
+		If cx<>-1 AND cobj>0
+				points(cobj-1,cpoint(cobj-1))\x=cx,cy,cz
+				cpoint(cobj-1)+1
+		EndIf
+
+		Gosub redrawall
+		Return
+EndIf
+
+If ew>0 AND ew<4		;one of the view windows
+		mx=EMouseX
+		my=EMouseY
+		hit=-1
+		If cplot>0
+				For l=0 To cplot-1
+						If ew=plots(l)\win
+								llx=plots(l)\wx
+								lly=plots(l)\wy
+								If mx>llx-4 AND mx<llx+4
+										If my>lly-3 AND my<lly+3
+												hit=l:Pop For:Goto gotdot
+										EndIf
+								EndIf
+						EndIf
+				Next
+gotdot:
+				If hit<>-1
+						sa=-1
+						For l=0 To cpick
+								If picked(l)=hit Then sa=l
+						Next
+						If sa=-1
+								picked(cpick)=hit
+								leobj=eobj
+								eobj=plots(hit)\obj
+								cpick+1
+								picked(cpick)=-1
+						EndIf
+						Gosub redrawall
+;						Gosub redrawsome
+				Else
+						For l=0 To 100
+								picked(l)=-1
+								pickedf(l)=-1
+						Next
+						cpick=0
+						cpickf=0
+						leobj=eobj
+						eobj=-1
+						Gosub redrawall
+;						Gosub redrawsome
+				EndIf
+
+				If hit<>-1 AND mode=5 AND sa<>-1 AND eobj>-1 ;add a face????
+						p=sa
+						faces(eobj,cface(eobj))\p1=plots(picked(p))\num
+						p+1
+						faces(eobj,cface(eobj))\p2=plots(picked(p))\num
+						p+1
+						faces(eobj,cface(eobj))\p3=plots(picked(p))\num
+						p+1:If p>cpick-1 Then p=cpick-1
+						faces(eobj,cface(eobj))\p4=plots(picked(p))\num
+						cface(eobj)+1
+						For l=0 To 100
+								picked(l)=-1
+								pickedf(l)=-1
+						Next
+						cpick=0
+						cpickf=0
+						Gosub redrawall
+				EndIf
+
+		EndIf
+
+		Gosub redrawsome		;all
+EndIf
+
+Return
+;----------------------------------------------------------------
+.loadandconvert
+
+f$=ASLFileRequest$("Load Imagine Object...",pa$,na$,"",150,33,340,194)
+If f$="" Then Return
+
+c.l=WriteMem(0,f$)
+If c=0 Then Return			;not found!!!
+
+ll.l=FileSeek(0)
+
+mem.l=##[$FE97](ll,0)
+memend.l=mem+ll
+
+##[$BE14] 0,mem,ll
+
+ptr.l=mem
+
+For l=0 To 10
+		cface(l)=0
+		cpoint(l)=0
+		cedge(l)=0
+Next
+cobj=0
+
+decodeit:
+
+While Peek.l(ptr)<>$504f5349 AND ptr<memend
+		ptr+2
+Wend
+If ptr=>memend Then Goto done
+ptr+4	 ;skip name
+ptr+4	 ;skip len
+axis(cobj)\x=Int(Peek.q(ptr)):ptr+4
+axis(cobj)\z=Int(Peek.q(ptr)):ptr+4
+axis(cobj)\y=Int(Peek.q(ptr)):ptr+4
+
+While Peek.l(ptr)<>$504e5453 AND ptr<memend	 ;"PNTS"
+		ptr+2
+Wend
+If ptr=>memend Then Goto done
+ptr+4
+ptr+4
+numpts.w=Peek.w(ptr):ptr+2
+cpoint(cobj)=0
+For l=0 To numpts-1
+		points(cobj,cpoint(cobj))\x=Int(Peek.q(ptr)):ptr+4
+		points(cobj,cpoint(cobj))\z=Int(Peek.q(ptr)):ptr+4
+		points(cobj,cpoint(cobj))\y=Int(Peek.q(ptr)):ptr+4
+		cpoint(cobj)+1
+Next
+
+While Peek.l(ptr)<>$45444745 AND ptr<memend		;"EDGE"
+		ptr+2
+Wend
+If ptr=>memend Then Goto done
+ptr+4
+ptr+4
+numedges.w=Peek.w(ptr):ptr+2
+cedge(cobj)=0
+For l=0 To numedges-1
+		edges(cobj,cedge(cobj))\sp=Peek.w(ptr):ptr+2
+		edges(cobj,cedge(cobj))\ep=Peek.w(ptr):ptr+2
+		cedge(cobj)+1
+Next
+
+While Peek.l(ptr)<>$46414345 AND ptr<memend		;"FACE"
+		ptr+2
+Wend
+If ptr=>memend Then Goto done
+ptr+4
+If ptr=>memend Then Goto done
+ptr+4
+If ptr=>memend Then Goto done
+numfaces.w=Peek.w(ptr):ptr+2
+cface(cobj)=0
+For l=0 To numfaces-1
+		e1=Peek.w(ptr):ptr+2
+		e2=Peek.w(ptr):ptr+2
+		e3=Peek.w(ptr):ptr+2
+
+		pa=edges(cobj,e1)\sp
+		pb=edges(cobj,e1)\ep
+		pc=edges(cobj,e3)\sp
+		If pc=pa OR pc=pb
+				pc=edges(cobj,e3)\ep
+		EndIf
+
+		faces(cobj,cface(cobj))\p1=pa
+		faces(cobj,cface(cobj))\p2=pb
+		faces(cobj,cface(cobj))\p3=pc
+		faces(cobj,cface(cobj))\p4=pc
+		cface(cobj)+1
+Next
+
+cobj+1
+Goto decodeit
+
+done:
+kkk.l=##[$FE99](mem,ll)
+Gosub redrawall
+WTitle "",screentitle$+mode$(mode)+cview$(cview)
+CloseFile 0
+
+Gosub coalesce
+
+Return
+;----------------------------------------------------------------
+.loadobject
+
+f$=ASLFileRequest$("Load Object...",pa$,na$,"",150,33,340,194)
+If f$="" Then Return
+
+c.l=WriteMem(0,f$)
+If c=0 Then Return			;not found!!!
+ll.l=FileSeek(0)
+mem.l=##[$FE97](ll,0)
+memend.l=mem+ll
+##[$BE14] 0,mem,ll
+ptr.l=mem
+
+o=cobj
+
+If Peek.l(ptr)=$434f4c52		;"COLR"
+		ptr+4			 ;skip name
+		For ccc.l=16 To 31
+				rr.w=Peek.w(ptr):ptr+2
+				gg.w=Peek.w(ptr):ptr+2
+				bb.w=Peek.w(ptr):ptr+2
+				AGARed ccc,rr,gg,bb
+		Next
+EndIf
+
+rloop:
+If Peek.l(ptr)<>$41584953 Then Goto done2
+
+ptr+4
+
+axis(o)\x=Peek.w(ptr):ptr+2
+axis(o)\y=Peek.w(ptr):ptr+2
+axis(o)\z=Peek.w(ptr):ptr+2
+
+ptr+4	 ;skip "PNTS"
+
+n=0
+While Peek.l(ptr)<>$46414345 AND ptr<memend
+		points(o,n)\x=Peek.w(ptr):ptr+2
+		points(o,n)\y=Peek.w(ptr):ptr+2
+		points(o,n)\z=Peek.w(ptr):ptr+2
+		n+1
+Wend
+cpoint(o)=n
+
+ptr+4
+
+n=0
+While Peek.l(ptr)<>$41584953 AND ptr<memend
+		faces(o,n)\p1=Peek.w(ptr):ptr+2
+		If ptr=>memend Then Pop While:Goto sk
+		faces(o,n)\p2=Peek.w(ptr):ptr+2
+		If ptr=>memend Then Pop While:Goto sk
+		faces(o,n)\p3=Peek.w(ptr):ptr+2
+		If ptr=>memend Then Pop While:Goto sk
+		faces(o,n)\p4=Peek.w(ptr):ptr+2
+		faces(o,n)\cc=Peek.w(ptr):ptr+2
+		n+1
+Wend
+sk:
+cface(o)=n
+o+1
+If Peek.l(ptr)=$41584953 Then Goto rloop
+
+done2:
+cobj=o
+kkk.l=##[$FE99](mem,ll)
+CloseFile(0)
+Gosub redrawall
+Return
+;----------------------------------------------------------------
+.saveobject
+
+If cobj=0 Then Return
+
+f$=ASLFileRequest$("Save Object...",pa$,na$,"",150,33,340,194)
+If f$="" Then Return
+
+c.l=ReadMem(0,f$)
+If c=0 Then Return			;not found!!!
+FileOutput 0
+
+;write palette..
+Print "COLR"
+For ccc=16 To 31
+		rr.w=ShowPalette(ccc)
+		gg.w=NewPaletteMode(ccc)
+		bb.w=CyclePalette(ccc)
+		Exists 0,&rr,2
+		Exists 0,&gg,2
+		Exists 0,&bb,2
+Next
+
+For o=0 To cobj-1
+
+		;write axis...
+		Print "AXIS"
+		Exists 0,&axis(o),3*2
+
+		If cpoint(o)>0
+				;write points...
+				Print "PNTS"
+				For n=0 To cpoint(o)-1
+						Exists 0,&points(o,n),3*2
+				Next
+		EndIf
+
+		If cface(o)>0
+				;write faces..
+				Print "FACE"
+				For n=0 To cface(o)-1
+						Exists 0,&faces(o,n),5*2	;1,2,3,4,c
+				Next
+		EndIf
+
+
+Next
+
+WindowOutput 0
+CloseFile(0)
+Return
+;----------------------------------------------------------------
+.savesource
+
+If cobj=0 Then Return
+
+f$=ASLFileRequest$("Save Source Code...",pa$,na$,"",150,33,340,194)
+If f$="" Then Return
+
+c.l=ReadMem(0,f$)
+If c=0 Then Return			;not found!!!
+FileOutput 0
+
+k=2		 ;scale object too!!!
+
+t$=Chr$(9)
+
+totp=0
+For o=0 To cobj-1
+		tpoint(o)=totp
+		totp=totp+cpoint(o)
+Next
+totf=0
+For o=0 To cobj-1
+		totf=totf+cface(o)
+Next
+ttt=totp:fff=totf
+
+Window 6,80,40,510,110,$100a,"Optimizing Object Source...",0,1
+WLocate 0,10
+NPrint "Current Object Statistics:"
+NPrint ""
+NPrint "		Total Number Of Points :"
+NPrint "		Total Number Of faces	:"
+NPrint ""
+NPrint "		Output Number Of Points:"
+NPrint "		Output Number Of faces :"
+WLocate 30*8,34-8
+NPrint totp,"	 "
+WLocate 30*8,34
+NPrint totf,"	 "
+WLocate 30*8,34+24-8
+NPrint ttt,"	 "
+WLocate 30*8,34+24
+NPrint fff,"	 "
+
+ttt=0
+For o=0 To cobj-1
+		For n=0 To cpoint(o)-1
+				allps(ttt)\x=points(o,n)\x*k
+				allps(ttt)\y=(0-points(o,n)\y)*k
+				allps(ttt)\z=points(o,n)\z*k
+				ttt+1
+		Next
+Next
+
+fff=0
+For o=0 To cobj-1
+		t=tpoint(o)
+		For n=0 To cface(o)-1
+			allfs(fff)\p1=faces(o,n)\p1+t
+			allfs(fff)\p2=faces(o,n)\p2+t
+			allfs(fff)\p3=faces(o,n)\p3+t
+			allfs(fff)\p4=faces(o,n)\p4+t
+			allfs(fff)\cc=faces(o,n)\cc
+			fff+1
+		Next
+Next
+
+
+;optimize points...
+opti:
+WLocate 30*8,34+24-8
+NPrint ttt,"	 "
+WLocate 30*8,34+24
+NPrint fff,"	 "
+
+For check=0 To ttt-1
+		x=allps(check)\x:y=allps(check)\y:z=allps(check)\z
+		For this=0 To ttt-1
+				If this<>check
+						If allps(this)\x=x AND allps(this)\y=y AND allps(this)\z=z
+								Gosub sortitout
+								Pop For:Pop For:Goto opti
+						EndIf
+				EndIf
+		Next
+Next
+
+;write it all out...
+
+WTitle "Saving...									 ",""
+
+FileOutput 0
+NPrint ""
+NPrint t$,"dc.w",t$,totp,t$,t$,";number of points..."
+For n=0 To ttt-1
+		NPrint t$,"dc.w",t$,allps(n)\x,",",allps(n)\y,",",allps(n)\z
+Next
+
+NPrint ""
+NPrint t$,"dc.w",t$,totf,"-1",t$,t$,";number of faces..."
+For n=0 To fff-1
+		Print t$,"Surf",t$,allfs(n)\p1,",",allfs(n)\p2,",",allfs(n)\p3,",",allfs(n)\p4
+		NPrint ",$",Right$(Hex$(allfs(n)\cc),4)
+Next
+
+WindowOutput 6
+Use Window 6
+CloseFile(0)
+
+Gosub savepalette
+
+WTitle "Complete...									 ",""
+qfgh:
+ev.l=WaitEvent
+If ev<>$200 Then Goto qfgh
+CloseWindow 6
+Use Window 1:WindowOutput 1
+Activate 1
+
+Return
+;----------------------------------------------------------------
+.sortitout
+
+If this<check
+		tem=this
+		this=check
+		check=tem
+EndIf
+
+;1/ make all points numbered 'this' equal 'check' (faces)
+;2/ copy all points from this+1 to top down 1		 (points)
+;3/ make all points numbered this+1 or > -1			 (faces)
+
+For u=0 To fff-1
+		If allfs(u)\p1=this Then allfs(u)\p1=check
+		If allfs(u)\p2=this Then allfs(u)\p2=check
+		If allfs(u)\p3=this Then allfs(u)\p3=check
+		If allfs(u)\p4=this Then allfs(u)\p4=check
+Next
+
+For u=this+1 To ttt-1
+		allps(u-1)\x=allps(u)\x
+		allps(u-1)\y=allps(u)\y
+		allps(u-1)\z=allps(u)\z
+Next
+
+For u=0 To fff-1
+		If allfs(u)\p1=>this+1 Then allfs(u)\p1-1
+		If allfs(u)\p2=>this+1 Then allfs(u)\p2-1
+		If allfs(u)\p3=>this+1 Then allfs(u)\p3-1
+		If allfs(u)\p4=>this+1 Then allfs(u)\p4-1
+Next
+
+ttt-1:totp-1
+Return
+;----------------------------------------------------------------
+.savepalette
+
+SaveScreen 0,"ram:palette"
+
+Return
+;----------------------------------------------------------------
+.redrawbar
+Use Window 0
+WBox 0,246,639,255,1
+WColour 0,1
+WLocate 460,247
+NPrint "This is NOT Imagine!!!"
+WLocate 400,247
+If lockx=0
+		Print "X"
+Else
+		Print "-"
+EndIf
+If locky=0
+		Print "Y"
+Else
+		Print "-"
+EndIf
+If lockz=0
+		Print "Z"
+Else
+		Print "-"
+EndIf
+
+Return
+;----------------------------------------------------------------
+.redrawall
+
+drawmode=0			;draw normally (1=moving/2=colour 0)
+
+Use Window 0
+WBox 0,246,639,255,1
+WColour 8,1
+WLocate 460,247
+NPrint "This is NOT Imagine!!!"
+WLocate 400,247
+If lockx=0
+		Print "X"
+Else
+		Print "-"
+EndIf
+If locky=0
+		Print "Y"
+Else
+		Print "-"
+EndIf
+If lockz=0
+		Print "Z"
+Else
+		Print "-"
+EndIf
+
+WLine 0,128,639,128,1
+
+linew{160,10,160,255,1}
+linew{0,10,0,255,1}
+linew{319,10,319,255,1}
+
+sexybutton{2,11,14,116,"TOP",1}
+sexybutton{2,129,14,116,"FRONT",1}
+sexybutton{322,129,14,116,"RIGHT",1}
+sexybutton{322,11,14,116,"PERSP",1}
+
+cplot=0
+
+;--------------------------------
+;draw top view....
+Use Window 1
+
+;WBox 18,11,318,127,0
+WCls
+
+If grid=On AND zoom>.0001
+		xs.q=((75-cvx)/(gsize*zoom))
+		xs=Abs(Frac(xs)*(gsize*zoom))
+;		xs+(18/2)
+		While xs=>0 AND xs<=300/2
+				linew{xs,0,xs,116,5}
+				xs+(gsize*zoom)
+		Wend
+		ys.q=((cvz+58)/(gsize*zoom))
+		ys=Abs(Frac(ys)*(gsize*zoom))
+;		ys+(11)
+		While ys=>0 AND ys<=116
+				linew{0,ys,300/2,ys,5}
+				ys+(gsize*zoom)
+		Wend
+EndIf
+
+Gosub redrawtop
+
+Use Window 1
+linew{8,116-20,8,116-5,1}
+linew{8,116-5,15+8,116-5,1}
+WLocate 13,116-30
+Print "z"
+WLocate 30+16+4,116-5-4
+Print "x"
+
+Use Window 0
+
+;--------------------------------
+;draw front view...
+Use Window 2
+;WBox 18,129,318,245,0
+WCls
+
+If grid=On AND zoom>.0001
+		xs.q=((75-cvx)/(gsize*zoom))
+		xs=Abs(Frac(xs)*(gsize*zoom))
+ ;	 xs+(18/2)
+		While xs=>0 AND xs<=300/2
+				linew{xs,0,xs,116,5}
+				xs+(gsize*zoom)
+		Wend
+		ys.q=((58+cvy)/(gsize*zoom))
+		ys=Abs(Frac(ys)*(gsize*zoom))
+;		ys+(129)
+		While ys=>0 AND ys<=116
+				linew{0,ys,300/2,ys,5}
+				ys+(gsize*zoom)
+		Wend
+EndIf
+
+Gosub redrawfront
+
+Use Window 2
+linew{8,116-20,8,116-5,1}
+linew{8,116-5,15+8,116-5,1}
+WLocate 13,116-30
+Print "y"
+WLocate 30+16+4,116-5-4
+Print "x"
+
+Use Window 0
+
+;--------------------------------
+;draw right view...
+;WBox 337,129,637,245,0
+Use Window 3
+WCls
+
+If grid=On AND zoom>.0001
+		xs.q=((75-cvz)/(gsize*zoom))
+		xs=Abs(Frac(xs)*(gsize*zoom))
+;		xs+(337/2)
+		While xs=>0 AND xs<=300/2
+				linew{xs,0,xs,116,5}
+				xs+(gsize*zoom)
+		Wend
+		ys.q=((58+cvy)/(gsize*zoom))
+		ys=Abs(Frac(ys)*(gsize*zoom))
+;		ys+(129)
+		While ys=>0 AND ys<=116
+				linew{0,ys,300/2,ys,5}
+				ys+(gsize*zoom)
+		Wend
+EndIf
+
+Gosub redrawright
+
+Use Window 3
+linew{8,116-20,8,116-5,1}
+linew{8,116-5,15+8,116-5,1}
+WLocate 13,116-30
+Print "y"
+WLocate 30+16+4,116-5-4
+Print "z"
+
+;--------------------------------
+
+Gosub redrawpersp
+
+;--------------------------------
+Use Window 0
+
+Gosub redrawpicks
+
+Return
+
+;----------------------------------------------------------------
+.redrawsome
+
+drawmode=0
+
+redrawsome2:
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+Gosub redrawpicks
+Return
+
+redrawsome2p:
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+Gosub redrawpicks
+drawmode=0
+Gosub redrawpersp
+Return
+;----------------------------------------------------------------
+.redrawtop
+
+If cobj=0 Then Return
+
+Use Window 1
+
+iww=InnerWidth
+ihh=InnerHeight
+
+odm=0
+sl=0:el=cobj-1
+If eobj<>-1 AND mode>1 Then sl=eobj:el=eobj
+If eobj<>-1 AND drawmode=>9 Then sl=eobj:el=sl
+If drawmode=>9 Then odm=drawmode:drawmode-9
+For o=sl To el
+
+;		If mode<2
+				xx1a=axis(o)\x
+				yy1a=axis(o)\y
+				zz1a=axis(o)\z
+				xx1=(xx1a-cvx)*zoom+75	 ;75
+				zz1=(cvz-zz1a)*zoom+58	 ;58
+
+				cc=2
+				If cpick>0
+						For p=0 To cpick-1
+								pp=picked(p)
+								If plots(pp)\typ=0 AND plots(pp)\obj=o
+										cc=7
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawtop
+								EndIf
+						Next
+				EndIf
+				If eobj=o Then cc=4
+
+				plotwq{xx1,zz1,cc}
+
+				plots(cplot)\wx=xx1*2,zz1,1,o,0,0,xx1a,yy1a,zz1a
+				cplot+1
+
+;		EndIf
+
+		If cface(o)<>0
+				numf=cface(o)-1
+				For num=0 To numf
+
+						xx1a=points(o,faces(o,num)\p1)\x
+						yy1a=points(o,faces(o,num)\p1)\y
+						zz1a=points(o,faces(o,num)\p1)\z
+
+						xx2a=points(o,faces(o,num)\p2)\x
+						yy2a=points(o,faces(o,num)\p2)\y
+						zz2a=points(o,faces(o,num)\p2)\z
+
+						xx3a=points(o,faces(o,num)\p3)\x
+						yy3a=points(o,faces(o,num)\p3)\y
+						zz3a=points(o,faces(o,num)\p3)\z
+
+						xx4a=points(o,faces(o,num)\p4)\x
+						yy4a=points(o,faces(o,num)\p4)\y
+						zz4a=points(o,faces(o,num)\p4)\z
+
+						xx1=(xx1a-cvx)*zoom+75	 ;84
+						zz1=(cvz-zz1a)*zoom+58	 ;69
+
+						xx2=(xx2a-cvx)*zoom+75	 ;84
+						zz2=(cvz-zz2a)*zoom+58	 ;69
+
+						xx3=(xx3a-cvx)*zoom+75	 ;84
+						zz3=(cvz-zz3a)*zoom+58	 ;69
+
+						xx4=(xx4a-cvx)*zoom+75	 ;84
+						zz4=(cvz-zz4a)*zoom+58	 ;69
+
+						cc=6
+						If mode>2
+								If cpick>0				;no pick face
+										For p=0 To cpick-1
+												pp=picked(p)
+												If plots(pp)\typ=0 AND plots(pp)\obj=o
+														cc=7
+												EndIf
+										Next
+								EndIf
+						EndIf
+						If mode=2
+								If cpickf>0
+										If pickedf(0)=num
+												cc=7
+										EndIf
+								EndIf
+						EndIf
+						If mode=1 AND eobj=o Then cc=7
+						If mode=1 AND leobj=o Then cc=3
+
+						linewq{xx1,zz1,xx2,zz2,cc}
+						linewq{xx2,zz2,xx3,zz3,cc}
+						linewq{xx3,zz3,xx4,zz4,cc}
+						linewq{xx4,zz4,xx1,zz1,cc}
+
+				Next
+		EndIf
+
+		If cpoint(o)>0
+				For num=0 To cpoint(o)-1
+
+						xx1a=points(o,num)\x
+						yy1a=points(o,num)\y
+						zz1a=points(o,num)\z
+
+						xx1=(xx1a-cvx)*zoom+75	 ;84
+						zz1=(cvz-zz1a)*zoom+58	 ;69
+
+						If mode>1
+								plotwq{xx1,zz1,4}
+								plots(cplot)\wx=xx1*2,zz1,1,o,1,num,xx1a,yy1a,zz1a:cplot+1
+						EndIf
+
+				Next
+		EndIf
+Next
+
+Use Window 0
+
+If odm=>9 Then drawmode=odm
+
+Return
+;----------------------------------------------------------------
+.redrawfront
+
+If cobj=0 Then Return
+
+Use Window 2
+
+iww=InnerWidth
+ihh=InnerHeight
+
+odm=0
+sl=0:el=cobj-1
+If eobj<>-1 AND mode>1 Then sl=eobj:el=eobj
+If eobj<>-1 AND drawmode=>9 Then sl=eobj:el=sl
+If drawmode=>9 Then odm=drawmode:drawmode-9
+For o=sl To el
+
+;		If mode<2
+				xx1a=axis(o)\x
+				yy1a=axis(o)\y
+				zz1a=axis(o)\z
+				xx1=(xx1a-cvx)*zoom+75	 ;84
+				yy1=(cvy-yy1a)*zoom+58	 ;187
+
+				cc=2
+				If cpick>0
+						For p=0 To cpick-1
+								pp=picked(p)
+								If plots(pp)\typ=0 AND plots(pp)\obj=o
+										cc=7
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawfront
+								EndIf
+						Next
+				EndIf
+				plotwq{xx1,yy1,cc}
+
+				plots(cplot)\wx=xx1*2,yy1,2,o,0,0
+				cplot+1
+
+;		EndIf
+
+		If cface(o)<>0
+				numf=cface(o)-1
+				For num=0 To numf
+
+						xx1a=points(o,faces(o,num)\p1)\x
+						yy1a=points(o,faces(o,num)\p1)\y
+						zz1a=points(o,faces(o,num)\p1)\z
+
+						xx2a=points(o,faces(o,num)\p2)\x
+						yy2a=points(o,faces(o,num)\p2)\y
+						zz2a=points(o,faces(o,num)\p2)\z
+
+						xx3a=points(o,faces(o,num)\p3)\x
+						yy3a=points(o,faces(o,num)\p3)\y
+						zz3a=points(o,faces(o,num)\p3)\z
+
+						xx4a=points(o,faces(o,num)\p4)\x
+						yy4a=points(o,faces(o,num)\p4)\y
+						zz4a=points(o,faces(o,num)\p4)\z
+
+						xx1=(xx1a-cvx)*zoom+75	 ;84
+						yy1=(cvy-yy1a)*zoom+58	 ;187
+
+						xx2=(xx2a-cvx)*zoom+75	 ;84
+						yy2=(cvy-yy2a)*zoom+58	 ;187
+
+						xx3=(xx3a-cvx)*zoom+75	 ;84
+						yy3=(cvy-yy3a)*zoom+58	 ;187
+
+						xx4=(xx4a-cvx)*zoom+75	 ;84
+						yy4=(cvy-yy4a)*zoom+58	 ;187
+
+						cc=6
+						If mode>2
+								If cpick>0				;no pick face
+										For p=0 To cpick-1
+												pp=picked(p)
+												If plots(pp)\typ=0 AND plots(pp)\obj=o
+														cc=7
+												EndIf
+										Next
+								EndIf
+						EndIf
+						If mode=2
+								If cpickf>0
+										If pickedf(0)=num
+												cc=7
+										EndIf
+								EndIf
+						EndIf
+						If mode=1 AND eobj=o Then cc=7
+						If mode=1 AND leobj=o Then cc=3
+
+						linewq{xx1,yy1,xx2,yy2,cc}
+						linewq{xx2,yy2,xx3,yy3,cc}
+						linewq{xx3,yy3,xx4,yy4,cc}
+						linewq{xx4,yy4,xx1,yy1,cc}
+
+				Next
+		EndIf
+
+		If cpoint(o)>0
+				For num=0 To cpoint(o)-1
+
+						xx1a=points(o,num)\x
+						yy1a=points(o,num)\y
+						zz1a=points(o,num)\z
+
+						xx1=(xx1a-cvx)*zoom+75	 ;84
+						yy1=(cvy-yy1a)*zoom+58	 ;187
+
+						If mode>1
+								plotwq{xx1,yy1,4}
+								plots(cplot)\wx=xx1*2,yy1,2,o,1,num,xx1a,yy1a,zz1a:cplot+1
+						EndIf
+
+				Next
+		EndIf
+Next
+
+Use Window 0
+If odm=>9 Then drawmode=odm
+
+Return
+;----------------------------------------------------------------
+.redrawright
+
+If cobj=0 Then Return
+
+Use Window 3
+
+iww=InnerWidth
+ihh=InnerHeight
+
+odm=0
+sl=0:el=cobj-1
+If eobj<>-1 AND mode>1 Then sl=eobj:el=eobj
+If eobj<>-1 AND drawmode=>9 Then sl=eobj:el=sl
+If drawmode=>9 Then odm=drawmode:drawmode-9
+For o=sl To el
+
+;		If mode<2
+				xx1a=axis(o)\x
+				yy1a=axis(o)\y
+				zz1a=axis(o)\z
+				zz1=(zz1a-cvz)*zoom+75	 ;243
+				yy1=(cvy-yy1a)*zoom+58	 ;187
+
+				cc=2
+				If cpick>0
+						For p=0 To cpick-1
+								pp=picked(p)
+								If plots(pp)\typ=0 AND plots(pp)\obj=o
+										cc=7
+										If eobj=-1 Then leobj=eobj:eobj=o:Pop For:Pop For:Goto redrawright
+								EndIf
+						Next
+				EndIf
+				plotwq{zz1,yy1,cc}
+
+				plots(cplot)\wx=zz1*2,yy1,3,o,0,0
+				cplot+1
+
+;		EndIf
+
+		If cface(o)<>0
+				numf=cface(o)-1
+				For num=0 To numf
+
+						xx1a=points(o,faces(o,num)\p1)\x
+						yy1a=points(o,faces(o,num)\p1)\y
+						zz1a=points(o,faces(o,num)\p1)\z
+
+						xx2a=points(o,faces(o,num)\p2)\x
+						yy2a=points(o,faces(o,num)\p2)\y
+						zz2a=points(o,faces(o,num)\p2)\z
+
+						xx3a=points(o,faces(o,num)\p3)\x
+						yy3a=points(o,faces(o,num)\p3)\y
+						zz3a=points(o,faces(o,num)\p3)\z
+
+						xx4a=points(o,faces(o,num)\p4)\x
+						yy4a=points(o,faces(o,num)\p4)\y
+						zz4a=points(o,faces(o,num)\p4)\z
+
+						zz1=(zz1a-cvz)*zoom+75	 ;243
+						yy1=(cvy-yy1a)*zoom+58	 ;187
+
+						zz2=(zz2a-cvz)*zoom+75	 ;243
+						yy2=(cvy-yy2a)*zoom+58	 ;187
+
+						zz3=(zz3a-cvz)*zoom+75	 ;243
+						yy3=(cvy-yy3a)*zoom+58	 ;187
+
+						zz4=(zz4a-cvz)*zoom+75	 ;243
+						yy4=(cvy-yy4a)*zoom+58	 ;187
+
+						cc=6
+						If mode>2
+								If cpick>0				;no pick face
+										For p=0 To cpick-1
+												pp=picked(p)
+												If plots(pp)\typ=0 AND plots(pp)\obj=o
+														cc=7
+												EndIf
+										Next
+								EndIf
+						EndIf
+						If mode=2
+								If cpickf>0
+										If pickedf(0)=num
+												cc=7
+										EndIf
+								EndIf
+						EndIf
+						If mode=1 AND eobj=o Then cc=7
+						If mode=1 AND leobj=o Then cc=3
+
+						linewq{zz1,yy1,zz2,yy2,cc}
+						linewq{zz2,yy2,zz3,yy3,cc}
+						linewq{zz3,yy3,zz4,yy4,cc}
+						linewq{zz4,yy4,zz1,yy1,cc}
+
+				Next
+		EndIf
+
+		If cpoint(o)>0
+				For num=0 To cpoint(o)-1
+
+						xx1a=points(o,num)\x
+						yy1a=points(o,num)\y
+						zz1a=points(o,num)\z
+
+						zz1=(zz1a-cvz)*zoom+75	 ;243
+						yy1=(cvy-yy1a)*zoom+58	 ;187
+
+						If mode>1
+								plotwq{zz1,yy1,4}
+								plots(cplot)\wx=zz1*2,yy1,3,o,1,num,xx1a,yy1a,zz1a:cplot+1
+						EndIf
+
+				Next
+		EndIf
+
+Next
+
+Use Window 0
+If odm=>9 Then drawmode=odm
+
+Return
+;----------------------------------------------------------------
+.redrawpersp
+
+Use Window 4
+
+iww=InnerWidth
+ihh=InnerHeight
+
+If perspmode<>#SOLID
+		WCls
+Else
+		Use BitMap 1
+		BlockScroll
+EndIf
+ClearList polysort()
+ResetList polysort()
+Use Window 4
+WLocate 0,0
+
+If cobj=0 Then Return
+
+rad.q=Pi/180
+
+rx.q=srx*rad
+ry.q=sry*rad
+rz.q=srz*rad
+
+ox=75
+oy=58
+
+s1.q=HSin(ry)
+s2.q=HSin(rx)
+s3.q=HSin(rz)				;0
+
+c1.q=HCos(ry)
+c2.q=HCos(rx)
+c3.q=HCos(rz)				;1
+
+
+xx.q=c2*c1
+xy.q=c2*s1
+xz.q=s2
+yx.q=c3*s1+s3*s2*c1
+yy.q=-c3*c1+s3*s2*s1
+yz.q=-s3*c2
+zx.q=s3*s1-c3*s2*c1
+zy.q=-s3*c1-c3*s2*s1
+zz.q=c3*c2
+
+
+For o=0 To cobj-1
+		If cpoint(o)>0
+				For i=0 To cpoint(o)-1
+
+						zzz.q=points(o,i)\z
+						yyy.q=points(o,i)\y
+						xxx.q=points(o,i)\x
+
+						xxx=(xxx-cvx)*zoom
+						yyy=(cvy-yyy)*zoom
+						zzz=(zzz-cvz)*zoom
+
+						nx.q=(xxx*xx)+(yyy*xy)+(zzz*xz)
+						ny.q=(xxx*yx)+(yyy*yy)+(zzz*yz)
+						nz.q=(xxx*zx)+(yyy*zy)+(zzz*zz)
+
+						az.q=700/(nz+750)
+
+						sxx.q=(nx*az)+ox
+						syy.q=(-ny*az)+oy
+
+						persp(o,i)\sx=Int(sxx)
+						persp(o,i)\sy=Int(syy)
+						persp(o,i)\nx=nx
+						persp(o,i)\ny=ny
+						persp(o,i)\nz=nz
+				Next
+		EndIf
+
+
+Next
+
+
+
+For o=0 To cobj-1
+		If cface(o)>0					;woz cpoint(o)
+				For n=0 To cface(o)-1	 ;woz cpoint
+
+						p1=faces(o,n)\p1
+						p2=faces(o,n)\p2
+						p3=faces(o,n)\p3
+						p4=faces(o,n)\p4
+						col.w=faces(o,n)\cc
+
+						nz1=persp(o,p1)\nz
+						nz2=persp(o,p2)\nz
+						nz3=persp(o,p3)\nz
+						nz4=persp(o,p4)\nz
+
+						sx1=persp(o,p1)\sx
+						sy1=persp(o,p1)\sy
+						sx2=persp(o,p2)\sx
+						sy2=persp(o,p2)\sy
+						sx3=persp(o,p3)\sx
+						sy3=persp(o,p3)\sy
+						sx4=persp(o,p4)\sx
+						sy4=persp(o,p4)\sy
+
+						clock=1
+						If perspmode=#HIDDEN
+								;check orientation...
+								dy1.l=sy1-sy2
+								dy2.l=sy2-sy3
+								dx1.l=sx1-sx2
+								dx2.l=sx2-sx3
+								dx2=dx2*dy1
+								dx1=dx1*dy2
+								clock=0
+								If dx1=>dx2 Then clock=1		;drawit!!
+						EndIf
+
+						If clock=1 AND perspmode<>#SOLID
+								linewq{sx1,sy1,sx2,sy2,6}
+								linewq{sx2,sy2,sx3,sy3,6}
+								linewq{sx3,sy3,sx4,sy4,6}
+								linewq{sx4,sy4,sx1,sy1,6}
+								If cpickf=1 AND eobj=o AND mode=2
+										If pickedf(0)=n
+												linewq{sx1,sy1,sx3,sy3,3}
+										EndIf
+								EndIf
+						EndIf
+
+						nz=(nz1+nz2+nz3+nz4)/4
+						qqq=AddItem(polysort())
+						polysort()\nz=nz,sx1*2,sy1,sx2*2,sy2,sx3*2,sy3,sx4*2,sy4,col,o,n
+
+				Next
+		EndIf
+Next
+
+
+If perspmode=#SOLID
+		Use BitMap 1
+		SortList polysort(),SizeOf .poly\nz
+		ResetList polysort()
+		LastItem polysort()
+		Repeat
+				coors(0)\x=polysort()\x1,polysort()\y1
+				coors(1)\x=polysort()\x2,polysort()\y2
+				coors(2)\x=polysort()\x3,polysort()\y3
+				coors(3)\x=polysort()\x4,polysort()\y4
+				np=4
+				col.w=polysort()\cc
+				col=col&15
+				If coors(2)\x=coors(3)\x AND coors(2)\y=coors(3)\y Then np=3
+
+				If showorient=0
+						Polyf np,&coors(0),col+16,col+16
+				Else
+						Polyf np,&coors(0),col+16,10
+				EndIf
+
+				If outline=1
+						Poly np,&coors(0),4
+				EndIf
+
+				If eobj=polysort()\oo AND cpickf=1 AND mode=2
+						If polysort()\nn=pickedf(0)
+								Poly np,&coors(0),3
+						EndIf
+				EndIf
+		Until NOT PrevItem(polysort())
+		BitMaptoWindow 1,4,0,0,0,0,300,116
+		Use Window 4
+EndIf
+
+Return
+;----------------------------------------------------------------
+.pickperspface
+
+hito=-1:hitn=-1
+hzz.l=999999
+Use BitMap 2
+SortList polysort(),SizeOf .poly\nz
+ResetList polysort()
+LastItem polysort()
+Repeat
+		coors(0)\x=polysort()\x1,polysort()\y1
+		coors(1)\x=polysort()\x2,polysort()\y2
+		coors(2)\x=polysort()\x3,polysort()\y3
+		coors(3)\x=polysort()\x4,polysort()\y4
+		nz=polysort()\nz
+		np=4
+		If coors(2)\x=coors(3)\x AND coors(2)\y=coors(3)\y Then np=3
+		Polyf np,&coors(0),1,1
+		If Cls(ppx,ppy)=1 AND nz<hzz Then hzz=nz:hito=polysort()\oo:hitn=polysort()\nn
+		Polyf np,&coors(0),0,0
+Until NOT PrevItem(polysort())
+
+Use Window 4
+WindowOutput 4
+WLocate 0,0:Print hito,",",hitn,"		"
+
+If hitn<>-1
+		If hitn=pickedf(0) AND eobj=hito
+				Gosub attributes
+				Return
+		EndIf
+EndIf
+
+If hitn<>-1 AND hito<>eobj
+		leobj=eobj
+		eobj=hito
+		For l=0 To 100
+				picked(l)=-1
+				pickedf(l)=-1
+		Next
+		cpick=0
+		cpickf=0
+		Gosub redrawall
+EndIf
+
+If hitn<>-1 AND hito=eobj
+		pickedf(0)=hitn
+		leobj=eobj
+		eobj=hito
+		cpickf=1
+		drawmode=3+1:Gosub redrawsome2p
+		drawmode=3:Gosub redrawsome2p:drawmode=0
+Else
+		cpickf=0
+EndIf
+Return
+;----------------------------------------------------------------
+.redrawpicks
+
+If cpick=0 Then Return
+If mode<2 Then Return
+
+WColour 6,0
+
+For n=0 To cpick-1
+
+		pp=picked(n)
+		xxx=plots(pp)\xxx
+		yyy=plots(pp)\yyy
+		zzz=plots(pp)\zzz
+
+		Use Window 1
+		xx1=(xxx-cvx)*zoom+75	 ;84
+		zz1=(cvz-zzz)*zoom+58	 ;69
+		plotwq{xx1,zz1,7}
+		WLocate xx1*2-10,zz1-4
+		NPrint n+1
+
+		Use Window 2
+		xx1=(xxx-cvx)*zoom+75	 ;84
+		yy1=(cvy-yyy)*zoom+58	 ;187
+		plotwq{xx1,yy1,7}
+		WLocate xx1*2-10,yy1-4
+		NPrint n+1
+
+		Use Window 3
+		zz1=(zzz-cvz)*zoom+75	 ;243
+		yy1=(cvy-yyy)*zoom+58	 ;187
+		plotwq{zz1,yy1,7}
+		WLocate zz1*2-10,yy1-4
+		NPrint n+1
+
+Next
+
+Return
+;----------------------------------------------------------------
+.coalesce
+
+For o=0 To cobj-1
+
+For l=0 To 50
+		coal(l)=-1
+Next
+ccoal=0
+
+num=0
+
+loop:
+;find normal to base polygon...
+
+x1=points(o,faces(o,num)\p1)\x
+y1=points(o,faces(o,num)\p1)\y
+z1=points(o,faces(o,num)\p1)\z
+x2=points(o,faces(o,num)\p2)\x
+y2=points(o,faces(o,num)\p2)\y
+z2=points(o,faces(o,num)\p2)\z
+x3=points(o,faces(o,num)\p3)\x
+y3=points(o,faces(o,num)\p3)\y
+z3=points(o,faces(o,num)\p3)\z
+
+nx1=(y2-y1)*(z3-z1)-(y3-y1)*(z2-z1)
+ny1=-((x2-x1)*(z3-z1)-(x3-x1)*(z2-z1))
+nz1=(x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)
+
+;find polygon that shares two of the points of the last one.
+hit=-1
+For l=0 To cface(o)-1
+		skip=0
+		For ll=0 To ccoal
+				If coal(ll)=l Then skip=1
+		Next
+		If l<>num AND skip=0
+
+				xa1=points(o,faces(o,l)\p1)\x
+				ya1=points(o,faces(o,l)\p1)\y
+				za1=points(o,faces(o,l)\p1)\z
+				xa2=points(o,faces(o,l)\p2)\x
+				ya2=points(o,faces(o,l)\p2)\y
+				za2=points(o,faces(o,l)\p2)\z
+				xa3=points(o,faces(o,l)\p3)\x
+				ya3=points(o,faces(o,l)\p3)\y
+				za3=points(o,faces(o,l)\p3)\z
+				same=0:s1=-1:s2=-1
+				If xa1=x1 AND ya1=y1 AND za1=z1 Then same+1
+				If xa2=x2 AND ya2=y2 AND za2=z2 Then same+1
+				If xa3=x3 AND ya3=y3 AND za3=z3 Then same+1
+				If xa1=x2 AND ya1=y2 AND za1=z2 Then same+1
+				If xa2=x3 AND ya2=y3 AND za2=z3 Then same+1
+				If xa3=x1 AND ya3=y1 AND za3=z1 Then same+1
+				If xa1=x3 AND ya1=y3 AND za1=z3 Then same+1
+				If xa2=x1 AND ya2=y1 AND za2=z1 Then same+1
+				If xa3=x2 AND ya3=y2 AND za3=z2 Then same+1
+				If same=2 Then hit=l:Pop For:Goto zzz
+		EndIf
+Next
+zzz:
+num2=hit
+
+If num2<>-1
+		;find normal of next one..
+		x1=points(o,faces(o,num2)\p1)\x
+		y1=points(o,faces(o,num2)\p1)\y
+		z1=points(o,faces(o,num2)\p1)\z
+		x2=points(o,faces(o,num2)\p2)\x
+		y2=points(o,faces(o,num2)\p2)\y
+		z2=points(o,faces(o,num2)\p2)\z
+		x3=points(o,faces(o,num2)\p3)\x
+		y3=points(o,faces(o,num2)\p3)\y
+		z3=points(o,faces(o,num2)\p3)\z
+
+		nx2=(y2-y1)*(z3-z1)-(y3-y1)*(z2-z1)
+		ny2=-((x2-x1)*(z3-z1)-(x3-x1)*(z2-z1))
+		nz2=(x2-x1)*(y3-y1)-(x3-x1)*(y2-y1)
+
+		If nx1=nx2 AND ny1=ny2 AND nz1=nz2	;co-planar!!!
+
+				n=cnface(o)
+
+				nfaces(o,n)\p1=faces(o,num)\p3
+				nfaces(o,n)\p2=faces(o,num)\p1
+				nfaces(o,n)\p3=faces(o,num)\p2
+
+				If faces(o,num)\p1<>faces(o,num2)\p1
+						nfaces(o,n)\p4=faces(o,num2)\p1
+				EndIf
+				If faces(o,num)\p1<>faces(o,num2)\p2
+						nfaces(o,n)\p4=faces(o,num2)\p2
+				EndIf
+				If faces(o,num)\p3<>faces(o,num2)\p3
+						nfaces(o,n)\p4=faces(o,num2)\p3
+				EndIf
+
+				cnface(o)+1
+
+		EndIf
+EndIf
+
+coal(ccoal)=num:ccoal+1
+coal(ccoal)=num2:ccoal+1
+
+;find another unused poly..
+hit=-1
+For l=0 To cface(o)
+		f=0
+		For ll=0 To ccoal				;is this free??
+				If coal(ll)=l Then f=1
+		Next
+		If f=0 Then hit=l:Pop For:Goto ii
+Next
+ii:
+num=hit
+If num<>-1
+		Goto loop
+EndIf
+
+donee:
+For l=0 To cnface(o)-1
+		faces(o,l)\p1=nfaces(o,l)\p1
+		faces(o,l)\p2=nfaces(o,l)\p2
+		faces(o,l)\p3=nfaces(o,l)\p3
+		faces(o,l)\p4=nfaces(o,l)\p4
+Next
+cface(o)=cnface(o)
+
+Next
+
+Return
+
+;----------------------------------------------------------------
+.moveit
+
+local=0		 ;move all 1=axis only
+
+cccc.l=##[$FEDB](&points(0,0),&opoints(0,0),20*500*SizeOf.p3d)
+cccc.l=##[$FEDB](&axis(0),&oaxis(0),20*SizeOf.p3d)
+
+moveit1:
+Use Window 0
+WLocate 10,247:WColour 0,1
+NPrint "Move (All) "
+
+Gosub redrawsome
+
+moveit2:
+ev=WaitEvent
+Use Window EventWindow
+WindowInput EventWindow
+
+a$=Inkey$
+If a$=" "
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "						"
+		Return
+EndIf
+
+If a$=Chr$(27)
+		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
+		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "						 "
+		Return
+EndIf
+
+If a$="l"
+		local=1-local
+		If local=0
+				Use Window 0
+				WLocate 10,247:WColour 0,1
+				NPrint "Move (All) "
+		Else
+				Use Window 0
+				WLocate 10,247:WColour 0,1
+				NPrint "Move (Axis)"
+		EndIf
+EndIf
+
+
+
+;If a$="m" Then Goto moveit1
+;If a$="s" Then Goto scaleit1
+;If a$="r" Then Goto rotateit1
+
+If a$="x" Then lockx=1-lockx:Gosub redrawbar:Goto moveit2
+If a$="y" Then locky=1-locky:Gosub redrawbar:Goto moveit2
+If a$="z" Then lockz=1-lockz:Gosub redrawbar:Goto moveit2
+
+
+If Joyb(0)=1
+		mx=SMouseX
+		my=SMouseY
+Else
+		Goto moveit2
+EndIf
+
+drawmode=2+9			;clear
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+
+cx=9999
+cy=9999
+cz=9999
+If mx=>18 AND mx<=318 AND my=>11 AND my<=127
+		cx=Int(((mx-18)-150)/zoom/2)+cvx
+		cz=Int((58-(my-11))/zoom+cvz)
+EndIf
+If mx=>18 AND mx<=318 AND my=>129 AND my<=245
+		cx=Int(((mx-18)-150)/zoom/2)+cvx
+		cy=Int((58-(my-129))/zoom+cvy)
+EndIf
+If mx=>337 AND mx<=637 AND my=>129 AND my<=245
+		cz=Int(((mx-337)-150)/zoom/2)+cvz
+		cy=Int((58-(my-129))/zoom+cvy)
+EndIf
+
+If lockx=1 Then cx=9999
+If locky=1 Then cy=9999
+If lockz=1 Then cz=9999
+
+If cx<>9999 Then lcx=cx
+If cy<>9999 Then lcy=cy
+If cz<>9999 Then lcz=cz
+lcoor$=coor$
+
+cx$=Left$(Str$(lcx)+"			",6)
+cy$=Left$(Str$(lcy)+"			",6)
+cz$=Left$(Str$(lcz)+"			",6)
+coor$=cx$+","+cy$+","+cz$
+If lcoor$<>coor$
+		For l=4 To 0 Step -1
+				Use Window l
+				WTitle "",screentitle$+mode$(mode)+cview$(cview)+coor$
+		Next
+EndIf
+
+
+
+If mode<2	 ;whole object
+		If eobj<>-1
+				o=eobj
+				dx=0:dy=0:dz=0
+				If cx<>9999 Then dx=cx-axis(o)\x:axis(o)\x=cx
+				If cy<>9999 Then dy=cy-axis(o)\y:axis(o)\y=cy
+				If cz<>9999 Then dz=cz-axis(o)\z:axis(o)\z=cz
+				If local=0
+						For l=0 To cpoint(o)-1
+								points(o,l)\x+dx
+								points(o,l)\y+dy
+								points(o,l)\z+dz
+						Next
+				EndIf
+		EndIf
+EndIf
+
+If mode=2 AND cpickf>0 AND eobj<>-1 ;move face...
+		dx=0:dy=0:dz=0
+		n=pickedf(0)
+		o=eobj
+
+		p1=faces(o,n)\p1
+		p2=faces(o,n)\p2
+		p3=faces(o,n)\p3
+		p4=faces(o,n)\p4
+
+		If cx<>9999 Then dx=cx-points(o,p1)\x:points(o,p1)\x=cx
+		If cy<>9999 Then dy=cy-points(o,p1)\y:points(o,p1)\y=cy
+		If cz<>9999 Then dz=cz-points(o,p1)\z:points(o,p1)\z=cz
+
+
+		points(o,p2)\x+dx
+		points(o,p2)\y+dy
+		points(o,p2)\z+dz
+		points(o,p3)\x+dx
+		points(o,p3)\y+dy
+		points(o,p3)\z+dz
+		points(o,p4)\x+dx
+		points(o,p4)\y+dy
+		points(o,p4)\z+dz
+
+EndIf
+
+If mode>2 AND cpick>0	;points
+		dx=0:dy=0:dz=0
+		pp=picked(0)
+		o=plots(pp)\obj
+		n=plots(pp)\num
+		If plots(pp)\typ=1
+				If cx<>9999 Then dx=cx-points(o,n)\x:points(o,n)\x=cx
+				If cy<>9999 Then dy=cy-points(o,n)\y:points(o,n)\y=cy
+				If cz<>9999 Then dz=cz-points(o,n)\z:points(o,n)\z=cz
+		EndIf
+		If cpick>1
+				For l=1 To cpick-1
+						pp=picked(l)
+						If plots(pp)\typ=1
+								x=plots(pp)\xxx
+								y=plots(pp)\yyy
+								z=plots(pp)\zzz
+								o=plots(pp)\obj
+								n=plots(pp)\num
+								points(o,n)\x+dx
+								points(o,n)\y+dy
+								points(o,n)\z+dz
+						EndIf
+				Next
+		EndIf
+EndIf
+
+
+drawmode=0+9			;draw
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+If local=0
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "Move (All) "
+Else
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "Move (Axis)"
+EndIf
+
+Goto moveit2
+
+Return
+;----------------------------------------------------------------
+.scaleit
+
+cccc.l=##[$FEDB](&points(0,0),&opoints(0,0),20*500*SizeOf.p3d)
+cccc.l=##[$FEDB](&axis(0),&oaxis(0),20*SizeOf.p3d)
+
+scaleit1:
+Use Window 0
+WLocate 10,247:WColour 0,1
+NPrint "Scale"
+
+Gosub redrawsome
+
+scaleit2:
+ev=WaitEvent
+Use Window EventWindow
+WindowInput EventWindow
+
+a$=Inkey$
+If a$=" "
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "											 "
+		Return
+EndIf
+
+If a$=Chr$(27)
+		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
+		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "											 "
+		Return
+EndIf
+
+;If a$="m" Then Goto moveit1
+;If a$="s" Then Goto scaleit1
+;If a$="r" Then Goto rotateit1
+
+If a$="x" Then lockx=1-lockx:Gosub redrawbar:Goto scaleit2
+If a$="y" Then locky=1-locky:Gosub redrawbar:Goto scaleit2
+If a$="z" Then lockz=1-lockz:Gosub redrawbar:Goto scaleit2
+
+If Joyb(0)=1
+		mx=SMouseX
+		If smx=9999 Then smx=mx
+Else
+		smx=9999
+		Goto scaleit2
+EndIf
+
+sfac.q=((smx-mx)/100)+1
+Use Window 0
+WLocate 10,247:WColour 0,1
+NPrint "Scale Factor:",sfac
+Use Window EventWindow
+
+drawmode=2+9
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+If mode<2	 ;whole object
+		If eobj<>-1
+				o=eobj
+				ax=axis(o)\x
+				ay=axis(o)\y
+				az=axis(o)\z
+				For l=0 To cpoint(o)-1
+						If lockx=0 Then points(o,l)\x=(opoints(o,l)\x-ax)*sfac+ax
+						If locky=0 Then points(o,l)\y=(opoints(o,l)\y-ay)*sfac+ay
+						If lockz=0 Then points(o,l)\z=(opoints(o,l)\z-az)*sfac+az
+				Next
+		EndIf
+EndIf
+
+
+If mode>2 AND cpick>0	;points
+
+		dx=0:dy=0:dz=0
+
+		pp=picked(0)
+		o=plots(pp)\obj
+		n=plots(pp)\num
+		ax=axis(o)\x
+		ay=axis(o)\y
+		az=axis(o)\z
+		If plots(pp)\typ=1
+				If lockx=0 Then points(o,n)\x=(opoints(o,n)\x-ax)*sfac+ax
+				If locky=0 Then points(o,n)\y=(opoints(o,n)\y-ay)*sfac+ay
+				If lockz=0 Then points(o,n)\z=(opoints(o,n)\z-az)*sfac+az
+		EndIf
+
+		If cpick>1
+				For l=1 To cpick-1
+						pp=picked(l)
+						If plots(pp)\typ=1
+								x=plots(pp)\xxx
+								y=plots(pp)\yyy
+								z=plots(pp)\zzz
+								o=plots(pp)\obj
+								n=plots(pp)\num
+								ax=axis(o)\x
+								ay=axis(o)\y
+								az=axis(o)\z
+								If lockx=0 Then points(o,n)\x=(opoints(o,n)\x-ax)*sfac+ax
+								If locky=0 Then points(o,n)\y=(opoints(o,n)\y-ay)*sfac+ay
+								If lockz=0 Then points(o,n)\z=(opoints(o,n)\z-az)*sfac+az
+						EndIf
+				Next
+		EndIf
+EndIf
+
+
+drawmode=0+9
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+Goto scaleit2
+
+Return
+;----------------------------------------------------------------
+.rotateit
+
+
+cccc.l=##[$FEDB](&points(0,0),&opoints(0,0),20*500*SizeOf.p3d)
+cccc.l=##[$FEDB](&axis(0),&oaxis(0),20*SizeOf.p3d)
+
+rotateit1
+If lockx=0 Then locky=1:lockz=1
+If locky=0 Then lockx=1:lockz=1
+If lockz=0 Then locky=1:lockx=1
+Gosub redrawbar
+Use Window 0
+WLocate 10,247:WColour 0,1
+NPrint "Rotate"
+
+Gosub redrawsome
+
+rotateit2:
+ev=WaitEvent
+Use Window EventWindow
+WindowInput EventWindow
+
+a$=Inkey$
+If a$=" "
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "											 "
+		Return
+EndIf
+
+If a$=Chr$(27)
+		ccc.l=##[$FEDB](&opoints(0,0),&points(0,0),20*500*SizeOf.p3d)
+		ccc.l=##[$FEDB](&oaxis(0),&axis(0),20*SizeOf.p3d)
+		Use Window 0
+		WLocate 10,247:WColour 0,1
+		NPrint "											 "
+		Return
+EndIf
+
+;If a$="m" Then Goto moveit1
+;If a$="s" Then Goto scaleit1
+;If a$="r" Then Goto rotateit1
+
+;0=free..
+If a$="x" Then lockx=1-lockx:If lockx=0 Then locky=1:lockz=1
+If a$="y" Then locky=1-locky:If locky=0 Then lockx=1:lockz=1
+If a$="z" Then lockz=1-lockz:If lockz=0 Then locky=1:lockx=1
+
+If a$="x" OR a$="y" OR a$="z"
+		Gosub redrawbar
+		Goto rotateit2
+EndIf
+
+If Joyb(0)=1
+		mx=SMouseX
+		If smx=9999 Then smx=mx
+Else
+		smx=9999
+		Goto rotateit2
+EndIf
+
+sfac.q=QWrap(((smx-mx)/1.2),0,359)
+
+sfac=Int(sfac+.5)
+
+Use Window 0
+WLocate 10,247:WColour 0,1
+NPrint "Rotate:",sfac,Chr$($b0)+"		 "
+Use Window EventWindow
+
+sfac=sfac*(Pi/180)
+
+drawmode=2+9
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+If mode<2	 ;whole object
+		If eobj<>-1
+				o=eobj
+				ax=axis(o)\x
+				ay=axis(o)\y
+				az=axis(o)\z
+				For l=0 To cpoint(o)-1
+						If lockx=0					;around x axis...
+								points(o,l)\z=(opoints(o,l)\z-az)*HCos(sfac)+(opoints(o,l)\y-ay)*HSin(sfac)+az
+								points(o,l)\y=(opoints(o,l)\y-ay)*HCos(sfac)-(opoints(o,l)\z-az)*HSin(sfac)+ay
+						EndIf
+						If locky=0					;around y axis...
+								points(o,l)\x=(opoints(o,l)\x-ax)*HCos(sfac)+(opoints(o,l)\z-az)*HSin(sfac)+ax
+								points(o,l)\z=(opoints(o,l)\z-az)*HCos(sfac)-(opoints(o,l)\x-ax)*HSin(sfac)+az
+						EndIf
+						If lockz=0					;around z axis...
+								points(o,l)\x=(opoints(o,l)\x-ax)*HCos(sfac)+(opoints(o,l)\y-ay)*HSin(sfac)+ax
+								points(o,l)\y=(opoints(o,l)\y-ay)*HCos(sfac)-(opoints(o,l)\x-ax)*HSin(sfac)+ay
+						EndIf
+				Next
+		EndIf
+EndIf
+
+
+If mode>2 AND cpick>0	;points
+
+		dx=0:dy=0:dz=0
+
+		pp=picked(0)
+		o=plots(pp)\obj
+		n=plots(pp)\num
+		ax=axis(o)\x
+		ay=axis(o)\y
+		az=axis(o)\z
+		If plots(pp)\typ=1
+				If lockx=0 Then points(o,n)\x=(opoints(o,n)\x-ax)*sfac+ax
+				If locky=0 Then points(o,n)\y=(opoints(o,n)\y-ay)*sfac+ay
+				If lockz=0 Then points(o,n)\z=(opoints(o,n)\z-az)*sfac+az
+		EndIf
+
+		If cpick>1
+				For l=1 To cpick-1
+						pp=picked(l)
+						If plots(pp)\typ=1
+								x=plots(pp)\xxx
+								y=plots(pp)\yyy
+								z=plots(pp)\zzz
+								o=plots(pp)\obj
+								n=plots(pp)\num
+								ax=axis(o)\x
+								ay=axis(o)\y
+								az=axis(o)\z
+								If lockx=0 Then points(o,n)\x=(opoints(o,n)\x-ax)*sfac+ax
+								If locky=0 Then points(o,n)\y=(opoints(o,n)\y-ay)*sfac+ay
+								If lockz=0 Then points(o,n)\z=(opoints(o,n)\z-az)*sfac+az
+						EndIf
+				Next
+		EndIf
+EndIf
+
+
+drawmode=0+9
+cplot=0
+Gosub redrawtop
+Gosub redrawfront
+Gosub redrawright
+
+Goto rotateit2
+
+Return
+;----------------------------------------------------------------
+.attributes
+If mode<>2 Then Return
+If cpickf=0 OR eobj=-1 Then Return
+co=faces(eobj,pickedf(0))\cc									;current colour
+
+rr.w=ShowPalette(co+16)
+gg.w=NewPaletteMode(co+16)
+bb.w=CyclePalette(co+16)
+
+AddIDCMP $10+$20
+Window 5,80,130,510,110,$100a,"Set Attributes",0,1
+AttachGTList 1,5
+Use Window 5
+WindowOutput 5
+Activate 5
+WLocate 460,20:Print rr," "
+WLocate 460,40:Print gg," "
+WLocate 460,60:Print bb," "
+GTSetAttrs 1,3,#tags+40,rr
+GTSetAttrs 1,4,#tags+40,gg
+GTSetAttrs 1,5,#tags+40,bb
+
+GTSetAttrs 1,0,#tags+17,co+16
+
+attfr:
+ev.l=WaitEvent
+If ev=$200 Then Goto qqq
+gh.l=GadgetHit
+ec.l=EventCode
+eq.l=EventQualifier
+WLocate 0,0
+NPrint ev,"-",gh,"-",ec,"-",eq,"------"
+
+If ev=64 AND gh=0			 ;select colour...
+		co=ec-16
+		rr=ShowPalette(co+16)
+		gg=NewPaletteMode(co+16)
+		bb=CyclePalette(co+16)
+		GTSetAttrs 1,3,#tags+40,rr
+		GTSetAttrs 1,4,#tags+40,gg
+		GTSetAttrs 1,5,#tags+40,bb
+		WLocate 460,20:Print rr," "
+		WLocate 460,40:Print gg," "
+		WLocate 460,60:Print bb," "
+EndIf
+
+If ev=64 AND gh=2 Then Goto qqq
+
+If ev=64 AND gh=1
+		faces(eobj,pickedf(0))\cc=co						;current colour
+		Goto qqq
+EndIf
+
+If ev=64 AND gh=3
+		rr=ec
+		AGARed co+16,rr,gg,bb
+		WLocate 460,20:Print rr," "
+EndIf
+If ev=64 AND gh=4
+		gg=ec
+		AGARed co+16,rr,gg,bb
+		WLocate 460,40:Print gg," "
+EndIf
+If ev=64 AND gh=5
+		bb=ec
+		AGARed co+16,rr,gg,bb
+		WLocate 460,60:Print bb," "
+EndIf
+
+If ev=32 Then down=1
+If ev=64 Then down=0
+
+If ev=16 AND eq=-16384 AND gh=>3 AND gh<=5 AND down=1
+		If gh=3
+				rr=ec
+				AGARed co+16,rr,gg,bb
+		EndIf
+		If gh=4
+				gg=ec
+				AGARed co+16,rr,gg,bb
+		EndIf
+		If gh=5
+				bb=ec
+				AGARed co+16,rr,gg,bb
+		EndIf
+		WLocate 460,20:Print rr," "
+		WLocate 460,40:Print gg," "
+		WLocate 460,60:Print bb," "
+EndIf
+
+If ev=8 AND EventWindow=4
+		Use BitMap 1
+		cc=Cls(EMouseX,EMouseY)-16
+		If cc>-1 AND cc<16
+				co=cc
+				GTSetAttrs 1,0,#tags+17,co+16
+		EndIf
+		Use Window 5
+		Activate 5
+EndIf
+
+Goto attfr
+
+
+qqq:
+Free Window 5
+Use Window 1
+WindowOutput 0
+Activate 1
+Gosub redrawall
+Return
+;----------------------------------------------------------------

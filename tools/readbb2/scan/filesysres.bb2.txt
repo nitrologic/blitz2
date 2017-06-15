@@ -1,0 +1,41 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/resources/filesysres.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/filesysres.bb2
+;
+; $VER: filesysres.bb2 40.0 (01.03.94)
+;
+
+XInclude"exec/nodes.bb2"
+XInclude"exec/lists.bb2"
+XInclude"dos/dos.bb2"
+
+Macro FSRNAME:"FileSystem.resource":End Macro
+
+NEWTYPE.fsr_Creator
+	*fsr_Creator.b
+End NEWTYPE
+
+NEWTYPE.FileSysResource
+fsr_Node.Node;/* on resource list */
+*fsr_Creator.fsr_Creator ;/* name of creator of this resource */
+fsr_FileSysEntries.List;/* list of FileSysEntry structs */
+End NEWTYPE
+
+NEWTYPE.FileSysEntry
+fse_Node.Node;/* on fsr_FileSysEntries list */
+;/* ln_Name is of creator of this entry */
+fse_DosType.l ;/* DosType of this FileSys */
+fse_Version.l ;/* Version of this FileSys */
+fse_PatchFlags.l ;/* bits set for those of the following that */
+;/*	 need to be substituted into a standard */
+;/*	 device node for this file system: e.g. */
+;/*	 0x180 for substitute SegList & GlobalVec */
+fse_Type.l ;/* device node type: zero */
+*fse_Task.b ;/* standard dos "task" field */
+*fse_Lock.b ;/* not used for devices: zero */
+*fse_Handler.b ;/* filename to loadseg (if SegList is null) */
+fse_StackSize.l ;/* stacksize to use when starting task */
+fse_Priority.l ;/* task priority when starting task */
+*fse_Startup.b ;/* startup msg: FileSysStartupMsg for disks */
+*fse_SegList.b ;/* code to run to start new task */
+*fse_GlobalVec.b ;/* BCPL global vector when starting task */
+;/* no more entries need exist than those implied by fse_PatchFlags */
+End NEWTYPE

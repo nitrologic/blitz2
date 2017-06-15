@@ -1,0 +1,29 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/sctest.bb2
+t$="hello there this is a test of a scrolly message written "
+t$+"in blitz basic 2 - OH YEAH, it's groovy all right - buy it "
+t$+"now! OR Else......"
+
+w=656
+
+BitMap 0,w,200,1
+
+BitMapOutput 0
+
+BLITZ
+
+Slice 0,44,320,200,$fff8,1,8,32,w,w
+
+lt=Len(t$)+1
+
+x=8
+
+While Joyb(0)=0
+	VWait
+	Show 0,x,0
+	If x&7=0
+		i=QWrap(i+1,1,lt):i$=Mid$(t$,i,1)
+		Locate x LSR 3+40,0:Print i$
+		Locate x LSR 3-1,0:Print i$
+	EndIf
+	x=QWrap(x+1,8,320+16)
+Wend

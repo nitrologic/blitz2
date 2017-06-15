@@ -1,0 +1,573 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/BootBlock_Checker.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/BootBlock_Checker.bb
+;
+
+;
+; * BOOT BLOCK CHECKER
+;
+; * Version 1.00	8-3-1994
+;
+; * Written by DCAT
+;
+; (C) Copyright March 1994
+;
+;
+; * PROCDURES *
+
+DEFTYPE.l
+DEFTYPE.b count,drive
+
+Dim devicelist$(50)
+Dim List errorlist$(50)
+
+; ------------------------------------------------------------------------
+; *		 ALLOCATE MEMORY		 *
+; ------------------------------------------------------------------------
+Function EXEC_allocmem {bytes}
+			Function Return ##[$FE97](bytes,$10000) ; <--- Allocate mem For Read/Write Buffer
+End Function
+; ------------------------------------------------------------------------
+; *		 TURN DRIVE ON OFF		 *
+; *		 ioportloc = location in memory of I/O port					 *
+; *		 sw				= 0 - Switch off motor										 *
+; *								 1 - Switch on motor											*
+; ------------------------------------------------------------------------
+Statement TD1_drivemotor {iorequest,sw.b}
+	Poke.w iorequest+28,9							; <--- 9 = ETD_MOTOR
+		Poke.l iorequest+36,sw					 ; <--- Motor on/off
+			##[$FEC2](iorequest)							 ; <--- Do I/o ie perform operation
+End Statement
+; ------------------------------------------------------------------------
+;				 ***** CHECK FOR DISK ETC *****
+;	Check for disk in drive : task = 14 (TD_CHANGESTATE)
+;			 if io_actual <> 0 then no disk in drive
+; ------------------------------------------------------------------------
+Statement TD1_check_disk{iorequest,task.b}
+	Shared io_actual								 ; <--- Var to return check to main program
+		Poke.w iorequest+28,task						; <--- Perform what type of task
+			##[$FEC2](iorequest)									; <--- OK do it
+				io_actual=Peek.l (iorequest+32) ; <--- What happened	 0 - disk in
+																				;										255 - no disk
+End Statement
+; ------------------------------------------------------------------------
+; *		 ALLOCATE SIGNAL		 *
+; -1 means allocate first avaiable signal
+; ------------------------------------------------------------------------
+Function TD1_allocsignal {}
+	Function Return ##[$FEAD](-1)			 ; <--- Allocate first avaiable signal
+End Statement
+; ------------------------------------------------------------------------
+; *		 FREE SIGNAL			*
+; ------------------------------------------------------------------------
+Statement TD_freesignal {signalnumber}
+	##[$FEAE](signalnumber)					; <--- Free the signal
+End Statement
+; ------------------------------------------------------------------------
+; ***** MESSAGE PORT *****
+; Size of the message port is 34 bytes
+; ------------------------------------------------------------------------
+Function TD1_msgport {signalnumber}
+msgportloc=EXEC_allocmem {34}				; <--- Allocate memory For MSG port
+	bexec=Peek.l(4)										; <--- Address of Exec base
+		findname=Peek.l(bexec+276)			 ; <--- Address of Current TASK
+	Poke.b msgportloc+8,16						 ; <--- Node type is message port
+		Poke.b msgportloc+9,0						; <--- Port Priority
+			Poke.b msgportloc+14,0				 ; <--- Flags
+				Poke.b msgportloc+15,signalnumber ; <--- This tasks signal
+					Poke.l msgportloc+16,findname	 ; <--- Address of task structure
+	Function Return msgportloc
+End Function
+; ------------------------------------------------------------------------
+; ***** I/O PORT *****
+; I/O port size is 48 bytes
+; ------------------------------------------------------------------------
+Function TD_ioport {msgportloc}
+	ioportloc=EXEC_allocmem {48}			 ; <--- Memory for PORT
+		Poke.b ioportloc+8,32						; <--- Message type
+			Poke.l ioportloc+14,msgportloc ; <--- Address of MSG PORT
+				Poke.w ioportloc+18,48			 ; <--- Length of MSG PORT Structure
+	Function Return ioportloc
+End Function
+; ------------------------------------------------------------------------
+; |				*****		FREE MEMORY		*****										|
+; |	Memblock = Address of memory block to return to system |
+; |	size		 = Amount of bytes to free										 |
+; ------------------------------------------------------------------------
+Function EXEC_freemem {memblock,size}
+	freemem=##[$FE99](memblock,size)		; <--- Return memory to system
+End Function
+; ------------------------------------------------------------------------
+; *			FREE ALL ALLOCATE MEMORY FOR DISK COPY			*
+; ------------------------------------------------------------------------
+Function TD_freemem {msgportloc,ioportloc_read,ioportloc_write}
+	tdfree=EXEC_freemem {msgportloc,34}					; <--- MSG port
+		tdfree=EXEC_freemem {ioportloc_read,48}		; <--- IO Port Read
+			tdfree=EXEC_freemem {ioportloc_write,48} ; <--- IO port Write
+End Function
+; ------------------------------------------------------------------------
+; *			OPEN DEVICE			*
+; ------------------------------------------------------------------------
+Function EXEC_opendevice {unit,memloc}
+	dv$="trackdisk.device"+Chr$(0)
+		Function Return ##[$FEC0](&dv$,unit,memloc,0)
+End Function
+; ------------------------------------------------------------------------
+; *			CLOSE DEVICE			*
+; ------------------------------------------------------------------------
+Function EXEC_closedevice {iorequest}
+	closedevice=##[$FEC1](iorequest)
+End Function
+; ------------------------------------------------------------------------
+; *		 READY READ & WRITE DEVICES		 *
+; ------------------------------------------------------------------------
+Function TD_readydevice {ioportloc_read,ioportloc_write,sourcedrive,targetdrive}
+	unit=sourcedrive									 ; <--- Source Drive
+		memloc=ioportloc_read
+		 od=EXEC_opendevice {unit,memloc}
+	unit=targetdrive									 ; <--- Target Drive
+		memloc=ioportloc_write
+			od=EXEC_opendevice {unit,memloc}
+End Function
+; -----------------------------------------------------------------------
+; *		READ & WRITE THE DISK		 *
+; -----------------------------------------------------------------------
+Function RW_drive {dblock,op,iorequest,bbuffer}
+Poke.w iorequest+28,op									 ; <--- Command
+	Poke.l iorequest+36,5632							 ; <--- Number of tracks in bytes
+		Poke.l iorequest+40,bbuffer			 ; <--- Pointer to buffer
+			Poke.l iorequest+44,0		; <--- Start of Track
+	Function Return ##[$FEC2](iorequest)
+End Function
+
+;
+; ------------------------------------------------------------------------
+; *		 CREATE A DEVICE LIST		 *
+; ------------------------------------------------------------------------
+Statement devices_get{}
+Shared devicelist$()								 ; <--- Return array to main program
+count.b=1														; <--- Counter
+libname$="dos.library"							 ; <--- Which library
+libbase=##[$FECF](&libname$,0)		; <--- Open the dos library
+rn=Peek.l (libbase+34)							 ; <--- Pointer to Rootnode	 Structure
+	df=Peek.l (rn+24)*4								; <--- Pointer to Dosinfo		Structure
+		dn=Peek.l (df+4)*4							 ; <--- Pointer to Devicelist Structure
+Repeat
+	dtype.b=Peek.l(dn+4)							 ; <--- Type of Device
+	If dtype=0
+		fs=Peek.l(dn+28)*4
+			If fs>20
+				d$= "<DEV>"
+			End If
+			n1=Peek.l(dn+40)*4						 ; <--- Pointer
+			 n2=(Peek.b(n1))+1						 ; <--- How many characters
+			name$=String$(" ",n2)					; <--- Create enough spaces in variable
+		For n=1 To n2
+			Poke.b (&name$)+n-1,Peek.b(n1+n)
+		Next n
+
+name$=StripTrail$(name$,0)
+
+devicelist$(count)=d$+" "+name$+":" ; <--- Add device name to array
+			count+1												; <--- Next postion in array
+	End If
+	dn=Peek.l(dn)*4						; <--- Get next structure address / 0 = finished
+Until dn=0													 ; <--- Repeat until no more structures
+closelib=##[$FEBB](libbase)			; <--- Finished with library close it
+End Statement
+; ------------------------------------------------------------------------
+; *		 ERROR TRAPPING		 *
+; ------------------------------------------------------------------------
+Statement add_to_errorlist {op,err}
+
+Shared errorlist$()
+
+f1$=Str$(op)												 ; <--- ERROR during operation
+f1$=String$(" ",3-(Len(f1$)))+f1$
+
+f2$=Str$(err)												; <--- What type of error
+f2$=String$(" ",3-(Len(f2$)))+f2$
+
+If AddItem (errorlist$()) Then errorlist$()=f1$+" "+f2$
+End Statement
+; ------------------------------------------------------------------------
+; *		 DISPLAY ANY ERRORS		 *
+; ------------------------------------------------------------------------
+Statement error_window {errorlist$}
+Shared errorlist$()											; <--- Array from main program
+wx=WindowX : wy=WindowY									; <--- Window = Main
+dum=FirstItem (errorlist$())						 ; <--- First Item of Array
+Repeat
+If errorlist$()<>"" Then c+1						 ; <--- Count the errors
+Until NextItem (errorlist$())=0
+;
+; * WHICH GADGET *
+;
+	If c>1																 ; <--- c>1 more than 1 error
+		TextGadget 2,175,55,0,1,"	 OKAY	 " ; <--- Quit the error window
+		TextGadget 2,50,55,0,2,"	 NEXT	 "	; <--- for displaying next error
+	Else
+		TextGadget 2,120,55,0,3,"	 OKAY	 " ; <--- Quit the error window
+	End If
+Window 2,wx+13,wy+15,318,80,$1008,"DAMN!! GOT A ERROR",2,1,2
+;
+; * NEED THIS FOR PROPER GFX *
+;
+InnerCls
+	If c>1														 ; <--- c>1 more than 1 error
+Redraw 2,2 : Redraw 2,1								; <--- These redraws must be here
+	Else
+Redraw 2,3
+	End If
+;
+	WColour 2,0												; <--- White Text
+			Gosub read_error							 ; <--- Decode first error
+;
+; * OPTIONS *
+;
+Repeat
+	ev.l=WaitEvent
+	If ev=$80000 Then Activate 2
+		If GadgetHit=2 AND ev=$40 Then Gosub read_error
+			If FirstItem (errorlist$())=0 AND c>1 Then ##[$C620] 2,2 : Redraw 2,2
+Until ev=$200 OR GadgetHit=1 OR GadgetHit=3
+;
+; * LEAVE THE ERROR ROUTINE *
+;
+	CloseWindow 2									; <--- Finished with window
+		FlushEvents									; <--- No event overflow
+			Use Window 0							 ; <--- Use the Main Window
+		ClearList errorlist$()			 ; <--- Clear array
+	If c>1 Then ##[$C61F] 2,2				 ; <--- If more than 1 error
+ WColour 1,0										 ; <--- Black text
+Statement Return								 ; <--- Back to Main
+End															; <--- Catch Me
+;
+; * DISPLAY ERROR MESSAGE *
+;
+read_error:
+FlushEvents
+If FirstItem (errorlist$())
+ WBox 20,15,290,50,0
+tx1=Val(Left$(errorlist$(),3))
+tx2=Val(Mid$(errorlist$(),5,3))
+tx1$="ERROR "+Str$(tx1) : tx2$="Unspecified error "+Str$(tx2)
+
+If tx1=3 Then tx1$="ERROR WHILE READING DISK"
+If tx1=4 Then tx1$="ERROR WHILE WRITING DISK"
+If tx1=5 Then tx1$="OPERATION ABORTED"
+
+If tx2=10 Then tx2$="Could not allocate signal"
+If tx2=12 Then tx2$="No disk in drive"
+If tx2=16 Then tx2$="WARNING - Disk may be" : tx3$="Unuseable."
+If tx2=17 Then tx2$="Could not allocate Memory"
+If tx2=18 Then tx2$="There is not enough memory" : tx3$="avaiable to perform this operation"
+
+If tx2=25 Then tx2$="Incorrect Sector Checksum"
+If tx2=26 Then tx2$="Not Enough Sectors Avaiable"
+If tx2=28 Then tx2$="Disk is Write Protected"
+If tx2=29 Then tx2$="Disk has been changed."
+
+x1=(310-(Len(tx1$)*8))/2
+x2=(310-(Len(tx2$)*8))/2
+
+WLocate x1,10 : NPrint tx1$					; <--- Error during operation
+WLocate x2,20 : NPrint tx2$					; <--- What error occured
+
+	If tx3$<>""												; <--- Three lines of text ???
+		x3=(310-(Len(tx3$)*8))/2				 ; <--- Work out pos
+		WLocate x3,30 : NPrint tx3$			; <--- OK print the text
+	End If
+KillItem errorlist$()								; <--- Finished with item Remove it
+tx3$=""															; <--- Blank out tx3$
+End If
+Return
+End Statement
+;
+; *		INIT		*
+;
+WBStartup	 ; <--- Program can run from WB
+WbToScreen 0 ; <--- Screen 0 is WB
+		devices_get {}
+
+drive=0
+;
+; ***** THE GADGETS FOR DRIVES *****
+;
+		For c.w=0 To 3
+			TextGadget 0,32+x,42,0,c,"DF"+Str$(c)+":"
+			x+80
+	##[$C620] 0,c
+		Next c
+count=1
+Repeat
+If Left$(devicelist$(count),8)="<DEV> DF"
+						 dl$=UnRight$(devicelist$(count),6)
+For n=0 To 3
+If dl$="DF"+Str$(n)+":"	Then ##[$C61F] 0,n
+Next n
+End If
+count+1
+Until devicelist$(count)=""
+;
+; *		OPEN THE WINDOW			*
+;
+
+TextGadget 0,20,20,0,7, "Install"
+TextGadget 0,100,20,0,6,"Remove "
+TextGadget 0,180,20,0,5," Check "
+TextGadget 0,260,20,0,4," Quit	"
+Borders 0,0,On
+
+
+Window 0,150,50,343,100,$100e,"BOOT BLK CHK By DCAT V1.00 March 94",1,3,0
+SetString 2,1
+ResetString 17,18,310,16
+ResetString 17,40,310,16
+ResetString 17,62,310,32
+WLocate 20,52 : Print "O/System -"
+WLocate 20,62 : Print "Format	 -"
+WLocate 20,72 : Print "Bootable -"
+
+Repeat
+ev=WaitEvent
+gh.b=GadgetHit
+
+	If ev=$40 Then Gosub select_drive
+
+If ev=$200 OR gh=4 Then End
+If gh>4 Then Gosub get_ready	: gh=0
+
+Forever
+
+End
+;
+; * SUBROUTINES *
+;
+; ------------------------------------------------------------------------
+; *		 SELECT DRIVE/S		 *
+; ------------------------------------------------------------------------
+select_drive:
+If gh<>drive
+	If gh<4
+		Borders 0,drive,On :	Redraw 0,drive
+			Borders 0,drive,Off :	Redraw 0,drive
+			drive=gh
+		Borders 0,drive,On : Redraw 0,drive
+	End If
+End If
+Return
+;
+; * GET MSG PORT ETC READY *
+;
+get_ready:
+
+	 signalnumber=TD1_allocsignal {}
+
+If signalnumber<0 Then add_to_errorlist {1,10} : Goto error
+
+		 msgportloc=TD1_msgport {signalnumber}
+ ioportloc_read=TD_ioport {msgportloc}
+ioportloc_write=TD_ioport {msgportloc}
+
+rd=TD_readydevice {ioportloc_read,ioportloc_write,drive,drive}
+
+
+If gh=5 Then Gosub check_disk
+If gh=6 Then Gosub remove_boot_block
+If gh=7 Then Gosub install_disk
+
+
+	FlushEvents												; <--- No overflow
+
+cd=EXEC_closedevice{ioportloc_read}
+cd=EXEC_closedevice{ioportloc_write}
+
+tdfree=TD_freemem {msgportloc,ioportloc_read,ioportloc_write}
+
+TD_freesignal {signalnumber}
+; --------------------------
+; *	 DID AN ERROR OCCUR	 *
+; --------------------------
+error:
+If FirstItem (errorlist$())
+Gosub blank_text
+ error_window {errorlist$()}
+End If
+ClearList errorlist$()							; <--- Ready for more errors
+Return
+; -------------------------------------------------------------------------
+; * CHECK BOOT BLOCK
+; -------------------------------------------------------------------------
+check_disk:
+Gosub read_boot_block
+fmat=Peek.l (bbuffer)	; <--- Disk format
+If fmat=$444f5300 Then	sys$="2.0" : fmat$="Old File System"
+If fmat=$444f5301 Then	sys$="2.0" : fmat$="Fast File System"
+If fmat=$444f5302 Then	sys$="3.0" : fmat$="OFSystem / Int Mode"
+If fmat=$444f5303 Then	sys$="3.0" : fmat$="FFSystem / Int Mode"
+If fmat=$444f5304 Then	sys$="3.0" : fmat$="OFSystem / Dir Cache"
+If fmat=$444f5305 Then	sys$="3.0" : fmat$="FFSystem / Dir Cache"
+h.l=Peek.l (bbuffer+92)
+If h=$79000000 Then boot$="Yes" Else boot$=" No"
+h.l=Peek.l (bbuffer+48)
+If h=$79000000 Then boot$="Yes" : sys$="1.3"
+
+
+h=Peek.l (bbuffer+100)
+count=0
+If h<>0 AND h<>fmat
+boot$="Non-Standard Boot Block"
+
+			name$=String$(" ",13)					; <--- Create enough spaces in variable
+		For n=bbuffer+629 To bbuffer+641	; <--- Check for zerovirus III
+			Poke.b (&name$+count),Peek.b(n) ; <--- bootblock
+count+1
+		Next n
+
+count=0
+
+			name1$=String$(" ",22)					; <--- Create enough spaces in variable
+		For n=bbuffer+342 To bbuffer+363	; <--- Check for xcopy bootblock
+			Poke.b (&name1$+count),Peek.b(n)
+count+1
+		Next n
+
+End If
+If h=fmat Then sys$="1.3"
+
+If name$="ZeroVirus III"			 ; <--- BOOTBLOCK Installed by
+sys$+"	 "+fmat$
+fmat$="Could be "+name$+" ?"
+End If
+
+If name1$="NO VIRUS ON BOOTBLOCK!"	 ; <--- BOOTBLOCK Installed by XCOPY
+sys$+"	 "+fmat$
+fmat$="Could be XCOPY ?"
+End If
+
+h=Peek.l (bbuffer+4)
+Gosub blank_text
+WLocate 130,52 : Print sys$
+WLocate 130,62 : Print fmat$
+WLocate 130,72 : Print boot$
+tdfree=EXEC_freemem {bbuffer,5632} ; <--- Free buffer
+derr:
+TD1_drivemotor {ioportloc_read,0}		; <--- Read drive motor off
+fmat=0 : h=0 : boot$="" : sys$="" : fmat$="" : name$="" : name1$=""
+Return
+; -------------------------------------------------------------------------
+; * INSTALL A BOOT BLOCK ONTO DISK *
+; -------------------------------------------------------------------------
+install_disk:
+count=0															; <--- Make sure counter is zero
+Restore ofs													; <--- Start of data
+	Gosub read_boot_block							; <--- Read data from disk
+		fmat=Peek.l(bbuffer)						 ; <--- What format
+For n=bbuffer To bbuffer+1020 Step 4 : Poke.l n,0 : Next ; <--- Zero boot blk
+	For n=bbuffer+8 To bbuffer+252 Step 4	 ; <--- Make sure Boot Blk is empty
+		If count<22											; <--- Boot Blk Data
+			Read hx												; <--- Get the data
+				Poke.l n,hx									; <--- Place data in buffer
+			count+1												; <--- Counter
+		End If
+	Next n
+;
+; * THE CHECK SUM *
+;
+If fmat=$444f5300 Then	chksum=$e33d0e73
+	If fmat=$444f5301 Then	chksum=$e33d0e72
+		If fmat=$444f5302 Then	chksum=$e33d0e71
+		If fmat=$444f5303 Then	chksum=$e33d0e70
+	If fmat=$444f5304 Then	chksum=$e33d0e6f
+If fmat=$444f5305 Then	chksum=$e33d0e6e
+	Poke bbuffer,fmat									; <--- Disk format
+	Poke bbuffer+4,chksum							; <--- The checksum
+Gosub write_boot_block							 ; <--- Write the buffer
+Return
+; -------------------------------------------------------------------------
+; * REMOVE BOOT BLOCK *
+; -------------------------------------------------------------------------
+remove_boot_block:
+	d$="DCAT"													; <--- DCAT
+		Gosub read_boot_block						; <--- Data to Buffer
+			fmat=Peek.l(bbuffer)					 ; <--- What format
+For n=bbuffer To bbuffer+508 Step 4	; <--- 1st Block to zero
+	Poke.l n,0
+Next n
+For n=bbuffer+512 To bbuffer+1020 Step 4 ; <--- 2nd block to DCAT
+	Poke.l n,Peek(&d$)
+Next n
+	Poke bbuffer,fmat									; <--- Disk format
+	Gosub write_boot_block						 ; <--- OK Write the buffer
+Return
+;
+; ***** DATA FOR BOOT BLOCK (To make disk bootable)
+; ***** In Long Word -
+;
+; ***** OFS
+;
+ofs:
+;Data.l $444f5300	; <--- Format
+;Data.l $e33d0e73	; <--- Checksum
+Data.l $00000370	 ; <--- Pointer to Root Block
+Data.l $43fa003e
+Data.l $70254eae
+Data.l $fdd84a80
+Data.l $670c2240
+Data.l $08e90006
+Data.l $00224eae
+Data.l $fe6243fa
+Data.l $00184eae
+Data.l $ffa04a80
+Data.l $670a2040
+Data.l $20680016
+Data.l $70004e75
+Data.l $70ff4e75
+Data.l $646f732e
+Data.l $6c696272
+Data.l $61727900
+Data.l $65787061
+Data.l $6e73696f
+Data.l $6e2e6c69
+Data.l $62726172
+Data.l $79000000
+; -------------------------------------------------------------------------
+; * READ THE BOOT BLOCK *
+; -------------------------------------------------------------------------
+read_boot_block:
+bbuffer=EXEC_allocmem {5632}				 ; <--- Memory for copy buffer
+TD1_drivemotor {ioportloc_read,1}		; <--- Drive motor on
+;
+; * CHECK DISKS/DRIVES FIRST *
+;
+TD1_check_disk {ioportloc_read,14}	 ; <--- Disk in source drive ???
+	If io_actual=255 Then add_to_errorlist {3,12} : Goto rbb_err
+;
+; * OK?? READ THE BOOT BLOCK *
+;
+copyread=RW_drive {0,2,ioportloc_read,bbuffer}
+If copyread<>0											 ; <--- copyread holds the error number
+	add_to_errorlist {3,copyread}			; <--- Store error (Reading)
+End If
+rbb_err:
+TD1_drivemotor {ioportloc_read,0}		; <--- Drive motor off
+Return
+; -------------------------------------------------------------------------
+; * WRITE THE BUFFER TO DISK *
+; -------------------------------------------------------------------------
+write_boot_block:
+writebuffer=RW_drive {0,11,ioportloc_write,bbuffer}
+	If writebuffer<>0										; <--- writebuffer holds the error number
+		add_to_errorlist {4,writebuffer}	 ; <--- Store Error (Writing)
+	End If
+tdfree=EXEC_freemem {bbuffer,5632}	 ; <--- Free buffer
+TD1_drivemotor {ioportloc_read,0}		; <--- Read drive motor off
+Return
+
+blank_text:
+WLocate 130,52 : Print String$(" ",24)
+WLocate 130,62 : Print String$(" ",24)
+WLocate 130,72 : Print String$(" ",24)
+Return
+
+
+

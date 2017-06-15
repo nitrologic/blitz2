@@ -1,0 +1,2 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/print.bb
+Print "hello"

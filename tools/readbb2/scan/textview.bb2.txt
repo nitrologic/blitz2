@@ -1,0 +1,120 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/textview.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/textview.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/EXAMPLES/textview.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/textview.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/EXAMPLES/textview.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/textview.bb2
+;
+;a little text viewer!
+;
+;as used on the Blitz 2 pd disks
+;
+;put textfile name in cli argument to test from here
+;
+;otherwise create an executable
+;
+
+Dim t$(2000),l(20)
+
+vl=Int((DispHeight-40)/8) ;visible display lines.
+dh=vl*8+26
+
+x=64:y=dh-12:g=4
+;
+If NumPars=1
+	If WriteMem(0,Par$(1))
+		FileInput 0
+		While NOT DosBuffLen(0) AND l<2000
+			l+1:t$(l)=Edit$(256)
+			If Left$(t$(l),1)="\"
+				g+1:l(g-5)=l
+				TextGadget 0,x,y,0,g,Mid$(t$(l),2)
+				x+Len(t$(l))*8+8
+				l-1
+			EndIf
+		Wend
+		CloseFile 0
+		If l=0 Then End
+	EndIf
+Else
+	##[$FF8C] 0:End
+EndIf
+
+TextGadget 0,624,dh-32,0,1,"^"
+TextGadget 0,624,dh-22,0,2,"v"
+
+PropGadget 0,627,14,128|256,3,10,dh-46
+TextGadget 0,592,dh-12,0,4,"EXIT!"
+
+bod=.9999:If l>vl Then bod=vl/l
+
+SetVProp 0,3,0,bod
+
+bc=3
+Screen 0,0,0,640,dh,2,$8000,"TEXT VIEW",1,2
+Green 0,6,6,6:Green 1,15,15,15:Green 2,0,0,0:Green 3,4,2,10 ;15,15,15
+ScreensBitMap 0,0
+AddIDCMP 16
+Window 0,0,0,640,dh,$1900,"",0,1,0
+WLocate 0,dh-10:Print "Topics:"
+BitMapOutput 0:Colour 1,bc
+ResetString 628,14,8,dh-46
+cl=1:Gosub refresh
+
+Repeat
+	ev.l=WaitEvent
+	If ev=32
+		Select GadgetHit
+		Case 1
+			While Event<>64 AND cl>1
+				VWait
+				Scroll 0,12,624,vl LSL 3-8,0,20
+				Boxf 0,12,623,19,bc
+				cl-1:Locate 0,1.5
+				Print t$(cl)
+				Gosub showprop
+			Wend
+			ocl=cl
+		Case 2
+			While Event<>64 AND cl<=l-vl
+				VWait
+				Scroll 0,20,624,vl LSL 3-8,0,12
+				Boxf 0,vl LSL 3+12-8,623,vl LSL 3+11,bc
+				cl+1:Locate 0,.5+vl
+				Print t$(cl+vl-1)
+				Gosub showprop
+			Wend
+			ocl=cl
+		Case 3
+			Repeat
+				Gosub propref
+			Until WaitEvent=64
+		End Select
+	EndIf
+	If ev=64
+		Select GadgetHit
+		Case 1
+		Case 2
+		Case 3
+			Gosub propref
+		Case 4
+			End
+		Default
+			cl=l(GadgetHit-5):Gosub refresh:Gosub showprop
+		End Select
+	EndIf
+Forever
+
+propref
+cl=Int(VPropPot(0,3)*(l-vl+1)+1)
+;
+refresh
+If cl<>ocl
+	ocl=cl
+	Boxf 0,12,623,vl LSL 3+11,bc
+	Locate 0,1.5
+	For k=0 To vl-1
+	NPrint t$(cl+k)
+	Next
+EndIf
+Return
+
+showprop
+SetVProp 0,3,(cl-1)/(l-vl),bod
+Redraw 0,3
+Return

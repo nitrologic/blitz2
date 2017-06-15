@@ -1,0 +1,16 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/convsfx.bb2
+
+If NumPars<>2 Then ##[$FF8C] 0
+
+If ReadMem(0,Par$(2))=0 Then ##[$FF8C] 0:End
+
+SetErr:##[$FF8C] 0:End:End SetErr
+
+LoadSound 0,Par$(1)
+
+s.l=Addr Sound(0)
+
+Exists 0,s+4,4
+
+Exists 0,Peek.l(s),Peek.w(s+6) LSL 1
+

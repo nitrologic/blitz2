@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/PushItem.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/PushItem.bb
+
+; 
+; pushing items on stack with list
+; 
+
+Dim List a(10)             ;initialize list array
+
+While AddLast(a())           ;fill array up with 0...9 
+ a()=c 
+ c+1 
+Wend
+
+ResetList a()              ;reset list 
+
+While NextItem(a())           ;process all items
+ If a()=5 Then PushItem a()      ;remember when '5' found
+Wend
+
+PopItem a()               ;recall '5' 
+KillItem a()              ;delete it. 
+
+ResetList a()              ;reset list 
+
+While NextItem(a())           ;output list contents 
+ NPrint a()             
+Wend
+
+MouseWait 
+
+End 
+

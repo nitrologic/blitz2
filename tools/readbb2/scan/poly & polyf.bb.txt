@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Poly & Polyf.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Poly & Polyf.bb
+
+NEWTYPE .tri:x0.w:y0:x1:y1:x2:y2:End NEWTYPE
+BLITZ
+BitMap 0,320,256,3
+Slice 0,44,3:Show 0
+While Joyb(0)=0
+  a.tri\x0=Rnd(320),Rnd(256),Rnd(320),Rnd(256),Rnd(320),Rnd(256)
+ Polyf 3,a,1+Rnd(7)
+Wend
+

@@ -1,0 +1,116 @@
+Library Name:
+  ritrackdisklib #91
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, pretty down to earth,
+
+Authors Docs:
+
+
+============================================
+=    T R A C K D I S K    L I B R A R Y    =
+============================================
+
+(C)1994 Reflective Images
+
+Written by Steve Matty.
+
+You can do whatever the hell you like to this library but must still
+give me some credit!
+
+
+Command List :
+
+    success=OpenDisk(unit#)
+    MotorOn unit#
+    MotorOff unit#
+    CloseDisk unit#
+    success=ReadSector(unit#,sector#,buffer[,numsectors])
+    success=WriteSector(unit#,sector#,buffer[,numsectors])
+    success=FormatTrack(unit#,track#,buffer[,numtracks])
+    success=WriteBoot(unit#[,bootdata])
+
+
+Command : OpenDisk
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=OpenDisk(unit#)
+
+This attempts to open unit 'unit#' of the trackdisk.device, for use with
+the other commands in this library. A return value of 0 indicates failure,
+-1 indicates success.
+
+
+Statement : MotorOn
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : MotorOn unit#
+
+This attempts to switch the drive motor on of the previously opened
+trackdisk unit (called with OpenDisk). You must call this command
+before attempting to ReadSector/WriteSector/FormatTrack/WriteBoot
+
+
+Statement : MotorOff
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : MotorOff unit#
+
+This turns the drive motor of 'unit#' off.
+
+
+Command : ReadSector
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : [success=]ReadSector(unit#,sector#,buffer[,numsectors])
+
+This attempts to read 'numsectors' sectors from a trackdisk device which
+has been opened with OpenDisk and has its Motor On. If numsectors is
+omitted then 1 sector is read. The data is read into the memory location
+pointed to by 'buffer'.
+
+WARNING! Please MAKE SURE the MOTOR is _ON_ otherwise, all hell will break
+loose!!!
+
+
+Command : WriteSector
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : [success=]WriteSector(unit#,sector#,buffer[,numsectors])
+
+This is the same as ReadSector except........... it writes!
+(and no, I am not being lazy by not typing any decent docs)
+
+
+Command : FormatTrack
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : [success=]FormatTrack(unit#,track#,buffer[,numtracks])
+
+This does a TD_FORMAT on the specified track number. Buffer should point
+to the area of memory which the track should be formatted with. I don't
+know why this command exists - but hey, it might come in useful.
+
+
+Command : WriteBoot
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : [success=]WriteBoot(unit#[,buffer])
+
+This writes 1kilobyte of data to the bootblock of the specified disk unit.
+The optional buffer parameter should point to an area of memory with which
+to write the bootblock.
+
+
+Statement : CloseDisk
+---------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : CloseDisk unit#
+
+This closes the trackdisk.device of the specified unit#. The Motor is
+automatically switched off if it is already on.
+
+>>END

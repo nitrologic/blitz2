@@ -1,0 +1,66 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/RomulusRequestLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/RomulusRequestLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/libsdev/userlibsrc/RomulusRequestLib.bb
+;
+; andre's requesterlib	(rev bum6)
+;
+
+!libheader{#romulusrequesterlib,0,0,0,0}
+
+!acommand{#long}
+;
+!args {#string,#string,#string}
+!libs {#intuitionlib,#la6}
+!subs {_request1+1,0,0}
+;
+!args {#word,#string,#string,#string}
+!libs {#windowslib,#ia1|#pd0,#intuitionlib,#la6}
+!subs {_request2+1,0,0}
+;
+!name {"EasyRequest","Result=EasyRequest([#Window,]title$,body$,gtext$)"}
+
+!libfin
+
+_request2:
+	MOVE.l	(a1),a0
+	MOVE.l	d1,es_Title
+	MOVE.l	d2,es_TextFormat
+	MOVE.l	d3,es_GadgetFormat
+	BRA _request
+
+_request1:
+	SUB.l a0,a0
+	MOVE.l	d0,es_Title
+	MOVE.l	d1,es_TextFormat
+	MOVE.l	d2,es_GadgetFormat
+
+_request:
+	MOVEM.l a3-a5,-(a7)
+
+	MOVE.l	es_Title,d0
+	MOVE.l	-(a2),d1
+	ALibJsr $cf01
+	MOVE.l	d0,es_Title
+
+	MOVE.l	es_TextFormat,d0
+	MOVE.l	-(a2),d1
+	ALibJsr $cf01
+	MOVE.l	d0,es_TextFormat
+
+	MOVE.l	es_GadgetFormat,d0
+	MOVE.l	-(a2),d1
+	ALibJsr $cf01
+	MOVE.l	d0,es_GadgetFormat
+
+	LEA.l EasyStruct(pc),a1
+	SUB.l a2,a2
+	SUB.l a3,a3
+	JSR -588(a6)
+	MOVEM.l (a7)+,a3-a5
+	RTS
+
+EasyStruct:
+es_StructSize:	Dc.l	SizeOf.EasyStruct
+es_Flags: Dc.l	0
+es_Title: Dc.l	0
+es_TextFormat:	Dc.l	0
+es_GadgetFormat:	Dc.l 0
+

@@ -1,0 +1,3 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/ted.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/ted.bb
+NPrint "HELLO!"
+End

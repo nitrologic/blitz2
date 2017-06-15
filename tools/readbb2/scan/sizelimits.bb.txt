@@ -1,0 +1,16 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SizeLimits.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SizeLimits.bb
+
+; 
+; sizelimits program example
+; 
+Screen 0,2                   ;A simple screen
+SizeLimits 20,20,150,150        ;set limits for windows 
+Window 0,0,0,100,100,15,"SizeLimits",0,1
+Print "Click RMB" 
+Print "to quit" 
+While Joyb(0)<>2
+Wend
+
+
+
+

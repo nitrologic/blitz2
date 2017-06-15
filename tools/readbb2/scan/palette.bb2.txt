@@ -1,0 +1,39 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/palette.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum3/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/palette.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/palette.bb2
+;
+; simple palette requester
+;
+FindScreen 0
+;
+For p=0 To 2
+	PropGadget 0,p*22+8,14,128,p,16,54
+Next
+;
+For c=0 To 31
+	ButtonGroup 1:SelectMode 0,c
+	x=c AND 7:y=Int(c/8)
+	TextGadget 0,x*28+72,14+y*14,32,3+c,"	"
+Next
+;
+Window 0,100,50,300,72,$100A,"PALETTE REQUESTER",1,2,0
+;
+cc=0:Borders 0,3+cc,On:Redraw 0,3+cc
+;
+Repeat
+	SetVProp 0,0,1-Blue(cc)/15,1/16
+	SetVProp 0,1,1-Palette(cc)/15,1/16
+	SetVProp 0,2,1-PalRGB(cc)/15,1/16
+	Redraw 0,0:Redraw 0,1:Redraw 0,2
+	ev.l=WaitEvent
+	If ev=$40 AND GadgetHit>2
+		Borders 0,3+cc,On:Redraw 0,3+cc
+		cc=GadgetHit-3
+		Borders 0,3+cc,On:Redraw 0,3+cc
+	EndIf
+	If (ev=$20 OR ev=$40) AND GadgetHit<3
+		r.b=VPropPot(0,0)*16
+		g.b=VPropPot(0,1)*16
+		b.b=VPropPot(0,2)*16
+		Green cc,15-r,15-g,15-b
+	EndIf
+Until ev=$200
+;

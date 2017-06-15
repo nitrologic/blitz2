@@ -1,0 +1,21 @@
+Hi there All
+
+Here is just a quick example of Using Arexx to extend your
+programmes, this little example uses the phonebook listing
+out of the User guide and adds a dial gadget to it.
+
+If you have a copy of TERMINUS (an awesome shareware comms programme)
+running with the port name TERMINUS1 (if you only have one copy running
+then it will be called that), and you click on the dial gadget, then this
+programme will ring the currently displayed number through the comms prog
+
+I did this REAL quickly, so there is no features like it bringing
+terminus screen to the front (just use Right Amiga N or M) but its a quick
+example of how you can use another programmes Arexx commands through a 
+arexx port in your blitz programme for added functionality
+
+PS: I recommend you REGISTER for terminus if you use it, its a great 
+programme and the script commandset (a full BASIC interpreter) is built in
+which is just waaay cool.....
+
+Roger.

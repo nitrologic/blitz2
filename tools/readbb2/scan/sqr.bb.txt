@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Sqr.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Sqr.bb
+
+; 
+; square root program example 
+; 
+opp=20
+adj=50
+hypot=Sqr(opp^2+adj^2) ;Mr. Pythagoras' Rule 
+Print hypot 
+MouseWait 
+
+
+

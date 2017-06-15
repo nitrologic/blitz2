@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Edit.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Edit.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Edit.bb
+
+; 
+; edit program example
+; 
+Print "Type in your age:"           ;prompt...
+a=Edit(40)                  ;receive age! 
+
+If a>=21                   ;are they over 21?
+ NPrint "I hope you enjoyed your twenty first!"       ;yes!
+Else                                         ;else... 
+ NPrint "I bet you're looking forward to your twenty first!" ;no! 
+EndIf 
+
+MouseWait 
+
+

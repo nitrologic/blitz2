@@ -1,0 +1,719 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/ppceq2b.bb2
+
+;/*
+;(c) Copyright 1988-1994 Microsoft Corporation.
+;
+;Microsoft Bars&Pipes Professional Source Code License
+;
+;This License governs Use of the accompanying Software.
+;Microsoft hopes you find this Software useful.
+;
+;You are licensed To do anything you want with the Software.
+;
+;In Return, we simply require that you agree:
+;
+;1.			NOT To remove any copyright notices from the Software.
+;
+;2.			That the Software comes "as is", with no warranties.
+;				None whatsoever. This means no implied warranty of merchantability OR
+;				fitness For a particular purpose OR any warranty of non-infringement.
+;				Also, you must pass this disclaimer On whenever you distribute the Software.
+;
+;3.			That we will NOT be liable For any of those types of damages known as indirect,
+;				special, consequential, OR incidental related To the Software OR this License,
+;				To the Maximum extent the law permits. Also, you must pass this limitation of
+;				liability On whenever you distribute the Software.
+;
+;4.			That If you sue anyone over patents that you think may apply To the Software
+;				For that persons Use of the Software, your license To the Software ends automatically.
+;
+;5.			That the patent rights Microsoft is licensing only apply To the Software,
+;				NOT To any derivatives you make.
+;
+;6.			That your rights under the License End automatically If you breach this in any way.
+;*/
+;
+
+;Bars&Pipes audio 3 Band par EQ
+;plugin (install sampler.ptool from Alfred Faust HP)
+;If someone wants the sampler.ptool Source in Blitzbasic mail
+;On lib init you must Call !initasm
+;If you want to use basic call !basica7 (this set a4/a5 to blitz values)
+;Dont forget to call !asma7 This set a4/a5 to original state
+;On lib exit you must call !exitasm
+##[$ED11] 1
+
+#toolid=$00010004
+#maxwindows=3
+DEFTYPE .l
+Dim wintab(#maxwindows)
+Dim db.l(31),qtab.f(33),ftab.w(74),q$(3)
+NEWTYPE .toolvar ;structur for edittool
+
+ tool.Tool	 ;toolvars\tool\left ,top,width,height= for windowcoord
+						 ;Zugriff auf Strings: Poke$ &*toolvars\string,a$
+						 ;a$=Peek$(&*toolvars\string) | Definition: string.b[20]
+						 ;first id code=$0001 for ppc $0002 for 68k
+ nextplugin.l	;$40
+ processcode.l ;$44			;address of processdata Code
+ in.b					;$48			;In Buffer Num $0=midichannel,$1=destbuff $2=2 .-32
+ out.b				 ;$49			;Out Buffer Num	"						 "
+ mode.b				;$4a			;add Buffer or copy buffer
+ pad.b				 ;$4b			;free
+ padm1.l			 ;$4c			;free
+ padm2.l			 ;$50			;free
+;****************User Data
+ ma0.l[3]
+ ma1.l[3]
+ ma2.l[3]
+ b1.l[3]
+ b2.l[3]
+ x1al.l
+ x1bl.l
+ x1cl.l
+ x2al.l
+ x2bl.l
+ x2cl.l
+ y1al.l
+ y1bl.l
+ y1cl.l
+ y2al.l
+ y2bl.l
+ y2cl.l
+ x1ar.l
+ x1br.l
+ x1cr.l
+ x2ar.l
+ x2br.l
+ x2cr.l
+ y1ar.l
+ y1br.l
+ y1cr.l
+ y2ar.l
+ y2br.l
+ y2cr.l
+ master.l
+ typ.w[3]
+ lev.l[3]
+ fs.l[3]
+ q.l[3]
+ change.w
+ range.b
+ pad1.l
+ pad2.l
+ pad3.l
+ pad4.l
+ pad5.l
+;****************
+End NEWTYPE
+BRA inittool
+Statement message{*toolv.toolvar,w2}
+Shared w,wintab(),lock,*functions.functions
+Shared ftab(),qtab(),q$()
+USEPATH *toolv
+MaxLen pa$=192
+MaxLen fi$=192
+rate=32000
+Gosub refreshall	;set gadgetvalues
+moremessage
+##[$C0A9]
+ev.l=##[$C0A1]
+##[$C0A8]
+If ev=$200 Then Goto closewin
+ If EventWindow=w2
+	 Use Window w2
+	 Select ev
+;***************************Message begin*****************
+.messageloop
+	Case $800000
+		Select ##[$C08E]
+		Case "gin":\in=##[$C085]:!bars{display,$40}
+		Case "gout":\out=##[$C085]:!bars{display,$40}
+		Case "gmode":\mode=##[$C085]:
+		Case "gmode1":\typ[0]=##[$C085]
+		Case "gmode2":\typ[1]=##[$C085]
+		Case "gmode3":\typ[2]=##[$C085]
+		Case "gmaster":\master=##[$C085]
+		Case "gfreq1":\fs[0]=##[$C085]:##[$C08D] "gfreqb1",ftab(\fs[0])
+		Case "gq1":\q[0]=##[$C085]:Format "##.#":q$(0)=Str$(qtab(\q[0])):##[$C08D] "gqb1",&q$(0)
+		Case "glevel1":\lev[0]=##[$C085]:##[$C08D] "glevelb1",\lev[0]
+		Case "gfreq2":\fs[1]=##[$C085]:##[$C08D] "gfreqb2",ftab(\fs[1])
+		Case "gq2":\q[1]=##[$C085]:Format "##.#":q$(1)=Str$(qtab(\q[1])):##[$C08D] "gqb2",&q$(1)
+		Case "glevel2":\lev[1]=##[$C085]:##[$C08D] "glevelb2",\lev[1]
+		Case "gfreq3":\fs[2]=##[$C085]:##[$C08D] "gfreqb3",ftab(\fs[2])
+		Case "gq3":\q[2]=##[$C085]:Format "##.#":q$(2)=Str$(qtab(\q[2])):##[$C08D] "gqb3",&q$(2)
+		Case "glevel3":\lev[2]=##[$C085]:##[$C08D] "glevelb3",\lev[2]
+		End Select
+	Gosub koeffcalc
+;***************************Message End*******************
+	End Select
+ End If
+BRA moremessage
+closewin:
+*i=\tool\_Window
+\tool\width=Peek.w(*i+8)
+\tool\height=Peek.w(*i+$a)
+\tool\left=Peek.w(*i+4)
+\tool\top=Peek.w(*i+6)
+Use Window w2
+!freenewidcmp
+\tool\_Window=0
+##[$C083] w2
+wintab(w2)=0
+Goto endstatement
+Return
+refreshall
+##[$C08D] "gin",\in:##[$C08D] "gout",\out:##[$C08D] "gmode",\mode
+##[$C08D] "gmaster",\master:##[$C08D] "imaster",\master
+;**************************************
+.refreshalluser
+##[$C08D] "gfreq1",\fs[0]:##[$C08D] "gfreqb1",ftab(\fs[0])
+##[$C08D] "gq1",\q[0]:Format "##.#":q$(0)=Str$(qtab(\q[0])):##[$C08D] "gqb1",&q$(0)
+##[$C08D] "glevel1",\lev[0]:##[$C08D] "glevelb1",\lev[0]
+##[$C08D] "gfreq2",\fs[1]:##[$C08D] "gfreqb2",ftab(\fs[1])
+##[$C08D] "gq2",\q[1]:Format "##.#":q$(1)=Str$(qtab(\q[1])):##[$C08D] "gqb2",&q$(1)
+##[$C08D] "glevel2",\lev[1]:##[$C08D] "glevelb2",\lev[1]
+##[$C08D] "gfreq3",\fs[2]:##[$C08D] "gfreqb3",ftab(\fs[2])
+##[$C08D] "gq3",\q[2]:Format "##.#":q$(2)=Str$(qtab(\q[2])):##[$C08D] "gqb3",&q$(2)
+##[$C08D] "glevel3",\lev[2]:##[$C08D] "glevelb3",\lev[2]
+##[$C08D] "gmode1",\typ[0]:##[$C08D] "gmode2",\typ[1]:##[$C08D] "gmode3",\typ[2]
+;**************************************
+Gosub koeffcalc
+Return
+.koeffcalc
+		wk.f=rate/(ftab(\fs[0]))
+		A2.f=qtab(\q[0])
+		level.l=\lev[0]
+		lev.f=level/32
+		typm=\typ[0]
+		eqnum=0
+		Gosub koeffr
+		wk.f=rate/(ftab(\fs[1]))
+		A2.f=qtab(\q[1])
+		level.l=\lev[1]
+		lev.f=level/32
+		typm=\typ[1]
+		eqnum=1
+		Gosub koeffr
+		wk.f=rate/(ftab(\fs[2]))
+		A2.f=qtab(\q[2])
+		level.l=\lev[2]
+		lev.f=level/32
+		typm=\typ[2]
+		eqnum=2
+		Gosub koeffr
+Return
+.koeffr
+e0.f=1.0:e1.f=1.36:e2.f=1.38:F0.f=0:f1.f=0:f2.f=1
+If wk=0 OR A2=0 Then Return
+If typm=0 Then Return
+If typm=1 Then F0=1:f2=0:f1=f1/A2:e1=e1/A2
+If typm=2 Then e1=e1/A2
+If typm=3 Then f2=0:f1=1:f1=f1/A2:e1=e1/A2
+If typm=4 Then A2=1/A2:F0=0:F0=F0/A2:e0=e0/A2:f2=f2/A2:e2=e2/A2
+u.f=1.0/HTan(3.1415925/wk):v.f=u*u
+s2.f=e0+e1*u+e2*v
+Format ""
+t.f=((F0-f1*u+f2*v)/s2)
+##[$FE8A]
+!tofloat
+\ma2[eqnum]=##[$C0A0]
+;WLocate 2,100
+;NPrint "ma2 ",t
+t=(2*(F0-f2*v)/s2)
+!tofloat
+\ma1[eqnum]=##[$C0A0]
+;NPrint "ma1 ",t
+t=((F0+f1*u+f2*v)/s2)
+!tofloat
+\ma0[eqnum]=##[$C0A0]
+;NPrint "ma0 ",t
+t=-((e0-e1*u+e2*v)/s2)
+!tofloat
+\b2[eqnum]=##[$C0A0]
+;NPrint "b2 ",t
+t=-(2*(e0-e2*v)/s2)
+!tofloat
+\b1[eqnum]=##[$C0A0]
+##[$FE8B]
+;NPrint "b1 ",t
+;Format "000.00"
+Return
+
+endstatement
+End Statement
+callengine
+MOVE.l d0,-(a7)
+LEA taskname,a1
+MOVE.l $4,a6
+JSR -294(a6)
+TST.l d0
+BEQ 'l2
+MOVE.l d0,a0
+MOVE.l $58(a0),d1
+MOVE.l d1,sndtask
+MOVE.l (a7)+,d0
+'l1
+MOVE.l d1,a0
+ MOVE.l 0(a0,d0),a0
+		JSR (a0)
+RTS
+'l2
+ADDQ.l #4,a7
+RTS
+transport:
+ !basica7
+ CMP.w #1,d0
+ BNE nomoretrack
+ *i=*functions.functions\tracklist
+ MOVE.l d0,a2
+moretrack: MOVE.l a2,d0
+ BEQ nomoretrack
+ MOVE.l a2,a3
+ MOVE.l SizeOf .Track\toollist(a2),a2
+moretool: MOVE.l a2,d0
+ BEQ nomoretool
+ CMP.l #toolid,SizeOf .Tool\toolid(a2)
+ BNE nomu80
+ MOVEM.l a2/a3,-(a7)
+ ;****************************
+.transportuser
+ MOVE.w #$fff,$dff180
+ ;****************************
+ MOVEM.l (a7)+,a2/a3
+nomu80
+ MOVE.l (a2),a2
+ BRA moretool
+nomoretool
+ MOVE.l (a3),a3
+ MOVE.l a3,a2
+ BRA moretrack
+nomoretrack
+ !asma7
+ RTS
+inittool:
+MOVEQ #$11,d0
+MOVE.l $4,a6
+JSR -336(a6)			 ;free Sig 11
+MOVEQ #$12,d0
+MOVE.l $4,a6
+JSR -336(a6)			 ;free sig 12
+!initasm
+MOVE.l 4(a7),d0
+!basica7
+MOVE.l d0,functions
+*functions.functions=##[$C0A0]
+*chip=AllocMem (150,2)
+##[$FEDB] ?Picture,*chip,144
+bild1.image\left =0,0,24,12,3,*chip,7,0,0
+master.ToolMaster\toolsize=SizeOf .toolvar
+master.ToolMaster\toolid=#toolid
+master\image=bild1
+Poke$ &master\name,"A_EQ_FP"
+master\processevent=?processeventcode
+master\removetool=?removetool
+master\edittool=?edittool
+master\tooltype=#TOOL_NORMAL
+master\createtool=?createtool
+master\deletetool=?deletetool
+master\loadtool=?loadtool
+master\expandc=?drawicon
+.inittooluser
+For i.l=0 To 31
+Read qtab.f(i)
+Next
+For i.l=0 To 72
+Read ftab.w(i)
+Next
+;!bars{installtransport,?transport}
+;**************************************
+
+;**************************************
+main:
+##[$C09F] master
+!asma7
+RTS
+.drawicon
+LEA 4(a7),a0
+!basica7
+MOVE.l $4(a0),d0:rp=##[$C0A0]
+MOVE.l (a0),d0:*tv.toolvar=##[$C0A0]
+MOVE.l $8(a0),d0:x=##[$C0A0]+2
+MOVE.l $c(a0),d0:y=##[$C0A0]+$5
+##[$FF35] rp,3
+##[$FF2F] rp,x-2,y-5,x+22,y+6
+##[$FF35] rp,1
+!bars{SetSmallFont,rp}
+##[$FF37] rp,0
+##[$FF24] rp,x,y
+##[$FF06] rp,"eq	",4
+##[$FF24] rp,x,y+6
+Format"##"
+a$=Str$(*tv\in)+Str$(*tv\out)
+##[$FF06] rp,a$,Len(a$)
+!bars{SetNormalFont,rp}
+!asma7
+RTS
+.loadtool
+PEA $0
+JSR createtool
+ADDQ #4,a7
+MOVE.l d0,a0
+MOVE.l $44(a0),-(a7)
+MOVE.l d0,-(a7)
+MOVE.l d6,-(a7)
+MOVE.l d0,-(a7)
+MOVE.l d7,-(a7)
+MOVE.l functions,a0
+MOVE.l $5de(a0),a0
+JSR (a0)						 ;fastread
+LEA $c(a7),a7
+MOVE.l (a7)+,d0
+MOVE.l d0,a0
+MOVE.l (a7)+,$44(a0)
+RTS
+.createtool
+MOVE.l 4(a7),a0
+!basica7
+MOVE.l a0,a3
+!bars{myalloc,SizeOf .toolvar,$10000}
+MOVE.l d0,-(a7)
+TST.l d0
+BEQ 'l1
+MOVE.l d0,a0
+MOVE.b #1,$49(a0)		;default output
+LEA ppccode,a1
+MOVE.l a1,$44(a0)	 ;process code
+MOVE.l a3,d0
+BEQ 'l1
+MOVE.w #SizeOf .toolvar,d0
+SUBQ #1,d0
+'c1:MOVE.b (a3)+,(a0)+
+DBF d0,'c1
+'l1:
+MOVEQ #0,d0			 ;createpluginlist
+JSR callengine
+MOVE.l (a7)+,d0
+!asma7
+RTS
+deletetool
+MOVE.l $4(a7),d0
+!basica7
+i=##[$C0A0]
+MOVE.l #$2a,d0			;deletepluginlist
+JSR callengine
+!bars{myfree,i,SizeOf .toolvar}
+!asma7
+RTS
+processeventcode
+MOVE.l 4(a7),a0
+!basica7
+MOVE.l event_tool(a0),a1
+MOVE.l (a1),event_tool(a0)
+;*****************************************
+.processeventuser
+;*****************************************
+!asma7
+MOVE.l 4(a7),d0
+RTS
+edittool
+MOVE.l $4(a7),d0
+##[$C0A8]
+!basic
+*toolvars.toolvar=##[$C0A0]
+MOVE.l functions,d0
+*functions.functions=##[$C0A0]
+If (*toolvars\tool\touched AND 1) =0
+*toolvars\tool\touched OR 1
+USEPATH *toolvars
+*temp.toolvar=*toolvars
+;**************************Initialize the first Time
+.setdefaultuser ;For Edit
+\q[0]=7:\q[1]=7:\q[2]=7
+\tool\left=20,20,300,180
+;**************************
+End If
+USEPATH *toolvars
+.begin
+FindScreen 0
+	s=0
+	For i=0 To #maxwindows-1
+	If wintab(i)=0 Then w=i:wintab(w)=1:i=20:s=100
+	Next
+	If s=0 Then Goto nofreewindow
+##[$C082] w,?SurfaceData,250,\tool\left,\tool\top,\tool\width,\tool\height,1
+\tool\_Window=##[$C087]
+If ##[$C087]
+!newidcmp
+	message {*toolvars,w}
+Else
+i=##[$B58D]("ppceq.ptool Error","Can `t open Window	(wizard.library ??)","Ok")
+End If
+nofreewindow
+##[$C0A9]
+!asm
+RTS
+removetool
+!basica7
+;!bars {removetransport,?transport}
+!asma7
+!exitasm
+End noa7
+Picture:;	BitPlane 0
+Dc.w $0000,$0000,$0FFF,$F000,$3FFF,$FC00,$3BFF,$FC00
+Dc.w $3BFF,$FC00,$3BFF,$FC00,$23FF,$FC00,$23FF,$FC00
+Dc.w $3FFF,$0000,$0000,$FC00,$0FFF,$F000,$0000,$0000
+;	BitPlane 1
+Dc.w $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+Dc.w $C000,$0300,$C000,$0300,$C000,$0300,$C000,$0300
+Dc.w $0000,$0000,$0000,$0000,$0000,$0000,$0000,$0000
+;	BitPlane 2
+Dc.w $0000,$0000,$0FFF,$F000,$3FFF,$FC00,$3BEE,$EC00
+Dc.w $0000,$0000,$0000,$EC00,$2388,$8C00,$2388,$8C00
+Dc.w $3FFF,$FC00,$3FFF,$FC00,$0FFF,$F000,$0000,$0000
+
+functions: Dc.l 0
+sndtask: Dc.l 0
+_Edit: Dc.l 0
+taskname :Dc.b "soundengine001",0
+ ;noexecutable result File end with .o
+								 ;r1 =Stack
+								 ;r2 =baseaddr for global variable (must be less 32768 Bytes)
+								 ;r3 =inbuffer
+								 ;r4 =outbuffer
+								 ;cr7 Z = addmode	cr6 Z = in=out
+								 ;r5 -r28 free 24 Regs always free no need for save regs
+								 ;ctr+r29=blocksize if ctr !=-1	on functionexit the inbuffer is copied to outbuffer
+								 ;r30=toolstruct dont write to last 32 Bytes
+								 ;r31=soundengine data don t change reg
+
+
+#lev	=	9		;r9
+#mlev = 5
+#ma0 =	9
+#ma1 =	10
+#ma2 =	11
+#_b1 =	12
+#_b2 =	13
+#x1l =	14
+#x2l =	15
+#y1l =	16
+#y2l =	17
+#x1r =	18
+#x2r =	19
+#y1r =	20
+#y2r =	21
+#tmp =	22
+USEPATH *toolvars
+##[$EC89]
+_data
+fptemp: Dc.l $43300000,$80000000
+fptemp3: Dc.s 1/(32768*2)
+fptemp2: Dc.s 1/64
+cycles: Dc.l $0
+_CITF_TEMP: Dc.l $43300000,0
+_CITF_DEF:	Dc.l $43300000,$80000000
+inl:				Dc.l $43300000,0
+inr:				Dc.l $43300000,0
+outl:			 Dc.l 0,0
+outr:			 Dc.l 0,0
+;end global variables
+_base
+.ppccode
+ ##[$ED0B] r21
+ !sw r21,cycles
+ ##[$ED0A] r21,r2
+ !ls f30,fptemp2
+ !ls f29,fptemp3
+ !lf f31,fptemp
+ ##[$ECA5]	r6
+ SUBI r1,r1,4
+ ##[$ECE1] r6,0(r1)
+ ##[$ECDE] r13,\master(r30)
+ ADDI r13,r13,64
+ ;!citf mlev,r12
+ ##[$EC85] mlev,mlev,f30
+ ##[$ED0A] r10,r3
+ ##[$ED0A] r11,r4
+ ##[$ECE5] r6,\typ(r30)
+ ##[$EC91] 0,r6,0
+ BEQ 'noeq1
+ ##[$ED04] r6,\ma0(r30)
+ ##[$ECDE] lev,\lev(r30)
+ ##[$ECEB] ma0,0(r6)
+ ##[$ECEB] ma1,12(r6)
+ ##[$ECEB] ma2,24(r6)
+ ##[$ECEB] _b1,36(r6)
+ ##[$ECEB] _b2,48(r6)
+ ##[$ECEB] x1l,60(r6)
+ ##[$ECEB] x2l,72(r6)
+ ##[$ECEB] y1l,84(r6)
+ ##[$ECEB] y2l,96(r6)
+ ##[$ECEB] x1r,108(r6)
+ ##[$ECEB] x2r,120(r6)
+ ##[$ECEB] y1r,132(r6)
+ ##[$ECEB] y2r,144(r6)
+ ##[$ECA9] calc
+ ##[$ED04] r6,\ma0(r30)
+ ##[$ECEF] x1l,60(r6)
+ ##[$ECEF] x2l,72(r6)
+ ##[$ECEF] y1l,84(r6)
+ ##[$ECEF] y2l,96(r6)
+ ##[$ECEF] x1r,108(r6)
+ ##[$ECEF] x2r,120(r6)
+ ##[$ECEF] y1r,132(r6)
+ ##[$ECEF] y2r,144(r6)
+'noeq1
+ ##[$ECE5] r6,\typ[1](r30)
+ ##[$EC91] 0,r6,0
+ BEQ 'noeq2
+ ##[$ECA3] r29
+ ##[$ED0A] r3,r10
+ ##[$ED0A] r4,r11
+ ##[$ED04] r6,\ma0[1](r30)
+ ##[$ECDE] lev,\lev[1](r30)
+ ##[$ECEB] ma0,0(r6)
+ ##[$ECEB] ma1,12(r6)
+ ##[$ECEB] ma2,24(r6)
+ ##[$ECEB] _b1,36(r6)
+ ##[$ECEB] _b2,48(r6)
+ ##[$ECEB] x1l,60(r6)
+ ##[$ECEB] x2l,72(r6)
+ ##[$ECEB] y1l,84(r6)
+ ##[$ECEB] y2l,96(r6)
+ ##[$ECEB] x1r,108(r6)
+ ##[$ECEB] x2r,120(r6)
+ ##[$ECEB] y1r,132(r6)
+ ##[$ECEB] y2r,144(r6)
+ ##[$ECA9] calc
+ ##[$ED04] r6,\ma0[1](r30)
+ ##[$ECEF] x1l,60(r6)
+ ##[$ECEF] x2l,72(r6)
+ ##[$ECEF] y1l,84(r6)
+ ##[$ECEF] y2l,96(r6)
+ ##[$ECEF] x1r,108(r6)
+ ##[$ECEF] x2r,120(r6)
+ ##[$ECEF] y1r,132(r6)
+ ##[$ECEF] y2r,144(r6)
+'noeq2
+ ##[$ECE5] r6,\typ[2](r30)
+ ##[$EC91] 0,r6,0
+ BEQ 'noeq3
+ ##[$ECA3] r29
+ ##[$ED0A] r3,r10
+ ##[$ED0A] r4,r11
+ ##[$ED04] r6,\ma0[2](r30)
+ ##[$ECDE] lev,\lev[2](r30)
+ ##[$ECEB] ma0,0(r6)
+ ##[$ECEB] ma1,12(r6)
+ ##[$ECEB] ma2,24(r6)
+ ##[$ECEB] _b1,36(r6)
+ ##[$ECEB] _b2,48(r6)
+ ##[$ECEB] x1l,60(r6)
+ ##[$ECEB] x2l,72(r6)
+ ##[$ECEB] y1l,84(r6)
+ ##[$ECEB] y2l,96(r6)
+ ##[$ECEB] x1r,108(r6)
+ ##[$ECEB] x2r,120(r6)
+ ##[$ECEB] y1r,132(r6)
+ ##[$ECEB] y2r,144(r6)
+ ##[$ECA9] calc
+ ##[$ED04] r6,\ma0[2](r30)
+ ##[$ECEF] x1l,60(r6)
+ ##[$ECEF] x2l,72(r6)
+ ##[$ECEF] y1l,84(r6)
+ ##[$ECEF] y2l,96(r6)
+ ##[$ECEF] x1r,108(r6)
+ ##[$ECEF] x2r,120(r6)
+ ##[$ECEF] y1r,132(r6)
+ ##[$ECEF] y2r,144(r6)
+'noeq3
+ ##[$ED0B] r5
+ !lw r6,cycles
+ SUB r6,r5,r6
+ ##[$ECE1] r6,-$24(r31)
+ ##[$ECDE] r6,0(r1)
+ ADDI r1,r1,4
+ ##[$ECA4] r6
+ ##[$ECAA]
+calc
+		##[$ECDE] r5,0(r3)
+		##[$ECB3] r5,r5,-$8000
+		!sw r5,inl+4
+		##[$ECDE] r7,4(r3)
+		##[$ECB3] r7,r7,-$8000
+		!sw r7,inr+4
+'l10
+ !lf f1,inl
+		!lf f3,inr
+ ##[$EC83] f1,f1,f31
+		##[$EC83] f3,f3,f31
+										##[$ECDE] r5,8(r3)
+											;mullw r5,r5,r12
+											;srawi r5,r5,6
+										##[$ECB3] r5,r5,-$8000
+										!sw r5,inl+4
+ ##[$EC85] f0,x1l,ma1
+		##[$EC85] f24,x1r,ma1
+												##[$ECDE] r7,12(r3)
+													;mullw r7,r7,r12
+													;srawi r7,r7,6
+												##[$ECB3] r7,r7,-$8000
+												!sw r7,inr+4
+ ##[$ECFC] f0,x2l,ma2,f0
+		##[$ECFC] f24,x2r,ma2,f24
+ ##[$ED0D] x2l,x1l
+		##[$ED0D] x2r,x1r
+ ##[$ED0D] x1l,f1;fmul x1l,f1,mlev
+	##[$ED0D] x1r,f3
+		;fmul x1r,f3,mlev
+ ##[$ECFC] f0,x1l,ma0,f0
+		##[$ECFC] f24,x1r,ma0,f24
+ ##[$ECFC] f0,y2l,_b2,f0
+		##[$ECFC] f24,y2r,_b2,f24
+ ##[$ED0D] y2l,y1l
+ ##[$ED0D] y2r,y1r
+ ##[$ECFC] y1l,y1l,_b1,f0
+		##[$ECFC] y1r,y1r,_b1,f24
+ ##[$ECF6] f1,y1l
+		##[$ECF6] f24,y1r
+ !_sf f1,outl
+ ADDI r4,r4,8
+ ADDI r3,r3,8
+		!_sf f24,outr
+ !lw r6,outl+4
+ BNE 7,'l11
+ ##[$ECDE] r8,-8(r3)
+								##[$EC8B] r6,r6,lev
+								##[$ECDB] r6,r6,6
+ ADD r6,r6,r8
+'l11
+ ##[$EC8B] r6,r13,r6
+ ##[$ECDB] r6,r6,6
+	 ##[$ECE1] r6,-8(r3)
+ !lw	r6,outr+4
+ BNE 7,'l12
+ ##[$ECDE] r8,-4(r3)
+								 ##[$EC8B] r6,r6,lev
+								 ##[$ECDB] r6,r6,6
+ ADD r6,r6,r8
+'l12:
+ ##[$EC8B] r6,r13,r6
+ ##[$ECDB] r6,r6,6
+		 ##[$ECE1] r6,-4(r3)
+ ##[$ECA7] 'l10
+ ##[$ED03] r5,1
+ ##[$ECAA]
+SurfaceData: IncBin "A_Wizard:ppceq.Wizard"
+Event
+Data.f 0.1,0.3,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.4,1.6,1.8,2.0,2.2,2.4
+Data.f 2.6,2.8,3.0,3.5,4.0,4.5,5.0,6,7,8,10,15,20,25,30,40
+Data.w 30,35,40,45,50,55,60,65,72,82,90,100,110,120,130 ;100=11
+Data.w 140,150,170,190		;150=16
+Data.w 210,230,250,280,310,340,370,400,450,500,550,600 ;500=28
+Data.w 750,800,850,900,950,1000		;1000=36
+Data.w 1100,1200,1300,1400,1500,1600,1800
+Data.w 2000,2200,2400,2600,2800,3000,3300	;2000=44;3000=49
+Data.w 3600,4000,4400,4800,5200,5800,6300	;4000=52;5200=55
+Data.w 7000,7500,8000,8500,9000,9500,10000 ;7000=58
+Data.w 10500,11000,11500,12000,12500,13000,14000,15000

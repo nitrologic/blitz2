@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/debugger.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/debugger.bb2
+;
+WbToScreen 0
+w=WBWidth
+Gosub opensmall
+
+MouseWait
+End
+
+opensmall
+h=12:y=WBHeight-h
+Window 0,x,y,w,h,$100a,"Blitz Debugger",1,0
+Return

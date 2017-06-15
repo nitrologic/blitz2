@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/shit.bb
+
+If WriteMem(0,"segalib")
+	FileInput 0
+	a$=Inkey$(FileSeek(0))
+	CloseFile 0
+EndIf
+
+a$=Replace$(a$,Chr$(10),"")
+a$=Replace$(a$,Chr$(13),"")
+
+If ReadMem(0,"ram:segalib")
+	FileOutput 0
+	Print a$
+	CloseFile 0
+EndIf
+
+End
+

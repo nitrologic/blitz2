@@ -1,0 +1,114 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples/examples2/doublebuffer.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/blitzmode/doublebuffer.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples2/doublebuffer.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/doublebuffer.bb2
+;
+;This example demonstrates the principle behind 'double buffering'
+;
+;Double buffering is a programming technique allowing you
+;to get rid of 'flicker' from graphic animation.
+;
+;Double buffering relies on the idea that, although graphics
+;are drawn to a particular bitmap, that bitmap may not
+;necessarily be 'shown' on the display.
+;
+;To achieve double buffering, you therefore need at least
+;2 bitmaps. At any one point in time, only 1 of these bitmaps
+;is displayed (using one of the 'Show' commands), whilst any
+;graphic drawing is performed on THE OTHER bitmap.
+;During the vertical blank period, these 2 bitmaps are 'swapped'
+;ie - the newly updated bitmap is shown, and the previously
+;shown bitmap is used for the next series of updates!
+
+
+;create a 'ball' type variable
+;
+NEWTYPE.ball
+x.q
+y
+xs
+ys
+End NEWTYPE
+
+;dimension a 'list' of 'balls'
+;
+Dim List balls.ball(12)
+
+;load in a shape and it's palette
+;
+LoadShape 0,"data/ball",0
+
+;keep adding items to list until list full
+;
+While AddLast(balls())
+	balls()\x=Rnd(280)+10,Rnd(160)+10,(Rnd-.5)*8,(Rnd-.5)*8
+Wend
+
+;now, we go into blitz mode
+;
+BLITZ
+
+;initialize a lor-res, 8 colour bitmap...
+;
+BitMap 0,320,200,3
+
+;we also need another bitmap for the double buffering:
+;
+BitMap 1,320,200,3
+
+;initialize a 'Queue' for the QBlit command to make use of:
+;
+Queue 0,50
+
+;We will also double buffer our queue's, so we need another
+;queue:
+;
+Queue 1,50
+
+;initialize a slice, and set it's colour palette
+;
+Slice 0,44,320,200,$fff0,3,8,32,320,320
+Use SetCycle 0
+Show 0
+
+;now, process all ballss...
+;
+;while mouse button not hit..
+;
+While Joyb(0)=0
+
+	;start at first item in list
+	;
+	ResetList balls()
+
+	;wait for vertical blank
+	;
+	VWait
+
+	;this bit does the actual double buffering:
+	;the 'db=1-db' will cause the 'db' variable to switch
+	;between 0/1/0/1/0/1...
+	;
+	Show db:db=1-db:Use BitMap db
+
+	;unqueue items on the 'used' bitmap:
+	;
+	UnQueue db
+
+	;while more items to come...
+	;
+	While NextItem(balls())
+
+		;update balls' position
+		;
+		balls()\x+balls()\xs
+		balls()\y+balls()\ys
+
+		;reverse direction if ball gets to edge of bitmap
+		;
+		If balls()\x<10 OR balls()\x>290 Then balls()\xs=-balls()\xs
+		If balls()\y<10 OR balls()\y>170 Then balls()\ys=-balls()\ys
+
+		;draw balls in new position
+		;
+		QBlit db,0,balls()\x,balls()\y
+
+	Wend
+Wend

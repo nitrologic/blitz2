@@ -1,0 +1,48 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/joypad.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/joypad.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/joypad.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/joypad.bb
+;
+; CD32 joypad reader
+;
+
+; stick controller in joystick port
+; call only once per vertical blank
+
+; 80% of AGA amiga's do not support the controller!!!
+; so why does C= keep saying they R going to make the A1200
+; CD32 compatible???? Ha ha ha
+
+Function.l ReadJoy{b.w}							;get joystick reading into d0
+	LEA $bfe001,a0:LEA $dff016,a1
+	MOVEQ #0,d0:MOVEQ #7,d3:MOVE	#$4000,d4
+	BSET	d3,$200(a0):BCLR	d3,(a0):MOVE #$2000,$dff034:MOVEQ #6,d1
+	loop27
+		TST.b (a0):TST.b (a0):TST.b (a0):TST.b (a0)
+		TST.b (a0):TST.b (a0):TST.b (a0):TST.b (a0)
+		MOVE	(a1),d2:BSET d3,(a0):BCLR d3,(a0):AND d4,d2
+		BNE skip:BSET	d1,d0:skip
+	DBF d1,loop27
+	MOVE	#$3000,$dff034:BCLR d3,$200(a0):ADD d0,d0:SWAP d0
+	MOVE	$dff00c,d1:MOVE d1,d0:LSR #1,d0:EOR d0,d1:AND #$101,d1
+	AND #$101,d0:ROR.b #1,d0:ROR.b #1,d1:LSR #7,d0:LSR #5,d1:OR d1,d0
+	UNLK a4:RTS
+End Function
+
+;bit 00 : right
+;		01 : left
+;		02 : down
+;		03 : up
+;		17 : play/pause
+;		18 : reverse
+;		19 : forward
+;		20 : green
+;		21 : yellow
+;		22 : red
+;		23 : blue
+;
+
+BLITZ:BitMap 0,320,256,4:Slice 0,44,4:Show 0:BitMapOutput 0
+
+While Joyb(0)=0
+	VWait
+	Locate 3,3
+	NPrint Hex$(ReadJoy{3})
+Wend

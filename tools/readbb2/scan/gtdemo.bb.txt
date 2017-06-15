@@ -1,0 +1,63 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/gtdemo.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/gtdemo.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/GadTools/gtdemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/GadTools/gtdemo.bb
+;
+; GadTools Demo
+;
+
+#Output=14:#Text=13:#String=12:#Slider=11:#Scroller=10
+#Pal=9:#Number=8:#MX=7:#ListView=6:#Integer=5:#Cyc=4
+#CheckBox=3:#Button=2:#w0=0
+
+#MOUSEMOVE=$10:#INTUITICKS=$400000
+
+.main
+	Gosub addevents		 ;enable intuiticks and mousemoves events
+	Gosub setuplists		;dim lists for both listviews
+	Gosub setupui			 ;open user interface window
+	Repeat
+		ev.l=WaitEvent
+		If ev<>#MOUSEMOVE AND ev<>#INTUITICKS Then Gosub addevent
+	Until ev=$200
+	End
+
+.addevents:
+	AddIDCMP #MOUSEMOVE+#INTUITICKS
+	Return
+
+.setuplists
+	NEWTYPE .item
+		a.w
+		b$
+	End NEWTYPE
+	Dim List results.item(1000)
+	Dim List test.item(20)
+	While AddItem(test()):test()\b="Item #"+Str$(i):i+1:Wend
+	Return
+
+.addevent
+	GTChangeList #w0,#Output
+	If AddFirst(results())
+		results()\b="Event#"+Str$(ev)+" Code#"+Str$(EventCode)
+	EndIf
+	If AddFirst(results())
+		results()\b="Gadget#"+Str$(GadgetHit)
+	EndIf
+	GTChangeList #w0,#Output,results()
+	Return
+
+.setupui:
+	Screen 0,0,0,640,256,2,-32768,"TEST",0,1
+	GTListView #w0,#Output,369,13,258,165,"Results",4,results()
+	GTText #w0,#Text,76,108,117,14,"Text",1,""
+	GTString #w0,#String,79,71,111,15,"String",1,20
+	GTSlider #w0,#Slider,280,123,80,12,"Slider",161,1,16,1
+	GTScroller #w0,#Scroller,279,104,82,12,"Scroller",417,1,10,0
+	GTPalette #w0,#Pal,267,61,95,33,"Palette",1,2
+	GTNumber #w0,#Number,79,89,112,14,"Number",1,0
+	GTMX #w0,#MX,288,4,49,28,"MX",2,"One|Two|Poo"
+	GTListView #w0,#ListView,100,130,98,36,"ListView",1,test()
+	GTInteger #w0,#Integer,79,52,112,15,"Integer",1,0
+	GTCycle #w0,#Cyc,260,37,82,17,"Cycle",1," One | Two |Three"
+	GTCheckBox #w0,#CheckBox,125,34,26,11,"CheckBox",1
+	GTButton #w0,#Button,70,7,133,21,"Button",16
+	Window #w0,0,11,640,195,$1008,"GadTools Demo",1,2:AttachGTList #w0,#w0
+	Return

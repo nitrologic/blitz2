@@ -1,0 +1,77 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/damen/text+Mirror_Sinus.bb2
+LoadShapes 0,"blitz_products:shapes/blitzfonts-2c"				; load some mod
+VWait
+;
+BLITZ
+BitMap 0,384,260,2
+BitMap 1,384,260,2
+Slice 0,44,320,260,$fff8,2,8,32,384,384
+Show 0,32,0
+Show 1,32,0
+Use BitMap 0
+GetaShape 0,0,0,1,1
+;
+Dim Y(240),XP(40),I(140)
+Gosub ICOS
+Gosub mirr
+;
+Green 1,15,15,15
+Green 2,8,8,8
+Green 3,13,13,13
+;
+For lop=3 To 11
+		ColSplit 0,0,0,lop,190+lop
+Next
+ColSplit 0,0,0,0,260
+ColSplit 1,10,10,10,217
+;
+;
+For LOP=0 To 18
+XP(LOP)=19+LOP*18
+Next
+;
+SCN$="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:"
+TE$="										THE WAVE PRESENTS SOME SINUS TEXT.."
+TE$=TE$+"...CODE BY JOOP DAMEN.............................."
+TL=Len(TE$)
+;
+For lop=0 To TL
+M$=Mid$(TE$,lop,1):I(lop)=Instr(SCN$,M$)
+Next
+;
+DIS=18
+;
+While Joyb(0)=0
+	 VWait
+	 Show db,32,0:db=1-db:Use BitMap db:BlockScroll 0
+	 ;
+	 DIS-3
+	 If DIS=0
+	 DIS=18
+	 POS+1
+	 TEX=QWrap(TEX+1,0,TL)
+	 EndIf
+	 ;
+	 For LOP=0 To 18
+	 Blit I(LOP+TEX),XP(LOP)+DIS,Y(POS+LOP)
+	 Next
+	 POS=QWrap(POS-1,0,157)
+Wend
+End
+;
+;
+;****************	DATA ROUTINES ***************
+;
+mirr:
+#BPLMOD1=$108
+#BPLMOD2=$10A
+co$=Mki$(#BPLMOD1)+Mki$(-137)
+co$+Mki$(#BPLMOD2)+Mki$(-137)
+CustomCop co$,216+44
+Return
+;
+ICOS:
+For LOP=0 To 230
+		S+.12 : Y(LOP)=173+HCos(S)*31
+Next
+Return

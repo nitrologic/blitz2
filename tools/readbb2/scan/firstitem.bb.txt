@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/FirstItem.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/FirstItem.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/FirstItem.bb
+
+; 
+; print lastitem in list
+; 
+
+Dim List a(10)     ;initialize list array
+
+While AddFirst(a())   ;fill list array... 
+ a()=c 
+ c+1 
+Wend
+
+If FirstItem(a())           ;if there is a lastitem...
+ NPrint "First Item in list is:",a() ;print it out...
+EndIf 
+
+MouseWait 
+

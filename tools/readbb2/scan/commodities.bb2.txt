@@ -1,0 +1,161 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/commodities.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/commodities.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/BlitzBlank/SOURCES/commodities.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/commodities.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/BlitzBlank/SOURCES/commodities.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/commodities.bb2
+CloseEd
+#LIBRARIES_COMMODITIES_H=-1
+;**
+;**	 $Filename: libraries/commodities.h $
+;**	 $Release: 2.04 Includes, V37.4 $
+;**	 $Revision: 37.1 $
+;**	 $Date: 91/04/15 $
+;**
+;**	 Commodities definitions.
+;**
+;**	 (C) Copyright 1988-1991 Commodore-Amiga Inc.
+;** All Rights Reserved
+;**
+; XINCLUDE "exec/types.h"
+;**************************
+; * object creation macros
+; **************************
+Macro CxFilter(d):CreateCxObj((LONG)CX_FILTER,:End Macro		LONG
+Macro CxTypeFilter(Typ):CreateCxObj((LONG)CX_TYPEFILTER,:End Macro LONG
+Macro CxSender(port,id):CreateCxObj((LONG)CX_SEND,:End Macro		LONG
+Macro CxSignal(task,sig):CreateCxObj((LONG)CX_SIGNAL,(LONG):End Macro	 task,
+Macro CxTranslate(ie):CreateCxObj((LONG)CX_TRANSLATE,:End Macro LONG
+Macro CxDebug(id):CreateCxObj((LONG)CX_DEBUG,:End Macro LONG
+Macro CxCustom(action,id):CreateCxObj((LONG)CX_CUSTOM,(LONG)action,(LONG)id):End Macro
+;****************
+; * Broker stuff
+; ****************
+;/* buffer sizes	 */
+#CBD_NAMELEN=24
+#CBD_TITLELEN=40
+#CBD_DESCRLEN=40
+;/* CxBroker errors	 */
+#CBERR_OK=0 ;/* No error				*/
+#CBERR_SYSERR=1 ;/* System error , no memory, etc		*/
+#CBERR_DUP=2		;/* uniqueness violation			*/
+#CBERR_VERSION=3		;/* didn't understand nb_VERSION		 */
+#NB_VERSION=5	 ;/* Version of NewBroker structure	 */
+NEWTYPE .NewBroker
+	nb_Version.b	;/* set to NB_VERSION			 */
+	pad1.b
+	*nb_Name.b
+	*nb_Title.b
+	*nb_Descr.b
+	nb_Unique.w
+	nb_Flags.w
+	nb_Pri.b
+	pad2.b
+	*nb_Port.MsgPort
+	nb_ReservedChannel.w	;/* plans for later port sharing		 */
+End NEWTYPE
+;/* Flags for nb_Unique */
+#NBU_DUPLICATE=0
+#NBU_UNIQUE=1	 ;/* will not allow duplicates			*/
+#NBU_NOTIFY=2	 ;/* sends CXM_UNIQUE to existing broker */
+;/* Flags for nb_Flags */
+#COF_SHOW_HIDE=4
+;*********
+; * cxusr
+; *********
+;/** Fake data types for system private objects	*/
+;/* Pointer to Function returning Long */
+;/********************************/
+;/** Commodities Object Types	 **/
+;/********************************/
+#CX_INVALID=0	 ;/* not a valid object (probably null)	*/
+#CX_FILTER=1		;/* input event messages only			*/
+#CX_TYPEFILTER=2		;/* filter on message type			*/
+#CX_SEND=3	;/* sends a message			 */
+#CX_SIGNAL=4		;/* sends a signal			 */
+#CX_TRANSLATE=5 ;/* translates IE into chain			*/
+#CX_BROKER=6		;/* application representative			*/
+#CX_DEBUG=7 ;/* dumps kprintf to serial port			*/
+#CX_CUSTOM=8		;/* application provids function			*/
+#CX_ZERO=9	;/* system terminator node			*/
+;/*****************/
+;/** CxMsg types **/
+;/*****************/
+#CXM_UNIQUE=1 LSL 4 ;/* sent down broker by CxBroker()			*/
+;/* Obsolete: subsumed by CXM_COMMAND (below)	 */
+;** Messages of this type rattle around the Commodities input network.
+; * They will be sent to you by a Sender object, and passed to you
+; * as a synchronous function call by a Custom object.
+; *
+; * The message port or function entry point is stored in the object,
+; * and the ID field of the message will be set to what you arrange
+; * issuing object.
+; *
+; * The Data field will point to the input event triggering the
+; * message.
+; **
+#CXM_IEVENT=1 LSL 5
+;** These messages are sent to a port attached to your Broker.
+; * They are sent to you when the controller program wants your
+; * program to do something.	The ID field identifies the command.
+; *
+; * The Data field will be used later.
+; **
+#CXM_COMMAND=1 LSL 6
+;/* ID values	 */
+#CXCMD_DISABLE=15	 ;/* please disable yourself			 */
+#CXCMD_ENABLE=17		;/* please enable yourself				*/
+#CXCMD_APPEAR=19		;/* open your window, if you can	*/
+#CXCMD_DISAPPEAR=21 ;/* go dormant				 */
+#CXCMD_KILL=23	;/* go away for good				*/
+#CXCMD_UNIQUE=25	; ** someone tried To create a broker
+;									* with your name.	Suggest you Appear.
+;									**
+#CXCMD_LIST_CHG=27	;/* Used by Exchange program. Someone */
+;/* return values for BrokerCommand(): */
+#CMDE_OK=0
+#CMDE_NOBROKER=-1
+#CMDE_NOPORT=-2
+#CMDE_NOMEM=-3
+;** IMPORTANT NOTE:
+; * Only CXM_IEVENT messages are passed through the input network.
+; *
+; * Other types of messages are sent to an optional port in your broker.
+; *
+; * This means that you must test the message type in your message handling,
+; * if input messages and command messages come to the same port.
+; *
+; * Older programs have no broker port, so processing loops which
+; * make assumptions about type won't encounter the new message types.
+; *
+; * The TypeFilter CxObject is hereby obsolete.
+; *
+; * It is less convenient for the application, but eliminates testing
+; * for type of input messages.
+; **
+;/**********************************************************/
+;/** CxObj Error Flags (return values from CxObjError())	**/
+;/**********************************************************/
+#COERR_ISNULL=1 ;/* you called CxError(NULL)			*/
+#COERR_NULLATTACH=2 ;/* someone attached NULL to my list		*/
+#COERR_BADFILTER=4	;/* a bad filter description was given	*/
+#COERR_BADTYPE=8		;/* unmatched type-specific operation	 */
+;******
+; * ix
+; ******
+#IX_VERSION=2
+NEWTYPE .InputXpression
+	ix_Version.b	;/* must be set to IX_VERSION	*/
+	ix_Class.b		;/* class must match exactly	*/
+	ix_Code.w
+	ix_CodeMask.w ;/* normally used for UPCODE	*/
+	ix_Qualifier.w
+	ix_QualMask.w
+	ix_QualSame.w ;/* synonyms in qualifier	*/
+End NEWTYPE
+;/* QualSame identifiers */
+#IXSYM_SHIFT=1	;/* left- and right- shift are equivalent */
+#IXSYM_CAPS=2	 ;/* either shift or caps lock are equivalent */
+#IXSYM_ALT=4		;/* left- and right- alt are equivalent */
+;/* corresponding QualSame masks */
+Macro IXSYM_SHIFTMASK:IEQUALIFIER_LSHIFT | IEQUALIFIER_RSHIFT:End Macro
+Macro IXSYM_CAPSMASK:IXSYM_SHIFTMASK		| IEQUALIFIER_CAPSLOCK:End Macro
+Macro IXSYM_ALTMASK:IEQUALIFIER_LALT	 | IEQUALIFIER_RALT:End Macro
+#IX_NORMALQUALS=$7FFF	 ;/* for QualMask field: avoid RELATIVEMOUSE */
+;/* matches nothing	 */
+;#NULL_IX(I)=(I	->ix_Class

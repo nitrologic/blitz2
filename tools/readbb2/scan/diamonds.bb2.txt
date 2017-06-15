@@ -1,0 +1,775 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/diamonds/game/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Diamonds/Diamonds.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/diamonds/game/Diamonds.bb2
+CloseEd:NoCli
+For k=1 To 100:VWait:##[$FF89]:Next
+WBStartup
+VWait 10
+
+Dim bx(210),by(210),map(210),ptrn(10)
+Dim znx(210),zny(210),znr(210),walk(34)
+Dim XBAL(8),YBAL(8),BW(8),EW(8),ZVX(8)
+Dim scr.l(9),name$(9),j(22),bani(22)
+
+;Disk$="dh1:blitz/diamonds/"				 ; ---- Current Disk
+
+InitBank 0,220,2										; ---- Reserve Map Bank
+
+Restore scr_dat										 ; ---- Read Score Data
+For lop=1 To 9
+		Read scr(lop)
+Next
+
+Restore nam_dat										 ; ---- Read Name Data
+For lop=1 To 9
+		Read name$(lop)
+Next
+
+Restore patern_dat									; ---- Background Patern
+For lop=1 To 10
+		Read patern
+		ptrn(lop)=patern
+Next
+
+Restore ball_ani										; ---- Get Ball Anim
+For lop=0 To 21
+		Read bani(lop)
+Next
+
+Restore ball_y											; ---- Get Ball Data
+For lop=0 To 21
+		 Read j(lop)
+Next
+
+Poke.w $DFF106,0						; make sure aga sprites are lowres.
+Poke.w $DFF1FC,0						; and only one word wide (aga stuff)
+BLITZ
+BlitzKeys On
+BitMapInput
+
+
+NEW:															 ; ---- Setup New Game
+Gosub INTRO
+QAMIGA
+LoadSound 0,Disk$+"sam1"
+LoadSound 1,Disk$+"sam2"
+LoadSound 2,Disk$+"sam5"
+LoadSound 3,Disk$+"sam4"
+LoadSound 4,Disk$+"sam3"
+LoadShapes 1,Disk$+"diamonds_shp"
+LoadSprites 0,Disk$+"diamonds_spr"
+LoadModule 0,Disk$+"mod.2"
+VWait 120
+CopyShape 1,0
+
+BLITZ
+NEWA:
+BitMap 0,960,224,5
+BitMap 1,960,224,5
+Slice 0,36,288,224,$fff8,5,8,32,960,960
+Show 0
+;
+Gosub GET_WALK
+Gosub SET_PALETTE
+Gosub MAKE_BACKBOX
+;
+BitMap 2,320,20,1
+Slice 1,260,320,20,$fff8,1,8,32,320,320
+Show 2
+;
+Gosub RAINBOW
+BitMapOutput 2
+Colour 1,0
+Locate 0,0:Print "	SCORE			 WAVE		 LIVES			TIME"
+Locate 0,1:Print "	000000			 01				05				99"
+
+score.l=0
+level.w=1
+lives.w=5
+tel=0
+
+Buffer 0,$5000
+Buffer 1,$5000
+
+NEWB:
+AANTAL=0
+GKEY=0
+TIME.w=99
+DBLOK=0
+KBLOK=0
+##[$A001] 0,200
+Use Slice 0
+Gosub BACK_GRD
+
+NEWC:
+JP=192
+BIT=1
+JUMP=0
+ANI=17
+PX=50
+PY=192
+ZPX=50
+ZPY=192
+SPRL=140
+SPRR=50
+WALK=1
+SX=0
+db=0
+game_stat=0
+
+;
+; ---- Get Ready
+;
+DisplayOn
+Show 0,SX,0
+ShowSprite walk(ANI),PX,PY,0
+Use BitMap 0
+BBlit 0,33,85,100
+FadeIn 0,2,0,31
+Repeat:VWait:Until Joyb(1)
+UnBuffer 0
+Colour 1,0
+;
+; ---- Set Sprite On Interrupt
+;
+SetInt 5
+ShowSprite walk(ANI),PX,PY,0
+End SetInt
+;
+; ---- Main Loop
+;
+.MAIN:
+Repeat
+	 VWait
+	 Show db,SX,0:db=1-db:Use BitMap db:UnBuffer db
+
+	 Poke.w $DFF106,0
+	 Poke.w $DFF1FC,0
+
+	 If Joyx(1)=-1															; MOVE LEFT
+			ANI=QWrap(ANI+1,0,15)
+			PX-2
+			ZPX-2:If ZPX<0 Then ZPX=0
+			WALK=0
+			LBIT=1
+	 If PX<SPRR
+			PX=SPRR
+			SPRL=140
+			SX-2
+			If SX<0 : SX=0 : SPRR=10 : ANI=2 : End If
+	 End If
+	 Else
+			LBIT=0
+	 End If
+
+	 If Joyx(1)=1															 ; MOVE RIGHT
+			ANI=QWrap(ANI+1,16,31)
+			PX+2
+			ZPX+2:If ZPX>960 Then ZPX=960
+			WALK=1
+			RBIT=1
+	 If PX>SPRL
+			PX=SPRL
+			SPRR=140
+			SX+2
+			If SX>672 : SX=672 : SPRL=279 : ANI=17 : End If
+	 End If
+	 Else
+			RBIT=0
+	 End If
+
+	 ; ---- Jump Up And Get Down
+
+	 If Joyy(1)=-1 AND PY=JP AND BIT=1
+			Sound 2,1,63,63,63,63
+			JUMP=-13
+			BIT=0
+	 End If
+
+	 PY+JUMP
+	 ZPY=PY
+	 PY=##[$A589](JP,PY)
+
+	 JUMP+1
+	 JUMP=##[$A589](3,JUMP)
+
+	 ; ---- Check Walk Zone
+
+	 w.w=##[$A004](ant_diam+1,ant_wlkz,ZPX,ZPY)
+	 If w>-1 AND JUMP>0
+			If Joyy(1)=0 Then BIT=1
+			ZPY=zny(w)
+			PY=ZPY
+			JP=PY
+			JUMP=0
+			If WALK=0 AND LBIT=0 Then ANI=2
+			If WALK=1 AND RBIT=0 Then ANI=17
+	 Else
+			JP=250
+			If WALK=0 Then ANI=32 Else ANI=33
+	 EndIf
+
+	 ; ---- Colect Diamonds
+
+	 d.w=##[$A004](0,ant_diam,ZPX,ZPY-5)
+	 If d>-1 AND db=0 AND DBLOK=0
+			If znr(d)>0
+				 BlitColl ptrn(level.w),znx(d),zny(d)
+				 Sound 0,2,63,63,63,63
+				 dlx=znx(d)
+				 dly=zny(d)
+				 znr(d)=0
+				 score.l+450
+				 AANTAL+1
+				 DBLOK=1
+				 Format "000000"
+				 Locate 2,1:Print score.l
+				 Format ""
+			EndIf
+	 Else
+			d=-2
+			If db=1 AND DBLOK=1
+				 BlitColl ptrn(level.w),dlx,dly
+				 DBLOK=0
+			EndIf
+	 EndIf
+
+	 ; ---- Colect Door Key
+
+	 key.w=##[$A004](key_zon,key_zon,ZPX,ZPY-5)
+	 If key=key_zon AND db=0 AND KBLOK=0
+			If znr(key)>0
+				 BlitColl ptrn(level.w),znx(key),zny(key)
+				 Sound 1,2,63,63,63,63
+				 klx=znx(key)
+				 kly=zny(key)
+				 znr(key)=0
+				 KBLOK=1
+				 GKEY=1
+			EndIf
+	 Else
+			If db=1 AND KBLOK=1
+				 BlitColl ptrn(level.w),klx,kly
+				 DBLOK=0
+			EndIf
+	 EndIf
+
+	 ; ---- Exit, Next Level
+
+	 exit.w=##[$A004](exit_zon,exit_zon,ZPX,ZPY-5)
+	 If exit=exit_zon AND GKEY=1 AND AANTAL-1=ant_diam
+			game_stat=1
+	 EndIf
+
+	 ; ---- Set Time
+	 If tel=0
+			Format "00"
+			Locate 35,1:Print TIME.w
+			Format ""
+			If TIME=0 Then game_stat=3
+			TIME.w-1
+			tel=40
+	 Else
+			tel-1
+	 EndIf
+
+	 Gosub BALLS
+
+Until game_stat>0 OR PY>215
+
+UnBuffer 0
+UnBuffer 1
+ClrInt 5
+;
+; ---- Next Level
+;
+If game_stat=1
+		FadeOut 0,2,0,31
+		ShowSprite 0,-32,-32,0
+		For lop=0 To 1
+				VWait:Show lop,0,0
+				Use BitMap lop
+				BlockScroll 0
+	 Next
+	 Blit 39,64,124												; ---- TIME BONUS
+	 Colour 31,0
+	 BitMapOutput 1
+	 Format "000000"
+	 Locate 22,18:Print score.l
+	 Format ""
+	 FadeIn 0,2,0,31
+
+	 Repeat
+		 score.l+10
+		 TIME.w-1														; ---- TIME X 10 Bonus
+		 Format "000000"
+		 Locate 22,18:Print score.l
+		 Format ""
+		 Sound 1,2,63,63,63,63
+		 VWait 4
+	 Until TIME.w<1
+	 level.w+1
+
+	 BitMapOutput 2
+	 Colour 1,0
+	 Format "000000"
+	 Locate 2,1:Print score.l
+	 Format ""
+	 VWait 70
+	 Format "00"
+	 Locate 15,1:Print level.w
+	 Format ""
+	 FadeOut 0,2,0,31
+	 BlockScroll 0
+	 If level.w=11 Then Goto check
+	 Goto NEWB
+EndIf
+;
+; ---- Dec Lives
+;
+If game_stat=2 OR PY>215
+	 Sound 4,4,63,63,63,63
+	 FadeOut 0,2,0,31
+	 BitMapOutput 2
+	 Colour 1,0
+	 Format "00"
+	 lives.w-1
+	 Locate 25,1:Print lives.w
+	 Format ""
+	 If lives.w>0 Then Goto NEWC
+	 If lives.w=0 Then Goto mem
+EndIf
+;
+; ---- Out Of Time
+;
+If game_stat=3
+	 Sound 4,4,63,63,63,63
+	 FadeOut 0,2,0,31
+	 ShowSprite 0,-32,-32,0
+	 BitMapOutput 2
+	 Colour 1,0
+	 Format "00"
+	 lives.w-1
+	 Locate 25,1:Print lives.w
+	 Format ""
+	 Show 0,0,0
+	 Use BitMap 0
+	 BBlit 0,31,75,100
+	 FadeIn 0,2,31,31
+	 Repeat:VWait:Until Joyb(1)
+	 FadeOut 0,2,31,31
+	 UnBuffer 0
+	 TIME=99
+	 If lives.w>0 Then Goto NEWC
+	 If lives.w=0 Then Goto mem
+EndIf
+;
+; ---- Check End Of Game
+;
+check:
+PlayModule 0
+Blit 40,25,96															 ; ---- Well Done
+FadeIn 0,2,0,31
+Repeat:VWait:Until Joyb(1)
+FadeOut 0,2,0,31
+BlockScroll 0
+Goto enter
+
+;
+; ---- Game Over
+;
+mem:
+PlayModule 0
+Show 1,0,0
+Use BitMap 1
+BitMapOutput 1
+ShowSprite 0,-32,-32,0
+BlockScroll 0
+BBlit 0,32,80,100
+FadeIn 0,2,0,31
+Repeat:VWait:Until Joyb(1)
+FadeOut 0,2,0,31
+UnBuffer 0
+
+;
+; ---- Enter Your Name
+;
+enter:
+BitMapOutput 1
+Colour 31,0
+If score.l<scr.l(9) Then Goto clear
+Blit 38,89,96															; ---- ENTER NAME BLIT
+FadeIn 0,2,0,31
+n$=""
+Repeat:Until Inkey$=""
+Locate 14,14
+n$=Edit$("",9)
+FadeOut 0,2,0,31
+
+;
+; ---- Score position
+;
+pos=1
+While score.l<=scr.l(pos)
+			If score.l=scr.l(pos):Goto QUIT:End If
+			pos+1
+Wend
+QUIT:
+For I=9 To pos+1 Step -1
+		name$(I)=name$(I-1)
+		scr.l(I)=scr.l(I-1)
+Next I
+name$(pos)=""
+name$(pos)=n$
+scr.l(pos)=score.l
+
+;
+; ---- Clear Mem
+;
+clear:
+For lop=63 To 0 Step -1										 ; ---- Music Volume
+		Volume 15,lop,lop,lop,lop
+		VWait
+Next
+StopModule
+DisplayOff
+FlushBuffer 0
+FlushBuffer 1
+Free BitMap 0
+Free BitMap 1
+Free BitMap 2
+FreeSlices
+Free Module 0
+For lop=0 To 4	: Free Sound	lop : Next
+For lop=0 To 40 : Free MidHandle	lop : Next
+For lop=0 To 12 : Free Sprite lop : Next
+Goto NEW
+;
+; ---- Move Balls
+;
+.BALLS:
+ann=QWrap(ann+1,0,22)
+If ann=21 Then Sound 3,4,63,63,63,63
+For I=1 To 8
+		If BW(I)<SX AND EW(I)<SX OR BW(I)>SX+288
+			 Goto NB
+		Else
+			 If ZPX>XBAL(I)-4 AND ZPX<XBAL(I)+30 AND ZPY>YBAL(I) AND ZPY<YBAL(I)+32
+					game_stat=2
+			 EndIf
+
+			 XBAL(I)+ZVX(I)
+			 If XBAL(I)>EW(I) OR XBAL(I)<BW(I):ZVX(I)=-ZVX(I):End If
+			 BBlit db,bani(ann),XBAL(I),YBAL(I)-j(ann),1
+		EndIf
+NB:
+Next
+Return
+
+
+.SET_PALETTE:
+Restore scrcolor
+For lop=0 To 31
+		Read s.l
+		StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
+Next
+Use SetCycle 0
+Return
+
+
+.RAINBOW:
+Restore copdat
+Use BitMap 2
+For lop=0 To 6
+		Read s.l
+		ColSplit	1,s.l/256,(s.l/16) MOD 16,s.l MOD 16,lop
+Next
+ColSplit 1,14,14,15,8
+ColSplit 1,0,0,0,15
+VWait
+Return
+
+
+.GET_WALK:
+Restore walk_lr
+For lop=0 To 33
+		Read walk(lop)
+Next
+Return
+
+
+.MAKE_BACKBOX:
+nr=0
+For lopy=0 To 223 Step 32
+For lopx=0 To 959 Step 32
+		nr+1
+		bx(nr)=lopx
+		by(nr)=lopy
+Next
+Next
+Return
+
+
+.BACK_GRD
+FadeOut 0,2,0,31
+For lop=0 To 210
+		znr(lop)=0
+		znx(lop)=0
+		zny(lop)=0
+Next
+		ant_diam=0
+		ant_wlkz=0
+		key_zon=0
+		exit_zon=0
+		;
+QAMIGA
+LoadBank 0,Disk$+"diamonds_map"+Str$(level.w)
+VWait 50
+For lop=1 To 210
+		map(lop)=Peek.b (BankLoc(0)+lop)
+Next
+BLITZ
+VWait
+;
+; ---- Background + Map
+;
+Use BitMap 0
+For lop=1 To 210
+		BlitColl ptrn(level.w),bx(lop),by(lop)
+		If map(lop)>1 AND map(lop)<28
+			 Blit map(lop),bx(lop),by(lop)
+		EndIf
+Next
+;
+; ---- Set Diamonds Zone
+;
+nr=0
+For lop=1 To 210
+		mp=map(lop)
+		If mp>22 AND mp<27
+			 znx(nr)=bx(lop)
+			 zny(nr)=by(lop)
+			 znr(nr)=1
+			 ant_diam=nr
+			 ##[$A002] nr,bx(lop),by(lop),bx(lop)+32,by(lop)+32
+			 nr+1
+		EndIf
+Next
+;
+; ---- Set Walk Zone
+;
+For lop=1 To 210
+		mp=map(lop)
+		If mp>8 AND mp<19
+			 znx(nr)=bx(lop)
+			 zny(nr)=by(lop)
+			 ant_wlkz=nr
+			 ##[$A002] nr,bx(lop),by(lop),bx(lop)+32,by(lop)+4
+
+			 nr+1
+		EndIf
+Next
+;
+; ---- Get Door Key
+;
+For lop=1 To 210
+		mp=map(lop)
+		If mp=27
+			 key_zon=ant_wlkz+1
+			 znx(nr)=bx(lop)
+			 zny(nr)=by(lop)
+			 znr(nr)=1
+			 ##[$A002] nr,bx(lop),by(lop),bx(lop)+32,by(lop)+32
+			 nr+1
+		EndIf
+Next
+;
+; ---- Get Exit Door
+;
+For lop=1 To 210
+		mp=map(lop)
+		If mp=21
+			 exit_zon=key_zon+1
+			 ##[$A002] nr,bx(lop)+13,by(lop)+21,bx(lop)+18,by(lop)+32
+		EndIf
+Next
+;
+; ---- Get Balls zone
+;
+bnr=0
+For lop=1 To 210
+		mp=map(lop)
+		If mp=28
+			 bnr+1
+			 XBAL(bnr)=8+bx(lop)
+			 YBAL(bnr)=16+by(lop)
+			 BW(bnr)=XBAL(bnr)
+			 EW(bnr)=XBAL(bnr)
+			 ZVX(bnr)=0
+		EndIf
+		If mp=29
+			 bnr+1
+			 XBAL(bnr)=8+bx(lop)+Rnd(32)
+			 YBAL(bnr)=16+by(lop)
+			 BW(bnr)=2+bx(lop)
+			 ZVX(bnr)=1
+		EndIf
+		If mp=30
+			 EW(bnr)=8+bx(lop)
+		EndIf
+Next
+
+ShapesBitMap 0,1
+VWait
+Return
+
+
+;
+; ---- Play Intro Stuff
+;
+.INTRO:
+QAMIGA
+LoadShapes 0,Disk$+"diamonds_int"
+LoadModule 0,Disk$+"mod.1"
+VWait 120
+BLITZ
+
+DisplayOff
+BitMap 0,320,200,4
+Slice 0,44,320,200,$fff8,4,8,32,320,320
+Use BitMap 0
+BitMapOutput 0
+Show 0
+Colour 7,0
+VWait
+DisplayOn
+
+PlayModule 0
+
+loop:
+ Restore wave_col
+ For lop=0 To 15
+		 Read s.l
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
+ Next
+
+ loptime=0
+ FadeOut 0,2,0,15
+ Blit 0,22,30
+ FadeIn 0,2,0,15
+ Repeat
+		VWait
+		If Joyb(1) Then Goto exit
+		loptime+1
+ Until loptime=200
+ FadeOut 0,2,0,15
+ BlockScroll 0
+
+ Restore diam_col
+ For lop=0 To 15
+		 Read s.l
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
+ Next
+ loptime=0
+ FadeOut 0,2,0,15
+ Blit 1,120,10
+ Blit 2,25,70
+ Blit 3,60,150
+ FadeIn 0,2,0,15
+ Repeat
+		VWait
+		If Joyb(1) Then Goto exit
+		loptime+1
+ Until loptime=250
+ FadeOut 0,2,0,15
+ BlockScroll 0
+
+ Restore tops_col
+ For lop=0 To 15
+		 Read s.l
+		 StopCycle 0,lop,s.l/256,(s.l/16) MOD 16,s.l MOD 16
+ Next
+ loptime=0
+ pos=0
+ FadeOut 0,2,0,15
+ Blit 4,15,10
+ For lop=1 To 9
+		 Locate 10,7+pos
+		 Print "0"+Str$(lop)+" "+UCase$(Left$(name$(lop),9))
+		 Locate 23,7+pos
+		 Format "000000"
+		 Print scr(lop)
+		 Format ""
+		 pos+2
+ Next
+ FadeIn 0,2,0,15
+ Repeat
+		VWait
+		If Joyb(1) Then Goto exit
+		loptime+1
+ Until loptime=300
+ FadeOut 0,2,0,15
+ BlockScroll 0
+Goto loop
+
+
+exit:
+FadeOut 0,2,0,15
+For lop=63 To 0 Step -1
+		Volume 15,lop,lop,lop,lop
+		VWait
+Next
+StopModule
+Free Module 0
+DisplayOff
+For lop=0 To 4:Free MidHandle lop:Next
+FreeSlices
+Free BitMap 0
+VWait
+Return
+
+
+scrcolor:
+Data.l $000,$250,$470,$790,$9C0,$CF0,$400,$600
+Data.l $900,$C00,$F00,$303,$606,$909,$9AD,$78B
+Data.l $569,$A60,$C82,$EA6,$730,$0EF,$09F,$05F
+Data.l $840,$FB0,$EEC,$000,$444,$777,$BBB,$FFF
+
+wave_col:
+Data.l $000,$FB0,$C90,$A70,$960,$750,$BDD,$9BB
+Data.l $799,$577,$466,$355,$133,$234,$FC0,$FFF
+
+diam_col:
+Data.l $000,$EEF,$CCF,$AAC,$88A,$668,$446,$224
+Data.l $000,$000,$000,$000,$000,$000,$000,$000
+
+tops_col:
+Data.l $000,$144,$366,$588,$7AA,$9CC,$BEE,$DFF
+Data.l $000,$000,$000,$000,$000,$000,$000,$000
+
+copdat:
+Data.l $669,$88b,$bbd,$dde,$840,$b64,$c85
+
+walk_lr:
+Data 0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7
+Data 8,8,9,9,10,10,11,11,12,12,13,13,14,14,15,15,16,17
+
+patern_dat:
+Data 4,1,5,7,2,3,4,6,8,1
+
+ball_y:
+Data 6,19,24,30,34,38,42,44
+Data 44,46,46,45,43,40,37,32
+Data 27,22,16,9,3,0
+
+ball_ani:
+Data 37,34,34,34,34,34,34,34,34,34
+Data 34,34,34,34,34,34,34,34,34,35
+Data 36,37
+
+scr_dat:
+Data.l 90000,80000,70000,50000
+Data.l 30000,15000,10000,5000,1000
+
+nam_dat:
+Data.s "THE.WAVE.","CHANTAL..","EDWIN....","ROBIN...."
+Data.s "ROMY.....","BAS......","PATRICIA.","RONALD..."
+Data.s "JURGEN..."

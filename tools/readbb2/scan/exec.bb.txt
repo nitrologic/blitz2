@@ -1,0 +1,600 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/exec.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/exec.bb
+;********************************************************
+;*																											*
+;*					 BlitzII exec.library Include file					*
+;*																											*
+;********************************************************
+
+;*****************File:nodes.h
+
+NEWTYPE.Node
+*ln_Succ.Node
+*ln_Pred.Node
+ln_Type.b
+ln_Pri.b
+*ln_Name.b
+End NEWTYPE
+
+NEWTYPE.MinNode
+*mln_Succ.MinNode
+*mln_Pred.MinNode
+End NEWTYPE
+
+#NT_UNKNOWN= 0
+#NT_TASK= 1
+#NT_INTERRUPT= 2
+#NT_DEVICE= 3
+#NT_MSGPORT= 4
+#NT_MESSAGE= 5
+#NT_FREEMSG= 6
+#NT_ReplyMsg= 7
+#NT_RESOURCE= 8
+#NT_LIBRARY= 9
+#NT_MEMORY= 10
+#NT_SOFTINT= 11
+#NT_FONT= 12
+#NT_PROCESS= 13
+#NT_SEMAPHORE= 14
+#NT_SIGNALSEM= 15
+#NT_BOOTNODE= 16
+#NT_KICKMEM= 17
+#NT_GRAPHICS= 18
+#NT_DEATHMESSAGE= 19
+#NT_USER= 254
+#NT_EXTENDED= 255
+
+;*****************File:lists.h
+
+NEWTYPE.List
+*lh_Head.Node
+*lh_Tail.Node
+*lh_TailPred.Node
+lh_Type.b
+l_pad.b
+End NEWTYPE
+
+NEWTYPE.MinList
+*mlh_Head.MinNode
+*mlh_Tail.MinNode
+*mlh_TailPred.MinNode
+End NEWTYPE
+
+;*****************File:tasks.h
+
+NEWTYPE.Task
+tc_Node.Node
+tc_Flags.b
+tc_State.b
+tc_IDNestCnt.b
+tc_TDNestCnt.b
+tc_SigAlloc.l
+tc_SigWait.l
+tc_SigRecvd.l
+tc_SigExcept.l
+tc_TrapAlloc.w
+tc_TrapAble.w
+*tc_ExceptData.b
+*tc_ExceptCode.b
+*tc_TrapData.b
+*tc_TrapCode.b
+*tc_SPReg.b
+*tc_SPLower.b
+*tc_SPUpper.b
+*tc_Switch.w
+*tc_Launch.w
+tc_MemEntry.List
+*tc_UserData.b
+End NEWTYPE
+
+#TB_PROCTIME= 0
+#TB_ETASK= 3
+#TB_STACKCHK= 4
+#TB_EXCEPT= 5
+#TB_Switch= 6
+#TB_LAUNCH= 7
+#TF_PROCTIME= (1 LSL 0)
+#TF_ETASK= (1 LSL 3)
+#TF_STACKCHK= (1 LSL 4)
+#TF_EXCEPT= (1 LSL 5)
+#TF_Switch= (1 LSL 6)
+#TF_LAUNCH= (1 LSL 7)
+#TS_INVALID= 0
+#TS_ADDED= 1
+#TS_RUN= 2
+#TS_READY= 3
+#TS_Wait= 4
+#TS_EXCEPT= 5
+#TS_REMOVED= 6
+#SIGB_ABORT= 0
+#SIGB_CHILD= 1
+#SIGB_BLIT= 4
+#SIGB_SINGLE= 4
+#SIGB_Intuition= 5
+#SIGB_DOS= 8
+#SIGF_ABORT= (1LSL0)
+#SIGF_CHILD= (1LSL1)
+#SIGF_BLIT= (1LSL4)
+#SIGF_SINGLE= (1LSL4)
+#SIGF_Intuition= (1LSL5)
+#SIGF_DOS= (1LSL8)
+
+;*****************File:ports.h
+
+NEWTYPE.MsgPort
+mp_Node.Node
+mp_Flags.b
+mp_SigBit.b
+*sm_LockMsg.w[0]
+*mp_SoftInt.w[0]
+*mp_SigTask.w
+mp_MsgList.List
+End NEWTYPE
+
+#PF_ACTION= 3
+#PA_SIGNAL= 0
+#PA_SOFTINT= 1
+#PA_IGNORE= 2
+
+NEWTYPE.Message
+mn_Node.Node
+*mn_ReplyPort.MsgPort
+mn_Length.w
+End NEWTYPE
+
+;*****************File:interrupts.h
+
+NEWTYPE.Interrupt
+is_Node.Node
+*is_Data.b
+*is_Code.w
+End NEWTYPE
+
+NEWTYPE.IntVector
+*iv_Data.b
+*iv_Code.w
+*iv_Node.Node
+End NEWTYPE
+
+NEWTYPE.SoftIntList
+sh_List.List
+sh_Pad.w
+End NEWTYPE
+
+#SIH_PRIMASK= ($f0)
+#INTB_NMI= 15
+#INTF_NMI= (1LSL15)
+
+;*****************File:semaphores.h
+
+NEWTYPE.SemaphoreRequest
+sr_Link.MinNode
+*sr_Waiter.Task
+End NEWTYPE
+
+NEWTYPE.SignalSemaphore
+ss_Link.Node
+ss_NestCount.w
+ss_WaitQueue.MinList
+ss_MultipleLink.SemaphoreRequest
+*ss_Owner.Task
+ss_QueueCount.w
+End NEWTYPE
+
+NEWTYPE.Semaphore
+sm_MsgPort.MsgPort
+sm_Bids.w
+End NEWTYPE
+
+;*****************File:libraries.h
+
+#LIB_VECTSIZE= 6
+#LIB_RESERVED= 4
+#LIB_BASE= (-#LIB_VECTSIZE)
+#LIB_USERDEF= (#LIB_BASE-(#LIB_RESERVED*#LIB_VECTSIZE))
+#LIB_NONSTD= (#LIB_USERDEF)
+#LIB_Open= (-6)
+#LIB_Close= (-12)
+#LIB_EXPUNGE= (-18)
+#LIB_EXTFUNC= (-24)
+
+NEWTYPE.Library
+lh_Node.Node[0]
+lib_Node.Node
+lh_Flags.b[0]
+lib_Flags.b
+lh_pad.b[0]
+lib_pad.b
+lh_NegSize.w[0]
+lib_NegSize.w
+lh_PosSize.w[0]
+lib_PosSize.w
+lh_Version.w[0]
+lib_Version.w
+lh_Revision.w[0]
+lib_Revision.w
+*lh_IdString.b[0]
+*lib_IdString.b
+lh_Sum.l[0]
+lib_Sum.l
+lh_OpenCnt.w[0]
+lib_OpenCnt.w
+End NEWTYPE
+
+#LIBF_SUMMING= {1LSL0}
+#LIBF_CHANGED= (1LSL1)
+#LIBF_SUMUSED= (1LSL2)
+#LIBF_DELEXP= (1LSL3)
+
+;*****************File:execbase.h
+
+NEWTYPE.ExecBase
+LibNode.Library
+SoftVer.w
+LowMemChkSum.w
+ChkBase.l
+*ColdCapture.b
+*CoolCapture.b
+*WarmCapture.b
+*SysStkUpper.b
+*SysStkLower.b
+MaxLocMem.l
+*DebugEntry.b
+*DebugData.b
+*AlertData.b
+*MaxExtMem.b
+ChkSum.w
+IntVects.IntVector[16]
+*ThisTask.Task
+IdleCount.l
+DispCount.l
+Quantum.w
+Elapsed.w
+SysFlags.w
+IDNestCnt.b
+TDNestCnt.b
+AttnFlags.w
+AttnResched.w
+*ResModules.b
+*TaskTrapCode.b
+*TaskExceptCode.b
+*TaskExitCode.b
+TaskSigAlloc.l
+TaskTrapAlloc.w
+MemList.List
+ResourceList.List
+DeviceList.List
+IntrList.List
+LibList.List
+PortList.List
+TaskReady.List
+TaskWait.List
+SoftInts.SoftIntList[5]
+LastAlert.l[4]
+VBlankFrequency.b
+PowerSupplyFrequency.b
+SemaphoreList.List
+*KickMemPtr.b
+*KickTagPtr.b
+*KickCheckSum.b
+ex_Pad0.w
+ex_Reserved0.l
+*ex_RamLibPrivate.b
+ex_EClockFrequency.l
+ex_CacheControl.l
+ex_TaskID.l
+ex_PuddleSize.l
+ex_PoolThreshold.l
+ex_PublicPool.MinList
+*ex_MMULock.b
+ex_Reserved.b[12]
+End NEWTYPE
+
+#AFB_68010= 0
+#AFB_68020= 1
+#AFB_68030= 2
+#AFB_68040= 3
+#AFB_68881= 4
+#AFB_68882= 5
+#AFF_68010= (1LSL0)
+#AFF_68020= (1LSL1)
+#AFF_68030= (1LSL2)
+#AFF_68040= (1LSL3)
+#AFF_68881= (1LSL4)
+#AFF_68882= (1LSL5)
+#CACRF_EnableI= (1LSL0)
+#CACRF_FreezeI= (1LSL1)
+#CACRF_ClearI= (1LSL3)
+#CACRF_IBE= (1LSL4)
+#CACRF_EnableD= (1LSL8)
+#CACRF_FreezeD= (1LSL9)
+#CACRF_ClearD= (1LSL11)
+#CACRF_DBE= (1LSL12)
+#CACRF_WriteAllocate= (1LSL13)
+
+;*****************File:devices.h
+
+NEWTYPE.Device
+dd_Library.Library
+End NEWTYPE
+
+NEWTYPE.Unit
+unit_MsgPort.MsgPort
+unit_flags.b
+unit_pad.b
+unit_OpenCnt.w
+End NEWTYPE
+
+#UNITF_ACTIVE= (1LSL0)
+#UNITF_INTASK= (1LSL1)
+
+;*****************File:errors.h
+
+#IOERR_OPENFAIL= (-1)
+#IOERR_ABORTED= (-2)
+#IOERR_NOCMD= (-3)
+#IOERR_BADLENGTH= (-4)
+#IOERR_BADADDRESS= (-5)
+#IOERR_UNITBUSY= (-6)
+#IOERR_SELFTEST= (-7)
+
+;*****************File:alerts.h
+
+#AT_DeadEnd= $80000000
+#AT_Recovery= $00000000
+#AG_NoMemory= $00010000
+#AG_MakeLib= $00020000
+#AG_OpenLib= $00030000
+#AG_OpenDev= $00040000
+#AG_OpenRes= $00050000
+#AG_IOError= $00060000
+#AG_NoSignal= $00070000
+#AG_BadParm= $00080000
+#AG_CloseLib= $00090000
+#AG_CloseDev= $000A0000
+#AG_ProcCreate= $000B0000
+#AO_ExecLib= $00008001
+#AO_GraphicsLib= $00008002
+#AO_LayersLib= $00008003
+#AO_Intuition= $00008004
+#AO_MathLib= $00008005
+#AO_DOSLib= $00008007
+#AO_RAMLib= $00008008
+#AO_IconLib= $00008009
+#AO_ExpansionLib= $0000800A
+#AO_DiskfontLib= $0000800B
+#AO_UtilityLib= $0000800C
+#AO_AudioDev= $00008010
+#AO_ConsoleDev= $00008011
+#AO_GamePortDev= $00008012
+#AO_KeyboardDev= $00008013
+#AO_TrackDiskDev= $00008014
+#AO_TimerDev= $00008015
+#AO_CIARsrc= $00008020
+#AO_DiskRsrc= $00008021
+#AO_MiscRsrc= $00008022
+#AO_BootStrap= $00008030
+#AO_Workbench= $00008031
+#AO_DiskCopy= $00008032
+#AO_GadTools= $00008033
+#AO_Unknown= $00008035
+#AN_ExecLib= $01000000
+#AN_ExcptVect= $01000001
+#AN_BaseChkSum= $01000002
+#AN_LibChkSum= $01000003
+#AN_MemCorrupt= $01000005
+#AN_IntrMem= $81000006
+#AN_InitAPtr= $01000007
+#AN_SemCorrupt= $01000008
+#AN_FreeTwice= $01000009
+#AN_BogusExcpt= $8100000A
+#AN_IOUsedTwice= $0100000B
+#AN_MemoryInsane= $0100000C
+#AN_IOAfterClose= $0100000D
+#AN_StackProbe= $0100000E
+#AN_GraphicsLib= $02000000
+#AN_GfxNoMem= $82010000
+#AN_LongFrame= $82010006
+#AN_ShortFrame= $82010007
+#AN_TextTmpRas= $02010009
+#AN_BltBitMap= $8201000A
+#AN_RegionMemory= $8201000B
+#AN_MakeVPort= $82010030
+#AN_GfxNewError= $0200000C
+#AN_GfxFreeError= $0200000D
+#AN_GfxNoLCM= $82011234
+#AN_ObsoleteFont= $02000401
+#AN_LayersLib= $03000000
+#AN_LayersNoMem= $83010000
+#AN_Intuition= $04000000
+#AN_GadgetType= $84000001
+#AN_BadGadget= $04000001
+#AN_CreatePort= $84010002
+#AN_ItemAlloc= $04010003
+#AN_SubAlloc= $04010004
+#AN_PlaneAlloc= $84010005
+#AN_ItemBoxTop= $84000006
+#AN_OpenScreen= $84010007
+#AN_OpenScrnRast= $84010008
+#AN_SysScrnType= $84000009
+#AN_AddSWGadget= $8401000A
+#AN_OpenWindow= $8401000B
+#AN_BadState= $8400000C
+#AN_BadMessage= $8400000D
+#AN_WeirdEcho= $8400000E
+#AN_NoConsole= $8400000F
+#AN_MathLib= $05000000
+#AN_DOSLib= $07000000
+#AN_StartMem= $07010001
+#AN_EndTask= $07000002
+#AN_QPktFail= $07000003
+#AN_AsyncPkt= $07000004
+#AN_FreeVec= $07000005
+#AN_DiskBlkSeq= $07000006
+#AN_BitMap= $07000007
+#AN_KeyFree= $07000008
+#AN_BadChkSum= $07000009
+#AN_DiskError= $0700000A
+#AN_KeyRange= $0700000B
+#AN_BadOverlay= $0700000C
+#AN_BadInitFunc= $0700000D
+#AN_Reclosed= $0700000E
+#AN_RAMLib= $08000000
+#AN_BadSegList= $08000001
+#AN_IconLib= $09000000
+#AN_ExpansionLib= $0A000000
+#AN_BadExpansionFree= $0A000001
+#AN_DiskfontLib= $0B000000
+#AN_AudioDev= $10000000
+#AN_ConsoleDev= $11000000
+#AN_NoWindow= $11000001
+#AN_GamePortDev= $12000000
+#AN_KeyboardDev= $13000000
+#AN_TrackDiskDev= $14000000
+#AN_TDCalibSeek= $14000001
+#AN_TDDelay= $14000002
+#AN_TimerDev= $15000000
+#AN_TMBadReq= $15000001
+#AN_TMBadSupply= $15000002
+#AN_CIARsrc= $20000000
+#AN_DiskRsrc= $21000000
+#AN_DRHasDisk= $21000001
+#AN_DRIntNoAct= $21000002
+#AN_MiscRsrc= $22000000
+#AN_BootStrap= $30000000
+#AN_BootError= $30000001
+#AN_Workbench= $31000000
+#AN_NoFonts= $B1000001
+#AN_WBBadStartupMsg1= $31000001
+#AN_WBBadStartupMsg2= $31000002
+#AN_WBBadIOMsg= $31000003
+#AN_WBInitPotionAllocDrawer= $B1010004
+#AN_WBCreateWBMenusCreateMenus1= $B1010005
+#AN_WBCreateWBMenusCreateMenus2= $B1010006
+#AN_WBLayoutWBMenusLayoutMenus= $B1010007
+#AN_WBAddToolMenuItem= $B1010008
+#AN_WBReLayoutToolMenu= $B1010009
+#AN_WBinitTimer= $B101000A
+#AN_WBInitLayerDemon= $B101000B
+#AN_WBinitWbGels= $B101000C
+#AN_WBInitScreenAndWindows1= $B101000D
+#AN_WBInitScreenAndWindows2= $B101000E
+#AN_WBInitScreenAndWindows3= $B101000F
+#AN_WBMAlloc= $B1010010
+#AN_DiskCopy= $32000000
+#AN_GadTools= $33000000
+#AN_UtilityLib= $34000000
+#AN_Unknown= $35000000
+
+;*****************File:resident.h
+
+NEWTYPE.Resident
+rt_MatchWord.w
+*rt_MatchTag.Resident
+*rt_EndSkip.b
+rt_Flags.b
+rt_Version.b
+rt_Type.b
+rt_Pri.b
+*rt_Name.b
+*rt_IdString.b
+*rt_Init.b
+End NEWTYPE
+
+#RTC_MATCHWORD= $4AFC
+#RTF_AUTOINIT= (1LSL7)
+#RTF_AFTERDOS= (1LSL2)
+#RTF_SINGLETASK= (1LSL1)
+#RTF_COLDSTART= (1LSL0)
+#RTW_NEVER= 0
+#RTW_COLDSTART= 1
+
+;*****************File:io.h
+
+NEWTYPE.IORequest
+io_Message.Message
+*io_Device.Device
+*io_Unit.Unit
+io_Command.w
+io_Flags.b
+io_Error.b
+End NEWTYPE
+
+NEWTYPE.IOStdReq
+io_Message.Message
+*io_Device.Device
+*io_Unit.Unit
+io_Command.w
+io_Flags.b
+io_Error.b
+io_Actual.l
+io_Length.l
+*io_Data.b
+io_Offset.l
+End NEWTYPE
+
+#DEV_BEGINIO= (-30)
+#DEV_AbortIO= (-36)
+#IOB_QUICK= 0
+#IOF_QUICK= (1LSL0)
+#CMD_INVALID= 0
+#CMD_RESET= 1
+#CMD_READ= 2
+#CMD_WRITE= 3
+#CMD_UPDATE= 4
+#CMD_CLEAR= 5
+#CMD_STOP= 6
+#CMD_START= 7
+#CMD_FLUSH= 8
+#CMD_NONSTD= 9
+
+;*****************File:types.h
+
+#INCLUDE_VERSION= 36
+#TRUE= 1
+#FALSE= 0
+#NULL= 0
+#BYTEMASK= $FF
+#LIBRARY_MINIMUM= 33
+
+;*****************File:memory.h
+
+NEWTYPE.MemChunk
+*mc_Next.MemChunk
+mc_Bytes.l
+End NEWTYPE
+
+NEWTYPE.MemHeader
+mh_Node.Node
+mh_Attributes.w
+*mh_First.MemChunk
+*mh_Lower.b
+*mh_Upper.b
+mh_Free.l
+End NEWTYPE
+
+NEWTYPE.MemEntry
+meu_Reqs.l[0]
+*meu_Addr.b
+me_Length.l
+End NEWTYPE
+
+NEWTYPE.MemList
+ml_Node.Node
+ml_NumEntries.w
+ml_me.MemEntry[0]
+ml_ME.MemEntry[1]
+End NEWTYPE
+
+#MEMF_ANY= 0
+#MEMF_PUBLIC= (1LSL0)
+#MEMF_CHIP= (1LSL1)
+#MEMF_FAST= (1LSL2)
+#MEMF_LOCAL= (1LSL8)
+#MEMF_24BITDMA= (1LSL9)
+#MEMF_CLEAR= (1LSL16)
+#MEMF_LARGEST= (1LSL17)
+#MEMF_REVERSE= (1LSL18)
+#MEMF_TOTAL= (1LSL19)
+#MEM_BLOCKSIZE= 8
+#MEM_BLOCKMASK= (#MEM_BLOCKSIZE-1)
+

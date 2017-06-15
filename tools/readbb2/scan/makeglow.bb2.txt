@@ -1,0 +1,40 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/makeglow.bb2
+;
+;make glow table
+;
+Statement pg{}
+Shared r,g,b
+Print Mki$((r LSL 8)+(g LSL 4)+b)
+End Statement
+
+l=4
+
+If ReadMem(0,"glow.bin")
+	FileOutput 0
+	r=15
+	For g=l+1 To 15
+	pg{}
+	Next
+	g=15
+	For r=14 To l Step -1
+	pg{}
+	Next
+	r=0
+	For b=l+1 To 15
+	pg{}
+	Next
+	b=15
+	For g=14 To l Step -1
+	pg{}
+	Next
+	g=0
+	For r=l+1 To 15
+	pg{}
+	Next
+	r=15
+	For b=14 To l Step -1
+	pg{}
+	Next
+	CloseFile 0
+EndIf
+

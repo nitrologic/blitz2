@@ -1,0 +1,137 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example4.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example4.bb2
+NoCli
+WBStartup
+
+INCDIR	"FUN_Math:"
+Include "FUN_Matrix.bb2"
+
+NEWTYPE.Facet_Type
+	Points.w[4]
+End NEWTYPE
+
+NEWTYPE.Point_Type
+	x.w
+	y.w
+End NEWTYPE
+
+Dim vertex_list.Vector_Type(7)
+Dim facet_list.Facet_Type(5)
+Dim output_list.Vector_Type(7)
+Dim polygon.Point_Type(4)
+
+DEFTYPE.Matrix_Type Final
+DEFTYPE.Matrix_Type Temp1
+DEFTYPE.Matrix_Type Temp2
+DEFTYPE.Matrix_Type Temp3
+
+DEFTYPE.Vector_Type VTemp1
+DEFTYPE.Vector_Type VTemp2
+DEFTYPE.Vector_Type Normal
+
+Restore Cube_Data
+For points.b=0 To 7
+	Read	vertex_list(points)\x
+	Read	vertex_list(points)\y
+	Read	vertex_list(points)\z
+	vertex_list(points)\s=1
+Next points
+
+For sides.b=0 To 5
+	For points.b=0 To 3
+		Read	facet_list(sides)\Points[points]
+	Next points
+Next sides
+
+BitMap 0,320,200,4
+BitMap 1,320,200,4
+
+DecodePalette 0,16
+For count.w=1 To 15
+	StopCycle 0,count,count,count,count
+Next count
+
+
+physical.b=0
+logical.b=1
+
+BLITZ
+
+InitCopList 0,42,199,$00004,0,16,0	;$12016 <- does not work on 1200's!!!
+CreateDisplay 0
+DisplayBitMap 0,physical
+DisplayPalette 0,0
+Use BitMap logical
+
+xrot.w=0
+yrot.w=0 ;67
+zrot.w=0 ;194
+sby.q=2
+sdelta.q=0.03
+
+Repeat
+ xrot+2 : If xrot>359 Then xrot=360-xrot
+ yrot+2 : If yrot>359 Then yrot=360-yrot
+ zrot+1 : If zrot>359 Then zrot=360-zrot
+ sby+sdelta
+ If (sdelta>0) AND (sby>=2) Then sdelta=0-sdelta
+ If (sdelta<0) AND (sby<=0.5) Then sdelta=0-sdelta
+
+ build_rotation_matrix{#ABOUT_Y,&Temp2,yrot}
+ build_rotation_matrix{#ABOUT_X,&Temp1,xrot}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+ build_rotation_matrix{#ABOUT_Z,&Temp1,zrot}
+ concatenate_matrix{&Temp1,&Temp3,&Temp2}
+ build_scale_matrix{&Temp1,sby,sby,sby}
+ concatenate_matrix{&Temp1,&Temp2,&Temp3}
+
+ build_translation_matrix{&Temp1,160,100,0}
+ concatenate_matrix{&Temp1,&Temp3,&Final}
+ BlockScroll 0
+ For points=0 To 7
+	apply_matrix{&Final,&vertex_list(points),&output_list(points)}
+ Next points
+ For sides=0 To 5
+	subtract_vectors{&output_list(facet_list(sides)\Points[2]),&output_list(facet_list(sides)\Points[1]),&VTemp1}
+	subtract_vectors{&output_list(facet_list(sides)\Points[3]),&output_list(facet_list(sides)\Points[1]),&VTemp2}
+	cross_product{&VTemp2,&VTemp1,&Normal}
+	If Normal\z>0
+		VTemp1\x=1,0,0.5,1
+		e.q=vector_angle{&Normal,&VTemp1}*8+7
+		If e<0 Then e=0
+		If e>15 Then e=15
+		For points=0 To 3
+			polygon(points)\x=output_list(facet_list(sides)\Points[points])\x,output_list(facet_list(sides)\Points[points])\y
+		Next points
+		Polyf 4,&polygon(0),e
+	EndIf
+ Next sides
+ VWait
+ If physical=1
+		logical=1
+		physical=0
+ Else
+		logical=0
+		physical=1
+ EndIf
+ DisplayBitMap 0,physical
+ Use BitMap logical
+Until Joyb(1)
+
+End
+
+Cube_Data:
+	Data.w	-20,20,20
+	Data.w	20,20,20
+	Data.w	20,-20,20
+	Data.w	-20,-20,20
+	Data.w	-20,20,-20
+	Data.w	20,20,-20
+	Data.w	20,-20,-20
+	Data.w	-20,-20,-20
+Facet_Data:
+	Data.w	0,3,2,1
+	Data.w	0,1,5,4
+	Data.w	4,5,6,7
+	Data.w	7,6,2,3
+	Data.w	1,2,6,5
+	Data.w	4,7,3,0

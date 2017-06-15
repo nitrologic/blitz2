@@ -1,0 +1,126 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum6/frac.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/bum6/frac.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum6/examples/frac.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/frac.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/examples/frac.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/examples/frac.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/examples/frac.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/frac.bb
+;
+; fractal demo
+;
+
+#sx=640
+#sy=512
+
+NEWTYPE .ifs
+	a.q:b:c:d:e:f:p
+End NEWTYPE
+
+Screen 0,1+8+16
+
+Green 0,0,0,0:Green 1,15,15,15
+
+ScreensBitMap 0,0
+
+For image=1 To 6
+	;
+	value=18500
+	;
+	Use BitMap 0
+	;
+	BlockScroll
+	;
+	Read trans,xscale,xoff,yscale,yoff,scxoff,scyoff,cspgreen,cspblue
+	;
+	Dim List code.ifs(trans)
+	;
+	USEPATH code()
+	;
+	For i=0 To trans-1
+		AddItem code()
+		Read \a,\b,\c,\d,\e,\f,\p
+	Next
+	;
+	x=0:y=0:detail=0
+	;
+	Repeat
+;
+; fractal background routine
+;
+			Use BitMap 0
+			ResetList code()
+			While NextItem(code())
+				n=Rnd
+				If n <= \p
+					newx=\a*x + \b*y + \e
+					newy=\c*x + \d*y + \f
+					x=newx
+					y=newy
+					xco=x*xscale+xoff
+					yco=(yscale-(y*yscale))-yoff
+					If detail>10 Then Point xco,yco,1 Else detail+1
+				EndIf
+			Wend
+
+	Until Joyb(0)<>0:VWait 50
+
+Next
+
+End
+
+.data
+;
+; The first two data lines are colours, scalings and screen offsets
+; The remaining lines are the I.F.S. codes for the fractals followed
+; by the text colours and c.v. text
+
+;
+; M.F.Barnsley's Fern Leaf
+;
+Data 4,80,270,50,-460,0,0,0,0
+Data 0,0,0,0.16,0,0,0.01
+Data 0.2,-0.26,0.23,0.22,0,1.6,0.07
+Data -0.15,0.28,0.26,0.24,0,0.44,0.07
+Data 0.85,0.04,-0.04,0.85,0,1.6,0.85
+
+;
+; Spirals
+;
+Data 2,550,307,400,140,0,0,0,0
+Data -0.15,0,0,-0.15,-0.75,-0.25,0.1
+Data 1.179,-0.594,0.594,0.467,0,0,0.9
+
+;
+; Fern Leaf
+;
+Data 4,640,21,512,10,0,0,10,12
+Data 0.504,-0.121,0.089,0.685,0.248,0.25,0.5
+Data 0.214,-0.378,0.214,0.378,0.393,0.044,0.2
+Data 0.2,0.354,-0.2,0.354,0.4,0.367,0.2
+Data 0.025,0,0,0.35,0.495,0,0.1
+
+;
+; Sierpinski Triangle
+;
+Data 3,640,14,512,20,0,0,11,9
+Data 0.5,0,0,0.5,0,0,0.33
+Data 0.5,0,0,0.5,0.5,0,0.33
+Data 0.5,0,0,0.5,0.25,0.433,0.34
+
+;
+; Snowflake
+;
+Data 5,640,15,500,-10,0,0,9,3
+Data 0.382,0,0,0.382,0.138,0.074,0.2
+Data 0.382,0,0,0.382,0.48,0.074,0.2
+Data 0.382,0,0,0.382,0.585,0.399,0.2
+Data 0.382,0,0,0.382,0.31,0.6,0.2
+Data 0.382,0,0,0.382,0.033,0.399,0.2
+
+;
+; Ted fractal
+;
+Data 9,640,15,512,0,0,0,0,0
+Data 0.3,0,0,0.2,0,0.8,0.1
+Data 0,0.1,-0.8,0,0.1,0.8,0.14
+Data 0,0.1,-1,0,0.35,1,0.17
+Data 0.2,0,0,0.2,0.45,0.8,0.07
+Data 0.2,0,0,0.2,0.45,0.4,0.07
+Data 0.2,0,0,0.2,0.45,0,0.07
+Data 0,0.1,-1,0,0.7,1,0.17
+Data 0.15,0.09,-0.5,0.11,0.76,0.89,0.1
+Data -0.15,0.09,-0.5,-0.11,0.91,0.61,0.1

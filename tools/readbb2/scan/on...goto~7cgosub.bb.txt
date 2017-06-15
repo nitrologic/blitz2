@@ -1,0 +1,30 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/On...Goto~7cGosub.bb
+
+; 
+; on...gosub prgram example 
+; 
+
+For k=1 To 3
+ On k Gosub one,two,three
+Next
+
+MouseWait 
+End 
+
+one:
+NPrint "One!" 
+Return
+
+two:
+NPrint "Two!" 
+Return
+
+three:NPrint "Three!" 
+Return
+
+NPrint "Click mouse button to return to the editor..."
+MouseWait 
+
+ 
+
+

@@ -1,0 +1,517 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Games/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abc/bums/out/new/Tetris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Games/BlitzTris/BlitzTris.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Tetris/BlitzTris.bb
+Ver$ = "BlitzTris 18.7.1995 Timo Suoranta"
+
+; READ ME NOW:
+;
+;	 No graphics & colours like Workbench?
+;	 Yep - You once again forgot the CD button!
+
+;	 Hold down Left & Right MouseButton to Quit
+;	 Number-keypad 1235 to move & rotate, space to drop
+
+
+SetErr:End:End SetErr								 ; Add ; to enable Debugger
+
+WBStartup														 ; A Must for WB progs
+CloseEd															 ; Editor run only; free mem.
+NoCli																 ; Editor run only; free mem.
+DEFTYPE .w														; Mostly sufficient & fast
+
+Gosub Variable_Init
+Gosub Graphics_Init
+Goto MAIN
+
+
+
+; Since this is a Tetris example, there are a few things missing:
+;
+;	 - Main loop Interface, selecting map size, level etc.
+;	 - Keaboard/Joystick/Mouse control
+;	 - Non-busy Play -Interface
+;	 - More & bigger shapes
+;	 - Smooth piece sliding
+;	 - Two player mode
+;	 - Highscore table
+;	 - etc. etc...
+;
+; However the game is there. You can add other things if you want.
+
+; I have used Timer function that is userlibrary function,
+; I think. So if you see ???? and get compiling error,
+; rebuild your deflibs, including this library.
+
+
+
+.
+.Variable_Init												; Define Variables
+
+	#MMX	=	50												 ; Playfield Max. Width
+	#MMY	=	30												 ; Playield Max. Height
+
+	#BXX	=	 8												 ; Block Shape Width
+	#BYY	=	 8												 ; Block Shape Height
+	#DXX	=	 9												 ; Digit Shape Width
+	#DYY	=	16												 ; Digit Shape Height
+
+	#PXX	=	 4												 ; Max. Piece Width
+	#PYY	=	 4												 ; Max. Piece Height
+
+	#GSC	=	 0												 ; Game Screen
+
+	#GBM	=	 0												 ; Game BitMap
+	#IBM	=	 1												 ; Init BitMap
+
+	#GPAL =	 0												 ; Game Palette
+
+	SXX	 = 320												 ; Game Screen Width
+	SYY	 = 256												 ; Game Screen Height
+	SBP	 =	 4												 ; Game Screen Depth, 2^4 = 16 Colour
+	ID		=	 0												 ; Game Screen ViewMode
+
+	#Pieces	= 7												; Number of Pieces
+	#Blocks	= 7												; Number of Block Shapes
+	#Digits	= 11											 ; Number of Number Digit Shapes
+
+	#Blk_Sps = 0												; Block Shapes Offset
+	#Dgt_Sps = 7												; Digital Number Shapes Offset
+
+	; pf.b() ,	Playfield is an array where is mapped which positions
+	;					 are free and which are used.
+
+	; blk () ,	Blocks, is an array that holds all 'n' pieces in
+	;					 all 'rots' rotations' all 'x' and 'y' positions
+	;					 Value in this point tells the colour (used) or
+	;					 if zero, means it is not used.
+
+	Dim pf.b(#MMX,#MMY)								 ; Playfield; x,y
+	Dim blk.b (#Pieces,3,#PXX,#PYY)		 ; Blocks; n,rots,x,y
+	Return
+
+
+
+
+
+.
+.Globals
+Macro Globals												 ; Global vars
+
+	; Global variables can be defined this way, and
+	; called by !Globals.	Constants are always Global.
+
+	Shared Ver$												 ; Version String
+	Shared SXX,SYY,SBP									; Screen Size & Depth
+	Shared GrS,GrY											; Grabber Shape Number & YPos
+	Shared PFX,PFY											; PlayField Grfx Offset
+	Shared pf(),blk()									 ; PlayField, blocks
+	Shared MXX,MYY											; PlayField Specs.
+	Shared Score,Level,Lines						; Game Stats
+	Shared IX1,IX2,IX3,IYY,k						; InfoPanel grfx Offsets
+	End Macro
+
+.MyBlit
+Macro MyBlit
+
+	; It would be easier to change this single macro
+	; to WBlit for example than searhing-replacing all Blits.
+
+	Blit #Blk_Sps+(`1), PFX+(`2)*#BXX,PFY+(`3)*#BYY
+	End Macro
+
+
+
+
+
+.
+.Grab
+Statement Grab {Count,Width,Height}	 ; Shape Grabber
+	!Globals
+
+	; Grabber is a simple statement that will grab 'Count'
+	; shapes (offset shape GrS) from currently used bitmap.
+	; These shapes must be of same size and be in a single
+	; line starting from left edge.
+
+	; GrS, the number of shape to be grabbed, is automaticaally
+	;			updated.
+	; GrY	is the graphics y-coordinate 'offset' position,
+	;			top edge of shapes.	Will be automatically increased
+	;			tbelow the bottom-edge, which will be the top-edge
+	;			for next shapes
+
+	For x=0 To Count-1
+		GetaShape GrS,x*Width,GrY,Width,Height
+		GrS + 1
+	Next
+	GrY + Height
+End Statement
+
+.Digi
+Statement Digi {Value,chars,xPos,yPos}
+	!Globals
+
+	; This will blit given 'Value' with given number of chars.
+	; (Well You _could_ make it receive a format string too.)
+	; Top-Left offset is defined in 'xPos,yPos'
+
+	Format String$("#",chars)					 ; Set Format Strings
+	Value$ = Str$(Value)								; Make a string of Value
+
+	For p=1 To Len(Value$)							; Loop through all chars
+		v = Asc(Mid$(Value$,p,1))				 ;	Get ASCII of p:th char from left
+		If v=32 : v = 0 Else v-47 :EndIf	;	Transfer ASCII to Digit shape #
+		Blit #Dgt_Sps+v,xPos,yPos				 ;	Blit sigit shape
+		xPos + #DXX											 ;	Move graphics 'cursor' to right
+	Next																; Loop end
+End Statement
+
+.DrawBlock
+Statement DrawBlock {N,R,X,Y,C}
+	!Globals
+
+	; Blits out piece 'N' in rotation 'R' To position 'X,Y'.
+	; If 'C' is set to 0, this will wipe out the piece (and only
+	; the piece).
+
+	For x=0 To #PXX-1
+		For y=0 To #PYY-1								 ; Loop through all locations
+			v = blk(N,R,x,y)
+			If v>0													; Check if there were a block
+				If C=0 : v = 1 :EndIf				 ; Wipe? then select background shape
+				!MyBlit { v,X+x,Y+y }				 ; Blit out what we got
+			EndIf
+		Next
+	Next
+End Statement
+
+.PlaceBlock
+Statement PlaceBlock {N,R,X,Y}				; Place Block here (Permanet)
+	!Globals
+
+	; This will fix a piece to the playfield, permanently.
+	; this will also check possible 'full lines' which will
+	; be removed, things above will be pushed down, AND
+	; score is updated.
+
+
+	; First we fix the piece in place. 'X,Y' is topleft offset
+	; of our piece.	'x,y' is a delta-addition to that, also
+	; it points respective position in blk() array.
+
+	For x=0 To #PXX-1									 ; Loop through all locations.
+		For y=0 To #PYY-1
+			v = blk(N,R,x,y)
+			If v>0													; If There's Block...
+				pf(X+x,Y+y)=v								 ; ...place it here
+			EndIf
+		Next
+	Next
+
+
+
+	; Here comes loop that'll check new lines. Actually it
+	; wouldn't need to check all the lines, but this is reliable.
+
+	NewLines = 0												; Count how many lines (score!)
+
+	For y=MYY To 1 Step -1							; Check all lines for Done?
+
+		Crash = True											; Assume: line is done
+
+		While Crash = True
+			For x=1 To MXX										; Check all x-positions
+				If pf(x,y)=1										;
+					Crash = False								 ;	Assumption disproved
+				EndIf													 ;
+			Next															;
+
+			If Crash													; Do the cleaning if needed
+
+				NewLines + 1										; Update Counter
+
+				; In this we'll push down the graphics.
+				; Actual Playfield arrays still stays untouched.
+				; Ok, I'm doing some (x1,y1,w) calcs here that should be
+				; done in init-stage..
+
+				x1 = PFX+#BXX									 ; Calc grfx position;
+				y1 = PFY+#BYY									 ; edge & top edge of Playfield
+				w	= MXX*#BXX									 ; Witdh of Playfield
+				h	= (y-1)*#BYY								 ; Height of area to be scrolled.
+				x2 = x1
+				y2 = y1+#BYY
+				Scroll x1,y1,w,h,x2,y2					; Move grfx down
+
+				; Well have to update the first line of playfield,
+				; otherwise it would contain 'trash' graphics.
+
+				For x=1 To MXX									; First line procedure;
+					!MyBlit { 1,x,1 }						 ;	-redraw
+					pf (x,1) = 1									;	-clear playfield data
+				Next
+
+				; Now it is time to update the Playfield array
+
+				For y2=y To 2 Step -1					 ; Go from bottom to top
+					For x=1 To MXX								;
+						pf(x,y2) = pf(x,y2-1)			 ;	copy data from above
+					Next													;
+				Next														;
+			EndIf
+		Wend
+	Next																; Check next line
+
+	; Update score etc.
+
+	Lines + NewLines
+	Score + NewLines*NewLines*10 + 5
+
+	; Advance level?
+
+	If Lines>(Level+1)*8 AND Level<18
+		Level + 1
+		Digi {Level,2,IX3,IYY}						; Update Level
+	EndIf
+
+	; Update display
+
+	Digi {Score,5,IX1,IYY}							; Display Score
+	Digi {Lines,3,IX2,IYY}							; Display Number of Lines Done
+
+End Statement
+
+
+
+
+.
+.CheckBlock
+Function.b CheckBlock {N,R,X,Y}			 ; Return True if there IS room
+	!Globals
+
+	; This will check if there was room space on Playfield
+	; for given piece.
+
+	ret = True													; Assume there is room
+	For x=0 To #PXX-1
+		For y=0 To #PYY-1
+			If blk(N,R,x,y)>0
+				If X+x<1 OR X+x>MXX OR Y+y<0 OR Y+y>MYY		; May not go outside Playfield!
+					ret = False
+				Else
+					If pf(X+x,Y+y)<>1 : ret = False :EndIf	 ; Piece would go here, but it is used already.
+				EndIf
+			EndIf
+		Next
+	Next
+
+	Function Return ret								 ; Return the result
+	End Function
+
+
+
+
+.
+.Graphics_Init												; Set Up Graphics
+	Screen #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
+	Window 0,0,0,SXX,SYY,$31940,Ver$,0,2
+	ScreensBitMap #GSC,#GBM
+	BitMap #IBM,320,256,4
+
+	; Window Flags are explained in intuition.bb2
+	;
+	;		$40 - Program takes care of ALL refreshing, other windows are NOT welcome
+	;	 $100 - This is a backdrop Window, yeah
+	;	 $800 - No borders, no
+	;	$1000 - Activate when opened
+	; $10000 - No menus here, let's catch RMB's for ourselves
+	; $30000 - Ensure not to be bothered about refresh...
+	;
+	; Actually we need window only for console - Need to read the keyboard!
+
+	##[$A486] "Data/BlockShapes.Iff",#IBM,#GPAL
+	Use BitMap #IBM
+
+	; Next we'll 'define' pieces.	They are hand-drawn on bitmap,
+	; with all their rotations.
+
+	For N=0 To #Pieces-1								; Get Block N
+		For R=0 To 3											;	rotation R
+			For x=0 To #PXX-1							 ;	from left to right edge
+				For y=0 To #PYY-1						 ;	from top to bottom
+					c = Cls(x+R*#PXX,y+N*#PYY);	Get the colour in respective position
+					If c>0 : c + 1 :EndIf			 ;	 Used -> transpose a little up
+					blk(N,R,x,y) = c						;	 Set piece data
+				Next													;
+			Next														;
+		Next															;
+	Next																;
+
+	GrS = 0														 ; Reset Grabber; 0 is first shape
+	GrY = #Pieces*#PYY									; Skip over 'piece-definitions'
+
+	Grab {#Blocks ,#BXX,#BYY}					 ; Grab Block Shapes
+	Grab {#Digits ,#DXX,#DYY}					 ; Grab Number Digit Shapes
+	Free BitMap #IBM										; Free WorkBitMap
+
+	Use BitMap #GBM
+	Use SetCycle #GPAL
+	Format "###"
+	Return
+
+
+
+
+
+
+.
+.MAIN																 ; Main Menu Loop
+
+	MXX = 10														; Set Map Size
+	MYY = 20
+
+	Rot = -1														; Rotation direction, +-1
+
+	PFX = (SXX-(MXX+2)*#BXX)/2					; Set PlayField Grfx Offset
+	PFY = 12+#DYY
+
+	Repeat
+		Gosub Play
+	Until Joyb(0)=3										 ; Both mousebuttons down -> Quit
+	End
+
+.Play																 ; Main Playing procedure
+
+	GameOver = False										; Reset
+	Score		= 0												; Clear Score
+	Lines		= 0												; Clear 'Lines Done'
+	Level		= 0												; Starting Level
+
+	MDX = SXX/2												 ; Screen middle-x Position
+	IX3 = MDX-(2*#DXX)/2								; Level Data X-position
+	IX1 = IX3-6*#DXX										; Score Data X-position
+	IX2 = IX3+3*#DXX										; Lines Data X-position
+	IYY = PFY-#DYY
+
+	Gosub InitPlayField								 ; Set Up PlayField
+	Gosub InitDrawPlayField						 ; Draw it
+
+	Time			= 0											 ; Time in seconds
+	OldTime.l = ##[$A588]									 ; Clock position in 1/50s
+
+	Digi {Score,5,IX1,IYY}							; Display Score
+	Digi {Lines,3,IX2,IYY}							; Display Number of Lines Done
+	Digi {Level,2,IX3,IYY}							; Display Level
+
+	NextPiece = True										; Give First piece
+
+	Repeat															; Loop Until End
+
+		er = r														; Store current
+		ex = x														; rotation & position.
+		ey = y														; It'll be 'previous' soon.
+		G$ = Inkey$
+
+		CurrTime.l = ##[$A588]								; Update Timer
+
+		If CurrTime<OldTime : OldTime = CurrTime :EndIf		; Timer Overflow (rare)
+
+		; Automatic push down piece.
+		; This will also cause the piece to fix in
+		; place if it cannot go any further down.
+
+		If CurrTime>OldTime+40-Level*2		; Will go faster on higher level
+			OldTime = CurrTime
+			y + 1
+			If NOT CheckBlock { n,r,x,y }
+				PlaceBlock { n,er,ex,ey }
+				NextPiece = True
+			EndIf
+		EndIf
+
+		; Read the keyboard, move, frop & rotate piece.
+
+		If G$="*":Gosub InitDrawPlayField:EndIf
+		If G$="5":r+Rot:If r=-1:r=3:EndIf:If r=4:r=0:EndIf:EndIf ; Rotate
+		If G$="4":x-1:EndIf							 ; move left
+		If G$="6":x+1:EndIf							 ; Move right
+		If G$="2":y+1:EndIf							 ; Move down
+		If G$=" " AND NOT NextPiece			 ; Drop
+			Repeat													;
+				y + 1												 ; go as down as possible
+			Until NOT CheckBlock {n,r,x,y } ;
+			DrawBlock	{n,er,ex, ey,0}			; remove old grfx
+			DrawBlock	{n, r, x,y-1,1}			; draw to new position
+			PlaceBlock {n, r, x,y-1	}			; fix in place
+			NextPiece = True								; ask for next piece
+		EndIf
+
+		; If the position/rotation was changed, we'll
+		; test if new position is ok, then re-draw grfx.
+
+		If (ex<>x OR ey<>y OR er<>r) AND NextPiece=False
+			If NOT CheckBlock { n,r,x,y }	 ; Test if new position ok?
+				x = ex												;	NOT > remain 'previous' position
+				y = ey												;
+				r = er												;
+			Else														;
+				DrawBlock {n,er,ex,ey,0}			;	OK	> remove old grfx
+				DrawBlock {n, r, x, y,1}			;				draw To new position
+			EndIf													 ;
+		EndIf														 ;
+
+		If NextPiece											; Get another block?
+			n = Rnd(#Pieces)								;
+			r = 0													 ;
+			x = MXX/2											 ;
+			y = 1													 ; Could be random, too..
+			NextPiece=False								 ; No more pieces this time.
+			If NOT CheckBlock { n,r,x,y }	 ; If it doesn't fit at first,
+				GameOver = True							 ; it'll be game over man.
+			Else														;
+				DrawBlock{n,r,x,y,1}					; Ok, lets draw it.
+			EndIf													 ;
+		EndIf
+
+	Until GameOver OR Joyb(0)=3				 ; End of Loop, check mouse buttons
+	Return															; Back to Main 'Interface' :-)
+
+
+.
+.InitPlayField												; Init PlayField;
+
+	; InitPlayfield will reset Playfield array & set 'borders'
+	; to it. Borders are set here so that theey'll be automatically
+	; drawn in InitDrawPlayField.
+
+	For y=1 To MYY											; Clear Inner Area
+		For x=1 To MXX
+			pf(x,y) = 1
+		Next
+	Next
+	For x=0 To MXX+1										; Set Left & Right Borders
+		pf(x,		0) = 0
+		pf(x,MYY+1) = 0
+	Next
+	For y=0 To MYY+1										; Set Top & Bottom Borders
+		pf(0		,y) = 0
+		pf(MXX+1,y) = 0
+	Next
+	Return
+
+
+.InitDrawPlayField										; Draw Unused PlayField
+
+	; Simply draws PlayFields contents.
+
+	For y=0 To MYY+1
+		For x=0 To MXX+1
+			!MyBlit { pf(x,y),x,y }
+		Next
+	Next
+	Return
+
+
+
+
+
+
+

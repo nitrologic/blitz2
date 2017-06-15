@@ -1,0 +1,1229 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/3ded.bb2
+
+;OH MY GOD...
+;
+;A 3D EDITOR!
+;
+;ARRRGGGGHHHHHHHH!
+;
+;QUICK AND NASTY VERSION
+
+AutoCookie Off
+
+Dim ncm.w(21)
+For k=0 To 21:Read ncm(k):Next
+Data.w 0,3,5,7,6,11,8,9,10,11,12,13,20,21,22,14,15,16,17,18,19,7
+
+##[$FE1F] "copy work:genam ram:",0,0
+sseg.l=##[$FE15]("show3d")
+BitMap 9,320,200,4
+bpa.l=Peek.l(Addr BitMap(9)+8)
+
+MenuTitle 0,0," 3D OPTIONS "
+MenuItem 0,0,0,0,"LOAD									 ","L"
+MenuItem 0,0,0,1,"SAVE									 ","S"
+MenuItem 0,0,0,2,"LOAD DITHER BRUSH			","D"
+MenuItem 0,0,0,3,"CREATE SOURCE CODE		 ","C"
+MenuItem 0,0,0,4,"KILL OBJECT						","K"
+MenuItem 0,0,0,5,"IMPORT OBJECT					","I"
+MenuItem 0,0,0,6,"MAP NEW COLOURS				","M"
+MenuItem 0,0,0,7,"QUIT									 ","Q"
+
+StringText$ Off
+TextGadget 0,96,12,0,1,"<"
+StringGadget 0,96+16,12,0,2,4,32
+ButtonId 0,2,"0"
+TextGadget 0,96+56,12,0,3,">"
+
+si=4:t$=Chr$(9)
+xsc=8:ysc=8:zsc=8
+rsc=8:his=1
+
+#dscx=256
+#dscy=96
+dof=56
+
+nd=256
+nd2=nd-1
+
+Dim sin_(nd2),cos_(nd2)
+
+;ndq=nd/4
+;
+cof.f=Pi*2/nd
+For k=0 To nd2
+sin_(k)=HSin((k+ndq)*cof):cos_(k)=HCos((k+ndq)*cof)
+Next
+
+Function rotx{x,z}
+Shared sin_(),cos_(),rot
+Function Return x*cos_(rot)-z*sin_(rot)
+End Function
+
+Function rotz{x,z}
+Shared sin_(),cos_(),rot
+Function Return x*sin_(rot)+z*cos_(rot)
+End Function
+
+;Macro xy 320+`1 LSL 2+`3 LSL 2,128+`1-`3-`2 End Macro
+Macro xy 320+rotx{`1,`3}/(rotz{`1,`3}+dof)*#dscx,128+`2/(rotz{`1,`3}+dof)*#dscy End Macro
+
+NEWTYPE.coll
+y.w
+r.w
+End NEWTYPE
+
+NEWTYPE.collinfo
+n.w
+c.coll[20]
+End NEWTYPE
+
+NEWTYPE.oldvert
+x.w						 ;x,y,z of vert
+y.w
+z.w
+f.w						 ;flags. non zero=shadowable!
+sx.w						;screen x and y for mouse checking
+sy.w
+sx2.w					 ;screen x and y for shadow
+sy2.w
+End NEWTYPE
+
+NEWTYPE.vert
+x.q						 ;x,y,z of vert
+y.q
+z.q
+f.w						 ;flags. non zero=shadowable!
+sx.w						;screen x and y for mouse checking
+sy.w
+sx2.w					 ;screen x and y for shadow
+sy2.w
+;
+;ox.q						;old x,y,z
+;oy.q
+;oz.q
+;
+End NEWTYPE
+
+NEWTYPE.poly
+n.w						 ;number of verts
+o.w						 ;origin vert number
+f.w						 ;<>0 = shadow type
+c1.w						;clockwise colour
+c2.w						;anticlockwise colour
+v.w[20]				 ;vertice offsets
+End NEWTYPE
+
+mo=64		 ;max objects
+maxve=256 ;max vertices
+maxpo=256 ;max polygons
+
+Dim xsc.q(mo),ysc.q(mo),zsc.q(mo)
+Dim v.vert(mo,maxve),p.poly(mo,maxpo),c.collinfo(mo)
+Dim nv(mo),np(mo),ov(mo),po(maxve),ps(maxve),zy(mo)	;zero y!
+
+For k=1 To mo
+xsc(k)=8:ysc(k)=8:zsc(k)=8
+Next
+
+Statement mess{m$}
+Shared rot,dof
+WLocate 0,0:Print LSet$(m$,80)
+End Statement
+
+Statement plot_{x,y,z,c}
+Shared rot,dof
+Point !xy{x,y,z},c
+End Statement
+
+Statement plot_2{x,y,z,c}
+Shared rot,dof
+Line !xy{x,32,z},!xy{x,y,z},2
+Circlef !xy{x,y,z},2,c
+End Statement
+
+Statement plot_3{x,y,z,c}
+Shared rot,dof
+Line !xy{x,32,z},!xy{32,32,z},2
+Line !xy{x,32,z},!xy{x,32,-32},2
+Line !xy{x,32,z},!xy{x,y,z},2
+Circlef !xy{x,y,z},2,2,c
+End Statement
+
+MaxLen dpa$=160:MaxLen dfi$=160
+MaxLen fpa$=160:MaxLen ffi$=160
+MaxLen cpa$=160:MaxLen cfi$=160
+MaxLen ipa$=160:MaxLen ifi$=160
+
+StopCycle 0,0,0,0,0
+StopCycle 0,1,15,15,15
+StopCycle 0,2,8,8,8
+StopCycle 0,3,0,0,15
+StopCycle 0,4,0,15,0
+StopCycle 0,5,15,0,0
+StopCycle 0,6,15,15,0
+StopCycle 0,7,0,12,15
+StopCycle 0,8,15,8,0
+
+nco=0 ;number of colours
+
+Screen 0,0,0,640,256,5,$8000,"3D EDITOR",1,2:Use SetCycle 0:ScreensBitMap 0,0
+Window 0,0,0,640,256,$1840,"",1,2,0:SetMenu 0
+Gosub windowtext
+;
+co=1
+
+Gosub loadobject:Gosub makegrid:f$="dither.iff":Gosub loaddither
+sa=-1:Goto mainbit
+
+.newobject
+Gosub loadobject:Gosub makegrid:sa=-1
+
+.mainbit
+Repeat
+;
+If sa
+	If sa=999 Then Goto newobject
+	If sa<0
+		Gosub showall:GetaShape 1,0,20,640,256-20:Gosub curs
+	Else
+		BlitColl 1,0,20:Gosub curs
+	EndIf
+	sa=0
+EndIf
+;
+ev.l=WaitEvent
+Select ev
+Case 64
+	Select GadgetHit
+	Case 1	;left arrow
+		If co>1 Then Gosub saveobject:co-1:sa=999
+	Case 2	;string
+		k=Val(GadgetPens(0,2))+1:If k>0 AND k<=mo AND k<>co Then co=k:sa=999
+	Case 3	;rite arrow
+		If co<mo Then Gosub saveobject:co+1:sa=999
+	End Select
+Case 256	;menu
+	Select MenuHit
+	Case 0	;project
+		Select ItemHit
+		Case 0	;load project
+			.projectload
+			f$=FileRequest$("Project to load...",fpa$,ffi$):sa=-1:Gosub windowtext
+			If f$
+				If WriteMem(0,f$)
+					FileInput 0:oldf$=Inkey$(4)
+					If oldf$="3ded" Then oldf=0 Else oldf=-1:Loc 0,0
+					For co=1 To mo
+					Gosub readobjectco
+					Next
+					If NOT DosBuffLen(0)
+						;load in xsc,ysc,zsc array
+						##[$BE14] 0,&xsc(1),mo LSL 2
+						##[$BE14] 0,&ysc(1),mo LSL 2
+						##[$BE14] 0,&zsc(1),mo LSL 2
+					EndIf
+					CloseFile 0:Use Window 0:co=1:sa=999
+				Else
+					##[$FF8C] 0:mess{"Error reading file"}
+				EndIf
+			EndIf
+		Case 1	;save project
+			.projectsave
+			f$=FileRequest$("Project to save...",fpa$,ffi$):sa=-1:Gosub windowtext
+			If f$
+				If ReadMem(0,f$)
+					FileOutput 0:Print "3ded"
+					Gosub saveobject:oco=co:FileOutput 0
+					For co=1 To mo
+					Print Mki$(nv(co)),Mki$(np(co)),Mki$(ov(co)),Mki$(zy(co))
+					For k=1 To nv(co)
+					Exists 0,v(co,k),SizeOf.vert
+					Next
+					For k=1 To np(co)
+					Exists 0,p(co,k),SizeOf.poly
+					Next
+					Exists 0,c(co),SizeOf.collinfo
+					Next
+					Exists 0,&xsc(1),mo LSL 2
+					Exists 0,&ysc(1),mo LSL 2
+					Exists 0,&zsc(1),mo LSL 2
+					CloseFile 0:Use Window 0:co=oco
+				Else
+					##[$FF8C] 0:mess{"Error writing file"}
+				EndIf
+			EndIf
+		Case 2	;load dither brush
+			f$=FileRequest$("IFF Dither brush...",dpa$,dfi$):sa=-1:Gosub windowtext
+			Gosub loaddither
+		Case 3	;create shape object code...
+			.projectcreate
+			;
+			;create asm source code
+			;and a .map file for maped to use!
+			;
+			f$=FileRequest$("Project to create...",cpa$,cfi$):sa=-1:Gosub windowtext
+			If f$
+				If ReadMem(0,f$)
+					If ReadMem(1,f$+".map")
+						Gosub saveobject:oco=co:FileOutput 0
+						NPrint "" ;:NPrint "asmfile"
+						;
+						cc=0:pc=1:vc=1:ci=1:sl=1
+						;
+						;polylist_ count, verts_ count, collinfo_, shadlist_
+						;
+						For co=1 To mo
+						If cc=0 Then NPrint "":Print t$+"dc.l"+t$
+						If nv(co)>0 AND np(co)>0
+							p$=".object_"+Str$(co)
+						Else
+							p$="0"
+						EndIf
+						If cc Then Print ","
+						Print p$
+						cc+1 AND 3
+						Next:NPrint "":NPrint ""
+						;
+						For co=1 To mo
+						Gosub writeobjco
+						Next
+						;
+						CloseFile 1:CloseFile 0:Use Window 0:co=oco
+					Else
+						##[$FF8C] 0:mess{"Error writing map file"}
+					EndIf
+				Else
+					##[$FF8C] 0:mess{"Error writing file"}
+				EndIf
+			EndIf
+			;
+		Case 4	;kill object
+			v=0:p=0:c(co)\n=0:Gosub saveobject:sa=999
+		Case 5	;import object
+			.projectimport
+			f$=FileRequest$("Project to import...",ipa$,ifi$):sa=-1:Gosub windowtext
+			If f$
+				WLocate 16,20:Print "Object # to import :"
+				opco=Val(Edit$(5))
+				If opco>=0 AND opco<64
+					If WriteMem(0,f$)
+						FileInput 0:oldf$=Inkey$(4)
+						If oldf$="3ded" Then oldf=0 Else oldf=-1:Loc 0,0
+						For opco2=0 To opco
+						Gosub readobjectco
+						Next
+						CloseFile 0:Use Window 0:sa=999
+					Else
+						##[$FF8C] 0:mess{"Error reading file"}
+					EndIf
+				EndIf
+			EndIf
+		Case 6	;map new colours
+			Gosub mapnew
+		Case 7	;quit
+			##[$FE16] sseg
+			KillFile "ram:genam"
+			End
+		End Select
+	End Select
+Case 8	;mbuttons
+	mb=MButtons
+	If mb=1 ;left down...
+		mx=EMouseX:my=EMouseY
+		;
+		shc=0						 ;shadow check
+		For k=1 To v
+		If QAbs(mx-v(co,k)\sx)<4 AND QAbs(my-v(co,k)\sy)<4
+			Pop For:Gosub joinvert:Goto out3
+		EndIf
+		Next
+		;
+		shc=-1						;ditto
+		For k=1 To v
+		If v(co,k)\f
+			If QAbs(mx-v(co,k)\sx2)<4 AND QAbs(my-v(co,k)\sy2)<4
+				Pop For:Gosub joinvert:Goto out3
+			EndIf
+		EndIf
+		Next
+		;
+		;vertice not found...are they trying to colourize?
+		;
+		cw=0:If mx<32 Then cw=1 Else If mx>=640-32 Then cw=-1
+		If cw
+			If my>=20
+				nc=Int((my-20)LSR 3)
+				If nc<nco
+					If sp
+						If cw>0
+							p(co,sp)\c1=nc:mess{"Positive (clockwise) set to :"+Str$(nc)}:sa=-1
+						Else
+							p(co,sp)\c2=nc:mess{"Negative (anti-clockwise) set to :"+Str$(nc)}:sa=-1
+						EndIf
+						Goto out3
+					Else
+						mess{"No polygon selected to colourize"}
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		##[$FF8C] 0
+		out3
+	EndIf
+Case 1024
+	Select Inkey$
+	Case "v"	;show new verts only
+		vfr=v+1
+		mess{"Showing new vertices"}:sa=-1
+	Case "V"	;make origin for new verts!
+		If vfr>0 AND vfr<=v
+			;
+			minx=32767:bigx=-32768
+			miny=32767:bigy=-32768
+			minz=32767:bigz=-32768
+			;
+			For k=vfr To v
+			;
+			If v(co,k)\x<minx Then minx=v(co,k)\x
+			If v(co,k)\y<miny Then miny=v(co,k)\y
+			If v(co,k)\z<minz Then minz=v(co,k)\z
+			If v(co,k)\x>bigx Then bigx=v(co,k)\x
+			If v(co,k)\y>bigy Then bigy=v(co,k)\y
+			If v(co,k)\z>bigz Then bigz=v(co,k)\z
+			;
+			Next
+			;
+			v+1:v(co,v)\x=(minx+bigx)/2,(miny+bigy)/2,(minz+bigz)/2,0
+			;
+			CELSE
+			xsu=0:ysu=0:zsu=0:nve=0
+			For k=vfr To v
+				xsu+v(co,k)\x
+				ysu+v(co,k)\y
+				zsu+v(co,k)\z
+				nve+1
+			Next
+			v+1
+			v(co,v)\x=xsu/nve,ysu/nve,zsu/nve,0
+			v(co,v)\nv=nve,xsu,ysu,zsu
+			CELSE
+			sa=-1
+			ov=v
+		Else
+			##[$FF8C] 0:mess{"No new vertices"}
+		EndIf
+	Case "h"
+		his=1-his:sa=-1
+		If his
+			mess{"Hidden surface removal enabled"}
+		Else
+			mess{"Hidden surface removal disabled"}
+		EndIf
+	Case "o"
+		If sp=0
+			##[$FF8C] 0:mess{"No polygon selected"}
+		Else
+			If ov=0
+				##[$FF8C] 0:mess{"No origin selected"}
+			Else
+				p(co,sp)\o=ov:sa=-1
+				mess{"Origin vertice changed"}
+			EndIf
+		EndIf
+	Case "r"
+		;
+		WLocate 16,20:Print "Degrees to rotate on x/z (0-",nd2,") :"
+		rot2=Val(Edit$(5)):rot2 &nd2
+		For k=1 To v
+		;
+		x2=v(co,k)\x:z2=v(co,k)\z
+		;
+		v(co,k)\x=x2*cos_(rot2)-z2*sin_(rot2)
+		v(co,k)\z=x2*sin_(rot2)+z2*cos_(rot2)
+		;
+		Next:sa=-1
+		;
+	Case "f"
+		For k=1 To v:v(co,k)\z=-v(co,k)\z:Next:sa=-1
+		Gosub swappolys
+	Case "F"
+		For k=1 To v:v(co,k)\y=-v(co,k)\y:Next:sa=-1
+		Gosub swappolys
+	Case "y"
+		zy(co)=y:mess{"'Zero Y' established"}
+	Case Chr$(27)
+		Gosub saveobject:sa=999
+	Case "p"
+		If p=0
+			##[$FF8C] 0:mess{"No polygons to select"}
+		Else
+			sp+1:sa=-1:If sp>p Then sp=1
+			ov=p(co,sp)\o
+			mess{"Polygon selected. Positive colour :"+Str$(p(co,sp)\c1)+". Negative colour :"+Str$(p(co,sp)\c2)}
+		EndIf
+	Case "="
+		dof-8:Gosub makegrid:sa=-1
+	Case "-"
+		dof+8:Gosub makegrid:sa=-1
+	Case ","
+		rot-8 AND nd2:Gosub makegrid:sa=-1
+	Case "."
+		rot+8 AND nd2:Gosub makegrid:sa=-1
+	Case "<"
+		rot-32 AND nd2:Gosub makegrid:sa=-1
+	Case ">"
+		rot+32 AND nd2:Gosub makegrid:sa=-1
+	Case "S"			;shadow all verts on this y...
+		For k=1 To v
+		If v(co,k)\y=y
+			v(co,k)\f=-1
+		EndIf
+		Next
+		sa=-1
+	Case "s"			;shadow a vert
+		Gosub findvert
+		If k
+			If v(co,k)\f
+				v(co,k)\f=0
+				mess{"Shadow vertice removed"}
+			Else
+				v(co,k)\f=-1
+				mess{"Shadow vertice created"}
+			EndIf
+			sa=-1
+		EndIf
+	Case "C"			;delete a collision info
+		For k=1 To c(co)\n
+		If c(co)\c[k]\y=y
+			c(co)\n-1
+			For j=k To c(co)\n
+			c(co)\c[j]\y=c(co)\c[j+1]\y
+			c(co)\c[j]\r=c(co)\c[j+1]\r
+			Next
+			mess{"Collision circle deleted"}
+			sa=-1:Pop For:Goto dcout
+		EndIf
+		Next
+		mess{"No collision circle to delete"}
+		dcout
+	Case "c"			;create a collision info
+		r=Tan(x*x+z*z)			;radius!
+		For k=1 To c(co)\n
+		If c(co)\c[k]\y=y
+			mess{"Collision circle replaced"}
+			Pop For:Goto cout
+		EndIf
+		Next
+		c(co)\n=k
+		mess{"Collision circle created"}
+		;
+		cout
+		c(co)\c[k]\y=y,r:sa=-1
+		;
+		;bubble sort collision circles...top down...
+		;
+		Repeat
+		sorted=-1
+		For k=1 To c(co)\n-1
+		If c(co)\c[k]\y>c(co)\c[k+1]\y
+			Exchange c(co)\c[k]\y,c(co)\c[k+1]\y
+			Exchange c(co)\c[k]\r,c(co)\c[k+1]\r
+			sorted=0
+		EndIf
+		Next
+		Until sorted
+		;
+	Case Chr$(28) ;curs up
+		If z<32 Then z+si:sa=1
+	Case Chr$(29)
+		If z>-32 Then z-si:sa=1
+	Case Chr$(30) ;rite
+		If x<32 Then x+si:sa=1
+	Case Chr$(31)
+		If x>-32 Then x-si:sa=1
+	Case "z"
+		If y<32 Then y+si:sa=1
+	Case "a"
+		If y>-48 Then y-si:sa=1
+	Case "A"
+		ysc(co)+1:mess{"Y scale +1 = :"+Str$(ysc(co))}
+	Case "Z"
+		ysc(co)-1:mess{"Y scale -1 = :"+Str$(ysc(co))}
+	Case "{"
+		xsc(co)-1:zsc(co)-1:mess{"X/Z scale -1 = :"+Str$(xsc(co))}
+	Case "}"
+		xsc(co)+1:zsc(co)+1:mess{"X/Z scale +1 = :"+Str$(xsc(co))}
+	Case "g"
+		If si=4 Then si=2 Else si=4:x&$fffc:y&$fffc:z&$fffc
+		Gosub makegrid:sa=-1
+	Case " "
+		Gosub findvert2
+		If k
+			##[$FF8C] 0:mess{"Vertice already there!"}
+		Else
+			If dv
+				v(co,dv)\x=x,y,z:dv=0
+				mess{"Vertice moved"}
+			Else
+				v+1:v(co,v)\x=x,y,z,0
+				mess{"Vertice created"}
+			EndIf
+			sa=-1
+		EndIf
+	Case "U"	;undo vertice
+		If v
+			For k=1 To p
+			For j=1 To p(co,k)\n
+			If p(co,k)\v[j]=v OR p(co,k)\o=v
+				mess{"Vertice cannot be deleted!"}
+				Pop For:Pop For:Goto dvout
+			EndIf
+			Next j,k
+			v-1:sa=-1:mess{"Vertice Deleted"}
+			dvout
+		Else
+			mess{"No vertice to delete"}
+		EndIf
+	Case "u"	;undo polygon
+		If sp
+			p-1
+			For k=sp To p
+			j=k+1
+			p(co,k)\n=p(co,j)\n
+			p(co,k)\o=p(co,j)\o
+			p(co,k)\f=p(co,j)\f
+			p(co,k)\c1=p(co,j)\c1
+			p(co,k)\c2=p(co,j)\c2
+			For j2=1 To p(co,k)\n
+			p(co,k)\v[j2]=p(co,j)\v[j2]
+			Next
+			Next
+			sp-1:sa=-1:mess{"Polygon Deleted"}
+		Else
+			mess{"No polygon to delete"}
+		EndIf
+	Case Chr$(127)
+		Gosub findvert
+		If k
+			dv=k:sa=-1:mess{"Moving vertice..."}
+		EndIf
+	Case Chr$(13)
+		Gosub findvert
+		If k
+			ov=k:sa=-1:mess{"Origin vertice established"}
+		EndIf
+	Case "m"	;multiple points...
+		WLocate 16,20:Print "How many points :"
+		mul=Val(Edit$(5))
+		r=Tan(x*x+z*z)
+		cof.f=Pi*2/mul
+		For k=0 To mul-1
+			v+1:v(co,v)\x=HSin(k*cof)*r,y,HCos(k*cof)*r,0
+		Next
+		sa=-1
+	Case "l"	;lift all points!
+		For k=1 To v
+		v(co,k)\y-si
+		Next
+		sa=-1
+	Case "L"	;lower all points!
+		For k=1 To v
+		v(co,k)\y+si
+		Next
+		sa=-1
+	Case "!"
+		SaveBitmap 0,"3ded.mock",0
+	Case "@"
+		WLocate 16,20:Print "Filename :"
+		flm$=Edit$(40)
+		SaveBitmap 9,flm$,3
+	Case "t"	;turn on z/y plane
+		rr=nd/4
+		For k=1 To v
+		zz=v(co,k)\z:yy=v(co,k)\y-zy(co)
+		zzz=zz*cos_(rr)-yy*sin_(rr)
+		yyy=zz*sin_(rr)+yy*cos_(rr)
+		v(co,k)\z=zzz:v(co,k)\y=yyy+zy(co)
+		Next
+		sa=-1
+	Case "\"			;remove all shadow flags
+		For k=1 To v
+		v(co,k)\f=0
+		Next
+		sa=-1
+	Case "3"			;3d view of object
+		If ReadMem(0,"ram:temp.s")
+			;
+			;Gosub kludge
+			;
+			Gosub saveobject
+			FileOutput 0
+			cc=0:pc=1:vc=1:ci=1:sl=1
+			NPrint "temp"+t$+"dc.l"+t$+".object_"+Str$(co)
+			Gosub writeobjco
+			CloseFile 0
+			##[$FE1F] "ram:genam ram:temp",0,0
+			Use Window 0
+			seg.l=##[$FE15]("ram:temp")
+			;
+			GetReg a3,bpa
+			GetReg a0,seg:ADD.l a0,a0:ADD.l a0,a0:ADDQ #4,a0
+			GetReg a1,sseg:ADD.l a1,a1:ADD.l a1,a1:ADDQ #4,a1
+			SUB.l a2,a2
+			MOVEM.l a4-a6,-(a7)
+			JSR (a1)
+			MOVEM.l (a7)+,a4-a6
+			;
+			##[$FE16] seg
+			;
+			;Gosub unkludge
+			;
+		EndIf
+	Case "4"	;move poly to first
+		If sp
+			##[$FEDB] &p(co,sp),&p(co,p+1),SizeOf.poly
+			For k=sp-1 To 1 Step -1
+			##[$FEDB] &p(co,k),&p(co,k+1),SizeOf.poly
+			Next
+			##[$FEDB] &p(co,p+1),&p(co,1),SizeOf.poly
+			mess{"Polygon moved to front"}
+		Else
+			mess{"No polygon selected to move to front"}
+		EndIf
+	Case "5"
+		Gosub dodome
+	Case "6"
+		Gosub dornddome
+	Case "7"
+		;Gosub kludge:sa=-1
+	End Select
+End Select
+Forever
+
+End
+
+CELSE
+
+.kludge	;add in mins, max to origin verts!
+;
+minx=32767:bigx=-32768
+miny=32767:bigy=-32768
+minz=32767:bigz=-32768
+;
+For k=1 To v
+;
+If v(co,k)\x<minx Then minx=v(co,k)\x
+If v(co,k)\y<miny Then miny=v(co,k)\y
+If v(co,k)\z<minz Then minz=v(co,k)\z
+If v(co,k)\x>bigx Then bigx=v(co,k)\x
+If v(co,k)\y>bigy Then bigy=v(co,k)\y
+If v(co,k)\z>bigz Then bigz=v(co,k)\z
+;
+v(co,k)\ox=v(co,k)\x
+v(co,k)\oy=v(co,k)\y
+v(co,k)\oz=v(co,k)\z
+;
+Next
+;
+For k=1 To p
+orv=p(co,k)\o
+;
+v(co,orv)\x=(v(co,orv)\ox+minx+bigx)/3
+v(co,orv)\y=(v(co,orv)\oy+miny+bigy)/3
+v(co,orv)\z=(v(co,orv)\oz+minz+bigz)/3
+;
+Next
+;
+Return
+
+.unkludge
+;
+For k=1 To v
+v(co,k)\x=v(co,k)\ox
+v(co,k)\y=v(co,k)\oy
+v(co,k)\z=v(co,k)\oz
+Next
+;
+Return
+
+CELSE
+
+.dornddome
+rndo=-1:Goto dome
+
+.dodome ;create a dome!
+rndo=0
+;
+dome
+If ov=0
+	mess{"No origin vertice"}:Return
+EndIf
+;
+r=Tan(x*x+z*z):If r=0 Then Return
+;
+WLocate 16,20:Print "How many points :"
+mul=Val(Edit$(5)):If mul=0 Then Return
+cof.f=Pi*2/mul
+cof2.f=Pi/2
+ccs=1/mul*2
+sk=0:sk2=.5
+;
+;generate vertices...
+;
+vv=v+1	;first v generated!
+rxa=0:rya=0:rza=0
+;
+For cc=1 To ccs Step -ccs
+r2=HSin(cc*cof2)*r:y2=HCos(cc*cof2)*r
+For k=sk To mul+sk-1
+If rndo
+	If cc<>1 AND cc<>ccs
+		rxa=Rnd(16)-8
+		;rya=Rnd(8)-4
+		rza=Rnd(16)-8
+	Else
+		rxa=0:rya=0:rza=0
+	EndIf
+EndIf
+v+1:v(co,v)\x=HSin(k*cof)*r2+rxa,y-y2+rya,HCos(k*cof)*r2+rza,0
+Next
+Exchange sk,sk2
+Next
+;
+;now, join the dots!
+;
+sk=0:sk2=1:coc=mul/2	;colour
+;
+For j=1 To mul/2-1
+For k=0 To mul-1
+;
+v1=(k) MOD mul
+v2=(k+1) MOD mul
+v3=(k+sk) MOD mul
+v4=(k+sk+1) MOD mul
+v3+mul:v4+mul
+;
+p+1
+p(co,p)\n=3,ov,0,coc+1,0
+p(co,p)\v[1]=vv+v1
+p(co,p)\v[2]=vv+v2
+p(co,p)\v[3]=vv+v3
+;
+p+1
+p(co,p)\n=3,ov,0,coc,0
+p(co,p)\v[1]=vv+v2
+p(co,p)\v[2]=vv+v4
+p(co,p)\v[3]=vv+v3
+;
+Next
+vv+mul:Exchange sk,sk2:coc-1
+Next
+;
+;put a lid on it!
+;
+vv=v+1-mul
+p+1
+p(co,p)\n=mul,ov,0,1,0
+For k=1 To mul
+p(co,p)\v[k]=vv:vv+1:If vv>v Then vv-mul
+Next
+sa=-1
+Return
+
+;NEWTYPE.poly
+;n.w						 ;number of verts
+;o.w						 ;origin vert number
+;f.w						 ;<>0 = shadow type
+;c1.w						;clockwise colour
+;c2.w						;anticlockwise colour
+;v.w[20]				 ;vertice offsets
+;End NEWTYPE
+
+.loaddither
+If f$
+	SetErr
+		mess{"Can't access IFF file"}
+		Goto ifferr
+	End SetErr
+	LoadPalette 3,f$:StopCycle 3,0,0,0,0
+	LoadPalette 0,f$,16:Use SetCycle 0
+	LoadShape 2,f$:BlitColl 2,0,20:nco=ShapeHeight(2)LSR 1
+	yyy=20
+	For yy=0 To ShapeHeight(2)-1 Step 2
+	GetaShape 2,0,yy+20,16,2
+	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
+	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
+	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
+	BlitColl 2,640-32,yyy:BlitColl 2,640-16,yyy:yyy+2
+	Next:GetaShape 2,640-32,20,32,nco LSL 3
+	CludgeBitMap 2,2:Use BitMap 2
+	For k=0 To 15:ReMap k,k+16:Next:Use BitMap 0
+	Gosub makegrid:sa=-1
+	ifferr:ClrErr
+EndIf
+Return
+
+.mapnew
+Gosub saveobject
+For kkk=1 To mo
+For k=1 To p
+p(kkk,k)\c1=ncm(p(kkk,k)\c1)
+p(kkk,k)\c2=ncm(p(kkk,k)\c2)
+Next
+Next
+mess{"Done!"}
+Return
+
+.swappolys
+For k=1 To p
+For j=1 To p(co,k)\n
+po(j)=p(co,k)\v[j]
+Next
+j2=j
+For j=1 To p(co,k)\n
+j2-1:p(co,k)\v[j]=po(j2)
+Next j,k
+Return
+
+.readobjectco
+nv(co)=Cvi(Inkey$(2))
+np(co)=Cvi(Inkey$(2))
+ov(co)=Cvi(Inkey$(2))
+zy(co)=Cvi(Inkey$(2))
+For k=1 To nv(co)
+If oldf ;old format?
+	##[$BE14] 0,vvv.oldvert,SizeOf.oldvert
+	v(co,k)\x=vvv\x,vvv\y,vvv\z
+	v(co,k)\f=vvv\f
+	v(co,k)\sx=vvv\sx,vvv\sy,vvv\sx2,vvv\sy2
+Else
+	##[$BE14] 0,v(co,k),SizeOf.vert
+EndIf
+Next
+For k=1 To np(co)
+##[$BE14] 0,p(co,k),SizeOf.poly
+Next
+##[$BE14] 0,c(co),SizeOf.collinfo
+Return
+
+.writeobjco
+;
+xsc=xsc(co):ysc=ysc(co):zsc=zsc(co)
+;
+FileOutput 0
+;
+If c(co)\n<2
+	NPrint t$+"dc.l"+t$+"0"
+Else
+	NPrint t$+"dc.l"+t$+".collinfo_"+Str$(ci)
+EndIf
+;
+;write collision cylinder description for objects (not scenery)
+;
+;y1.w, y2.w, r.w
+;
+miny=32767:maxy=-32768
+For k=1 To nv(co)
+yt=(v(co,k)\y-zy(co))*ysc
+If yt<miny Then miny=yt
+If yt>maxy Then maxy=yt
+Next
+;
+Print t$+"dc"+t$+Str$(Int(miny))+","+Str$(Int(maxy))+","
+;
+If c(co)\n=1 Then NPrint Str$(c(co)\c[1]\r*rsc) Else NPrint "0"
+;
+NPrint ".object_"+Str$(co)+t$+"dc"+t$+Str$(nv(co)-1)
+;
+For k=1 To nv(co)
+xt=Int(v(co,k)\x*xsc)
+yt=Int((v(co,k)\y-zy(co))*ysc)
+zt=Int(v(co,k)\z*zsc)
+ft=v(co,k)\f
+;
+NPrint t$+"dc"+t$+Str$(xt)+","+Str$(yt)+","+Str$(zt)+","+Str$(ft)
+Next
+;
+pos=0
+For k=1 To np(co)
+If p(co,k)\f Then pos+1
+Next
+;
+poc=0
+For j=1 To nv(co):po(j)=0
+For k=1 To np(co)
+If p(co,k)\o=j
+	If p(co,k)\f=0
+		po(j)+1:If po(j)=1 Then poc+1
+	EndIf
+EndIf
+Next k,j
+;
+NPrint t$+"dc"+t$+Str$(poc-1):opc=pc
+;
+For j=1 To nv(co)
+If po(j)
+	NPrint t$+"dc"+t$+Str$(j-1)
+	NPrint t$+"dc.l"+t$+".polylist_"+Str$(pc):pc+1
+EndIf
+Next
+;
+If pos
+	NPrint t$+"dc.l"+t$+".shadlist_"+Str$(sl)
+Else
+	NPrint t$+"dc.l"+t$+"0"
+EndIf
+;
+pc=opc:ovc=vc
+;
+For j=1 To nv(co)
+If po(j)
+	NPrint ".polylist_"+Str$(pc)+t$+"dc"+t$+Str$(po(j)-1):pc+1
+	For k=1 To np(co)
+	If p(co,k)\o=j AND p(co,k)\f=0
+		Print t$+"dc"+t$+Str$(p(co,k)\n-1)+",$"
+		NPrint Right$(Hex$(p(co,k)\c2 LSL 8+p(co,k)\c1),4)
+		NPrint t$+"dc.l"+t$+".verts_"+Str$(vc):vc+1
+	EndIf
+	Next
+EndIf
+Next
+;
+vc=ovc
+;
+For j=1 To nv(co)
+If po(j)
+	For k=1 To np(co)
+	If p(co,k)\o=j AND p(co,k)\f=0
+		;
+		;create verts...
+		;
+		Print t$+"dc"+t$:Gosub makeverts:NPrint ""
+		Print ".verts_"+Str$(vc)+t$+"dc"+t$:Gosub makeverts:vc+1
+		Print ",":Gosub makeverts:NPrint ""
+		;
+	EndIf
+	Next
+EndIf
+Next
+;
+If pos
+	ovc=vc
+	NPrint ".shadlist_"+Str$(sl)+t$+"dc"+t$+Str$(pos-1):sl+1
+	For k=1 To np(co)
+	If p(co,k)\f
+		NPrint t$+"dc"+t$+Str$(p(co,k)\n-1)	;number of verts...
+		NPrint t$+"dc.l"+t$+".verts_"+Str$(vc):vc+1
+	EndIf
+	Next
+EndIf
+;
+If pos
+	vc=ovc
+	For k=1 To np(co)
+	If p(co,k)\f
+		;
+		Print t$+"dc"+t$:Gosub makesverts:NPrint ""
+		Print ".verts_"+Str$(vc)+t$+"dc"+t$:Gosub makesverts:vc+1
+		Print ",":Gosub makesverts:NPrint ""
+		;
+	EndIf
+	Next
+EndIf
+;
+If c(co)\n>1	;create collision circle data...
+	Print ".collinfo_"+Str$(ci):ci+1
+	For k=1 To c(co)\n-1
+	yc1=(c(co)\c[k]\y-zy(co))*ysc
+	yc2=(c(co)\c[k+1]\y-zy(co))*ysc
+	rc1=(c(co)\c[k]\r)*rsc
+	rc2=(c(co)\c[k+1]\r)*rsc
+	;
+	ydf.q=yc2-yc1:rdf.q=rc2-rc1
+	rdf/ydf:rdf ASR 2
+	;
+	Print t$+"dc"+t$+Str$(yc1)+","+Str$(yc2)+",$"
+	NPrint Right$(Hex$(Peek.w(&rdf+2)),4)+","+Str$(rc1)
+	Next
+	Print t$+"dc"+t$+"32767"
+EndIf
+;
+NPrint "":Return
+
+makesverts
+For n=1 To p(co,k)\n
+	If n>1 Then Print ","
+	nn=0
+	For n2=1 To p(co,k)\v[n]
+	If v(co,n2)\f Then nn+1
+	Next
+	Print Str$(nn-1)
+Next
+Return
+
+makeverts
+For n=1 To p(co,k)\n
+	If n>1 Then Print ","
+	Print Str$(p(co,k)\v[n]-1)
+Next
+Return
+
+.makegrid
+Boxf 0,20,639,255,0
+For zt=-32 To 32 Step si
+For xt=-32 To 32 Step si
+If xt<>0 OR zt<>0 Then plot_{xt,32,zt,3}
+Next xt,zt
+If nco Then BlitColl 2,0,20:BlitColl 2,640-32,20
+For k=0 To nco-1
+WLocate 32,20+k LSL 3:Print k
+WLocate 640-48,20+k LSL 3:Print k
+Next
+GetaShape 0,0,20,640-64,256-20
+Return
+
+.loadobject	;co=current object number
+v=nv(co):p=np(co):ov=ov(co)
+dv=0	;deleted vert
+fv=0	;first vertice for polygon
+sp=0	;selected polygon
+vfr=0 ;verts from
+x=0:y=zy(co):z=0
+rot=8
+ButtonId 0,2,Str$(co-1):Redraw 0,2
+mess{"Object "+Str$(co-1)+"... "+Str$(v)+" vertices, "+Str$(p)+" polygons and "+Str$(c(co)\n)+" collision circles."}
+Return
+
+.saveobject	;co=object number to save
+nv(co)=v:np(co)=p:ov(co)=ov
+Return
+
+.findvert2	;return k=vert number or 0
+;
+For k=1 To v
+If x=v(co,k)\x AND y=v(co,k)\y AND z=v(co,k)\z Then Pop For:Return
+Next
+k=0:Return
+
+.findvert
+Gosub findvert2:If k Then Return
+##[$FF8C] 0:mess{"Vertice not found"}:k=0:Return
+
+.joinvert	;k=vert number!
+If ov=0 Then ##[$FF8C] 0:mess{"No origin established"}:Return
+If fv
+	If p(co,p+1)\f<>shc
+		##[$FF8C] 0:mess{"Vertice not same type"}:Return
+	EndIf
+	If k=fv
+		sa=-1:p+1:sp=p:fv=0
+		p(co,p)\o=ov:If shc Then p(co,p)\o=0
+		If shc
+			mess{"Shadow finished"}
+		Else
+			mess{"Polygon Finished"}
+		EndIf
+	Else
+		pe=p(co,p+1)\n+1
+		p(co,p+1)\v[pe]=k
+		p(co,p+1)\n=pe
+		mess{"Vertice Added...Total "+Str$(pe)}
+	EndIf
+Else
+	fv=k:p(co,p+1)\f=shc
+	p(co,p+1)\n=1:p(co,p+1)\v[1]=k
+	p(co,p+1)\c1=1,0
+	If shc
+		mess{"Creating shadow"}
+	Else
+		mess{"Creating polygon"}
+	EndIf
+EndIf
+Return
+
+.curs
+plot_3{x,y,z,6}
+Return
+
+.showall
+BlitColl 0,0,20
+;
+For k=1 To c(co)\n
+yt=c(co)\c[k]\y:rt=c(co)\c[k]\r
+For rt2=0 To nd2 Step 8
+Point !xy{cos_(rt2)*rt,yt,sin_(rt2)*rt},8
+Next
+Next
+;
+For k=1 To v
+xt=v(co,k)\x:yt=v(co,k)\y:zt=v(co,k)\z
+;
+If v(co,k)\f
+	Circlef !xy{xt,32,zt},2,2
+	v(co,k)\sx2=!xy{xt,32,zt}
+EndIf
+;
+If k>=vfr
+	c=1
+	If k=ov Then c=4
+	If k=dv Then c=5
+	plot_2{xt,yt,zt,c}
+	v(co,k)\sx=!xy{xt,yt,zt}
+Else
+	v(co,k)\sx=32767,32767,32767 ;!xy{xt,yt,zt}
+EndIf
+Next
+;
+c=3
+For k=1 To p:Gosub drawpolyk:Next
+;
+If sp Then c=7:k=sp:Gosub drawpolyk2
+;
+Return
+
+.drawpolyk
+If his
+	vt=p(co,k)\v[1]
+	xt1=v(co,vt)\sx:yt1=v(co,vt)\sy
+	vt=p(co,k)\v[2]
+	xt2.l=v(co,vt)\sx:yt2.l=v(co,vt)\sy
+	vt=p(co,k)\v[3]
+	xt3.l=v(co,vt)\sx:yt3.l=v(co,vt)\sy
+	;
+	xt3-xt2:yt3-yt2
+	xt2-xt1:yt2-yt1
+	;
+	If xt2*yt3-yt2*xt3>=0
+		;clockwise
+		If p(co,k)\c1=0 Then Return
+	Else
+		;anti
+		If p(co,k)\c2=0 Then Return
+	EndIf
+EndIf
+;
+drawpolyk2
+For j=1 To p(co,k)\n-1
+vn=p(co,k)\v[j]
+vn2=p(co,k)\v[j+1]
+If p(co,k)\f
+	Line v(co,vn)\sx2,v(co,vn)\sy2,v(co,vn2)\sx2,v(co,vn2)\sy2,2
+Else
+	Line v(co,vn)\sx,v(co,vn)\sy,v(co,vn2)\sx,v(co,vn2)\sy,c
+EndIf
+Next
+vn=p(co,k)\v[1]
+If p(co,k)\f
+	Line v(co,vn)\sx2,v(co,vn)\sy2,v(co,vn2)\sx2,v(co,vn2)\sy2,2
+Else
+	Line v(co,vn)\sx,v(co,vn)\sy,v(co,vn2)\sx,v(co,vn2)\sy,c
+EndIf
+Return
+
+windowtext
+Redraw 0,1:Redraw 0,2:Redraw 0,3
+WLocate 12,12:Print "+"
+WLocate 640-16-4,12:Print "-"
+WLocate 40,12:Print "OBJECT:"
+Return

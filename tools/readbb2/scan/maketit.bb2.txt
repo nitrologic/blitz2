@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/warp/maketit.bb2
+DEFTYPE.l
+
+Screen 0,4:ScreensBitMap 0,0:BlockScroll
+LoadShape 0,"oblivion.iff",0:Use SetCycle 0:Blit 0,0,0
+
+Dim b(3)
+
+b(0)=Peek.l(Addr BitMap(0)+8)
+b(1)=Peek.l(Addr BitMap(0)+12)
+b(2)=Peek.l(Addr BitMap(0)+16)
+b(3)=Peek.l(Addr BitMap(0)+20)
+
+If ReadMem(0,"oblivion.bin")
+	FileOutput 0
+	For y=0 To ShapeHeight(0)-1
+	o=y*40
+	For d=0 To 3
+	For x=0 To 38 Step 2
+	Print Mki$(Peek.w(b(d)+o+x))
+	Next x,d
+	Next
+	CloseFile 0
+EndIf
+
+If ReadMem(0,"tit.pal")
+	FileOutput 0
+	For k=0 To 15
+	Print Mki$($180+k*2)
+	Print Mki$(Blue(k) LSL 8+Palette(k) LSL 4+PalRGB(k))
+	Next
+	CloseFile 0
+EndIf
+
+MouseWait

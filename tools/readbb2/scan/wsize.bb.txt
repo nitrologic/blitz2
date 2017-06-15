@@ -1,0 +1,12 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WSize.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WSize.bb
+
+; 
+; wsize example 
+; 
+Screen 0,2
+Window 0,0,0,10,10,$1000,"",0,1 
+VWait 100 
+WSize 320,100 
+Print "Click Mouse to Quit" 
+MouseWait 
+

@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/bug.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/bug.bb2
+
+NEWTYPE.test
+	s$
+End NEWTYPE
+
+Statement ftest{*x.test}
+	*x\s="aa"
+End Function
+
+test.test\s="a"
+ftest{test}
+
+MouseWait
+
+MouseWait
+End

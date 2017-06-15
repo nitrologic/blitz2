@@ -1,0 +1,83 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/gadgets.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/amigamode/gadgets.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/gadgets.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/amigamode/gadgets.bb2
+
+;a simple example of gadgets...
+
+;first, we load in some IFF brushes for some flash gadgets...
+;
+LoadShape 0,"data/ok",0
+LoadShape 1,"data/cancel"
+
+;now, we open a screen. We need a screen to open windows in.
+;Why do we need windows?...to put our gadgets in!
+;
+Screen 0,0,0,320,200,3,0,"My Screen",0,7
+
+;this will set the screen's palette to that of the brushes
+;
+Use SetCycle 0
+
+;set up some shape gadgets in gadgetlist 0...
+;
+ShapeGadget 0,0,160,0,1,0
+ShapeGadget 0,192,160,0,2,1
+
+;some text gadgets in gadgetlist 1...
+;
+TextGadget 1,8,112,0,1," OK "
+TextGadget 1,152,112,0,2," CANCEL "
+
+;a string gadget in gadgetlist 1...
+;
+StringGadget 1,48,24,0,3,64,168
+
+;and some proportional gadgets in gadgetlist 1...
+;
+PropGadget 1,24,49,64,4,200,12
+PropGadget 1,24,65,64,5,200,12
+PropGadget 1,24,81,64,6,200,12
+
+;now for the windows. The flags used to open this window
+;are 'borderless' and 'backdrop'. This will cause the
+;window to be created with no imagery whatsoever...
+;
+;The last parameter will cause the window to open using
+;gadgetlist 0
+;
+Window 0,0,0,320,200,$1900,"",1,2,0
+
+;this is a more standard window...with gadgetlist 1
+;
+Window 1,40,20,240,128,$f,"WINDOW",1,0,1
+
+;add some appropriate text to the window
+;
+WLocate 4,16:Print "Name:"
+WLocate 4,40:Print "R:"
+WLocate 4,56:Print "G:"
+WLocate 4,72:Print "B:"
+
+;send print statements to window 0...
+;
+Use Window 0
+
+;our main loop...
+;
+Repeat
+
+	;wait for something to happen
+	;
+	a.l=WaitEvent
+
+	;get ready to print...
+	;
+	WLocate 0,192
+	Select a
+	Case 32 ;gadget down
+		Print "Gadget ",GadgetHit," in window ",EventWindow," Pushed down"
+	Case 64 ;gadget up
+		If EventWindow=0 AND GadgetHit=2 Then End
+		Print "Gadget ",GadgetHit," in window ",EventWindow," Released	 "
+	Case 512	;close window
+		Free Window EventWindow
+	End Select
+Forever

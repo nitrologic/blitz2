@@ -1,0 +1,44 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot2.bb
+;This programme uses integers instead of floating point.
+;This way is faster than pure floating point and produces
+;pictures which are just as interesting.
+;It depends on whether you want a pretty picture
+;or a mathematically accurate result. The latter is much
+;harder to achieve using integers and depends very much
+;on exactly what sort of formula is involved.
+;--------------------------------------------------------
+;Create a pseudo trig function
+WBStartup
+Dim c.l(1024)
+Function.l zcos{x.l}
+	Shared c()
+	x=Abs(x)
+	z.l=x AND %1111111111
+	z=c(z)
+	Function Return z
+End Function
+
+For i.l=0 To 1023:c(i)=500*HCos(i*Pi/512):Next
+
+BitMap 0,320,256,5
+VWait 250
+BLITZ
+Slice 0,44,320,256,$fff8,5,8,32,320,320
+Show 0
+Use BitMap 0
+Green 0,0,0,0:For i=16 To 31:Green i,31-i,31-i,31-i:Next
+For i=0 To 15:Green i,i,i,i:Next
+;--------------------------------------------------------
+;No conversion of pixel positions in this case.
+For x.l=-160 To 160
+	If Joyb(1)<>0:Pop For:Goto l1:EndIf
+	x2.l=x*x
+	For y.l=-128 To 128
+	z.l=x2+y*y-x*y
+		z=z ASR 4
+		z=Abs(zcos{z})
+		Point x+160,y+128,z
+Next:Next
+l1:MouseWait
+AMIGA
+VWait 50

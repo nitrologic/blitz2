@@ -1,0 +1,378 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/oldtest.bb
+;
+; skid 1.1 interface
+;
+
+; no title in ui bitmap
+; displayadjust?
+; multiple sprites added (16)
+; cars & tracks as sprites
+
+NEWTYPE .config
+	init$
+	dial$
+	func$[9]
+	name$[12]
+	phone$[12]
+End NEWTYPE
+
+DEFTYPE .config config
+
+If WriteMem(0,"skidconfig")
+	FileInput 0
+	USEPATH config
+	\init=Edit$(80):\dial=Edit$(80)
+	For i=0 To 8:\func[i]=Edit$(80):Next
+	For i=0 To 11:\name[i]=Edit$(80):Next
+	For i=0 To 11:\phone[i]=Edit$(80):Next
+	CloseFile 0
+EndIf
+
+If ReadMem(0,"skidconfig")
+	FileOutput 0
+	USEPATH config
+	NPrint \init:NPrint \dial
+	For i=0 To 8:NPrint \func[i]:Next
+	For i=0 To 11:NPrint \name[i]:Next
+	For i=0 To 11:NPrint \phone[i]:Next
+	CloseFile 0
+EndIf
+
+NEWTYPE .handling
+	speed.w:accel.w:slide.w:steer.w
+	bounce.w:penalty.w:shadowx.w:shadowy.w
+	pad.w[8]
+End NEWTYPE
+
+NEWTYPE .cheader
+	name$
+	designer$
+	settings.handling
+	pic.b[64*32/4]
+End NEWTYPE
+
+DEFTYPE .cheader car
+
+##[$CD10] 2,64,32,4:CludgeBitMap 2,2
+
+BitMap 0,608,76,4 ;37696 bytes (16 color main interface)
+
+LoadShape 0,"mouse.iff":GetaSprite 0,0
+
+;LoadBitMap 0,"banner.iff"
+LoadBank 0,"readme"
+LoadShape 0,"mouse.iff":GetaSprite 0,0
+
+StopCycle 0,0,0,0,0:StopCycle 0,1,5,5,5:StopCycle 0,2,12,10,10:StopCycle 0,3,15,15,15
+StopCycle 0,4,3,3,3:StopCycle 0,5,12,12,12:StopCycle 0,6,12,1,2
+
+;===============================================================================
+
+BLITZ
+
+Statement loadcar{name$,car}
+	Shared car
+	QAMIGA
+	If WriteMem(0,"vehicles/truck.def")
+		FileInput 0:car\name=Edit$(80):car\designer=Edit$(80)
+		##[$BE14] 0,&car\settings,SizeOf .handling
+		##[$BE14] 0,Peek.l(Addr BitMap(2)+8),64*32/4
+		Use BitMap 2:ReMap 1,4:ReMap 2,5:ReMap 3,6+n
+		MakeCookie 2
+		CloseFile 0
+	EndIf
+	BLITZ
+End Statement
+
+Mouse On:MouseArea 0,0,640,140:VWait						 ;settle down mouse!
+BlitzKeys On:BitMapInput
+InitCopList 0,44,76,$114,8,16,18								;ui at top
+DisplayAdjust 0,-4,8,0,16,0
+
+mo=Off:VWait 10
+
+SetInt 5
+	DisplaySprite 0,0,MouseX,MouseY,0
+End SetInt
+
+DisplayBitMap 0,0:DisplayPalette 0,0
+CreateDisplay 0
+BitMapOutput 0
+
+loadcar{"",0}
+Use BitMap 0
+Gosub setupui
+
+n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]
+
+Repeat
+	VWait
+	ev.w=##[$BA92]
+	If ev=-1 Then Gosub handleit
+	a=BlitzKey				 ;:Locate 0,0:Print a,"	"
+	;BoxPrint 0,Chr$(Rnd(128))+Chr$(Rnd(128))
+Until a=27
+
+End
+
+Repeat
+	a=Asc(Inkey$)
+	If mo=On Then ##[$BA87] 0,MouseX,MouseY
+	If a=28 OR Joyx(1)=-1 Then ##[$BA87] 0,-1
+	If a=29 Then ##[$BA87] 0,1
+	If a=30 Then ##[$BA87] 1,0
+	If a=31 Then ##[$BA87] -1,0
+	If a=13 Then ##[$BA89]:Gosub handleit
+	If a=-1 AND flag Then ##[$BA88]:flag=0
+Until a=27
+
+End
+
+handleit:
+	If n=0
+
+		If ##[$BA8F]=2															;about
+			n=2:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]:Return
+		EndIf
+		If ##[$BA8F]=3															;serial link
+			n=1:Use ##[$BA81] n:soff=0:Gosub setserial
+			##[$BA87] 10:##[$BA85]:Return
+		EndIf
+		If ##[$BA8F]=4															;select teams
+			n=4:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+;			For i=0 To 3:ClipBlit 2,238+i*96,15:Next
+			Return
+		EndIf
+		If ##[$BA8F]=5															;play
+			n=5:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+			Return
+		EndIf
+		If ##[$BA8F]=6															;exit
+			End
+		EndIf
+
+
+		If ##[$BA8F]=15					 ;track select
+			n=3:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+			Gosub readtrackdisk:Return
+		EndIf
+		If ##[$BA8F]=16					 ;options
+			n=6:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+		EndIf
+		If ##[$BA8F]=19 Then Goto quit
+	EndIf
+
+	If n=1 ;serial
+		If ##[$BA8F]=11 Then soff=QWrap(soff+1,0,3):Gosub setserial:##[$BA85]
+		If ##[$BA8F]=10 Then n=0:Use ##[$BA81] n:##[$BA87] 3:##[$BA85]:Return
+		;
+		USEPATH config
+		\init=##[$BA8D](15):\dial=##[$BA8D](16)
+		For i=0 To 3
+			\name[i+soff*4]=##[$BA8D](25+i)
+			\phone[i+soff*4]=##[$BA8D](30+i)
+			If i<3 Then \func[i+soff*3]=##[$BA8D](35+i)
+		Next
+		;
+	EndIf
+
+Statement doreadme{section}
+	Shared readme
+	start=section*30
+	If readme>start+29 OR readme<start Then readme=start
+	For i=0 To 6:##[$BA90] 2,0,readme:readme+1:Next
+End Statement
+
+	If n=2 ;readme
+		If ##[$BA8F]=10 Then doreadme{0}
+		If ##[$BA8F]=11 Then doreadme{1}
+		If ##[$BA8F]=12 Then doreadme{2}
+		If ##[$BA8F]=13 Then n=0:Use ##[$BA81] n:##[$BA87] 2:##[$BA85]:Return
+	EndIf
+
+	If n=3 ;trackselect
+		If ##[$BA8F]=13
+			n=0:Use ##[$BA81] n:##[$BA87] 15:##[$BA85]:
+			CustomColors 0,0,83,0,0,16:Return
+		EndIf
+	EndIf
+
+	If n=4 ;carselect
+		If ##[$BA8F]=3
+			n=5:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+			For i=0 To 2:ClipBlit 2,133+i*66,60:Next
+			For i=0 To 2:ClipBlit 2,133+i*66,84:Next
+			For i=0 To 3:ClipBlit 2,341+i*66,60:Next
+			For i=0 To 3:ClipBlit 2,341+i*66,84:Next
+			Return
+		EndIf
+	EndIf
+
+	If n=6 ;carselect
+		If ##[$BA8F]=3
+			n=5:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+			For i=0 To 2:ClipBlit 2,133+i*66,60:Next
+			For i=0 To 2:ClipBlit 2,133+i*66,84:Next
+			For i=0 To 3:ClipBlit 2,341+i*66,60:Next
+			For i=0 To 3:ClipBlit 2,341+i*66,84:Next
+			Return
+		EndIf
+	EndIf
+
+	Return
+
+setupui:
+	##[$BA82] 0,0,8
+	##[$BA84] 0,0,0,0,608,11,0,"SKIDMARKS V2.0 (C)1994 ACID SOFTWARE"
+	##[$BA84] 0,1,0,12,608,64,0
+	##[$BA84] 0,2,184,15,240,11,2,"README"
+	##[$BA84] 0,3,184,27,240,11,2,"SERIAL CONNECT"
+	##[$BA84] 0,4,184,39,240,11,2,"SELECT PLAYERS"
+	##[$BA84] 0,5,184,51,240,11,2,"PLAY"
+	##[$BA84] 0,6,184,63,240,11,2,"EXIT TO WORKBENCH"
+
+	##[$BA82] 1,0,40
+	##[$BA84] 1,0,0,0,608,11,0,"SERIAL LINKUP"
+	##[$BA84] 1,1,0,12,608,64,0
+	##[$BA84] 1,10,04,14,41,11,2,"OK"
+	##[$BA84] 1,11,50,14,41,11,2,"MORE"
+	##[$BA84] 1,12,96,14,62,11,2,"ANSWER"
+	##[$BA84] 1,13,164,14,84,11,2,"ORIGINATE"
+	##[$BA84] 1,14,252,14,70,11,2,"HANGUP"
+	##[$BA84] 1,15,331,14,270,11,4,"INIT$="
+	##[$BA84] 1,16,331,26,270,11,4,"DIAL$="
+	For y=0 To 3
+		##[$BA84] 1,20+y,4,27+y*12,41,11,2,"DIAL"
+		##[$BA84] 1,25+y,50,27+y*12,158,11,4,"NAME:"
+		##[$BA84] 1,30+y,210,27+y*12,112,11,4,"PH:"
+		If y<3 Then ##[$BA84] 1,35+y,331,38+y*12,270,11,4,"Fn:"
+	Next
+
+	##[$BA82] 2,0,20
+	##[$BA84] 2,0,0,0,608,11,0,"README FILES"
+	##[$BA84] 2,1,0,12,608,64,0
+	##[$BA84] 2,2,128,14,476,60,1
+	##[$BA84] 2,10,8,16,116,11,2,"ABOUT ACID"
+	##[$BA84] 2,11,8,31,116,11,2,"ABOUT V1.1"
+	##[$BA84] 2,12,8,46,116,11,2,"ABOUT SERIAL"
+	##[$BA84] 2,13,8,61,116,11,2,"OK"
+
+	##[$BA82] 3,0,20
+	##[$BA84] 3,0,0,38,608,11,0,"TRACK SELECTION"
+	##[$BA84] 3,1,0,50,608,64,0
+	##[$BA84] 3,10,034,52,116,11,2,"READ FLOPPY"
+	##[$BA84] 3,11,174,52,116,11,2,"READ HD"
+	##[$BA84] 3,12,324,52,116,11,2,"HD INSTALL"
+	##[$BA84] 3,13,464,52,116,11,2,"OK"
+	For i=0 To 5
+		a$="SELECT#"+Str$(i+1)
+		##[$BA84] 3,14+i,1+i*101,65,100,11,2,a$
+	Next
+
+	##[$BA82] 4,0,60
+	##[$BA84] 4,0,0,0,608,11,0,"SELECT PLAYERS"
+	##[$BA84] 4,1,0,12,608,64,0
+	##[$BA84] 4,2,210,14,390,60,1
+	##[$BA84] 4,3,4,14,72,60,10,"NEW FILE|ABCDEFGH|HELLO|YOU|NAUGHTY|FISH|HELLO|YOU|NAUGHTY|FISH"
+	For i=0 To 3
+		##[$BA84] 4,4+i*2,85,14+i*12,72,11,2,"ABCDEFGH"
+		##[$BA84] 4,5+i*2,162,14+i*12,42,11,2,"DROP"
+	Next
+	##[$BA84] 4,12,85,63,119,11,2,"OK"
+
+	##[$BA82] 5,0,50
+	##[$BA84] 5,0,0,0,608,11,0,"SELECT CARS"
+	##[$BA84] 5,1,0,12,608,64,0
+
+	For i=0 To 7
+		##[$BA84] 5,4+i*2,14+i*72,12,68,11,1,"ABCDEFGH"
+		##[$BA84] 5,5+i*2,14+i*72,22,68,34,0
+	Next
+
+	c$="YELLOW|RED|BLUE|GREEN|BLACK|PURPLE|DARK BLUE|DARK GREEN|TAN|MAUVE|DARK GREY|LIGHTGREEN"
+	m$="JOYSTICK|KEYBOARD|REMOTELINK|COMPUTER"
+
+
+	Return
+
+setserial:
+	USEPATH config
+	##[$BA8C] 15,\init:##[$BA8C] 16,\dial
+	For y=0 To 2
+		a$="F"+Str$(y+1+soff*3)+":":##[$BA93] 35+y,a$
+;		SetBoxString 35+y,\func[y+soff*3]
+	Next
+	For y=0 To 3
+		##[$BA8C] 25+y,\name[y+soff*4]:##[$BA8C] 30+y,\phone[y+soff*4]
+	Next
+	Return
+
+Statement myscale{myshape.l}
+	MOVE.l d0,a0:MOVE.l14(a0),a0:MOVE.la0,a1:MOVE #3,c0
+	nxplane:MOVE#27,c3:MOVE#6,c4
+	nxline:MOVE #4,c2:MOVEM.l(a0)+,d0-d3:MOVE #99,c1
+	joko:ROXL.l#1,d3:ROXL.l#1,d2:ROXL.l#1,d1:ROXL.l#1,d0:TST c2:BEQ oko
+	moko:ROXL.l#1,d7:ROXL.l#1,d6:ROXL.l#1,d5:ROXL.l#1,d4
+	oko:SUB#1,c2:BPL yono:MOVE#4,c2:BRA joko:yono:SUB#1,c1:BPL joko:MOVEQ#27,d0
+	soko:ROXL.l#1,d7:ROXL.l#1,d6:ROXL.l#1,d5:ROXL.l#1,d4:DBRA d0,soko
+	MOVEM.l d4-d7,(a1):ADD#16,a1:SUB#1,c4:BPL foko:MOVE #6,c4:ADD#16,a0
+	foko:SUB#1,c3:BPL nxline:ADD #64,a1:SUB#1,c0:BPL nxplane:AsmExit
+	c0:Dc 0
+	c1:Dc 0
+	c2:Dc 0
+	c3:Dc 0
+	c4:Dc 0
+End Statement
+
+readtrackdisk:
+	#xs=123:#ys=32
+	NEWTYPE .header
+		plan.l [80*#ys*2]
+		trk.w
+		grcol.w[48]
+		typ.w[6]
+		text.b[32]
+		pad.w[32]
+	End NEWTYPE
+	InitBank 3,SizeOf.header,2
+	*thisone.header=Bank(3)
+	QAMIGA
+	pp$="track/"
+	If WriteMem (0,pp$+"track4")	;yeah right..
+		Loc 0,28
+	;	ReadMem 0,&trkoff(0),4*7
+		##[$BE14] 0,*thisone,20622
+		CloseFile 0
+	EndIf
+	BLITZ
+	tc=0:tt=0
+	For i=0 To 15
+		rr.w=*thisone\grcol[i*3+0] &15
+		gg.w=*thisone\grcol[i*3+1] &15
+		bb.w=*thisone\grcol[i*3+2] &15
+		cc.w=rr+gg+bb:If cc>tc Then tc=cc:tt=i
+		StopCycle 1,i,rr,gg,bb
+	Next
+	##[$D007] 1,640,#ys*2,4,*thisone
+	For y=0 To 1:For x=0 To 2
+		Use BitMap 1:GetaShape 0,x*123,y*32,123,32:myscale{Addr MidHandle(0)} ;:Scale 0,100/123,28/32
+		MakeCookie 0
+		Use BitMap 0:ClipBlit 0,1+x*101+y*303,85
+	Next:Next
+	Use BitMap 0:For x=0 To 5:xx=x*101+1:Box xx,84,xx+100,113,tt:Next
+	CustomColors 0,0,83,1,0,16
+	Return
+
+quit:
+	AMIGA
+	If ReadMem(0,"skidconfig")
+		FileOutput 0
+		USEPATH config
+		NPrint \init:NPrint \dial
+		For i=0 To 8:NPrint \func[i]:Next
+		For i=0 To 11:NPrint \name[i]:Next
+		For i=0 To 11:NPrint \phone[i]:Next
+		CloseFile 0
+	EndIf
+	SaveBitmap 0,"ram:test.iff"
+	End

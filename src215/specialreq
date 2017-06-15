@@ -1,0 +1,138 @@
+specialreq	dc.l	0
+	dc.w	4,2,512,172,0,0	;52,
+	dc.l	specialreqga1,specialreqbo1,specialreqin1
+	dc.w	0
+	dc.b	0,0
+	dc.l	0
+	ds.b	32
+	dc.l	0,0
+	ds.b	36
+
+specialreqbo1	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	specialreqla1,specialreqla2
+specialreqla1	dc.w	391,8,88,8,88,27
+specialreqla2	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	specialreqla3,specialreqbo2
+specialreqla3	dc.w	391,9,391,27,89,27
+specialreqbo2	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	specialreqla4,specialreqla5
+specialreqla4	dc.w	511,0,0,0,0,171
+specialreqla5	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	specialreqla6,0
+specialreqla6	dc.w	511,1,511,171,1,171
+specialreqbo3	dc.w	0,0
+	dc.b	1,2,1,3
+	dc.l	specialreqla22,specialreqla23
+specialreqla22	dc.w	79,0,0,0,0,11
+specialreqla23	dc.w	0,0
+	dc.b	2,1,1,3
+	dc.l	specialreqla24,0
+specialreqla24	dc.w	79,1,79,11,1,11
+
+specialreqin1	dc.b	1,0,1,0
+	dc.w	100,14
+	dc.l	0
+	dc.l	specialreqla7,specialreqin2
+specialreqla7	dc.b	'THE EXTRA SPECIAL THANKS REQUESTER!',0
+	even
+specialreqin2	dc.b	1,0,1,0
+	dc.w	12,38
+	dc.l	0
+	dc.l	specialreqla8,specialreqin3
+specialreqla8	dc.b	'Special thanks go out to the following',0
+	even
+specialreqin3	dc.b	1,0,1,0
+	dc.w	324,38
+	dc.l	0
+	dc.l	specialreqla9,specialreqin4
+specialreqla9	dc.b	'people (dead or alive)',0
+	even
+specialreqin4	dc.b	1,0,1,0
+	dc.w	12,46
+	dc.l	0
+	dc.l	specialreqla10,specialreqin5
+specialreqla10	dc.b	'for a wide range of reasons:',0
+	even
+specialreqin5	dc.b	1,0,1,0
+	dc.w	12,58
+	dc.l	0
+	dc.l	specialreqla11,specialreqin6
+specialreqla11	dc.b	'Monique (Sigh!)',0
+	even
+specialreqin6	dc.b	1,0,1,0
+	dc.w	12,66
+	dc.l	0
+	dc.l	specialreqla12,specialreqin7
+specialreqla12	dc.b	'Rich, James and Glen (burp!)',0
+	even
+specialreqin7	dc.b	1,0,1,0
+	dc.w	12,74
+	dc.l	0
+	dc.l	specialreqla13,specialreqin8
+specialreqla13	dc.b	'Acid Reign (Brett, Roger and Co.)',0
+	even
+specialreqin8	dc.b	1,0,1,0
+	dc.w	12,82
+	dc.l	0
+	dc.l	specialreqla14,specialreqin9
+specialreqla14	dc.b	'James, James and James',0
+	even
+specialreqin9	dc.b	1,0,1,0
+	dc.w	196,82
+	dc.l	0
+	dc.l	specialreqla15,specialreqin10
+specialreqla15	dc.b	'(Hendrix, Page and HetField)',0
+	even
+specialreqin10	dc.b	1,0,1,0
+	dc.w	12,90
+	dc.l	0
+	dc.l	specialreqla16,specialreqin11
+specialreqla16	dc.b	'Nigel Tufnell and the rest of ',39,'Tap',39,0
+	even
+specialreqin11	dc.b	1,0,1,0
+	dc.w	12,98
+	dc.l	0
+	dc.l	specialreqla17,specialreqin12
+specialreqla17	dc.b	'Oops! Nearly forgot! Mum, Dad and Gran',0
+	even
+specialreqin12	dc.b	1,0,1,0
+	dc.w	12,114
+	dc.l	0
+	dc.l	specialreqla18,specialreqin13
+specialreqla18	dc.b	'Special Raspberries to:',0
+	even
+specialreqin13	dc.b	1,0,1,0
+	dc.w	12,126
+	dc.l	0
+	dc.l	specialreqla19,specialreqin14
+specialreqla19	dc.b	'The Gulf War',0
+	even
+specialreqin14	dc.b	1,0,1,0
+	dc.w	12,134
+	dc.l	0
+	dc.l	specialreqla20,specialreqin15
+specialreqla20	dc.b	'South African Politics',0
+	even
+specialreqin15	dc.b	1,0,1,0
+	dc.w	12,142
+	dc.l	0
+	dc.l	specialreqla21,0
+specialreqla21	dc.b	'Politicians and Powermongers',0
+	even
+specialreqin16	dc.b	1,0,1,0
+	dc.w	4,2
+	dc.l	0
+	dc.l	specialreqla25,0
+specialreqla25	dc.b	' ENOUGH! ',0
+	even
+
+
+specialreqga1	dc.l	0
+	dc.w	208,156,80,12,0,5,1
+	dc.l	specialreqbo3,0,specialreqin16,0,0
+	dc.w	1
+	dc.l	0

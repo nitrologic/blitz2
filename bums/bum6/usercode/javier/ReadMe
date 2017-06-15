@@ -1,0 +1,29 @@
+Thanks to javier for these proggies
+
+3d stuff...
+
+These are just two examples from when I was beginning to program in Blitz2.
+As you'll notice if you compile them, the second version is much faster,
+because it makes use of linked lists instead of reading the information from
+the Datas continuosly, as the first one does.
+
+amos stuff...
+
+In these drawers you'll find some useful utilities for AMOS and Blitz
+programmers. Alongside Abk2Shapes, which comes with its own documentation,
+there are two other ones:
+
+
+AMOS_JoyRead   A simple routine that reads the joystick in the AMOS way.
+
+AMOS_Banks     A handful of functions that allow you to load and manipulate
+               AMOS Data banks in a similar way to the AMOS System. I'm
+               currently working on it, and it will soon support all those
+               "Reserve as" commands, as AMOS does.
+
+shapecutter...
+
+This program lays a bitmap out from a shape file. It is not finished,
+because it doesn't have a GUI yet, but it works if you put the correct file
+names in the listing and compile it from Blitz2.
+

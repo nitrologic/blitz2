@@ -1,0 +1,323 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example9.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example9.bb2
+NoCli
+WBStartup
+
+INCDIR	"FUN_Math:"
+Include "FUN_Objects.bb2"
+
+NEWTYPE.DList_Entry
+	address.l
+	z.w
+End NEWTYPE
+
+
+DEFTYPE.w xr : xr=0
+DEFTYPE.w yr : yr=0
+DEFTYPE.w zr : zr=0
+DEFTYPE.w pz : pz=0
+
+DEFTYPE.Object_Type *Player
+
+Dim List	Objects.Object_Type(16)
+
+Dim DList.DList_Entry(16)
+
+BLITZ
+
+Statement Draw_Object_Solid_Colour{*Object.Object_Type,*Final.Matrix_Type}
+
+ DEFTYPE.Vector_Type V
+ DEFTYPE.Vector_Type L
+ DEFTYPE.Vector_Type Normal
+
+ Dim polygon.Point_Type(3)
+
+ For points.b=0 To *Object\VCount
+	apply_matrix{*Final,&*Object\Vertices[points],&*Object\WC_Vertices[points]}
+ Next points
+ For sides.b=0 To *Object\FCount
+subtract_vectors{&*Object\WC_Vertices[*Object\Facets[sides]\Points[1]],&*Object\WC_Vertices[*Object\Facets[sides]\Points[0]],&V}
+subtract_vectors{&*Object\WC_Vertices[*Object\Facets[sides]\Points[2]],&*Object\WC_Vertices[*Object\Facets[sides]\Points[0]],&L}
+	cross_product{&V,&L,&Normal}
+	If Normal\z>0
+		e.w=*Object\Facets[sides]\FColour
+		If *Object\Facets[sides]\Points[3]=-1 Then pnum.b=3 Else pnum.b=4
+		For points=0 To pnum-1
+			polygon(points)\x=*Object\WC_Vertices[*Object\Facets[sides]\Points[points]]\x
+			polygon(points)\y=*Object\WC_Vertices[*Object\Facets[sides]\Points[points]]\y
+		Next points
+		Polyf pnum,&polygon(0),e
+	EndIf
+ Next sides
+
+End Statement
+
+Statement Sort_DList{items.w}
+	Shared DList()
+
+	DEFTYPE.DList_Entry Temp
+
+	swaps.b=False
+	Repeat
+		swaps=False
+		For count.w=0 To items-1
+			If DList(count)\z>DList(count+1)\z
+				Temp\address=DList(count)\address,DList(count)\z
+				DList(count)\address=DList(count+1)\address,DList(count+1)\z
+				DList(count+1)\address=Temp\address,Temp\z
+				swaps=True
+			EndIf
+		Next count
+	Until swaps=False
+End Statement
+
+Statement Draw_Plane{*VRC.Matrix_Type}
+	Shared Objects()
+	Shared logical.b,xr,py.w,px.w,pz.w
+	DEFTYPE.Vector_Type V1
+	DEFTYPE.Vector_Type R
+
+	Dim oblong2.w(9)
+
+	V1\x=-15,0,-15,1
+	apply_matrix{*VRC,&V1,&R}
+	oblong2(0)=R\x+160:oblong2(1)=R\y+32
+	V1\x=-15,0,15,1
+	apply_matrix{*VRC,&V1,&R}
+	oblong2(2)=R\x+160:oblong2(3)=R\y+32
+	V1\x=15,0,15,1
+	apply_matrix{*VRC,&V1,&R}
+	oblong2(4)=R\x+160:oblong2(5)=R\y+32
+	V1\x=15,0,-15,1
+	apply_matrix{*VRC,&V1,&R}
+	oblong2(6)=R\x+160:oblong2(7)=R\y+32
+
+	V1\x=0,py/10,0
+	apply_matrix{*VRC,&V1,&R}
+	oblong2(8)=R\x+160:oblong2(9)=R\y+32
+
+
+	Use BitMap 2
+	Boxf	136,8,184,56,0
+	If xr>180 Then c.b=8 Else c.b=14
+	Poly 4,&oblong2(0),c
+	Line 160,32,oblong2(8),oblong2(9),c
+
+	ResetList Objects()
+	While NextItem(Objects())
+		ox.w=Objects()\Position\x-px : oz.w=Objects()\Position\z-pz : oy.w=Objects()\Position\y
+		If (Abs(ox)<240) AND (Abs(oz)<240)
+			V1\x=ox/16,oy/16,oz/16,1
+			apply_matrix{*VRC,&V1,&R}
+			Point R\x+160,R\y+32,1
+		EndIf
+	Wend
+	Use BitMap logical
+End Statement
+
+Statement Draw_World{x.w,y.w,t.w}
+	Shared xr,yr,zr,pz
+	Shared Objects(),DList()
+
+	DEFTYPE.Vector_Type HL
+	DEFTYPE.Vector_Type HR
+	DEFTYPE.Vector_Type Res
+	DEFTYPE.Matrix_Type Mper
+	DEFTYPE.Matrix_Type VRP
+	DEFTYPE.Matrix_Type VRC
+	DEFTYPE.Matrix_Type VRT
+	DEFTYPE.Matrix_Type X
+	DEFTYPE.Matrix_Type Y
+	DEFTYPE.Matrix_Type Z
+	DEFTYPE.Matrix_Type XY
+	DEFTYPE.Matrix_Type WC_Trans
+	DEFTYPE.Matrix_Type SC_Trans
+	Dim oblong.w(7)
+
+	SC_Trans\Column[0]\x=1,0,0,0
+	SC_Trans\Column[1]\x=0,1,0,0
+	SC_Trans\Column[2]\x=0,0,1,0
+	SC_Trans\Column[3]\x=160,68,0,1
+
+	HL\x=-400,0-y,-1000,1
+	HR\x=400,0-y,-1000,1
+
+
+	build_translation_matrix{&VRP,0-x,0-y,0-pz}
+	build_rotation_matrix{#ABOUT_X,&X,xr}
+	build_rotation_matrix{#ABOUT_Y,&Y,yr}
+	build_rotation_matrix{#ABOUT_Z,&Z,zr}
+
+	concatenate_matrix{&Y,&Z,&XY}
+	concatenate_matrix{&X,&XY,&VRC}
+
+	concatenate_matrix{&VRC,&VRP,&WC_Trans}
+
+	concatenate_matrix{&SC_Trans,&WC_Trans,&XY}
+
+	build_scale_matrix{&Mper,0.625,0.625,0.625}
+	concatenate_matrix{&Mper,&WC_Trans,&XY}
+
+	Draw_Plane{&VRC}
+
+	dcount.b=-1
+
+	apply_matrix{&X,&HL,&Res}
+	apply_matrix{&Z,&Res,&HL}
+	apply_matrix{&Mper,&HL,&Res}
+	ly.w=Res\y/3+58
+
+	apply_matrix{&X,&HR,&Res}
+	apply_matrix{&Z,&Res,&HR}
+	apply_matrix{&Mper,&HR,&Res}
+	ry.w=Res\y/3+58
+
+
+	oblong(0)=0 : oblong(1)=ly :	oblong(2)=320 :	oblong(3)=ry
+	oblong(4)=320 : oblong(5)=0 :	oblong(6)=0 :	oblong(7)=0
+
+	BlockScroll 0
+	Polyf 4,&oblong(0),8
+	oblong(1)=ly-8 : oblong(3)=ry-8 : oblong(5)=ry : oblong(7)=ly
+	Polyf 4,&oblong(0),3
+
+	ResetList Objects()
+	While NextItem(Objects())
+		apply_matrix{&WC_Trans,&Objects()\Position,&Objects()\WC_Vertices[0]}
+		If (Objects()\WC_Vertices[0]\z<0) AND (Objects()\WC_Vertices[0]\z>-1000) AND (Objects()\WC_Vertices[0]\x<400)
+			If (Objects()\WC_Vertices[0]\x>-400)
+				dcount+1 : DList(dcount)\address=&Objects(),Objects()\WC_Vertices[0]\z
+			EndIf
+		EndIf
+	Wend
+
+	Sort_DList{dcount}
+
+	For o.w=0 To dcount
+		If DList(o)\z<>0
+			scf.q=1/(Abs(DList(o)\z*0.004))
+			build_scale_matrix{&Mper,scf,scf,scf}
+			concatenate_matrix{&Mper,&WC_Trans,&X}
+			concatenate_matrix{&SC_Trans,&X,&XY}
+		Else
+			concatenate_matrix{&SC_Trans,&WC_Trans,&XY}
+		EndIf
+		Draw_Object_Solid_Colour{DList(o)\address,&XY}
+	Next o
+
+	Draw_Plane{&VRC}
+
+End Statement
+
+Statement Draw_Radar{plx.w,ply.w,x2.w,y2.w}
+	Shared Objects()
+
+	Line plx+160,ply+68,x2+160,y2+68,2
+
+	ResetList Objects()
+
+	While NextItem(Objects())
+		Point Objects()\Position\x/10+160,Objects()\Position\z/20+68,2
+	Wend
+
+End Statement
+
+QAMIGA
+
+BitMap 0,320,136,4
+BitMap 1,320,136,4
+BitMap 2,320,64,4
+
+LoadBitMap 2,"fun_math:panel.iff",0
+LoadPalette 1,"fun_math:arena.pal"
+
+physical.b=0
+logical.b=1
+
+For count.w=0 To 10
+	If AddItem(Objects())
+		Load_Object{"FUN_Math:Example_Shapes/Tree.shp",&Objects(),Rnd(1000)-500,0,Rnd(1000)-500,1}
+	EndIf
+Next count
+
+;For count.w=0 To 3
+;	If AddItem(Objects())
+;		Load_Object{"FUN_Math:Example_Shapes/hill.shp",&Objects(),Rnd(1000)-500,0,Rnd(1000)-500,1}
+;	EndIf
+;Next count
+
+
+dummy.l=AddItem(Objects())
+Load_Object{"FUN_Math:Example_Shapes/House_complex.shp",&Objects(),0,0,-200,1}
+
+dummy.l=AddItem(Objects())
+Load_Object{"FUN_Math:Example_Shapes/titus_2.shp",&Objects(),200,-200,-200,1}
+*Player=&Objects()
+
+StopCycle 1,0,0,6,0
+StopCycle 1,8,0,10,15
+
+BLITZ
+
+InitCopList 0,42,135,$13004,0,16,0	;$12016 <- does not work on 1200's!!!
+InitCopList 1,178,63,$13004,0,16,0
+CreateDisplay 0,1
+DisplayPalette 0,1
+DisplayPalette 1,0
+DisplayBitMap 0,physical
+DisplayBitMap 1,2
+Use BitMap logical
+
+xr=0
+px.w=0
+py.w=-20
+vy.q=0
+
+
+Repeat
+ yra.q=yr*(Pi/180)
+ xra.q=xr*(Pi/180)
+ rat.q=HCos(xra)*10
+
+ If Joyx(1)=1
+		yr+4
+		If yr>=360 Then yr=0
+ EndIf
+ If Joyx(1)=-1
+		yr-4 : :If yr<0 Then yr=359
+		If yr<0 Then yr=359
+ EndIf
+
+ If Joyy(1)=1 Then xr+4 : If xr>360 Then xr=0
+ If Joyy(1)=-1 Then xr-4 : If xr<0 Then xr=359
+ If Joyb(1)
+	 zdif.q=HCos(yra)*rat
+	 xdif.q=HSin(yra)*rat
+	 ydif.q=HSin(xra)*10
+	 pz-zdif : px+xdif
+	 py-ydif
+ EndIf
+
+
+ If py>0
+		py=0
+ EndIf
+
+ Draw_World{px,py,0}
+
+ If logical=0
+		logical=1
+		physical=0
+ Else
+		logical=0
+		physical=1
+ EndIf
+ VWait
+ BitMapOutput 2 : Colour 2 : Locate 0,0
+ DisplayBitMap 0,physical
+ Use BitMap logical
+Until Joyb(0)
+
+End
+
+

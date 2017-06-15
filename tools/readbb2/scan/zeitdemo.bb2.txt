@@ -1,0 +1,55 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/paule/Zeitdemo.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/paule/Zeitdemo.bb2
+
+
+;* * * * * * * * * * * * * * * * * * * * * * * *
+;*                                             *
+;*           Anwendung von CurrentTime_        *
+;*                                             *
+;*---------------------------------------------*
+;*  Demo von: Michael Paulwitz / Berlin        *
+;*            im Februar 1994 (PD)             *
+;*                                             *
+;* * * * * * * * * * * * * * * * * * * * * * * *
+
+
+
+WBStartup:NoCli
+
+; Beispiel eines Zhlers auf 10 Sekunden
+
+WbToScreen 0    ;  Workbenchbildschirm wird benutzt
+WBenchToFront_  ;
+Window 0,320,112,320,100,$1403,"10 Sek Window",1,2 ; Windowgroesse aenderbar
+
+Dim xy(3,20)    ;  Linienzhler
+
+DEFTYPE.l Sekunden,Mikrosek,NSekunden,NMikrosek
+
+dummy = CurrentTime_ (&Sekunden,&Mikrosek)  ; Hier steht die Betriebssystem-
+                                            ; funktion fr Sekunden und Mikro-
+                                            ; sekunden
+
+While NSekunden-Sekunden < 10 ; /10 Sekunden/ Alte Zeit - Aktuelle Zeit
+  For z = 0 To 20
+    Wline xy(0,z),xy(2,z),xy(1,z),xy(3,z),0
+    For i=0 To 1
+      xy(i,z)=Rnd(InnerWidth)
+      xy(i+2,z)=Rnd(InnerHeight)
+    Next i
+    f1=Rnd (3) + 1
+    Wline xy(0,z),xy(2,z),xy(1,z),xy(3,z),f1
+    alt=z
+  Next z
+  dummy = CurrentTime_ (&NSekunden,&NMikrosek)     ; Wie spaet ?
+  If xx = InnerWidth/2-40 AND yy = InnerHeight/2-5
+     WLocate xx , yy
+     Print "Zeit = ",NSekunden-Sekunden," s  "    ; Immer schoen zaehlen
+  Else
+     WLocate xx , yy
+     Print "                  "                    ; Windowgroesse ist anders
+     xx = InnerWidth/2-40: yy = InnerHeight/2-5
+  End If
+Wend
+
+End
+

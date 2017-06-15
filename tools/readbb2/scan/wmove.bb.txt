@@ -1,0 +1,15 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WMove.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WMove.bb
+
+; 
+; wmove example 
+; 
+Screen 0,2
+Window 0,0,0,100,100,$1000,"Moving window!",0,1 
+
+For k=1 To 50 
+
+ WMove k,k 
+Next
+
+MouseWait 
+

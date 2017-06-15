@@ -1,0 +1,29 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/convert.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/convert.bb
+;
+; print file converter for Quark Express
+;
+
+bold$=Chr$($1b)+"[1m"
+norm$=Chr$($1b)+"[22m"
+tab$=Chr$(9)
+
+p$="<P>"
+b$="<B>"
+i$="<I>"
+
+If NumPars<>1 Then End
+
+f$=Par$(1)
+
+If WriteMem(0,f$)
+	FileInput 0
+	a$=Inkey$(FileSeek(0))
+	a$=Replace$(a$,bold$,b$)						 ;put in bold
+	a$=Replace$(a$,norm$,p$)						 ;put in normal
+	a$=Replace$(a$,"	",tab$)						;dblspaces => tabs
+	a$=Replace$(a$,tab$+" ",tab$)				;tab-space => tabs
+	a$=Replace$(a$,";",i$+";")					 ;rems => italic
+	a$=Replace$(a$,Chr$(10),p$+Chr$(10)) ;eol => normal eol
+	CloseFile 0
+	If ReadMem(0,f$+".qasc") Then FileOutput 0:Print a$:CloseFile 0
+EndIf

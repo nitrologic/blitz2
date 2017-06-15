@@ -1,0 +1,1075 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk2/BNet/BNET.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk2/BNet/BNET.bb2
+;BNET	 by Bruce Webster	(websbd2@cosc.canterbury.ac.nz
+;====										or craigw@pretzel.equinox.gen.nz)
+
+
+;BNET is a simple neural net simulator,
+
+;based on Turings a-type and b-type definitions in his 1948 paper:
+;"Intelligent Machinery". National Physical Laboratory Report.
+;In Meltzer, B., Michie, D. (eds) 1969.	Machine Intelligence 5.
+;In Ince, D.C. (ed.) 1992.	Collected Works of A.M. Turring:
+;													 Mechanical Intelligence.
+
+;Each neuron simply holds a 1 or a 0.
+;It should have two inputs, coming from other neurons and any
+;number of outputs.
+
+;A neurons value is calculated from its two inputs, by the formula
+;value=1-(input1 * input2)
+
+;Each 'moment' of time, the value is updated.
+;for more info, read the doc file.
+
+
+;Feel free to change the code, but don't give anyone a copy unless
+;it's a definite improvement and doesn't have any extra bugs.
+
+NoCli
+WBStartup
+
+#debug=0			 ;If #debug=0, we do our
+							 ;own custom error routines.
+
+#panely=70		 ;This is where the horozontal line between control
+							 ;panel and the drawing area goes.
+
+#cellmax=1000	;how many cells?	With the current screen, I doubt
+							 ;you could fit a thousand on it...
+
+#linkmax=1500	;freehand lines can have upto #linkmax points in them.
+							 ;the memory for any points not used is freed, so
+							 ;there is very little wastage of memory.
+
+#drawmax=2100	;max no. of freehand lines
+
+#arrowsize=8	 ;want _BIG_ arrows?	I think 8 is a nice size.
+
+#pshape=2
+
+#startbutton=5		 ;gadget no.s
+#slider=6
+#single=9
+#atype=7
+#selec=3
+#inpu=4
+#KILL=10
+#rdraw=11
+
+;codes for the 'what' field of a neuron type.
+;these allow us to tell what kind of neuron it is.
+#whati=0					 ;input neuron
+#whatzilch=2			 ;empty space (no neuron here)
+#whata=4					 ;proper main node
+#whatb=6					 ;the smaller neurons in a b-type connection.
+
+#boffx1=-5	 ;where to place the three b-type neurons
+#boffy=8
+#boffx2=3
+
+NEWTYPE .point
+x.w
+y
+End NEWTYPE
+
+
+;this is the type used for freehand lines.
+
+NEWTYPE .chain ;_Don't_ stick anything after p[]!
+numlinks.w		 ;I allocate memory for this entire newtype, but
+left					 ;once the line has been drawn, I free all the
+top						;memory beyond the last used point in the p[] array.
+right
+bottom
+noff[3]
+start
+finish
+finishi
+p.point[#linkmax]
+End NEWTYPE
+
+
+NEWTYPE .neuron
+pa.w[2]			;the number of the parent neurons
+v.b[2]			 ;the value held in neuron (0 or 1)
+						 ;there are two bytes here becuase we need the
+						 ;previous moment's value for calculating the new val.
+
+x.w					;where is it (on the screen)
+y
+what.b			 ;what is it?	(input, main node, etc.)
+End NEWTYPE
+
+DEFTYPE .chain tline
+DEFTYPE .w
+
+	 ;array of all neurons	 ;array of pointers to freehand lines
+													 ;('chains') we've allocated.
+Dim cell.neuron(#cellmax) ,*lippy.chain(#drawmax)
+
+;arrays of what is currently selected (for select, kill)
+Dim selneuron.b(#cellmax),		selline.b(#drawmax)
+
+MaxLen pa$=160
+MaxLen fi$=64
+
+.err
+Statement err{a$}				;you see this if something bad happens.
+Window 1,190,148,260,83,$1002,"",1,2,1
+WindowOutput 1
+WindowInput 1
+WLocate 7,14:WColour 2
+Print a$
+Repeat:Until WaitEvent&$40 AND GadgetHit=16
+CloseWindow 1
+Use Window 0
+End Statement
+
+Statement waitup{}	 ;wait till user lets go of the mouse button
+Repeat							 ;so we don't get _two_ mouse events
+happen=WaitEvent
+Until MButtons=5
+End Statement
+
+Statement pn{f}			;(re)draw a neuron
+Shared cell(),dbuff
+Blit cell(f)\v[dbuff]|cell(f)\what,cell(f)\x,cell(f)\y
+End Statement
+
+.hitneur		;is the space at x,y occupied?
+Function hitneur{x,y,shap}
+Shared cell(),numcells,*lippy(),numdraw
+hit=0
+kl=1
+While (kl<=numcells) AND hit=0
+*tc.neuron=cell(kl)
+	If SpritesHit(shap,x,y,*tc\what,*tc\x,*tc\y) AND (*tc\what<>#whatzilch) Then hit=kl
+	kl+1
+Wend
+			;hit is either 0, or the neuron at this position.
+Function Return hit
+End Statement
+
+				;is something at x,y and radius rad completely on the page?
+Function offpage{x,y,rad}
+Function Return (y<(#panely+rad) OR (y>511-rad) OR (x<rad) OR (x>640-rad))
+End Statement
+
+.addneuron
+Statement addneuron{x,y,huh}	 ; pop a new neuron on the page
+Shared cell(),numcells				 ; of type stored in huh
+
+n=1			 ;find an unused space in the array...
+While (cell(n)\what<>#whatzilch) AND n<#cellmax+1
+n+1
+Wend
+
+If n>#cellmax OR offpage{x,y,8} OR hitneur{x,y,#whati}
+	BeepScreen 0
+Else
+	If n>numcells Then numcells=n
+	cell(n)\pa[0]=0	 ;neuron 0 is never used.	It is fixed to 0.
+	cell(n)\pa[1]=0
+
+	cell(n)\v[0]=0		;initial value is zero
+	cell(n)\v[1]=0
+
+	cell(n)\x=x,y
+	cell(n)\what=huh
+	pn{n}
+EndIf
+End Statement
+
+.lino		 ;redraw a line
+Statement lino{*la.chain,col.w}
+For i=1 To *la\numlinks
+Line *la\p[i-1]\x,*la\p[i-1]\y,*la\p[i]\x,*la\p[i]\y,col
+Next
+End Statement
+
+
+.moment	 ;update the net once.
+Statement moment{}
+Shared cell(),dbuff,numcells,hour
+
+nbuff=dbuff BitChg 0
+For loop=1 To numcells
+	*current.neuron=cell(loop)
+
+											 ;don't update inputs or non-existant neurons
+	If *current\what>#whatzilch
+		newval=(cell(*current\pa[0])\v[dbuff] AND cell(*current\pa[1])\v[dbuff]) BitChg0
+		 ;Turing's rule was value= 1-(input1 * input2)
+		 ;I use value=(input1 and input2) bitchg 0,
+		 ;because it is equivalent and hopefully faster.
+		*current\v[nbuff]=newval
+		If *current\v[dbuff]<>newval
+			Blit *current\v[nbuff]|*current\what,*current\x,*current\y
+		EndIf
+	EndIf
+Next
+dbuff=nbuff
+hour+1					 ;update the hourglass
+If hour=22 Then hour=8
+BlitColl hour,416,15
+End Statement
+
+
+.freeline	 ;give back the memory for a line
+Statement freeline{*la.chain}
+Shared numdraw
+endbit=((&*la\p[*la\numlinks+1])-*la)	;this is how much mem. was
+																			 ;used by the line.
+##[$FE99] *la,endbit
+End Statement
+
+.killline
+Statement killline{linno}	 ;remove line from pointer array
+Shared *lippy(),numdraw,selline()
+lino{*lippy(linno),0}
+freeline{*lippy(linno)}
+If linno<numdraw
+	For i=linno To numdraw-1
+		*lippy(i)=*lippy(i+1)
+		selline(i)=selline(i+1)
+	Next
+EndIf
+numdraw-1
+End Statement
+
+Statement fulllinekill{i}				 ;update attached neurons before
+Shared cell(),*lippy(),selline()	;killing the line.
+		*la.chain=*lippy(i)
+
+		selline(i)=0
+
+		cell(*la\finish)\pa[*la\finishi]=0
+		If *la\noff[0]
+			BlitMode EraseMode
+			For ff=0 To 2
+				pn{*la\noff[ff]}
+				cell(*la\noff[ff])\what=#whatzilch
+			Next
+			BlitMode CookieMode
+		EndIf
+		n_link=*la\start
+		n_end=*la\finish
+		killline{i}
+		If n_end
+			pn{n_end}
+		EndIf
+		If n_link
+			pn{n_link}
+		EndIf
+End Statement
+
+
+.kill	 ;kill all selected items
+Statement kill{}
+Shared selline(),selneuron(),cell(),*lippy(),numdraw,numcells
+
+For i=1 To numcells	 ;undraw boxes
+	If selneuron(i)
+		Box cell(i)\x-10,cell(i)\y-10,cell(i)\x+10,cell(i)\y+10,-1
+	EndIf
+Next
+For i=0 To numdraw
+	If selline(i)
+		Box *lippy(i)\left,*lippy(i)\top,*lippy(i)\right,*lippy(i)\bottom,-1
+	EndIf
+Next
+
+For i=1 To numcells	 ;kill neurons
+	If selneuron(i)
+		selneuron(i)=0
+		k=0
+		While k<= numdraw		;kill all lines connected to neuron
+			If (*lippy(k)\start=i)
+				*lippy(k)\start=0:fulllinekill{k}
+			Else
+				If (*lippy(k)\finish=i)
+					*lippy(k)\finish=0:fulllinekill{k}
+				Else
+					k+1
+				EndIf
+			EndIf
+		Wend
+		BlitMode EraseMode
+		pn{i}
+		BlitMode CookieMode
+		cell(i)\what=#whatzilch
+	EndIf
+Next
+
+i=0		;kill selected lines
+While i<= numdraw
+	If selline(i)
+		fulllinekill{i}
+	Else
+		i+1
+	EndIf
+Wend
+End Statement
+
+
+.angle	;calculate angle from height (adj) and width (opp)
+Function.q angle{adj,opp}
+	If adj
+		angle.q=Cos(opp/adj)+Pi
+		If adj<0
+			If opp<0
+				angle-Pi
+			Else
+				angle+Pi
+			EndIf
+		EndIf
+	Else
+		angle=Pi/2*Sgn(opp)+Pi
+	EndIf
+	Function Return angle
+End Statement
+
+.flip		;toggle neuron f
+Statement flip{f}
+Shared cell()
+If f
+	cell(f)\v[0] BitChg 0
+	cell(f)\v[1] BitChg 0
+	pn{f}
+EndIf
+End Statement
+
+	;add an arrow to a line, at position n
+Statement arrow{*la.chain,n}
+For i= *la\numlinks To n Step-1
+	*la\p[i+3]\x=*la\p[i]\x
+	*la\p[i+3]\y=*la\p[i]\y
+Next
+*la\numlinks+3
+adj=*la\p[n]\x-*la\p[n-1]\x
+opp=*la\p[n]\y-*la\p[n-1]\y
+angle.q=angle{adj,opp}
+
+newang.q=(Pi/4+angle)
+*la\p[n+1]\x=*la\p[n]\x+#arrowsize*HCos(newang)
+*la\p[n+1]\y=*la\p[n]\y+#arrowsize*HSin(newang)
+newang=(angle-Pi/4)
+*la\p[n+2]\x=*la\p[n]\x+#arrowsize*HCos(newang)
+*la\p[n+2]\y=*la\p[n]\y+#arrowsize*HSin(newang)
+
+Line *la\p[n]\x,*la\p[n]\y,*la\p[n+1]\x,*la\p[n+1]\y,2
+Line *la\p[n+2]\x,*la\p[n+2]\y,2
+Line *la\p[n+3]\x,*la\p[n+3]\y,2
+End Statement
+
+Function badd{x,y,initial}	 ;add a small connecty neuron.
+Shared cell(),numcells,dbuff
+	n=1
+	While (cell(n)\what<>#whatzilch) AND n<#cellmax+1
+	n+1
+	Wend
+	If n>#cellmax
+		Function Return 0
+	Else
+		If n>numcells Then numcells=n
+		cell(n)\v[dbuff]=initial
+		cell(n)\x=x,y
+		cell(n)\what=#whatb
+		pn{n}
+		Function Return n
+	EndIf
+End Statement
+
+.addseg
+Statement addseg{*la.chain,x,y}	;add a line segment
+	*la\numlinks+1
+	*la\p[*la\numlinks]\x=x,y
+End Statement
+
+
+.splot ;can we squeeze in a b-type connection bundle at position x,y
+Function splot{x,y}
+ag=hitneur{x,y,#whatb}OR hitneur{x+#boffx1,y+#boffy,#whatb}OR hitneur{x+#boffx2,y+#boffy,#whatb}
+ag OR offpage{x,y,5} OR offpage{x+#boffx1,y+#boffy,5} OR offpage{x+#boffx2,y+#boffy,5}
+Function Return ag
+End Statement
+
+.glue	 ;attach neurons to line, fill in b-type bundle
+Function glue{n_link,n_end,*la.chain,parent}
+Shared cell(),numcells
+
+kill=False
+If cell(n_end)\what=#whata
+	*la\start=n_link:*la\finish=n_end:*la\finishi=parent
+	n=(*la\numlinks) ASR1
+	n+n ASR2
+	lino{*la,2}
+	If (SetGadgetStatus(0,2)-#atype)	;bytpe?
+
+		While (n>0) AND splot{*la\p[n]\x,*la\p[n]\y}
+			n-1
+		Wend
+
+		If n>0
+			num=badd{*la\p[n]\x,*la\p[n]\y,0}
+			*la\noff[0]=num
+			num1=badd{*la\p[n]\x+#boffx1,*la\p[n]\y+#boffy,0}
+			*la\noff[1]=num1
+			num2=badd{*la\p[n]\x+#boffx2,*la\p[n]\y+#boffy,1}
+			*la\noff[2]=num2
+
+			cell(num)\pa[0]=n_link
+			cell(num)\pa[1]=num2
+
+			cell(num1)\pa[0]=num2
+			cell(num1)\pa[1]=num2
+
+			cell(num2)\pa[0]=num1
+			cell(num2)\pa[1]=num1
+
+			cell(n_end)\pa[parent]=num
+
+			arrow{*la,(*la\numlinks) ASR2+1}
+		Else
+			kill=True
+		EndIf
+	Else
+		cell(n_end)\pa[parent]=n_link
+		arrow{*la,(*la\numlinks) ASR1+1}:*la\noff[0]=0
+	EndIf
+	If NOT kill
+		For i=0 To 3
+			flip{n_end}
+			flip{n_link}
+			VWait 3
+		Next
+	EndIf
+Else
+kill=True
+EndIf
+Function Return kill	;kill is true if there's something wrong
+											;with the line
+End Statement
+
+
+.extremes	;find the topmost,bottommost,leftmost,rightmost points
+					 ;of a line
+
+Statement extremes{*la.chain}
+	t.point\x=*la\p[0]\x,*la\p[0]\y
+	*la\left=t\x,t\y,t\x,t\y
+	For i=0 To *la\numlinks
+		t\x=*la\p[i]\x,*la\p[i]\y
+
+		If t\x<*la\left Then *la\left=t\x
+		If t\x>*la\right Then *la\right=t\x
+
+		If t\y<*la\top Then *la\top=t\y
+		If t\y>*la\bottom Then *la\bottom=t\y
+	Next
+End Statement
+
+.draw	;follow mouse to draw a line.
+Statement draw{a,b}
+Shared cell(),numdraw,*lippy(),dbuff,selline(),tline
+If numdraw<#drawmax	;this is __very__ unlikely unless user is
+										 ;being silly...
+;	numdraw+1
+									;allocate memory for longest possible line.
+;	*lippy(numdraw)=AllocMem_(#allocsize,0)
+;	tline.chain=*lippy(numdraw)
+
+	kill=False
+;	If *tline
+		tline.chain\numlinks=-1
+
+		horz=a
+		vert=b
+		oangle.q=50
+		n_link=hitneur{a,b,#pshape}
+		Repeat
+			happen=WaitEvent
+			If happen=$10
+				vert=EMouseY:If vert<#panely Then vert=#panely
+				horz=EMouseX
+				adj=horz-a
+				opp=vert-b
+
+				angle.q=angle{adj,opp}
+
+	;I'm trying to economize a bit on memory here.
+	;We add a new point iff the angle is>.09 rad since the last point
+	;or its been >20 pixels since the last point.
+				If Abs(angle-oangle.q)>.09 OR (Abs(adj)>20) OR (Abs(opp)>20)
+
+					addseg{&tline,a,b}
+					Line a,b,horz,vert,1
+					a=horz:b=vert
+					oangle=angle
+				EndIf
+			EndIf
+		Until MButtons=5 OR tline\numlinks=#linkmax-5
+				 ;								 -5=		-the 2 endpoints, -1 arrow (3 points)
+
+		addseg{&tline,a,b}
+
+		addseg{&tline,horz,vert}
+		Line a,b,horz,vert,1
+
+		n_end=hitneur{horz,vert,#pshape}
+		If (n_link) AND (n_end>0)
+			If cell(n_end)\pa[0]=0
+				kill=glue{n_link,n_end,&tline,0}
+			Else
+				If cell(n_end)\pa[1]=0
+					kill=glue{n_link,n_end,&tline,1}
+				Else
+					kill=True
+				EndIf
+			EndIf
+		Else
+			tline\start=0:tline\finish=0:tline\noff[0]=0:tline\finishi=0
+			If (n_link) OR (n_end)
+				kill=True
+			EndIf
+		EndIf
+		If NOT kill
+			extremes{&tline}
+			*tl.chain=0	;just to calculate length...
+			length.l=(*tl\p[tline\numlinks+1])
+			*tl.chain=##[$FE97](length,0)	;alloc mem for the part of
+																		 ;the newtype that we used.
+
+			If *tl>0
+				numdraw+1
+				selline(numdraw)=0
+				*lippy(numdraw)=*tl
+				For i=0 To length-1 Step4	 ;copy entire newtype...
+					Poke.l *tl+i,Peek.l(&tline+i)
+				Next
+			Else
+				err{"Out of Memory!"}:kill=True
+			EndIf
+		EndIf
+
+		If kill
+			BeepScreen0:lino{&tline,0}
+			If n_end Then pn{n_end}
+			If n_link Then pn{n_link}
+		EndIf
+EndIf
+End Statement
+
+
+Statement desel{}		;deselect any selected items
+Shared selline(),selneuron(),cell(),*lippy(),numdraw,numcells
+For i=1 To numcells
+	If selneuron(i)
+		Box cell(i)\x-10,cell(i)\y-10,cell(i)\x+10,cell(i)\y+10,-1
+		selneuron(i)=0
+	EndIf
+Next
+
+For i=0 To numdraw
+	If selline(i)
+		Box *lippy(i)\left,*lippy(i)\top,*lippy(i)\right,*lippy(i)\bottom,-1
+		selline(i)=0
+	EndIf
+Next
+End Statement
+
+
+.sel		;select from point x,y
+Statement selec{x,y}
+Shared *lippy(),selline(),selneuron(),cell(),numcells,numdraw
+	a=x:b=y
+	Box x,y,a,b,-1
+	q=False
+
+;do rubber-band
+	Repeat
+		Repeat
+		happen= Event&$10
+		If happen Then doit=True
+		If MButtons=5 Then q=True
+		Until (happen=0)
+
+		If doit
+			Box x,y,a,b,-1
+			a=EMouseX:b=EMouseY:If b<#panely Then b=#panely
+			Box x,y,a,b,-1
+			doit=False
+		EndIf
+	Until q
+	Box x,y,a,b,-1
+	If a<x Then Exchange a,x
+	If b<y Then Exchange b,y
+
+	wx=a-x+19:wy=b-y+19
+	x-9:y-9
+
+;select all items inside our rubber-band
+	kl=1
+	While (kl<=numcells)
+		*tc.neuron=cell(kl)
+		If PColl(x,y,wx,wy,*tc\x,*tc\y,1,1) AND ((*tc\what &2)=0)
+			selneuron(kl) BitChg 0
+			Box cell(kl)\x-10,cell(kl)\y-10,cell(kl)\x+10,cell(kl)\y+10,-1
+		EndIf
+		kl+1
+	Wend
+
+	kl=0
+	While (kl<=numdraw)
+		*tl.chain=*lippy(kl)
+		n=(*tl\numlinks) ASR1+1
+		If PColl(x,y,wx,wy,*tl\p[n]\x,*tl\p[n]\y,1,1) OR PColl(x,y,wx,wy,*tl\p[n ASR1]\x,*tl\p[n ASR1]\y,1,1)
+			selline(kl) BitChg 0
+			*la.chain=*lippy(kl)
+			Box *la\left,*la\top,*la\right,*la\bottom,-1
+		EndIf
+		kl+1
+	Wend
+End Statement
+
+.freejunk	;free all line memory
+Statement freejunk{}
+Shared *lippy(),numdraw
+i=0
+While i<=numdraw
+freeline{*lippy(i)}
+i+1
+Wend
+End Statement
+
+
+.new		;clear all arrays, memory, etc
+Statement new{}
+Shared numcells,numdraw,dbuff,cell(),itworks
+desel{}
+For i=1 To numcells
+	cell(i)\what=#whatzilch
+Next
+freejunk{}
+dbuff=0
+numcells=0
+numdraw=-1
+itworks=True
+Boxf 0,#panely,639,511,0
+End Statement
+
+
+.redraw		 ;redraw the screen
+Statement rdraw{}
+Shared numcells,numdraw,cell(),*lippy()
+desel{}
+Boxf 0,#panely,639,511,0
+For i=0 To numdraw
+	If *lippy(i)\start
+		lino{*lippy(i),2}
+	Else
+		lino{*lippy(i),1}
+	EndIf
+Next
+For i=1 To numcells
+	If cell(i)\what<>#whatzilch
+		pn{i}
+	EndIf
+Next
+End Statement
+
+
+.testmo		;Are there any neurons without 2 inputs?
+Statement testmo{}
+Shared cell(),numcells,itworks
+If NOT itworks Then rdraw{}
+itworks=True
+For loop=1 To numcells
+	If cell(loop)\what=#whata
+		If cell(loop)\pa[0]=0 OR cell(loop)\pa[1]=0
+			itworks=False		;draw a box round any bad neurons
+			Box cell(loop)\x-12,cell(loop)\y-12,cell(loop)\x+12,cell(loop)\y+12,1
+		EndIf
+	EndIf
+Next
+End Statement
+
+
+.runcircuit	 ;continually run the net.
+Statement runcircuit{}
+Shared quit
+
+bored=False
+Repeat
+	VWait 129-(HPropPot(0,#slider) ASL7)
+	moment{}
+
+	Repeat
+		happen=Event
+		If happen&$40				 ;v-stop?
+			If GadgetHit=#startbutton Then bored=True
+		Else
+			If happen&$100	 ;quit menu item?
+				If ItemHit=4 Then quit=True:bored=True
+			Else
+				If happen &$8 AND EMouseY>#panely		 ;allow toggling
+					flip{hitneur{EMouseX,EMouseY,#pshape}}:waitup{}
+				EndIf
+			EndIf
+		EndIf
+	Until happen=0
+Until bored
+End Statement
+
+CNIF #debug=0
+	SetErr										;Serious errors...
+		Select err
+		Case 1
+			err{"Can't find 'bnet_images' file."}
+			End						;Can't do much without the images, so we end.
+		Case 2
+			err{"Error in file!"}
+			CloseFile 0
+			new{}											 ;the rest of these file errors,
+			Goto main									 ;we can hopefully survive OK.
+		Case 3
+			err{"Error writing file!"}
+			CloseFile 0
+			Goto main
+		Case 4
+			err{"Error writing iff!"}
+			Gosub rdgad
+			Goto main
+		Default
+														;This shouldn't happen (often ;-).
+			err{"Bizarre Error!"} ;We must end, cos
+			End									 ;we have no idea what happened!
+		End Select
+	End SetErr
+CEND
+
+
+Gosub initscreen
+.main
+err=0
+Repeat
+happen=WaitEvent
+If EMouseY<#panely	 ;did the event occur on the control panel?
+	Select happen
+	Case $40					 ;gadget pushed.
+		If GadgetHit<=#inpu
+			desel{}
+		EndIf
+
+		Select GadgetHit	 ;what shall we do about it?
+		Case #startbutton
+			testmo{}
+			runcircuit{}
+		Case #single
+			testmo{}
+			moment{}
+		Case #KILL
+			kill{}
+		Case #rdraw
+			rdraw{}
+		End Select
+	Case $100					 ;menu item hit...
+		Select ItemHit
+		Case 4
+			quit=True
+		Case 0
+			new{}
+		Case 1
+			Goto load
+		Case 2
+			Goto save
+		Case 3
+			Goto saveiff
+		End Select
+	End Select
+Else								;time to edit main screen
+	Select happen
+	Case 8
+		Select SetGadgetStatus(0,1)
+		Case 2
+			draw{EMouseX,EMouseY}
+		Case 0
+			addneuron{EMouseX,EMouseY,#whata}
+			waitup{}
+		Case 1
+			flip{hitneur{EMouseX,EMouseY,#pshape}}
+			waitup{}
+		Case #selec
+			selec{EMouseX,EMouseY}
+		Case #inpu
+			addneuron{EMouseX,EMouseY,#whati}
+			waitup{}
+		End Select
+	End Select
+EndIf
+
+Until quit
+freejunk{}
+End
+
+.initscreen						;set up screen, window, gadgets...
+DefaultIDCMP $578
+MenuTitle 0,0,"PROJECT"
+MenuItem 0,0,0,0,"NEW		 "
+MenuItem 0,0,0,1,"LOAD"
+MenuItem 0,0,0,2,"SAVE"
+MenuItem 0,0,0,3,"SAVE IFF"
+MenuItem 0,0,0,4,"QUIT"
+
+
+TextGadget 0,455,55,0,5," START | STOP! "
+TextGadget 0,535,55,0,9,"STEP"
+
+PropGadget 0,455,29,64,6,172,19
+SetHProp 0,6,.9,.15
+
+TextGadget 0,173,24,0,#KILL,"KILL"
+TextGadget 0,173,55,0,#rdraw,"ReDraw"
+
+Enable 1
+TextGadget 0,12,24,$201,0,"Place"
+TextGadget 0,12,55,$201,1,"Toggle"
+TextGadget 0,76,55,$201,2,"Draw/Join"
+
+TextGadget 0,12,39,$201,#inpu,"INPUT"
+TextGadget 0,76,24,$201,#selec,"SELECT"
+
+Enable 2
+TextGadget 0,273,55,$201,#atype,"A-type"
+TextGadget 0,339,55,$201,#atype+1,"B-type"
+
+Borders 0,0,On
+Borders 0,#atype,On
+
+Screen 0,0,0,640,512,2,-32764,"BNET												by Bruce Webster.",1,2
+Green 0,5,6,7:Green 1,9,9,10:Green 2,0,0,0:Green 3,0,10,11
+
+;B&W palette for save-iff
+StopCycle 1,0,15,15,15:StopCycle 1,1,0,0,0:StopCycle 1,2,0,0,0:StopCycle 1,3,15,15,15
+
+ScreensBitMap 0,0
+Window 0,0,0,640,512,$1900,"",3,2,0
+
+;useful error button
+TextGadget 1,93,60,0,16,"How sad."
+
+err=1
+LoadShapes #whati,"bnet_images"
+err=0
+
+Gosub text
+
+DecodeShapes #whati
+DecodeShapes #whati |1
+For i=#whata To #whata |3
+DecodeShapes i
+Next
+
+WbToScreen 1
+
+numdraw=-1
+numcells=#cellmax:new{}
+quit=False
+SetMenu 0
+Return
+
+.getname				;use ASL filerequestor
+##[$FFB5]	;its a bit hard to read on the interlace screen
+Use Screen 1		;(depending on your monitor) - so open on WB.
+name$= ASLFileRequest$(q$+"					",pa$,fi$,("#?"+ex$))
+##[$FFB4]
+Use Screen 0
+Use Window 0
+FlushEvents
+Return
+
+.load
+q$="Select file to LOAD"
+ex$=".net"
+Gosub getname
+If name$>""
+	If ##[$BE15](name$)
+		If OpenFile(0,name$)
+			FileInput 0
+			If (Inkey$(4))="BNET"		;our files all start with "BNET"
+				err=2
+				new{}
+				numcells=Cvi(Inkey$(2))
+				numdraw=Cvi(Inkey$(2))
+				dbuff=Asc(Inkey$)
+				For i=1 To numcells
+					*tc.neuron=cell(i)
+					*tc\pa[0]=Cvi(Inkey$(2))
+					*tc\pa[1]=Cvi(Inkey$(2))
+					*tc\v[0]=Asc(Inkey$)
+					*tc\v[1]=Asc(Inkey$)
+					*tc\x=Cvi(Inkey$(2))
+					*tc\y=Cvi(Inkey$(2))
+					*tc\what=Asc(Inkey$)
+				Next
+				i=0: While i<= numdraw
+					*tl.chain=0				 ;this is just so we can calculate this
+					temp=Cvi(Inkey$(2)) ;	 length. (We don't poke into 0!)
+					length.l=(&*tl\p[temp+1]) ;	<-'
+
+					*lippy(i)=##[$FE97](length,0) ;allocate #length bytes
+																				;to hold #temp points
+
+					If *lippy(i)>0
+						*tl.chain=*lippy(i)
+						*tl\numlinks=temp
+
+						*tl\left=Cvi(Inkey$(2))
+						*tl\top=Cvi(Inkey$(2))
+						*tl\right=Cvi(Inkey$(2))
+						*tl\bottom=Cvi(Inkey$(2))
+
+						*tl\noff[0]=Cvi(Inkey$(2))
+						*tl\noff[1]=Cvi(Inkey$(2))
+						*tl\noff[2]=Cvi(Inkey$(2))
+
+						*tl\start=Cvi(Inkey$(2))
+						*tl\finish=Cvi(Inkey$(2))
+						*tl\finishi=Cvi(Inkey$(2))
+
+						For l=0 To *tl\numlinks
+							*tl\p[l]\x=Cvi(Inkey$(2))
+							*tl\p[l]\y=Cvi(Inkey$(2))
+						Next
+					Else
+						err{"Out of Memory!"}
+						numdraw=i-1:new{}:Goto flail
+					EndIf
+					i+1
+				Wend
+				err=0
+			Else
+				err{"Not a BNET file!"}
+			EndIf
+flail
+			WindowInput 0
+			CloseFile 0
+			rdraw{}
+		EndIf
+	Else
+		err{"Can't find file."}
+	EndIf
+EndIf
+Goto main
+;Yes, gotos are horrible, but I didn't want to get into trouble
+;if there was an error that caused execution to jump to the seterr
+;routine.	A procedure/gosub would leave something on the stack.
+
+
+.save
+q$="Enter SAVE file name"
+ex$=".net"
+Gosub getname
+
+If name$>""
+	If Right$(name$,4)<>ex$ Then name$+ex$:fi$+ex$
+	If OpenFile(0,name$)
+		FileOutput 0
+		err=3
+		Print "BNET"
+
+		Print Mki$(numcells)
+		Print Mki$(numdraw)
+		Print Chr$(dbuff)
+		For i=1 To numcells
+			*tc.neuron=cell(i)
+			Print Mki$(*tc\pa[0])
+			Print Mki$(*tc\pa[1])
+			Print Chr$(*tc\v[0])
+			Print Chr$(*tc\v[1])
+			Print Mki$(*tc\x)
+			Print Mki$(*tc\y)
+			Print Chr$(*tc\what)
+		Next
+
+		For i=0 To numdraw
+			*tl.chain=*lippy(i)
+			Print Mki$(*tl\numlinks)
+			Print Mki$(*tl\left)
+			Print Mki$(*tl\top)
+			Print Mki$(*tl\right)
+			Print Mki$(*tl\bottom)
+
+			Print Mki$(*tl\noff[0])
+			Print Mki$(*tl\noff[1])
+			Print Mki$(*tl\noff[2])
+
+			Print Mki$(*tl\start)
+			Print Mki$(*tl\finish)
+			Print Mki$(*tl\finishi)
+
+			For l=0 To *tl\numlinks
+				Print Mki$(*tl\p[l]\x)
+				Print Mki$(*tl\p[l]\y)
+			Next
+		Next
+		err=0
+		WindowOutput 0
+		CloseFile 0
+	Else
+		err{"Can't create file."}
+	EndIf
+EndIf
+Goto main
+
+.saveiff
+q$="Enter IFF SAVE name"
+ex$=".iff"
+oname$=fi$
+
+If Right$(fi$,4)=".net"
+	fi$=Left$(fi$,Len(fi$)-4)+ex$
+Else
+	If Right$(fi$,4)<>ex$
+		fi$+ex$
+	EndIf
+EndIf
+Gosub getname
+fi$=oname$
+
+If name$>""
+	Boxf 0,0,639,#panely-1,0
+	WColour 2
+	WLocate 10,25:Print fi$
+	If Right$(name$,4)<>ex$ Then name$+ex$
+	err=4
+	SaveBitmap 0,name$,1
+	err=0
+	Boxf 0,0,639,#panely-1,0
+	Gosub rdgad
+EndIf
+Goto main
+
+
+.rdgad			;redraw all the gadgets
+For i=0 To 11
+Redraw 0,i
+Next
+
+.text			 ;(re)print the control-panel text
+hour=8
+BlitColl 8,416,15
+WLocate 7,13
+WColour 3,0
+Print "Neurons:"
+WLocate 273,25
+Print "Connection"
+WLocate 274,37
+Print "Type:"
+WLocate 456,15
+Print "Moment Speed"
+
+Line 0,11,0,#panely-2,1
+Line 639,11,639,#panely-2,2
+Line 1,#panely-1,639,#panely-1,2
+Return

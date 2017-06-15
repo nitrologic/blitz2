@@ -1,0 +1,206 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/BUZZBAR/buzzbar.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/BUZZBAR/buzzbar.bb
+Include qfuncs.bb
+
+NEWTYPE .ship
+	x.w:y:rot:thrust:rspeed:id:frame:xv:yv:px:py:upd
+End NEWTYPE
+
+Dim List nme.ship(50)		 ;enemy
+Dim List bul.ship(50)		 ;bullets
+Dim List bng.ship(50)		 ;explosions
+
+Dim qsin.q(1023)			 ;look up tables
+Dim qcos.q(1023)
+
+me.ship\x=0,0,0,0,0,0,0
+
+BitMap 0,320+64,256+64,3	;doublebuffered display
+BitMap 1,320+64,256+64,3
+BitMap 2,832,768,3				;background
+
+LoadShapes 0,"ships.shapes"
+LoadShapes 64,"bombs.shapes"
+LoadShapes 80,"shards.shapes"
+
+LoadBitMap 2,"moon.iff"
+Use BitMap 2
+Scroll 0,0,320,512,512,0
+Scroll 0,0,832,256,0,512
+Use BitMap 0
+
+LoadPalette 0,"ships.iff"
+LoadPalette 0,"moon.iff",8
+
+Queue 0,100
+Queue 1,100
+
+BLITZ										;setup blitz display
+Mouse On
+BlitzKeys On:BitMapInput
+Slice 0,44,320,256,$fffa,6,8,32,320+64,832
+Use SetCycle 0
+
+Gosub setupsincos
+Gosub setupnme
+Gosub setupdisplay
+
+While NOT RawStatus($45)			 ;main loop
+	VWait
+	ShowF db,32,32
+	ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
+	db=1-db
+	Use BitMap db
+	UnQueue db
+	Gosub drawnme
+	Gosub drawbullets
+	Gosub moveship
+	Gosub moveexplosions
+;	MOVE #$fff,$dff180
+Wend
+
+End
+
+.setupdisplay
+	Return
+
+Macro ssin qsin((`1 LSR 6)&1023):End Macro
+Macro ccos qcos((`1 LSR 6)&1023):End Macro
+Macro onscreen PColl(`1,`2,1,1,12,12,320+32,256+32):End Macro
+
+#xcntr=160+32
+#ycntr=100+32
+
+.moveship
+	If RawStatus($31) OR Joyx(1)=-1 Then me\rot-1400
+	If RawStatus($32) OR Joyx(1)=1 Then me\rot+1400
+	me\rot+(MouseXSpeed*200)
+	If RawStatus($38) OR Joyb(0)&2 OR Joyy(1)<>0		;thrust
+		me\xv+!ssin{me\rot} ASL 4
+		me\yv-!ccos{me\rot} ASL 4
+	EndIf
+	If RawStatus($39) OR Joyb(0)&1 OR Joyb(1)&1			;fire
+		If rl=0
+			If AddItem(bul())
+				bul()\x=me\x,me\y,me\rot
+				bul()\xv=!ssin{me\rot} ASL 8+me\xv
+				bul()\yv=-!ccos{me\rot} ASL 8+me\yv
+				rl=8
+				me\xv-!ssin{me\rot} ASL 5				 ;reverse thrust
+				me\yv+!ccos{me\rot} ASL 5
+			EndIf
+		EndIf
+	Else
+		rl=0
+	EndIf
+	me\xv-me\xv ASR 5	 ;drag
+	me\yv-me\yv ASR 5
+	me\x+me\xv
+	me\y+me\yv
+	QBlit db,((me\rot+2048) LSR 12)&15,#xcntr,#ycntr
+	If rl>0 Then rl-1
+	Return
+
+.moveexplosions
+	ResetList bng()
+	USEPATH bng()
+	While NextItem(bng())
+		\rot-1
+		If \rot>-1
+			\x+\xv:\y+\yv
+			px=((\x-me\x) ASR 6)+#xcntr
+			py=((\y-me\y) ASR 6)+#ycntr
+			If !onscreen{px,py}
+				QBlit db,80+\rot/4,px,py
+			EndIf
+		Else
+			KillItem bng()
+		EndIf
+	Wend
+	Return
+
+.drawnme
+	ResetList nme()
+	USEPATH nme()
+	While NextItem(nme())
+		\upd-1
+		If \upd<0
+			\upd=5
+			ang.w=32768-angle{me\x-\x,me\y-\y}-\rot
+			s=Sgn(ang):ang=Abs(ang)
+			If ang>\rspeed Then ang=\rspeed
+			\rot+s*ang									 ;rotate towards me
+			\xv+!ssin{\rot} * \thrust	;thrust
+			\yv-!ccos{\rot} * \thrust
+			\xv-\xv ASR 6													;drag
+			\yv-\yv ASR 6
+		EndIf
+		\x+\xv																 ;speed
+		\y+\yv
+		\px=((\x-me\x) ASR 6)+#xcntr
+		\py=((\y-me\y) ASR 6)+#ycntr
+		If !onscreen{\px,\py}
+			QBlit db,(\rot LSR 12)&15+\frame,\px,\py
+		EndIf
+	Wend
+	Return
+
+.drawbullets
+	ResetList bul()
+	USEPATH bul()
+	While NextItem(bul())
+		\x+\xv																 ;speed
+		\y+\yv
+		px=((\x-me\x) ASR 6)+#xcntr
+		py=((\y-me\y) ASR 6)+#ycntr
+		If !onscreen{px,py}
+			If ##[$CB09](64,px,py)
+				ResetList nme()
+				While NextItem(nme())
+					If SpritesHit(16,nme()\px,nme()\py,64,px,py)
+						For i=1 To 5
+							If AddItem(bng())
+								bng()\x=\x,\y,31
+								bng()\xv=nme()\xv/2+Rnd(64)-32
+								bng()\yv=nme()\yv/2+Rnd(64)-32
+							EndIf
+						Next
+						KillItem nme()
+				 EndIf
+				Wend
+			EndIf
+			QBlit db,64,px,py
+		Else
+			KillItem bul()
+		EndIf
+	Wend
+	Return
+
+.setupships:
+	For i=1 To 15
+		CopyShape 0,i			;generate rotations
+		Rotate i,i/16
+		DecodeShapes i
+	Next
+	Return
+
+.setupnme:
+	USEPATH nme()
+	For i=1 To 16
+		AddItem nme()
+		\x=Rnd(65535),Rnd(65535),Rnd(65535)
+		\id=Rnd(2)
+		Select \id
+			Case 0:\thrust=32,16384:\frame=16
+			Case 1:\thrust=20,8192:\frame=32
+		End Select
+		\upd=Rnd(6)
+	Next
+	Return
+
+.setupsincos
+	For i=0 To 1023
+		r.f=i*Pi/512
+		qsin(i)=HSin(r)
+		qcos(i)=HCos(r)
+	Next
+	Return

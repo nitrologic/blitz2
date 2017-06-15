@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MouseX.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MouseX.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MouseX.bb
+
+; 
+; pretty lines program example
+; 
+BLITZ                ;into blitz mode 
+BitMap 0,320,DispHeight,3      ;make a bitmap 
+Slice 0,44,3             ;and a slice 
+Show 0                ;show bitmap in slice
+While NOT Joyb(0)             ;while LMB not pushed...
+ VWait                  ;wait for vertical blank
+ Line 160,100,MouseX,MouseY,Rnd(7)+1   ;pretty lines 
+Wend
+

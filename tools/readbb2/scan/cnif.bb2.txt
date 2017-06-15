@@ -1,0 +1,7 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/cnif.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/cnif.bb2
+
+InitCopList 0,44,200,0,0,0,0
+
+CNIF 0=0
+
+CEND

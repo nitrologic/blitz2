@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MouseWait.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MouseWait.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MouseWait.bb
+
+; 
+; mousewait program example
+; 
+
+a=10
+NPrint "Click mouse button, then type 'NPrint a'" 
+MouseWait 
+Stop
+
+
+
+

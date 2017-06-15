@@ -1,0 +1,975 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dev/joy.bb2
+
+JMP start
+
+Macro initjoytrans
+BSR joytrans+32
+End Macro
+
+Macro finitjoytrans
+BSR joytrans+36
+End Macro
+
+Macro initjoyregs
+BSR joytrans+40
+End Macro
+
+Macro writememory
+BSR joytrans+44
+End Macro
+
+Macro readmemory
+BSR joytrans+48
+End Macro
+
+Macro writelong
+BSR joytrans+52
+End Macro
+
+Macro readlong
+BSR joytrans+56
+End Macro
+
+joytrans
+IncBin joytrans
+
+#forbid=-132
+#permit=-138
+
+#oldopenlibrary=-408
+#closelibrary=-414
+#putmsg=-366
+#getmsg=-372
+#replymsg=-378
+#adddevice=-432
+#openresource=-498
+#allocsignal=-330
+#signal=-324
+#waitsignal=-318
+#freesignal=-336
+#opendevice=-444
+#closedevice=-450
+#doio=-456
+#sendio=-462
+#checkio=-468
+#waitio=-474
+#abortio=-480
+#addintserver=-168
+#remintserver=-174
+;
+#write=-48
+#output=-60
+;
+#waittof=-270
+;
+#adddosnode=-150
+#makedosnode=-144
+;
+#allocpotbits=-6
+#freepotbits=-12
+#writepotgo=-18
+;
+#ioerr_openfail=-1
+#ioerr_aborted=-2
+#ioerr_nocmd=-3
+#ioerr_badlength=-4
+;
+#io_device=20
+#io_unit=24
+#io_command=28
+#io_flags=30
+#io_error=31
+#io_actual=32
+#io_length=36
+#io_data=40
+#io_offset=44
+;
+#iotd_count=48
+#iotd_seclabel=52
+;
+;------------------- macros required by joy ----------------------;
+
+Macro intsoff
+MOVE #$4000,$dff09a:ADDQ.b #1,$126(a6)
+End Macro
+
+Macro intson
+SUBQ.b #1,$126(a6):BGE 'intson`@:MOVE #$c000,$dff09a
+'intson`@
+End Macro
+
+;------------------- NOW FOR MY DEVICE! -----------------;
+
+devstart
+JMP joy_abortio
+JMP joy_beginio
+JMP joy_extfunc
+JMP joy_expunge
+JMP joy_close
+JMP joy_open
+joydevice
+Dc.l 0,0
+Dc.b 3,0
+Dc.l joydevname
+Dc.b 4,0
+Dc joydevice-devstart,devend-joydevice
+version:Dc 1,0		;version,rev
+Dc.l 0,0
+Dc 0
+
+joyopen:Dc 0		;only one joy.device at a time!
+
+.joy_open
+MOVE.b #7,8(a1):SUBQ #1,joyopen:BNE open_err
+;
+MOVEM.l a0-a2/d0-d1/a6,-(a7)
+LEA task0info(pc),a2:BSR inittaskinfo
+MOVEM.l (a7)+,a0-a2/d0-d1/a6
+MOVEQ #0,d0:MOVE.b d0,io_error(a1):RTS
+;
+open_err
+ADDQ #1,joyopen:MOVEQ #-1,d0:MOVE.b d0,io_error(a1):RTS
+
+joy_close
+MOVEQ #0,d0:RTS
+
+joy_expunge
+MOVEQ #0,d0:RTS
+
+joy_extfunc
+MOVEQ #0,d0:RTS
+
+joy_abortio
+MOVEQ #ioerr_nocmd,d0:MOVE.b d0,io_error(a1):RTS
+
+commtable
+Dc.l joy_nocmd				;0	what?
+Dc.l joy_reset				;1	reset
+Dc.l joy_read				 ;2	read
+Dc.l joy_write				;3	write
+Dc.l joy_update			 ;4	update
+Dc.l joy_clear				;5	declare invalid
+Dc.l joy_stopio			 ;6	stop io
+Dc.l joy_startio			;7	start io
+Dc.l joy_flush				;8	flush!
+Dc.l joy_motor				;9	motor
+Dc.l joy_seek				 ;10 seek
+Dc.l joy_format			 ;11 format
+Dc.l joy_remove			 ;12 remove int
+Dc.l joy_changenum		;13 changenum
+Dc.l joy_changestatus ;14 whether disk in drive!
+Dc.l joy_protstatus	 ;15 test writeprotect
+Dc.l joy_rawread			;16 raw read
+Dc.l joy_rawwrite		 ;17 raw write
+Dc.l joy_getdrivetype ;18 determine drive type
+Dc.l joy_getnumtracks ;19 number of tracks
+Dc.l joy_addchangeint ;20 add disk change interupt
+Dc.l joy_remchangeint ;21 remove disk change interupt
+
+.joy_beginio
+;
+MOVE.b #5,8(a1):MOVE io_command(a1),d0:CMP #21,d0:BHI joy_nocmd
+;
+MOVEM.l a0-a3/a6,-(a7)
+;
+MOVE.l a1,a3:LEA task0info(pc),a2:MOVE.l 4,a6
+;
+MOVE io_command(a3),d0:LSL #2,d0:LEA commtable(pc),a0
+MOVE.l 0(a0,d0),a0:JSR (a0)
+;
+MOVEM.l (a7)+,a0-a3
+;
+BTST #0,io_flags(a1):BNE 'quick:JSR replymsg(a6)
+'quick:MOVE.l (a7)+,a6:RTS
+
+iopacket
+Dc.l 0			;for linking...
+Dc.b 0,1		;from, to
+Dc 0				;don't free packet or data
+Dc.l iodata
+Dc.l 10
+
+iodata
+Ds.b 10
+
+putioreq	;tell other machine what's happening!
+;
+LEA iodata(pc),a0:MOVE io_command(a3),(a0)+
+MOVE.l io_length(a3),(a0)+:MOVE.l io_offset(a3),(a0)
+LEA iopacket(pc),a1:BRA putpacket
+
+.joy_read
+;
+MOVE.l io_data(a3),20(a2):BSR putioreq
+BSR getpacket:BSR freepacket
+;
+.joy_getreturn
+;
+BSR getpacket
+MOVE.l 8(a1),a0:MOVE.b 1(a0),io_error(a3):MOVE.l 2(a0),io_actual(a3)
+BRA freepacket
+
+.joy_format
+.joy_write
+;
+BSR putioreq
+MOVE.l io_data(a3),a0:MOVE.l io_length(a3),d0:MOVEQ #1,d1
+LEA writepacket(pc),a1
+MOVE.l io_data(a3),8(a1)
+MOVE.l io_length(a3),12(a1)
+BSR putpacket:BRA joy_getreturn
+
+writepacket
+Dc.l 0
+Dc.b 0,1
+Dc 0
+Dc.l 0
+Dc.l 0
+
+joy_commerr			;0	what?
+joy_stopio			 ;6	stop io
+joy_startio			;7	start io
+joy_rawread
+joy_rawwrite
+joy_remove
+joy_addchangeint
+joy_remchangeint
+joy_nocmd
+;
+MOVE.b #ioerr_nocmd,io_error(a1):RTS
+
+joy_seek				 ;10 seek
+joy_changenum		;13 changenum
+joy_changestatus ;14 whether disk in drive!
+joy_protstatus	 ;15 test writeprotect
+joy_getdrivetype ;18 determine drive type
+joy_getnumtracks ;19 number of tracks
+;
+CLR.b io_error(a3):CLR.l io_actual(a3):RTS
+
+joy_reset				;1	reset
+joy_update			 ;4	update
+joy_clear				;5	declare invalid
+joy_flush				;8	flush!
+joy_motor				;9	motor
+;
+BSR putioreq:BRA joy_getreturn
+
+.devend
+
+joydevname:Dc.b "joy.device",0:Event
+
+.initdevice:MOVE.l 4,a6
+LEA joydevice(pc),a1:JSR adddevice(a6)
+LEA exname(pc),a1:JSR oldopenlibrary(a6):MOVE.l d0,a6
+MOVE.l dosnode(pc),a0:JSR makedosnode(a6):MOVE.l d0,a0
+MOVEQ #-5,d0:MOVEQ #0,d1:JSR adddosnode(a6)
+MOVE.l a6,a1:MOVE.l 4,a6:JMP closelibrary(a6)
+
+dosnode:Dc.l 0
+
+;******************* END OF DEVICE *******************
+.
+dosname:Dc.b "dos.library",0:Event
+dos:Dc.l 0
+gfxname:Dc.b "graphics.library",0:Event
+gfx:Dc.l 0
+exname:Dc.b "expansion.library",0:Event
+
+devname:Dc.b "JOY",0:Event
+drivername:Dc.b "joy.device",0:Event
+
+mess0:Dc.b 10,"Attempting to link...",0
+mess1:Dc.b "Link successful!",0
+mess2:Dc.b "Tasks going...everything seems OK!",0
+
+err1:Dc.b "Other machine can't find device!",0
+err2:Dc.b "I Can't find device!",0
+err3:Dc.b "Can't find DeviceProc!",0
+err4:Dc.b "Can't open device!",0
+err5:Dc.b "Can't allocate potgo bits!",0
+
+Event
+
+usedevunit:Dc.l 0
+usedev:Dc.l 0
+
+clidevname:Dcb.b 64,0	 ;EG: DF0,0
+usedevmess:Dc.b "Sharing device "
+usedevname:Dcb.b 64,0	 ;EG: trackdisk.device,0
+
+Event
+
+sendinfodone:Dc 0
+recinfodone:Dc 0
+
+;A packet struct:
+;
+;00.l : next (for list)
+;04.w : id
+;06.w : flags
+;08.l : data		;bit 0 = 1 to free data/length when free-ing packet
+								;bit 1 = 1 to free packet struct ""	""			 ""
+								;bit 2 = 1 to signal task when packet sent
+;12.l : length
+
+;OK, our struct for each task is like this:
+;
+;00.l : first
+;04.l : last
+;08.l : sigmask ;for read
+;12.l : task		;""	 ""
+;16.l : sigbit
+;20.l : mem to read into...
+;24.l : sigmask ;for write
+;28.l : task		;""	 ""
+;32.l : sigbit for write
+
+;--- 36 ---
+
+tasktable:Dc.l task0info,task1info,task2info,task3info,task4info,task5info
+;
+Dc.l 0
+
+task0info:Dcb.b 36,0
+task1info:Dcb.b 36,0
+task2info:Dcb.b 36,0
+task3info:Dcb.b 36,0
+task4info:Dcb.b 36,0
+task5info:Dcb.b 36,0
+
+.
+.start
+;-------------------- ENTRY POINT ---------------------;
+
+;get device name we want to access from CLI
+;
+MOVE.l 4,a6:LEA clidevname(pc),a1
+;
+'loop:MOVE.b (a0)+,d0:CMP.b #96,d0:BCS 'skip:AND #$df,d0
+'skip:MOVE.b d0,(a1)+:CMP.b #10,-1(a1):BNE 'loop
+CLR.b -(a1):CMP.b #":",-(a1):BNE 'notc:CLR.b (a1):'notc
+
+;open some libs
+;
+LEA dosname(pc),a1:JSR oldopenlibrary(a6):MOVE.l d0,dos
+LEA gfxname(pc),a1:JSR oldopenlibrary(a6):MOVE.l d0,gfx
+
+;allocate potgo stuff
+;
+!initjoytrans:MOVE.l 4,a6:BEQ 'aok
+LEA err5(pc),a0:BRA printmess
+'aok:LEA mess0(pc),a0:JSR printmess
+
+;see if other machine is already online and trying to send to us
+;
+BTST #1,$dff00c:BNE recinfo
+
+;nothing incoming...we must be first online
+;
+.sendinfo
+MOVE sendinfodone(pc),d0:BNE linkdone:NOT sendinfodone
+;
+;OK, scan list for usedevname, and send disk size table...
+;
+MOVE.l dos(pc),a0:MOVE.l 34(a0),a0
+MOVE.l 24(a0),a0:ADD.l a0,a0:ADD.l a0,a0
+MOVE.l 4(a0),d0
+;
+scandevs
+LSL.l #2,d0:MOVE.l d0,a0:MOVE.l 40(a0),a1:ADD.l a1,a1:ADD.l a1,a1
+MOVE.b (a1)+,d0:BEQ 'notme:EXT d0:SUBQ #1,d0:LEA clidevname(pc),a6
+'loop:MOVE.b (a1)+,d1:CMP.b #96,d1:BCS 'aok:AND #$df,d1
+'aok:CMP.b (a6)+,d1:DBNE d0,'loop:BEQ 'found
+'notme:MOVE.l (a0),d0:BNE scandevs
+;
+!initjoyregs:MOVEQ #0,d0:!writelong
+LEA err2(pc),a0:BSR printmess:!finitjoytrans:RTS
+;
+'found	;a0=entry
+TST.b (a6):BNE 'notme
+MOVE.l 28(a0),a0:ADD.l a0,a0:ADD.l a0,a0
+MOVE.l (a0)+,usedevunit:MOVE.l (a0)+,a1:ADD.l a1,a1:ADD.l a1,a1
+MOVE.b (a1)+,d0:EXT d0:SUBQ #1,d0:LEA usedevname(pc),a6
+'loop3:MOVE.b (a1)+,(a6)+:DBF d0,'loop3:CLR.b (a6)
+MOVE.l (a0),a0:ADD.l a0,a0:ADD.l a0,a0
+;
+;a0=disk size stuff to send...
+;
+!initjoyregs
+MOVE.l (a0),d0:!writelong	;how many!
+MOVE.l (a0)+,d0:LSL.l #2,d0:!writememory:MOVE.l 4,a6
+;
+LEA usedevmess(pc),a0:BSR printmess
+;
+.recinfo
+MOVE recinfodone(pc),d0:BNE linkdone:NOT recinfodone
+;
+!initjoyregs:!readlong:MOVE.l 4,a6:MOVE.l d0,d7:BNE 'tok
+;
+LEA err1(pc),a0:BSR printmess:!finitjoytrans:RTS
+;
+'tok:ADDQ.l #5,d0:LSL.l #2,d0:MOVE.l #$10001,d1
+JSR -198(a6):MOVE.l d0,dosnode:MOVE.l d0,a0
+MOVE.l #devname,(a0)+:MOVE.l #drivername,(a0)+:ADDQ #8,a0
+MOVE.l d7,(a0)+:MOVE.l d7,d0:LSL.l #2,d0
+;
+!initjoyregs:!readmemory:MOVE.l 4,a6
+;
+BRA sendinfo
+;
+linkdone
+LEA mess1(pc),a0:BSR printmess:MOVE.l 4,a6
+;
+;OK, put JOY: online!
+;
+CLR joyopen:JSR initdevice
+
+;all right, now for the tricky bit!
+;
+;we have 5 tasks...
+;
+;joytask (filesys)	: id = 0	set up on opendevice
+;devtask (eg scsi.) : id = 1
+;inptask (input ev) : id = 2
+;readtask					 : id = 3
+;writetask					: id = 4
+;us - diskchange -	: id = 5
+;
+LEA task5info(pc),a2:BSR inittaskinfo ;us (diskchange task!)
+
+LEA devtask(pc),a0:MOVE.l #1024,d0:MOVEQ #5,d1:BSR inittask
+
+LEA readtask(pc),a0:MOVE.l #1024,d0:MOVEQ #5,d1:BSR inittask
+
+LEA writetask(pc),a0:MOVE.l #1024,d0:MOVEQ #5,d1:BSR inittask
+
+LEA inptask(pc),a0:MOVE.l #1024,d0:MOVEQ #0,d1:BSR inittask
+
+;Wait For other tasks To Get their shit together!
+
+'twait0
+MOVE.l 8(a2),d0:JSR waitsignal(a6)
+LEA tasktable+4(pc),a0:MOVEQ #3,d0	;check 4 tasks
+'twait:MOVE.l (a0)+,a1:CMP.l 4(a1),a1:DBNE d0,'twait:BNE 'twait0
+
+setupdone
+;
+LEA clidevname(pc),a0
+'f0:TST.b (a0)+:BNE 'f0:CLR.b (a0):MOVE.b #":",-(a0)
+;
+MOVE #1,joyopen:LEA mess2(pc),a0:BSR printmess
+;
+'main
+MOVE.l 8(a2),d0:JSR waitsignal(a6):MOVE.l dos(pc),a6
+;
+;to diskchange, we inhibit then un-inhibit
+;
+MOVE.l #clidevname,d1:JSR -174(a6):TST.l d0:BEQ 'done:MOVE.l d0,a3
+;
+MOVE.l a3,d1:MOVEQ #$1f,d2:MOVEQ #-1,d3
+MOVEQ #0,d4:MOVEQ #0,d5:MOVEQ #0,d6:JSR -240(a6)	;dopkt!
+MOVE.l a3,d1:MOVEQ #0,d3:JSR -240(a6)
+;
+'done:MOVE.l 4,a6:BRA 'main
+
+;--------------------- END OF THAT BIT -------------------------;
+.subs
+
+cr:Dc $a00
+printmess
+BSR printmess_:LEA cr(pc),a0
+;
+printmess_	;message in a0!
+;
+MOVEM.l d2-d3/a6,-(a7)
+MOVE.l a0,d2:MOVEQ #-1,d3
+'loop:ADDQ.l #1,d3:TST.b (a0)+:BNE 'loop
+MOVE.l dos(pc),a6:JSR output(a6)
+MOVE.l d0,d1:JSR write(a6)
+MOVEM.l (a7)+,d2-d3/a6:RTS
+
+.inittaskinfo	;a2=info
+;
+MOVE.l 4,a6:CLR.l (a2):CLR.l 20(a2):MOVE.l a2,4(a2)
+;
+MOVEQ #-1,d0:JSR allocsignal(a6)
+MOVE.b d0,16(a2):MOVEQ #0,d1:BSET d0,d1:MOVE.l d1,8(a2)
+MOVE.l 276(a6),12(a2)
+;
+MOVEQ #-1,d0:JSR allocsignal(a6)
+MOVE.b d0,32(a2):MOVEQ #0,d1:BSET d0,d1:MOVE.l d1,24(a2)
+MOVE.l 276(a6),28(a2)
+;
+RTS
+
+.
+.devtask	;task to handle requests from joy on other
+					;machine to scsi.device on us...
+
+;
+;OK, first we open device other machine wants to use...
+;
+LEA usedevname(pc),a0:MOVE.l usedevunit(pc),d0:MOVEQ #0,d1
+JSR _opendevice:MOVE.l d0,usedev
+;
+LEA task1info(pc),a2:BSR inittaskinfo
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6)	;we're ready!
+;
+MOVE.l usedev(pc),a3
+;
+'main:BSR getpacket
+;
+MOVE.l 8(a1),a0:MOVE (a0)+,io_command(a3)
+MOVE.l (a0)+,io_length(a3):MOVE.l (a0),io_offset(a3)
+;
+BSR freepacket
+;
+MOVE io_command(a3),d0:LSL #2,d0:LEA inttable(pc),a0
+MOVE.l 0(a0,d0),a0:JSR (a0)
+;
+MOVE.b io_error(a3),ioreplydata+1
+MOVE.l io_actual(a3),ioreplydata+2
+LEA ioreplypacket(pc),a1:BSR putpacket
+;
+BRA 'main
+
+ioreplypacket
+Dc.l 0
+Dc.b 1,0
+Dc 0
+Dc.l ioreplydata
+Dc.l 6
+
+ioreplydata:Dcb.b 6,0
+
+inttable
+Dc.l pass			;0	what?
+Dc.l pass			;1	reset
+Dc.l intread	 ;2	read
+Dc.l intwrite	;3	write
+Dc.l pass			;4	update
+Dc.l pass			;5	declare invalid
+Dc.l pass			;6	stop io
+Dc.l pass			;7	start io
+Dc.l pass			;8	flush!
+Dc.l pass			;9	motor
+Dc.l pass			;10 seek
+Dc.l intformat ;11 format
+Dc.l pass			;12 remove int
+Dc.l pass			;13 changenum
+Dc.l pass			;14 whether disk in drive!
+Dc.l pass			;15 test writeprotect
+Dc.l pass			;16 raw read
+Dc.l pass			;17 raw write
+Dc.l pass			;18 determine drive type
+Dc.l pass			;19 number of tracks
+Dc.l pass			;20 add disk change interupt
+Dc.l pass			;21 remove disk change interupt
+
+Macro dosysio
+MOVE.l a3,a1:JSR doio(a6)
+End Macro
+
+intread
+;
+MOVE.l io_length(a3),d0:MOVEQ #2,d1:JSR -198(a6)
+MOVE.l d0,io_data(a3):!dosysio
+LEA readpacket(pc),a1
+MOVE.l io_data(a3),8(a1):MOVE.l io_length(a3),12(a1)
+MOVE.l io_length(a3),12(a1):BRA putpacket
+
+readpacket
+Dc.l 0
+Dc.b 1,0
+Dc 1			 ;free data after send!
+Dc.l 0
+Dc.l 0
+
+intformat
+intwrite
+;
+BSR getpacket:MOVE.l a1,-(a7)
+MOVE.l 8(a1),io_data(a3):MOVE.l 12(a1),io_length(a3)
+!dosysio:MOVE.l (a7)+,a1:BRA freepacket
+
+pass:!dosysio:RTS
+
+.
+.inptask	;for handling of incoming input events!
+
+;initialize inputhandler!
+;
+LEA inputhandler(pc),a0:LEA firstevent(pc),a1
+MOVEQ #100,d0:BSR allocinputhandler
+;
+LEA task2info(pc),a2:BSR inittaskinfo
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6)	;we're ready!
+;
+'main:BSR getpacket:MOVE.l a1,-(a7)
+;
+CMP.l #22,12(a1):BEQ 'iev
+;
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6):BRA 'done
+;
+'iev:MOVE.l 8(a1),a0:MOVE.l iddev(pc),a1:CLR.b io_flags(a1)
+CLR.l (a0):MOVEQ #11,d0:MOVEQ #22,d1:MOVEQ #0,d2:JSR _doio
+;
+'done:MOVE.l (a7)+,a1:BSR freepacket:BRA 'main
+
+firstevent:Dc.l 0
+
+.inputhandler ;my input.device handler!
+;
+;a0=old input events...a1=prev...return d0=new input events
+;
+MOVE.l a0,d0:MOVE.l d0,(a1)
+;
+'loop:BEQ 'done:MOVE.l d0,a0
+;
+MOVE.b 4(a0),d0:SUBQ.b #1,d0:BEQ 'key:SUBQ.b #1,d0:BEQ 'checksend
+;
+'more:MOVE.l a0,a1:MOVE.l (a0),d0:BRA 'loop
+;
+'done:MOVE.l firstevent(pc),d0:RTS
+;
+'key
+;
+CMP #$45+$80,6(a0):BNE 'checksend
+MOVE 8(a0),d0:AND #$30,d0:BEQ 'checksend
+NOT inputout
+;
+MOVEM.l a0-a1/a6,-(a7)
+;
+;signal other machine!
+;
+MOVEQ #20,d0:MOVEQ #1,d1:MOVE.l 4,a6:JSR -198(a6):MOVE.l d0,a1
+;
+MOVE.l a1,-(a7):CLR.l (a1)+:MOVE #$ff02,(a1)+:MOVE #3,(a1)+
+CLR.l (a1)+:MOVE.l #4,(a1)+:MOVE.l a1,a0
+MOVE.l (a7)+,a1:MOVE.l a0,8(a1):BSR putpacketq
+;
+;signal diskchange task!
+;
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6)
+MOVEM.l (a7)+,a0-a1/a6
+;
+BRA 'more
+;
+'checksend
+MOVE inputout(pc),d0:BEQ 'more
+;
+;OK, gotta send this stuff!
+;
+MOVEM.l a0-a2/a6,-(a7):MOVE.l a0,a2
+;
+;allocate packet
+MOVEQ #16,d0:MOVEQ #1,d1:MOVE.l 4,a6:JSR -198(a6):MOVE.l d0,a1
+;
+MOVE.l a1,-(a7):CLR.l (a1)+:MOVE #$ff02,(a1)+:MOVE #3,(a1)+
+CLR.l (a1)+:MOVE.l #22,(a1)+
+;
+MOVEQ #22,d0:MOVEQ #1,d1:JSR -198(a6):MOVE.l d0,a0
+MOVE.l (a7)+,a1:MOVE.l a0,8(a1)
+;
+;copy input event to packet data!
+;
+MOVE.l (a2)+,(a0)+:MOVE.l (a2)+,(a0)+
+MOVE.l (a2)+,(a0)+:MOVE.l (a2)+,(a0)+
+MOVE.l (a2)+,(a0)+:MOVE (a2),(a0)
+;
+BSR putpacketq
+;
+MOVEM.l (a7)+,a0-a2/a6
+;
+'delevent		;unlink this input event!
+MOVE.l (a0),(a1):MOVE.l (a0),d0:BRA 'loop
+
+inputout:Dc 0
+
+;----------------------- packet stuff --------------------------;
+
+.freepacket ;a1=packet to free
+;
+BCLR #0,7(a1):BEQ 'skip:MOVE.l a1,-(a7)
+MOVE.l 12(a1),d0:MOVE.l 8(a1),a1:JSR -210(a6):MOVE.l (a7)+,a1
+'skip:BCLR #1,7(a1):BEQ 'skip2:MOVEQ #16,d0:JSR -210(a6)
+'skip2:RTS
+
+;------------------------ read stuff ---------------------------;
+
+.getpacketq	 ;a2=taskinfo to get packet from...return a1=packet
+							;or beq=1 if no packet
+;
+!intsoff:MOVE.l (a2),d0:BEQ 'none:MOVE.l d0,a1
+MOVE.l (a1),(a2):BNE 'skip:MOVE.l a2,4(a2)
+'skip:!intson:MOVEQ #-1,d0:RTS
+'none:!intson:MOVEQ #0,d0:RTS
+
+getpacket		;wait until packet actually here!
+;
+BSR getpacketq:BNE 'done
+MOVE.l 8(a2),d0:JSR waitsignal(a6):BRA getpacket:'done:RTS
+
+.
+.readtask ;for handling incoming data in general
+;
+;initialize interupt
+;
+;a0=code, a1=data, d0=level, d1=priority
+;
+LEA readinterupt(pc),a0:SUB.l a1,a1
+MOVEQ #5,d0:MOVEQ #0,d1:JSR allocintserver
+;
+LEA task3info(pc),a2:BSR inittaskinfo
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6)	;we're ready!
+;
+'main
+;BTST #1,$dff00c:BNE 'dat
+'main2
+MOVE.l 8(a2),d0:JSR waitsignal(a6)
+;BTST #1,$dff00c:BEQ 'main2
+;
+'dat:!initjoyregs:MOVEM.l a1/a6,raregs
+;
+!readlong:MOVE d0,readid:!readlong:MOVE.l d0,readlen:MOVE.l 4,a6
+;
+MOVEQ #16,d0:MOVEQ #1,d1:JSR -198(a6):MOVE.l d0,-(a7) ;packet
+MOVE.l d0,a1:MOVE #2,6(a1)	;flag:free packet struct
+;
+MOVE.b readid+1(pc),d0:EXT d0:LSL #2,d0
+LEA tasktable(pc),a0:MOVE.l 0(a0,d0),a0:MOVE.l a0,-(a7) ;info
+;
+MOVE.l 20(a0),d0:BNE 'noalloc
+;
+BSET #0,7(a1) ;flag:free packet data
+MOVE.l readlen(pc),d0:MOVEQ #2,d1:JSR -198(a6)
+;
+'noalloc
+MOVE.l d0,-(a7):MOVE.l d0,a0:MOVE.l readlen(pc),d0
+MOVEM.l raregs(pc),a1/a6:!readmemory:CLR readbusy:MOVE.l 4,a6
+;
+MOVEM.l (a7)+,d0/a0-a1	;data,info,packet (?)
+;
+CLR.l 20(a0):CLR.l (a1):MOVE readid(pc),4(a1)
+MOVE.l d0,8(a1):MOVE.l readlen(pc),12(a1)
+;
+!intsoff
+;link in packet...
+MOVE.l 4(a0),a2:MOVE.l a1,(a2):MOVE.l a1,4(a0)
+!intson
+;
+MOVEM.l 8(a0),d0/a1:JSR signal(a6)
+;
+LEA task3info(pc),a2:BRA 'main
+
+raregs:Dc.l 0,0
+readid:Dc.l 0
+readlen:Dc.l 0
+
+.readinterupt ;my vblank interupt routine...
+;
+MOVE readbusy(pc),d0:BNE 'done
+BTST #1,$dff00c:BEQ 'done
+;
+;signal readtask!
+;
+ADDQ #1,readbusy
+MOVE.l a6,-(a7)
+MOVEM.l task3info+8(pc),d0/a1:MOVE.l 4,a6:JSR signal(a6)
+MOVE.l (a7)+,a6
+;
+'done:MOVEQ #0,d0:RTS
+
+readbusy:Dc 0
+
+;------------------------ write stuff -----------------------;
+
+.putpacketq	 ;a1=packet : send packet and return immediately
+;
+BCLR #2,7(a1)
+;
+put_a_packet
+CLR.l (a1):!intsoff
+;MOVE.l firstpacket(pc),d0:BNE q_a_packet	;no need to q if q empty!
+;MOVE.l a1,firstpacket:MOVE.l a1,lastpacket
+;MOVEM.l d2-d7/a2-a5,-(a7):BSR sendpacket:MOVEM.l (a7)+,d2-d7/a2-a5
+;RTS
+;
+q_a_packet
+MOVE.l lastpacket(pc),a0:MOVE.l a1,(a0):MOVE.l a1,lastpacket
+!intson:MOVEM.l task4info+8(pc),d0/a1:JMP signal(a6)
+
+putpacket		;a1=packet, a2=taskinfo : return only once packet is sent
+;
+BSET #2,7(a1):BSR put_a_packet:MOVE.l 24(a2),d0:JMP waitsignal(a6)
+
+firstpacket:Dc.l 0
+lastpacket:Dc.l firstpacket
+
+.
+.writetask
+;
+;task to send out packets...
+;
+LEA task4info(pc),a2:BSR inittaskinfo
+MOVEM.l task5info+8(pc),d0/a1:JSR signal(a6)	;we're ready!
+;
+'main
+!intsoff:MOVE.l firstpacket(pc),d0:BNE 'send
+!intson:MOVE.l 8(a2),d0:JSR waitsignal(a6):BRA 'main	;wait!
+;
+'send	 ;unlink packet...
+;
+MOVE.l d0,a1:BSR sendpacket
+;
+LEA task4info(pc),a2:BRA 'main
+
+sendpacket	;ints should be off when we get here
+;
+!intson:MOVE.l a1,-(a7):MOVE.l a1,a0
+;
+!initjoyregs ;space cake mind warp fuckout blitz
+;
+MOVE 4(a0),d0:!writelong:MOVE.l 12(a0),d0:!writelong
+MOVE.l 12(a0),d0:MOVE.l 8(a0),a0:!writememory:MOVE.l 4,a6
+;
+MOVE.l (a7),a1:BTST #2,7(a1):BEQ 'nosig	;signal sender ?
+;
+LEA tasktable(pc),a0:MOVE.b 4(a1),d0:EXT d0:LSL #2,d0
+MOVE.l 0(a0,d0),a0:MOVEM.l 24(a0),d0/a1:JSR signal(a6)
+;
+'nosig:!intsoff
+MOVE.l (a7)+,a1:MOVE.l (a1),firstpacket:BNE 'skip
+MOVE.l #firstpacket,lastpacket:'skip:!intson:BRA freepacket
+
+#alloclen=34+48+64	;reply port+iostdreq+xtra
+
+_opendevice
+	;a0=device name ("trackdisk.device" etc)
+	;d0=unit
+	;d1=flags
+	;return:
+	;d0=device block
+MOVEM.l a2/a6,-(a7):MOVE.l	4,a6:MOVEM.l d0-d1/a0,-(a7)
+MOVE.l	#alloclen,d0:MOVE.l	#$10001,d1:JSR -198(a6)
+MOVE.l	d0,-(a7):MOVEQ #-1,d0:JSR allocsignal(a6)
+MOVE.l	(a7)+,a0:MOVE.b #4,8(a0)	;type: msgport
+LEA 34(a0),a1:MOVE.l	a0,14(a1)
+MOVE.b	d0,15(a0):MOVE.l	276(a6),16(a0)
+LEA 24(a0),a2:MOVE.l	a2,20(a0):MOVE.l	a0,28(a0)
+MOVEM.l (a7)+,d0-d1/a0
+MOVE.l	a1,-(a7):JSR opendevice(a6):MOVE.l	(a7)+,d0
+MOVEM.l (a7)+,a2/a6:RTS
+
+	;*
+_closedevice ;a1=device block
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4,a6:MOVE.l	a1,-(a7)
+MOVE.b	15(a1),d2:JSR closedevice(a6):MOVE.b	d2,d0
+JSR freesignal(a6):MOVE.l	(a7)+,a1:LEA -34(a1),a1
+MOVE.l	#alloclen,d0:JSR -210(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+_doio	;a1.l=device block
+	;a0.l=data
+	;d0.w=command
+	;d1.l=length
+	;d2.l=offset
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4,a6:MOVE	d0,28(a1):MOVE.l	d1,36(a1)
+MOVE.l	a0,40(a1):MOVE.l	d2,44(a1):JSR doio(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+_sendio	;a1.l=device block
+	;a0.l=data
+	;d0.w=command
+	;d1.l=length
+	;d2.l=offset
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4,a6:MOVE	d0,28(a1):MOVE.l	d1,36(a1)
+MOVE.l	a0,40(a1):MOVE.l	d2,44(a1):JSR sendio(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+_checkio ;a1.l=device block
+	;return d0=io done else d0/eq if still going
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4,a6:JSR checkio(a6):MOVE.l	(a7)+,a6:TST.l d0:RTS
+
+	;*
+_waitio	;a1.l=device block
+	;wait till io done then return!
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4,a6:JSR waitio(a6):MOVE.l	(a7)+,a6:RTS
+
+	;*
+_abortio ;a1.l=device block
+	;give up on IO!
+	;return d0/eq if went ok else d0/ne if error
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4,a6:JSR abortio(a6):MOVE.l	(a7)+,a6:TST.l d0:RTS
+
+#in_node=0
+#in_type=8
+#in_pri=9
+#in_name=10
+#in_data=14
+#in_code=18
+#in_level=22
+#in_oldint=24
+#in_sizeof=28
+
+freeintserver
+	;a1=server struct
+MOVE.l a6,-(a7):MOVE.l	4,a6
+MOVE	in_level(a1),d0:EXT.l d0:MOVE.l	a1,-(a7)
+JSR remintserver(a6):MOVE.l	(a7)+,a1:MOVEQ #in_sizeof,d0
+JSR -210(a6):MOVE.l (a7)+,a6:RTS
+
+allocintserver
+	;a0=code, a1=data, d0=level, d1=priority
+	;return
+	;d0=server struct
+MOVEM.l a2/a6,-(a7):MOVE.l	4,a6
+EXT.l d0:MOVEM.l d0-d1/a0-a1,-(a7):MOVEQ #in_sizeof,d0
+MOVE.l	#$10001,d1:JSR -198(a6):MOVE.l	d0,a1
+MOVE.b	#2,8(a1):MOVEM.l (a7)+,d0-d1/a0/a2
+MOVE.b	#2,in_type(a1):MOVE.b	d1,in_pri(a1):MOVE.l	a2,in_data(a1)
+MOVE.l	a0,in_code(a1):MOVE	d0,in_level(a1)
+;
+MOVE.l	a1,-(a7):JSR addintserver(a6):MOVE.l (a7)+,d0
+MOVEM.l (a7)+,a2/a6:RTS
+
+idname:Dc.b "input.device",0:Event
+iddev:Dc.l 0
+
+allocinputhandler
+	;a0=code, a1=data, d0=priority
+;
+MOVEM.l d0/a0-a1,-(a7)
+LEA idname(pc),a0:MOVEQ #0,d0:MOVEQ #0,d1:BSR _opendevice
+MOVE.l d0,iddev
+MOVEM.l (a7)+,d0/a0-a1
+;
+MOVEM.l a2/a6,-(a7):MOVE.l	4,a6
+EXT.l d0:MOVEM.l d0-d1/a0-a1,-(a7):MOVEQ #in_sizeof,d0
+MOVE.l	#$10001,d1:JSR -198(a6):MOVE.l	d0,a1
+MOVE.b	#2,8(a1):MOVEM.l (a7)+,d0-d1/a0/a2
+MOVE.b	#2,in_type(a1):MOVE.b	d0,in_pri(a1):MOVE.l a2,in_data(a1)
+MOVE.l	a0,in_code(a1)
+;
+MOVE.l a1,a0:MOVE.l iddev(pc),a1:MOVEQ #9,d0	;add handler!
+MOVEQ #0,d1:MOVEQ #0,d2:BSR _doio
+;
+MOVEM.l (a7)+,a2/a6:RTS
+
+inittask	;a0=task to startup, d0=stacksize, d1=priority
+;
+MOVEM.l a2-a3/a6,-(a7)
+MOVEM.l d0-d1/a0,-(a7)
+ADD.l #96,d0:MOVE.l #$10001,d1:MOVE.l 4,a6:JSR -198(a6):MOVE.l d0,a1
+LEA 92(a1),a2 ;stack!
+MOVE.l a2,58(a1):ADD.l (a7)+,a2:MOVE.l a2,54(a1):MOVE.l a2,62(a1)
+MOVE.l (a7)+,d0:MOVE.b #1,8(a1):MOVE.b d0,9(a1)
+MOVE.l (a7)+,a2:SUB.l a3,a3:JSR -282(a6)	;add task!
+MOVEM.l (a7)+,a2-a3/a6:RTS

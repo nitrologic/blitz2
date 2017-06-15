@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/sprites.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/sprites.bb
+BLITZ
+
+BitMap 0,320,256,2
+
+For i=15 To 0 Step -1:Circle 16,16,i,i:Next
+GetaShape 0,0,0,32,32
+GetaSprite 0,0:BlockScroll 3
+
+Circlef 160,50,50,2
+
+Slice 0,44,320,100,$fff8,2,8,32,320,320
+Show 0
+
+Slice 1,146,320,50,$fff8,2,8,32,320,320
+Show 0
+
+Slice 2,198,320,100,$fff8,2,8,32,320,320
+Show 0
+
+a=1
+
+While Joyb(0)<>1
+	VWait
+	For i=0 To 2:Use Slice i:ShowSprite 0,64,y,0:ShowSprite 0,128,y,4:Next
+	y+a
+	If y>120 Then a=-1
+	If y<-40 Then a=1
+	While Joyb(0)=2:VWait:Wend
+Wend
+
+MouseWait

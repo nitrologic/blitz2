@@ -1,0 +1,18 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bb2src/vfont.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/bbdev/vfont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bbdev/vfont.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/dev/bb2src/vfont.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bbdev/vfont.bb2
+
+DEFTYPE.l bp
+
+Screen 0,9:ScreensBitMap 0,0:BlockScroll
+
+bp=Peek.l(Addr BitMap(0)+8)
+
+If WriteMem(0,"chars8.b")
+	For k=0 To 63
+	##[$BE14] 0,bp,16
+	bp+80
+	Next
+	SaveBitmap 0,"oldfont.iff"
+	MouseWait
+Else
+	##[$FF8C] 0
+EndIf

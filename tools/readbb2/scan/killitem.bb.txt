@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/KillItem.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/KillItem.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/KillItem.bb
+
+; 
+; process list with killitem program example
+; 
+
+Dim List a(10)         ;initialize list array
+
+While AddItem(a())       ;fill list... 
+ a()=c              ;with sequential values...
+ c+1 
+Wend
+
+ResetList a()          ;reset list...
+
+
+While NextItem(a())       ;process list...
+ If a()/2<>Int(a()/2)     ;is item odd ?
+  KillItem a()        ;yes, kill it!
+ EndIf 
+Wend
+
+NPrint "Final List (Odd elements deleted) is..."
+
+ResetList a()          ;reset list 
+
+While NextItem(a())       ;output all elements... 
+ NPrint a()
+Wend
+
+MouseWait 
+

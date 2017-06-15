@@ -1,0 +1,24 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/carpal.bb
+NEWTYPE .cols
+	r.q:g:b
+End NEWTYPE
+
+Dim col.cols(32)
+
+If WriteMem(0,"blitz2:car.dat")
+	Loc 0,34*34*34*16
+	##[$BE14] 0,&col(0),32*12
+	CloseFile 0
+EndIf
+
+If ReadMem(0,"car.palette")
+	For i=0 To 15
+		col.w=Int(col(i)\b/32)*512
+		col.w+Int(col(i)\g/32)*32
+		col.w+Int(col(i)\r/32)*2
+		Exists 0,&col,2
+	Next
+	CloseFile 0
+EndIf
+
+End

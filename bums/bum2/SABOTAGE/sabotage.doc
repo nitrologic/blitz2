@@ -1,0 +1,130 @@
+                             SABOTAGE
+                             ========
+
+The Object
+----------
+
+Enemy forces are trying to take over your country (you know the stuff
+rape, pillage, mahem) your average sort of war.
+
+Thus far your gun emplacement has defended your women and children
+from the facist pinko scum but the enemy has launched an offensive
+against your gun sight. If four of their paratroopers are able to land
+on one side of your gun then they will be able to sabotage it and you
+will be conquered by the enemy.
+
+To avoid this disaster as long as possible control your guns angle
+using your joystick plugged in port 1 and using the fire button gun
+down enemy helicopters and paratroopers. If you survive a wave of
+helicopters any landed enemy paratroopers will perish (so you have
+to have four enemies land on one side in one wave to lose)
+
+You score 30pts for each Helicopter, 20 for each Paratrooper, and
+lose 1 point every time you fire your gun (your minimum score is 0)
+
+Good Luck
+
+History:
+--------
+
+Sabotage began its life (to the best of my knowledge) on the
+Apple IIe computer system. It was probably the first computer
+'arcade' game I ever played.
+
+Many years later, I'm on night shift as a Sys Manager/Programmer
+when the night-shift boredom blues set in. A quick zoom round
+the Digital VAX Mainframe system at work found a sub-directory
+called GAMES amongst which lay a little file called SABO.EXE
+
+Could it be the infamous Sabotage?? indeed it was and my interest
+in the game was back.....
+
+So What?
+--------
+
+Since my involvement with Blitz Basic 2 on the Amiga, I thought
+the possibility of me being able to write a game was finally here.
+It had to be simple in concept (for a simple kinda guy like me!)
+many ideas were tossed around, some were started, none were
+finished, when Sabotage sprung to mind.
+
+I have decided just to do a real-simple version of Sabotage for
+two reasons.
+
+1. I'm a lazy sod and I've spent about 10 hours drawing and
+   writing Sabotage and that's long enough
+
+2. It's written for other novice games programmers using Blitz
+   who want a game shell thats simple to follow and demonstrates
+   the basics of arcade game writing in Blitz (Double Buffering,
+   QBlits, Slices, List arrays, List processing etc etc)
+
+So consequently This version has helicopters only (no scummy jets
+with smart bombs) and the gun only has 7 rotational positions
+the reason for that is I couldn't be bothered drawing any more
+thats also the reason for the lack of effects when you kill or get
+killed. Also the game over and end of level screens are quick and
+simple.
+
+The programme is exhaustively commented to aid some of you in
+following it. For you structure purists out there TOUGH LUCK
+the programme has 5 goto statements into it and has no functions
+or procedures (doesn't need any). I write structured stuff at work
+but can see no need to when doing this. LONG LIVE GOTO!!!
+
+If you are really struggling following any of this then write to
+ACID SOFTWARE and ask for me to do a step by step article on games
+writing for beginners by a beginner (me!) if you don't ask you
+shalt not receive.
+
+CREDITS
+-------
+
+Roger Lockerbie  (ME) (doing those looverly graphics and
+                       writing Sabotage)
+
+Paul Andrews     (I nicked his sfx out of zombies. Thanks Paul)
+
+Mark Sibly and
+the rest of the
+lads at ACID     (For writing Blitz, answering my questions on
+                  programming and Guitar, and for allowing me
+                  to be part of the development of the best
+                  programming language on the Amiga)
+
+
+Other Bits
+----------
+
+You can do whatever you like to this programme I wont put all
+the legal mumbo jumbo about not selling for profit as anyone
+who would shell money out for this game is certifiable and
+deserves to be ripped-off
+
+Just cos it's missing a lot of features does NOT mean that you
+can't write them yourself put in nice fades or whatever you like
+add explosions (the IFF is there to add shapes to and rebuild the
+shape file) and animation. EXPERIMENT!! If you don't try you'll
+never learn
+
+If you do hack it around turn runtime errors on so if you make a
+mistake (who doesn't) it will tell you, the game will slow down
+but thats fine when your working on it. When you have finished
+your masterpiece create the executable with runtime errors off
+if you leave them on the game will run slow and jittery and
+people might think it was written with the AMOS compiler hahaha
+
+OK so now the excuses are done I suppose you may as well have a
+blast.
+
+Make sure you CD (change directory) to the sabotage directory
+as if you don't it wont find the files and the game will
+crash!!
+
+Happy Coding and see ya next issue
+
+Roger
+
+
+
+

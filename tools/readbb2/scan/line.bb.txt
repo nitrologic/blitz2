@@ -1,0 +1,15 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Line.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Line.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Line.bb
+
+; 
+; line example
+; 
+Screen 0,3                 ;an intuition screen
+ScreensBitMap 0,0          ;it's bitmap
+
+For k=1 To 100           ;start of loop... 
+ Line Rnd(320),Rnd(200),Rnd(7)+1  ;random lines!
+Next                    ;end of loop
+
+
+
+

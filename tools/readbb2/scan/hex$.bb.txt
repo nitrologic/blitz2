@@ -1,0 +1,4 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Hex$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Hex$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Hex$.bb
+
+Print Hex$(32): ; Will print the string 00000020
+

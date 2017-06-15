@@ -1,0 +1,9 @@
+/* MountList for V1.3 */
+
+/*  Mount Entry for the new Console Handler */
+
+NEWCON: 
+    Handler = L:Newcon-Handler
+    Priority = 5
+    StackSize = 1000
+#

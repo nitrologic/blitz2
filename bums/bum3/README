@@ -1,0 +1,29 @@
+BLITZ USER 3 COVER DISK
+
+* the new TED now lets you hit RETURN for OK gadgets and ESC for CANCEL
+
+* use TAB key to swap between string gadgets if running 2.0 or higher
+
+* ignore library not found errors when loading progs for first time with 1.5
+
+* libtools.lha includes blitzlibs, new libmanager etc. for advanced users
+
+* 3D library will be re-released soon, copy User2 3dlibs into blitzlibs:basic
+  if you are hacking around with pre-release version
+
+Please do not spread executable versions of insectoids or buzzbar as
+they will be released on PD Disk3 which we hope to get on the coverdisk
+with some major Amiga magazines.
+
+Please report any bugs in new version AS SOON AS POSSIBLE directly
+to Acid Software.
+
+We have converted all Workbench 3.0 libraries as well as ASL library
+and others. Work is underway to support all the new features so keep
+hassling us.
+
+Don't forget to send in the questionaire...
+
+Thanks,
+
+Simon

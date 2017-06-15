@@ -1,0 +1,4 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Bin$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Bin$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Bin$.bb
+
+Print Bin$(32): ; Will print 00000000000000000000000000100000 
+

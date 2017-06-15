@@ -1,0 +1,376 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/RunMeOrDie.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/RunMeOrDie.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/RunMeOrDie.bb
+;
+; run me or die!
+;
+
+
+WBStartup
+
+DEFTYPE.l
+
+Gosub init
+
+Repeat
+
+	WBox 4,12,494,98,0
+	Read ansf:Read nl:Read na
+	For t=1 To nl
+		Read q$
+		If t=1 AND q$<>"" Then WColour 1
+		WLocate 22,8*t:NPrint q$
+		WColour 2
+	Next
+
+	Select	ansf
+		Case -1
+			quit=1:MouseWait
+		Case	0										 ; string question
+			Gosub getstring
+		Case	1										 ; multiple choice question
+			Gosub getmulti
+	End Select
+
+
+Until quit=1
+
+	FileOutput 1
+	NPrint "***	 END OF RESULTS	 ***"
+	CloseFile 1
+	name$=Replace$(name$," ","_")
+	name$=Left$(name$,25)
+	##[$FE09] &f$,&name$
+End
+
+
+getstring:
+
+
+	FileOutput 1:fin=0
+
+	For t=5 To 4+na
+		##[$C61F] 0,t
+		Redraw 0,t
+	Next
+
+
+	ClearString 0,5
+
+	While fin=0
+
+		ev=WaitEvent
+
+		If ev=$200 Then End
+		If ev=$40
+			g=GadgetHit
+			If g-4=na
+				fin=1
+				For t=5 To 4+na
+					NPrint GadgetPens (0,t)
+					If name$="" Then name$="RAM:RatQuest_"+GadgetPens (0,5)
+				Next
+			Else
+				If g>4 AND g<8
+					ClearString 0,g+1
+				End If
+			End If
+		End If
+
+	Wend
+
+	WindowOutput 0
+
+	For t=5 To 8
+		BorderPens 0,t
+		##[$C620] 0,t
+		Redraw 0,t
+	Next
+
+Return
+
+getmulti:
+
+	FileOutput 1:fin=0
+
+	For t=1 To 4
+		##[$C61F] 0,t
+		Redraw 0,t
+	Next
+
+
+	While fin=0
+
+		ev=WaitEvent
+
+		If ev=$200 Then End
+		If ev=$40
+			g=GadgetHit
+			If g>0 AND g<5
+				fin=1
+				NPrint "|"+Chr$(64+g)+"|"
+			End If
+		End If
+
+	Wend
+
+	WindowOutput 0
+
+	For t=1 To 4
+		##[$C620] 0,t
+		Redraw 0,t
+	Next
+
+
+Return
+
+init:
+
+
+	TextGadget 0,44 ,180,0,1,"	A	"
+	TextGadget 0,103,180,0,2,"	B	"
+	TextGadget 0,162,180,0,3,"	C	"
+	TextGadget 0,221,180,0,4,"	D	"
+
+	StringGadget 0,30,120,0,5,80,432
+	StringGadget 0,30,134,0,6,80,432
+	StringGadget 0,30,148,0,7,80,432
+	StringGadget 0,30,162,0,8,80,432
+
+
+	NoCli
+	FindScreen 0
+	Window 0,50,32,500,200,$100E,"RatQuest V1.0",1,2,0
+
+	f$="Ram:Ratwork"
+
+	If ReadMem(1,f$)
+		FileOutput 1
+		NPrint "*** Results of RatQuest survey ***"
+		WindowOutput 0
+	Else
+		##[$FF8C] 0
+		End
+	End If
+
+	For t=1 To 8
+		If t>4 Then BorderPens 0,t
+		##[$C620] 0,t
+		Redraw 0,t
+	Next
+
+Return
+
+
+; Question format 0=string,1=multichoice,-1=end
+; number of question lines
+; number of answer lines allowed
+; Question strings
+
+Data		0,6,4
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"1)		What's your name?"
+Data.s	"2-4)	What's your postal address?"
+Data.s	""
+Data.s	"Don't forget your postcode!"
+
+Data		0,5,4
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"1-4)		What other languages have you used?"
+Data.s	""
+Data.s	"						(In order of preference)"
+
+Data		0,5,4
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"1-4)		What do you mainly use Blitz II for?"
+Data.s	""
+Data.s	"						(In order of importance)"
+
+Data		0,5,3
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"1-4)		What Amiga magazines do you read?"
+Data.s	""
+Data.s	"						(In order of importance)"
+
+Data		1,8,0
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"What level do you consider yourself to be?"
+Data.s	""
+Data.s	"(A)	Beginner"
+Data.s	"(B)	Competent"
+Data.s	"(C)	Proficient"
+Data.s	"(D)	Power user"
+
+Data		1,8,0
+Data.s	"ABOUT YOU"
+Data.s	""
+Data.s	"Where do you get BBS feedback on Blitz?"
+Data.s	""
+Data.s	"(A)	AmiNet"
+Data.s	"(B)	Internet"
+Data.s	"(C)	Local BBS	(tell us where!)"
+Data.s	"(D)	I don't!"
+
+Data		0,6,4
+Data.s	"ABOUT YOUR COMPUTER"
+Data.s	""
+Data.s	"1)		Which Amiga do you mainly use?"
+Data.s	"2)		What version of Workbench do you have?"
+Data.s	"3)		How much memory do you have?	CHIP/FAST"
+Data.s	"4)		Do you have a hard disk? If so, how big is it?"
+
+Data		0,6,4
+Data.s	"ABOUT YOUR COMPUTER"
+Data.s	""
+Data.s	"1)		How many extra drives do you have?"
+Data.s	"2)		What, if any, type of printer do you have?"
+Data.s	"3)		What, if any, type of modem do you have?"
+Data.s	"4)		What other goodies do you have?"
+
+Data		0,6,4
+Data.s	"ABOUT YOUR RETAILER"
+Data.s	""
+Data.s	"1)		Where did you buy Blitz II from?"
+Data.s	"2)		When did you buy it?"
+Data.s	"3)		How much did it cost?"
+Data.s	"4)		Are you happy with your retailer?"
+
+Data		0,6,4
+Data.s	"ABOUT YOUR DISTRIBUTER"
+Data.s	""
+Data.s	"1)		Where did you send your rego card?"
+Data.s	"2)		Where do you usually get Blitz technical help?"
+Data.s	"3)		Are you happy with your distributer?"
+Data.s	"4)		Any further comments about him?"
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"What do you really think about Blitz Basic II?"
+Data.s	""
+Data.s	"(A)	 It's excellent, can't live without it!"
+Data.s	"(B)	 It's pretty good"
+Data.s	"(C)	 It's average."
+Data.s	"(D)	 Even Amos is better!"
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"How do you like the Blitz II manual?"
+Data.s	""
+Data.s	"(A)	 It's excellent!"
+Data.s	"(B)	 It's pretty good."
+Data.s	"(C)	 It falls apart."
+Data.s	"(D)	 It's crap!"
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"How do you like the Blitz II User Guide?"
+Data.s	""
+Data.s	"(A)	 It's excellent!"
+Data.s	"(B)	 It's pretty good."
+Data.s	"(C)	 It could have been better!"
+Data.s	"(D)	 It's crap!"
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"What do you think about the Blitz User Magazine?"
+Data.s	""
+Data.s	"(A)	 It's excellent!"
+Data.s	"(B)	 It's pretty good"
+Data.s	"(C)	 Never seen one, I'm not a subscriber!"
+Data.s	"(D)	 BUM is a good name for it..."
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"How well do you think Blitz has been supported"
+Data.s	""
+Data.s	"(A)	 Very well."
+Data.s	"(B)	 OK."
+Data.s	"(C)	 Pretty bad."
+Data.s	"(D)	 Support!, what support?"
+
+Data		1,8,0
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"What do you want most from Blitz now?"
+Data.s	""
+Data.s	"(A)	 Better docs."
+Data.s	"(B)	 Faster executables."
+Data.s	"(C)	 More commands."
+Data.s	"(D)	 Fix the current bugs first."
+
+Data		0,3,3
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-3)	What commands do you like best?"
+
+Data		0,3,3
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-3)	What commands would you like added?"
+
+Data		0,3,4
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-4)	What do you like most about Blitz?"
+
+Data		0,3,4
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-4)	What do you like least about Blitz?"
+
+Data		0,3,4
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-4)	What other features would you like added?"
+
+Data		0,3,4
+Data.s	"WHAT YOU THINK ABOUT BLITZ II"
+Data.s	""
+Data.s	"1-4)	Got any good bugs to tell us about?"
+
+Data		0,3,4
+Data.s	"IN GENERAL"
+Data.s	""
+Data.s	"1-4)	Any further comments?"
+
+Data		1,8,0
+Data.s	"AND FINALLY..."
+Data.s	""
+Data.s	"What do you really, really like best in life?"
+Data.s	""
+Data.s	"(A)	 Rats"
+Data.s	"(B)	 Big, hairy, beasts of men"
+Data.s	"(C)	 Skidmarks on my computer"
+Data.s	"(D)	 BUMS! When I can get them..."
+
+
+
+
+
+
+
+
+
+Data		-1,11,0
+Data.s	"THATS ALL FOLKS!"
+Data.s	"Thanks for using RatQuest 1.0"
+Data.s	"Results file located on RAM: disk"
+Data.s	"Please return your results file to:"
+Data.s	""
+Data.s	"RATBYTE SOFTWARE"
+Data.s	"BOX 1420		"
+Data.s	"WOLLONGONG	"
+Data.s	"NSW		2500 "
+Data.s	""
+Data.s	"Thanks!				(Hit mouse to exit)"
+
+
+

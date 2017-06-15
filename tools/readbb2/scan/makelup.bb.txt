@@ -1,0 +1,41 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makelup.bb
+If ReadMem (0,"ram:tt")
+	FileOutput 0
+	NPrint "rightlup"
+	For i=0 To 23
+		blah.l=0
+		For cnt=0 To 23
+			col=0
+			If (cnt<=i) Then col=1
+			blah=blah+blah+col
+		Next
+;		tt$="$"+Right$(Hex$(blah),4)
+		tt$=Right$(Hex$(blah),6)
+		tt$="$"+Right$(tt$,2)+Mid$(tt$,3,2)+Left$(tt$,2)
+
+		de$="	 dl	"+tt$+","+tt$+","+tt$+","+tt$
+		NPrint de$
+	Next
+	NPrint ""
+
+	NPrint "leftlup"
+	For i=0 To 23
+		blah.l=0
+		For cnt=0 To 23
+			col=0
+			If (cnt>=i) Then col=1
+			blah=blah+blah+col
+		Next
+;		tt$="$"+Right$(Hex$(blah),4)
+		tt$=Right$(Hex$(blah),6)
+		tt$="$"+Right$(tt$,2)+Mid$(tt$,3,2)+Left$(tt$,2)
+		de$="	 dl	"+tt$+","+tt$+","+tt$+","+tt$
+		NPrint de$
+	Next
+
+	DefaultOutput
+	CloseFile 0
+EndIf
+
+MouseWait
+End

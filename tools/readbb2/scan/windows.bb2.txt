@@ -1,0 +1,40 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/windows.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/amigamode/windows.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/amigamode/windows.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/windows.bb2
+
+;This little example shows how to open windows
+
+;first, we need a screen for the windows to open on...
+;
+Screen 0,11,"My Screen"
+
+;alternatively, we could have used the workbench screen, like so:
+;WbToScreen 0:WBenchToFront
+
+;window 0...
+;
+Window 0,0,12,320,100,$0,"Window 0",1,2
+Print "Window Flags=$0"
+
+;window 1...
+;
+Window 1,320,12,320,100,$2,"Window 1",1,2
+NPrint "Window Flags=$2"
+Print "Window has drag bar"
+
+;window 2...
+;
+Window 2,0,112,320,100,$6,"Window 2",1,2
+NPrint "Window Flags=$3"
+NPrint "Window has drag bar"
+Print "Window has depth gadget"
+
+;window 3...
+;
+Window 3,320,112,320,100,$100f,"Window 3",1,2
+NPrint "Window Flags=$f"
+NPrint "Window has the works!"
+NPrint "Close me to exit!"
+
+;wait for a 'close window' event...
+;
+Repeat
+Until WaitEvent=512

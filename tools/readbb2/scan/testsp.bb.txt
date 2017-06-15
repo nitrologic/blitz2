@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/testsp.bb
+#dpth=0
+
+Statement psort{a.l,b.l}
+	MOVEM.l a4-a6,-(a7):MOVE.l d0,a0
+sortem:
+	MOVEQ#0,d0:MOVE.l d1,a1:MOVE.l(a1)+,a2:MOVE dpth(a2),d2
+nxvals:
+	MOVE.l a2,a3:MOVE d2,d3
+wowo:
+	MOVE.l (a1)+,d7:BEQ endlist:MOVE.l d7,a2
+	MOVE dpth(a2),d2:CMP d2,d3:BPL nxvals
+flip:
+	MOVEM.l a2-a3,-8(a1):MOVEQ#-1,d0:BRA wowo
+endlist:
+	TST d0:BNE sortem
+	MOVEM.l (a7)+,a4-a6:AsmExit
+End Statement
+
+NEWTYPE .sp
+	y.w:lnk.w:dat.w:x.w
+End NEWTYPE
+
+#dpth=0
+
+NEWTYPE .test:a.w:End NEWTYPE
+
+Dim a.w(15),*p.test(16)
+For i=0 To 15:a(i)=Rnd(1024):*p(i)=&a(i):Next:*p(16)=0
+Dim p.l(16)
+
+psort{a.l,&*p(0)}
+For i=0 To 16:NPrint Hex$(*p(i)),"				",*p(i)\a:Next
+MouseWait
+End

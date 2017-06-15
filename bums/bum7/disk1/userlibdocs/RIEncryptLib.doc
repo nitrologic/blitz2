@@ -1,0 +1,48 @@
+Library Name:
+  riencryptlib #55
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, good for war games?
+
+Authors Docs:
+
+RIEncryptLibrary
+
+Date sent: 26-AUG-1994 
+
+You can have this little library if you like.  Sorry there are no full docs in
+the archive - the lib was done in a hurry for someone.  It performs Enigma
+compression and is very cute ;-).
+The archive contains the source code for the library.  I'm sure it wouldn't
+take you a second to have a look at it ;-).
+
+
+Commands in the library:
+
+  Encrypt memadr,len[,wheel1,wheel2,wheel3]
+
+              This will encrypt a block of memory starting at the address and
+running through to addresslength-1.  The optional wheel parameters allow you to 
+specify the start positions of the three wheels.  If you leave these out then
+the wheels' start positions will be randomised.
+
+  GetWheel n
+
+    This will tell you the position that wheel n stopped at after
+encrypting a file.  n can range from 1 to 3 - YOU MUST REMEMBER THESE POSITIONS
+IF YOU WANT TO DECRYPT THE FILE (at the moment at least).
+
+  Decrypt memadr,len,wheel1,wheel2,wheel3
+
+    Same Encrypt except that it does the opposite and the wheel
+positions ARE NOT OPTIONAL.  The positions should be the ones you wrote down
+after encrypting the file.  I may, in future, change it so that you can also
+specify the start wheel positions instead of the end ones (shouldn't be tooooo
+hard ;-)).
+
+
+Oh well, have a look and tell us what you think............
+

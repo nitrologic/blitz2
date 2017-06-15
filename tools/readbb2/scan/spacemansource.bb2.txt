@@ -1,0 +1,2504 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/SpaceMan/SpaceManSource.bb2
+;((F))2
+;a--------------------------------
+;This is a development sourcecode for
+;the SpaceMan program. I've tried to make it
+;independent of the graphical representation
+;Current features are:
+; 1993-12-26
+;-Double buffering with buffered blitting
+;-Drawing of rooms or sectors
+;-Moving of spaceman with acceleration and retardation
+;-Passage from one sector to another through passages
+; 1993-12-27
+;-A rudimentary routine for moving stupid aliens
+;-Aliens does not collide with eachother
+; 1993-12-28
+;-Building of a rudimentary MapEditor.
+; 1993-12-29
+;-Import of roomdata and passagedata from Mapeditor
+; 1994-01-01
+;-Happy New Year.
+;-A fast starplot routine with parallax scroll
+; All stars has an individual velocity.
+; Their direction is determined by dx and dy which
+; can be changed during runtime. This took me over
+; two days of hard work to accomplish.
+; 1994-01-03
+;-Spaceman goes isometric.
+; 1994-01-04
+; A tool is made for reading in animbrushes and making
+; them to shapes and adding their hotspots.
+; 1994-01-05
+;-Animation is added. Each object has its own animlists
+; 1994-01-06
+;-A drawlist keeps tracks of which shapes should be drawn
+; first. The drawlist is sorted by selection sort.
+;-The drawlist is no longer sorted by selection because it
+; was to slow. A faster assembler routine goes through
+; all the objectpositions and returns the object which
+; should be drawn first and so on.
+; 1994-01-07
+;-The drawlist assemblerroutine caused a guru or two.
+; Not strange really since I put a -1 on location
+; pointed to by a1 without knowing where it pointed.
+; (Definitly a sign of IQ somewhere..) It's all taken
+; care of...it seems...
+;-A interruptroutine for vbl toggles a bit in a flagbyte
+; so that I can make sure that the screen updates are
+; only every second frame.(I.e 25 f/s, sorry but buffered
+; blits are not fast.) Before when I stepped into a room
+; my speed changed drastically.
+;-The exittiles are now drawn on their right places.
+; The passagetype depends on from which room you
+; enter stupid!
+;-SpaceMan can't move through switches. Which is not
+; a bad thing since they are supposed to be switched
+; and not passed through.
+;-Suprise, suprise. SpaceMan can now switch the
+; switches(if he faces them). No obstacles is yet
+; affected though.
+;-The firebutton is checked for release which allows
+; for a greater distinction when switching and shooting.
+;-It seems that SpaceMan now can shoot. It's not pretty,
+; it's not fast but at least it's fun.
+;-Objects also explodes when they are hit!(forever)
+;-Obstacles disappears when switch is toggled. They
+; turn #dead...
+; 1994-01-08
+;-Soundeffects is added (from Zombie Apocalypse) for
+; shooting, explosions, switching and exititng.
+;-Also objects are now erased from vmap when dead and
+; explosions don't go on forever...
+; 1994-01-09
+;-A new totpos(depth) algorithm is used. Scrx+Scry
+; Quite simple really, and it works better to.
+;-Shots are now drawn in front of or behind sp and not
+; always in front of.
+; 1994-01-10
+;-A better collission detection between missiles and
+; objects are now obtained.
+;-Flags can now be collected.
+; 1994-01-14
+;-A top and bottomscreen is implemented which should
+; display the title resp. scores etc.
+; 1994-01-15
+;-SpaceMan now have the same kind of animlists as
+; the objects.(He didn't before). Works better to..!
+;-A PAUSE-button is implemented. It's the "p"-key,
+; suprise, suprise. A nice touch is that everything
+; still moves, but on the same place and the stars
+; continue to scroll.
+;-Also the game is now terminated with Esc or "q".
+;-Obstacles when blown to pieces cannot be
+; resurrected again.
+;-Objects now have hitpoints which make aliens a bit harder
+; to destroy, likewise obstacles. Switches cannot be destroyed
+;-Objects are now updated in the room previously visited.
+; That should be a sufficient realistic update.
+;-------------
+;Do list:-> Disable debugroutine before contest
+;		Ok!		-> Give objects hitpoints
+;		Ok!		-> Give objects a value which adds
+;					 to players scores when hit etc
+;				 -> A level must be cleared before the oxygen is
+;						is finished.
+;				 -> A level is cleared when all flags are taken
+;				 -> When a level is cleared the picture should be
+;						faded down and a message should appear...
+;						"prepare for level xx etc"
+;				 -> Missiles should become explosions. If object
+;						is hit but not killed then another explosion
+;						and sound should be used.
+;				 -> Oxygen should be possible to collect so that
+;						the effective time is prelonged.
+;				 -> Flags should not be killed.
+;				 -> Flags should have a unique sound when collected
+;						so that there is no doubt about what was taken
+;				 -> A deathroutine must be implemented.(The reaperman)
+;				 -> Objects sholud turn into scores after explosion
+;						visible a short while.
+;				-> Give #hitsound its own sound and not #shotsound
+;		Ok!		-> Make it possible to collect flags
+;		Ok!		-> Energy should be drained from SP whenever
+;					 he touches an alien
+;				-> Update aliens in the room before
+;		Ok!		-> Clear missilelist upon exiting
+;		Ok!		-> Change the Show command when drawing
+;					 a new room so that it gets the right offsets
+;				-> Make screen dark when initializing game
+;Buglist Ok!* Spaceman cant shoot when he is on an exit
+;						 facing inwards
+;			 Ok? * Spaceman can shoot when he is on an exit
+;						 facing outwards resulting in major error!
+;			Ok!* Switching should not be possible when standing
+;					 a bit away from the switch
+;				* Sometimes the missiles moves a bit weird...
+;			Ok!	* The aliens images shows after an explosion
+;
+;			Ok!	* Dont let switches explode
+WBStartup:
+SetErr:End:End SetErr
+BLITZ
+DisplayOff			;Shut down display
+MOVE #0,$dff180 ;Make display black
+QAMIGA
+#scrxw=320
+#scryw=240
+#depth=5
+BitMap 0,#scrxw,#scryw,#depth
+LoadMedModule 0,"sounds/sptune1.med"
+LoadBitMap 0,"graphics/tittel_spm2.iff",2
+;LoadBitMap 3,"graphics/spbottomscreen1.iff",2
+;VWait 100
+BLITZ
+StartMedModule 0
+SetInt 5
+	PlayMed
+End SetInt
+
+Slice 2,44,#scrxw,#scryw,$fff8,#depth,8,32,#scrxw,#scrxw
+Use SetCycle 2
+
+Show 0
+DisplayOn
+QAMIGA
+DEFTYPE.w
+#nrofframes=7	 ;Eight frames 0-7
+;#scrxw=320:#scryw=240
+;#depth=5
+#bmapyoffset=40	;Offset for bitmap 0&1 in the show command
+#scrdx=144:#scrdy=20 ;Offset for all graphics on screen
+#maxret=0	;Retardation for spaceman
+#maxvel=3	;Velocity for spaceman
+#north=1	;Passagetype
+#east=2	 ;Passagetype
+#south=3	;
+#west=4	 ;
+#xmod=16 ;Modulo value for calculating screenposition of objects
+#ymod=16	;
+#nrofpassages=400
+#nrofrooms=100
+#clear=0	;Parameters to drawstars routine
+#draw=1	 ;
+#scrbytewidth=#scrxw/8
+#nrofstars=50
+#nrofanims=73	;Nr of animlists
+#nroflevels=10
+
+#maxtobj=1 ;Max 1 objects on a tile in the virtual sectionmap
+#maxrobj=20 ;max 20 objects in one room or section
+#mxw=10:#myw=10 ;Size of sections and maps
+#maxoffset=#mxw*#myw*2 ;Used in buildguide subroutine
+#vblflag=0 ;Bitnr for vblflag in flagbyte
+flagbyte.b=0	;A byte which can contain different flags i want to use
+
+Dim rooms(#nrofrooms,#mxw+1,#myw+1)
+Dim vmap(#mxw+1,#myw+1)
+Dim objlist(#nrofrooms,#maxrobj)
+Dim oldvmap(#mxw+1,#myw+1)
+Dim oldobjlist(#maxrobj)
+Dim animlist(#nrofanims,#nrofframes)
+Dim levelnames$(#nroflevels)
+
+stoffs.w=Int(2*Pi/0.1)	;Used for generating a list for the
+Dim staroffs.w(2*Pi/0.1);Scrolling stars
+
+Statement drawstars{bmap.l,dx.w,dy.w,drawflag}
+	UNLK	a4
+	MOVE.w d3,drawmode
+	MOVE.w d1,dex	;save dx and dy values
+	MOVE.w d2,dey	;
+	MOVE.l d0,d0	 ;Test which bitmap to use (0 or 1)
+	BNE		bmap1
+	LEA		starbase1,a0	;This is if bitmap 0 is used
+	LEA		starbase0,a3	;
+	LEA		bplbase0,a2	 ;
+	BRA		start
+bmap1:
+	LEA		starbase0,a0	;This is if bitmap 1 is used
+	LEA		starbase1,a3
+	LEA		bplbase1,a2
+start:
+	MOVE.w #nrofstars-1,d1	 ;Load loopcounter
+loop0:
+	MOVE.w drawmode,d3	;If drawmode<>0 then drawstar
+	BNE		drawstar		 ;else clearstar
+;-- start with clearing star ---
+	MOVE.w 6(a3),d0		 ;Test if star has been drawn
+	BEQ		newstar			;If not so then drawstar
+
+	MOVE.w (a3),d0			;Get old x
+	MOVE.w 2(a3),d2		 ;Get old y
+
+	MULU	 #scrbytewidth,d2
+	LSR		#3,d0				;D0=x/8
+	ADD		d0,d2				;add byte offset to rowoffset
+	MOVE.w (a3),d0			;Get x again
+	AND.w	#7,d0
+	MULS.w #-1,d0
+	ADD.w	#7,d0
+
+	MOVE.l (a2),a1			;Get adress to bitplan
+	ADD		d2,a1				;add on adressoffset
+	BCLR.b d0,(a1)			;If we get here its ok to draw pixel
+	BRA		newstar
+
+drawstar:
+	MOVE.w dex,d0			 ;d0=dx
+	MULS.w 4(a0),d0		 ;Multiply with velocity
+	ADD.w	(a0),d0			;add with xpos
+	CMPI	 #scrxw-1,d0	;If x>=320 subtract 320
+	BLE		checkxmin		;
+	SUBI	 #scrxw,d0		;
+	BRA		checkymax
+checkxmin:
+	CMPI	#0,d0
+	BGE	 checkymax
+	ADDI	#scrxw,d0
+
+checkymax:
+	MOVE.w dey,d2			 ;d2=dy
+	MULS.w 4(a0),d2		 ;multiply with velocity
+	ADD.w	2(a0),d2		 ;add ypos
+	CMPI	 #scryw-1,d2	;If y>=200 subtract 200
+	BLE		checkymin		;
+	SUBI	 #scryw,d2		;
+	BRA		continue1
+checkymin:
+	CMPI	#0,d2
+	BGE	 continue1
+	ADDI	#scryw,d2
+
+continue1:
+	MOVE.w d0,(a3)			;Save new x
+	MOVE.w d2,2(a3)		 ;save new y
+
+	MULU	 #scrbytewidth,d2
+	LSR		#3,d0				;D0=x/8
+	ADD		d0,d2				;add byte offset to rowoffset
+	MOVE.w (a3),d0			;Get x again
+	AND.w	#7,d0
+	MULS.w #-1,d0
+	ADD.w	#7,d0
+	CLR.w	6(a3)				;Clear drawflag
+
+	MOVE.w #depth-1,d3	;Load loopcounter
+checkbpl:
+	LSL		#2,d3				;bitplannr * 4
+	MOVE.l 0(a2,d3),a1	;Get adress to bitplan
+	ADD		d2,a1				;add on adressoffset
+	BTST.b d0,(a1)			;Test if pixel exists
+	BNE		newstar			;Exit if pixel is already drawn
+
+	LSR		#2,d3				;Restore loopcounter
+	DBRA	 d3,checkbpl	;Loop through all bitplans
+	BSET.b d0,(a1)			;If we get here its ok to draw pixel
+
+	MOVE.w #-1,6(a3)		;Set drawflag
+newstar:
+	ADD.l	#8,a0			 ;Point to next star
+	ADD.l	#8,a3
+	DBRA d1,loop0
+
+	RTS
+drawmode:
+Dc.w 0
+End Statement
+
+
+NEWTYPE.passage
+	sekt1.w
+	sekt2.w
+	x1.b:y1.b
+	x2.b:y2.b
+	passtype1.b	 ;can be eiter north,east,south,west
+	passtype2.b	 ;
+End NEWTYPE
+Dim pass.passage(#nrofpassages)
+
+NEWTYPE.spaceman
+	totpos.w
+	tilex.w:tiley					;Position on maptile [-4,3]
+	mapx:mapy							;Position on map
+	scrx:scry							;Position on screen without graphics offset
+	animptr								;offset in animlist depending on dir
+	animlist[4]						;Array which contains the shapenrs for animation
+	dir										;Direction 0=n,1=ne,2=e...7=nw
+	retcount							 ;Retardation counter
+	vel
+	flags.b
+	lives.b
+	score.l
+	oldscore.l
+	startscore.l	;The score with which he starts a level
+	scoredigit.b
+	hitpoints.b		;Health
+	oldhitpoints.b ;
+	oxygen.b		;Oxygen
+	oldoxygen.b ;
+	firepower.b
+End NEWTYPE
+#maxoxygen=100
+#maxhealth=100
+#maxscore=9999999
+DEFTYPE .spaceman sp		 ;From hereon spaceman is reffered to as SP
+
+;Some classconstants
+#removed=66	 ;For Obstacles which is toggled and not shot
+#dead=65
+#explosion=64
+#whiteexplosion=67
+#score=68
+#alien=14
+#flag=6
+#switch=16
+#oxygen=17
+#death=18
+#obstacle=12
+#battery=1
+#drink=3
+#fruit=4
+#flower=5
+#parcel=7
+#whiteghost=8
+#blueball=9
+#blackball=10
+#moscito=13
+#slimesnake=15
+#spid=-1					;Idnr for spaceman
+#nrofmissiles=5
+
+
+NEWTYPE.missile
+	totpos.w
+	roomnr.w
+	tilex.w
+	tiley.w
+	mapx.w:mapy.w
+	scrx.w:scry.w
+	animlist.w[4]
+	dir.b
+	vel.b
+	misstype.b								;A bomb or a bullet
+	power.b									 ;Equal to firepower or range
+	info1.b
+End NEWTYPE
+Dim missile.missile(#nrofmissiles)
+Dim misslist.b(#nrofmissiles)	;List to hold track of active missiles
+misslist(0)=0
+misspower=1 ;Power for missiles which can be increased with batteries
+#maxnrofobjects=1000
+
+NEWTYPE.object
+	totpos.w							 ;mapx+mapy*#mxw
+	roomnr.w							 ;
+	class.b								;Can be flag,switch,alien etc
+	mobile.b							 ;True or false
+	movpat.b							 ;1=random:2=patrooling...etc
+	tilex.w:tiley.w					;Position on a floortile -8,7
+	mapx.w:mapy.w							;Mapposition in a section
+	scrx.w:scry.w							;Screenposition
+	animlist.w[4]
+	dir.b									;Direction
+	vel.b									;velocity
+	steps.w								;Used for deciding when to change direction
+	info1.w								;Contains specific classinfo
+	info2.w								;If class=switch then info1= its obstaclenr
+	info3.l
+	score.w
+	damage.w
+	hitpoints.w
+	startmapx.w						;Start values when starting level
+	startmapy.w						;used when restarting
+End NEWTYPE
+#objstructdiff=14 ;Value in bytes counted from info3
+									;This is because different objectstructure
+									;in mapedit
+#lefthandmode=1	 ;These are the values for \movpat
+#searchmode=2		 ;and decides what general strategy a
+#trackmode=3			;mobile object should use when on the move
+
+Macro tp `1+`2:End Macro ;totpos=\scrx+\scry*#scrxw
+Macro sp `1*#xmod+`2,`3*#ymod+`4:End Macro ;Screenpos
+
+Dim object.object(#maxnrofobjects)
+Dim drawlist(#maxrobj,2)
+#shotsound=0
+#hitsound=0				;Obs! Hitsound should have its own sound
+#xplosionsound=1
+#switchsound=2
+#exitsound=3
+#flagsound=4
+#gameoversound=5
+#aliensound=6
+#eatsound=7
+#sphurtsound=8
+#alienhurtsound=9
+#parcelsound=10
+#flowersound=#parcelsound
+#batterysound=#switchsound
+#drinksound=13
+#oxygensound=#eatsound
+#startsound=14
+#spdiesound=15
+#excellentsound=16
+#hastasound=17
+;deathsound
+LoadSound #excellentsound,"sounds/excellent.sfx"
+LoadSound #hastasound,"sounds/hastalavisita1.sfx"
+LoadSound #startsound,"sounds/okeydokey.sfx"
+LoadSound #spdiesound,"sounds/spdie.sfx"
+LoadSound #shotsound,"sounds/shot2.sfx"
+LoadSound #xplosionsound,"sounds/boom.sfx"
+LoadSound #flagsound,"sounds/ajloveit.sfx"
+LoadSound #exitsound,"sounds/exit.sfx"
+LoadSound #switchsound,"sounds/ufo.sfx"
+LoadSound #gameoversound,"sounds/gameover.sfx"
+LoadSound #aliensound,"sounds/appear3.sfx"
+LoadSound #eatsound,"sounds/speat.sfx"
+LoadSound #parcelsound,"sounds/parcel.sfx"
+LoadSound #drinksound,"sounds/spdrink.sfx"
+LoadSound #sphurtsound,"sounds/sphurt.sfx"
+LoadSound #alienhurtsound,"sounds/die3.sfx"
+;LoadMedModule 0,"dh0:sptune1.med"
+;StartMedModule 0
+nrofshapes=227
+nroffloorshapes=16
+LoadShapes 0,"shapes/sp3dshapes"
+LoadShape nrofshapes+nroffloorshapes+1,"shapes/scoreshapes"
+scoreshapebase=nrofshapes+nroffloorshapes+1
+LoadShape scoreshapebase+10,"graphics/game over2.brush"
+gameovershapebase=scoreshapebase+10
+;read in	floortiles
+;LoadShapes nrofshapes,"shapes/sp3dfloorshapes"
+;LoadShape nrofshapes+1,"blitz2:spacemancode/sp3danims/floor1.brush",0
+LoadPalette 0,"graphics/hero_spm2.iff"
+;--- Setup screen -----------
+
+;BitMap 0,#scrxw,#scryw,#depth
+BitMap 1,#scrxw,#scryw,#depth
+Buffer 0,30000			;Remember to increase these if
+Buffer 1,30000			;buffer overflow occurs
+
+BitMap 2,#scrxw,40,#depth
+BitMap 3,#scrxw,40,#depth
+LoadBitMap 2,"graphics/sptopscreen1.iff",2
+LoadBitMap 3,"graphics/spbottomscreen1.iff",3
+StopCycle 3,1,$b,$8,0 ;Change colour for scoredigits
+Gosub initstars
+
+QAMIGA
+
+ClrInt 5
+
+Gosub readlevelnames
+levelnr.w=1
+level$=levelnames$(levelnr)
+Gosub readroomdata
+Gosub initspaceman
+sp\oxygen=roomnr
+Gosub readobjectdata
+Gosub readpassagedata
+Gosub initobjects
+Gosub initanimlists
+
+
+For a=1 To 150
+	VWait
+Next
+BLITZ
+ShowBlitz
+#play=1 ;Gamemodes
+#load=2 ;
+gamemode.b=#play
+db.l=0
+;Set a vblflag every twice frame
+SetInt 5
+	flagbyte BitChg #vblflag
+	soundupdate+1
+;	PlayMed
+End SetInt
+DisplayOff
+FreeSlices
+StopCycle 0,0,0,0,$2 ;Set background to darkblue
+StopCycle 2,0,0,0,$2 ;Set background to darkblue
+StopCycle 3,0,0,0,$2 ;Set background to darkblue
+Slice 2,44,320,40,$fff8,5,8,32,320,320
+Use SetCycle 2
+Show 2
+Slice 3,236,320,40,$fff8,5,8,32,320,320
+Use SetCycle 3
+Show 3
+
+Use BitMap db
+Slice 0,44+42,#scrxw,148,$fff8,#depth,8,32,320,320
+BlitzKeys On
+Use SetCycle 0
+Dim col(31,2) ;A array for storing palette values when pause
+	For a=0 To 31
+		col(a,0)=Blue(a):col(a,1)=Palette(a):col(a,2)=PalRGB(a)
+		StopCycle 4,a,col(a,0)/2,col(a,1)/2,col(a,2)/2
+	Next
+
+sp\lives=3
+sp\flags=0
+level=1
+beginlevel:
+FadeOut 0,0
+Show 0,0,#bmapyoffset
+roomnr=1
+Gosub displaylives
+BitMapOutput 1-db
+Gosub drawa3droom
+Gosub createvmap
+Gosub makedrawlist
+
+
+dx.w=2:dy.w=0
+so=0;staroffset counter
+animcount.b=0
+gametime.w=0
+aliendeath.b=0 ;Counter used when triggering sound a while after death
+buttrelease.b=False		;Used for determine if firebutton is released
+pause=False ;Used for toggling pausemode with "p"
+oldroom=False ;We have not yet moved to another room
+oldobjptr=0	 ;Pointer to which old object that should be updated
+stackptr.l=?stack
+sp\startscore=sp\score
+;sp\hitpoints=20
+;sp\oxygen=50
+;sp\flags=
+;sp\flags=0
+SetMedMask 15
+StopMed
+DisplayOn
+Sound #startsound,2
+FadeIn 0,1
+gameover=False
+spdead=False
+.main
+;Exit with Escape or "Q"(uit)
+While RawStatus($45)=0 AND RawStatus($10)=0
+	VWait
+	If flagbyte BitTst #vblflag	 ;Only exit every second frame
+		Show db,0,#bmapyoffset
+		db=1-db
+		Use BitMap db
+		Gosub makedrawlist
+		animcount+1:If animcount>#nrofframes Then animcount=0
+		gametime+1
+		;A little test with scrolling stars
+		so1+1													;
+		If so1=10											;
+			so+1:If so=stoffs Then so=0	;
+			so1=0													;
+		EndIf													;
+
+		UnBuffer db
+		drawstars{db,staroffs(so),staroffs(so),#clear}
+
+		;Draw all shapes on screen
+		;MOVE.w #$f,$dff180
+		USEPATH object(b)
+		nrofo.w=objlist(roomnr,0)+misslist(0) ;nrofo is the amount of objects
+		For a=1 To nrofo+1
+			min.w=32000		;A startvalue for comparisons in getobjnr
+			Gosub getobjnr ;Decide which object is in turn to be drawn
+			If b=#spid AND gameover=False
+				If Joyr(1)=8
+					BBlit db,animlist(sp\animlist[sp\animptr-1],0),sp\scrx-sp\scry+#scrdx,sp\scrx/2+sp\scry/2+#scrdy
+				Else
+					BBlit db,animlist(sp\animlist[sp\animptr-1],animcount),sp\scrx-sp\scry+#scrdx,sp\scrx/2+sp\scry/2+#scrdy
+				EndIf
+			EndIf
+			If b>0 AND b<$1000
+				BBlit db,animlist(\animlist[\dir-1],animcount),\scrx-\scry+#scrdx,(\scrx+\scry)ASR1+#scrdy
+			EndIf
+			If b>=$1000
+				b-$1000
+				USEPATH missile(b)
+				BBlit db,animlist(\animlist[\dir-1],animcount),\scrx-\scry+#scrdx,(\scrx+\scry)ASR1+#scrdy
+			EndIf
+		Next
+		If gameover=True
+			goy.q+0.2
+			If goy>2*Pi Then goy=0
+			BBlit db,gameovershapebase,92,64+20*HSin(goy)
+		EndIf
+		;MOVE.w #$50,$dff180
+		drawstars{db,staroffs(so),1,#draw}
+		If pause=False AND gameover=False
+			;All kind of updates should be done here in the
+			;"pausable" section.
+			gametime+1
+			If gametime>300
+				gametime=0
+				sp\oxygen-1
+			EndIf
+			Gosub movespaceman
+			If Joyb(1)=0 Then buttrelease=True
+			If Joyb(1) Then Gosub buttonaction
+			Gosub buildguide
+			Gosub moveobjects1
+			If oldroom=True AND oldobjlist(0)>0
+				oldobjptr+1
+				If oldobjptr>oldobjlist(0)
+					oldobjptr=1
+				EndIf
+				b=oldobjlist(oldobjptr)
+				Gosub moveoldobjects
+			EndIf
+			Gosub updatemissiles
+		EndIf
+		If sp\oldscore<>sp\score
+			Gosub displayscore
+		EndIf
+		If aliendeath>0 ;Has any alien died lately
+			aliendeath-1
+			If aliendeath=0 Then Sound #hastasound,2
+		EndIf
+		If spdead=True
+				spdead=False
+				If sp\lives>=0
+					sp\lives-1
+					If sp\lives>=0
+						Gosub spdeath
+					EndIf
+				EndIf
+				If sp\lives<0		 ;No more lives
+					Sound #gameoversound,4
+					gameover=True
+					FadeOut 0,1
+					VWait 50
+					StartMedModule 0
+					FadeIn 0,1
+				EndIf
+				If gameover=False
+					Goto beginlevel
+				EndIf
+		EndIf
+		If sp\oldhitpoints<>sp\hitpoints AND gameover=False
+			Gosub displayhealth
+			sp\oldhitpoints=sp\hitpoints
+			If sp\hitpoints<0
+				Sound #spdiesound,2
+				spdead=True
+			EndIf
+		EndIf
+		If gameover=True
+				If Joyb(1)<>0 ;If fire then start game all over again
+					level=1
+					Gosub initspaceman
+					Gosub nextlevel
+					Goto beginlevel
+				EndIf
+				If RawStatus($45)<>0 OR RawStatus($10)<>0
+					Goto exitgame	;If "Esc" or "Q" then exit game
+				EndIf
+		EndIf
+		If sp\oldoxygen<>sp\oxygen
+			If sp\oxygen<0
+				Sound #spdiesound,2
+				Gosub nooxygen
+				Gosub nextlevel
+				Goto beginlevel
+			EndIf
+			Gosub displayoxygen
+			sp\oldoxygen=sp\oxygen
+		EndIf
+		If sp\flags>=nrofflags
+			almostclear.b+1	 ;A counter for letting game go on for a while
+			If almostclear>25 ;after picking up the last flag (nice touch)
+				level+1
+				Sound #excellentsound,2
+				Gosub nextlevel
+				gamemode=#play
+				Goto beginlevel
+			EndIf
+		Else
+			almostclear=0
+		EndIf
+		If RawStatus($5f)
+;			Gosub debug
+		EndIf
+;		If RawStatus($50) Then sp\oxygen=0
+;		If RawStatus($51) Then sp\lives=0
+;		If RawStatus($52) Then sp\flags=nrofflags
+;		If RawStatus($53) Then sp\oxygen=#maxoxygen
+;		If RawStatus($54) Then sp\lives=3
+;		If RawStatus($55) Then sp\hitpoints=#maxhealth
+		If RawStatus($19)
+			If pause=True
+				pause=False
+				Use SetCycle 0
+			Else
+				pause=True
+				Use SetCycle 4
+			EndIf
+			Repeat:Until RawStatus($19)=0
+		EndIf
+	EndIf
+Wend
+
+exitgame:
+	ClrInt 5
+	;StopMed
+End
+
+.gameover
+	BitMapOutput 1-db
+	Use BitMap 1-db
+FadeOut 0,1
+VWait 50
+	StartMedModule 0
+;	Blit gameovershapebase,92,65
+	FadeIn 0,1
+	Return
+
+.nooxygen
+	;Start the level all over again.
+	;Reduce the points to their old state
+	;Restore health and oxygen
+	FadeOut 0,1,1,31
+	sp\hitpoints=#maxhealth
+	sp\oxygen=#maxoxygen
+	sp\score=sp\startscore
+	roomnr=1
+	sp\mapx=2:sp\mapy=2
+	sp\scrx=sp\mapx*#xmod
+	sp\scry=sp\mapy*#ymod
+	sp\animptr=#east
+	FadeOut 0,1
+	BlockScroll 0
+Return
+
+.spdeath
+	b=0
+	FadeOut 0,1,1,31
+	sp\hitpoints=#maxhealth
+	roomnr=1
+	sp\mapx=2:sp\mapy=2
+	sp\scrx=sp\mapx*#xmod
+	sp\scry=sp\mapy*#ymod
+	sp\animptr=#east
+	For a=1 To objlist(1,0)
+		b=objlist(1,a)
+		object(b)\mapx=object(b)\startmapx
+		object(b)\mapy=object(b)\startmapy
+	Next
+	Gosub displaylives
+	FadeOut 0,1
+	BlockScroll 0
+;	ShowBlitz
+Return
+
+.nextlevel
+	FadeOut 0,1,1,31
+	Use BitMap 1-db
+	StartMedModule 0
+	BlockScroll 0
+	FadeIn 0,0
+	BitMapOutput 1-db
+	Use BitMap 1-db
+	If level<=#nroflevels
+		Blit scoreshapebase+level/10,140,100
+		Blit scoreshapebase+level-(level/10)*10,162,100
+		level$=levelnames$(level)
+	Else
+		level=1
+	EndIf
+	level$=levelnames$(level)
+	QAMIGA
+	gamemode=#load
+	Gosub clearlists
+	sp\mapx=2:sp\mapy=2		;Always start here
+	sp\scrx=sp\mapx*#xmod
+	sp\scry=sp\mapy*#ymod
+	sp\animptr=#east
+	sp\flags=0
+	Gosub readroomdata
+	sp\oxygen=roomnr
+	If sp\oxygen>#maxoxygen Then sp\oxygen=#maxoxygen
+	Gosub readobjectdata
+	Gosub readpassagedata
+	Gosub initobjects
+	Gosub initanimlists
+	roomnr=1
+	For a=1 To 150
+		VWait
+	Next
+	BLITZ
+	FadeOut 0,1
+	BlockScroll 0
+	ShowBlitz
+Return
+
+.buttonaction
+	;Only enter here if button was previously released
+	If buttrelease=True
+	buttrelease=False
+		o=0
+		Select sp\animptr
+			Case #north
+			If sp\tiley<-2
+				o=vmap(sp\mapx,sp\mapy-1) ;Get objectnr in front of SP
+			EndIf
+			Case #east
+			If sp\tilex>=2
+				o=vmap(sp\mapx+1,sp\mapy) ;Get objectnr in front of SP
+			EndIf
+			Case #south
+			If sp\tiley>=2
+				o=vmap(sp\mapx,sp\mapy+1) ;Get objectnr in front of SP
+			EndIf
+			Case #west
+			If sp\tilex<-2
+			o=vmap(sp\mapx-1,sp\mapy) ;Get objectnr in front of SP
+			EndIf
+		End Select
+		If o>0
+			If object(o)\class=#switch
+				USEPATH object(o)
+				Select \dir
+					Case #north
+						\dir=#south
+					Case #south
+						\dir=#north
+					Case #east
+						\dir=#west
+					Case #west
+						\dir=#east
+				End Select
+				;Remove or replace obstacle which number is in \info1
+				o1=\info1
+				USEPATH object(o1)
+				If \class<>#dead
+					If \class=#removed
+						\class=#obstacle
+						objlist(\roomnr,objlist(\roomnr,0)+1)=o1
+						objlist(\roomnr,0)+1
+						If \roomnr=roomnr
+							 vmap(\mapx,\mapy)=o1
+						EndIf
+						If \roomnr=oldroomnr
+							 oldvmap(\mapx,\mapy)=o1
+						EndIf
+					Else
+						\class=#removed
+						n=objlist(\roomnr,0)
+						For a=1 To n
+							If objlist(\roomnr,a)=o1
+								objlist(\roomnr,a)=objlist(\roomnr,n)
+								objlist(\roomnr,n)=0
+								objlist(\roomnr,0)-1
+								If \roomnr=roomnr
+									vmap(\mapx,\mapy)=0
+								EndIf
+								If \roomnr=oldroomnr
+									oldvmap(\mapx,\mapy)=0
+								EndIf
+							EndIf
+						Next
+					EndIf
+				EndIf
+				Sound #switchsound,1
+			Else
+			 Gosub shoot
+			EndIf
+		Else
+			Gosub shoot
+		EndIf
+	EndIf
+	Return
+
+
+
+displayhealth:
+	BitMapOutput 3
+	Use BitMap 3
+	x=16:y=12
+	Boxf x,y,x+50-1,y+2,0
+	If sp\hitpoints>#maxhealth Then sp\hitpoints=#maxhealth
+	If sp\hitpoints>=2
+		Boxf x,y,x+sp\hitpoints/2-1,y+2,7
+	EndIf
+	Use BitMap 1-db
+	Return
+
+displayoxygen:
+	BitMapOutput 3
+	Use BitMap 3
+	x=16:y=30
+	Boxf x,y,x+50-1,y+2,0
+	If sp\oxygen>#maxoxygen Then sp\oxygen=#maxoxygen
+	If sp\oxygen>=2
+		Boxf x,y,x+sp\oxygen/2-1,y+2,3
+	EndIf
+;	Locate 0,1
+;	Print "Oxygen:",sp\oxygen," "
+	Use BitMap 1-db
+	Return
+
+displaylives:
+	BitMapOutput 3
+	Use BitMap 3
+	If sp\lives>-1 AND sp\lives<10
+		Boxf 293,15,313,32,0
+		Blit scoreshapebase+sp\lives,293,15
+	EndIf
+	Use BitMap 1-db
+	Return
+
+.displayscore
+	BitMapOutput 3
+	Use BitMap 3
+	s$=Str$(sp\score)
+	s$=LSet$("0000000",7-Len(s$))+s$
+	sp\scoredigit-1
+	If sp\scoredigit=0
+		sp\oldscore=sp\score
+		sp\scoredigit=7
+	EndIf
+	x=sp\scoredigit
+	Boxf 70+x*20,15,90+x*20,32,0
+	Blit scoreshapebase+Val(Mid$(s$,x,1)),70+x*20,15
+	scoreupdate=0
+Return
+
+.debug
+	BitMapOutput 1-db
+	Locate 0,6
+	Print objlist(roomnr,0)
+
+
+For a=1 To objlist(roomnr,0)
+	b=objlist(roomnr,a)
+
+	If a>0
+	NPrint b,":",object(b)\class,"	 "
+	EndIf
+Next
+MouseWait
+Return
+
+getobjnr:
+;This little nice assemblerroutine goes through
+;all the object positions previously stored on
+;the memory location objdrawlist by the subroutine
+;makedrawlist
+	GetReg d0,min		 ;startvalue for comparisons (initialized in main)
+	GetReg d1,nrofo	 ;Nr of objects (initialized in main)
+	LEA objdrawlist,a0 ;Get the adress of the drawlist
+	LEA objdrawlist,a1 ;Also initialize a1.
+shloop0:
+	LSL #2,d1					;d1*4=offset for last object
+	CMP.w #0,0(a0,d1)	;If objpos=0 then it has already been drawn
+	BLT shcont0				;
+	CMP.w 0(a0,d1),d0	;If objpos>min then look for next pos
+	BLT shcont0
+	MOVE.w 0(a0,d1),d0 ;Else min=objpos
+	MOVE.l a0,a1			 ;Save objpos memorylocation
+	ADD.l	d1,a1			 ;
+
+shcont0:
+	LSR #2,d1					;Restore loopcounter
+	DBRA d1,shloop0		;Go through all objects
+	MOVE.w 2(a1),d2		;Return object in turn to draw
+	MOVE.w #-1,(a1)				 ;Reset position so its not included
+	PutReg d2,b				;again
+Return
+
+.makedrawlist
+;makedrawlist
+b= objlist(roomnr,0)
+If b>0
+	USEPATH object(c)
+	For a=1 To b
+			c=objlist(roomnr,a)		 ;b=objektnr
+			Poke.w ?objdrawlist+(a-1)*4,\totpos	 ;Put objects totpos in drawlist
+			Poke.w ?objdrawlist+(a-1)*4+2,c				 ;and its objectnr
+	Next
+EndIf
+	Poke.w ?objdrawlist+(b*4),sp\totpos
+	Poke.w ?objdrawlist+(b*4)+2,#spid
+;Also poke in any missiles
+	ms=b*4+4
+b= misslist(0)
+If b>0
+	USEPATH missile(c)
+	For a=1 To b
+			c=misslist(a)		 ;b=objektnr
+			Poke.w ?objdrawlist+ms+(a-1)*4,\totpos	 ;Put objects totpos in drawlist
+			Poke.w ?objdrawlist+ms+(a-1)*4+2,c+$1000 ;and its objectnr
+	Next
+EndIf
+Return
+objdrawlist:
+	Dcb.w #maxrobj*2+#nrofmissiles*2,0
+
+
+
+.shoot
+;only a crude shootroutine
+	If misslist(0)<#nrofmissiles
+		misslist(0)+1
+		misslist(misslist(0))=misslist(0)
+		USEPATH missile(misslist(0))
+		\tilex=(sp\tilex ASL 1)
+		\tiley=(sp\tiley ASL 1)
+		\mapx=sp\mapx
+		\mapy=sp\mapy
+		\dir=sp\animptr
+		\power=sp\firepower
+		If \mapx=1 AND \dir=#east Then \mapx=2:\tilex=-8
+		If \mapx=10 AND \dir=#west Then \mapx=9:\tilex=7
+		If \mapy=1 AND \dir=#south Then \mapy=2:\tiley=-8
+		If \mapy=10 AND \dir=#north Then \mapy=9:\tiley=7
+		\vel=4
+		\scrx=!sp{\mapx,\tilex,\mapy,\tiley}
+		\totpos=!tp{\scrx,\scry}
+		\animlist[0]=11
+		\animlist[1]=11
+		\animlist[2]=11
+		\animlist[3]=11
+		\misstype=0
+		\info1=0
+		Sound #shotsound,1
+	EndIf
+	Return
+
+.updatemissiles
+	remove=0
+	For m=1 To misslist(0)
+	If m>0
+		missnr=misslist(m)
+		USEPATH missile(missnr)
+		If \misstype<>#whiteexplosion AND \misstype<>#explosion
+			Select \dir
+				Case #east:a=1:b=0
+				Case #south:a=0:b=1
+				Case #west:a=-1:b=0
+				Case #north:a=0:b=-1
+			End Select
+			If vmap(\mapx,\mapy)>0	;Check for collission before moving
+				objnr=vmap(\mapx,\mapy)
+				USEPATH object(objnr)
+				x=\tilex:y=\tiley
+				USEPATH missile(missnr)
+				If Abs(\tilex-x)<10
+					If Abs(\tiley-y)<10
+						Gosub objecthit
+						Goto finito1
+					EndIf
+				EndIf
+			EndIf
+			\tilex+a*\vel:\tiley+b*\vel
+			If ((\tilex<-8 OR \tilex>7) AND a<>0) OR ((\tiley<-8 OR \tiley>7) AND b<>0)
+				If ((\mapx>1 AND \mapx<#mxw) AND a<>0) OR ((\mapy>1 AND \mapy<#mxw) AND b<>0)
+					\tilex-a*16:\tiley-b*16
+					\mapx+a:\mapy+b
+					If vmap(\mapx,\mapy)>0
+						objnr=vmap(\mapx,\mapy)
+						USEPATH object(objnr)
+						x=\tilex:y=\tiley
+						USEPATH missile(missnr)
+						If Abs(\tilex-x)<10
+							If Abs(\tiley-y)<10
+								Gosub objecthit
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+finito1
+			\scrx=!sp{\mapx,\tilex,\mapy,\tiley}
+			\totpos=!tp{\scrx,\scry}
+			If (\mapx>=#mxw AND \dir=#east)OR(\mapx<=1 AND \dir=#west)OR(\mapy>=#myw AND \dir=#south)OR(\mapy<=1 AND \dir=#north)
+;				 misslist(m)=misslist(misslist(0))
+;				 misslist(0)-1
+				 remove BitSet m
+			EndIf
+		EndIf
+		If \misstype=#whiteexplosion OR \misstype=#explosion
+			\info1+1
+			If \info1>=8
+;				 misslist(m)=misslist(misslist(0))
+;				 misslist(0)-1
+					remove BitSet m
+			EndIf
+		EndIf
+	EndIf
+	Next
+	For m=1 To misslist(0)
+		If remove BitTst m
+			misslist(m)=misslist(misslist(0))
+			misslist(0)-1
+		EndIf
+	Next
+	Return
+
+.objecthit
+	Sound #hitsound,1
+	If object(objnr)\mobile
+		Sound #alienhurtsound,2
+	EndIf
+	If object(objnr)\hitpoints>=0
+		object(objnr)\hitpoints-missile(missnr)\power
+		If object(objnr)\hitpoints<=0
+			missile(missnr)\misstype=#explosion
+			missile(missnr)\dir=1
+			missile(missnr)\info1=0
+			missile(missnr)\animlist[0]=1
+			USEPATH object(objnr)
+			If \mobile=True
+				sp\score+\score
+				\class=#score
+				\mobile=False
+				Select \score
+					Case 20 :\animlist[0]=62
+					Case 50 :\animlist[0]=63
+					Case 80 :\animlist[0]=64
+					Case 150 :\animlist[0]=65
+					Case 250 :\animlist[0]=66
+					Case 500 :\animlist[0]=67
+					Case 800 :\animlist[0]=68
+				End Select
+				\dir=1
+				\info2=0		;Counter for scores lifelength
+				If \roomnr=roomnr
+					vmap(\mapx,\mapy)=0
+				EndIf
+				If \roomnr=oldroomnr
+					oldvmap(\mapx,\mapy)=0
+				EndIf
+				Sound #aliensound,4
+				aliendeath=16 ;A counter for knowing when to say hastalavista
+										 ;It is decreased in mainloop
+			Else
+				Gosub killobject
+			EndIf
+			Sound #xplosionsound,2
+		EndIf
+	EndIf
+;	misslist(m)=misslist(misslist(0))
+;	misslist(0)-1
+	If missile(missnr)\misstype<>#explosion
+		missile(missnr)\misstype=#whiteexplosion
+		missile(missnr)\dir=1
+		missile(missnr)\info1=0
+		missile(missnr)\animlist[0]=60
+	EndIf
+Return
+
+.moveobjects1
+	For m=1 To objlist(roomnr,0)
+		b=objlist(roomnr,m)
+		USEPATH object(b)
+;		c=\class
+;		If c=#alien OR c=#whiteghost OR c=#blueball OR c=#blackball OR c=#moscito OR c=#slimesnake
+		 If \mobile=True
+			aliens=True
+			oldmapx=\mapx:oldmapy=\mapy
+;			\steps=1
+;			If \steps=0 Then \steps=5
+			Select \dir
+			Case #east
+
+				\tilex+\vel
+				If \tilex=0
+;					\steps-1
+;					If \steps=0
+						Gosub changedir
+;					EndIf
+				EndIf
+				If \tilex>0
+					If rooms(roomnr,\mapx+1,\mapy)<1 OR vmap(\mapx+1,\mapy)>0
+						\tilex=0
+						Gosub changedir;here we should change direction
+					Else
+						If \tilex>7
+							\tilex-16
+							\mapx+1
+						EndIf
+					EndIf
+				EndIf
+			Case #south
+				\tiley+\vel
+				If \tiley=0
+ ;				 \steps-1
+ ;				 If \steps=0
+						Gosub changedir
+ ;				 EndIf
+				EndIf
+				If \tiley>0
+					If rooms(roomnr,\mapx,\mapy+1)<1 OR vmap(\mapx,\mapy+1)>0
+						\tiley=0
+						Gosub changedir;here we should change direction
+					Else
+						If \tiley>7
+							\tiley-16
+							\mapy+1
+						EndIf
+					EndIf
+				EndIf
+			Case #west
+				\tilex-\vel
+				If \tilex=0
+;					\steps-1
+;					If \steps=0
+						Gosub changedir
+;					EndIf
+				EndIf
+				If \tilex<0
+					If rooms(roomnr,\mapx-1,\mapy)<1	OR vmap(\mapx-1,\mapy)>0
+						\tilex=0
+						Gosub changedir;here we should change direction
+					Else
+						If \tilex<-8
+							\tilex+16
+							\mapx-1
+						EndIf
+					EndIf
+				EndIf
+			Case #north
+				\tiley-\vel
+				If \tiley=0
+ ;				 \steps-1
+ ;				 If \steps=0
+						Gosub changedir
+ ;				 EndIf
+				EndIf
+				If \tiley<0
+					If rooms(roomnr,\mapx,\mapy-1)<1 OR vmap(\mapx,\mapy-1)>0
+						\tiley=0
+						Gosub changedir;here we should change direction
+					Else
+						If \tiley<-8
+							\tiley+16
+							\mapy-1
+						EndIf
+					EndIf
+				EndIf
+				Default
+					Gosub changedir
+			End Select
+
+			\scrx=!sp{\mapx,\tilex,\mapy,\tiley}
+			\totpos=!tp{\scrx,\scry}
+			vmap(oldmapx,oldmapy)=0
+			vmap(\mapx,\mapy)=b
+	EndIf
+	If \class=#score
+		\info2+1
+		If \info2>23
+			objnr=b
+			Gosub killobject
+		EndIf
+	EndIf
+	Next
+	Return
+
+.smartmove
+	USEPATH object(b)
+	\movpat=#trackmode
+	;This little routine switches the alien between two
+	;movementsmodes searchmode or lefthandmode
+	lm:
+	If \movpat=#lefthandmode
+		Select \dir
+		Case #east:a=1:c=0
+		Case #south:a=0:c=1
+		Case #west:a=-1:c=0
+		Case #north:a=0:c=-1
+		End Select
+		If rooms(roomnr,\mapx+c,\mapy-a)<=0 OR vmap(\mapx+c,\mapy-a)>0
+			If rooms(roomnr,\mapx+a,\mapy+c)<=0 OR vmap(\mapx+a,\mapy+c)>0
+				;If something is in the way then turn right
+				\dir+1:If \dir=5 Then \dir=1
+				\steps=0
+			EndIf
+		Else
+			;If nothing is in the way, and nothing to
+			;the left, then turn left
+			\dir-1:If \dir=0 Then \dir=4
+			\steps+1
+			If \steps=4 ;We are walking in circles here...
+				\steps=0
+				\movpat=#searchmode
+			EndIf
+		EndIf
+		If Abs(\mapx-sp\mapx)<2
+			If Abs(\mapy-sp\mapy)<2
+				\movpat=#searchmode
+			EndIf
+		EndIf
+	EndIf
+	If \movpat=#searchmode
+		If sp\mapy<\mapy
+			\dir=#north
+		EndIf
+		If sp\mapy>\mapy
+			\dir=#south
+		EndIf
+		If sp\mapx<\mapx
+			\dir=#west
+		EndIf
+		 If sp\mapx>\mapx
+			\dir=#east
+		EndIf
+		Select \dir
+		Case #east:a=1:c=0
+		Case #south:a=0:c=1
+		Case #west:a=-1:c=0
+		Case #north:a=0:c=-1
+		End Select
+		If rooms(roomnr,\mapx+a,\mapy+c)<=0 OR object(vmap(\mapx+a,\mapy+c))\mobile=False
+			\movpat=#lefthandmode
+		EndIf
+	EndIf
+	If \movpat=#trackmode
+		;This uses the guide that is created every frame
+		min=100 ;No value larger than this should appear in the guide
+		;Get value in north	tile
+		c=Peek.w (?guide+((\mapy-2)*#mxw+(\mapx-1))ASL1)
+
+		If c>0 AND vmap(\mapx,\mapy-1)=0
+			If min>c
+				min=c
+				\dir=#north
+			EndIf
+		EndIf
+		;Get value in south tile
+		c=Peek.w (?guide+((\mapy)*#mxw+(\mapx-1))ASL1)
+		If c>0 AND vmap(\mapx,\mapy+1)=0
+			If min>c
+				min=c
+				\dir=#south
+			EndIf
+		EndIf
+		;Get value in east tile
+		c=Peek.w (?guide+((\mapy-1)*#mxw+(\mapx))ASL1)
+		If c>0 AND vmap(\mapx+1,\mapy)=0
+			If min>c
+				min=c
+				\dir=#east
+			EndIf
+		EndIf
+		;Get value in west tile
+		c=Peek.w (?guide+((\mapy-1)*#mxw+(\mapx-2))ASL1)
+		If c>0 AND vmap(\mapx-1,\mapy)=0
+			If min>c
+				min=c
+				\dir=#west
+			EndIf
+		EndIf
+		If min=100 Then \movpat=#lefthandmode:Goto lm
+	EndIf
+	Return
+.moveoldobjects
+;Old objects are objects from the latest visited
+;room. They are only updated one at a time and they
+;are only moved by whole squares. They change direction
+;with help of the subroutine oldchangedir
+		USEPATH object(b)
+		If \class=#alien
+			oldmapx=\mapx:oldmapy=\mapy
+			If \steps=0 Then \steps=5
+			Select \dir
+			Case #east
+					\steps-1
+					If \steps=0
+						Gosub oldchangedir
+					EndIf
+					If rooms(oldroomnr,\mapx+1,\mapy)<1 OR oldvmap(\mapx+1,\mapy)>0
+						Gosub oldchangedir;here we should change direction
+					Else
+						\mapx+1
+					EndIf
+			Case #south
+					\steps-1
+					If \steps=0
+						Gosub oldchangedir
+					EndIf
+					If rooms(oldroomnr,\mapx,\mapy+1)<1 OR oldvmap(\mapx,\mapy+1)>0
+						Gosub oldchangedir;here we should change direction
+					Else
+						\mapy+1
+					EndIf
+			Case #west
+					\steps-1
+					If \steps=0
+						Gosub oldchangedir
+					EndIf
+					If rooms(oldroomnr,\mapx-1,\mapy)<1	OR oldvmap(\mapx-1,\mapy)>0
+						Gosub oldchangedir;here we should change direction
+					Else
+						\mapx-1
+					EndIf
+			Case #north
+					\steps-1
+					If \steps=0
+						Gosub oldchangedir
+					EndIf
+					If rooms(oldroomnr,\mapx,\mapy-1)<1 OR oldvmap(\mapx,\mapy-1)>0
+						Gosub oldchangedir;here we should change direction
+					Else
+						\mapy-1
+					EndIf
+				Default
+					Gosub oldchangedir
+			End Select
+			\tilex=0:\tiley=0
+			\scrx=!sp{\mapx,\tilex,\mapy,\tiley}
+			\totpos=!tp{\scrx,\scry}
+			oldvmap(oldmapx,oldmapy)=0
+			oldvmap(\mapx,\mapy)=b
+	EndIf
+	If \class=#explosion
+	 \info2+1
+	 If \info2>7
+				\class=#dead
+				n=objlist(\roomnr,0)
+				For a=1 To n
+					If objlist(\roomnr,a)=b
+						objlist(\roomnr,a)=objlist(\roomnr,n)
+						objlist(\roomnr,n)=0
+						objlist(\roomnr,0)-1
+						If \roomnr=roomnr
+							vmap(\mapx,\mapy)=0
+						EndIf
+						If \roomnr=oldroomnr
+							oldvmap(\mapx,\mapy)=0
+						EndIf
+					EndIf
+				Next
+		 EndIf
+		EndIf
+	Return
+
+.killobject
+	USEPATH object(objnr)
+	\class=#dead
+	kon=objlist(\roomnr,0)
+	For koa=1 To kon
+		If objlist(\roomnr,koa)=objnr
+			objlist(\roomnr,koa)=objlist(\roomnr,kon)
+			objlist(\roomnr,kon)=0
+			objlist(\roomnr,0)-1
+			If \roomnr=roomnr
+				vmap(\mapx,\mapy)=0
+			EndIf
+			If \roomnr=oldroomnr
+				oldvmap(\mapx,\mapy)=0
+			EndIf
+		EndIf
+	Next
+Return
+
+.smartchangedir
+Goto smartmove
+	USEPATH object(b)
+	ways=0
+	If rooms(roomnr,\mapx,\mapy-1)>0 OR vmap(\mapx,\mapy-1)>0
+		ways+1
+	EndIf
+	If rooms(roomnr,\mapx,\mapy+1)>0 OR vmap(\mapx,\mapy+1)>0
+		ways+2
+	EndIf
+	If rooms(roomnr,\mapx-1,\mapy)>0 OR vmap(\mapx-1,\mapy)>0
+		ways+4
+	EndIf
+	If rooms(roomnr,\mapx+1,\mapy)>0 OR vmap(\mapx+1,\mapy)>0
+		ways+8
+	EndIf
+	If \mapx<sp\mapx AND ways BitTst 3
+		\dir=#east
+	EndIf
+	If \mapx>sp\mapx AND ways BitTst 2
+		\dir=#west
+	EndIf
+	If \mapy<sp\mapy AND ways BitTst 1
+		\dir=#south
+	EndIf
+	If \mapy>sp\mapy AND ways BitTst 0
+		\dir=#north
+	EndIf
+
+	If \dir>4 OR \dir<1 Then \dir=1
+	Return
+
+.changedir
+	Goto smartchangedir
+	USEPATH object(b)
+	ways=0
+	If rooms(roomnr,\mapx,\mapy-1)>0 OR vmap(\mapx,\mapy-1)>0
+		ways+1
+	EndIf
+	If rooms(roomnr,\mapx,\mapy+1)>0 OR vmap(\mapx,\mapy+1)>0
+		ways+2
+	EndIf
+	If rooms(roomnr,\mapx-1,\mapy)>0 OR vmap(\mapx-1,\mapy)>0
+		ways+4
+	EndIf
+	If rooms(roomnr,\mapx+1,\mapy)>0 OR vmap(\mapx+1,\mapy)>0
+		ways+8
+	EndIf
+	Select ways
+		Case 1:\dir=#north
+		Case 2:\dir=#south
+		Case 3:\dir=1+Int(Rnd(2))*2 ;Either 1 or 3
+		Case 4:\dir=#west
+		Case 5:\dir=1+Int(Rnd(2))*3 ;Either 1 or 4
+		Case 6:\dir=3+Int(Rnd(2)) ;Either 3 or 4
+		Case 7:\dir= 5-2^Int(Rnd(3)) ;Either 1,3 or 4
+		Case 8:\dir=#east
+		Case 9:\dir=1+Int(Rnd(2)) ;Either 1 or 2
+		Case 10:\dir=2+Int(Rnd(2)) ;Either 2 or 3
+		Case 11:\dir= 1+Int(Rnd(3)) ;Either 1,2 or 3
+		Case 12:\dir= 2+Int(Rnd(2))*2 ;Either 2 or 4
+		Case 13:\dir=2^Int(Rnd(3)) ;Either 1,2 or 4
+		Case 14:\dir=2+Int(Rnd(3))	 ;Either 2,3 or 4
+		Case 15:\dir=1+Int(Rnd(4)) ;Either 1,2,3 or 4
+		Default
+			\dir=1
+	End Select
+	If \dir>4 OR \dir<1 Then \dir=1
+	Return
+
+.oldchangedir
+	USEPATH object(b)
+	ways=0
+	If rooms(oldroomnr,\mapx,\mapy-1)>0 OR oldvmap(\mapx,\mapy-1)>0
+		ways+1
+	EndIf
+	If rooms(oldroomnr,\mapx,\mapy+1)>0 OR oldvmap(\mapx,\mapy+1)>0
+		ways+2
+	EndIf
+	If rooms(oldroomnr,\mapx-1,\mapy)>0 OR oldvmap(\mapx-1,\mapy)>0
+		ways+4
+	EndIf
+	If rooms(oldroomnr,\mapx+1,\mapy)>0 OR oldvmap(\mapx+1,\mapy)>0
+		ways+8
+	EndIf
+	Select ways
+		Case 1:\dir=#north
+		Case 2:\dir=#south
+		Case 3:\dir=1+Int(Rnd(2))*2 ;Either 1 or 3
+		Case 4:\dir=#west
+		Case 5:\dir=1+Int(Rnd(2))*3 ;Either 1 or 4
+		Case 6:\dir=3+Int(Rnd(2)) ;Either 3 or 4
+		Case 7:\dir= 5-2^Int(Rnd(3)) ;Either 1,3 or 4
+		Case 8:\dir=#east
+		Case 9:\dir=1+Int(Rnd(2)) ;Either 1 or 2
+		Case 10:\dir=2+Int(Rnd(2)) ;Either 2 or 3
+		Case 11:\dir= 1+Int(Rnd(3)) ;Either 1,2 or 3
+		Case 12:\dir= 2+Int(Rnd(2))*2 ;Either 2 or 4
+		Case 13:\dir=2^Int(Rnd(3)) ;Either 1,2 or 4
+		Case 14:\dir=2+Int(Rnd(3))	 ;Either 2,3 or 4
+		Case 15:\dir=1+Int(Rnd(4)) ;Either 1,2,3 or 4
+		Default
+			\dir=1
+	End Select
+	If \dir>4 OR \dir<1 Then \dir=1
+	Return
+
+
+.movespaceman
+	;-- Check for leftmove --
+	If Joyx(1)<0
+		Gosub checkleftmove
+	EndIf
+	;-- Check for rightmove --
+	If Joyx(1)>0
+		Gosub checkrightmove
+	EndIf
+	;-- Check for upward move --
+	If Joyy(1)<0
+		Gosub checkupmove
+	EndIf
+	;-- Check for downward move --
+	If Joyy(1)>0
+		Gosub checkdownmove
+	EndIf
+
+	If Joyr(1)<8					;Joystick is moved
+		sp\dir=Joyr(1)			;Store current direction
+
+		If sp\vel<#maxvel
+			If sp\retcount=0
+				sp\vel=sp\vel+1
+				sp\retcount=#maxret
+			Else
+				sp\retcount=sp\retcount-1 ;Refresh the retardation count
+			EndIf
+		Else
+			sp\retcount=#maxret
+		EndIf
+	EndIf
+
+	If Joyr(1)=8					;No movement
+	 If sp\vel>0		 ;If not stopped start retardation
+		Select sp\dir
+		USEPATH sp
+			Case 0
+				Gosub checkupmove
+			Case 1
+				Gosub checkupmove:Gosub checkrightmove
+			Case 2
+				Gosub checkrightmove
+			Case 3
+				Gosub checkdownmove:Gosub checkrightmove
+			Case 4
+				Gosub checkdownmove
+			Case 5
+				Gosub checkdownmove:Gosub checkleftmove
+			Case 6
+				Gosub checkleftmove
+			Case 7
+				Gosub checkleftmove: Gosub checkupmove
+		End Select
+
+	 If sp\retcount=0
+		sp\vel=sp\vel-1
+		sp\retcount=#maxret
+	 Else
+		sp\retcount=sp\retcount-1
+	 EndIf
+	 EndIf
+	EndIf
+	sp\scrx=sp\mapx*#xmod+sp\tilex*2	;Calculate screenposition
+	sp\scry=sp\mapy*#ymod+sp\tiley*2	;
+	sp\totpos=!tp{sp\scrx,sp\scry}
+	o=vmap(sp\mapx,sp\mapy)
+	If o>0 AND object(o)\mobile
+		sp\hitpoints-object(o)\damage
+		Sound #sphurtsound,4
+	EndIf
+	Return
+
+.objectpickup
+	;This routine is called from some of the
+	;check...move routines for spaceman.
+	;It needs to know the number of the object spaceman
+	;tries to pick up. It then determines the type of
+	;object it is and acts according to it.
+	sp\score+object(o)\score
+	sp\hitpoints-object(o)\damage ;Gains hitpoints if damage <0
+	If sp\score>#maxscore Then sp\score=#maxscore
+	If sp\hitpoints>#maxhealth Then sp\hitpoints=#maxhealth
+	If object(o)\class=#flag
+		sp\flags+1
+		Sound #flagsound,3
+	EndIf
+	If object(o)\class=#battery
+		sp\firepower+1
+		Sound #batterysound,3
+	EndIf
+	If object(o)\class=#fruit
+		Sound #eatsound,3
+	EndIf
+	If object(o)\class=#drink
+		Sound #drinksound,3
+	EndIf
+	If object(o)\class=#parcel
+		Sound #parcelsound,3
+	EndIf
+	If object(o)\class=#flower
+		Sound #flowersound,3
+	EndIf
+	If object(o)\class=#oxygen
+		Sound #oxygensound,3
+		sp\oxygen+10
+		If sp\oxygen>#maxoxygen Then sp\oxygen=#maxoxygen
+	EndIf
+	objnr=o:Gosub killobject
+	Return
+
+.checkleftmove
+		sp\tilex=sp\tilex-sp\vel
+		oldanim=sp\animptr	;Save animpointer
+		sp\animptr=#west
+		If rooms(roomnr,sp\mapx,sp\mapy)<0
+			If sp\tilex<0
+				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
+				USEPATH pass(passagenr)
+				If (roomnr=\sekt1 AND \passtype1=#west)OR(roomnr=\sekt2 AND \passtype2=#west)
+					Gosub movetonewroom
+				EndIf
+			EndIf
+		EndIf
+		If sp\tilex<0 AND rooms(roomnr,sp\mapx-1,sp\mapy)=0
+			sp\tilex=0
+			sp\animptr=oldanim
+		EndIf
+		If sp\tilex<-4
+		 If sp\mapx>1
+			o=vmap(sp\mapx-1,sp\mapy)
+			If rooms(roomnr,sp\mapx-1,sp\mapy)<>0 AND	object(o)\class <> #switch AND object(o)\class<>#obstacle
+				sp\tilex=8+sp\tilex
+				sp\mapx=sp\mapx-1
+				If o>0 AND object(o)\mobile=False
+					Gosub objectpickup
+				EndIf
+			Else
+				sp\tilex=-4
+				sp\animptr=oldanim
+			EndIf
+		 Else
+			sp\tilex=-4
+			sp\animptr=oldanim
+		 EndIf
+		EndIf
+	Return
+
+.checkrightmove
+		sp\tilex=sp\tilex+sp\vel
+		oldanim=sp\animptr	;Save animpointer
+		sp\animptr=#east
+		If rooms(roomnr,sp\mapx,sp\mapy)<0
+			If sp\tilex>-1
+				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
+				USEPATH pass(passagenr)
+				If (roomnr=\sekt1 AND \passtype1=#east)OR(roomnr=\sekt2 AND \passtype2=#east)
+					Gosub movetonewroom
+				EndIf
+			EndIf
+		EndIf
+		If sp\tilex>0 AND rooms(roomnr,sp\mapx+1,sp\mapy)=0
+			sp\tilex=0
+			sp\animptr=oldanim
+		EndIf
+		If sp\tilex>3
+		 If sp\mapx<#mxw
+			o=vmap(sp\mapx+1,sp\mapy)
+			If rooms(roomnr,sp\mapx+1,sp\mapy)<>0 AND	object(o)\class <> #switch	AND object(o)\class<>#obstacle
+				sp\tilex=sp\tilex-8
+				sp\mapx=sp\mapx+1
+				If o>0 AND object(o)\mobile=False
+					Gosub objectpickup
+				EndIf
+			Else
+				sp\animptr=oldanim
+				sp\tilex=3
+			EndIf
+		 Else
+			sp\tilex=3
+			sp\animptr=oldanim
+		 EndIf
+		EndIf
+	Return
+
+.checkupmove
+		sp\tiley=sp\tiley-sp\vel
+		oldanim=sp\animptr
+		sp\animptr=#north
+		If rooms(roomnr,sp\mapx,sp\mapy)<0
+			If sp\tiley<0
+				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
+				USEPATH pass(passagenr)
+				If (roomnr=\sekt1 AND \passtype1=#north)OR(roomnr=\sekt2 AND \passtype2=#north)
+					Gosub movetonewroom
+				EndIf
+			EndIf
+		EndIf
+		If sp\tiley<0 AND rooms(roomnr,sp\mapx,sp\mapy-1)=0
+			sp\tiley=0
+			sp\animptr=oldanim
+		EndIf
+		If sp\tiley<-4
+		 If sp\mapy>1
+			o=vmap(sp\mapx,sp\mapy-1)
+			If rooms(roomnr,sp\mapx,sp\mapy-1)<>0 AND	object(o)\class <> #switch	AND object(o)\class<>#obstacle
+					sp\tiley=8+sp\tiley
+					sp\mapy=sp\mapy-1
+				If o>0 AND object(o)\mobile=False
+					Gosub objectpickup
+				EndIf
+			Else
+				sp\tiley=-4
+				sp\animptr=oldanim
+			EndIf
+		 Else
+			sp\tiley=-4
+			sp\animptr=oldanim
+		 EndIf
+		EndIf
+	Return
+
+.checkdownmove
+		sp\tiley=sp\tiley+sp\vel
+		oldanim=sp\animptr
+		sp\animptr=#south
+		If rooms(roomnr,sp\mapx,sp\mapy)<0
+			If sp\tiley>-1
+				passagenr=Abs(rooms(roomnr,sp\mapx,sp\mapy))
+				USEPATH pass(passagenr)
+				If (roomnr=\sekt1 AND \passtype1=#south)OR(roomnr=\sekt2 AND \passtype2=#south)
+					Gosub movetonewroom
+				EndIf
+			EndIf
+		EndIf
+		If sp\tiley>0 AND rooms(roomnr,sp\mapx,sp\mapy+1)=0
+			sp\tiley=0
+			sp\animptr=oldanim
+		EndIf
+		If sp\tiley>3
+		 If sp\mapy<#myw
+			o=vmap(sp\mapx,sp\mapy+1)
+			If rooms(roomnr,sp\mapx,sp\mapy+1)<>0 AND	object(o)\class <> #switch	AND object(o)\class<>#obstacle
+				sp\tiley=sp\tiley-8
+				sp\mapy=sp\mapy+1
+				If o>0 AND object(o)\mobile=False
+					Gosub objectpickup
+				EndIf
+			Else
+				sp\tiley=3
+				sp\animptr=oldanim
+			EndIf
+		 Else
+			sp\tiley=3
+			sp\animptr=oldanim
+		 EndIf
+		EndIf
+	Return
+
+.movetonewroom
+	Sound #exitsound,1
+	oldroom=True
+	oldroomnr=roomnr
+	USEPATH pass(passagenr)
+	If roomnr=\sekt1
+		roomnr=\sekt2
+		sp\mapx=\x2
+		sp\mapy=\y2
+	Else
+		roomnr=\sekt1
+		sp\mapx=\x1
+		sp\mapy=\y1
+	EndIf
+	Gosub createvmap
+	Gosub drawa3droom
+	misslist(0)=0	;Clear missilelist when we enter new room
+	Return
+
+.createvmap
+;If we have moved to a new room then update oldvmap
+;and copy objectlist to oldobjectlist
+If oldroom=True
+	For x=1 To #mxw
+		For y=1 To #myw
+				oldvmap(x,y)=vmap(x,y)
+		Next
+	Next
+	For a=0 To objlist(oldroomnr,0)
+		oldobjlist(a)=objlist(oldroomnr,a)
+	Next
+EndIf
+;Clear virtual map first of all
+	For x=1 To #mxw
+		For y=1 To #myw
+				vmap(x,y)=0
+		Next
+	Next
+;Now fill virtual map with objects
+	For a=0 To objlist(roomnr,0)
+	 If a>0
+		b=objlist(roomnr,a)
+		USEPATH object(b)
+			vmap(\mapx,\mapy)=b	 ;put in object
+	 EndIf
+	Next
+;Also we should create a roommap in memory for the
+;guideroutine etc
+	For x=1 To #mxw
+		For y=1 To #myw
+			r=rooms(roomnr,x,y)
+			If r<>0
+				Poke.w ?roommap+((y-1)*#mxw+(x-1))ASL1,1
+			Else
+				Poke.w ?roommap+((y-1)*#mxw+(x-1))ASL1,0
+			EndIf
+		Next
+	Next
+	stackptr.l=?stack	;Clear stack for use in new room
+	Return
+roommap:
+	Dcb.w #mxw*#myw,0
+
+
+.buildguide:
+	GetReg d0,sp\mapx
+	GetReg d1,sp\mapy
+	GetReg a2,stackptr
+	LEA	 roommap,a0
+	LEA	 guide,a1
+;	LEA	 stack,a2
+	MOVE.l #mxw*#myw-1,d2	 ;First we will have to
+clearguide:							 ;clear the guide i.e
+	CLR.w (a1)+						 ;fill it with zeroes
+	DBRA	d2,clearguide		 ;
+	LEA	 guide,a1
+	SUBQ	#1,d1			 ;y=y-1
+	MULU	#mxw,d1		 ;(y-1)*#mxw
+	SUBQ	#1,d0
+	ADD	 d1,d0			 ;Offset=(y-1)*#mxw+x=d0
+	MULU	 #2,d0			;Correct for wordsize
+	MOVE.l #1,d1				;d1=steps
+	MOVE.w	d1,0(a1,d0) ;Put a one in spacemans square
+	CLR.l d2						;clear d2, used for counting...
+checkeast:
+	ADDQ	#1,d1				 ;Increase steps
+	CMP.w #maxoffset,d0 ;Check if offset is within bonds
+	BGE	 checkwest		 ;If not then goto checkwest
+	TST.w 2(a0,d0)			;check if something in room
+	BLE	 checkwest		 ;No goto checkwest
+	TST.w 2(a1,d0)			;Is there something in the guide
+	BEQ	 c11					 ;No, thats ok, continue
+	CMP.w 2(a1,d0),d1	 ;guide bigger than steps
+	BGE	 checkwest		 ;No goto checkwest
+c11:
+	MOVE.w	d0,(a2)		 ;save offset in stack
+	ADDQ		#2,(a2)+		;add one since that actually what we were
+	MOVE.w	d1,(a2)+		;save steps on stack
+	MOVE.w	d1,2(a1,d0) ;put steps in guide
+checkwest:
+	CMP.w #2,d0 ;Check if offset is within bonds
+	BMI	 checksouth		;If not then goto checkwest
+	TST.w -2(a0,d0)			;check if something in room
+	BLE	 checksouth		;No goto checkwest
+	TST.w -2(a1,d0)			;Is there something in the guide
+	BEQ	 c12					 ;No, thats ok, continue
+	CMP.w -2(a1,d0),d1	 ;guide bigger than steps
+	BGE	 checksouth		;No goto checkwest
+c12:
+	MOVE.w	d0,(a2)		 ;save offset in stack
+	SUBQ		#2,(a2)+		;add one since that actually what we were
+	MOVE.w	d1,(a2)+		;save steps on stack
+	MOVE.w	d1,-2(a1,d0) ;put steps in guide
+checksouth:
+	CMP.w #maxoffset-#mxw*2,d0 ;Check if offset is within bonds
+	BGE	 checknorth		 ;If not then goto checkwest
+	TST.w 20(a0,d0)			;check if something in room
+	BLE	 checknorth		 ;No goto checkwest
+	TST.w 20(a1,d0)			;Is there something in the guide
+	BEQ	 c13					 ;No, thats ok, continue
+	CMP.w 20(a1,d0),d1	 ;guide bigger than steps
+	BGE	 checknorth		 ;No goto checkwest
+c13:
+	MOVE.w	d0,(a2)		 ;save offset in stack
+	ADDI		#20,(a2)+		;add one since that actually what we were
+	MOVE.w	d1,(a2)+		;save steps on stack
+	MOVE.w	d1,20(a1,d0) ;put steps in guide
+checknorth:
+	CMP.w #mxw*2,d0 ;Check if offset is within bonds
+	BMI	 c15		;If not then goto checkwest
+	TST.w -20(a0,d0)			;check if something in room
+	BLE	 c15		;No goto checkwest
+	TST.w -20(a1,d0)			;Is there something in the guide
+	BEQ	 c14					 ;No, thats ok, continue
+	CMP.w -20(a1,d0),d1	 ;guide bigger than steps
+	BGE	 c15		;No goto checkwest
+c14:
+	MOVE.w	d0,(a2)		 ;save offset in stack
+	SUBI		#20,(a2)+		;add one since that actually what we were
+	MOVE.w	d1,(a2)+		;save steps on stack
+	MOVE.w	d1,-20(a1,d0) ;put steps in guide
+c15:
+	ADDQ		#1,d2			 ;Increment counter
+	CMP.w	 #50,d2
+	BNE		 c16
+	BRA		 c17
+;	PutReg	a2,stackptr
+c16:
+	MOVE.w	-(a2),d1		;Fetch steps from stack
+	MOVE.w	-(a2),d0		;And adress offset to square in guide
+	CMP.l	 #stack,a2	 ;Check if stack is empty
+	BGE		 checkeast	 ;If not, continue.
+c17:
+	PutReg	d2,nroftimes
+Return
+
+
+guide:
+	Dcb.w #mxw*#myw,0
+stack:
+	Dcb.w 1000,0
+
+.clearlists
+	For a=0 To #nrofrooms
+		For b=0 To #maxrobj
+			objlist(a,b)=0
+		Next
+	Next
+	For a=0 To #maxrobj
+		oldobjlist(a)=0
+	Next
+	For a=0 To #nrofmissiles
+		misslist(a)=0
+	Next
+	Return
+
+.initspaceman
+	Restore spdata
+	Read sp\mapx,sp\mapy
+
+	For a=0 To 3
+		Read sp\animlist[a]
+	Next
+	sp\scrx=sp\mapx*#xmod
+	sp\scry=sp\mapy*#ymod
+	sp\animptr=#east
+	sp\firepower=1
+	sp\score=0
+	sp\startscore=0
+	sp\oldscore=1 ;Just to differ from sp\score
+	sp\scoredigit=7 ;Counter for displaying digits in score
+	sp\flags=0
+	sp\lives=3
+	sp\hitpoints=#maxhealth
+	sp\oxygen=#maxoxygen
+	Return
+spdata:
+	Data.w 2,2								;Position on map
+	Data.w 14,15,16,17				;Animlists
+
+.initobjects
+	USEPATH object(a)
+	nrofflags=0
+	For a=1 To nrofobjects
+		\totpos=!tp{\scrx,\scry}
+		\tilex=0
+		\tiley=0
+		\scrx=!sp{\mapx,\tilex,\mapy,\tiley}
+		\totpos=!tp{\scrx,\scry}
+		\info3=0
+		\startmapx=\mapx:\startmapy=\mapy
+		If \class=#alien	;oneyes!
+			\vel=2
+			\dir=1
+			\animlist[0]=2
+			\animlist[1]=3
+			\animlist[2]=4
+			\animlist[3]=5
+			\hitpoints=2		;Takes two hits to kill
+			\score=150
+			\mobile=True
+			\damage=#maxhealth/4
+		EndIf
+		If \class=#oxygen
+			\dir=1
+			\hitpoints=1
+			\animlist[0]=69
+			\score=50
+			\damage=0
+			\mobile=False
+		EndIf
+		If \class=#whiteghost
+			\vel=1
+			\dir=1
+			\animlist[0]=28
+			\animlist[1]=29
+			\animlist[2]=30
+			\animlist[3]=31
+			\hitpoints=2		;Takes two hits to kill
+			\score=150
+			\mobile=True
+			\damage=#maxhealth/4
+		EndIf
+		If \class=#blueball
+			\vel=2
+			\dir=1
+			\animlist[0]=56
+			\animlist[1]=57
+			\animlist[2]=58
+			\animlist[3]=59
+			\hitpoints=2		;Takes two hits to kill
+			\score=150
+			\mobile=True
+			\damage=#maxhealth/8
+		EndIf
+		If \class=#blackball
+			\vel=3
+			\dir=1
+			\animlist[0]=20
+			\animlist[1]=21
+			\animlist[2]=22
+			\animlist[3]=23
+			\hitpoints=10		;Takes two hits to kill
+			\score=500
+			\mobile=True
+			\damage=#maxhealth
+		EndIf
+		If \class=#death
+			\vel=2
+			\dir=1
+			\animlist[0]=70
+			\animlist[1]=71
+			\animlist[2]=72
+			\animlist[3]=73
+			\hitpoints=10		;Takes two hits to kill
+			\score=800
+			\mobile=True
+			\damage=#maxhealth
+		EndIf
+		If \class=#moscito
+			\vel=3
+			\dir=1
+			\animlist[0]=51
+			\animlist[1]=52
+			\animlist[2]=53
+			\animlist[3]=54
+			\hitpoints=4		;Takes two hits to kill
+			\score=250
+			\mobile=True
+			\damage=#maxhealth/2
+		EndIf
+		If \class=#slimesnake
+			\vel=2
+			\dir=1
+			\animlist[0]=24
+			\animlist[1]=25
+			\animlist[2]=26
+			\animlist[3]=27
+			\hitpoints=2		;Takes two hits to kill
+			\score=80
+			\mobile=True
+			\damage=#maxhealth/3
+		EndIf
+
+		If \class=#flag
+			\dir=1
+			\animlist[0]=6	;Greenflag
+			\score=800
+			\hitpoints=-1		;Cannot be destroyed
+			\damage=0
+			\mobile=False
+			nrofflags+1			;Keep track of how many flags there are
+		EndIf
+		If \class=#switch
+			\dir=1
+			\animlist[0]=7	;switch
+			\animlist[1]=9
+			\animlist[2]=8
+			\animlist[3]=10
+			\hitpoints=-1	 ;Indestructable
+		EndIf
+		If \class=#obstacle
+			r=\roomnr
+			\hitpoints=50	;Should maybe be increased
+			\score=50
+			\mobile=False
+			If rooms(r,\mapx-1,\mapy)=0 OR rooms(r,\mapx+1,\mapy)=0
+			 \dir=1
+			Else
+			\dir=2
+			EndIf
+			\animlist[0]=12	;
+			\animlist[1]=13
+		EndIf
+		If \class=#battery
+			\dir=1
+			\hitpoints=1
+			\animlist[0]=37
+			\score=150
+			\damage=0
+			\mobile=False
+		EndIf
+		If \class=#drink
+			\dir=1
+			\hitpoints=1
+			\animlist[0]=38
+			\score=50
+			\damage=-1*#maxhealth/10
+			\mobile=False
+		EndIf
+		If \class=#fruit
+			\hitpoints=1
+			\dir=Int(Rnd(4))+1
+			\animlist[0]=39
+			\animlist[1]=40
+			\animlist[2]=41
+			\animlist[3]=42
+			\score=50
+			\damage=-1*#maxhealth/10
+			\mobile=False
+		EndIf
+		If \class=#flower
+			\hitpoints=1
+			\dir=Int(Rnd(4))+1
+			\animlist[0]=43
+			\animlist[1]=44
+			\animlist[2]=45
+			\animlist[3]=46
+			\score=20
+			\damage=0
+			\mobile=False
+		EndIf
+		If \class=#parcel
+			\hitpoints=1
+			\dir=Int(Rnd(4))+1
+			\animlist[0]=47
+			\animlist[1]=48
+			\animlist[2]=49
+			\animlist[3]=50
+			\score=20
+			\mobile=False
+		EndIf
+		If \mobile=True Then \movpat=#trackmode
+		objlist(\roomnr,0)+1	;Increase nrofobjects in relevant objlist
+		objlist(\roomnr,objlist(\roomnr,0))=a ;Put objectnr in objlist
+	Next
+	Return
+
+.initanimlists
+	Restore animlists
+	For a=1 To #nrofanims
+		For b=0 To #nrofframes
+			Read animlist(a,b)
+		Next
+	Next
+	For a=32 To 35
+		Handle a,-7,4
+	Next
+	Return
+animlists:
+;Here all the animlists for the aliens and objects are defined
+Data.w 32,33,34,35,35,34,33,32 ;1=explosionanim
+Data.w 16,17,18,19,19,18,17,16 ;2=alien1 north
+Data.w 20,21,22,23,23,22,21,20 ;3=alien1 east
+Data.w 24,25,26,27,27,26,25,24 ;4=alien1 south
+Data.w 28,29,30,31,31,30,29,28 ;5=alien1 west
+Data.w 36,37,38,39,39,38,37,36 ;6=greenflag	anydir
+Data.w 58,58,58,58,58,58,58,58 ;7=switch1 on ns
+Data.w 59,59,59,59,59,59,59,59 ;8=switch1 off ns
+Data.w 56,56,56,56,56,56,56,56 ;9=switch1 off ew
+Data.w 57,57,57,57,57,57,57,57 ;10=switch1 on ew
+Data.w 60,61,62,63,63,62,61,60 ;11=plasmashot anydir
+Data.w 53,53,53,53,53,53,53,53 ;12=bars1 ns
+Data.w 52,52,52,52,52,52,52,52 ;13=bars1 ew
+Data.w 0,1,2,3,3,2,1,0				 ;14 N sp animlist
+Data.w 4,5,6,7,7,6,5,4				 ;15 E sp animlist
+Data.w 8,9,10,11,11,10,9,8		 ;16 S sp animlist
+Data.w 12,13,14,15,15,14,13,12 ;17 W sp animlist
+Data.w 68,69,70,71,71,70,69,68 ;18 electrobars ew
+Data.w 72,73,74,75,75,74,73,72 ;19 electrobars ns
+Data.w 84,85,86,87,87,86,85,84 ;20 Blackball n
+Data.w 80,81,82,83,83,82,81,80 ;21 Blackball e
+Data.w 76,77,78,79,79,78,77,76 ;22 Blackball s
+Data.w 84,85,86,87,87,86,85,84 ;23 Blackball w
+Data.w 92,93,94,95,95,94,93,92 ;24 Slimesnake n
+Data.w 96,97,98,99,99,98,97,96 ;25 Slimesnake e
+Data.w 88,89,90,91,91,90,89,88 ;26 Slimesnake s
+Data.w 100,101,102,103,103,102,101,100 ;27 Slimesnake w
+Data.w 104,105,106,107,107,106,105,104 ;28 Whiteghost n
+Data.w 108,109,110,111,111,110,109,108 ;29 Whiteghost e
+Data.w 112,113,114,115,115,114,113,112 ;30 Whiteghost s
+Data.w 116,117,118,119,119,118,117,116 ;31 Whiteghost w
+Data.w 55,55,55,55,55,55,55,55 ;32 Roadblock ns
+Data.w 54,54,54,54,54,54,54,54 ;33 Roadblock ew
+Data.w 48,49,50,51,51,50,49,48 ;34 Redflag
+Data.w 40,41,42,43,43,42,41,40 ;35 Yellowflag
+Data.w 44,45,46,47,47,46,45,44 ;36 Purpleflag
+Data.w 172,173,174,175,175,174,173,172 ;37 Battery
+Data.w 176,177,178,179,176,177,178,179 ;38 Drink
+Data.w 160,160,160,160,160,160,160,160 ;39 ananas
+Data.w 161,161,161,161,161,161,161,161 ;40 grapes
+Data.w 162,162,162,162,162,162,162,162 ;41 apple
+Data.w 163,163,163,163,163,163,163,163 ;42 cheese
+Data.w 164,164,164,164,164,164,164,164 ;43 flower1
+Data.w 165,165,165,165,165,165,165,165 ;44 flower2
+Data.w 166,166,166,166,166,166,166,166 ;45 flower3
+Data.w 167,167,167,167,167,167,167,167 ;46 flower4
+Data.w 168,168,168,168,168,168,168,168 ;47 parcel1
+Data.w 169,169,169,169,169,169,169,169 ;48 parcel2
+Data.w 170,170,170,170,170,170,170,170 ;49 Parcel3
+Data.w 171,171,171,171,171,171,171,171 ;50 Parcel4
+Data.w 120,121,122,123,123,122,121,120 ;51 Moscito n
+Data.w 124,125,126,127,127,126,125,124 ;52 Moscito e
+Data.w 128,129,130,131,131,130,129,128 ;53 Moscito s
+Data.w 132,133,134,135,135,134,133,132 ;54 Moscito w
+Data.w 152,153,154,155,155,154,153,152 ;55 ufo
+Data.w 136,137,138,139,139,138,137,136 ;56 blueball n
+Data.w 140,141,142,143,143,142,141,140 ;57 Blueball e
+Data.w 144,145,146,147,147,146,145,144 ;58 Blueball s
+Data.w 148,149,150,151,151,150,149,148 ;59 Blueball w
+Data.w 156,157,158,159,156,157,158,159 ;60 Whiteexplosion
+Data.w 64,65,66,67,67,66,65,64 ;61 Greenshot
+Data.w 180,181,182,183,183,182,181,180 ;62 score 20
+Data.w 184,185,186,187,187,186,185,184 ;63 score 50
+Data.w 188,189,190,191,191,190,189,188 ;64 score 80
+Data.w 192,193,194,195,195,194,193,192 ;65 score 150
+Data.w 196,197,198,199,199,198,197,196 ;66 score 250
+Data.w 200,201,202,203,203,202,201,200 ;67 score 500
+Data.w 204,205,206,207,207,206,205,204 ;68 score 800
+Data.w 208,208,209,209,210,210,211,211 ;69 oxygen
+Data.w 212,213,214,215,215,214,213,212 ;70 deathn
+Data.w 216,217,218,219,219,218,217,216 ;71 deathe
+Data.w 220,221,222,223,223,222,221,220 ;72 deaths
+Data.w 224,225,226,227,227,226,225,224 ;73 deathw
+objectdata:
+	;roomnr,mapx,mapy
+	Data.w 1,8,8
+	Data.w 7,7,7,7,7,7,7,7
+	 Data.w 1,7,8
+	Data.w 7,7,7,7,7,7,7,7
+	 Data.w 1,6,8
+	Data.w 7,7,7,7,7,7,7,7
+	 Data.w 2,8,8
+	Data.w 7,7,7,7,7,7,7,7
+	Data.w 2,7,8
+	Data.w 7,7,7,7,7,7,7,7
+
+
+.drawa3droom
+	Use BitMap db
+	FlushBuffer 0:FlushBuffer 1
+	flshnr=nrofshapes+1
+	BlockScroll
+	For x=1 To #mxw
+		For y= 1 To #myw
+			r=rooms(roomnr,x,y)
+			If r<>0
+				If r>0
+					Blit flshnr-1+r,#scrdx+x*16-y*16,#scrdy+y*8+x*8
+				Else
+					r=Abs(r)
+					USEPATH pass(r)
+					If roomnr=\sekt1
+						et=\passtype1
+					Else
+						et=\passtype2
+					EndIf
+					Select et
+						Case #north
+							exnr=flshnr+12
+						Case #east
+							exnr=flshnr+13
+						Case #south
+							exnr=flshnr+14
+						Case #west
+							exnr=flshnr+15
+					End Select
+					Blit exnr,#scrdx+x*16-y*16,#scrdy+y*8+x*8
+				EndIf
+			EndIf
+		Next
+	Next
+	VWait
+	Show db,0,#bmapyoffset
+	ShapesBitMap db,1-db
+	db=1-db
+	Use BitMap db
+	Return
+
+.readroomdata
+f$="rooms/roomdata."+level$
+If WriteMem(0,f$)
+	FileInput 0		;read in nr of roomms
+	roomnr=Edit(10)
+	For a=1 To roomnr
+		For x=1 To #mxw
+			For y=1 To #myw
+			 rooms(a,x,y)=Edit(10)
+			Next
+		Next
+	Next
+	DefaultInput
+EndIf
+Return
+
+.readobjectdata
+DEFTYPE.object *objptr
+f$="objects/objectdata."+level$
+If WriteMem(0,f$)
+	FileInput 0
+	nrofobjects=Edit(10) ;Get nr of objects
+	If nrofobjects<=#maxnrofobjects
+		For a=1 To nrofobjects
+			*objptr=object(a)
+			##[$BE14] 0,*objptr,((SizeOf.object) - #objstructdiff) ;This is because of
+			USEPATH object(a)										;a difference in objectstruct
+		Next																	 ;in mapedit and here
+	EndIf
+	CloseFile 0
+	DefaultInput
+EndIf
+Return
+
+.readpassagedata
+DEFTYPE.passage *passptr
+f$="passages/passagedata."+level$
+If WriteMem(0,f$)
+	FileInput 0
+	passnr=Edit(10) ;Get nr of objects
+	For a=1 To passnr
+		*passptr=pass(a)
+		##[$BE14] 0,*passptr,SizeOf.passage
+	Next
+	CloseFile 0
+	DefaultInput
+EndIf
+Return
+
+.readlevelnames
+	Restore levels
+	For a=1 To #nroflevels
+		Read levelnames$(a)
+	Next
+	Return
+	levels:
+	Data$ "01"
+	Data$ "02"
+	Data$ "03"
+	Data$ "04"
+	Data$ "05"
+	Data$ "06"
+	Data$ "07"
+	Data$ "08"
+	Data$ "09"
+	Data$ "10"
+
+.initstars
+;Find and store the bitplan pointers fo the two bitmaps
+;Init bitplane pointers
+For a=0 To #depth-1
+	bplptr.l=Peek.l(Addr BitMap(0)+8+a*4)
+	Poke.l ?bplbase0+a*4,bplptr
+Next
+For a=0 To #depth-1
+	bplptr.l=Peek.l(Addr BitMap(1)+8+a*4)
+	Poke.l ?bplbase1+a*4,bplptr
+Next
+;Calculate the positions and velocities for the stars
+;and store them in two buffers, one for each bitmap.
+;Init starbase0
+For a=0 To #nrofstars-1
+x=Int (Rnd(#scrxw))
+	Poke.w ?starbase0+a*8,x ;xpos;
+	Poke.w ?starbase1+a*8,x
+y=Int (Rnd(#scryw))
+	Poke.w ?starbase0+a*8+2,y ;ypos
+ Poke.w ?starbase1+a*8+2,y ;ypos
+v=Int (Rnd(3))+1
+	Poke.w ?starbase0+a*8+4,v	;Velocity
+	Poke.w ?starbase1+a*8+4,v	;Velocity
+	Poke.w ?starbase0+a*8+6,0	;Clear drawflag
+ Poke.w ?starbase1+a*8+6,0
+Next
+b=0
+For lg.f=0 To 2*Pi Step 0.1
+	staroffs.w(b)=Int(3*HSin(lg))
+	b=b+1
+Next
+Return
+dex: Dc.w	0			;Place for parameters sent to
+dey: Dc.w	0			;the drawstars routine
+starbase0:
+	Dcb.w #nrofstars*8,0
+starbase1:
+	Dcb.w #nrofstars*8,0
+bplbase0:
+	Dcb.l #depth*4,0
+bplbase1:
+	Dcb.l #depth*4,0

@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/half.bb
+BitMap 0,1024,516,4
+LoadBitMap 0,"t11.iff4",0
+
+InitCopList 0,44,258,$104,8,16,-2
+DisplayBitMap 0,0
+DisplayPalette 0,0
+DisplayDblScan 0,0
+
+BLITZ
+
+Statement half{bmap.l}
+	;
+	MOVE.l d0,a3:ADDQ#8,a3
+	MOVE.l #$aaaaaaaa,d0:MOVE.l d0,d1:NOT.l d1:MOVE#3,d5
+	nxllb:MOVE.l (a3)+,a0:LEA 128(a0),a1:MOVE.l a0,a2:MOVE #128,d6:nxlll:MOVE#31,d7
+
+	nxolw:MOVE.l (a0)+,d2:MOVE.l (a1)+,d3:AND.l d0,d2:AND.l d0,d3:LSR.l#1,d3:OR.l d3,d2
+	MOVE.l d2,(a2)+:DBRA d7,nxolw:ADD#128,a0:ADD#128,a1:MOVE#31,d7
+
+	nxelw:MOVE.l (a0)+,d2:MOVE.l (a1)+,d3:AND.l d1,d2:AND.l d1,d3:LSL.l#1,d2:OR.l d3,d2
+	MOVE.l d2,(a2)+:DBRA d7,nxelw:ADD#128,a0:ADD#128,a1:DBRA d6,nxlll
+
+	DBRA d5,nxllb:AsmExit
+	;
+End Statement
+
+half{Addr BitMap(0)}
+
+CreateDisplay 0
+MouseWait
+;AMIGA
+;SaveBitmap 0,"ram:test.iff",0
+
+End

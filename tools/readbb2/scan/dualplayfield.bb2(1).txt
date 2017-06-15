@@ -1,0 +1,57 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/examples/examples2/dualplayfield.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples2/blitzmode/dualplayfield.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples2/dualplayfield.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples2/blitzmode/dualplayfield.bb2
+;
+;A Dualplayfield example
+;
+
+BLITZ
+
+;set up foreground bitmap...
+;
+BitMap 0,640,200,3
+
+;draw some randome circles on foreground bitmap
+;
+For k=1 To 10
+Circlef Rnd(256)+32,Rnd(200),Rnd(24)+8,Rnd(7)+1
+Next
+
+;this line will copy the left half of the foreground
+;bitmap to the right half. This allows us to scroll
+;'continuously' through the foreground
+;
+Scroll 0,0,320,200,320,0
+
+;set up background bitmap...
+;
+BitMap 1,320,200,3
+
+;draw some random boxes on background bitmap
+;
+For k=1 To 50
+Boxf Rnd(320),Rnd(100)+50,Rnd(320),Rnd(100)+50,Rnd(7)+1
+Next
+
+;set up slice:
+;
+Slice 0,44,320,200,$fffa,6,8,32,640,320
+
+;show background bitmap
+;
+ShowB 1
+
+;while mouse button not hit
+;
+While Joyb(0)=0
+
+	;wait for vertical blank
+	;
+	VWait
+
+	;update 'acrosswards' variable
+	;
+	x=QWrap(x+2,0,320)
+
+	;show foreground bitmap at current 'acrosswards' position
+	;
+	ShowF 0,x,0
+Wend

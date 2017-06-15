@@ -1,0 +1,85 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/spectre/lineswithcopsplit.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/spectre/lineswithcopsplit.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/spectre/lineswithcopsplit.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/spectre/lineswithcopsplit.bb2
+; LINES BY SPECTRE IN BLITZ II
+
+VWait 100
+BLITZ
+
+NUMLINES=50
+;PlayModule 1
+
+Dim CX(720),PX1(NUMLINES),PY1(NUMLINES),PX2(NUMLINES),PY2(NUMLINES)
+
+#bplmod1=$108
+#bplmod2=$10a
+BitMap 0,320,270,1
+BitMap 1,320,270,1
+
+Slice 0,34,320,270,$FFFA,1,8,2,320,320
+Green 0,0,0,15
+Green 1,15,15,0
+
+For i=1 To 7
+	ColSplit 0,0,0,8+i,i*5+160
+Next
+
+co$=Mki$(#bplmod1)+Mki$(-122)
+co$+Mki$(#bplmod2)+Mki$(-122)
+CustomCop co$,190+34
+
+Show 0
+
+For tm=1 To 2
+If tm=1 Then n=0
+If tm=2 Then n=360
+For k=0 To 1 Step .0027777
+	CX(n)=HCos(Pi*2*k)*125
+	n=n+1
+Next k,tm
+
+For I=1 To NUMLINES
+	PX1(I)=I*4-4
+	PY1(I)=I*4-4
+	PX2(I)=I*4+56
+	PY2(I)=I*4+56
+Next
+
+.REDO
+Restore PATDATA
+.NUPAT
+Read XI,YI,XI2,YI2,X2,Y2,X,Y
+If XI=999 Then Goto REDO
+T=0
+
+Repeat
+	VWait
+	Show DB
+	DB=1-DB
+	Use BitMap DB
+	BlockScroll
+
+	X=X+XI : If X>359 Then X=0
+	Y=Y+YI : If Y>359 Then Y=0
+	X2=X2+XI2 : If X2>359 Then X2=0
+	Y2=Y2+YI2 : If Y2>359 Then Y2=0
+
+	For I=1 To NUMLINES
+		Line CX(X+PX1(I))+160,CX(Y+PY1(I))+128,CX(X2+PX2(I))+160,CX(Y2+PY2(I))+128,1
+	Next
+
+	T=T+1
+
+	If Joyb(0)>0 Then End
+Until T=600
+
+Use BitMap 0 : BlockScroll
+Use BitMap 1 : BlockScroll
+VWait 10
+Goto NUPAT
+
+.PATDATA
+Data 7,10,10,7,90,0,50,0
+Data 12,9,9,12,0,0,50,0
+Data 12,9,9,12,245,60,0,0
+Data 5,10,10,10,100,0,0,0
+Data 999,0,0,0,0,0,0,0
+

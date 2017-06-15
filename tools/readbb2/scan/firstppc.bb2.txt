@@ -1,0 +1,24 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/firstppc.bb2
+WBStartup
+##[$C0A4] ?ppcprog,?_base			;use warpup (needs wizard.library)a4->r2
+End
+##[$EC89]
+#storereg=8				;=r8 or fp8
+ppcprog
+##[$ED0A] r21,r2
+!lf f0,fpudat3
+!lf f1,fpudat3
+
+##[$ED03] r21,0
+##[$ED03] r9,$0f0
+##[$ED08] storereg,$dff180		 ;Changes backgroundcolor of aga Screen
+##[$ECE9] r9,0(storereg)
+!lw r31,ppcdat1
+;you can use { } on macro or not
+##[$ECDE] r31,ppcdat1-_base(r2) ;same as above
+##[$ECAA]
+_base: Dc.l 1						;_base is used in all.bb2 too
+ppcdat1	Dc.l 314
+dat2	Dc.s 2					;float single
+fpudat3	Dc.d 3.14		;float double
+dat4	Dc.d 0

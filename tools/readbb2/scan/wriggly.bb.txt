@@ -1,0 +1,2070 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/wriggly/Source/Wriggly.bb
+;----------------------------------------------------------------------
+;									 WRIGGLY II - The Worm Returns
+;
+;										 Written in Blitz Basic 2
+;
+;										(c) 1994	Keith T. Suddick
+;
+;----------------------------------------------------------------------
+
+DEFTYPE .w
+
+
+;----------------------------------------------------------------------
+; A debugging macro to pause the action
+;----------------------------------------------------------------------
+
+#DEBUG=0 ;**** Set to zero to omit debug code ****
+
+Macro Jwait
+	VWait
+	CNIF #DEBUG>0
+		While Joyb(1)=0:Wend
+	CEND
+End Macro
+
+;----------------------------------------------------------------------
+; Constants
+;----------------------------------------------------------------------
+
+#NUM_WORMS		= 5
+#NUM_LEVELS	 = 3
+#NUM_BROOMS	 = 5
+
+#START_LEVEL	= 0
+
+#V_TOP				= 44			;Y offset to top of VDU
+
+#START				= 1			 ;Code for start-game
+#QUIT				 = 2			 ;Code for quit
+
+#BLANK				= 16
+#GEM					= 32
+#PIPE				 = 64
+#OBSTACLE		 = 128
+
+#WORM				 = #OBSTACLE
+#NO_WORM			= 255-#WORM
+
+#EARTH				= 296
+
+#WORM_SHAPES	= 16			;Base for worm shapes
+#BACK_SHAPES	= 127		 ;Base for background shapes
+#CHAR_SHAPES	= 304		 ;Base for ASCII shapes
+#SPRITES			= 384		 ;Base for sprite shapes
+
+#SZ_HISCORE	 = 16			;Newtype sizes - SIZEOF rounds up to next word !
+#SZ_LEVEL		 = 6
+#SZ_ROOM			= 4
+#SZ_WORM			= 13
+#SZ_PIPE			= 10
+#SZ_BONUS		 = 34
+
+#ENTRY_OVER	 = 1			 ;Status codes during the game
+#ROOM_OVER		= 2
+#EXIT_OVER		= 4
+#WORM_OVER		= 8
+#MAP_OVER		 = 16
+#LEVEL_OVER	 = 32
+#GAME_OVER		= 64
+#ESCAPE			 = 128
+
+#NEW_WORM		 = %11110000
+
+
+;----------------------------------------------------------------------
+; New Types
+;----------------------------------------------------------------------
+
+NEWTYPE .pal_type
+	xred.b[16]
+	xgrn.b[16]
+	xblu.b[16]
+End NEWTYPE
+
+NEWTYPE .worm_type
+	turn.b[9]
+	index.b[4]
+End NEWTYPE
+
+NEWTYPE .frame_type
+	change.b[124]
+	impact.b[124]
+	check.b[76]
+End NEWTYPE
+
+NEWTYPE .quad_type
+	x1.b[13]
+	y1.b[13]
+	x2.b[13]
+	y2.b[13]
+End NEWTYPE
+
+NEWTYPE .hiscore_type
+	pts.l
+	char.b[12]
+End NEWTYPE
+
+NEWTYPE .level_type
+	start_room.w
+	start_pipe.w
+	total_gems.w
+End NEWTYPE
+
+NEWTYPE .bonus_type
+	room.w
+	pipe.w
+	gems.w
+	room_title.b[28]
+End NEWTYPE
+
+NEWTYPE .room_type
+	first_pipe.w
+	num_pipes.w
+End NEWTYPE
+
+NEWTYPE .pipe_type
+	x.w
+	y.w
+	source.w
+	dest_pipe.w
+	entry.w
+End NEWTYPE
+
+NEWTYPE .way_type
+	out_x.b[4]
+	out_y.b[4]
+	in_x1.b[4]
+	in_y1.b[4]
+	in_x2.b[4]
+	in_y2.b[4]
+End NEWTYPE
+
+
+;----------------------------------------------------------------------
+; Global Variables
+;----------------------------------------------------------------------
+
+DEFTYPE .pal_type	 *pal
+DEFTYPE .worm_type	*worm
+DEFTYPE .frame_type *frame
+DEFTYPE .quad_type	*quad
+DEFTYPE .level_type *level
+DEFTYPE .bonus_type *bonus
+DEFTYPE .room_type	*room
+DEFTYPE .pipe_type	*pipe
+DEFTYPE .way_type	 *way
+
+DEFTYPE .b option,fader,maxfade,path,view,hit
+DEFTYPE .b worms,level,gems,pops
+DEFTYPE .b dir,head,tail,phase,length,extend,growing
+DEFTYPE .b phase,waiting,tick,tock1,tock2,highsfirst
+DEFTYPE .w status,delay,room,here,pipe
+DEFTYPE .l score,pts,bonus,mapdata,gembase
+DEFTYPE .l adr,hs_start,hs_end
+
+Dim *hiscore.hiscore_type(9)
+
+Dim rsg.b(15)
+Dim gem.w(99), gemval.w(3), gemspr.b(3)
+Dim heading.l(3)
+Dim map.w(19,15), id.b(19,15)
+Dim dx.b(4),dy.b(4)
+Dim buff.b(127)
+Dim bump.b(40,32)
+
+
+;----------------------------------------------------------------------
+; Startup Code (In AMIGA mode)
+;----------------------------------------------------------------------
+
+WBStartup
+NoCli
+
+AbsMouse 639,511
+
+LoadShapes 0,"Data/Wriggly.data"
+
+LoadSound	0,"Data/Dig.snd"
+LoadSound	1,"Data/Ding.snd"
+LoadSound	2,"Data/Impact.snd"
+LoadSound	3,"Data/Chink.snd"
+LoadSound	4,"Data/Tweet.snd"
+LoadSound	5,"Data/Beep.snd"
+LoadSound	6,"Data/Squeeze.snd"
+LoadSound	7,"Data/Whoop.snd"
+LoadSound	8,"Data/Bell.snd"
+LoadSound	9,"Data/Scream.snd"
+LoadSound 10,"Data/Gunshot.snd"
+LoadSound 11,"Data/Ping.snd"
+LoadSound 12,"Data/Ooee.snd"
+
+LoadMedModule 0,"Data/Blinkys.med"
+LoadMedModule 1,"Data/Bubble.med"
+
+If WriteMem(0,"Data/Wriggly.HighScores")
+	##[$BE14] 0,?hiscore_data,160
+	CloseFile 0
+EndIf
+
+VWait 150
+
+BLITZ
+
+Gosub Wriggly
+
+AMIGA
+
+If ReadMem(0,"Data/Wriggly.HighScores")
+	Exists 0,?hiscore_data,160
+	CloseFile 0
+EndIf
+
+End
+
+
+BLITZ ; This "command" is never "executed", but it appears to be needed
+
+
+;----------------------------------------------------------------------
+; Functions / Statements
+;----------------------------------------------------------------------
+
+Function.w CheckStatus{}
+;Check for either start game or quit signals
+
+	If Joyb(1)=1 Then Function Return #START
+	If Joyb(0)=3 OR RawStatus(50) Then Function Return #QUIT
+	Function Return 0
+End Function
+
+
+Function.w CharShape{ASCII.w}
+;Convert ASCII code into shape number
+
+	 ASCII&127
+	If ASCII>$5f
+		ASCII+240
+	Else
+		If ASCII<$20
+			ASCII=335
+		Else
+			ASCII+272
+		EndIf
+	EndIf
+	Function Return ASCII
+End Function
+
+
+Statement FadeOff{rate}
+;Fades all current colour registers to black in steps every "rate"
+;v-syncs, stops as soon as all registers are black
+
+	Repeat
+		faded=True
+		VWait rate
+		For reg=0 To 15
+			vred=Blue(reg):If vred Then vred-1:faded=False
+			vgrn=Palette(reg):If vgrn Then vgrn-1:faded=False
+			vblu=PalRGB(reg):If vblu Then vblu-1:faded=False
+			Green reg,vred,vgrn,vblu
+		Next reg
+	Until faded
+End Statement
+
+
+Statement FadeOn{rate}
+;Fade from black to palette colours in steps every "rate" v-syncs
+
+Shared *pal
+
+	For fade=15 To 0 Step -1
+		VWait rate
+		For reg=0 To 15
+			If fade<*pal\xred[reg] Then vred=Blue(reg)+1 Else vred=0
+			If fade<*pal\xgrn[reg] Then vgrn=Palette(reg)+1 Else vgrn=0
+			If fade<*pal\xblu[reg] Then vblu=PalRGB(reg)+1 Else vblu=0
+			Green reg,vred,vgrn,vblu
+		Next reg
+	Next fade
+End Statement
+
+
+Statement FadeUp{fade_bits}
+;Set colour registers signalled by "fade_bits" to fraction of pallette
+;given by "fade/maxfade" then increment global "fader".	Global "maxfade"
+;determines rate of increase (NB May fail if global values conflict !)
+
+Shared *pal, fader, maxfade
+
+	DEFTYPE .q q
+	q=fader/maxfade
+	For reg=0 To 15
+		If fade_bits BitTst reg
+			Green reg,*pal\xred[reg]*q,*pal\xgrn[reg]*q,*pal\xblu[reg]*q
+		EndIf
+	Next reg
+	fader+1
+End Statement
+
+
+Statement DoFadeUp{fade_bits,rate}
+;Auto version of FadeUp from 0 to maxfade, every rate v-syncs
+
+Shared fader, maxfade
+
+fader=0
+	Repeat
+		VWait rate
+		FadeUp{fade_bits}
+	Until fader>maxfade
+End Statement
+
+
+Statement FadeDown{fade_bits}
+;Decrement global "fader" and set colour registers signalled by
+;"fade_bits" to fraction of pallette given by "fader/maxfade", thus
+;global "maxfade" determines rate of decrease (NB may fail if global
+;values conflict !)
+
+Shared *pal, fader, maxfade
+
+	DEFTYPE .q q
+	fader-1
+	q=fader/maxfade
+	For reg=0 To 15
+		If fade_bits BitTst reg
+			Green reg,*pal\xred[reg]*q,*pal\xgrn[reg]*q,*pal\xblu[reg]*q
+		EndIf
+	Next reg
+End Statement
+
+
+Statement DoFadeDown{fade_bits,rate}
+;Auto version of FadeDown from maxfade to 0, every rate v-syncs
+
+Shared fader, maxfade
+
+fader=maxfade+1
+	Repeat
+		VWait rate
+		FadeDown{fade_bits}
+	Until fader=0
+End Statement
+
+
+Statement RGB_On{reg_bits}
+;Set registers signalled in "reg_bits" to colours in pallette (*pal->)
+
+Shared *pal
+
+	For reg=0 To 15
+		If reg_bits BitTst reg
+			Green reg,*pal\xred[reg],*pal\xgrn[reg],*pal\xblu[reg]
+		EndIf
+	Next reg
+End Statement
+
+
+Statement RGB_Off{reg_bits}
+;Set colour registers signalled in "reg_bits" to black
+
+	For reg=0 To 15
+		If reg_bits BitTst reg
+			Green reg,0,0,0
+		EndIf
+	Next reg
+End Statement
+
+
+Statement ShapeStr{x,y,col}
+;"Print" a string in shape-characters
+
+Shared msg$
+
+	If x<0 Then x=150-Len(msg$)*5 Else x-10
+
+	For i=1 To Len(msg$)
+		s=CharShape{Asc(Mid$(msg$,i,1))}
+		Blit s,x+i*10,y-1,col
+		Blit s,x+i*10,y+1,col
+		BlitMode InvMode
+		Blit s,x+i*10,y,col
+		BlitMode CookieMode
+	Next i
+End Statement
+
+
+Statement ShapeText{x,y,col,adr.l,n}
+;"Print" some text from memory in shape-characters
+
+	If x<0 Then x=160-n*5
+
+	For i=0 To n-1
+		s=CharShape{Peek.b(adr+i)}
+		Blit s,x+i*10,y+1,col
+		BlitMode InvMode
+		Blit s,x+i*10,y,col
+		BlitMode CookieMode
+	Next i
+End Statement
+
+
+Statement RBox{x1,y1,x2,y2,col}
+;Draw a round cornered box using shapes
+
+	x1*16:y1*16
+	x2*16:y2*16
+
+	Blit 376,x1,y1,col
+	Blit 378,x1,y2,col
+	For x=x1+16 To x2-16 Step 16
+		Blit 374,x,y1,col
+		Blit 374,x,y2,col
+	Next x
+
+	Blit 377,x2,y1,col
+	Blit 379,x2,y2,col
+	For y=y1+16 To y2-16 Step 16
+		Blit 375,x1,y,col
+		Blit 375,x2,y,col
+	Next y
+
+End Statement
+
+
+Statement SBox{x1,y1,x2,y2,col}
+;Draw a square cornered box using shapes
+
+	x1*16:y1*16
+	x2*16:y2*16
+
+	Blit 370,x1,y1,col
+	Blit 372,x1,y2,col
+	For x=x1+16 To x2-16 Step 16
+		Blit 368,x,y1,col
+		Blit 368,x,y2,col
+	Next x
+
+	Blit 371,x2,y1,col
+	Blit 373,x2,y2,col
+	For y=y1+16 To y2-16 Step 16
+		Blit 369,x1,y,col
+		Blit 369,x2,y,col
+	Next y
+
+End Statement
+
+
+Statement ButWait{n}
+;Wait for either n frames, joystick button or escape
+
+Shared status
+
+	While n AND Joyb(1)=0 AND status<#ESCAPE
+		VWait
+		n-1
+	Wend
+
+End Statement
+
+
+;----------------------------------------------------------------------
+; The Main Program
+;----------------------------------------------------------------------
+
+
+
+	;Err/Int code is NOT included if debug on as it messes up the debugger
+	CNIF #DEBUG=0
+
+		SetErr
+			ClrInt 5
+			ErrFail
+		End SetErr
+
+		SetInt 5
+			PlayMed
+			If tick Then tick-1 Else tick=10:status|(#ESCAPE&RawStatus(69))
+		End SetInt
+
+	CEND
+
+
+	Gosub Initialise
+	Repeat
+		Gosub Titles
+		If option=#START Then Gosub PlayGame
+	Until option=#QUIT
+
+	ClrInt 5
+
+Return
+
+
+;----------------------------------------------------------------------
+; Initialisation of assorted things
+;----------------------------------------------------------------------
+
+Initialise:
+	DisplayOff
+
+	*frame=?frame_data
+	*quad=?quad_data
+	*way=?way_data
+
+	For i=0 To 3:heading(i)=?worm_data+i*#SZ_WORM:Next i
+
+	For i=0 To 9:*hiscore(i)=?hiscore_data+i*#SZ_HISCORE:Next i
+
+	For i=0 To 4:Read dx(i),dy(i):Next i
+
+	For i=0 To 3:Read gemval(i):Next i
+
+	For i=0 To 3:Read gemspr(i):Next i
+
+	For i=0 To 15:StopCycle 0,i,0,0,0:Next i
+
+	For i=0 To 15:GetaSprite i,i+#SPRITES:Next i
+
+	Queue 0,4
+	Buffer 0,8192
+
+	BitMap 0,640,256,4
+	Use BitMap 0
+	BlockScroll
+
+	BitMap 1,320,256,4
+	Use BitMap 1
+	BlockScroll
+
+	BitMap 2,320,256,4
+	Use BitMap 2
+	BlockScroll
+
+	InitPalette On
+	BlitzKeys On
+	BitMapInput
+
+Return
+
+
+;----------------------------------------------------------------------
+; The Titles
+;----------------------------------------------------------------------
+
+Titles:
+	Use BitMap 0
+	BlockScroll
+	BitMapOutput 0
+
+	Slice 0,#V_TOP,640,256,$fff9,4,8,32,640,640
+	FadePalette 0
+	Show 0
+
+	FlushQueue 0
+
+	If highsfirst Then phase=21 Else phase=0
+	waiting=0
+	delay=0
+
+	DisplayOn
+
+	StartMedModule 0
+
+	option=0
+	Repeat
+		VWait
+		If delay
+			delay-1
+		Else
+			Select phase
+				Case	0
+					BlockScroll
+					FadePalette 0
+					*pal=?title1_pal
+					Blit 0,320,50,3
+					maxfade=32
+					fader=0
+					phase+1
+				Case	1
+					FadeUp{%1110000000000000}
+					If fader>maxfade Then delay=100:phase+1
+				Case	2
+					QBlit 0,1,264,112,1
+					QBlit 0,2,406,112,1
+					fader=0
+					phase+1
+				Case 3
+					FadeUp{%0000000011100000}
+					If fader>maxfade Then delay=60:phase+1
+				Case 4
+					FadeDown{%0000000011100000}
+					If fader=0 Then phase+1
+				Case 5
+					UnQueue 0
+					Blit 1,249,112,1
+					Blit 3,410,112,2
+					msg=4
+					phase+1
+				Case 6
+					FadeUp{%0000000011100000}
+					If fader>maxfade Then fader=0:delay=20:phase+1
+				Case 7
+					FadeUp{%0000111000000000}
+					If fader>maxfade Then delay=100:phase+1
+				Case 8
+					QBlit 0,msg,320,200,0
+					maxfade=16
+					fader=0
+					phase+1
+				Case 9
+					FadeUp{%0000000000001110}
+					If fader>maxfade Then delay=200:phase+1
+				Case 10
+					FadeDown{%0000000000001110}
+					If fader=0 Then phase+1
+				Case 11
+					UnQueue 0
+					msg+1
+					If msg<7 Then phase=8 Else fader=maxfade:delay=10:phase+1
+				Case 12
+					FadeDown{%0000111011100000}
+					If fader=0 Then fader=maxfade:delay=10:phase+1
+				Case 13
+					FadeDown{%1110000000000000}
+					If fader=0 Then delay=10:phase+1
+				Case 14
+					FadePalette 0
+					BlockScroll
+					*pal=?notes_pal
+					Boxf 80,4,560,252,8
+					For y=30 To 230 Step 10
+						Line 80,y,560,y,4
+					Next y
+					Box 124,4,125,252,12
+					maxfade=16
+					fader=0
+					adr=?notes_data
+					phase+1
+				Case 15
+					Blit 10,85,5,0
+					Blit 11,86,0,7
+					Blit 12,488,23,2
+					Blit 13,91,201,1
+					Colour 3,8
+					FadeUp{%1111111111111111}
+					If fader>maxfade Then phase+1
+				Case 16
+					x=Peek.b(adr)
+					adr+1
+					If x=0 Then phase=19 Else y=Peek.b(adr):adr+1:phase+1
+				Case 17
+					Locate x,y*10/8+.25
+					Colour 3,8
+					phase+1
+				Case 18
+					c=Peek.b(adr)
+					adr+1
+					If c=0
+						phase=16
+					Else
+						If c<16 Then Colour c,8 Else Print Chr$(c)
+					EndIf
+				Case 19
+					Blit 14,412,217,1
+					phase+1:delay=1000
+				Case 20
+					FadeDown{%1111111111111111}
+					If fader=0 Then phase+1
+				Case 21
+					BlockScroll
+					FadePalette 0
+					*pal=?title2_pal
+					Boxf 116,0,524,254,13
+					Boxf 119,2,521,252,14
+					Boxf 122,4,518,250,15
+					Boxf 125,6,515,248,0
+					Point 116,0,0
+					Point 116,254,0
+					Point 524,0,0
+					Point 524,254,0
+					phase+1
+				Case 22
+					Blit 7,320,36,2
+					maxfade=16
+					fader=0
+					n=0
+					phase+1
+				Case 23
+					FadeUp{%1110000000000000}
+					If fader>maxfade Then delay=10:fader=0:phase+1
+				Case 24
+					FadeUp{%0000111000000000}
+					If fader>maxfade Then delay=25:phase+1
+				Case 25
+					y=72+n*16
+					pts$=RSet$(Str$(*hiscore(n)\pts),8)
+					RGB_On{%0000000010100000}
+					phase+1
+				Case 26
+					For c=0 To 11
+						Blit CharShape{*hiscore(n)\char[c]},160+c*14,y,0
+					Next c
+					phase+1
+				Case 27
+					For c=1 To 8
+						Blit CharShape{Asc(Right$(pts$,c))},480-c*14,y,1
+					Next c
+					fader=0
+					phase+1
+				Case 28
+					FadeUp{%0000000000001010}
+					If fader>maxfade Then phase+1
+				Case 29
+					For c=0 To 11
+						Blit CharShape{*hiscore(n)\char[c]},160+c*14,y,2
+					Next c
+					phase+1
+				Case 30
+					For c=1 To 8
+						Blit CharShape{Asc(Right$(pts$,c))},480-c*14,y,3
+					Next c
+					phase+1
+				Case 31
+					RGB_Off{%0000000000001010}
+					n+1
+					If n<10 Then phase=25 Else fader=maxfade:delay=400:phase+1
+				Case 32
+					FadeDown{%0000000010101010}
+					If fader=0 Then delay=10:fader=maxfade:phase+1
+				Case 33
+					FadeDown{%0000111000000000}
+					If fader=0 Then delay=10:fader=maxfade:phase+1
+				Case 34
+					FadeDown{%1110000000000000}
+					If fader=0 Then phase+1
+				Case 35
+					If highsfirst Then highsfirst=False:phase=0 Else phase+1
+				Case 36
+					FadePalette 0
+					BlockScroll
+					*pal=?notes_pal
+					Boxf 80,4,560,252,8
+					For y=30 To 230 Step 10
+						Line 80,y,560,y,4
+					Next y
+					Box 124,4,125,252,12
+					maxfade=16
+					fader=0
+					adr=?hints_data
+					phase+1
+				Case 37
+					Blit 12,488,23,2
+					Blit 13,91,201,1
+					Colour 3,8
+					FadeUp{%1111111111111111}
+					If fader>maxfade Then phase+1
+				Case 38
+					x=Peek.b(adr)
+					adr+1
+					If x=0 Then delay=1000:phase=41 Else y=Peek.b(adr):adr+1:phase+1
+				Case 39
+					Locate x,y*10/8+.25
+					Colour 3,8
+					phase+1
+				Case 40
+					c=Peek.b(adr)
+					adr+1
+					If c=0
+						phase=38
+					Else
+						If c<16 Then Colour c,8 Else Print Chr$(c)
+					EndIf
+				Case 41
+					FadeDown{%1111111111111111}
+					If fader=0 Then phase+1
+				Case 42
+					FadePalette 0
+					BlockScroll
+					phase=0
+			End Select
+		EndIf
+
+		If waiting Then waiting-1 Else waiting=5:option=CheckStatus{}
+
+	Until option>0
+
+	FadeOff{1}
+	DisplayOff
+	FreeSlices
+
+	For i=64 To 0 Step -1
+		SetMedVolume i
+		VWait
+	Next i
+	StopMed
+
+	highsfirst=False
+
+Return
+
+
+;----------------------------------------------------------------------
+; The actual game routine
+;----------------------------------------------------------------------
+
+PlayGame:
+	Use BitMap 1
+	BlockScroll
+	BitMapOutput 1
+
+	Slice 0,#V_TOP,320,256,$fff8,4,8,32,320,320
+	FadePalette 0
+	Show 1
+
+	*pal=?sprite_pal
+	For i=0 To 15
+		Green 16+i,*pal\xred[i],*pal\xgrn[i],*pal\xblu[i]
+	Next i
+
+	score=0
+	pts=0
+	extras=10000
+	worms=#NUM_WORMS
+	level=#START_LEVEL
+
+	tick=0
+	tock1=0
+	tock2=0
+	highsfirst=False
+
+	DisplayOn
+
+	status=0
+	While status<#GAME_OVER
+		*level=?level_data+level*#SZ_LEVEL
+
+		Gosub PlayLevel
+
+		If status<#GAME_OVER
+			level+1
+			If level=#NUM_LEVELS
+				Gosub Apologies
+				level=0
+			EndIf
+		EndIf
+
+	Wend
+
+	VWait 10
+
+	If status<#ESCAPE Then Gosub GameOver
+
+	DisplayOff
+	FreeSlices
+Return
+
+
+;----------------------------------------------------------------------
+; Control play for one level of the game, may be several screens
+;----------------------------------------------------------------------
+
+PlayLevel:
+	For i=0 To 15
+		rsg(i)=0
+	Next i
+
+	room=*level\start_room
+	pipe=*level\start_pipe
+	gems=*level\total_gems
+	no_gems=False
+	gmax=1
+	extend=0
+
+	;gems=1 ;**** Include for quick level checking ****
+
+	status&NOT#LEVEL_OVER
+	While status<#LEVEL_OVER
+		*room=?room_data+room*#SZ_ROOM
+		Gosub PlayRoom
+	Wend
+
+	If status<#GAME_OVER Then Gosub LevelOver
+
+	If status<#ESCAPE Then Gosub PlayBonus
+
+Return
+
+
+;----------------------------------------------------------------------
+; Control the game play for one normal room
+;----------------------------------------------------------------------
+
+PlayRoom:
+	Gosub BuildRoom
+	here=room
+	*pal=?game_pal
+	FadeOn{1}
+
+	status&NOT#MAP_OVER
+
+	While status<#MAP_OVER
+
+		Gosub PlayWorm
+
+		If status<#WORM_OVER ;Must have used an exit
+			If gems<=0
+				status|#LEVEL_OVER
+			Else
+				*pipe=?pipe_data+(*room\first_pipe+exit)*#SZ_PIPE
+				pipe=*pipe\dest_pipe
+				*pipe=?pipe_data+pipe*#SZ_PIPE
+				room=*pipe\source
+				If room<>here Then status|#MAP_OVER
+			EndIf
+		Else
+			If status<#ESCAPE
+				status|#MAP_OVER
+				extend=0
+				worms-1
+				Gosub ShowWorms
+				If worms=0 Then status|#GAME_OVER
+				VWait 25
+				Sound 4,1,64
+				i=0
+				While i<80 AND status<#ESCAPE AND Joyb(1)=0
+					VWait 3
+					ShowSprite 8+i&7,head_x-4,head_y-10,0
+					i+1
+				Wend
+				ShowSprite 0,0,0,0
+			EndIf
+		EndIf
+
+	Wend
+
+	maxfade=32
+	fader=maxfade
+
+	For i=64 To 0 Step -1
+		VWait
+		Volume 15,i,i,i,i
+		If fader>0 Then FadeDown{%1111111111111111}
+	Next i
+
+Return
+
+
+;----------------------------------------------------------------------
+; Play one bonus screen
+;----------------------------------------------------------------------
+
+PlayBonus:
+	room=*bonus\room
+	pipe=*bonus\pipe
+	gems=*bonus\gems
+	no_gems=False
+
+	bonus=-score
+	extend=0
+	gmax=1
+	*room=?room_data+room*#SZ_ROOM
+
+	Gosub BuildRoom
+
+	status=status&NOT#LEVEL_OVER&NOT#MAP_OVER
+
+	If status<#GAME_OVER
+		*pal=?game_pal
+		FadeOn{1}
+
+		Gosub PlayWorm
+
+		If status>=#WORM_OVER AND status<#ESCAPE
+			VWait 25
+			Sound 4,1,64
+			i=0
+			While i<80 AND status<#ESCAPE AND Joyb(1)=0
+				VWait 3
+				ShowSprite 8+i&7,head_x-4,head_y-10,0
+				i+1
+			Wend
+			ShowSprite 0,0,0,0
+		EndIf
+
+		maxfade=32
+		fader=maxfade
+
+		For i=64 To 0 Step -1
+			VWait
+			 Volume 15,i,i,i,i
+			If fader>0 Then FadeDown{%1111111111111111}
+		Next i
+
+		If status<#ESCAPE
+			BlockScroll
+			*pal=?text_pal
+
+			msg$="level "+Str$(level+1)+" bonus"
+			ShapeStr{-1,90,4}
+
+			bonus+score
+			If bonus Then msg$=Str$(bonus)+" points" Else msg$="zero !"
+			ShapeStr{-1,120,1}
+
+			FadeOn{1}
+			ButWait{150}
+			FadeOff{1}
+		EndIf
+
+	EndIf
+
+Return
+
+
+;----------------------------------------------------------------------
+; Control the life of one worm
+;----------------------------------------------------------------------
+
+PlayWorm:
+		*pipe=?pipe_data+pipe*#SZ_PIPE
+		dir=*pipe\entry
+		head_x=16**pipe\x+8**way\out_x[dir]
+		head_y=16**pipe\y+8**way\out_y[dir]
+		tail_x=head_x+dx(dir+1)
+		tail_y=head_y+dy(dir+1)
+		head=0
+		tail=2
+		length=8+level+extend
+		phase=-1
+		turning=True
+		oldir=dir
+		*worm=heading(dir)
+
+		For i=0 To 2
+			Sound 5,4,64
+			ShowSprite 4+dir,tail_x,tail_y,4
+			VWait 10
+			ShowSprite 0,0,0,4
+			VWait 10
+		Next i
+
+		status&#NEW_WORM
+
+		Gosub StartHead
+		Gosub MoveHead
+		If status<#WORM_OVER
+			Gosub StartTail
+			Gosub MoveWorm
+			If status<#WORM_OVER
+				Gosub MoveTail
+				Gosub StopTail
+			EndIf
+		EndIf
+
+		If tock1 Then ShowSprite 0,0,0,2
+
+Return
+
+
+;----------------------------------------------------------------------
+; Convert stored map data into a useable block map and set of gem and
+; pipe references and generate a collision map for the room
+;----------------------------------------------------------------------
+
+BuildRoom:
+	mapdata=?map_data+room*300
+
+	rid=room&15
+	If rsg(rid)=0 Then rsg(rid)=gmax
+	g=rsg(rid)
+
+	For y=2 To 31
+		For x=0 To 39
+			bump(x,y)=#BLANK
+		Next x
+	Next y
+
+	For y=1 To 15
+		For x=0 To 19
+			s=Peek.b(mapdata)&$FF
+			If s
+				bx=x*2
+				by=y*2
+				If s>207
+					If g>=gmax
+						If s&15<15 Then gem(g)=s Else gem(g)=(s&240)|Rnd(12)
+					EndIf
+					If gem(g)
+						s=Peek.b(?gem_data+gem(g)&15)&$FF
+						bump(bx,by)=#GEM
+						bump(bx+1,by+1)=#GEM
+						id(x,y)=g
+						s+#BACK_SHAPES
+					Else
+						s=0
+					EndIf
+					g+1
+				Else
+					id(x,y)=0
+					hit=Peek.b(?block_data+s)
+					If hit BitTst 0 Then bump(bx,by)=#OBSTACLE
+					If hit BitTst 1 Then bump(bx+1,by)=#OBSTACLE
+					If hit BitTst 2 Then bump(bx,by+1)=#OBSTACLE
+					If hit BitTst 3 Then bump(bx+1,by+1)=#OBSTACLE
+					s+#BACK_SHAPES
+				EndIf
+			EndIf
+			map(x,y)=s
+			mapdata+1
+		Next x
+	Next y
+
+	If g>gmax Then gmax=g
+
+	*pipe=?pipe_data+*room\first_pipe*#SZ_PIPE
+	For i=0 To *room\num_pipes-1
+		dir=*pipe\entry
+		x=*pipe\x
+		y=*pipe\y
+		id(x,y)=i
+		bump(2*x+*way\in_x1[dir],2*y+*way\in_y1[dir])=#PIPE
+		bump(2*x+*way\in_x2[dir],2*y+*way\in_y2[dir])=#PIPE
+		*pipe+#SZ_PIPE
+	Next i
+
+	Gosub ShowRoom
+
+Return
+
+
+;----------------------------------------------------------------------
+; Use the map data to construct the room from graphic blocks
+;----------------------------------------------------------------------
+
+ShowRoom:
+	BlockScroll
+	For y=1 To 15
+		For x=0 To 19
+			CNIF #DEBUG=0
+				BlitColl #EARTH,x*16,y*16
+			CEND
+			If map(x,y) Then Blit map(x,y),x*16,y*16
+		Next x
+	Next y
+	ShapesBitMap 1,2
+	Blit 15,0,0,0
+	Gosub ShowScore
+	Gosub ShowGems
+	Gosub ShowLevel
+	Gosub ShowWorms
+
+	CNIF #DEBUG>0
+		For y=0 To 31
+			For x=0 To 39
+				If bump(x,y)&#OBSTACLE Then Point x*8,y*8,10
+				If bump(x,y)&#PIPE		 Then Point x*8,y*8,13
+				If bump(x,y)&#GEM			Then Point x*8,y*8,8
+				If bump(x,y)&#BLANK		Then Point x*8,y*8,12
+			Next x
+		Next y
+	CEND
+
+Return
+
+
+;----------------------------------------------------------------------
+; Update screen display of points score
+;----------------------------------------------------------------------
+
+ShowScore:
+	Colour 9,7
+	Locate 6,0.5
+	Print RSet$(Str$(score),8)
+Return
+
+
+;----------------------------------------------------------------------
+; Update screen display of gems remaining on level
+;----------------------------------------------------------------------
+
+ShowGems:
+	Colour 9,7
+	Locate 20,0.5
+	Print RSet$(Str$(gems),2)
+Return
+
+
+;----------------------------------------------------------------------
+; Update screen display of level
+;----------------------------------------------------------------------
+
+ShowLevel:
+	Colour 9,7
+	Locate 29,0.5
+	Print RSet$(Str$(level+1),2)
+Return
+
+
+;----------------------------------------------------------------------
+; Update screen display of worms remaining
+;----------------------------------------------------------------------
+
+ShowWorms:
+	Colour 9,7
+	Locate 38,0.5
+	Print RSet$(Str$(worms),1)
+Return
+
+
+;----------------------------------------------------------------------
+; First images of the head leaving a pipe
+;----------------------------------------------------------------------
+
+StartHead:
+	worm_head=*worm\index[dir]
+	xx=16**pipe\x
+	yy=16**pipe\y
+	nozzle=map(xx/16,yy/16)
+	For i=0 To 3
+		!Jwait
+		worm_head+1
+		Blit worm_head,head_x,head_y,0
+		Blit nozzle,xx,yy
+	Next i
+Return
+
+
+;----------------------------------------------------------------------
+; First images of the tail leaving the pipe
+;----------------------------------------------------------------------
+
+StartTail:
+	worm_tail=buff(tail)+48
+	Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
+	Blit worm_tail+1,tail_x,tail_y
+Return
+
+
+;----------------------------------------------------------------------
+; Move just the head (tail still in pipe)
+;----------------------------------------------------------------------
+
+MoveHead:
+	pops=length+tail-6
+	While status<#ENTRY_OVER
+		!Jwait
+		phase=(phase+1)&3
+
+		If phase=0 Then Gosub TurnHead
+		worm_head+1
+		mv=*frame\change[worm_head]
+		If mv
+			head_x+dx(mv)
+			head_y+dy(mv)
+			Gosub BumpCheck
+			path=*frame\impact[worm_head]
+			bump(bx+*quad\x1[path],by+*quad\y1[path])|#WORM
+			bump(bx+*quad\x2[path],by+*quad\y2[path])|#WORM
+		EndIf
+		Blit worm_head,head_x,head_y
+
+		If phase=1 Then Gosub TickTock
+		If phase=2 Then Gosub Update
+		If phase=3
+			If head=pops Then Sound 6,3,64
+			If Abs(head-tail)>length Then status|#ENTRY_OVER
+		EndIf
+
+	Wend
+Return
+
+
+;----------------------------------------------------------------------
+; Move both the head and the tail
+;----------------------------------------------------------------------
+
+MoveWorm:
+	While status<#ROOM_OVER
+		!Jwait
+		phase=(phase+1)&3
+
+		If growing
+			growing-1
+		Else
+			If phase=0 Then Gosub TurnTail
+			Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
+			worm_tail+1
+			mv=*frame\change[worm_tail]
+			If mv
+				path=*frame\impact[worm_tail]
+				bx=tail_x/8
+				by=tail_y/8
+				bump(bx+*quad\x1[path],by+*quad\y1[path])&#NO_WORM
+				bump(bx+*quad\x2[path],by+*quad\y2[path])&#NO_WORM
+				tail_x+dx(mv)
+				tail_y+dy(mv)
+			EndIf
+			Blit worm_tail,tail_x,tail_y
+		EndIf
+
+		If phase=0 Then Gosub TurnHead
+		worm_head+1
+		mv=*frame\change[worm_head]
+		If mv
+			head_x+dx(mv)
+			head_y+dy(mv)
+			Gosub BumpCheck
+			path=*frame\impact[worm_head]
+			bump(bx+*quad\x1[path],by+*quad\y1[path])|#WORM
+			bump(bx+*quad\x2[path],by+*quad\y2[path])|#WORM
+		EndIf
+		Blit worm_head,head_x,head_y
+
+		If phase=1 Then Gosub TickTock
+		If phase=2 Then Gosub Update
+
+	Wend
+Return
+
+
+;----------------------------------------------------------------------
+; Move the tail only towards a pipe
+;----------------------------------------------------------------------
+
+MoveTail:
+	Sound 7,2,64
+	leaving=True
+	While status<#EXIT_OVER
+		!Jwait
+		phase=(phase+1)&3
+
+		If leaving
+			If phase=0
+				leaving=False
+				turning=True
+				Gosub TurnHead
+			Else
+				worm_head+1
+				Blit worm_head,head_x,head_y
+				Blit nozzle,xx,yy
+			EndIf
+		EndIf
+
+		If growing
+			growing-1
+		Else
+			If phase=0 Then Gosub TurnTail
+				Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
+				worm_tail+1
+				mv=*frame\change[worm_tail]
+			If mv
+				path=*frame\impact[worm_tail]
+				bx=tail_x/8
+				by=tail_y/8
+				bump(bx+*quad\x1[path],by+*quad\y1[path])&#NO_WORM
+				bump(bx+*quad\x2[path],by+*quad\y2[path])&#NO_WORM
+				tail_x+dx(mv)
+				tail_y+dy(mv)
+			EndIf
+			Blit worm_tail,tail_x,tail_y
+		EndIf
+
+		If phase=1 AND no_gems Then pts+10:Gosub Update:Sound 11,4,32
+		If phase=2 Then Gosub TickTock
+		If phase=3 Then If tail=head Then status|#EXIT_OVER
+
+	Wend
+Return
+
+
+;----------------------------------------------------------------------
+; Movement of just the tail, into a pipe
+;----------------------------------------------------------------------
+
+StopTail:
+	worm_tail-3
+	For i=1 To 3
+		!Jwait
+		Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
+		Blit worm_tail,tail_x,tail_y
+		Blit nozzle,xx,yy
+		worm_tail+1
+	Next i
+	!Jwait
+	Scroll tail_x,tail_y,16,16,tail_x,tail_y,2
+	Blit nozzle,xx,yy
+	path=*frame\impact[worm_tail]
+	bx=tail_x/8
+	by=tail_y/8
+	bump(bx+*quad\x1[path],by+*quad\y1[path])&#NO_WORM
+	bump(bx+*quad\x2[path],by+*quad\y2[path])&#NO_WORM
+Return
+
+
+;----------------------------------------------------------------------
+; Turn the head to follow the joystick, if possible
+;----------------------------------------------------------------------
+
+TurnHead:
+	If turning Then turning=False Else dir=*worm\turn[Joyr(1)]
+	worm_head=*worm\index[dir]
+	buff(head)=worm_head
+	head=(head+1)&127
+	If dir<>oldir
+		turning=True
+		*worm=heading(dir)
+		oldir=dir
+	EndIf
+Return
+
+
+;----------------------------------------------------------------------
+; Turn the tail to follow the body
+;----------------------------------------------------------------------
+
+TurnTail:
+	worm_tail=buff(tail)+48
+	tail=(tail+1)&127
+Return
+
+
+;----------------------------------------------------------------------
+; Check for collisions between the worm head and objects on the screen
+;----------------------------------------------------------------------
+
+BumpCheck:
+	view=*frame\check[worm_head]
+	bx=head_x LSR 3
+	by=head_y LSR 3
+
+	hq1=bump(bx+*quad\x1[view],by+*quad\y1[view])
+	hq2=bump(bx+*quad\x2[view],by+*quad\y2[view])
+	hq=hq1|hq2
+
+	If hq&128 ;Collided with an "obstacle"
+		Sound 2,1,64
+		status|#WORM_OVER
+	Else
+		hit=7 AND hq LSR 4
+		If hit>1 ;Something needs checking
+			If hit>4 ;Missed a pipe
+				Sound 3,1,64
+				status|#WORM_OVER
+			Else
+				If hit<4 ;Gem nearby - must be exactly over it to count
+					If bump(bx,by)&bump(bx+1,by+1)&#GEM&((bx|by)&1=0)
+						xx=head_x/16
+						yy=head_y/16
+						bump(bx,by)=#BLANK
+						bump(bx+1,by+1)=#BLANK
+						map(xx,yy)=0
+						Use BitMap 2
+						CNIF #DEBUG>0
+							Boxf head_x,head_y,head_x+15,head_y+15,0
+						CELSE
+							BlitColl #EARTH,head_x,head_y
+						CEND
+						Use BitMap 1
+						g=(gem(id(xx,yy)) LSR 4)&3
+						gem(id(xx,yy))=0
+						pts+gemval(g)
+						ShowSprite gemspr(g),head_x-8,head_y-8,2
+						Sound 1,2,64
+						tock1=12
+						gems-1
+						If gems=0 Then no_gems=True:tock2=6
+						extend+1
+						growing+4
+					EndIf
+				Else ;Only pipes involved
+					xx=(head_x+dx(dir+1))
+					yy=(head_y+dy(dir+1))
+					If xx&15 OR yy&15 ;Must have hit different pipes !
+						Sound 3,1,64
+						status|#WORM_OVER
+					Else
+						xx&$FF0
+						yy&$FF0
+						nozzle=map(xx/16,yy/16)
+						exit=id(xx/16,yy/16)
+						status|#ROOM_OVER
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+Return
+
+
+;----------------------------------------------------------------------
+; Amend and display the score if needed
+;----------------------------------------------------------------------
+
+Update:
+	If pts
+		score+pts
+		pts=0
+		Gosub ShowScore
+		Gosub ShowGems
+		If score>extras
+			extras+10000
+			If worms<9 Then worms+1:Sound 10,2,64
+		EndIf
+	EndIf
+Return
+
+
+;----------------------------------------------------------------------
+; Various timed functions, called ~ every 4th frame
+;----------------------------------------------------------------------
+
+TickTock:
+	If tock1 Then tock1-1:If tock1=0 Then ShowSprite 0,0,0,2
+	If tock2 Then tock2-1:If tock2=0 Then Sound 12,4.64
+	If dig Then dig-1 Else dig=2:Sound 0,1,10
+	If RawStatus(64) Then Gosub Pause
+	key=Asc(Inkey$)
+Return
+
+
+;----------------------------------------------------------------------
+; Pause the game, wait for space up, space down and space up
+;----------------------------------------------------------------------
+
+Pause:
+	Volume 15,0,0,0
+	FlushBuffer 0
+	BBlit 0,8,160,128
+	While RawStatus(64):Wend
+	While NOT RawStatus(64):Wend
+	While RawStatus(64):Wend
+	UnBuffer 0
+Return
+
+
+;----------------------------------------------------------------------
+; Message and sound for end of level
+;----------------------------------------------------------------------
+
+LevelOver:
+	Repeat
+		broom=Rnd(#NUM_BROOMS)
+	Until broom<#NUM_BROOMS ;Just in case rnd goes funny !
+	*bonus=?bonus_data+broom*#SZ_BONUS
+
+	BlockScroll
+	*pal=?text_pal
+	maxfade=16
+
+	SBox{0,0,19,15,1}
+
+	msg$="level "+Str$(level+1)+" completed!"
+	ShapeStr{-1,64,4}
+
+	msg$="* bonus screen *"
+	ShapeStr{-1,112,3}
+
+	ShapeText{-1,160,7,&*bonus\room_title[0],28}
+
+	DoFadeUp{%0000000000001100,1}
+
+	Sound 8,2,64
+	DoFadeUp{%0000001100000000,1}
+
+	VWait 50
+	Sound 8,2,64
+	DoFadeUp{%0000000011000000,1}
+
+	VWait 50
+	Sound 8,2,64
+	DoFadeUp{%1100000000000000,1}
+
+	ButWait{150}
+
+	maxfade=32
+	fader=maxfade
+
+	For i=64 To 0 Step -1
+		VWait
+		Volume 15,i,i,i,i
+		If fader>0 Then FadeDown{%1111111111111111}
+	Next i
+
+Return
+
+
+;----------------------------------------------------------------------
+; Message and sound for end of game
+;----------------------------------------------------------------------
+
+GameOver:
+	BlockScroll
+	*pal=?title1_pal
+
+	Blit 9,160,100,1
+	Sound 9,2,64
+
+	DoFadeUp{%0000000011100000,1}
+
+	ButWait{250}
+
+	maxfade=32
+	fader=maxfade
+
+	For i=64 To 0 Step -1
+		VWait
+		Volume 15,i,i,i,i
+		If fader>0 Then FadeDown{%1111111111111111}
+	Next i
+
+	Gosub CheckHighScores
+
+Return
+
+
+;----------------------------------------------------------------------
+; Check the current score against the highscore table entries, if the
+; score is high enough prompt for name to insert into table
+;----------------------------------------------------------------------
+
+CheckHighScores:
+	s=10
+	i=0
+	While i<10
+		If *hiscore(i)\pts<score Then s=i:i=9
+		i+1
+	Wend
+
+	If s<9
+		hs_start=?hiscore_data+s*#SZ_HISCORE
+		hs_end=?hiscore_data+9*#SZ_HISCORE-1
+		For adr=hs_end To hs_start Step -1
+			Poke.b adr+#SZ_HISCORE,Peek.b(adr)
+		Next adr
+	EndIf
+
+	If s<10
+		StartMedModule 1
+		BlockScroll
+		*pal=?text_pal
+
+		SBox{0,0,19,15,3}
+
+		msg$="good score !"
+		ShapeStr{-1,32,7}
+
+		msg$="enter your name"
+		ShapeStr{-1,72,2}
+
+		msg$="for high score table"
+		ShapeStr{-1,96,2}
+
+		FadeOn{1}
+		Gosub GetName
+		If name$="" Then name$="anonymous ! " Else name$=name$+"						"
+
+		*hiscore(s)\pts=score
+		For i=0 To 11
+			*hiscore(s)\char[i]=Asc(Mid$(name$,i+1,1))
+		Next i
+
+		highsfirst=True
+		maxfade=32
+		fader=maxfade
+
+		For i=64 To 0 Step -1
+			VWait
+			SetMedVolume i
+			If fader>0 Then FadeDown{%1111111111111111}
+		Next i
+		StopMed
+
+		VWait 50
+
+	EndIf
+
+Return
+
+
+;----------------------------------------------------------------------
+; Build name$ from the keyboard using character shapes
+;----------------------------------------------------------------------
+
+GetName:
+	msg$="------------"
+	ShapeStr{-1,170,1}
+	name$=""
+	done=1000
+	x=100:y=160
+	i=0
+	While Asc(Inkey$)<>-1:Wend
+	Boxf x,y,x+9,y+15,15
+	While done>0
+		VWait
+		key=Asc(Inkey$)
+		If key=-1
+			done-1
+		Else
+			If key=13
+				done=0
+				Boxf x,y,x+9,y+15,0
+			Else
+				done=1000
+				If key=8 OR key=127 Then Gosub DelChar Else Gosub AddChar
+			EndIf
+		EndIf
+	Wend
+Return
+
+
+;----------------------------------------------------------------------
+; Add a character to name$ if possible, and update the cursor
+;----------------------------------------------------------------------
+
+AddChar:
+	If i<12 AND key>31 AND key<127
+		If key>95 Then key-32
+		name$=name$+Chr$(key)
+		Boxf x,y,x+9,y+15,0
+		Blit CharShape{key},x,y,0
+		x+10
+		i+1
+		Boxf x,y,x+9,y+15,15
+	EndIf
+Return
+
+
+;----------------------------------------------------------------------
+; Delete a character from name$ if possible, and update the cursor
+;----------------------------------------------------------------------
+
+DelChar:
+	If i>0
+		Boxf x,y,x+9,y+15,0
+		x-10
+		i-1
+		Boxf x,y,x+9,y+15,15
+		name$=Left$(name$,i)
+	EndIf
+Return
+
+
+;----------------------------------------------------------------------
+; Ah, yes, the get out clause...
+;----------------------------------------------------------------------
+
+Apologies:
+	BlockScroll
+	*pal=?text_pal
+
+	RBox{0,0,19,15,7}
+
+	msg$="* congratulations *":ShapeStr{-1,24,4}
+	msg$="* on getting this far *":ShapeStr{-1,40,4}
+	msg$="the bad news is I haven't":ShapeStr{-1,70,1}
+	msg$="had time to do more levels":ShapeStr{-1,86,1}
+	msg$="or a decent end-of-game":ShapeStr{-1,102,1}
+	msg$="sequence -- so this it !":ShapeStr{-1,118,1}
+	msg$="Yes, I know its a cop-out !":ShapeStr{-1,148,3}
+	msg$="I'll try and do some more":ShapeStr{-1,178,2}
+	msg$="but just for now, I'm sending":ShapeStr{-1,194,2}
+	msg$="you back to level 1...":ShapeStr{-1,210,2}
+
+	FadeOn{1}
+	ButWait{1000}
+	FadeOff{1}
+Return
+
+
+;-----------------------------------------------------------------------
+; Assorted data to be read in
+;-----------------------------------------------------------------------
+
+Data.b 0,0, 8,0, 0,8, -8,0, 0,-8 ;Directions
+
+Data.w 0,1000,10,100 ;Gem values
+
+Data.b 0,3,1,2 ;Gem value sprites
+
+
+;----------------------------------------------------------------------
+; Embedded Data - All referenced by pointers and/or peek/poke
+;----------------------------------------------------------------------
+
+Event
+sprite_pal:
+Dc.b 08,15,06,15,08,00,00,15,08,00,15,15,08,15,00,00
+Dc.b 08,08,15,15,08,00,00,15,08,00,06,14,08,00,15,00
+Dc.b 08,08,10,00,08,00,15,15,08,00,00,00,08,00,00,15
+
+Event
+game_pal:
+Dc.b 05,10,14,15,00,03,08,00,15,15,15,15,00,00,00,05
+Dc.b 01,10,00,06,07,02,00,00,14,15,05,10,12,06,12,05
+Dc.b 00,11,00,00,00,10,11,00,00,15,09,08,00,15,12,06
+
+Event
+title1_pal:
+Dc.b 00,00,00,00,15,00,00,00,09,05,10,15,15,04,09,15
+Dc.b 00,05,09,15,06,01,04,10,00,05,10,15,15,00,00,00
+Dc.b 00,00,00,00,00,07,12,15,09,05,10,15,00,00,00,00
+
+Event
+title2_pal:
+Dc.b 00,15,00,15,00,15,00,15,00,00,00,00,00,05,10,15
+Dc.b 00,00,00,14,00,00,00,14,00,01,04,10,00,05,10,15
+Dc.b 00,04,00,00,00,04,00,00,00,07,12,15,00,05,10,15
+
+Event
+notes_pal:
+Dc.b 00,15,15,00,00,00,00,00,15,15,09,15,08,14,00,05
+Dc.b 00,15,06,00,12,06,00,00,12,11,11,09,00,00,08,05
+Dc.b 00,15,00,00,12,15,10,08,11,08,07,04,08,00,00,05
+
+Event
+text_pal:
+Dc.b 00,15,15,14,00,00,01,01,15,15,00,00,00,00,15,07
+Dc.b 00,15,06,00,11,06,07,03,14,06,00,00,00,00,15,07
+Dc.b 00,15,08,00,02,00,15,08,00,00,00,00,00,00,15,07
+
+Event
+worm_data:
+Dc.b 3,0,0,0,1,1,0,3,0, 027,035,000,031
+Dc.b 1,0,0,1,1,1,2,2,1, 043,039,047,000
+Dc.b 3,3,2,1,1,2,2,2,2, 000,055,051,059
+Dc.b 3,3,0,0,3,2,2,3,3, 071,000,067,063
+
+Event
+frame_data:
+Dc.b 0,0,0,0
+Dc.b 0,0,0,0, 0,0,0,0, 0,0,0,0
+Dc.b 0,0,0,0, 0,0,0,0, 0,0,0,0
+Dc.b 1,0,0,0, 0,4,0,0, 0,2,0,0
+Dc.b 2,0,0,0, 0,1,0,0, 0,3,0,0
+Dc.b 3,0,0,0, 0,2,0,0, 0,4,0,0
+Dc.b 4,0,0,0, 0,3,0,0, 0,1,0,0
+Dc.b 0,0,0,1, 0,0,1,0, 0,0,1,0
+Dc.b 0,0,0,2, 0,0,2,0, 0,0,2,0
+Dc.b 0,0,0,3, 0,0,3,0, 0,0,3,0
+Dc.b 0,0,0,4, 0,0,4,0, 0,0,4,0
+
+Dc.b 00,00,00,00
+Dc.b 00,00,00,00, 00,00,00,00, 00,00,00,00
+Dc.b 00,00,00,00, 00,00,00,00, 00,00,00,00
+Dc.b 01,00,00,00, 00,02,00,00, 00,03,00,00
+Dc.b 04,00,00,00, 00,05,00,00, 00,06,00,00
+Dc.b 07,00,00,00, 00,08,00,00, 00,09,00,00
+Dc.b 10,00,00,00, 00,11,00,00, 00,12,00,00
+Dc.b 00,00,00,01, 00,00,01,00, 00,00,01,00
+Dc.b 00,00,00,04, 00,00,04,00, 00,00,04,00
+Dc.b 00,00,00,07, 00,00,07,00, 00,00,07,00
+Dc.b 00,00,00,10, 00,00,10,00, 00,00,10,00
+
+Dc.b 00,00,00,00
+Dc.b 00,00,00,00, 00,00,00,00, 00,00,00,00
+Dc.b 00,00,00,00, 00,00,00,00, 00,00,00,00
+Dc.b 07,00,00,00, 00,04,00,00, 00,10,00,00
+Dc.b 10,00,00,00, 00,07,00,00, 00,01,00,00
+Dc.b 01,00,00,00, 00,10,00,00, 00,04,00,00
+Dc.b 04,00,00,00, 00,01,00,00, 00,07,00,00
+
+Event
+quad_data:
+Dc.b 0, 0, 1, 1, 0,-1, 1, 1, 0, 0, 0, 1,-1
+Dc.b 0, 0, 1,-1, 0, 1, 1, 0, 0, 1, 1, 0, 0
+Dc.b 0, 0, 1, 1, 1, 0, 2, 1, 0, 0, 1, 2, 0
+Dc.b 0, 1, 2, 0, 0, 1, 1, 1,-1, 2, 1, 0, 0
+
+Event
+block_data:
+Dc.b $0
+Dc.b $8,$4,$8,$C,$4,$8,$4,$B,$D,$C,$0,$C,$F,$F,$C,$0
+Dc.b $A,$5,$2,$3,$1,$A,$5,$A,$0,$0,$E,$7,$0,$0,$B,$D
+Dc.b $2,$1,$8,$C,$4,$2,$1,$F,$F,$F,$0,$F,$F,$F,$F,$0
+Dc.b $2,$1,$2,$3,$1,$F,$C,$0,$0,$5,$C,$C,$F,$3,$3,$A
+Dc.b $E,$D,$C,$B,$2,$4,$0,$3,$A,$0,$C,$1,$C,$3,$3,$A
+Dc.b $3,$3,$0,$8,$4,$9,$E,$1,$9,$6,$3,$8,$3,$0,$F,$F
+Dc.b $8,$C,$4,$F,$0,$0,$0,$4,$F,$F,$0,$7,$F,$5,$D,$5
+Dc.b $2,$3,$1,$F,$5,$B,$0,$1,$F,$F,$F,$F,$0,$5,$0,$5
+Dc.b $E,$F,$D,$F,$F,$C,$C,$C,$C,$0,$F,$F,$0,$0,$0,$0
+Dc.b $F,$F,$F,$F,$F,$F,$F,$F,$F,$0,$0,$0,$0,$0,$0,$0
+Dc.b $B,$F,$7,$F,$F,$F,$F,$F,$0,$0,$0,$0,$0,$0,$0,$0
+
+Event
+way_data:
+Dc.b	1, 0,-1, 0
+Dc.b	0, 1, 0,-1
+Dc.b	1, 0, 0, 0
+Dc.b	0, 1, 0, 0
+Dc.b	1, 1, 0, 1
+Dc.b	1, 1, 1, 0
+
+Event
+gem_data:
+Dc.b $8d,$9d,$ad,$8e,$9e,$ae,$8f,$9f,$af,$b0,$a0,$b0,$00,$00,$00,$00
+
+Event
+notes_data:
+Dc.b 36,03,"Name		: Wally (the Worm)",0
+Dc.b 36,04,"Address : Underground",0
+Dc.b 36,05,"Age		 : Unknown",0
+Dc.b 36,06,"Length	: Varies",0
+Dc.b 18,10,"Wally made his first appearance in ",34,12,"Wriggly",3,34," way",0
+Dc.b 18,11,"back in 1984 on the ",6,"Commodore 64",3,".	His talent for",0
+Dc.b 18,12,"collecting things didn't go unnoticed and now",0
+Dc.b 18,13,"he's back !",0
+Dc.b 18,15,"In this game he is collecting ",13,"GEMS",3,", but he still",0
+Dc.b 18,16,"has a problem with his head and ",14,"bumping into",0
+Dc.b 18,17,14,"things is fatal",3,".	He can use the pipes to move",0
+Dc.b 18,18,"between rooms but they don't always go where you",0
+Dc.b 18,19,"would expect !",0
+Dc.b 18,21,"Space = Pause",0
+Dc.b 18,22,"Escape = Quit current game",0
+Dc.b 18,23,"x = Exit to W/B",0
+Dc.b 0
+
+Event
+hints_data:
+Dc.b 36,02,"Hints & Tips",0
+Dc.b 35,03,13,"==============",0
+Dc.b 16,05,"- Pipes always go between the same two inlets",0
+Dc.b 16,06,"	and outlets, so a map might be useful.",0
+Dc.b 16,08,"- On ",14,"normal",3," screens, all gems are worth 100",0
+Dc.b 16,09,"	points each.	On ",14,"BONUS SCREENS",3," they are worth",0
+Dc.b 16,10,"	either ",13,"10, 100 or 1000 points",3,".	You can't tell",0
+Dc.b 16,11,"	which but usually, the more difficult the gem is",0
+Dc.b 16,12,"	to reach the more points it is worth.",0
+Dc.b 16,14,"- Each time Wally collects a gem he grows a new,",0
+Dc.b 16,15,"	segment but he loses these extra segments at the",0
+Dc.b 16,16,"	end of each level, or after a ",12,"crash",3,".",0
+Dc.b 16,18,"- When there are no gems left on a level, ",6,"any",0
+Dc.b 16,19,"	exit will take Wally to the next level.	Points",0
+Dc.b 16,20,"	are collected for every worm segment when leaving.",0
+Dc.b 16,22,"- Bonus screen crashes don't lose a life :-)",0
+Dc.b 0
+
+Event
+hiscore_data: ;(Default)
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+Dc.b $00,$00,$03,$e8,"wriggly		 "
+
+Event
+pipe_data:
+Dc.w 01,06,000,003,0 ;0
+Dc.w 11,05,000,002,1
+Dc.w 18,13,000,006,2
+Dc.w 04,07,001,000,1 ;3
+Dc.w 12,02,001,008,1
+Dc.w 18,10,001,003,2
+Dc.w 07,08,002,002,0 ;6
+Dc.w 09,14,002,004,3
+Dc.w 18,04,002,007,2
+Dc.w 09,14,003,000,3 ;9
+Dc.w 05,06,004,015,1 ;10
+Dc.w 18,04,004,012,2
+Dc.w 17,11,004,017,2
+Dc.w 04,14,004,017,3
+Dc.w 11,02,005,015,1 ;14
+Dc.w 06,06,005,018,0
+Dc.w 17,11,005,014,2
+Dc.w 05,07,006,018,1 ;17
+Dc.w 06,02,007,017,1 ;18
+Dc.w 14,02,007,020,1
+Dc.w 18,07,007,021,2
+Dc.w 08,14,007,010,3
+Dc.w 01,10,008,022,0 ;22
+Dc.w 08,12,009,041,2 ;23
+Dc.w 18,05,009,031,2
+Dc.w 18,06,009,023,2
+Dc.w 18,07,009,032,2
+Dc.w 18,08,009,023,2
+Dc.w 18,09,009,042,2
+Dc.w 12,04,010,025,2 ;29
+Dc.w 07,10,010,032,0
+Dc.w 16,09,010,029,1
+Dc.w 05,06,011,029,0 ;32
+Dc.w 08,12,011,035,2
+Dc.w 10,12,011,033,0
+Dc.w 10,11,012,023,0 ;35
+Dc.w 04,02,012,039,1
+Dc.w 08,02,012,033,1
+Dc.w 12,02,012,035,1
+Dc.w 18,06,013,040,2 ;39
+Dc.w 10,08,013,041,0
+Dc.w 08,06,013,027,2
+Dc.w 01,08,013,031,0
+Dc.w 05,14,014,043,3 ;43
+Dc.w 14,02,014,044,1
+Dc.w 01,10,015,045,0 ;45
+Dc.w 12,02,015,046,1
+Dc.w 13,12,016,046,3 ;47
+
+;^^^ XX YY SRC DSP D
+
+Event
+room_data:
+Dc.w 000,003
+Dc.w 003,003
+Dc.w 006,003
+Dc.w 009,001
+Dc.w 010,004
+Dc.w 014,003
+Dc.w 017,001
+Dc.w 018,004
+Dc.w 022,001
+Dc.w 023,006
+Dc.w 029,003
+Dc.w 032,003
+Dc.w 035,004
+Dc.w 039,004
+Dc.w 043,002
+Dc.w 045,002
+Dc.w 047,001
+
+;^^^ FP	NoP
+
+Event
+level_data:
+Dc.w 000,000,009
+
+Dc.w 004,011,016
+
+Dc.w 009,023,035
+
+;^^^ SR	SP	TG
+
+Event
+bonus_data:
+Dc.w 003,009,12
+Dc.b "				 easy peasy				 "
+
+Dc.w 008,022,15
+Dc.b "				 no smoking				 "
+
+Dc.w 014,043,46
+Dc.b "		console-ation	prize		"
+
+Dc.w 015,045,61
+Dc.b "			 marble madness			 "
+
+Dc.w 016,047,16
+Dc.b "				bone	shaker				"
+
+;^^^ RNo PNo GMS
+;		"TITLE---------------------->"
+
+
+Event
+map_data:
+IncBin "Source/Screens.bin"

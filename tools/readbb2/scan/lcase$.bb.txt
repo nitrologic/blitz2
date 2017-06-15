@@ -1,0 +1,4 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LCase$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LCase$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LCase$.bb
+
+Print LCase$("ABCDEFG"): ; Prints abcdefg 
+

@@ -1,0 +1,64 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/Abk2Shapes/Abk2Shapes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/Abk2Shapes/Abk2Shapes.bb2
+WBStartup: CloseEd: NoCli: WbToScreen 0 ; Program Startup
+NPrint "Abk2Shapes v1.0.- Convert Amos Sprite Banks to Blitz2 Shape files"
+NPrint "Written by Francisco Javier Di"+Chr$(233)+"guez, Spain. November 1993."
+np.b=NumPars
+If Par$(1)="?"
+	NPrint ""
+	NPrint "Usage: Abk2Shapes [<source>] [<destination>]"
+	NPrint ""
+	NPrint "Omitted parameters will be entered via the standard Blitz2 file selector."
+Else
+	; Variable defining using the names shown in the AMOS Pro manual
+	DEFTYPE .w id,Number_Of_Objects,X_Size,Y_Size,Number_Of_Planes
+	DEFTYPE .w X_Hot_Spot,Y_Hot_Spot
+	; File opening
+	MaxLen pa$=160 ;fix length of strings for use with Blitz2 FileRequest$
+	MaxLen fi$=64
+	If np>0 Then a$=Par$(1) Else a$=FileRequest$("Load an Amos Object Bank",pa$,fi$)
+	Window 0,50,30,200,100,$1006,"Abk2Shapes v1.0",0,1
+	If NOT WriteMem(0,a$)
+		WLocate 0,8: NPrint "Couldn't read file"
+	Else
+		; File identification
+		Loc 0,2: ##[$BE14] 0,&id,2
+		If id<>$5370 AND id<>$4963
+			WLocate 0,8: NPrint "Not an AMOS Object bank"
+		Else
+			##[$BE14] 0,&Number_Of_Objects,2
+			NPrint "Number of objects: ",Number_Of_Objects
+			For i.w=1 To Number_Of_Objects
+				##[$BE14] 0,&X_Size,2
+				##[$BE14] 0,&Y_Size,2
+				##[$BE14] 0,&Number_Of_Planes,2
+				##[$BE14] 0,&X_Hot_Spot,2
+				##[$BE14] 0,&Y_Hot_Spot,2
+				WLocate 0,16: NPrint "Processing object: ",i
+				WLocate 0,32: NPrint "X_Size: ",X_Size,"	 "
+				NPrint "Y_Size: ",Y_Size,"	 "
+				NPrint "Number of planes: ",Number_Of_Planes,"	 "
+				If X_Size>0 AND Y_Size>0 AND Number_Of_Planes>0
+					; The conversion takes place here
+					BitMap 0,X_Size*16+1,Y_Size+1,5
+					GetaShape i,0,0,X_Size*16,Y_Size
+					*s.shape=Addr MidHandle(i)
+					*s\_xhandle=X_Hot_Spot ;no flipping flags on disk
+					*s\_yhandle=Y_Hot_Spot
+					##[$BE14] 0,*s\_data,2*X_Size*Y_Size*Number_Of_Planes
+					Free BitMap 0
+				EndIf
+			Next
+			CloseFile 0: WLocate 0,64
+			If np>1 Then a$=Par$(2) Else a$=FileRequest$("Save as a BLITZ shape file",pa$,fi$)
+			If a$=""
+				NPrint "Nothing Saved"
+			Else
+				SetErr: NPrint "Couldn't save file": Pop If: End SetErr
+				SaveShapes 1,Number_Of_Objects,a$
+				NPrint "Operation successful"
+				ClrErr
+			EndIf
+		EndIf		 ; file type test
+	EndIf			 ; file opening test
+	VWait 80
+EndIf				 ; "?" parameter test

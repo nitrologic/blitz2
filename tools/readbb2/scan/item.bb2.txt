@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/map/item.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/item.bb2
+
+
+Dim List a(100)
+
+##[$C00F] a(),0
+
+ResetList a()
+
+AddItem a():a()=10
+AddItem a():a()=20
+AddItem a():a()=30
+
+ResetList a()
+While NextItem(a())
+	NPrint a()
+Wend
+
+MouseWait

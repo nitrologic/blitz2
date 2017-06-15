@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/surfmap.bb,/Users/simon/Google Drive/amiga/w/skid2/skidpc/surfmap.bb
+Screen 0,4
+ScreensBitMap 0,0
+
+BitMap 1,48,28,4
+LoadBitMap 1,"surfmap.iff"
+delmx=1:delmy=-1
+
+For stp=0 To 31
+
+Next
+
+MouseWait

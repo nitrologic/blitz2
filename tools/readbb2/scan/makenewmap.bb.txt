@@ -1,0 +1,21 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makenewmap.bb
+NEWTYPE .frend :lti.w:ltj:rti:rtj:End NEWTYPE
+
+	f$="maps:t1/cross"
+
+	If WriteMem (0,f$+".map")
+		InitBank 0,FileSeek(0)+7*SizeOf.frend,0
+		##[$BE14] 0,Bank(0),FileSeek(0)
+		CloseFile 0
+
+		maptr.l=Bank(0)
+		pts.w=Peek.w(maptr+64*64*2):pts1.w=pts+1:pts2.w=pts+2:pts3=pts+3:pts4=pts+4
+		condt.l=maptr+64*64*2 + 2
+		For cnt.w=0 To 7*SizeOf.frend Step 2
+			Poke.w condt+cnt+(pts1*SizeOf.frend),Peek.w (condt+cnt)
+		Next
+
+		SaveBank 0,f$+".nmp"
+
+	EndIf
+End

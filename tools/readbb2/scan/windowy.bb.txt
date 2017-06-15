@@ -1,0 +1,10 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WindowY.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WindowY.bb
+
+; 
+; windowy example program 
+; 
+Screen 0,2
+Window 0,0,10,320,180,0,"Window",0,1
+Print WindowY 
+MouseWait 
+

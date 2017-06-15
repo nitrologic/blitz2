@@ -1,0 +1,55 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/write3d.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/write3d.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/write3d.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/write3d.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/write3d.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/write3d.bb2
+;*************************************************************
+;*																													 *
+;*	 THIS IS A DEMO PROGRAMME THAT CREATES LARGE 3-D				 *
+;*				LETTERS FROM 8*8 PIXEL FONTS											 *
+;*																													 *
+;*			THIS IS THE VERSION THAT WORKS FROM THE NEW					*
+;*					 VERSION	 OF BLITZ BASIC	TWO									 *
+;*																													 *
+;*************************************************************
+Screen 0,11
+Window 0,0,0,640,256,$1800,"test",2,1
+WindowOutput 0
+Green 0,0,0,0:Green 2,10,0,0:Green 3,15,4,4
+ScreensBitMap 0,0
+BlockScroll
+Use BitMap 0
+a$="BLITZ":b$="BASIC":c$="TWO"
+Statement	large{d$,x,y,af,p,j}
+	Shared ln,vn
+	xx=x:yy=y
+	For r=1 To Len(d$)
+	WLocate 24,24:NPrint Mid$(d$,r,1)
+	sx=xx:sy=y
+	 For d=1 To p
+		If d<p
+			cl=2
+		Else
+			cl=3
+		EndIf
+	 xx=sx:yy=sy-(d*2)
+		For o=0 To 7
+			For s=0 To 7
+				If Cls(24+s,32+o)=1
+					dx=(xx+(s*af))
+					dy=(yy+(o*af))
+					fx=dx+(af-1):fy=dy+(af-1)
+					Boxf dx,dy,fx,fy,cl
+				EndIf
+			Next s
+			xx=xx-ln
+		Next o
+	Next d
+	xx=xx+j:ln=ln-vn
+Next r
+End Statement
+ln=2:vn=1
+large{a$,180,40,2,6,60}
+ln=4:vn=2
+large{b$,150,80,3,9,80}
+ln=3:vn=3
+large{c$,180,130,5,12,100}
+MouseWait
+End
+

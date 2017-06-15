@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Andre/CrMDecrunch_Demo.bb
+If NumPars<>2
+	NPrint "Usage: CrMDec <Source> <Destination>"
+	End
+EndIf
+header.l=##[$FEE5](14,0)
+If header
+	If WriteMem(0,Par$(1))
+		##[$BE14] 0,header,14
+		NPrint Peeks$(header,4)
+		NPrint Peek.w(header+4)
+		NPrint Peek.l(header+6)
+		NPrint Peek.l(header+10)
+	EndIf
+	bufadr.l=##[$FEE5](14+Peek.l(header+6),0)
+	If bufadr
+		Loc0,0
+		##[$BE14] 0,bufadr,14+Peek.l(header+10)
+		CrMDecrunch bufadr
+		##[$FF8C]0
+		If ReadMem(1,Par$(2))
+			Exists1,bufadr+14,Peek.l(header+6)
+		EndIf
+		##[$FEE6] bufadr
+	EndIf
+	##[$FEE6] header
+EndIf

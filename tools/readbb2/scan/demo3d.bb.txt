@@ -1,0 +1,191 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/old/demo3d.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/old/demo3d.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/3d/demo3d.bb
+
+#iso=0				 ;change to 1 for red/blue 3d glasses
+
+DEFTYPE .w
+
+NEWTYPE .xyz:x.q:y:z:End NEWTYPE
+
+NEWTYPE .matrix:m.w[9]:End NEWTYPE
+
+NEWTYPE .part3d
+	*sister.part3d
+	*child.part3d
+	*parent.part3d
+	*frame.w
+	rota.xyz:rotv:rot
+	posa.xyz:posv:pos
+	id.matrix
+	vertpos.w[3]
+	view.matrix
+	animvals.w[16]
+End NEWTYPE
+
+.initialise
+	Dim List shapes.part3d(100)
+	USEPATH shapes()
+	BLITZ
+	Gosub setupshapes
+	If #iso=0 Then Gosub setuprgb Else Gosub setuprb
+	Gosub mainsetup
+
+.mainloop
+	While Inkey$=""
+		VWait
+		If #iso=0 Then Gosub showrgb Else Gosub showrb
+		db=1-db
+		Gosub moveship
+		b.l=##[$AB02](0,db,shapes())
+		MOVE #$fff,$dff180
+	Wend
+	End
+
+.moveship:
+	mx=MouseXSpeed
+	my=MouseYSpeed
+	j=Joyb(0)
+	\rot\z+mx ASL 2
+	\rot\y+\rot\z ASR 4				 ;(\rot\z ASR 5) *j
+	\rot\x+my
+	\animvals[0]=-1
+	\animvals[1]=j*5
+	\animvals[2]=3
+	##[$AA02] shapes()
+	If \pos\y>0 Then \pos\y=0
+	Return
+
+.showrgb:
+	Show db:Return
+
+.showrb:
+	ShowF db,0,192:ShowB db,0,0:Return
+	Return
+
+.mainsetup
+	Mouse On:h=1024:MouseArea -h,-h,h,h:
+	BlitzKeys On
+	Return
+
+.setuprgb
+	BitMap 0,320,192,3
+	BitMap 1,320,192,3
+	##[$AB82] 0,0,1,0,50,40			;,64,0,320-128,150
+	##[$AB01] 1,6								;3,2
+	Slice 0,54,320,192,$fff8,3,8,8,320,320
+	Gosub palettergb
+	Return
+
+.setuprb
+	BitMap 0,320,192*2,4
+	BitMap 1,320,192*2,4
+	##[$AB82] 0,0,1,1,50,50	;,64,0,320-128,150
+	##[$AB01] 0,0			 ;3,2
+	##[$AB03] 0,2000,12
+	Slice 0,54,320,192,$fff8,4,8,16,320,320
+	Gosub paletterb
+	Return
+
+.setupshapes
+
+;	Goto missem
+
+	For i=1 To 16								;16 boxes
+		If AddItem(shapes())
+			USEPATH shapes()
+			\pos\x=Rnd(10000),0,Rnd(10000)
+			\rot\x=2048,0,0
+			\rotv\x=0,Rnd(50)-25,0	;whack all these up for spinning
+			\frame=?cube
+			\animvals[0]=1
+		EndIf
+	Next
+
+	Goto missem
+
+	For i=1 To 10								;10 pyramids
+		If AddItem(shapes())
+			USEPATH shapes()
+			\pos\x=Rnd(20000),-512,Rnd(20000)
+			\rot\x=0,0,0
+			\rotv\x=0,0,0
+			\frame=?pyramid
+			\animvals[0]=1
+		EndIf
+	Next
+missem
+	AddItem shapes()							;viewer
+	Return
+
+.palettergb
+	Restore rgbcols
+	For i=0 To 7:Read rr.w,gg.w,bb.w:Green i,rr,gg,bb:Next
+	Return
+rgbcols:
+	Data.w 0,0,0,2,10,5,15,15,15,12,12,12
+	Data.w 8,8,8,13,9,0,8,10,14,12,3,2
+
+.paletterb
+	Restore rbcols
+	For i=0 To 15:Read rr.w,gg.w,bb.w:Green i,rr,gg,bb:Next
+	Return
+rbcols:
+	Data.w 4,4,4,15,4,0,4,8,15,15,8,15
+	Data.w 13,4,0,11,3,0,13,8,15,11,8,15
+	Data.w 4,7,13,15,7,13,3,6,11,15,6,11
+	Data.w 13,7,13,11,7,13,13,6,11,11,6,11
+
+
+.frames:
+
+.cube:
+	Dc.l 0,0
+	Dc.w $10,6000,0
+
+	#s=8:#m=-8
+
+	Dc.w 8
+	Dc #m,#m,#s
+	Dc #s,#s,#m
+	Dc #s,#s,#s
+	Dc #m,#s,#m
+	Dc #s,#m,#m
+	Dc #s,#m,#s
+	Dc #m,#s,#s
+	Dc #m,#m,#m
+
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+
+	Dc.w 4,0,$10,$70,$30,$60,$6666,$6666,0,0
+	Dc.w 4,0,$10,$80,$40,$70,$2222,$2222,0,0
+	Dc.w 4,0,$10,$60,$50,$80,$3333,$3333,0,0
+	Dc.w 4,0,$20,$50,$60,$30,$4444,$4444,0,0
+	Dc.w 4,0,$20,$40,$80,$50,$5555,$5555,0,0
+	Dc.w 4,0,$20,$30,$70,$40,$7777,$7777,0,0
+
+	Dc.w 0,0
+
+
+.pyramid:
+	Dc.l 0,0
+	Dc.w $10,16000,0
+
+	#p=9:#q=-9:#h=10
+
+	Dc.w 4
+	Dc #p,#h,#q
+	Dc #p,#h,#p
+	Dc #q,#h,#p
+	Dc #q,#h,#q
+
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+
+	Dc.w 3,0,$20,$10,$00,$5555,$5555,0,0
+	Dc.w 3,0,$30,$20,$00,$2222,$2222,0,0
+	Dc.w 3,0,$40,$30,$00,$3333,$3333,0,0
+	Dc.w 3,0,$10,$40,$00,$4444,$4444,0,0
+
+	Dc.w 0,0

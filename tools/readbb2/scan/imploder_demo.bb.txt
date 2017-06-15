@@ -1,0 +1,65 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Andre/Imploder_Demo.bb
+WBStartup
+;If NumPars<>1
+;	DisplayBeep_0
+;	End
+;EndIf
+
+Statement ShowFillBar{prozent.f,richtung.b}		 ; Statement Beginn
+	Shared alt_prozent.f													; Variable als Shared deklariern
+	If richtung=True															; Vorwaerts ?
+		If Int(alt_prozent) < Int(prozent)					;
+			WBox 20,18,20+Int(prozent)*2,29,3				 ; Der Fuellbalken wird nur neu gezeichnet, wenn der ganzzahlige Anteil von
+			ResetString 19,17,prozent*2+2,14				 ; 'prozent' groesser ist als der ganzzahlige Anteil von 'alt_prozent'.
+		EndIf																			 ;
+	Else																					; bleibt rueckwaerts
+		If Int(alt_prozent) > Int(prozent)					;
+			WBox 20,18,20+Int(prozent)*2,29,3				 ; Der Fuellbalken wird nur neu gezeichnet, wenn der ganzzahlige Anteil von
+			WBox 20+Int(prozent)*2+1,17,220,30,0			;
+			ResetString 19,17,prozent*2+2,14				 ; 'prozent' kleiner ist als der ganzzahlige Anteil von 'alt_prozent'.
+		EndIf																			 ;
+	EndIf																				 ;
+	WColour 1																		 ; Textfarbe 0
+	WLocate 120-30,26:Print prozent," %"					; Prozent immer ausgeben (formatiert)
+	alt_prozent=prozent													 ; 'prozent' retten
+	If prozent=0																	; 0 % ?
+		WBox 19,17,221,30,0												 ; dann kein Balken und kein Rahmen
+	EndIf																				 ;
+End Statement																	 ; Ende des Statements
+
+Hook:
+Function.l	Hook{current.l}
+	Shared fsize.l
+	r.f=(fsize-current)/fsize*100
+	ShowFillBar{r,True}
+	ev.l=Event
+	If ev<>$200
+		Function Return True
+	Else
+		Function Return False
+	EndIf
+End Function
+
+WbToScreen0
+Window 0,(WBWidth-240)/2,(WBHeight-54)/2,240,54,$8|$1002,"Crunching...",1,2; Fenster oeffnen
+StringText$ 0,0																		 ; Kein Borderspacing
+SetString 2,1																	; Borderfarben gesamt
+ResetString 8,12,224,39												; Borderrahmen
+SetString 1,2																	; Borderfarben Fuellbalken
+ResetString 17,16,206,16											 ; Borderrahmen Fuellbalken
+ResetString 17,35,206,12											 ; Borderrahmen Prozentanzeige
+Format "###.00"																 ; 3 Stellen vor dem Komma, 2 dahinter. Ggf. durch Nullen ersetzen
+SetString 2,1																	; Borderfarben
+
+If WriteMem(0,"work:VT.Cruncher")
+	fsize.l=FileSeek(0)
+	buf.l=##[$FEE5](fsize,0)
+	If buf
+		##[$BE14] 0,buf,fsize
+		success.l=Implode(buf,fsize,?Hook+6)
+		##[$FEE6] buf
+	EndIf
+	MouseWait
+EndIf
+
+End

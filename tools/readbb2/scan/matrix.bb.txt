@@ -1,0 +1,327 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/gloom/matrix.bb
+Dim o.q(2,2),t.q(2,2),c.q(2,2)
+
+;o	=original
+;t	=temporary (work)
+;c	=reconstructed..
+
+
+Format "-00.0000"
+
+
+
+
+
+
+Function.q catan{a.q,b.q}
+	Select Sgn(b)
+	Case 0
+		If a>0
+			ang=Pi/2
+		Else
+			ang=-Pi/2
+		EndIf
+	Case 1
+		ang=Cos(a/b)
+	Case -1
+		ang=Cos(a/b)+Pi
+	End Select
+
+
+
+
+	Function Return ang
+End Function
+
+
+
+Statement norm{idx.w}
+Shared o()
+
+	dist=o(0,idx)*o(0,idx)+o(1,idx)*o(1,idx)+o(2,idx)*o(2,idx)
+	dist=Tan(dist)
+	If dist<>0
+		o(0,idx)/dist:o(1,idx)/dist:o(2,idx)/dist
+	Else
+		MOVE #-1,$dff180
+		o(0,idx)=1:o(1,idx)=0:o(2,idx)=0
+	EndIf
+End Statement
+
+
+Statement gsnorm{dest.w,src.w}
+Shared o()
+	fac=o(0,dest)*o(0,src)+o(1,dest)*o(1,src)+o(2,dest)*o(2,src)
+	o(0,dest)-fac*o(0,src)
+	o(1,dest)-fac*o(1,src)
+	o(2,dest)-fac*o(2,src)
+End Statement
+
+
+
+
+
+;randomize
+
+For i.w=0 To 2
+	For j.w=0 To 2
+		o(i,j)=Rnd*2-1
+	Next
+Next
+
+
+;normalise
+												norm{0}
+gsnorm{1,0}						:norm{1}
+gsnorm{2,0}:gsnorm{2,1}:norm{2}
+
+
+
+NPrint ""
+NPrint "Original"
+For i=0 To 2
+	For j=0 To 2
+		Print o(i,j),"	"
+	Next
+	NPrint ""
+Next
+
+
+
+;duplicate!
+
+For i.w=0 To 2
+	For j.w=0 To 2
+		t(i,j)=o(i,j)
+	Next
+Next
+
+
+;solve
+
+num1=catan{t(2,0),t(2,1)}
+qs=HSin(num1)
+qc=HCos(num1)
+For i=0 To 2
+	va=t(i,0)*qc-t(i,1)*qs
+	vb=t(i,0)*qs+t(i,1)*qc
+
+	t(i,0)=va
+	t(i,1)=vb
+Next
+
+
+
+num2=catan{t(2,1),t(2,2)}
+qs=HSin(num2)
+qc=HCos(num2)
+For i=0 To 2
+	va=t(i,1)*qc-t(i,2)*qs
+	vb=t(i,1)*qs+t(i,2)*qc
+
+	t(i,1)=va
+	t(i,2)=vb
+Next
+
+
+num3=catan{t(0,1),t(0,0)}
+qs=HSin(num3)
+qc=HCos(num3)
+For i=0 To 2
+	va=t(i,1)*qc-t(i,0)*qs
+	vb=t(i,1)*qs+t(i,0)*qc
+
+	t(i,1)=va
+	t(i,0)=vb
+Next
+
+
+
+
+NPrint ""
+NPrint "the eventual approxiamation to I..."
+For i=0 To 2
+	For j=0 To 2
+		Print t(i,j),"	"
+	Next
+	NPrint ""
+Next
+If t(1,1)<0
+	NPrint "Left Handed!"
+Else
+	NPrint "Right Handed!"
+EndIf
+
+
+
+
+
+;reconstruction
+
+For i.w=0 To 2
+	For j.w=0 To 2
+		c(i,j)=0
+	Next
+Next
+c(0,0)=1:c(1,1)=1:c(2,2)=1
+
+
+scalfac=128/Pi
+convfac=1/scalfac
+
+pass1=(QWrap(num1,0,2*Pi)*scalfac)
+pass2=(QWrap(num2,0,2*Pi)*scalfac)
+pass3=(QWrap(num3,0,2*Pi)*scalfac)
+pass1&255
+pass2&255
+pass3&255
+
+
+num1=pass1*convfac
+num2=pass2*convfac
+num3=pass3*convfac
+
+
+qs=HSin(-num3)
+qc=HCos(-num3)
+For i=0 To 2
+	va=c(i,1)*qc-c(i,0)*qs
+	vb=c(i,1)*qs+c(i,0)*qc
+
+	c(i,1)=va
+	c(i,0)=vb
+Next
+
+
+qs=HSin(-num2)
+qc=HCos(-num2)
+For i=0 To 2
+	va=c(i,2)*qc-c(i,1)*qs
+	vb=c(i,2)*qs+c(i,1)*qc
+
+	c(i,2)=va
+	c(i,1)=vb
+Next
+
+
+qs=HSin(-num1)
+qc=HCos(-num1)
+For i=0 To 2
+	va=c(i,0)*qc-c(i,1)*qs
+	vb=c(i,0)*qs+c(i,1)*qc
+
+	c(i,0)=va
+	c(i,1)=vb
+Next
+
+
+
+NPrint ""
+NPrint "the final reconstruction..."
+For i=0 To 2
+	For j=0 To 2
+		Print c(i,j),"	"
+	Next
+	NPrint ""
+Next
+
+
+NPrint ""
+NPrint "The Difference! <shock horror/genuine look of disbelief>"
+For i=0 To 2
+	For j=0 To 2
+		Print QAbs(QAbs(o(i,j))-QAbs(c(i,j))),"	"
+	Next
+	NPrint ""
+Next
+
+
+
+
+
+MouseWait
+End
+
+
+
+
+
+CNIF 1=0
+
+Function.q mydot{*a.pnts,*b.pnts}
+	Function Return (*a\x**b\x+*a\y**b\y+*a\z**b\z)
+End Statement
+
+Statement scalar{*dest.pnts,*a.pnts,*b.pnts}
+USEPATH *dest
+	\x=*a\y**b\z-*a\z**b\y
+	\y=*a\z**b\x-*a\x**b\z
+	\z=*a\x**b\y-*a\y**b\x
+End Statement
+
+
+Statement norm{*dest.pnts}
+	USEPATH *dest
+	dist=Tan(mydot{*dest,*dest})
+	If dist<>0
+		\x/dist:\y/dist:\z/dist
+	Else
+		MOVE #-1,$dff180
+		\x=1:\y=0:\z=0
+	EndIf
+End Statement
+
+Statement gsnorm{*dest.pnts,*src.pnts} ;pretends *src is a normal..
+	fac=mydot{*dest,*src}
+	*dest\x-(fac**src\x)
+	*dest\y-(fac**src\y)
+	*dest\z-(fac**src\z)
+End Statement
+
+Statement order{}	;call me before attempting to draw anything
+	Shared pnts(),edge(),face(),edge.w,face.w
+
+	For cnt.w=0 To edge
+		*e.edge=edge(cnt)
+		If *e\a>*e\b Then Exchange *e\a,*e\b
+	Next
+
+	DEFTYPE .pnts vec1,vec2,vec3
+	For cnt.w=0 To face
+		*f.face=face(cnt)
+
+		*e1.edge=edge(*f\a)
+		*e2.edge=edge(*f\b)
+		*e3.edge=edge(*f\c)
+
+		If *e1\b>*e2\b Then Exchange *e1,*e2:Exchange *f\a,*f\b
+		If *e1\a>*e2\a Then Exchange *e1,*e2:Exchange *f\a,*f\b
+
+		If *e1\b>*e3\b Then Exchange *e1,*e3:Exchange *f\a,*f\c
+		If *e1\a>*e3\a Then Exchange *e1,*e3:Exchange *f\a,*f\c
+
+		If *e2\b>*e3\b Then Exchange *e2,*e3:Exchange *f\b,*f\c
+		If *e2\a>*e3\a Then Exchange *e2,*e3:Exchange *f\b,*f\c
+
+CNIF #solid
+		minus{&vec1.pnts,&pnts(*e1\a),&pnts(*e1\b)}
+		minus{&vec2.pnts,&pnts(*e2\a),&pnts(*e2\b)}
+;		minus{&vec3.pnts,&pnts(*e3\a),&pnts(*e3\b)}
+
+
+
+		*p.pnts=pnts(*e1\a)
+		b1.pnts\x=*p\x,*p\y,*p\z
+
+		norm{&vec1}
+		gsnorm{&vec2,&vec1}:norm{&vec2}
+		gsnorm{&b1	,&vec2}:gsnorm{&b1,&vec1}
+		scalar {&vec3,&vec1,&vec2}
+		*f\ord=-Sgn(mydot{&b1,&vec3})
+CEND
+
+	Next
+
+
+End Statement
+CEND

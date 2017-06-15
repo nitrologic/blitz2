@@ -1,0 +1,24 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/remap4.bb
+BitMap 0,768,384,4
+Screen 0,0,0,768,384,4,$8004,"",1,2,0
+LoadPalette 0,"snow.palette":FadePalette 0
+
+tr=5:Gosub doremap
+tr=6:Gosub doremap
+tr=13:Gosub doremap
+tr=14:Gosub doremap
+tr=21:Gosub doremap
+tr=22:Gosub doremap
+MouseWait
+End
+
+doremap:
+LoadBitMap 0,"tracks/iff/track.fix"+Str$(tr)
+Use BitMap 0
+ReMap 1,13
+ReMap 11,1
+ReMap 8,11
+ReMap 15,8
+ReMap 2,15
+SaveBitmap 0,"tracks/iff/track.fix"+Str$(tr),0
+Return

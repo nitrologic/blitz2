@@ -1,0 +1,135 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/stuff/shader.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/stuff/shader.bb
+;
+; tint-a-matic program by Simon Armstrong
+;
+
+MaxLen pa$=160 ;set path string variable for filerequester
+MaxLen fi$=64	;set filename string variable for filerequester
+
+Enable 1
+For i=0 To 7:Read a$:TextGadget 0,4+i*18,14,512+32,8+i,a$:Next
+Enable 2
+For i=0 To 7:SelectMode 0,i:TextGadget 0,4+i*18,32,512+32,i," ":Next
+For i=0 To 2:PropGadget 0,8,50+i*10,64,16+i,134,8:Next
+funcnames:Data$ ".","o","O","f","F"," ","B","C"
+SelectMode 0,3
+currpen=1:Borders 0,1,On:currfunc=1:Borders 0,9,On
+
+MenuTitle 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD		 ","L"
+MenuItem 0,0,0,1,"SAVE		 ","S"
+MenuItem 0,0,0,2,"QUIT		 ","Q"
+
+Screen 0,0,0,320,256,6,0,"",1,2
+
+ScreensBitMap 0,0
+BitPlanesBitMap 0,1,$07	;lower 3 bitplanes (hue)
+BitPlanesBitMap 0,2,$38	;upper 3 bitplanes (brightness)
+
+Gosub initcolors:Use SetCycle 0
+
+Window 0,0,0,320,256,$1800,"",1,2:SetMenu 0
+
+backdrop.l=Peek.l(Addr Window(0)) ;for direct calls to intuition library
+
+Window 1,100,100,150,82,$2,"TOOL BOX",1,2,0:SetMenu 0:Gosub setprop
+
+Repeat
+	ev.l=WaitEvent
+	If ev=256
+		Select MenuHit
+			Case 0
+				If ItemHit=0 Then Gosub loadpic
+				If ItemHit=1 Then Gosub savepic
+				If ItemHit=2 Then End
+		End Select
+	EndIf
+	If ev=32 AND GadgetHit>15 Then Gosub adjustcol
+	If ev=64 Then Gosub dotoolbox
+	If EventWindow=0 AND ev=8 Gosub dofunc
+Forever
+
+dotoolbox:
+	If GadgetHit<8 Then currpen=GadgetHit:Gosub setprop
+	If GadgetHit>7 AND GadgetHit<16 Then currfunc=GadgetHit-8
+	If GadgetHit>15 Then Gosub adjustcol
+	Return
+
+.dofunc:
+	##[$FFB0] backdrop:Use Window 0:x=WMouseX:y=WMouseY:Use BitMap 1
+	If currfunc<3
+		bs=1+currfunc*2							 ;do freehand with brushsize
+		Repeat
+			Boxf WMouseX-bs,WMouseY-bs,WMouseX,WMouseY,currpen
+		Until Event=8 ;button up!
+	EndIf															;do flood
+	If currfunc=3 OR currfunc=4
+		If currfunc=4 Then Use BitMap 1 Else Use BitMap 0
+		WaitEvent:FloodFill x,y,(Cls(x,y) AND $38)+currpen
+	EndIf
+	If currfunc=6
+		Use BitMap 1				 ;do box
+		Repeat
+			xx=WMouseX:yy=WMouseY
+			Boxf x,y,xx,yy,-currpen:##[$FE1B] 5:Boxf x,y,xx,yy,-currpen
+		Until Event=8
+		Boxf x,y,WMouseX,WMouseY,currpen
+	EndIf
+	##[$FFAF] backdrop
+	Return
+
+.dodraw
+	Use Window 0
+	Repeat
+		Use BitMap 1:Boxf WMouseX,WMouseY,WMouseX+4,WMouseY+4,currpen
+	Until MButtons=5
+	Return
+
+.loadpic
+	a$=FileRequest$("SELECT IFF TO LOAD",pa$,fi$)
+	If WriteMem(0,a$) Then CloseFile 0 Else Return
+	ILBMDepth a$
+	If ILBMViewMode<>320 OR DecodeILBM<>256 Then Return
+	##[$FFB0] backdrop
+	If ##[$D087]=4										;16 color gray scale
+		BitMap 3,320,256,4:LoadBitMap 3,a$
+		For i=0 To 15:ReMap i,7-Int(i/2),2:Next
+		Free BitMap 3
+	EndIf
+	If ##[$D087]=6 Then LoadBitMap 0,a$,0 ;halfbright picture!
+	##[$FFAF] backdrop
+	Return
+
+.savepic
+	a$=FileRequest$("SAVE HALFBRITE FILE",pa$,fi$)
+	##[$FFB0] backdrop:SaveBitmap 0,a$,0:##[$FFAF] backdrop
+	Return
+
+Statement setcolors{pen.w,r,g,b}
+	For s=0 To 7
+		br=20-s*1.8							 ;brightness = 15,13,11,9
+		rr=QLimit(r*br/15,0,15)
+		gg=QLimit(g*br/15,0,15)
+		bb=QLimit(b*br/15,0,15)
+		StopCycle 0,pen+s*8,rr,gg,bb
+	Next
+End Statement
+
+.adjustcol
+	Repeat
+		r=HPropPot(0,16)*16:g=HPropPot(0,17)*16:b=HPropPot(0,18)*16:
+		setcolors{currpen,r,g,b}:Use SetCycle 0
+	Until Event
+	Return
+
+.setprop:
+	SetHProp 0,16,Blue(currpen)/16,1/16:Redraw 1,16
+	SetHProp 0,17,Palette(currpen)/16,1/16:Redraw 1,17
+	SetHProp 0,18,PalRGB(currpen)/16,1/16:Redraw 1,18
+	Return
+
+.initcolors
+	Restore cols:For p=0 To 7:Read r,g,b:setcolors{p,r,g,b}:Next:Return
+cols:
+	Data 15,15,15,15,6,6,6,15,6,6,6,15	 ;primary colors
+	Data 15,6,15,6,15,15,15,15,6,15,12,8 ;and a few hues

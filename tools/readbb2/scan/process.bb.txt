@@ -1,0 +1,49 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/process.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/code/process.bb
+;
+; process old reference manual
+;
+
+If ReadMem(0,"shit")=0 Then End
+
+For i=1 To 50
+	ff$="app/app"+Str$(i)
+	If WriteMem(1,ff$)
+		FileInput 1:f$=""
+		While NOT DosBuffLen(1)
+			Gosub readline
+			If f$="" Then FileOutput 0:NPrint a$
+			If f$="e"
+				If a$="See Also:" Then f$="-" Else FileOutput 3:NPrint a$
+			EndIf
+			If f$="-"
+				If a$="Example:"
+					If ReadMem(3,"examples/"+e$+".bb")=0 Then End Else f$="e"
+				Else
+					FileOutput 2:NPrint a$
+				EndIf
+			EndIf
+			If Len(f$)>2
+				FileOutput 0:NPrint f$
+				If ReadMem(2,"help/"+f$)=0 Then End
+				FileOutput 2:NPrint a$:e$=f$:f$="-"
+			EndIf
+		Wend
+		CloseFile 1
+	EndIf
+Next
+End
+
+readline:
+	a$=""
+	a$=Edit$(2048)
+	If a$<>""
+		a$=Replace$(a$,Chr$(9),"")	;pull out tabs
+		a$=Replace$(a$,"	"," ")		;kill doublespaces
+		If Left$(a$,10)="Directive:" Then f$=Mid$(a$,12)
+		If Left$(a$,10)="Statement:" Then f$=Mid$(a$,12)
+		If Left$(a$,9)="Function:" Then f$=Mid$(a$,11)
+		If Left$(a$,10)="Functions:" Then f$=Mid$(a$,12)
+		If Left$(a$,11)="Statements:" Then f$=Mid$(a$,13)
+		If Left$(a$,19)="Statement/Function:" Then f$=Mid$(a$,21)
+	EndIf
+	Return

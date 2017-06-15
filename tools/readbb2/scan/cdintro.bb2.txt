@@ -1,0 +1,76 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/cdintro.bb2
+
+;CloseLibrary_ OldOpenLibrary_("freeanim.library")
+
+DEFTYPE.l
+
+Gosub dispoff
+
+again
+Screen 0,0,0,320,256,2,0,"",0,0:ScreensBitMap 0,0
+LoadScreen 0,"cdopts.iff",0:Use SetCycle 0
+Gosub dispon
+
+c=3:cr=Blue(c):cg=Palette(c):cb=PalRGB(c)
+
+Gosub inton
+
+Repeat
+	VWait:j=Joyy(1)
+	If j<0 AND c<>3 Then Green c,cr,cg,cb:c=3:cr=Blue(c):cg=Palette(c):cb=PalRGB(c):cc=0:ccc=1
+	If j>0 AND c<>1 Then Green c,cr,cg,cb:c=1:cr=Blue(c):cg=Palette(c):cb=PalRGB(c):cc=0:ccc=1
+	If Joyb(1)
+		Gosub intoff
+		For k=0 To 3:Green k,Blue(k)/2,Palette(k)/2,PalRGB(k)/2:Next
+		Select c
+		Case 3	;guardian
+			##[$FE1F] "intro",0,0
+		Case 1	;skidmarks
+			##[$FE1F] "skidcd",0,0
+		End Select
+		Use SetCycle 0
+		ShowScreen 0
+		##[$FF29]:MOVE #$20,$dff096
+		Repeat
+			VWait
+		Until Joyb(1)=0
+		Gosub inton
+	EndIf
+Forever
+
+End
+
+intoff
+ClrInt 5
+Green c,cr,cg,cb
+Return
+
+inton
+SetInt 5
+	If cc
+		cc-1
+	Else
+		cc=15
+		ccc+1
+		If ccc&1
+			Green c,cr,cg,cb
+		Else
+			Green c,0,0,0 ;cb,cg,cr
+		EndIf
+	EndIf
+End SetInt
+Return
+
+dispoff	;outputs: a6.l=chipbase
+	##[$FF29]
+	MOVE #$01a0,$dff096
+	RTS
+
+dispon
+	##[$FF29]
+	MOVE #$0020,$dff096
+	MOVE #$8180,$dff096
+	RTS
+
+view_temp:Dc.l 0
+grname:Dc.b "graphics.library",0:Event

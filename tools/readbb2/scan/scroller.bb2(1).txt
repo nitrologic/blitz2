@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum3/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/afold/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/art/afstuff/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples2/scroller.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/examples1/scroller.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/gpd/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum3/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/afold/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/afstuff/examples/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples2/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/examples1/scroller.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/gpd/examples/scroller.bb2
+;
+; mouse controlled scroller
+;
+BLITZ
+;
+Mouse On
+;
+n=25
+;
+BitMap 0,640,512,3
+;
+For i=0 To 150
+	Circlef Rnd(320-32)+16,Rnd(256-32)+16,Rnd(16),Rnd(8)
+Next
+;
+Scroll 0,0,320,256,320,0
+Scroll 0,0,640,256,0,256
+;
+Slice 0,44,320,256,$fff8,3,8,8,640,640
+;
+While Joyb(0)=0
+	VWait
+	Show db,x,y
+	xa=QLimit(xa+MouseXSpeed,-20,20)
+	ya=QLimit(ya+MouseYSpeed,-20,20)
+	x=QWrap(x+xa,0,320)
+	y=QWrap(y+ya,0,256)
+Wend
+;
+End
+;

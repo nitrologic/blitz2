@@ -1,0 +1,47 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/cd32/test.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/cd32/test.bb
+;
+; test writing hiscore table to cd32 nv memory
+;
+
+; note to test on A1200 rem out cdmem commands and enable file commands
+;
+; note in blitz probably good idea to be in amiga/qamiga mode when
+; using cd32mem commands
+;
+; note to go to the bother of getting it working with ram:test b4
+; replacing with cd32mem commands and also remember size in cd32mem
+; command represents 10 bytes!
+;
+; I think also there is available nvmem type simulation library
+; for 3.0 so you can test cd32mem commands properly on A1200
+
+NEWTYPE .hitable
+	name.l[5]				 ;space for 5 names	(3 chars+null)
+	score.l[5]				;space for 5 scores (4 bytes each)
+End NEWTYPE
+
+DEFTYPE .hitable hitable
+
+Dim name$(5)				;actual arrays used in game
+Dim score.l(5)
+
+readtable:
+
+	gotit=##[$B882]("STARBASHER","HI-SCORES",&hitable,4)	;reads 40 bytes
+;	If ReadFile(0,"ram:test") Then ReadMem 0,&hitable,40:CloseFile 0
+
+	For i=0 To 4
+		name$(i)=Peeks$(&hitable\name[i],4)
+		score(i)=hitable\score[i]
+	Next
+
+writetable:
+	For i=0 To 4
+		Poke$ &hitable\name[i],Left$(name$(i),3)
+		hitable\score[i]=score(i)
+	Next
+
+	gotit=##[$B881]("STARBASHER","HI-SCORES",&hitable,4)	;write 40 bytes
+;	If WriteFile(0,"ram:test") Then WriteMem 0,&hitable,40:CloseFile 0
+
+	End

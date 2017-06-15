@@ -1,0 +1,46 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/cricket/bup/graphics.bb
+;
+; render graphics for use in sky cricket program
+;
+
+##[$CD10] 0,3,24,4:CludgeBitMap 0,0:Use BitMap 0
+Boxf 0,0,2,23,11:Point 0,23,0:Point 1,23,0:Point 0,22,0
+For i=0 To 2:Boxf 0,2+i*4,3,3+i*4,12:Next
+MakeCookie 0
+
+Macro p 368+`1+`2+`2,283+`1-`2/2-`3:End Macro
+
+StopCycle 0,1,15,15,15
+StopCycle 0,8,0,6,0
+StopCycle 0,9,5,12,5
+StopCycle 0,10,12,8,4
+StopCycle 0,11,12,12,12
+StopCycle 0,12,9,9,9
+
+BitMap 0,736,566,4
+Screen 0,0,0,736,566,4,$8004,"",1,2,0
+Use SetCycle 0:Use BitMap 0
+
+BlockScroll 8
+
+Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*160,0},!p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*160,0},9
+For i=0 To 256
+	Line !p{HSin(i*Pi/128)*128,HCos(i*Pi/128)*160,0},9
+Next
+FloodFill 368,283,9
+
+Line !p{-16,40,0},!p{16,40,0},10
+Line !p{16,40,0},!p{16,-40,0},10
+Line !p{16,-40,0},!p{-16,-40,0},10
+Line !p{-16,-40,0},!p{-16,40,0},10
+FloodFill 368,283,10
+
+For i=0 To 1:Line !p{-10,-28,i},!p{10,-28,i},11:Next
+
+For i=0 To 2:Blit 0,!p{-5+i*5,-40,20}:Blit 0,!p{-5+i*5,40,20}:Next
+
+SaveBitmap 0,"ram:oval.iff",0
+
+MouseWait
+
+End

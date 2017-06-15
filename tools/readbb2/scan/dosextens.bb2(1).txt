@@ -1,0 +1,6 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/libraries/dosextens.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/libraries/dosextens.bb2
+;
+; $VER: dosextens.bb2 40.0 (02.03.94)
+;
+
+XInclude"dos/dosextens.bb2"

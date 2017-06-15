@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/zinzeszins.bb2
+	FindScreen 0
+	##[$C082] 1,?wzdata,20
+	Repeat
+		 ev.l=WaitEvent
+		 Use Window EventWindow
+		 Select EventWindow
+			Case 1:Select ev
+							Case #IDCMP_CLOSEWINDOW:exit=1
+							Case #IDCMP_MENUPICK:
+								 Select ##[$C08F]
+												 Case "quit":exit=1
+												 Case "cut":
+								 End Select
+							Case #IDCMP_IDCMPUPDATE
+									Select ##[$C08E]
+									Case "start":kapital.f=Val(Peek$(##[$C085]))
+									Case "zins":zins.f=Val(Peek$(##[$C085]))
+									Case "zeit":jahr=Val(Peek$(##[$C085]))
+									Case "entnommen":ent.f=Val(Peek$(##[$C085]))
+									End Select
+									Gosub calculate
+						 End Select
+			End Select
+		 Until exit=1
+		 exit=0
+	##[$C083] 1
+	End
+.calculate
+	k.f=kapital
+	z.f=zins/100
+	For i= 1 To jahr:k=k+k*z-ent:Next
+	##[$C08D] "ergebniss",Str$(k)
+Return
+wzdata: IncBin "zinzeszins.wizard"

@@ -1,0 +1,199 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/sega.bb
+;
+; sega megadrive skidmarks code
+;
+
+; $0000 = 64x32 map	(4096)
+; $1000 = blocks
+; $e000 = window		 (2048)?
+; $f000 = sprites		(640)
+; $f200 = spdata		 (start at #$760)
+; $fc00 = scroll
+
+#vd=$c00000	;vdp data port
+#cp=$c00004	;vdp control port
+#hv=$c00008	;hv counter
+
+#wvram=$40000000:#wcram=$c0000000:#wsram=$40000010
+#vram=$0:#cram=$80000000:#vsram=$40000000
+#z80=$a11100:#z80sram=$a00000:#z80dram=$ff8000
+
+NEWTYPE .sprite
+	vp.w
+	size.b:splink.b
+	spdata.w
+	hp.w
+End NEWTYPE
+
+Macro reg #$8000+`1*256:End Macro
+Macro setreg:MOVE.w #$8000+`1*256+`2,cp:End Macro
+Macro setmem:MOVE.l `1,cp:MOVE.w `2,vd:End Macro
+Macro pokemem:MOVE.l `1,cp:Poke.w #vd,`2:End Macro
+
+globals:
+
+	Dim acar.b(288)
+
+	cars.l=Peek.l($ff0004)
+	track.l=Peek.l($ff0008)
+	tracklen.l=Peek.l($ff000c)
+
+	skidmap.l=track
+	blocks.l=track+96*48*2
+	blocklen.l=tracklen-96*48*2
+
+setup:
+	;
+	For y=0 To 31
+		##[$C482] ?blank,#vram+y*64*2,64				;2048 bytes
+	Next
+	##[$C482] ?mypalette,#cram+0,16
+	##[$C482] ?carpalette,#cram+32,16
+	##[$C482] blocks,#vram+4096,blocklen/2		;32 chars
+
+	!setmem{#wvram+$3c000003,#0}						;horizontal
+	!setmem{#wvram+$3c020003,#-24*8}
+
+	!setmem{#wsram+$00000000,#0}						;vertical
+	!setmem{#wsram+$00020000,#0}
+
+	!setreg{2,0}		 ;map location=0*8192
+	!setreg{4,0}		 ;map location=0*8192
+	!setreg{5,$78}	 ;sprites location=$f000
+	!setreg{11,0}		;scroll=entire screen + no external interupts (8)
+	!setreg{12,$89}	;32 cell mode shadows no interlace
+	!setreg{13,$3f}	;hs=$fc00
+	!setreg{16,1}		;64x32 sized map
+	!setreg{3,$38}	 ;windowpos= $e000
+	!setreg{17,$0};$8a}
+	!setreg{18,$0};$ff}
+
+	vv=1
+
+x=0:y=0:xa=1:ya=0
+
+fr.l=750
+
+poka
+;	fr.l=fr+1:If fr>799 Then fr=0
+
+;	x+xa:y+ya
+;	If x<0 Then x=0:xa=0:ya=-1
+;	If y<0 Then y=0:ya=0:xa=1
+;	If x=768-319 Then x=768-320:xa=0:ya=1
+;	If y=384-239 Then y=384-240:ya=0:xa=-1
+
+	a.w=##[$C484](0):xa=0:ya=0
+
+	If a AND 1 Then ya=-1
+	If a AND 2 Then ya=1
+	If a AND 4 Then xa=-1:fr=QLimit(fr+1,0,799)		;xa=-1
+	If a AND 8 Then xa=1:fr=QLimit(fr-1,0,799)
+
+	x=QLimit(x+xa,0,768-320)
+	y=QLimit(y+ya,0,384-240)
+
+	vbwait:TST $ff0000:BEQ vbwait:MOVE#0,$ff0000
+
+	!pokemem{#wvram+$3c000003,-(x AND 7)}						;horizontal
+	!pokemem{#wsram+$00000000,(y AND 7)}						;vertical
+
+	maptl.l=skidmap+Int(x LSR 3)ASL1+Int(y LSR 3)*96*2
+	maptr.l=skidmap+150-(Int(x LSR 3)ASL1)+Int(y LSR 3)*96*2
+
+	MOVE #$8704,$c00004
+	##[$C482] ?spites,#vram+$f000,256
+	MOVE #$8705,$c00004
+;	SegaDMA &acar(0),#vram+$f200,288
+
+	##[$C486] 0,fr,$f200,1
+
+	MOVE #$8706,$c00004
+
+	##[$C485] maptl,0,41,31
+
+;	SegaMap maptl,0,21,31					 ;lside
+;	SegaMap maptr,43,21,31					;rside
+
+;	doscrn {maptl,0}
+
+;	doline {skidmap,0}
+;	doline {skidmap+76*2,88}
+	MOVE #$8707,$c00004
+;	yy.w=dosegaquad{?mypoly,&acar(0)}
+
+	yy.w=##[$C483](?mypoly,&acar(0))
+
+	MOVE #$8710,$c00004
+	BRA poka
+
+	mypoly:Dc.w 8,0,20,10,10,20,3,6
+
+	MOVE #$8708,$c00004
+
+	vb+vv:If vb>16 OR vb<-16 Then vv=-vv
+
+	!pokemem{#wsram+$00000000,vb}
+	!pokemem{#wsram+$00020000,-vb}
+	!pokemem{#wvram+$3c000003,vb}
+	!pokemem{#wvram+$3c020003,-vb-24*8}
+
+	While Peek.w($c00008)<$6f00:Wend
+;	!setreg{1,$24}
+	!pokemem{#wsram+$00000000,-vb}
+	!pokemem{#wsram+$00020000,vb}
+	!pokemem{#wvram+$3c000003,-vb}
+	!pokemem{#wvram+$3c020003,vb-24*8}
+
+	MOVE #$8700,$c00004
+
+	MOVE #$8704,$c00004
+
+	Goto poka
+
+
+blank:Dcb.w 64,$80
+
+spites:
+	Dc.w $080,$a01,$a790,$f0			;palette 1
+	Dc.w $090,$a02,$a790,$90
+	Dc.w $0a0,$a03,$a790,$f0
+	Dc.w $0b0,$a04,$e790,$90
+	Dc.w $0c0,$a05,$e790,$f0
+	Dc.w $0d0,$a00,$e790,$90
+	Dc.w $0e0,$a07,$e790,$e0
+	Dc.w $0f0,$a08,$e790,$90
+	Dc.w $100,$a09,$e790,$f0
+	Dc.w $110,$a0a,$e790,$90
+	Dc.w $120,$a0b,$e790,$f0
+	Dc.w $130,$a0c,$e790,$90
+	Dc.w $140,$a0d,$c790,$f0
+	Dc.w $150,$a0e,$c790,$90
+	Dc.w $160,$a0f,$c790,$f0
+	Dc.w $080,$a10,$c790,$120			;palette 1
+	Dc.w $090,$a11,$c790,$150
+	Dc.w $0a0,$a12,$c790,$120
+	Dc.w $0b0,$a13,$c790,$150
+	Dc.w $0c0,$a14,$c790,$120
+	Dc.w $0d0,$a15,$c790,$150
+	Dc.w $0e0,$a16,$c790,$120
+	Dc.w $0f0,$a17,$c790,$150			;23
+
+	Dc.w $100,$a18,$a790,$120
+	Dc.w $110,$a19,$a790,$150
+	Dc.w $120,$a1a,$a790,$120
+	Dc.w $130,$a1b,$a790,$150
+
+	Dc.w $140,$a1c,$a790,$120
+	Dc.w $150,$a1d,$a790,$150
+	Dc.w $160,$a1e,$a790,$120
+	Dc.w $170,$a00,$a790,$150
+
+mypalette:
+	IncBin "palette.dat"
+
+carpalette:
+	IncBin "car.palette"
+
+sincos
+	IncBin "sincos.bin"

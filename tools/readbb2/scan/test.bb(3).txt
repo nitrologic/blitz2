@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/test.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/test.bb
+Dim a$(3)
+
+For i=0 To 2
+	Read a$(i),b$:TextGadget 0,20+i*80,14,0,i,b$
+Next
+
+FindScreen 0
+Window 0,20,20,300,40,$100f,"CLOSE ME",1,2,0
+win.l=Peek.l(Addr Window(0))
+
+Repeat
+	Select WaitEvent
+		Case $20
+			WLocate 100,18:Print a$(GadgetHit)
+			##[$FF98] win,Rnd(200)-100,Rnd(200)-100
+		Case $200:End
+	End Select
+Forever
+
+Data$ "OOOOM","Button 1"
+Data$ "PA PA","Button 2"
+Data$ "BANG!","Button 3"

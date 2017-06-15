@@ -1,0 +1,214 @@
+Library Name:
+  riapplib #57
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, renamed by me...
+
+Authors Docs:
+
+;------------------------------
+;- WB library version 0.9     -
+;- ©1994 Reflective Images    -
+;------------------------------
+
+This small library provides quick and easy to use commands for accessing
+AppWindows, AppIcons and AppMenus.
+
+* PLEASE NOTE * 
+This library must have at least V37+ of Workbench/DOS/Icon libraries
+
+This version of the library only enables you to read the FIRST file
+dragged to an AppWindow/AppIcon or selected from an AppMenu - future
+versions will have additional commands AppWindowArg/AppIconArg/AppMenuArg
+which returns the filename of the specified arg. E.g. f$=AppIconArg(1)
+
+Command List:
+
+  AppEvent()
+  AppWindowEvent()
+  AppIconEvent()
+  AppMenuEvent()
+  AddAppWindow()
+  AddAppIcon()
+  AddAppMenu()
+  DelAppWindow()
+  DelAppIcon()
+  DelAppMenu()
+  AppWindowFile()
+  AppIconFile()
+  AppIconHit()
+  AppMenuFile()
+  AppMenuHit()
+
+
+Function : AppEvent
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppEvent
+
+This command checks the msg ports of any open AppIcons/AppWindows/AppMenus
+and if an event has been passed, returns -1. 0 indicates no event has
+occurred.
+
+e.g.
+  Repeat
+    VWait
+  Until AppEvent
+
+
+Function : AppWindowEvent
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppWindowEvent
+
+This command checks the msg ports of any open AppWindows and if an event
+has been passed, returns -1. 0 indicates no event has occurred.
+
+e.g.
+  Repeat
+    VWait
+  Until AppWindowEvent
+
+
+Function : AppIconEvent
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppIconEvent
+
+This command checks the msg ports of any AppIcons and if an event has been
+passed, returns -1. 0 indicates no event has occurred.
+
+e.g.
+  Repeat
+    VWait
+  Until AppIconEvent
+
+
+Function : AppMenuEvent
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppMenuEvent
+
+This command checks the msg ports of any AppMenus and if an event has been
+passed, returns -1. 0 indicates no event has occurred.
+
+e.g.
+  Repeat
+    VWait
+  Until AppMenuEvent
+
+
+Function : AddAppWindow
+-------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=AddAppWindow(windownumber)
+
+This command attempts to make the window specified by 'windownumber' to become
+an AppWindow. -1 means success, 0 means failure. There is a currently
+limit of 4 AppWindows.
+
+
+Function : AddAppIcon
+-------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=AddAppIcon(id,text$,iconname$)
+
+This command attempts to place an AppIcon onto the Workbench desktop.
+ID is a unique identification number. Text$ is text to display underneath
+the AppIcon and Iconname$ is the name of the file to use the Icon imagery.
+-1 means success, 0 means failure.
+e.g.
+  suc=AddAppIcon(0,"Test","Work:Test")
+  If suc=0 Then End
+  
+
+Function : AddAppMenu
+-------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=AddAppMenu(id,text$)
+
+This command tries to add 'text$' to the Tools menu of Workbench.
+ID is a unique identification number. Returns -1 for success, 0 for failure.
+e.g.
+  suc=AddAppMenu(0,"Blitz2")
+  If suc=0 Then End
+
+
+Function : AppWindowFile
+-------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : filename$=AppWindowFile(windownumber)
+
+This command returns the complete path of the file which was dragged to the
+AppWindow. If the file was in fact a directory a '/' is appended.
+An empty string signifies nothing was Dragged.
+
+
+Function : AppIconFile
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : filename$=AppIconFile(id)
+
+This command returns the complete path of the file which was dragged to the
+AppIcon. If the file was in fact a directory a '/' is appended.
+An empty string signifies nothing was Dragged.
+
+
+Function : AppMenuFile
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : filename$=AppMenuFile(id)
+
+This command returns the complete path of the file which was selected when
+the AppMenu was hit. If the file was in fact a directory a '/' is appended.
+An empty string signifies nothing was selected.
+
+
+Function : AppIconHit
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppIconHit(id)
+   idnumber=AppIconHit
+
+This command returns the status of the AppIcon <id>. -1 = The icon was
+doubleclicked, 0 = nothing has happened.
+If no argument is supplied, the function returns the number of the
+doubleclicked icon, or -1 for none.
+
+
+Function : AppMenuHit
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : status=AppMenuHit(id)
+   idnumber=AppMenuHit
+
+This returns the status of the AppMenu item <id>. -1 = This menu
+item was selected, 0 = This menu item was not selected.
+If no argument is given, the function returns the numbe of the
+selected menu item, or -1 for none.
+
+
+Function : DelAppWindow/DelAppIcon/DelAppMenu
+------------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : success=DelAppWindow[(number)]
+   success=DelAppIcon[(id)]
+   success=DelAppMenu[(id)]
+
+These commands will remove the AppWindow/AppIcon/AppMenu from the system
+and free up the associated message ports.
+
+*** IMPORTANT *** You must call DelAppWindow BEFORE closing a window,
+or your machine will GURU!
+
+
+
+
+-----------------======= T H E   E N D ======------------------------
+Enjoy!
+
+Steve.
+

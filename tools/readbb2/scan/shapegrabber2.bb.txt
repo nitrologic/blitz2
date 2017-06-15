@@ -1,0 +1,428 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/ShapeGrabber/ShapeGrabber2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/ShapeGrabber/ShapeGrabber2.bb
+ NoCli
+
+Dim sd(60)
+en=0
+NW=1:ct=0:gx=8:gy=8:xo=0:yo=0 :xp=-1:yp=-1:shp=0:shh=0:shw=0
+LoadShapes 59,98,"data/gadsnap.shp"
+LoadShapes 58,58,"data/about.shp"
+
+ShapeGadget 0,2,20,0,1,60,61
+ShapeGadget 0,2,31,0,2,62,63
+ShapeGadget 0,2,42,0,3,64,65
+ShapeGadget 0,2,53,0,4,66,67
+ShapeGadget 0,2,64,0,5,68,69
+ShapeGadget 0,2,75,0,6,70,71
+ShapeGadget 0,2,86,0,7,72,73
+ShapeGadget 0,2,97,0,8,74,75
+;ShapeGadget 0,2,108,0,9,76,77
+ShapeGadget 0,2,119,0,10,78,79
+ShapeGadget 0,2,130,0,11,80,81
+ShapeGadget 0,2,141,0,12,82,83
+ShapeGadget 0,2,152,0,13,84,85
+ShapeGadget 0,2,163,0,14,86,87
+ShapeGadget 0,2,108,0,15,88,89
+
+Screen 0,0,0,640,200,4,$8000," Shape Graber By King Fuzzy",1,6
+Green 0,0,0,0
+Green 1,13,13,13
+Green 2,2,3,3
+Green 3,4,4,5
+Green 4,1,4,7
+Green 5,5,5,7
+Green 6,6,7,7
+Green 7,6,7,9
+Green 8,0,5,12
+Green 9,3,6,11
+Green 10,4,8,12
+Green 11,6,9,12
+Green 12,9,9,10
+Green 13,9,10,12
+Green 14,10,11,13
+Green 15,1,2,3
+
+
+DefaultIDCMP $118
+Window 0,0,0,640,200,$1A00,"",2,5
+Wi=640:Hi=200:dp=4
+LoadScreen 0,"data/Blitz2.logo2",0
+
+MaxLen pa$=160
+MaxLen fl$=160
+
+MenuTitle 0,0," Project "
+MenuItem	0,0,0,0,"Load Iff				","L"
+MenuItem	0,0,0,1,"Save Shapes		 ","S"
+MenuItem	0,0,0,2,"About					 ","A"
+MenuItem	0,0,0,3,"Edit Shapes		 ","E"
+MenuItem	0,0,0,4,"Quit						","Q"
+
+MenuTitle 0,1," Options "
+MenuItem	0,0,1,0,"Set Grid Size"
+MenuItem	0,1,1,1,"	Grid ON/OFF					 ","G"
+MenuItem	0,3,1,2,"	Copy Left border			","4"
+MenuItem	0,3,1,3,"	Copy Right border		 ","6"
+MenuItem	0,3,1,4,"	Copy Top border			 ","8"
+MenuItem	0,3,1,5,"	Copy Bottom border		","2"
+
+
+
+
+.lod:
+fl$=FileRequest$("Select an IFF file",pa$,fl$)
+If fl$="" AND NW=1 Then Goto skp1
+If fl$="" Then Goto lop
+
+ILBMDepth fl$
+Hi=DecodeILBM:Wi=ILBMViewMode:dp=##[$D087]
+Free Window 0
+Free Screen 0
+Screen 0,0,0,Wi,Hi,dp,##[$D088]," ",1,2
+DefaultIDCMP $118
+Window 0,0,0,Wi,Hi,$1A00,"",1,2
+
+LoadScreen 0,fl$,0
+Use SetCycle 0
+
+skp1:
+SetMenu 0
+skp2:
+Use Screen 0
+Use Window 0
+ScreensBitMap 0,0
+WJam 2
+NW=0
+Gosub crhrf
+.lop:
+ev=WaitEvent
+If ev=$100 Then Goto mnu
+If ev=$10 Then Goto mmv
+If ev=$8 Then Goto snap
+Goto lop
+
+mmv:
+Gosub DMP
+If xp=lx AND yp=ly Then Goto lop
+Gosub crhr
+Goto lop
+crhr:
+WLine lx,0 , lx,Hi,3
+WLine 0,ly , Wi,ly,3
+crhrf:
+WLine xp,0 , xp,Hi,3
+WLine 0,yp , Wi,yp,3
+Return
+
+.DMP:
+lx=xp:ly=yp
+xp=EMouseX:yp=EMouseY:bt=MButtons
+FlushEvents $10
+If NOT(MenuList (0,1,1)) Then Goto nog
+tx=Int((xp-xo)/gx):ty=Int((yp-yo)/gy)
+tx=tx*gx+xo:ty=ty*gy+yo
+xp=xp-tx:yp=yp-ty
+If xp>(gx/2) Then tx=tx+gx
+If yp>(gy/2) Then ty=ty+gy
+If xp>gx Then tx=tx+gx
+If yp>gy Then ty=ty+gy
+xp=tx:yp=ty
+nog:
+Return
+
+
+.mnu:
+m1=MenuHit
+m2=ItemHit
+If m1=0 AND m2=0 Then Goto lod
+If m1=0 AND m2=1 Then Goto sav
+If m1=0 AND m2=2 Then Goto About
+If m1=0 AND m2=3 Then Goto Eddit
+If m1=0 AND m2=4 Then Goto kill
+If m1=1 AND m2=0 Then Goto gdsz
+If m1=1 AND m2>0 AND m2<6 Then Goto lop
+
+WLocate 20,20
+Print m1,"	",m2,"		"
+Goto lop
+.gdsz:
+Gosub crhrf
+Wnd.l=Peek.l(Addr Window(0))
+t.l=##[$FF95](Wnd,$18)
+pmouse:
+FlushEvents $10
+Gosub drgd
+e=WaitEvent
+Gosub drgd
+If e=$10 Then Goto pmse
+If e=8 Then Goto mbtt
+Goto mbt
+pmse:
+xo=EMouseX-gx*4:yo=EMouseY-gy*4
+Goto pmouse
+
+mbtt:
+If MButtons <>1 Then Goto mbr
+mbt:
+FlushEvents $10
+Gosub drgd
+e=WaitEvent
+Gosub drgd
+If e=$10 Then Goto pmuse
+If e=8 Then Goto mbr
+Goto mbt
+pmuse:
+gx=Int((EMouseX-xo)/4):gy=Int((EMouseY-yo)/4)
+If gx<1 Then gx=1
+If gy<1 Then gy=1
+Goto mbt
+mbr:
+FlushEvents 8
+If (xo-gx)>(gx/2) Then xo=xo-gx:Goto mbr
+If (yo-gy)>(gy/2) Then yo=yo-gy:Goto mbr
+
+t.l=##[$FF95](Wnd,$118)
+Gosub crhrf
+Goto lop
+
+drgd:
+WJam 2
+For a=0 To 4
+WLine xo+gx*a,yo , xo+gx*a,yo+gy*4,3
+Next
+For a=0 To 4
+WLine xo,yo+gy*a , xo+gx*4,yo+gy*a,3
+Next
+
+
+Return
+.kill:
+Free Window 0
+Free Screen 0
+End
+.sav:
+If shp=0 Then Goto lop
+fl$=FileRequest$("Select file for Shapes",pa$,fl$)
+If fl$="" Then Goto lop
+SaveShapes 0,shp-1,fl$
+Goto lop
+.snap:
+If MButtons <> 1 Then FlushEvents 8: Goto lop
+Gosub crhrf
+Gosub DMP
+x1=xp:y1=yp
+x2=x1:y2=y1
+snp:
+Gosub bx
+e=WaitEvent
+Gosub bx
+If e=$100 Goto snp
+If e=$10 Then Goto mvb
+If e=8 Then Goto fsp
+Goto snp
+mvb:
+Gosub DMP
+x2=xp:y2=yp
+Goto snp
+bx:
+WLine x1,y1,x1,y2,3
+WLine x1,y2,x2,y2,3
+WLine x1,y1,x2,y1,3
+WLine x2,y1,x2,y2,3
+
+Return
+fsp:
+If x1>x2 Then Exchange x1,x2
+If y1>y2 Then Exchange y1,y2
+If	NOT MenuList (0,1,2) Then x1+1
+If	NOT MenuList (0,1,4) Then y1+1
+If	NOT MenuList (0,1,3) Then x2-1
+If	NOT MenuList (0,1,5) Then y2-1
+w=x2-x1+1:h=y2-y1+1
+If w<1 OR h<1 Then Goto nos
+GetaShape shp,x1,y1,w,h
+sd(shp)=dp
+shp+1
+If w>shw Then shw=w
+If h>shh Then shh=h
+
+nos:
+FlushEvents
+Gosub crhrf
+Goto lop
+.Eddit:
+Gosub crhrf
+ednx:
+rn=0
+reed:
+cs=0
+If shp=0 Then Goto skp2
+t$=" Shape Editor : Shape # "+Str$(en+1)+" of "+Str$(shp)
+Screen 1,0,0,640,400,sd(en),0,t$,2,3
+Use SetCycle 0
+DefaultIDCMP $40
+Window 1,0,0,640,200,$1800,"",2,3,0
+ScreensBitMap 1,0
+WLocate 30,1
+WColour 2,0
+NPrint t$
+
+w=ShapeWidth(en):h=ShapeHeight(en):ns=0:x=0:y=0
+If w>620 OR h>370 Then ns=1
+
+If rn=0 Then CopyShape en,55
+bord:
+If ns=0 Then Blit en,100,20
+If ns=1 Then Blit 59,100,20
+
+WLocate 30,9
+WJam 1
+WColour 2,0
+NPrint "Width ",w-x,"	Height ",h-y,"				 "
+
+WJam 0
+WLine 99+x,19+y ,100+x+w,19+y,3
+WLine 99+x,19+y ,99+x,20+y+h,3
+WLine 100+x+w,19+y ,100+x+w,20+y+h,3
+WLine 99+x,20+y+h ,100+x+w,20+y+h,3
+
+fl:
+FlushEvents
+e=WaitEvent
+If e <> $40 Then Goto fl
+On GadgetHit Goto nxs,pvs,swp,mov,rst,flx,fly,rot,rsz,trt,trl,trr,trb,qut,del
+Goto fl
+rsz:
+
+qut:
+If ns=0 Then Gosub fix
+Free Window 1
+Free Screen 1
+Goto skp2
+nxs:
+If ns=0 Then Gosub fix
+en+1
+If en => shp Then en=0
+Free Window 1
+Free Screen 1
+Goto ednx
+pvs:
+If ns=0 Then Gosub fix
+en-1
+If en < 0	Then en=shp-1
+Free Window 1
+Free Screen 1
+Goto ednx
+trt:
+If h-y>1 Then y+1:h-1:cs=1
+Goto bord
+trl:
+If w-x>1 Then x+1:w-1:cs=1
+Goto bord
+trb:
+If h-y>1 Then h-1:cs=1
+Goto bord
+trr:
+If w-x>1 Then w-1:cs=1
+Goto bord
+fix:
+If cs=0 Then Return
+BlockScroll 0
+Blit en,0,0
+GetaShape en,x,y,w,h
+Return
+flx:
+XFlip en
+Goto bord
+fly:
+YFlip en
+Goto bord
+rot:
+rn=rn+.125:If rn>= 1 Then rn=0
+CopyShape 55,en
+Rotate en,rn
+Free Window 1
+Free Screen 1
+Goto reed
+
+rst:
+CopyShape 55,en
+Free Window 1
+Free Screen 1
+Goto ednx
+del:
+If shp=1 Then shp=0:Goto qut
+shp-1
+If en=shp Then en-1:Goto dodsp
+For a=en To shp-1
+CopyShape a+1,a
+sd(a)=sd(a+1)
+Next
+dodsp:
+Free Window 1
+Free Screen 1
+Goto ednx
+
+.snum:
+DefaultIDCMP $400
+Window 2,100,30,120,70,$1000,tt$,1,2
+WJam1
+WColour 1,0
+WLocate 20,9
+NPrint "Select"
+WLocate 40,19
+NPrint "A"
+WLocate 20,29
+NPrint "Shape"
+WLocate 30,39
+WindowInput 2
+EditFrom 2
+op=Edit (en+1,2)
+Free Window 2
+op-1
+Return
+swp:
+tt$="	SWAP	"
+Gosub snum
+If op>=shp Then Goto dodsp
+CopyShape op,en
+CopyShape 55,op
+Exchange sd(en),sd(op)
+Goto dodsp
+mov:
+tt$="	MOVE	"
+Gosub snum
+If op>=shp Then Goto dodsp
+s=Sgn(op-en)
+If s=0 Then Goto dodsp
+td=sd(en)
+For a=en+s To op Step s
+CopyShape a,a-s
+sd(a-s)=sd(a)
+Next
+CopyShape 55,op
+sd(op)=td
+Goto dodsp
+.About:
+Gosub crhrf
+Screen 1,0,0,320,200,2,0,"",1,2
+Green 0,0,0,0
+Green 2,15,0,0
+Green 3,15,8,0
+Green 1,15,15,15
+
+DefaultIDCMP $200
+Window 1,0,0,320,200,$1008,"",1,0
+ScreensBitMap 1,0
+
+Blit 58,60,40
+
+FlushEvents
+e=WaitEvent
+Free Window 1
+Free Screen 1
+Goto skp2
+
+
+
+
+

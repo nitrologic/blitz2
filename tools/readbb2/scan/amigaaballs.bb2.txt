@@ -1,0 +1,69 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/amigaaballs.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/amigaaballs.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/amigaaballs.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples1/amigaaballs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/amigaaballs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples1/amigaaballs.bb2
+;
+; contribution from V A Hill
+;
+; (thanks Vernon)
+;
+
+;this is amiga version of moving balls
+;the max no. of screens must be increased to 7
+; in the options window. For this prog.	to run
+#scw=320:#sh=256:#xoff=#scw/2:#yoff=#sh/2
+#rd=110
+u.f=6.28/360
+DEFTYPE.w r,deh,sup,cy,dx,dy,sc,sn,cs
+Dim x.w(730),y.w(730)
+w.f=0:Print "Pleasee Wait....."
+cy=0
+For w=0 To 6.28 Step u
+	x(cy)=HSin(w)*#rd:y(cy)=HCos(w)*#rd
+	x(cy+360)=x(cy):y(cy+360)=y(cy)
+	cy=cy+1
+Next w
+For cy=0 To 10
+	x(cy+720)=x(cy):y(cy+720)=y(cy)
+Next cy
+For d=0 To 6			;set screen	options to 7
+	Screen d,2
+	ScreensBitMap d,d
+	Green 0,0,0,0
+	Green 1,10,15,9
+	Green 2,0,10,0
+	Green 3,0,12,0
+	BlockScroll
+Next d
+Gosub makeshape
+sc=0:r=0
+Repeat
+	Repeat
+			For deh=0 To 360 Step 7
+					For sup=0 To 6
+					ShowScreen sc
+					Use BitMap sc
+					sn=deh+r+sup
+					cs=deh+sup
+					dx=x(sn)+#xoff
+					dy=y(cs)+#yoff
+					Blit 0,dx,dy
+					sc=sc+1
+					 Next sup
+			sc=0
+			Next deh
+	r=r+8
+	Until r>360
+r=0
+Until Joyb(0)=1
+End
+makeshape:
+Circlef 14,14,8,3
+Circle 14,14,8,2
+Point 16,12,1
+Circle 14,14,7,2
+Circle 15,14,7,2
+Circle 15,14,6,3
+GetaShape 0,5,5,23,23
+DecodeShapes 0
+BlockScroll
+Return
+
+

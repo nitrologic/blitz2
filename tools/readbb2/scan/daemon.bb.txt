@@ -1,0 +1,337 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/daemon.bb
+DEFTYPE.l
+
+;
+; send file to jaguar via rs232
+;
+
+;adds header to link code and install exec
+
+#amispeed=16	;26, 18,	16
+#dest=$8000
+
+Statement send_run{dest.l,src.l,srcend.l}
+	;
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2
+	;
+	MOVE.l a0,-(a7):BSR send:MOVE.l (a7)+,a0
+	;
+	run
+	;
+	MOVE.l a1,a2
+	;
+	send
+	;
+	MOVE #$4000,$dff09a						 ;no interupts!
+	MOVE #amispeed,$dff032								;period (fast!)
+	;
+	SUB.l a1,a2:MOVE.l a2,d0
+	MOVEM.l d0/a1,-(a7)
+	;
+	MOVE.l a0,dat_:MOVE.l d0,len_
+	LEA dat_(pc),a0:MOVEQ #8,d0:BSR write_mem
+	;
+	MOVEM.l (a7)+,d0/a0
+	TST.l d0:BEQ skip:BSR write_mem
+	MOVE #$0801,$dff09c:MOVE #$c000,$dff09a:RTS
+	;
+	skip
+	MOVE #$0801,$dff09c
+	:MOVE #$c000,$dff09a
+	AsmExit
+
+	dat_:Dc.l 0
+	len_:Dc.l 0
+
+	write_mem	 ;a0=address, d0=length
+	;
+	MOVE #$300,d1:MOVE d1,d2
+	;
+	loop
+	MOVE.b (a0)+,d1:ADD.b d1,d2
+	wt:MOVE $dff018,d3:BTST #13,d3:BEQ wt
+	MOVE d1,$dff030:SUBQ.l #1,d0:BNE loop
+	;
+	wt2:MOVE $dff018,d3:BTST #13,d3:BEQ wt2
+	MOVE d2,$dff030:RTS
+	;
+End Statement
+
+
+
+
+
+NEWTYPE.FileInfoBlock
+	 _DiskKey.l
+	 _DirEntryType.l
+	 _FileName.b[108]
+	 _Protection.l
+	 _EntryType.l
+	 _Size.l
+	 _NumBlocks.l
+	 ds_Days.l
+	 ds_Minute.l
+	 ds_Tick.l
+	 _Comment.b[80]
+	 _Reserved.b[36]
+End NEWTYPE
+
+DEFTYPE .FileInfoBlock myfib				;myfib holds infoblock
+
+
+
+
+Statement dolink{code.l,origin.l} ;sega!
+	MOVE.l d0,a0
+	MOVE.l d1,d2
+	LEA 28(a0),a0
+	MOVE.l	(a0)+,d0
+	MOVE.l	a0,a1 ;start of code
+	MOVE.l	a0,d1
+	LSL.l #2,d0
+	ADD.l d0,a0
+	CMP.l #$3ec,(a0)+
+	BNE	 done
+	MOVE.l	(a0)+,d0	;how many relocs
+	SUBQ	#1,d0
+	ADDQ	#4,a0 ;skip hunk#
+	MOVE.l d2,d1
+loop7:MOVE.l	(a0)+,d2	;offset
+	ADD.l d1,0(a1,d2.l)
+	DBF d0,loop7
+done:
+	AsmExit
+End Statement
+
+
+
+
+
+
+t$="jag"
+If NumPars>0 Then t$=Par$(1)
+
+f$=t$
+If Instr(t$,":")<1 Then f$="ram:"+t$
+e$=f$+".l"
+
+s$="ram:sega"
+se$=s$+".l"
+
+NoCli
+WbToScreen 0
+Window 0,WBWidth-360,12,360,80,$43f,"Daemon - "+f$,1,2
+WindowOutput 0
+
+
+	p$="gpu.g"									 ;directory name goes in p$
+	t$=Chr$(9)													;tab$
+	lock.l=##[$FE0A](&p$,-2)								;lock is dos system to access files
+	If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
+
+		oldtick.l=myfib\ds_Tick
+;		Execute_ "c gpu",0,0
+		NPrint oldtick
+		WPrintScroll
+	Else
+		NPrint "LOCK FAILED"
+		WPrintScroll
+	EndIf
+	##[$FE0B] lock
+
+Repeat
+	VWait 30
+	ev.l=Event
+	If WriteMem(0,f$)
+
+		Print Hours,":",Right$(Str$(Mins+100),2)," loading ",f$
+		l1.l=?mycode-?header:l2.l=FileSeek(0):l2=(l2+7)AND ($ffffff8)
+		InitBank 0,l1+l2,0
+		##[$FEDB] ?header,Bank(0),l1
+		##[$BE14] 0,Bank(0)+l1,l2
+		CloseFile 0
+		send_run{#dest,Bank(0),Bank(0)+l1+l2}
+		NPrint ", ",l2," bytes sent"
+		WPrintScroll
+		Free Bank 0
+		VWait 20
+		If ##[$BE15](e$) Then KillFile e$
+
+		##[$FE1F] "rename "+f$+" "+e$,0,0
+	EndIf
+
+
+
+
+	If ##[$BE15](s$)
+		LoadBank 0,"ram:sega"
+
+		dolink{Bank(0),$400}			;$420}
+
+		If ReadMem(0,"ram:sega.bin")
+			Exists 0,Bank(0)+32,BankSize(0)-32
+			CloseFile 0
+		EndIf
+		If ##[$BE15](se$) Then KillFile se$
+		##[$FE1F] "copy ram:sega.bin bd:skid.bin",0,0
+		FindScreen 1:BeepScreen 1
+		##[$FE1F] "rename "+s$+" "+se$,0,0
+		FreeBank 0
+	EndIf
+
+	;SaveBank 0,"test.bin"
+
+
+
+
+
+
+
+
+	lock.l=##[$FE0A](&p$,-2)								;lock is dos system to access files
+	If ##[$FE0D](lock,myfib)<>0					;if we get lock on p$
+		If oldtick<>myfib\ds_Tick
+
+			NPrint Hours,":",Right$(Str$(Mins+100),2)," compiling ",p$
+			WPrintScroll
+			##[$FE1F] "c gpu",0,0
+
+			oldtick=myfib\ds_Tick
+		EndIf
+	EndIf
+	##[$FE0B] lock
+
+
+
+Until ev=$200
+
+
+
+End
+
+
+
+
+
+;-------------------------------------------------
+
+
+
+;----------------------------------------------------------------
+
+; link code located at mycode
+; install exec pointers
+; call mycode+32
+
+#allocat=$200
+	#superstacksize=256
+	#userstacksize=256
+.header
+	LEA mycode(pc),a0:BSR relocate
+
+	LEA myexecminus210(pc),a0:ADD#210,a0:MOVE.l a0,4
+
+	MOVE.l #$18000,a0
+	LEA		mems(pc),a1
+	MOVE.l #$200000-$58000-4096-8,d0
+;	MOVE.l #$200000-$28000-4096-8,d0
+
+	MOVE.l a0,(a1)
+	CLR.l	(a0)+
+	MOVE.l d0,(a0)+
+
+	MOVE.l #$200000-2048,a7
+
+;	MOVE.l #$200000-2048,allocat:MOVE.l (a7),a0
+;	MOVE.l allocat,a7:SUB.l #superstacksize,allocat
+;	MOVE #0,sr
+;	MOVE.l allocat,a7:SUB.l #userstacksize,allocat:MOVE.l a0,-(a7)
+
+	BRA		mycode+32
+
+mems
+	Dc.l 0
+
+myexecminus210:
+	JMP fmem-header+dest	;-210
+	JMP amem-header+dest	;-204
+	JMP amem-header+dest	;-198
+
+.relocate	;a0=file location
+	;
+	MOVE.l	a0,a1
+	LEA 28(a1),a0
+	MOVE.l	(a0)+,d0
+	ASL.l#2,d0
+	MOVE.l a0,a1
+	ADD.l d0,a1
+;	LEA 0(a0,d0),a1
+	CMP.l #$3ec,(a1)+
+	BNE hrts
+	MOVE.l	(a1)+,d0
+	ADDQ	#4,a1
+	MOVE.l	a0,d2
+	;
+mloop
+;	MOVE.l (a1)+,d1	;offset
+;	ADD.l d2,0(a0,d1)
+
+	MOVE.l a0,a2
+	ADD.l (a1)+,a2
+	ADD.l d2,(a2)
+
+	SUBQ.l	#1,d0
+	BNE mloop
+	;
+hrts
+	RTS
+
+.amem
+	;d0.l=size, d1.l=type!
+	MOVEM.l a0/d2-d3,-(a7)
+	;
+	LEA mems(pc),a0:ADD.l #15,d0:AND#$fff0,d0:MOVE.l d0,d2:MOVE.l d1,d3
+	'loop
+	MOVE.l (a0),d1:BEQ 'fail:MOVE.l a0,a1:MOVE.l d1,a0
+	CMP.l 4(a0),d0:BHI 'loop
+	MOVE.l a0,d1:SUB.l d0,4(a0):BNE 'skip
+	MOVE.l (a0),(a1)
+	'skip:ADD.l 4(a0),d1
+
+	MOVE.l d1,a0:BTST #16,d3:BEQ 'fail:LSR.l#2,d2:MOVEQ#0,d3
+	'clmem:MOVE.l d3,(a0)+:SUBQ.l#1,d2:BNE 'clmem
+
+
+	'fail:MOVE.l d1,d0
+	MOVEM.l (a7)+,a0/d2-d3
+	RTS
+
+.fmem
+	;
+	;d0.l=address, d1.l=size
+	;
+	MOVE.l d0,d1
+	MOVE.l a1,d0
+	ADD.l#15,d1:AND#$fff0,d1
+	;
+	MOVE.l d2,-(a7)
+	;
+	LEA mems(pc),a0
+	'loop
+	MOVE.l (a0),d2:BEQ 'here:MOVE.l a0,a1:MOVE.l d2,a0
+	ADD.l 4(a0),d2:CMP.l d0,d2:BEQ 'join:BCS 'loop
+	;
+	MOVE.l d0,(a1):MOVE.l d0,a1:ADD.l d1,d0:CMP.l a0,d0:BNE 'skip
+	ADD.l 4(a0),d1:MOVE.l (a0),a0
+	'skip:MOVE.l a0,(a1):MOVE.l d1,4(a1):BRA 'exit
+	;
+	'join:MOVE.l (a0),a1:ADD.l d1,d0:CMP.l a1,d0:BNE 'skip2
+	ADD.l 4(a1),d1:MOVE.l (a1),(a0)
+	'skip2:ADD.l d1,4(a0):BRA 'exit
+	;
+	'here:MOVE.l d0,a1:CLR.l (a1):MOVE.l d1,4(a1):MOVE.l a1,(a0)
+	;
+	'exit:MOVE.l (a7)+,d2:RTS
+
+.mycode:
+

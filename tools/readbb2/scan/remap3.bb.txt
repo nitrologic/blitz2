@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/remap3.bb
+Screen 0,4
+ScreensBitMap 0,0
+BitPlanesBitMap 0,1,8
+LoadBitMap 0,"rails.iff",0
+FadePalette 0
+
+Use BitMap 1:BlockScroll
+
+Use BitMap 0
+
+For x=0 To 319
+	For y=0 To 255
+		If (x+y)AND1
+			c=Cls(x,y)
+			If c>0 Then Point x,y,c/2+8
+		EndIf
+	Next
+Next
+
+MouseWait
+End

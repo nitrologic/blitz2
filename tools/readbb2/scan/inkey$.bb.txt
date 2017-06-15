@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Inkey$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Inkey$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Inkey$.bb
+
+; 
+; inkey$ program example
+; 
+Screen 0,3
+Window 0,0,0,320,200,$100f,"My Window!",1,2 
+NPrint "Type away - hit Mouse Button to Quit!"
+
+While Joyb(0)=0  ;loop continuously until a mousebutton down
+ WaitEvent
+ Print Inkey$ 
+Wend
+

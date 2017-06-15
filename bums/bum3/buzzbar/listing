@@ -1,0 +1,701 @@
+;
+;     PROJECT BUZZ BAR
+;
+
+#reload=4       ;time till next bullet
+#around=4       ;num bullets in one auto fire
+#mythrust=4     ;5=nice and fast
+#bthrust=4      ;anti thrust when firing
+#mydrag=6
+#bspeed=9       ;bullet speed
+
+#upd=7          ;number of frames for scanner and alien changes
+#xcntr=160+32
+#ycntr=100+32
+
+#shield=128      ;shape numbers
+#hume=112
+#thrst=131
+#title=135
+
+#nmetypes=48
+
+;
+; machine code /x*x+y*y
+;
+
+Function.w distance{x1.w,y1.w,x2.w,y2.w}
+ UNLK a4                               ;unlink (no recursion)
+ SUB d2,d0:BPL xpos:NEG d0:xpos        ;d0=width
+ SUB d3,d1:BPL ypos:NEG d1:ypos        ;d1=height
+ CMP d0,d1:BEQ kludge                  ;kludge if equal
+ BMI ygtx:EXG d0,d1:ygtx               ;d0=greater side
+ TST d1:BNE yne:RTS:yne                ;if short side 0 len=other
+ SWAP d1:CLR d1:DIVU d0,d1:LSR#7,d1    ;look up=short/long
+ ADD d1,d1:SWAP d0
+ DIVU lvals(pc,d1.w),d0:RTS
+ kludge:MULU #27146,d0:SWAP d0:ADD d1,d0:RTS ;multiply by sqrt(2)
+ lvals:IncBin "len.inc"
+End Function
+
+;
+; machine code arctan(x,y)
+;
+
+Function.w angle{x1.w,y1.w}
+  UNLK a4                                     ;unlink
+  MOVEQ#0,d2                                  ;d2=quadrant
+  TST d1:BPL hpos:MOVEQ#16,d2:NEG d1:hpos     ;y positive
+  TST d0:BPL wpos:EOR#8,d2:NEG d0:wpos        ;x positive
+  CMP d1,d0:BMI notsteep:BNE neq
+  MOVE#$2000,d1:BRA flow:neq
+  EOR #4,d2:EXG d1,d0:notsteep
+  TST d1:BNE noflow:MOVEQ#0,d1:BRA flow:noflow
+  EXT.ld0:SWAP d0:DIVU d1,d0:LSR#6,d0:AND#1022,d0
+  MOVE arc(pc,d0),d1
+  flow:MOVE.l oct(pc,d2),d0:EOR d0,d1:SWAP d0:ADD d1,d0:RTS
+  oct:Dc.w 0,0,$4000,-1,0,-1,$c000,0
+      Dc.w $8000,-1,$4000,0,$8000,0,$C000,-1
+  arc:IncBin "arc.inc"
+End Function
+
+Macro ssin qsin((`1 LSR 6)&1023):End Macro
+Macro ccos qcos((`1 LSR 6)&1023):End Macro
+Macro onscreen RectsHit(`1,`2,1,1,12,12,320+32,220+32):End Macro
+
+
+NEWTYPE .nmedata
+  frame.w         ;shape number
+  numrots         ;number of roatations
+  thrust          ;amount of thrust 1-8
+  rspeed          ;max turning speed
+  drag            ;drag coefficient
+  thrusttime      ;alternate timing for thrust and fire
+  firepower       ;percentage liklihood of firing
+  points          ;score
+  reload          ;time to reload bullet
+  color           ;color on scanner
+End NEWTYPE
+
+NEWTYPE .nmewave
+  *nme.nmedata    ;type of nme as above
+  start.w         ;time that first wave appears
+  num             ;number of waves
+  apart           ;time between waves
+  count           ;number of aliens in wave
+  neces           ;flag if required to finish patern
+  tot             ;total number
+End NEWTYPE
+
+NEWTYPE .ship
+  x.w:y:rot:frame  ;position
+  xv:yv:px:py:upd  ;& speed
+  thcount          ;count for fire thrust alternate
+  fcount           ;count for
+  bcount
+  *parent.nmewave  ;points back to wave he came from
+  *nme.nmedata     ;points to nmetype
+End NEWTYPE
+
+NEWTYPE .paterndata
+  pcol.w:numhumes
+  waves.nmewave[10]
+End NEWTYPE
+
+NEWTYPE .playerdata
+  score.l:lives.w:shield:patern:status:xpos
+  ptimer:totwaves:tothumes:numhumes
+  nme.nmewave[10]
+End NEWTYPE
+
+NEWTYPE .hume
+  x.w:y:rot
+  xv:yv:rv:frame:upd:px:py
+End NEWTYPE
+
+NEWTYPE .rgb
+  r.w:g:b
+End NEWTYPE
+
+Dim List nme.ship(50)      ;enemy
+Dim List bul.ship(16)      ;bullets
+Dim List bng.ship(50)      ;explosions
+Dim List fire.ship(32)     ;nme fire
+Dim List astro.hume(32)    ;astronauts
+
+Dim alien.nmedata(#nmetypes) ;nme information
+Dim patern.paterndata(200)   ;patern information
+Dim player.playerdata(1)     ;2 players
+Dim pcols.rgb(4)
+
+Dim a$(1000)                 ;listing
+
+Dim qsin.q(1023),qcos(1023)   ;look up tables
+
+me.ship\x=0,0,0,0,0,0,0
+
+BitMap 0,320+64,220+64,3  ;doublebuffered front playfield
+BitMap 1,320+64,220+64,3
+BitMap 2,832,768,3        ;background
+BitMap 3,320,32,3         ;double buffered scanner
+BitMap 4,320,32,3
+
+If ReadFile(0,"text")
+  FileInput 0:numl=0
+  While NOT Eof(0)
+    a$(numl)=Left$(Edit$(100),38):numl+1
+  Wend
+  CloseFile 0
+  DefaultInput
+EndIf
+
+LoadSound 0,"shoot1"
+LoadSound 1,"shoot2"
+LoadSound 2,"explo1"
+LoadSound 3,"explo2"
+LoadSound 4,"thrust1"
+LoadSound 5,"tankoo"
+LoadSound 6,"freemun"
+LoadSound 7,"intromusic"
+
+LoadShapes 0,"ships.shapes"     ;8 color
+LoadShapes 160,"bombs.shapes"    ;2 color
+LoadShapes 192,"shards.shapes"   ;4 color
+
+LoadPalette 1,"ships.iff"
+
+LoadBitMap 2,"moon.iff"         ;back drop
+Use BitMap 2
+Scroll 0,0,320,512,512,0
+Scroll 0,0,832,256,0,512
+Use BitMap 0
+
+Queue 0,100
+Queue 1,100
+
+Gosub setuppcols
+Gosub setupsincos
+Gosub setupnme
+Gosub setuppaterns
+
+BLITZ
+Mouse On
+BlitzKeys On:BitMapInput
+Gosub setuppalette
+
+Slice 0,44,320,32,$fff8,3,8,8,320,320:Use Palette 1
+Slice 1,78,320,220,$fffa,6,8,32,320+64,832:Use Palette 1
+
+sdb=3
+
+.titledisplay
+  LoopSound 7,4:Volume 4,64
+  Use BitMap sdb:Cls:BitMapOutput sdb
+  Blit #title,160,11
+  Use Slice 0:Show sdb:Use Slice 1
+  ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
+  Use BitMap 1-db:Cls:Use BitMap db:Cls
+  cc=0:ci=0:l=0:db=0
+  Repeat
+    VWait
+    ShowF db:db=1-db:BitMapOutput db:Colour 1,0
+    Poke Addr BitMap(db)+4,1
+    Use BitMap db:Scroll 0,4,320,224,0,0,1-db:WaitBlit_
+    If db=0
+      Locate 1,27:Print a$(l):l+1:If l>numl Then l=1
+    EndIf
+    cc-1
+    If cc<0
+      cc=100:BitMapOutput sdb:Locate 1,3
+      Select ci
+        Case 0:Print "WRITTEN BY SIMON ARMSTRONG IN BLITZ 2 "
+        Case 1:Print " F1-1 PLAYER   F2-2 PLAYER  F10-EXIT  "
+        Case 2:Print "      KEYBOARD CONTROLS Z X , . /     "
+        Case 3:Print "      CURRENT HIGH SCORE = ",hiscore.l,"     "
+      End Select
+      ci+1:If ci=4 Then ci=0
+    EndIf
+    Poke Addr BitMap(db)+4,3
+    If (RawStatus($50) OR Joyx(1)=-1) Then nump=1:Gosub playgame
+    If (RawStatus($51) OR Joyx(1)=1) Then nump=2:Gosub playgame
+    If RawStatus($59) Then End
+  Forever
+
+.playgame
+  Use Palette 1
+  ShowF db,32,32
+  ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
+  Use BitMap 1-db:Cls:Use BitMap db:Cls
+  player(0)\score=0,3,600,0,-1,1,0,0
+  player(1)\score=0,3,600,0,-1,23,0,0
+  If nump=1 Then player(1)\score=0,0,0,0
+  currp=0
+  While player(0)\lives>0 OR player(1)\lives>0
+    *p.playerdata=player(currp)
+    If *p\lives>0 Then Gosub newlife
+    If *p\score>hiscore Then hiscore=*p\score
+    currp=1-currp
+  Wend
+  Goto titledisplay
+
+.newlife
+  Gosub initscanner:Gosub initscanner
+  *p\status=0
+  upd=0:updcount=1  ;frame update and new alien update counters
+  ShowF db,32,32
+  i=patern(*p\patern)\pcol:r=pcols(i)\r:g=pcols(i)\g:b=pcols(i)\b
+  Gosub planetcolor:Use Palette 1
+  Use BitMap db:Cls:BitMapOutput db
+  Locate 20,15:Colour 1:Print "PLAYER ",currp+1
+  Gosub oldaliens
+  VWait 100:Cls
+  LoopSound 4,4:Volume 4,0
+
+.mainloop
+  Repeat
+    If RawStatus($45) Then End
+    VWait
+    ShowF db,32,32
+    ShowB 2,(me\x LSR 6)&511,(me\y LSR 6)&511
+    If *p\totwaves=0 AND numexp=0 Then Gosub newpatern
+    Gosub newaliens
+    If upd=0 Then Gosub doscanner
+    db=1-db
+    Use BitMap db
+    UnQueue db
+    Gosub drawnme
+    Gosub drawfire
+    Gosub astromen
+    If *p\status=0 Then Gosub moveship
+    Gosub drawbullets
+    Gosub moveexplosions
+    upd+1:If upd>#upd Then upd=0
+    *p\ptimer+1
+    If (*p\ptimer AND 7)=0 Then ct3+1:If ct3=3 Then ct3=0
+  Until *p\status=-1 AND numexp=0
+  ClearList nme()
+  ClearList bul()
+  ClearList fire()
+  ClearList astro()
+  *p\lives-1
+  Volume 4,0
+  Return
+
+.oldaliens
+  USEPATH *p\nme[i]
+  i=0
+  While \nme AND i<10
+    j=0:While j<\tot:Gosub addalien:j+1:Wend
+    i+1
+  Wend
+  Gosub addhumes
+  Return
+
+.addhumes
+  i=0
+  While i<*p\tothumes
+    AddItem astro()
+    astro()\x=Rnd($ffff),Rnd($ffff),0
+    astro()\xv=Rnd(200)-100,Rnd(200)-100,Rnd(16384)-8192,0
+    astro()\upd=updcount
+    updcount+1:If updcount>#upd Then updcount=1
+    i+1
+  Wend
+  Return
+
+.newaliens
+  USEPATH *p\nme[i]
+  i=0
+  While \nme AND i<10
+    If *p\ptimer=\start   ;time for a new wave
+      For j=1 To \count
+        Gosub addalien
+        \tot+1
+      Next
+      If \num>0 Then \num-1
+      If \num<>0 Then \start+\apart Else \start=0
+    EndIf
+    i+1
+  Wend
+  Return
+
+.addalien
+  AddItem nme()
+  nme()\x=me\x+Rnd($c000)+$2000
+  nme()\y=me\y+Rnd($c000)+$2000
+  nme()\rot=Rnd(65535),0,0,0,0,0,0,0,0
+  nme()\upd=updcount
+  nme()\parent=*p\nme[i]
+  nme()\nme=\nme
+  updcount+1:If updcount>#upd Then updcount=1
+  nme()\thcount=0,0
+  Return
+
+.newpatern
+  ClearList nme()
+  ClearList bul()
+  ClearList fire()
+  ClearList astro()
+  Use BitMap db:BitMapOutput db
+  *p\patern+1:pat=*p\patern
+  Colour 1:Locate 16,15:Print "ATTACK WAVE ",pat
+  USEPATH patern(pat)
+  i=\pcol:r=pcols(i)\r:g=pcols(i)\g:b=pcols(i)\b
+  Gosub planetcolor:Use Palette 1
+  USEPATH patern(pat)\waves[i]
+  For i=0 To 9                    ;copy patern data to player
+    *p\nme[i]\nme=\nme,\start,\num,\apart,\count,0,0
+    *p\totwaves+\neces
+  Next
+  *p\tothumes=patern(pat)\numhumes:Gosub addhumes
+  *p\ptimer=0
+  VWait 100:Cls
+  Return
+
+
+.initscanner
+  sdb=7-sdb
+  Use BitMap sdb:BitMapOutput sdb:Cls
+  Box 0,0,319,31,1
+  Box 160-16,0,160+16,31,2
+  USEPATH player(i)
+  For i=0 To 1
+    c=2:If player(i)=*p Then c=1
+    Locate \xpos,.3:Colour c:Print i+1,"UP"
+    Locate \xpos,1.5:Print \score
+    Boxf \xpos*8,22,\xpos*8+100,28,0
+    If \shield Then Boxf \xpos*8,22,\xpos*8+\shield LSR 4,28,4
+    s=1
+    While s<\lives AND s<6
+      Blit 0,\xpos*8+s*14+50,8
+      s+1
+    Wend
+  Next
+  Return
+
+.doscanner
+  Use Slice 0:Show sdb:Use Slice 1
+  sdb=7-sdb
+  Use BitMap sdb:BitMapOutput sdb
+  Boxf 160-16,0,160+16,31,0
+  Box 160-16,0,160+16,31,2
+  Blit 164+(me\rot ASR 13 AND 7),160,16
+  Locate *p\xpos,1.5:Colour 1:Print *p\score
+  Boxf *p\xpos*8,22,*p\xpos*8+100,28,0
+  If *p\shield Then Boxf *p\xpos*8,22,*p\xpos*8+*p\shield LSR 4,28,4
+  If *p\lives>1 AND *p\lives<6 Then Blit 0,*p\xpos*8+*p\lives*14+50-14,8
+  Return
+
+.moveship
+  If (RawStatus($3a) OR Joyy(1)=1) AND *p\shield>0
+    If BlitColl (#shield,#xcntr,#ycntr)
+      px=#xcntr:py=#ycntr:sh=#shield
+      Gosub checknme
+    EndIf
+    QBlit db,#shield+ct3,#xcntr,#ycntr
+    *p\shield-2
+  Else
+    If BlitColl (0,#xcntr,#ycntr)
+      *p\status=-1
+      Sound 3,2
+      For i=1 To 15
+        If AddItem(bng())
+          bng()\x=me\x,me\y,31
+          bng()\xv=me\xv/2+Rnd(128)-64
+          bng()\yv=me\yv/2+Rnd(128)-64
+          numexp+1
+        EndIf
+      Next
+      Return
+    EndIf
+  EndIf
+  If RawStatus($31) OR Joyx(1)=-1 Then me\rot-1400
+  If RawStatus($32) OR Joyx(1)=1 Then me\rot+1400
+  me\rot+(MouseXSpeed*200)
+  If RawStatus($38) OR Joyb(0)&2 OR Joyy(1)=-1      ;thrust
+    Volume 4,63
+    me\xv+!ssin{me\rot} ASL #mythrust
+    me\yv-!ccos{me\rot} ASL #mythrust
+    QBlit db,#thrst+thanim,#xcntr-!ssin{me\rot}*6,#ycntr+!ccos{me\rot}*6
+    thanim-1:If thanim<0 Then thanim=3
+  Else
+    Volume 4,0
+  EndIf
+  If RawStatus($39) OR Joyb(0)&1 OR Joyb(1)&1      ;fire
+    If rl=0 AND nb>0
+      If AddItem(bul())
+        Sound 1,1
+        bul()\x=me\x,me\y,me\rot
+        bul()\xv=!ssin{me\rot} ASL #bspeed+me\xv
+        bul()\yv=-!ccos{me\rot} ASL #bspeed+me\yv
+        rl=#reload
+        me\xv-!ssin{me\rot} ASL #bthrust         ;reverse thrust
+        me\yv+!ccos{me\rot} ASL #bthrust
+        nb-1
+      EndIf
+    EndIf
+  Else
+    rl=0:nb=#around
+  EndIf
+  me\xv-me\xv ASR #mydrag
+  me\yv-me\yv ASR #mydrag
+  me\x+me\xv
+  me\y+me\yv
+  QBlit db,((me\rot+2048) LSR 12)&15,#xcntr,#ycntr
+  If rl>0 Then rl-1
+  Return
+
+
+.moveexplosions
+  ResetList bng()
+  USEPATH bng()
+  While NextItem(bng())
+    \rot-1
+    If \rot>-1
+      \x+\xv:\y+\yv
+      px=((\x-me\x) ASR 6)+#xcntr
+      py=((\y-me\y) ASR 6)+#ycntr
+      If !onscreen{px,py}
+        QBlit db,192+\rot/4,px,py
+      EndIf
+    Else
+      KillItem bng()
+      numexp-1
+    EndIf
+  Wend
+  Return
+
+.drawnme
+  ResetList nme()
+  USEPATH nme()
+  While NextItem(nme())
+    If \upd=upd
+      ang.w=32768-angle{me\x-\x,me\y-\y}-\rot
+      s=Sgn(ang):ang=Abs(ang)
+      If ang>\nme\rspeed Then ang=\nme\rspeed
+      \rot+s*ang                       ;rotate towards me
+
+      \thcount-1
+      If \thcount>0
+        \xv+!ssin{\rot} * \nme\thrust        ;thrust
+        \yv-!ccos{\rot} * \nme\thrust
+      Else
+        If \thcount<-\nme\thrusttime Then \thcount=\nme\thrusttime
+      EndIf
+      \xv-\xv ASR \nme\drag
+      \yv-\yv ASR \nme\drag
+      Use BitMap sdb
+      Plot ((\x-me\x) ASR 11)+160,((\y-me\y) ASR 11)+16,\nme\color
+      Use BitMap db
+      \frame=(\rot LSR 12)&15+\nme\frame
+    EndIf
+    \x+\xv                                 ;speed
+    \y+\yv
+    \px=((\x-me\x) ASR 6)+#xcntr
+    \py=((\y-me\y) ASR 6)+#ycntr
+    If !onscreen{\px,\py}
+      QBlit db,\frame,\px,\py
+      If \thcount<0              ;if not thrusting
+        If \fcount=0             ;and not fired
+          If \nme\firepower>Rnd(100) Then Gosub nmefire
+        Else
+          \fcount-1
+        EndIf
+      EndIf
+    EndIf
+  Wend
+  Return
+
+.astromen
+  ResetList astro()
+  USEPATH astro()
+  While NextItem(astro())
+    If \upd=upd
+      \rot+\rv
+      Use BitMap sdb
+      Plot ((\x-me\x) ASR 11)+160,((\y-me\y) ASR 11)+16,1
+      Use BitMap db
+      \frame=(\rot LSR 12)&15+#hume
+    EndIf
+    \x+\xv:\y+\yv
+    \px=((\x-me\x) ASR 6)+#xcntr
+    \py=((\y-me\y) ASR 6)+#ycntr
+    If !onscreen{\px,\py}
+      If BlitColl (\frame,\px,\py)
+        KillItem astro():*p\tothumes-1
+      Else
+        If ShapesHit(\frame,\px,\py,0,#xcntr,#ycntr)
+          KillItem astro():*p\tothumes-1
+          oldscore.l=*p\score
+          *p\score+1000:Sound 5,2
+          If Int(*p\score/10000)>Int(oldscore/10000)
+            *p\lives+1:*p\shield+200:Sound 6,2
+          EndIf
+        Else
+          QBlit db,\frame,\px,\py
+        EndIf
+      EndIf
+    EndIf
+  Wend
+  Return
+
+.nmefire
+  USEPATH nme()
+  If AddItem(fire())
+    Sound 0,1
+    fire()\x=\x,\y,\rot
+    fire()\xv=!ssin{\rot} ASL 7+\xv
+    fire()\yv=-!ccos{\rot} ASL 7+\yv
+    \fcount=\nme\reload
+  EndIf
+  Return
+
+.drawfire
+  ResetList fire()
+  USEPATH fire()
+  While NextItem(fire())
+    \x+\xv                                 ;speed
+    \y+\yv
+    px=((\x-me\x) ASR 6)+#xcntr
+    py=((\y-me\y) ASR 6)+#ycntr
+    If !onscreen{px,py}
+      QBlit db,161,px,py
+    Else
+      KillItem fire()
+    EndIf
+  Wend
+  Return
+
+.drawbullets
+  ResetList bul()
+  USEPATH bul()
+  While NextItem(bul())
+    \x+\xv                                 ;speed
+    \y+\yv
+    px=((\x-me\x) ASR 6)+#xcntr
+    py=((\y-me\y) ASR 6)+#ycntr
+    If !onscreen{px,py}
+      If BlitColl(64,px,py) Then sh=64:Gosub checknme
+      QBlit db,160,px,py
+    Else
+      KillItem bul()
+    EndIf
+  Wend
+  Return
+
+.checknme:
+  ResetList nme()
+  USEPATH nme()
+  While NextItem(nme())
+    If ShapesHit(\frame,\px,\py,sh,px,py)
+      Sound 2,2
+      oldscore.l=*p\score
+      *p\score+\nme\points
+      If Int(*p\score/10000)>Int(oldscore/10000)
+        *p\lives+1:*p\shield+200:Sound 6,2
+      EndIf
+      For i=1 To 4
+        If AddItem(bng())
+          bng()\x=\x,\y,31
+          bng()\xv=\xv/2+Rnd(64)-32
+          bng()\yv=\yv/2+Rnd(64)-32
+          numexp+1
+        EndIf
+      Next
+      USEPATH nme()\parent
+      \tot-1
+      If \tot=0
+        If \start>0
+          \start=*p\ptimer+1
+        Else
+          *p\totwaves-1
+        EndIf
+      EndIf
+      KillItem nme()
+    EndIf
+  Wend
+  Return
+
+.setupsincos
+  For i=0 To 1023
+    rad.f=i*Pi/512
+    qsin(i)=Sin(rad)
+    qcos(i)=Cos(rad)
+  Next
+  Return
+
+.setuppalette
+  Restore scanpalette
+  For i=0 To 7:Read r,g,b:PalRGB 0,i,r,g,b:Next
+  r=14:g=12:b=12:Gosub planetcolor
+  Return
+
+.scanpalette:
+  Data 0,0,0,15,15,15,14,0,0,0,8,0,3,6,13
+  Data 15,14,0,13,6,11,4,4,9
+
+.planetcolor:
+  PalRGB 1,9,r,g,b
+  r=QLimit(r-3,0,15):g=QLimit(g-3,0,15):b=QLimit(b-3,0,15)
+  For i=0 To 5
+    PalRGB 1,10+i,r,g,b
+    r=QLimit(r-1,0,15):g=QLimit(g-1,0,15):b=QLimit(b-1,0,15)
+  Next
+  Return
+
+;frame,numrots,thrust,rspeed,drag,thrusttime,firpower,pts,reload,col=3
+
+.setupnme:
+  For i=0 To 7
+    alien(00+i)\frame=16,16,40+i*20,4096+i*64,3,8-i/3,5+i*3,150,50-i,7
+    alien(08+i)\frame=32,16,20+i,3048+i*160,7,10-i/3,5+i*3,150,50-i,7
+    alien(16+i)\frame=48,16,10+i,5048+i*500,6,8,10+i*2,200,40-i/2,6
+    alien(24+i)\frame=64,16,6+i,2048+i*500,8,8,20+i*3,200,40-i/2,6
+    alien(32+i)\frame=80,16,70+i*10,8000+i*32,4,2,8+i,300,30-i*2,3
+    alien(40+i)\frame=96,16,90+i*14,6000+i*24,2,2,8+i,300,30-i*2,3
+  Next
+  Return
+
+.setuppcols
+  Restore pcolors
+  For i=0 To 4:Read r,g,b:pcols(i)\r=r,g,b:Next
+  Return
+
+pcolors:
+  Data 9,7,7
+  Data 9,9,9
+  Data 7,9,7
+  Data 7,7,9
+  Data 9,9,7
+
+.setuppaterns
+  USEPATH patern(i)
+  d=-1:n=2
+  For i=1 To 199
+    prpt=i MOD 5
+    If prpt=1
+      Restore patdata
+      If d<7 Then d+1 Else n+1          ;increase difficulty
+    EndIf
+    \pcol=prpt
+    Read acode
+    \numhumes=acode
+    j=0
+    Repeat
+      Read acode
+      If acode>-1
+        \waves[j]\nme=alien(acode+d),0,3,500,n,1,0
+        j+1
+      EndIf
+    Until acode=-1
+    \waves[j]\nme=0
+  Next
+  Return
+
+.patdata
+  Data 5,0,16,-1
+  Data 5,0,8,16,-1
+  Data 5,0,8,16,24,-1
+  Data 5,8,24,32,40,-1
+  Data 15,24,40,-1
+  Data -1

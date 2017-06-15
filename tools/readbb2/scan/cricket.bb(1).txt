@@ -1,0 +1,1743 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/cricket/cricket.bb
+;
+; cricket scoring program
+;
+
+; any cli parameter means byes and legbyes also break maidin overs
+
+; (C)1994 Armstrong Communications Ltd
+
+; 6/12/94
+; fixed equation which was one over out
+; batterout and newbowler corrupted on backup
+; need font for display of 0
+; no pad on scoretick in dismissal files
+; over(s) needs checking every fucking where
+
+; rollover didn't set ball to 0
+
+; special cases
+;
+; partner can get run out
+; narrator to be enabled on OK
+; 2 runs on a noball???
+; save events so reset can power up correctly
+;
+; batter order
+; chasing figure
+; over needs updating in stats before start of next
+;
+; added caught and bowled
+; last batsman out fixed
+; scoretick 2 now displays 1st innings score NOT chasing
+; fixed out so counts as a ball faced
+; fixed runout so doesn't require fielder???
+; golden duck still stuffed.... grrr
+;
+; click bowlers overs up as soon as ball#6 is bowled
+; disallow new bowler being same as old bowler
+;
+; ok now forwards through from a backup without destroying info
+; extras included in batter scorecard
+;
+; fixed up bowling socrecard with totals and fall of wickets
+; added StandardScoreBL.txt generator
+; bowler not allowed to be = to lastbowler except when backedup
+; add noball+four shot
+; added lowercase names for stats fields
+; updates scoretick file for every shot adjust
+; added wagon wheel program
+;
+; fixed up ok from backup to set batter/partner so change is ok
+; added extra noball situations
+;
+; minutes
+; sequential man out files batsmanout?.txt
+; end of innings script file
+; equation and target files needed
+;
+; worm graphics needed
+;
+; counts extras in partnership total???
+; wagon draws only for scoring shots
+; ball and over count now correct
+; backup keeps 4 files alive with .0 being most current
+;
+; bowlers balls up the creek
+; bowling teams byes legbyes need to equal extras scored from them
+;
+; added 1 to target runs
+;
+; need to account for long and short overs
+; support scroller through events for information
+; check backup for irregularities
+;
+
+mcludge=NumPars
+
+tab$=Chr$(9)
+
+NEWTYPE .batter		;10 fields
+	;
+	ballsfaced.w
+	runs.w
+	minutes.w
+	fours.w
+	sixes.w
+	status.w
+	;
+	bowler.w				 ;responsible for dismissal
+	fielder.w
+	;
+	disscore.w			 ;score at dismissal
+	diswicket.w
+	;
+	pballs.w
+	pruns.w
+	;
+End NEWTYPE
+
+NEWTYPE .bowler
+	overs.w					 ;bowling
+	maidens.w
+	runsallowed.w
+	wickets.w
+	extras.w
+	balls.w
+	noballs.w
+	byes.w
+	legbyes.w
+	wides.w
+End NEWTYPE
+
+NEWTYPE .side
+	teamname$
+	teamabbrev$
+	name$[12]
+	lame$[12]			 ;lower case
+	;
+	runs.w					;batting totals
+	extras.w
+	wickets.w
+	partnership.w
+	;
+	byes.w
+	legbyes.w
+	noballs.w
+	wides.w
+	fall.w[12]
+	;
+	cscore.w
+	cwickets.w
+	;
+	ba.w[12]				;batting order
+	bo.w[12]				;bowling order
+	bat.batter[12]
+	bowl.bowler[12]
+End NEWTYPE
+
+NEWTYPE .entry
+	message$			 ;displayed in view window
+	id.w					 ;0=empty 1=newinnings 2=newbatsmen 3=over 4=ball
+	batting.w			;1 innings team batting
+	batter.w			 ;2 define batsmen
+	partner.w
+	bowler.w			 ;3 over
+	whichend.w
+	over.w
+	ball.w
+;	shot.w				 ;4 ball
+	oshot.b
+	shot.b
+	runs.w
+	extras.w
+	wx.w
+	wy.w
+	batterout.w
+	fielder.w
+	newbatter.w
+	time.w
+End NEWTYPE
+
+Dim team.side(1)
+Dim entry.entry(1023)
+Dim ends$(2)
+Dim shot$(20)
+Dim out$(20)
+Dim inst$(5)
+Dim fi$(20)
+
+ends$(0)="NEAR END"
+ends$(1)="FAR END"
+
+shot$(0)="* IS FACING (& OPPOSITE)"
+shot$(1)="--PADDED EVENT FOR SHORT OVER--"						 ;* MISSES"
+shot$(2)="* HITS"
+shot$(3)="*: NOBALL NOBAT"
+shot$(4)="*: WIDE"
+shot$(5)="*: BYE"
+shot$(6)="*: LEGBYE"
+shot$(7)="* HITS A BOUNDARY"
+shot$(8)="* HITS A NOBALL"
+shot$(9)="* HITS BOUNDARY OFF A NOBALL"
+;
+shot$(10)="* IS CAUGHT BY ?"
+shot$(11)="* IS BOWLED"
+shot$(12)="* IS STUMPED BY ?"
+shot$(13)="* IS RUNOUT"
+shot$(14)="& IS RUNOUT"
+shot$(15)="* RETIRES"
+shot$(16)="* HITWICKET AND IS OUT"
+shot$(17)="* HANDLEDBALL AND IS OUT"
+shot$(18)="* IS OUT BY LBW"
+shot$(19)="* IS CAUGHT AND BOWLED"
+;
+out$(01)=tab$+tab$+"Not Out"+tab$+tab$+tab$				 ;score
+out$(02)=tab$+tab$+"Retired Hurt"+tab$+tab$+tab$
+out$(10)=tab$+"c"+tab$+tab$+"b"
+out$(11)=tab$+tab$+tab$+"b"
+out$(12)=tab$+"st"+tab$+tab$+"b"
+out$(13)=tab$+tab$+"Run Out"
+out$(14)=tab$+tab$+"Run Out"
+out$(15)=tab$+tab$+"Retired"
+out$(16)=tab$+tab$+"Hit Wicket"+tab$+"b"
+out$(17)=tab$+tab$+"Handled Ball"
+out$(18)=tab$+tab$+"lbw"+tab$+"b"
+out$(19)=tab$+tab$+"c+b"
+
+inst$(0)="							 SELECT BEGIN										 "
+inst$(1)="SELECT TEAM FROM BELOW LEFT TO BAT AND SELECT OK"
+inst$(2)="		SELECT BATSMEN FROM BELOW AND SELECT OK		 "
+inst$(3)="	SELECT BOWLER AND TOGGLE ENDS FOR NEXT OVER	 "
+inst$(4)="	 SELECT FUNCTION FROM RIGHT THEN SELECT OK		"
+inst$(5)="						SELECT NEW BATSMAN									"
+
+Function.s nth{n.w}
+	a$=Str$(n):If n>20 Then n=n MOD 10
+	Select n
+		Case 1:a$+"st"
+		Case 2:a$+"nd"
+		Case 3:a$+"rd"
+		Default:a$+"th"
+	End Select
+	Function Return a$
+End Function
+
+.initialise
+	For i=0 To 11:For j=0 To 1:team(j)\ba[i]=i:team(j)\bo[i]=i:Next:Next
+	batting=0:lastbowler=-1
+	Gosub readteam
+	Gosub setuppalette
+	Gosub setupscreen
+	Gosub setupdata
+	Gosub initevents
+	Gosub tryrestore
+	Gosub listplayers
+	Gosub drawoval
+	Gosub printevents
+	Gosub dostats
+	Gosub printstats
+	Gosub displayevent
+	Activate 1
+
+.main
+	;
+	Repeat
+		;
+		ev.l=WaitEvent
+		id=-1:If ev=$20 Then id=GadgetHit
+		;
+		If ev=$400000
+			a.l=SystemDate:time.w=Hours*60+Mins
+			t$=Right$(Str$(Hours+100),2)+":"
+			t$+Right$(Str$(Mins+100),2)+":"
+			t$+Right$(Str$(Secs+100),2)
+			WLocate 20,131:Print t$
+		EndIf
+		;
+;		If ev=$400
+;			rk=EventCode
+;			If rk=80 Then Gosub dumpdata
+;		EndIf
+		;
+		If id=200
+			If tc=3 Then End Else tc+1
+		EndIf
+		;
+		USEPATH entry(cmess)
+		;
+		If id=102 Then Gosub dismissals
+		;
+		If id=108 Then wagonman=\batter:Gosub wagonwheel
+		If id=109 Then wagonman=\partner:Gosub wagonwheel
+		If id=111 Then Gosub drawworm
+		;
+		If id=110 Then Gosub scrollview
+		;
+		If id=105
+;			\id=0:
+			cmess-1:lastbowler=-1:runs=\runs		 ;backup!
+			If \shot=4 Then runs=\extras ;simon was here
+			Gosub listplayers:Gosub dostats:Gosub printstats:Gosub drawoval
+		EndIf
+		;
+		If id=104																		;end of innings
+			If tc>2
+				\id=0:\message="END OF INNINGS"
+				\batting=1-\batting
+				Gosub initnextevent
+				\id=1
+				HideScreen 0
+				##[$FE1F] "execute rollover.script",0,0
+				ShowScreen 0
+				Gosub listplayers:Gosub printstats:lastbowler=-1
+			Else
+				tc+1
+			EndIf
+		EndIf
+		;
+		If (id>-1) AND (id<>200) AND (id<>104) Then tc=0
+		;
+		Select \id
+				;
+			Case 0:
+				If id=101 Then cmess=nxmess:nxmess+1:\id=1
+				;
+			Case 1:
+				If id=0 Then \batting=0
+				If id=20 Then \batting=1
+				If id=100 Then Gosub tobatok
+				;
+			Case 2:
+				If id>0 AND id<13 Then Gosub openingbatter
+				If id=100 Then Gosub openingbattersok
+				;
+			Case 3:
+				If id>20 AND id<33 Then \bowler=team(1-\batting)\bo[id-21]
+				If id=106 Then \whichend=1-\whichend
+				;
+				If id=112 AND \over>1						;extra ball!
+					*pm.entry=entry(cmess-1)
+					\id=4
+					\ball=*pm\ball+1
+					\whichend=1-\whichend
+					\over-1
+					currball=\ball:currover=\over:Gosub newball
+				EndIf
+				;
+				If id=100 Then bowl=\bowler:Gosub bowlerok
+				;
+			Case 4:
+				If id=107 Then Exchange \batter,\partner
+				If id>49 AND id<59				 ;1..9
+					\shot=id-49:\oshot=0:Activate 1
+					If \shot=4 OR \shot=5 OR \shot=6 Then runs=1
+					If \shot=7 OR \shot=9 Then If runs=4 Then runs=6 Else runs=4
+				EndIf
+				If id>59 AND id<70
+					oshot=\shot:\shot=id-50							;10..19
+					If \shot=12 OR \shot=13 OR \shot=14 Then \oshot=oshot Else \oshot=0
+					If \shot=14 Then \batterout=\partner Else \batterout=\batter
+				EndIf
+				If id>20 AND id<33
+					If \shot=10 OR \shot=12
+						\fielder=team(1-\batting)\bo[id-21]
+					EndIf
+				EndIf
+				If ev=$8 AND EventWindow=1 Then Gosub ovalclick
+				If id=100 Then Gosub ballok
+				;
+			Case 5:
+				If id>0 AND id<13 Then Gosub newbatter
+				If id=100 AND \newbatter>-1 Then Gosub newbatterok
+				;
+		End Select
+		;
+		If ev<>$400000 AND ev<>$10 AND id<>110 Then Gosub displayevent
+		;
+	Forever
+
+.tobatok:
+	USEPATH entry(cmess)
+	Gosub listplayers
+	Gosub initnextevent:\id=2:\batter=1:\partner=0
+	Return
+
+.newbatter:
+	USEPATH entry(cmess)
+	bat=team(batting)\ba[id-1]
+	If team(batting)\bat[bat]\status=1 OR team(batting)\bat[bat]\status>2 Then BeepScreen 0:Return
+	\newbatter=bat
+	Return
+
+.newbatterok:
+	USEPATH entry(cmess)
+	shot=\oshot
+	If \batter=\batterout Then \batter=\newbatter Else \partner=\newbatter
+	Gosub sortbatters
+	Gosub initnextevent
+	If shot<>3 AND shot<>4 AND shot<>8 AND shot<>9 Then \ball+1
+	If \ball>5 Then \id=3:\ball=0:\whichend=1-\whichend:\over+1 Else \id=4
+	currball=\ball:currover=\over
+	Gosub newball
+	Return
+
+.openingbattersok:
+	USEPATH entry(cmess)
+	If \batter=\partner Then BeepScreen 0:Return
+	Gosub sortbatters
+	Gosub initnextevent:\id=3:\over=0:\ball=0
+	currball=\ball:currover=\over
+	Gosub printstats
+	Return
+
+.bowlerok:											 ;insert
+	USEPATH team(1-batting)
+	If bowl=lastbowler Then BeepScreen 0:Return
+	i=-1:Repeat:i+1:Until \bo[i]=bowl:j=i:i=0
+	If i<j
+		Repeat
+			If \bowl[\bo[i]]\overs=0 AND \bowl[\bo[i]]\balls=0
+				Exchange \bo[i],\bo[j]:j=i
+			Else
+				i+1 ;=j
+			EndIf
+		Until i=j
+	EndIf
+
+;	i=-1:Repeat:i+1:Until \bo[i]=bowl:j=i
+;	If i>0
+;		Repeat
+;			i-1
+;			If \bowl[\bo[i]]\overs=0 AND \bowl[\bo[i]]\balls=0
+;				Exchange \bo[i],\bo[j]:j=i
+;			Else
+;				i=0
+;			EndIf
+;		Until i=0
+;	EndIf
+
+
+	USEPATH entry(cmess)
+	Gosub listplayers
+	Gosub initnextevent
+	\id=4:Exchange \batter,\partner
+	lastbowler=bowl
+	;
+	Gosub printstats
+	Gosub makefiles
+	;
+	Return
+
+.ballok:
+	USEPATH entry(cmess)
+	If \shot=0 Then BeepScreen 0:Return								 ;notplayed shot
+	If \shot=10 OR \shot=12														 ;no fielder entered
+		If \fielder=-1 Then BeepScreen 0:Return
+	EndIf
+	batterout=\batterout:shot=\shot:odd=(\runs OR \extras) AND 1
+	WLocate 0,0:Print batterout
+	If \shot=4 AND \extras=1 Then odd=0
+	Gosub initnextevent
+	If shot<10
+		If shot<>3 AND shot<>4 AND shot<>8 AND shot<>9 Then \ball+1
+		If odd Then Exchange \batter,\partner
+		If \ball>5 Then \id=3:\ball=0:\whichend=1-\whichend:\over+1 Else \id=4
+	Else
+		\id=5:\newbatter=-1:\batterout=batterout
+	EndIf
+	currball=\ball:currover=\over
+	Gosub newball
+	;
+	Gosub dostats:Gosub printstats
+	;
+	Return
+
+.initnextevent
+	USEPATH entry(cmess)
+	;
+	*nx.entry=entry(cmess+1)
+	;
+	If (cmess+1)<nxmess
+		*nx\whichend=\whichend,\over,\ball
+		*nx\batter=\batter,\partner
+		If *nx\id<>3 Then *nx\bowler=\bowler
+;		*nx\batterout=\batterout
+		cmess+1:runs=\runs:If \shot=4 Then runs=\extras ;simon was here
+	Else
+		currover=\over:currball=\ball:\time=time
+		If *nx\id=0
+			*nx\batting=\batting,\batter,\partner,\bowler,\whichend,\over,\ball
+			*nx\shot=0,0,0,0,0,0,0
+			*nx\fielder=-1
+			*nx\batterout=\batterout
+			*nx\time=time
+			runs=0
+		EndIf
+		cmess+1:nxmess+1
+	EndIf
+	;
+	Return
+
+.newball:
+	Gosub dostats
+	Gosub printstats
+	Gosub makescoreticks
+	Gosub makefiles
+	Gosub backup
+	Return
+
+.displayevent:
+	USEPATH entry(cmess)
+	WLocate 6,87:Print inst$(\id)
+	Select \id
+		Case 0
+			\message="WAITING TO COMMENCE PLAY"
+		Case 1
+			\message="TEAM TO BAT IS "+team(\batting)\teamname
+		Case 2
+			t$=team(\batting)\name[\batter]+" AND "
+			t$+team(\batting)\name[\partner]
+			\message="NEW BATSMEN ARE "+t$
+		Case 3
+			t$="OVER#"+Str$(\over+1)+":"
+			t$+team(1-\batting)\name[\bowler]
+			\message=t$+" IS BOWLING FROM "+ends$(\whichend)
+			Gosub drawoval
+		Case 4
+			t$=team(\batting)\name[\batter]
+			u$=team(\batting)\name[\partner]
+			;
+			g$=" BALL#"+Str$(\ball+1)+":"
+			g$+shot$(\shot)
+			g$=Replace$(g$,"*",t$)
+			g$=Replace$(g$,"&",u$)
+			;
+			If \fielder>-1
+				t$=team(1-\batting)\name[\fielder]
+				g$=Replace$(g$,"?",t$)
+			EndIf
+			;
+			If \oshot=0 Then \runs=0:\extras=0
+			Select \shot
+				Case 2:\runs=runs:\extras=0
+				Case 3:\runs=0:\extras=2+runs				;If runs<3 Then \extras=2 Else \extras=run ;noball
+				Case 4:\runs=0:\extras=runs					;wide
+				Case 5:\runs=0:\extras=runs
+				Case 6:\runs=0:\extras=runs
+				Case 7:\runs=runs:\extras=0
+				Case 8:\runs=runs:\extras=2
+				Case 9:\runs=runs:\extras=2
+			End Select
+			;
+			If \oshot=0
+				If \runs Then g$+" "+Str$(\runs)+" RUNS"
+				If \extras Then g$+" "+Str$(\extras)+" EXTRAS"
+			Else
+				g$+"("+Str$(\runs)+"+"+Str$(\extras)+")"
+			EndIf
+			;
+			\message=g$
+			;
+			Gosub updateoval
+			Gosub makescoreticks			 ;every display
+			;
+		Case 5
+			t$="?"
+			If \newbatter>-1Then t$=team(\batting)\name[\newbatter]
+			\message="	NEW BATSMAN IS "+t$
+	End Select
+	Gosub printevents
+	Return
+
+.openingbatter:
+	USEPATH entry(cmess)
+	bat=id-1
+	If bat=\batter OR bat=\partner
+		Exchange \batter,\partner
+	Else
+		\batter=\partner:\partner=bat
+	EndIf
+	Return
+
+.ovalclick:
+	USEPATH entry(cmess)
+	If EMouseX<0 OR EMouseX>191 OR EMouseY<0 OR EMouseY>109 Then Return
+	Use Window 1
+	x=QLimit(EMouseX-4,0,184):y=QLimit(EMouseY-4,0,102)
+	If \whichend=0
+		ex=94:ey=34:\wx=x-ex:\wy=y-ey
+	Else
+		ex=94:ey=34+21:\wx=x-ex:\wy=ey-y
+	EndIf
+	If (\shot>1 AND \shot<7) OR \shot=8
+		mb=MButtons
+		If mb=1 Then runs=QLimit(runs+1,0,9)
+		If mb=2 Then runs=QLimit(runs-1,0,9)
+	EndIf
+	If \shot<2 Then \shot=2
+	Gosub updateoval
+	Activate 1
+	Use Window 0
+	Return
+
+.updateoval:
+	USEPATH entry(cmess)
+	ShapesBitMap 0,1
+	If \shot>1 AND \shot<10
+		If \whichend=0
+			ex=94:ey=34:x=ex+\wx:y=ey+\wy
+		Else
+			ex=94:ey=34+21:x=ex+\wx:y=ey-\wy
+		EndIf
+		Use BitMap 1:BitMapOutput 1
+		Line ex,ey,x,y,1:Locate x/8,y/8:Print runs
+	EndIf
+	BitMaptoWindow 1,1
+	WindowOutput 0
+	Return
+
+.drawoval:
+	ends=entry(cmess)\whichend
+	Use BitMap 0:BlockScroll 3
+	Circlef 95,46,80,45,4
+	Boxf 95-10,46-12,95+10,46+12,5
+	ex=94:ey=34+ends*21
+	For x=-1 To 1:Boxf ex+x*6,ey,ex+2+x*6,ey+1,1:Next
+	ShapesBitMap 0,1:BitMaptoWindow 1,1
+	Return
+
+.sortbatters:
+	USEPATH entry(cmess)
+	ba=\partner:Gosub movehim
+	ba=\batter:Gosub movehim
+	Gosub listplayers
+	Return
+
+movehim:
+	USEPATH team(batting)
+	i=-1:Repeat:i+1:Until \ba[i]=ba:j=i
+	If i>0
+		Repeat
+			i-1
+			If \bat[\ba[i]]\status=0 Then Exchange \ba[i],\ba[j]:j=i Else i=0
+								;was \ballsfaced=0
+		Until i=0
+	EndIf
+	Return
+
+.listplayers
+	USEPATH team(batting)
+	batting=entry(cmess)\batting:bowling=1-batting
+	For i=0 To 11
+		##[$C622] 0,i+1,LSet$(\name[\ba[i]],12):Redraw 0,i+1
+	Next
+	USEPATH team(bowling)
+	For i=0 To 11
+		##[$C622] 0,i+21,LSet$(\name[\bo[i]],12):Redraw 0,i+21
+	Next
+	Return
+
+.setupscreen
+	;
+	Screen 0,0,0,736,283,3,$8000,"HELLO",1,2:FadePalette 0
+	;
+	USEPATH team(x)
+	;
+	For x=0 To 1
+		t$="("+LSet$(\teamabbrev,2)+")"
+		TextGadget 0,6+x*56,155,0,x*20,t$
+		For i=0 To 11
+			TextGadget 0,x*262+120,i*12+137,0,x*20+i+1,LSet$(\name[i],12)
+		Next
+	Next
+	;
+	Restore funcs:id=50
+	For x=0 To 1
+		For i=0 To 9
+			Read a$:a$=LSet$(a$,7):m=0;:If id>52 AND id<60 Then m=1
+			TextGadget 0,598+x*68,3+i*12,m,id,a$:id+1
+		Next
+	Next
+	;
+	TextGadget 0,544,105,0,100, " OK "				;546,106
+
+	TextGadget 0,464,99,0,105, " BACKUP "
+	TextGadget 0,464,112,0,112,"XTRABALL"		;442
+	;
+	TextGadget 0,6,142,0,101,"	 BEGIN	 "
+	;
+
+
+	TextGadget 0,6,227,0,104,"END INNINGS"
+;	TextGadget 0,6,226,0,105,"	BACK UP	"
+	;
+	TextGadget 0,398,099,0,106,"SWAPEND"
+	TextGadget 0,398,112,0,107,"SWAPBAT"		;442
+	;
+;	TextGadget 0,470,099,0,111,"PAD BALL"
+;	TextGadget 0,488,112,0,112,"EXTRA BALL"		;442
+	;
+	TextGadget 0,6,170,0,102,"DISMISSSALS"
+	;
+	TextGadget 0,6,184,0,108,"WAG BATTER "
+	TextGadget 0,6,198,0,109,"WAG PARTNER"
+	TextGadget 0,6,211,0,111," DRAW WORM "
+	;
+	PropGadget 0,0,0,$80,110,12,84 ;96
+	;
+	TextGadget 0,6,268,0,200,"	 QUIT		"
+	;
+	StringGadget 0,6,240,0,120,4,32
+	StringGadget 0,6,254,0,121,4,32
+	;
+	AddIDCMP $400010
+	;
+	Window 0,0,0,736,283,$1800,"",1,2,0:MenusOff
+	;
+	ResetString 398,99,188,25		 ;436
+	;
+	ResetString 18,2,370,80
+	ResetString 4,87,384,7
+	;
+	ResetString 398,2,189,92
+	ResetString 598,2,132,122
+	ResetString 4,129,102,152
+	ResetString 118,129,250,152
+	ResetString 380,129,350,152
+	;
+;	GadgetBorder 494,223,232,56
+	;
+	ResetString 10,131,88,7
+	;
+	WLocate 138,129:Print "BATTERS"
+	WLocate 414,129:Print "BOWLERS"
+	;
+	WLocate 50,243:Print "RUNS"
+	WLocate 50,257:Print "OVERS"
+	;
+	Window 1,397,1,192,94,$800,"",1,2:MenusOff
+	BitMap 0,192,94,3:BitMap 1,192,94,3
+	;
+	BitMap 2,736,566,4
+	BitMap 3,736,566,4
+	BitMap 4,736,566,4
+	;
+	LoadBitMap 2,"oval.iff",1
+	LoadBitMap 4,"worm.iff",2
+	;
+	Return
+
+.funcs:
+	Data.s 5BOVER,HITS,NBnobat,WIDE,BYE,LEGBYE,BOUNDRY,NBbat,NBbound,
+	Data.s CAUGHT,BOWLED,STUMPED,BRUNOUT,PRUNOUT,RETIRED,HITWICKET,HANDLEDBALL,LBW,C&B
+
+.setuppalette
+	StopCycle 0,0,8,8,8:StopCycle 0,1,15,15,15:StopCycle 0,2,0,0,0:StopCycle 0,3,4,8,12
+	StopCycle 0,4,4,12,4:StopCycle 0,5,0,8,0:StopCycle 0,6,8,4,12:StopCycle 0,7,15,15,8
+	Return
+
+.readteam
+	If WriteMem(0,"teams")
+		FileInput 0
+		USEPATH team(i)
+		For i=0 To 1
+			\teamname=Edit$(80)
+			\teamabbrev=Edit$(80)
+			For j=0 To 11:\lame[j]=Edit$(80):\name[j]=Edit$(80):Next
+		Next
+		CloseFile 0
+	Else
+		NPrint "Couldn't Open Team File!":End
+	EndIf
+	Return
+
+.initevents:
+	Restore header
+	For i=0 To 7:Read entry(i)\message:Next
+	nxmess=9:cmess=8:Return
+
+.scrollview:
+	Use Window 0:WindowOutput 0
+	Repeat
+		hh=nxmess-9:If hh<0 Then hh=0
+		moff=QLimit(VPropPot(0,110)*(hh+1),0,hh)
+		Gosub printevents2
+		ev.l=WaitEvent
+	Until ev=$40
+	Return
+
+.printevents:
+	;
+	Use Window 0:WindowOutput 0
+	moff=QLimit(cmess-8,0,4096)
+	SetVProp 0,110,cmess/(nxmess-1),9/nxmess:Redraw 0,110
+	If (cmess+1)<nxmess Then moff+1
+	;
+printevents2:
+	;
+	For i=0 To 8
+		ii=moff+i:If ii=cmess Then col=1 Else col=7
+		WColour col:WLocate 20,2+i*9:Print LSet$(entry(ii)\message,46)
+	Next
+	WColour 1,0
+	Return
+
+.header ;46 chars wide
+	Data.s "			 SKY CRICKET STATISTICS SOFTWARE				"
+	Data.s "																							"
+	Data.s "							 V1.1 6/12/94									 "
+	Data.s "																							"
+	Data.s "		(C)1994 ARMSTRONG COMMUNICATIONS LTD			"
+	Data.s "																							"
+	Data.s "					 MAY THE BEST TEAM WIN							"
+	Data.s "																							"
+
+.backup
+	;
+	##[$FE1F] "delete backup.3",0,0
+	##[$FE1F] "rename backup.2 backup.3",0,0
+	##[$FE1F] "rename backup.1 backup.2",0,0
+	##[$FE1F] "rename backup.0 backup.1",0,0
+	;
+	If ReadMem(0,"backup.0")
+		FileOutput 0
+		For i=0 To 1:Exists 0,&team(i)\ba[0],48:Next
+		For i=0 To cmess
+			NPrint entry(i)\message
+			Exists 0,&entry(i)\id,SizeOf .entry-4
+		Next
+		CloseFile 0
+	EndIf
+	WindowOutput 0
+	Return
+
+.tryrestore
+	USEPATH entry(cmess)
+	If WriteMem(0,"backup.0")
+		FileInput 0:i=0
+		For i=0 To 1:##[$BE14] 0,&team(i)\ba[0],48:Next
+		i=0
+		While NOT DosBuffLen(0)
+			entry(i)\message=Edit$(128)
+			##[$BE14] 0,&entry(i)\id,SizeOf .entry-4
+			i+1
+		Wend
+		CloseFile 0
+		WindowInput 0
+		nxmess=i:cmess=i-1
+		currball=\ball:currover=\over:runs=\runs+\extras
+	EndIf
+	Return
+
+;---------------------------------------------------------------------
+
+Macro p 368+`1+`2+`2,243+`1-`2/2-`3:End Macro
+Macro px 368+`1+`2+`2:End Macro
+Macro py 243+`1-`2/2-`3:End Macro
+
+.wagonwheel:						 ;wagonman=player
+	;
+	Screen 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 1
+	ShapesBitMap 2,3:Use BitMap 3
+	;
+	USEPATH entry(i)
+	;
+	For i=0 To 1023
+		If \batting=batting
+			If \batter=wagonman AND \shot<10 AND \runs>0
+				xx=\wx
+				yy=\wy
+				xx=128*xx/80
+				yy=160*yy/45
+				;
+				ll=Tan(xx*xx+yy*yy)
+				If ll>0 Then xx=xx*3/ll:yy=yy*3/ll
+				txx=0:tyy=-30
+				For j=0 To ll Step 3
+					 If (\shot=7 OR \shot=9) AND \runs=6
+						 zz=HSin(Pi*j/ll)*64
+						 px=!px{txx,tyy,zz}
+						 py=!py{txx,tyy,zz}
+						 cc=7
+					 Else
+						 px=!px{txx,tyy,0}
+						 py=!py{txx,tyy,0}
+						 cc=5:If (\shot=7 OR \shot=9) AND \runs=4 Then cc=6
+					 EndIf
+					 ;
+					 p=Cls(px,py):If p=9 OR p=10 Then Point px,py,cc:px+1
+					 p=Cls(px,py):If p=9 OR p=10 Then Point px,py,cc:py+1
+					 p=Cls(px,py):If p=9 OR p=10 Then Point px,py,cc:px-1
+					 p=Cls(px,py):If p=9 OR p=10 Then Point px,py,cc
+					 ;
+					 txx-xx:tyy+yy
+				Next
+			EndIf
+		EndIf
+	Next
+	SaveBitmap 3,"ram:waggonwheel.iff"
+	VWait 100
+	CloseScreen 1
+	Use BitMap 0
+	Return
+
+.drawworm:
+	Screen 1,0,0,736,566,4,$8004,"",1,2,3:Use SetCycle 2
+	ShapesBitMap 4,3:Use BitMap 3
+	;
+	USEPATH entry(i)
+	;
+	cbat=-1
+	;
+	For i=0 To 1023
+		If \id>2
+			If \batting<>cbat																		 ;new team
+				cbat=\batting:x0=192:y0=420:cc=6+\batting
+				wover=0:wscore=0:wwick=0
+			EndIf
+			If \over=wover
+				If \id=4
+					wscore+\runs+\extras:If \shot>9 Then wwick+1
+				EndIf
+			Else
+				wover=\over
+				x1=192+wover*496/50-2
+				y1=420-wscore*1.5
+				For j=0 To 7:Line x0,y0-j,x1,y1-j,cc:Next
+				hx=x1-5:hy=(y0+y1)/2+5
+				x0=x1+1:y0=y1:
+				For j=1 To wwick
+					Circlef hx,hy-j*10,5,7
+					Circle	hx,hy-j*10,5,2
+					Circle	hx,hy-j*10-1,5,2
+				Next
+				wwick=0
+			EndIf
+		EndIf
+	Next
+	;
+	SaveBitmap 3,"ram:wormgraph.iff"
+	VWait 100
+	CloseScreen 1
+	Use BitMap 0
+	Return
+
+.printstats
+	;
+	mb0=-1:mb1=-1:mb2=-1
+	If entry(cmess)\id>0
+		mb0=entry(cmess)\batter
+		mb1=entry(cmess)\partner
+		mb2=entry(cmess)\bowler
+	EndIf
+	;
+	Use Window 0:WindowOutput 0
+	;
+	USEPATH team(batting)\bat[j]
+	WColour 1:WLocate 230,129:Print "	R	 B	4	6	 M"
+	For i=0 To 11
+		j=team(batting)\ba[i]
+		If \minutes>0 OR j=mb0 OR j=mb1				;was ballsfaced
+			t$=RSet$(Str$(\runs),3)+" "
+			t$+RSet$(Str$(\ballsfaced),3)+" "
+			t$+RSet$(Str$(\fours),2)+" "
+			t$+RSet$(Str$(\sixes),2)+" "
+			t$+RSet$(Str$(\minutes),3)
+		Else
+			t$=String$(" ",17)
+		EndIf
+		WColour 2:If j=mb0 OR j=mb1 Then WColour 7
+		WLocate 230,139+i*12:Print t$
+	Next
+	;
+	USEPATH team(1-batting)\bowl[j]
+	WColour 1:WLocate 492,129:Print " O	B M	 R	W	X nb	b lb	w "
+	For i=0 To 11
+		j=team(1-batting)\bo[i]
+		If \overs<>0 OR \balls<>0 OR j=mb2
+			t$=RSet$(Str$(\overs),2)+" "
+			t$+RSet$(Str$(\balls),2)+" "
+			t$+RSet$(Str$(\maidens),1)+" "
+			t$+RSet$(Str$(\runsallowed),3)+" "
+			t$+RSet$(Str$(\wickets),2)+" "
+			t$+RSet$(Str$(\extras),2)+" "
+			t$+RSet$(Str$(\noballs),2)+" "
+			t$+RSet$(Str$(\byes),2)+" "
+			t$+RSet$(Str$(\legbyes),2)+" "
+			t$+RSet$(Str$(\wides),2)+" "
+		Else
+			t$=String$(" ",29)
+		EndIf
+		WColour 2:If j=mb2 Then WColour 7
+		WLocate 492,139+i*12:Print t$
+	Next
+	;
+	; do onscreen stats display
+	;
+	WColour 2
+	;
+	USEPATH team(batting)
+	;
+	rrr.q=\runs*6
+	bbb.q=currover*6+currball
+	If bbb>0 Then rrr/bbb Else rrr=0
+	rrr*100:rrr$=Str$(Int(rrr))
+	rrr$=UnLeft$(rrr$,2)+"."+Right$(rrr$,2)
+	;
+	t$="("+\teamabbrev+") ":t$+Str$(\runs+\extras)+"-"+Str$(\wickets)+" "
+	u$=nth{currover+1}:t$+u$+" OVER ":t$+"RR="+rrr$+" ":t$+"PT="+ppp$
+	WLocate 0,99:Print LSet$(t$,49)
+	;
+	USEPATH team(1-batting)
+	t$="("+\teamabbrev+") ":t$+Str$(\runs+\extras)+"-"+Str$(\wickets)+" "
+	t$+"COMPARISON:"+Str$(\cscore)+"-"+Str$(\cwickets)+"	"
+	WLocate 0,108:Print LSet$(t$,49)
+	;
+	WLocate 0,117:Print LSet$(eee$,49)
+	;
+	WColour 1
+	;
+	Return
+
+.dostats:							 ;set currover for
+	;
+	USEPATH entry(i)
+	;
+	For i=0 To 1
+		team(i)\runs=0,0,0,0						 ;runs,extras,wickets,partnership
+		team(i)\byes=0,0,0,0						 ;byes,lbyes,noballs,wides
+		For j=0 To 11:team(i)\fall[j]=-1:Next
+		For j=0 To 11
+			team(i)\bat[j]\ballsfaced=0,0,0,0,0,0,0,0,0,0,0,0
+			team(i)\bowl[j]\overs=0,0,0,0,0,0,0,0,0,0
+		Next
+	Next
+	;
+	maidin=False:*bo.bowler=0:*b.side=0
+	;
+	For i=0 To cmess		;1023
+		;
+		If *bo<>0 AND (\id=3 OR \id=1)	;if new innings
+			*bo\balls=0
+			*bo\overs+1
+			If maidin Then *bo\maidens+1
+			*bo=0
+		EndIf
+		;
+		Select \id
+			;
+			Case 1:																		 ;innings
+				If *b<>0
+					;
+					For j=0 To 11
+						If *b\bat[j]\minutes<0
+							*b\bat[j]\minutes+\time
+							If *b\bat[j]\minutes=0 Then *b\bat[j]\minutes=1
+						EndIf
+					Next
+					;
+					targetruns=*b\runs+*b\extras+1:targetovers=50
+					gt=Val(GadgetPens(0,120)):If gt>0 Then targetruns=gt
+					gt=Val(GadgetPens(0,121)):If gt>0 Then targetovers=gt
+					ButtonId 0,120,Str$(targetruns):Redraw 0,120
+					ButtonId 0,121,Str$(targetovers):Redraw 0,121
+					;
+				EndIf
+				*b.side=team(\batting)
+				*f.side=team(1-\batting)
+				fall=0
+				*b\partnership=0
+				subruns=0
+			Case 3:																		 ;over
+				maidin=1:*bo=*f\bowl[\bowler]
+			Case 4:
+				;
+				*ba.batter=*b\bat[\batter]								;whos who
+				*pa.batter=*b\bat[\partner]
+				*ba\status=1
+				*pa\status=1
+				;
+				If *ba\minutes=0 Then *ba\minutes=-\time	;the time mr wolf
+				If *pa\minutes=0 Then *pa\minutes=-\time
+				;
+				If *ba\minutes>0 Then *ba\minutes-\time	;the time mr wolf
+				If *pa\minutes>0 Then *pa\minutes-\time
+				;
+				If \shot>1				 ;it IS a ball
+					;
+					*ba\ballsfaced+1
+					*ba\runs+\runs
+					;
+					If (\over=currover-5 AND \ball>=currball) OR (\over>currover-5)
+						subruns+\runs+\extras
+					EndIf
+					;
+				EndIf
+				;
+				shot=\shot:If shot>9 Then shot=\oshot
+				;
+				If shot>1 AND shot<10
+					;
+					*ba\pballs+1									;partnership stats
+					*ba\pruns+\runs
+					*b\partnership+\runs+\extras
+					;
+					If shot=7 Then If \runs=4 Then *ba\fours+1 Else *ba\sixes+1
+					If shot=9 Then If \runs=4 Then *ba\fours+1 Else *ba\sixes+1
+					;
+					*b\runs+\runs
+					*b\extras+\extras
+					*bo\runsallowed+\runs
+					;
+					If (shot<>5) AND (shot<>6)
+						*bo\runsallowed+\extras
+						If \extras>0 Then maidin=0 ;only bowlers fault extras cause maidins
+					EndIf
+					;
+					*bo\extras+\extras
+					;
+					If shot=3 OR shot=8 OR shot=9
+						*bo\noballs+1:*f\noballs+\extras
+					EndIf
+					;
+					If shot=4 Then *bo\wides+1:*f\wides+\extras
+					If shot=5 Then *bo\byes+1:*f\byes+\extras
+					If shot=6 Then *bo\legbyes+1:*f\legbyes+\extras
+					;
+					If \runs>0 Then maidin=0
+					If mcludge=1 AND \extras>0 Then maidin=0 ;maidin broken for byes&legbyes
+					;
+				EndIf
+				;
+				If \shot>9
+					;
+					*ba\pballs=0,0:*pa\pballs=0,0:*b\partnership=0
+					;
+					*ba.batter=*b\bat[\batterout] ;use batterout
+					;
+					*ba\status=\shot
+					*ba\bowler=\bowler
+					*ba\fielder=\fielder
+					*ba\minutes+\time:If *ba\minutes=0 Then *ba\minutes=1
+					;
+					If \shot<>15									;not retired
+						*b\wickets+1
+						If (\shot<>13) AND (\shot<>14) Then *bo\wickets+1
+						*f\fall[fall]=*b\runs+*b\extras
+						fall+1
+						;
+						*ba\disscore=*b\runs+*b\extras
+						*ba\diswicket=*b\wickets
+						;
+					Else
+						*ba\status=2								;status=not out
+					EndIf
+					;
+				EndIf
+				;
+				If \over=currover AND \ball=currball
+					*b\cscore=*b\runs+*b\extras
+					*b\cwickets=*b\wickets
+				EndIf
+				;
+				*bo\balls=\ball				;:If \ball=0 Then *bo\balls=1
+				;
+		End Select
+	Next
+	;
+	If *b<>0				 ;update notout batters minutes on crease
+		For j=0 To 11
+			If *b\bat[j]\minutes<0
+				*b\bat[j]\minutes+time
+				If *b\bat[j]\minutes=0 Then *b\bat[j]\minutes=1
+			EndIf
+		Next
+	EndIf
+	;
+	Return
+
+;ScoreTick1.TXT
+;<<ND 225-9>>
+;<<49th Over>>
+
+;ScoreTick2.TXT
+;<<ND 225-9>>
+;<<49th Over>>
+;<<CD 270-7>>
+
+.makescoreticks:
+	USEPATH team(batting)
+	;
+	adjust=entry(cmess)\runs+entry(cmess)\extras
+	;
+	t1$=\teamabbrev+" "+Str$(\runs+\extras+adjust)+"-"+Str$(\wickets)
+	t2$=nth{currover+1}:t2$+" Over"
+	USEPATH team(1-batting)
+	t3$=\teamabbrev+" "+Str$(\runs+\extras)+"-"+Str$(\wickets)
+	If ReadMem(0,"ram:scoretick1.txt")
+		FileOutput 0
+		NPrint t1$+Chr$(13):NPrint t2$+Chr$(13)
+		CloseFile 0
+	EndIf
+	If ReadMem(0,"ram:scoretick2.txt")
+		FileOutput 0
+		NPrint t1$+Chr$(13):NPrint t2$+Chr$(13):NPrint t3$+Chr$(13)
+		CloseFile 0
+	EndIf
+	WindowOutput 0
+	Return
+
+;AllBowlersBL.TXT
+;BatsmanInBL.TXT
+;BatsmanOutBL.TXT
+;Batting Scorecard.TXT
+;BowlerBL.TXT
+;BowlingScorecard.TXT
+;ComparisonBL.TXT
+;Equation+BL.TXT
+;EquationBL.TXT
+;PartnershipBL.TXT
+;StandardScoreBL.TXT
+
+;--------------------------------------------------------------------------------------
+
+.makefiles:
+	;
+	;AllBowlersBL.TXT
+	;
+	;<<MORRISON>>
+	;<t><<^^3<t>2<t>^26<t>1>>
+	;
+	USEPATH team(1-batting)\bowl[j]
+	;
+	cubo=entry(cmess)\bowler
+	;
+	If ReadMem(0,"ram:allbowlersbl.txt")
+		FileOutput 0
+		For i=0 To 11
+			j=team(1-batting)\bo[i]
+			If (\overs<>0) OR (\balls<>0) OR j=cubo
+				NPrint team(1-batting)\name[j]+Chr$(13)
+				t$=Chr$(9)
+				If \balls=0 Then t$+RSet$(Str$(\overs),3) Else t$+Str$(\overs)+"."+Str$(\balls)
+				If \balls=0 AND j=cubo Then t$+"."
+				t$+Chr$(9)+Str$(\maidens)+Chr$(9)+RSet$(Str$(\runsallowed),3)+Chr$(9)+Str$(\wickets)
+				NPrint t$+Chr$(13)
+			EndIf
+		Next
+		CloseFile 0
+	EndIf
+	;
+	;BatsmanInBL.TXT
+	;
+	;<<McSWEENEY>>
+	;<<88>>
+	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
+	;
+	USEPATH team(batting)\bat[j]
+	;
+	If ReadMem(0,"ram:batsmaninbl.txt")
+		FileOutput 0
+		j=entry(cmess)\batter
+		NPrint team(batting)\name[j]+Chr$(13)
+		NPrint Str$(\runs)+Chr$(13)
+		;
+		t$=Str$(\fours)+" FOUR":If \fours<>1 Then t$+"S"
+		t$+"	 "+Str$(\sixes)+" SIX":If \sixes<>1 Then t$+"ES"
+		t$+"	 "+Str$(\minutes)+" MIN":If \minutes<>1 Then t$+"S"
+		t$+"	 "+Str$(\ballsfaced)+" BALL":If \ballsfaced<>1 Then t$+"S"
+		NPrint t$+Chr$(13)
+		;
+		CloseFile 0
+	EndIf
+	;
+	;PartnerInBL.TXT
+	;
+	;<<McSWEENEY>>
+	;<<88>>
+	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
+	;
+	USEPATH team(batting)\bat[j]
+	;
+	If ReadMem(0,"ram:partnerbl.txt")
+		FileOutput 0
+		j=entry(cmess)\partner
+		NPrint team(batting)\name[j]+Chr$(13)
+		NPrint Str$(\runs)+Chr$(13)
+		;
+		t$=Str$(\fours)+" FOUR":If \fours<>1 Then t$+"S"
+		t$+"	 "+Str$(\sixes)+" SIX":If \sixes<>1 Then t$+"ES"
+		t$+"	 "+Str$(\minutes)+" MIN":If \minutes<>1 Then t$+"S"
+		t$+"	 "+Str$(\ballsfaced)+" BALL":If \ballsfaced<>1 Then t$+"S"
+		NPrint t$+Chr$(13)
+		;
+		CloseFile 0
+	EndIf
+	;
+	;BatsmanOutBL.TXT
+	;
+	;<<McSWEENEY>>
+	;<<88>>
+	;<t><<ST Robertson	b Hartshorne>>
+	;<<3 FOURS	 2 SIXES	 222 MINS	 122 BALLS>>
+	;<<225-9>>	--- Pad score here as ^5-9^, then ^55-9, then 225-9
+	;
+	USEPATH team(batting)\bat[j]
+	*f.side=team(1-batting)
+	;
+	If ReadMem(0,"ram:batsmanoutbl.txt")
+		FileOutput 0
+		j=entry(cmess)\batterout
+		NPrint team(batting)\name[j]+Chr$(13)
+		NPrint Str$(\runs)+Chr$(13)
+		Select \status
+			Case 10:t$="c "+*f\lame[\fielder]+"	b "+*f\lame[\bowler]
+			Case 11:t$="b "+*f\lame[\bowler]
+			Case 12:t$="st "+*f\lame[\fielder]+"	b "+*f\lame[\bowler]
+			Case 13:t$="Run Out"
+			Case 14:t$="Run Out"
+			Case 15:t$="Retired"
+			Case 16:t$="HitWicket		b "+*f\lame[\bowler]
+			Case 17:t$="Handled Ball"
+			Case 18:t$="lbw		b "+*f\lame[\bowler]
+			Case 19:t$="c+b "+tab$+*f\lame[\bowler]
+			Default:t$="Not Out"
+		End Select
+		NPrint tab$+t$+Chr$(13)
+		;
+		t$=Str$(\fours)+" FOUR":If \fours<>1 Then t$+"S"
+		t$+"	 "+Str$(\sixes)+" SIX":If \sixes<>1 Then t$+"ES"
+		t$+"	 "+Str$(\minutes)+" MIN":If \minutes<>1 Then t$+"S"
+		t$+"	 "+Str$(\ballsfaced)+" BALL":If \ballsfaced<>1 Then t$+"S"
+		NPrint t$+Chr$(13)
+		;
+		t$=team(batting)\teamabbrev+" "+Str$(\disscore)+"-"+Str$(\diswicket)
+		NPrint t$+Chr$(13)
+		CloseFile 0
+	EndIf
+	;
+	;Batting Scorecard.TXT
+	;
+	;<<NORTHERN DISTRICTS>>
+	;<<BATSMAN1>>
+	;<<BATSMAN2>>
+	;<<BATSMAN3>>
+	;<<BATSMAN4>>
+	;<<BATSMAN5>>
+	;<<BATSMAN6>>
+	;<<BATSMAN7>>
+	;<<BATSMAN8>>
+	;<<BATSMAN9>>
+	;<<BATSMAN10>>
+	;<<BATSMAN11>>
+	;
+	USEPATH team(batting)\bat[j]
+	*f.side=team(1-batting)
+	;
+	If ReadMem(0,"ram:batting scorecard.txt")
+		FileOutput 0
+		;
+		NPrint team(batting)\teamname+Chr$(13)
+		;
+		For i=0 To 10
+			j=team(batting)\ba[i]:NPrint team(batting)\name[j]+Chr$(13)
+		Next
+		;
+		;<t><t>NOT Out<t><t><t>^88<t>^(64)						yellow
+		;<t><t><t>b
+		;<t>c<t><t>b
+		;<t>ST<t><t>b
+		;<t><t>lbw<t>b
+		;<t><t>NOT Out<t><t><t>^44<t>^(44)
+		;
+		For i=0 To 10
+			j=team(batting)\ba[i]
+			t$=out$(\status)
+			If \status=1 OR \status=2
+				t$+RSet$(Str$(\runs),3)+Chr$(9)+"("+Str$(\ballsfaced)+")"
+			EndIf
+			NPrint t$+Chr$(13)
+		Next
+		;
+		;<t><t><t><t>Kuggeleijn<t>^10<t>^(10)
+		;<t><t>Kuggeleijn<t><t>Wilson<t>^^0<t>^^(1)
+		;<t><t>Wilson<t><t>Walker<t>^22<t>^(14)
+		;<t><t><t><t>Mallendar<t>^^8<t>^^(7)
+		;
+		For i=0 To 10
+			j=team(batting)\ba[i]
+			t$=""
+			If \status>9
+				Select \status
+					Case 10:t$=tab$+tab$+*f\lame[\fielder]+tab$+tab$+*f\lame[\bowler]
+					Case 12:t$=tab$+tab$+*f\lame[\fielder]+tab$+tab$+*f\lame[\bowler]
+					Case 11:t$=tab$+tab$+tab$+tab$+*f\lame[\bowler]
+					Case 16:t$=tab$+tab$+tab$+tab$+*f\lame[\bowler]
+					Case 18:t$=tab$+tab$+tab$+tab$+*f\lame[\bowler]
+					Case 19:t$=tab$+tab$+tab$+tab$+*f\lame[\bowler]
+					Default:t$=tab$+tab$+tab$+tab$
+				End Select
+				t$+tab$+RSet$(Str$(\runs),3)+Chr$(9)+"("+Str$(\ballsfaced)+")"
+			EndIf
+			NPrint t$+Chr$(13)
+		Next
+		;
+		;<t><t><t><t>Extras<t>nnn
+		;49.5 Overs
+		;<t><t>TOTAL<t><t>9 wkts		225
+		;
+		t$=tab$+tab$+tab$+tab$+"Extras"+tab$+RSet$(Str$(team(batting)\extras),3)
+		NPrint t$+Chr$(13)
+		t$=Str$(currover):If currball<>0 Then t$+"."+Str$(currball)
+		NPrint t$+" Overs"+Chr$(13)
+		t$=tab$+tab$+"TOTAL"+tab$+tab$
+		t$+Str$(team(batting)\wickets)+" wkts"+tab$
+		t$+Str$(team(batting)\runs+team(batting)\extras)
+		NPrint t$+Chr$(13)
+		;
+		For i=0 To 10
+			j=team(batting)\ba[i]
+			If entry(cmess)\batter=j OR entry(cmess)\partner=j
+				NPrint"A"+Chr$(13)
+			Else
+				NPrint Chr$(13)
+			EndIf
+		Next
+		For i=0 To 10
+			j=team(batting)\ba[i]
+			If entry(cmess)\batter=j OR entry(cmess)\partner=j
+				NPrint team(batting)\name[j]+Chr$(13)
+			Else
+				NPrint Chr$(13)
+			EndIf
+		Next
+		;
+		CloseFile 0
+	EndIf
+	;
+	;BowlerBL.TXT
+	;
+	;<<MORRISON>>
+	;<t><<^^3<t>2<t>^26<t>1>>
+	;
+	USEPATH team(1-batting)\bowl[j]
+	;
+	If ReadMem(0,"ram:bowlerbl.txt")
+		FileOutput 0
+		j=entry(cmess)\bowler
+		NPrint team(1-batting)\name[j]+Chr$(13)
+		t$=Chr$(9)
+		If \balls=0 Then t$+RSet$(Str$(\overs),3)+"." Else t$+Str$(\overs)+"."+Str$(\balls)
+		t$+Chr$(9)+Str$(\maidens)+Chr$(9)+RSet$(Str$(\runsallowed),3)+Chr$(9)+Str$(\wickets)
+		NPrint t$+Chr$(13)
+		CloseFile 0
+	EndIf
+	;
+	;BowlingScorecard.TXT
+	;
+	;<<NORTHERN DISTRICTS>>
+	;
+	USEPATH team(1-batting)\bowl[j]
+	*b.side=team(batting)
+	*f.side=team(1-batting)
+	;
+	If ReadMem(0,"ram:bowlingscorecard.txt")
+		FileOutput 0
+		;
+		NPrint team(1-batting)\teamname+Chr$(13)
+		;
+		;<<BOWLER1>>
+		;<<BOWLER2>>
+		;<<BOWLER3>>
+		;<<BOLWER4>>
+		;<<BOWLER5>>
+		;<<BOWLER6>>
+		;<<BOWLER7>>
+		;
+		For i=0 To 8	;was 10
+			j=team(1-batting)\bo[i]
+			If \overs+\balls<>0
+				NPrint team(1-batting)\name[j]+Chr$(13)
+			Else
+				NPrint Chr$(13)
+			EndIf
+		Next
+		;
+		;<t>^5<t>2<t>12<t><t>-<t>1
+		;<t><t><t><t>0
+		;<t>10<t>0<t>68<t><t>2<t>-
+		;<t><t><t><t>2
+		;<t>9.5<t>1<t>49<t><t>-<t>-
+		;<t><t><t><t>1
+		;<t>10<t>0<t>56<t><t>1<t>-
+		;<t><t><t><t>2
+		;<t>^5<t>0<t>30<t><t>3<t>2
+		;<t><t><t><t>1
+		;<t>10<t>0<t>44<t><t>-<t>2
+		;<t><t><t><t>3
+		;<t>77<t>7<t>77<t><t>7<t>7
+		;<t><t><t><t>7
+		;
+		For i=0 To 8	;was 10
+			j=team(1-batting)\bo[i]
+			If \overs+\balls<>0
+				t$=tab$
+				If \balls=0
+					t$+RSet$(Str$(\overs),3)
+				Else
+					t$+Str$(\overs)+"."+Str$(\balls)
+				EndIf
+				t$+tab$+Str$(\maidens)+tab$+RSet$(Str$(\runsallowed),3)
+				t$+tab$+tab$
+				If \noballs>0 Then t$+Str$(\noballs) Else t$+"-"
+				t$+tab$
+				If \wides>0 Then t$+Str$(\wides) Else t$+"-"
+				t$+tab$
+				NPrint t$+Chr$(13)
+				NPrint tab$+tab$+tab$+tab$+Str$(\wickets)+Chr$(13)
+			Else
+				NPrint Chr$(13)
+				NPrint Chr$(13)
+			EndIf
+		Next
+		;
+		;^24
+		;<t>^0<t><t>12<t><t>7<t>5
+		;<t>107^^123^^177
+		;
+		NPrint "	 "+RSet$(Str$(*b\extras),3)+Chr$(13)
+		t$=tab$+RSet$(Str$(*f\byes),2)+tab$+tab$
+		t$+Str$(*f\legbyes)+tab$+tab$+Str$(*f\noballs)+tab$+Str$(*f\wides)
+		NPrint t$+Chr$(13)
+		t$=tab$:fall=0
+		While *f\fall[fall]<>-1:t$+Str$(*f\fall[fall])+", ":fall+1:Wend
+		t$=UnLeft$(t$,2)
+		NPrint t$+Chr$(13)
+		;
+		CloseFile 0
+	EndIf
+	;
+	;StandardScoreBL.TXT
+	;
+	;<<NORTHERN DISTRICTS>>
+	;<<CurrentBATSMAN1>>
+	;<<CurrentBATSMAN2>>
+	;<t><t>188
+	;<t><t>^^4
+	;<<49.5 Overs>>
+	;<t><t><t>TOTAL<t><t><<9 wkts	 ^^5>>
+	;
+	USEPATH team(batting)
+	;
+	If ReadMem(0,"ram:standardscorebl.TXT")
+		FileOutput 0
+		NPrint \teamname+Chr$(13)
+		j0=entry(cmess)\batter:j1=entry(cmess)\partner:
+		NPrint \name[j0]+Chr$(13)
+		NPrint \name[j1]+Chr$(13)
+		t$=RSet$(Str$(\bat[j0]\runs),3):NPrint tab$+tab$+t$+Chr$(13)
+		t$=RSet$(Str$(\bat[j1]\runs),3):NPrint tab$+tab$+t$+Chr$(13)
+		t$=Str$(currover):If currball<>0 Then t$+"."+Str$(currball)
+		If currover=1 AND currball=0 Then t$+" Over" Else t$+" Overs"
+		NPrint t$+Chr$(13)
+		t$=tab$+tab$+tab$+"TOTAL"+tab$+tab$+Str$(\wickets)+" wkts	 "
+		t$+RSet$(Str$(\runs+\extras),3)
+		NPrint t$+Chr$(13)
+		CloseFile 0
+	EndIf
+	;
+	;ComparisonBL.TXT
+	;<<AFTER 49 OVERS>>
+	;<<NORTHERN DISTRICTS>>
+	;<<CENTRAL DISTRICTS>>
+	;<t><t><t><<225-9>>
+	;<t><t><t><<^^4-6>>
+	;
+	If ReadMem(0,"ram:comparisonbl.txt")
+		FileOutput 0
+		t$="AFTER "+Str$(currover)
+		If currball>0 Then t$+"."+Str$(currball)
+		t$+" OVER":If (curover>1) OR (currball<>0) Then t$+"S"
+		NPrint t$+Chr$(13)
+		NPrint team(1-batting)\teamname+Chr$(13)
+		NPrint team(batting)\teamname+Chr$(13)
+		;
+		t$=RSet$(Str$(team(1-batting)\cscore),3)+"-"
+		t$+Str$(team(1-batting)\cwickets)
+		NPrint tab$+tab$+tab$+t$+Chr$(13)
+		;
+		t$=RSet$(Str$(team(batting)\cscore),3)+"-"
+		t$+Str$(team(batting)\cwickets)
+		NPrint tab$+tab$+tab$+t$+Chr$(13)
+		;
+		CloseFile 0
+	EndIf
+	;
+	;EquationBL.TXT
+	;<<CANTERBURY>>
+	;<<270-7>>
+	;<<88 RUNS>>
+	;<<5.2 OVERS>>						;number balls remaining		4 balls
+	;<<8.45>>
+	;												 --- RATE REQUIRED
+	;<<6.95>>
+	;												 --- LAST 5
+	;
+	; need 23 runs from 2.3 overs
+	;
+	USEPATH team(batting)
+	*f.side=team(1-batting)
+	;
+	If ReadMem(0,"ram:equationbl.txt")
+		FileOutput 0
+		NPrint \teamname+Chr$(13)
+		NPrint Str$(\runs+\extras)+"-"+Str$(\wickets)+Chr$(13)
+		;
+		; targetruns=(*f\runs+*f\extras)-(\runs+\extras)+1
+		;
+		bbb=6-currball:If bbb<0 Then bbb=0
+		ooo=targetovers-currover-1
+		rr.q=targetruns-(\runs+\extras)	; rr.q=targetruns -\runs-\extras
+		bb.q=ooo*6+bbb
+		;
+		t$="need "+Str$(rr)+" runs from "
+		If bbb=6
+			t$+Str$(ooo+1)+" over":If ooo<>1 Then t$+"s"
+		Else
+			t$+Str$(ooo)+"."+Str$(bbb)+"overs"
+		EndIf
+		NPrint t$+Chr$(13)
+		;
+		eee$=t$+"("+Str$(bb)+"balls)"
+		;
+		If bb>0 Then rr=rr*6/bb Else rr=0
+		rr*100:rr$=Str$(Int(rr))
+		t$=UnLeft$(rr$,2)+"."+Right$(rr$,2)
+		NPrint t$+Chr$(13)
+		;
+		If rr=>0 Then eee$=eee$+" rrr="+t$ Else eee$=""
+		;
+		rr=subruns*6/30:rr*100:rr$=Str$(Int(rr))
+		NPrint UnLeft$(rr$,2)+"."+Right$(rr$,2)+Chr$(13)
+		;
+	EndIf
+	;
+	; PartnershipBL.TXT
+	; <<CurrentBATSMAN1>>
+	; <<CurrentBATSMAN2>>
+	; <<223>>
+	; <<88	(88*)>>
+	; <<30	(125*)>>
+	;												--- Awaiting definition of these elements from Sky.
+	;
+	USEPATH team(batting)
+	;
+	If ReadMem(0,"ram:partnershipbl.txt")
+		FileOutput 0
+		j0=entry(cmess)\batter:j1=entry(cmess)\partner
+		;
+		NPrint \name[j0]+Chr$(13)
+		NPrint \name[j1]+Chr$(13)
+		;
+		NPrint Str$(\partnership)+Chr$(13)
+		;
+		t$=Str$(\bat[j0]\pruns)+"		("+Str$(\bat[j0]\runs)+"*)"
+		NPrint t$+Chr$(13)
+		;
+		t$=Str$(\bat[j1]\pruns)+"		("+Str$(\bat[j1]\runs)+"*)"
+		NPrint t$+Chr$(13)
+		;
+		ppp$=Str$(\partnership)+" from "+Str$(\bat[j0]\pballs+\bat[j1]\pballs)+" balls"
+		;
+	EndIf
+	;
+	WindowOutput 0
+	Return
+
+.dismissals:
+	USEPATH *ba
+	dis=0
+	For i=0 To 1023
+		If entry(i)\id=4 AND entry(i)\shot>9
+			*ba.batter=team(entry(i)\batting)\bat[entry(i)\batterout]
+			dis+1
+			If ReadMem(0,"ram:dismissal"+Str$(dis)+".txt")
+				FileOutput 0
+				NPrint team(entry(i)\batting)\name[entry(i)\batterout]+Chr$(13)
+				*f.side=team(1-entry(i)\batting)
+				NPrint Str$(\runs)+Chr$(13)
+				Select \status
+					Case 10:t$="c "+*f\lame[\fielder]+"	b "+*f\lame[\bowler]
+					Case 11:t$="b "+*f\lame[\bowler]
+					Case 12:t$="st "+*f\lame[\fielder]+"	b "+*f\lame[\bowler]
+					Case 13:t$="Run Out"
+					Case 14:t$="Run Out"
+					Case 15:t$="Retired"
+					Case 16:t$="HitWicket		b "+*f\lame[\bowler]
+					Case 17:t$="Handled Ball"
+					Case 18:t$="lbw		b "+*f\lame[\bowler]
+					Case 19:t$="c+b "+*f\lame[\bowler]
+					Default:t$="Not Out"
+				End Select
+				NPrint tab$+t$+Chr$(13)
+				;
+				t$=Str$(\fours)+" FOUR":If \fours<>1 Then t$+"S"
+				t$+"	 "+Str$(\sixes)+" SIX":If \sixes<>1 Then t$+"ES"
+				t$+"	 "+Str$(\minutes)+" MIN":If \minutes<>1 Then t$+"S"
+				t$+"	 "+Str$(\ballsfaced)+" BALL":If \ballsfaced<>1 Then t$+"S"
+				NPrint t$+Chr$(13)
+				;
+				t$=Str$(\disscore)+"-"+Str$(\diswicket)
+;				t$=LSet$(t$,6)	 mark does not want this here!
+				NPrint t$+Chr$(13)
+				CloseFile 0
+			EndIf
+		EndIf
+	Next
+	WindowOutput 0
+	Return
+
+;-------------------------------------------------------------------------------
+
+.dumpdata:
+	Window 2,0,0,736,283,$1008,"VIEW TEXT FILES",1,2:MenusOff
+	For i=0 To 2
+		NPrint fi$(i)
+		If WriteMem(0,"ram:"+fi$(i))
+			FileInput 0
+			While NOT DosBuffLen(0):NPrint Edit$(80):Wend
+			CloseFile 0
+		EndIf
+	Next
+	WindowInput 0
+	Repeat
+		ev.l=WaitEvent
+	Until ev=$400
+	CloseWindow 2:Activate 1
+	Use Window 0:WindowOutput 0:WindowInput 0
+	Return
+
+.setupdata
+	Restore filenames
+	finum=0:Read f$
+	While f$<>"***":fi$(finum)=f$:finum+1:Read f$:Wend
+	Return
+
+filenames:
+	Data.s "scoretick1.txt"
+	Data.s "scoretick2.txt"
+	Data.s "allbowlersbl.txt"
+	Data.s "batsmaninbl.txt"
+	Data.s "allbowlersbl.txt"
+	Data.s "batsmaninbl.txt"
+	Data.s "partnerbl.txt"
+	Data.s "batsmanoutbl.txt"
+	Data.s "batting scorecard.txt"
+	Data.s "bowlerbl.txt"
+	Data.s "bowlingscorecard.txt"
+	Data.s "standardscorebl.txt"
+	Data.s "comparisonbl.txt"
+	Data.s "equationbl.txt"
+	Data.s "partnershipbl.txt"
+	Data.s "***"

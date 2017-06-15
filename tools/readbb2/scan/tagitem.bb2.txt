@@ -1,0 +1,68 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/utility/tagitem.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/utility/tagitem.bb2
+;
+; $VER: tagitem.bb2 40.0 (28.02.94)
+;
+
+XInclude "exec/types.bb2"
+
+;/*****************************************************************************/
+
+;/* Tags are a general mechanism of extensible data arrays for parameter
+; * specification and property inquiry. In practice, tags are used in arrays,
+; * or chain of arrays.
+; *
+; */
+
+NEWTYPE.TagItem
+ti_Tag.l; /* identifies the type of data */
+;/* identifies the type of data */
+ti_Data.l ;/* type-specific data				*/
+End NEWTYPE
+
+;/* constants for Tag.ti_Tag, control tag values */
+#TAG_DONE=(0);/* terminates array of TagItems. ti_Data unused */
+#TAG_END=(0);/* synonym for TAG_DONE		 */
+#TAG_IGNORE=(1);/* ignore this item, not end of array		*/
+#TAG_MORE=(2);/* ti_Data is pointer to another array of TagItems
+;				* note that this tag terminates the current array
+;				*/
+#TAG_SKIP=(3);/* skip this and the next ti_Data items	 */
+
+;/* differentiates user tags from control tags */
+#TAG_USER=(1LSL31)
+
+;/* If the TAG_USER bit is set in a tag number, it tells utility.library that
+; * the tag is not a control tag (like TAG_DONE, TAG_IGNORE, TAG_MORE) and is
+; * instead an application tag. "USER" means a client of utility.library in
+; * general, including system code like Intuition or ASL, it has nothing to do
+; * with user code.
+; */
+
+
+;/*****************************************************************************/
+
+
+;/* Tag filter logic specifiers for use with FilterTagItems() */
+#TAGFILTER_AND=0;/* exclude everything but filter hits */
+#TAGFILTER_NOT=1;/* exclude only filter hits	*/
+
+
+;/*****************************************************************************/
+
+
+;/* Mapping types for use with MapTags() */
+#MAP_REMOVE_NOT_FOUND=0;/* remove tags that aren't in mapList */
+#MAP_KEEP_NOT_FOUND=1;/* keep tags that aren't in mapList	 */
+
+
+;/*****************************************************************************/
+
+
+;/* Merging types for use with MergeTagItems() */
+#MERGE_OR_LIST_1=0;/* list 1's item is preferred			*/
+#MERGE_OR_LIST_2=1;/* list 2's item is preferred			*/
+#MERGE_AND_LIST_1=2;/* item must appear in both lists		*/
+#MERGE_AND_LIST_2=3;/* item must appear in both lists		*/
+#MERGE_NOT_LIST_1=4;/* item must not appear in list 1		*/
+#MERGE_NOT_LIST_2=5;/* item must not appear in list 2		*/
+#MERGE_XOR=6;/* item must appear in only one list */

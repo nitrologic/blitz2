@@ -1,0 +1,105 @@
+                      Intuitools v2.01
+
+                Preliminary Documentation
+
+                       April, 1994
+
+
+Overview
+========
+
+Inutitools2 is a replacement project for the original Intuitools
+program written by Mark. I've not had quite the enthusiasm to
+polish it completely for BUM6 but the code included is working
+and should be useful for those wanting to design gadget layout
+especially with the Blitz2's new GadTools capabilities.
+
+Unfortunately Intuitools2 will only work with WorkBench2.0 or
+greater so those running 1.3 will need to stick with the original
+IntuiTools. WB1.3 was the only platform it ran on reliably anyway!
+
+
+Usage
+=====
+
+After running Intuitools2 select AddWindow. Then drag the mouse
+across the screen to select the new window's dimensions.
+
+After letting go of the mouse button the new window should
+appear on the screen. You can then double click inside the
+window to edit it's various flags and settings.
+
+Once you have created a window you may then add gadgets. If no
+window is open the screen will flash when you attempt to add
+gadgets to the project.
+
+To position the gadgets select inside the gadgets bounding
+rectangle and drag with the mouse. To size select one of the
+8 highlighted edges of the gadget and drag. Note that some
+gadgets will be fixed in size depending on their contents
+such as Blitz2 text gadgets and shape gadgets in general.
+
+The Constant field will be used when source code is created.
+Using constants for gadget and window numbers eliminates
+problems when making alterations to the project. The constant
+list created at the top of the source is also a useful
+reference in your main program when including the ui source
+in a separate file. It also makes your program much more
+readable!
+
+Anyway here follows description of the menus...
+
+
+The Project Menu
+================
+
+Load - there are two .it example projects in this drawer that
+       you can load stright into the Intuitools2 program.
+
+Save - will save an it project, the format is completely ascii
+       so people can download problem projects onto AmigaNet
+       to help me debug the program.
+
+Screen - change the resolution of the project's screen. Best to
+         do this before creating windows as going from say hi to
+         lo res may cause a runtime error if an existing window
+         will not fit in the new screen.
+
+Font - change screen font that is used by windows, gadgets etc.
+
+Palette - not supported as of yet, sorry.
+
+Test - use test to "run" your project. The second screen will
+       come to the front and you are able to play with all the
+       gadgets. Use the single menu option (QUIT) to return
+       back to the editor screen.
+
+Create - this option lets you create Blitz2 source code. At present
+         shape gadgets will not produce source code and the GTList
+         will be commented.
+
+Quit - should succesfully exit.
+
+The Options Menu
+================
+
+At present only two options are available-
+
+Grid : locks all coordinated to the nearest word boundary.
+
+AutoOption: When enabled the settings requester for windows
+            and gadgets appears after they are created.
+
+
+Future Releases...
+
+A full release of Intuitools2 will appear shortly. Please post
+all bugreports and fixes either on the BlitzAmi network or
+send to me:
+
+Simon Armstrong
+12 York Street
+Parnell
+Auckland 1001
+New Zealand
+

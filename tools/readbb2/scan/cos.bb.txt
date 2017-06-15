@@ -1,0 +1,28 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Cos.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Cos.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Cos.bb
+
+; 
+; cosine curve program example
+; 
+Screen 0,0,0,320,200,2,0,"A COSINE CURVE",1,2 
+ScreensBitMap 0,0 
+BitMapOutput 0
+Locate 0,2:Print " 1" 
+Locate 0,12:Print " 0"
+Locate 0,22:Print "-1"
+Locate 19,13:Print "Pi" 
+Locate 37,13:Print "2Pi"
+; 
+Line 16,20,16,180,2 
+Line 16,100,319,100,2 
+; 
+For k.f=0 To 1 Step .0025 
+; 
+Plot k*303+16,Cos(Pi*2*k)*80+100,3
+; 
+Next
+; 
+MouseWait 
+
+
+
+

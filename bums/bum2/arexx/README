@@ -1,0 +1,64 @@
+Hi,
+
+just a quick note inserted here by Simon before the docs
+on Roger's BPAINT program.
+
+Arexx was implemented in Blitz 2 by Greg Abbiss, a big thanks
+to Greg for not only providing an excellent extension to Blitz2
+but also for showing that it wasn't so silly of me to put the
+library writing docs in the User Guide (so there Mark...)
+
+Note:
+
+The amigalibs.res file can be expanded to contain the macros
+and constants included from arexxres.bb,
+load in arexxres.bb, compile and run it (shouldn't do anything),
+then create resident called blitzlibs:amigalibs2.res, your new
+amigalibs2.res file now contains all the macros/constants/types from
+the arexxres.bb AS WELL as all the amiga libraries.
+
+Now you can remove the include arexxres.bb and replace the resident
+file listed in the options as amigalibs.res with amigalibs2.res.
+
+If you didn't follow this, don't worry, its probably better to just
+use the include arexxres.bb abyway....
+
+Thank you for your time, now over to Roger....
+
+
+
+BPAINT a little example of using Blitz 2's Arexx Library
+
+BPAINT is just here as a practical demonstration of how easy it is to
+create your own arexx interface for a programme
+
+The paint programme is just a window you can paint to. Nothing flash
+just something to replicate what say a real application would do
+
+The programme opens a message port and looks for a arexx script, it then
+processes that arexx script and you see the result.
+
+This programme demonstrates how to add your own arexx commands and do
+basic rexx handling. Look for a proper tutorial next Blitz User
+
+Sorry for the quick nature of the programme and documentation but we
+have all been a tad busy at Blitz HQ :-)
+
+Credits
+-------
+
+Greg Abbiss, A great personal friend of mine, who happened to write
+             the Arexx library for Blitz, this is no small acheivement
+             and I and I'm sure everyone at ACID software thank Greg
+             for the skill, time, and effort he has put into it
+
+Roger Lockerbie (ME!) for writing this little BPAINT programme. Once
+                      again as with the Sabotage proggy, If you want
+                      to know about a specific subject in depth then
+                      write me mail C/- BlitzUser to ACID Software
+                      (or fax for that matter)
+
+Have fun......
+
+Roger
+

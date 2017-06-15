@@ -1,0 +1,127 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/Plasma3.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/Plasma3.bb2
+;
+;
+;		Plasma, just how do you do it ?
+;
+;		This is a program about something a friend told me about
+;		which is quite simplistic really but what fun, ho hum.
+;
+;		by	jilt'94	(c) electronic sweatshop
+;
+;
+;--------------------------------------------------------------------
+
+NoCli : WBStartup
+SetErr : End : End SetErr
+
+;--------------------------------------------------------------------
+._Gadget_List
+
+TextGadget 1, 2,12,0, 1,"R"
+TextGadget 1,20,12,0, 2,"G"
+TextGadget 1,38,12,0,11,"B"
+TextGadget 1,56,12,0,12,"#"
+
+TextGadget 1,2,26,0, 3,"+" : TextGadget 1,20,26,0, 4,"-"
+TextGadget 1,2,36,0, 5,"+" : TextGadget 1,20,36,0, 6,"-"
+TextGadget 1,2,46,0, 7,"+" : TextGadget 1,20,46,0, 8,"-"
+TextGadget 1,2,56,0, 9,"+" : TextGadget 1,20,56,0,10,"-"
+
+TextGadget 1,210,26,0,13,"+" : TextGadget 1,230,26,0,14,"-"
+TextGadget 1,210,36,0,15,"+" : TextGadget 1,230,36,0,16,"-"
+TextGadget 1,210,46,0,17,"+" : TextGadget 1,230,46,0,18,"-"
+TextGadget 1,210,56,0,19,"+" : TextGadget 1,230,56,0,20,"-"
+
+;--------------------------------------------------------------------
+._Set_Up
+
+BitMap 0,320,256,2
+Screen 0,0,0,320,256,2,0,"Plasma",0,1,0
+Window 0,0,0,320,256,$1400,"Plasma Playground				 jilt'94",0,1,1
+Green 0,0,0,0 : Green 1,15,15,15 : Green 2,5,5,5 : Green 3,10,10,10
+
+Dim SS(360)
+For f.f = 0 To 360 : SS(f)=HSin(f/180*Pi) : Next
+
+Use BitMap 0
+Circlef 150,50,30,30,2
+Circlef 150,50,27,27,3
+Circlef 150,50,24,24,1
+
+ang1= 0 : sync1=	0 : rad1= 10 : swing1=	6 : wave1= 8 : res1= 2
+ang2= 0 : sync2= 46 : rad2= 10 : swing2=	6 : wave2= 8 : res2= 2
+Gosub _Update_Info
+
+;--------------------------------------------------------------------
+._Main_Loop
+
+Repeat
+
+	ev.l = Event
+	If ev=$40
+		Select GadgetHit
+			Case	1 : Green 0,0,0,0 : Green 1,15,0,0 : Green 2,5,0,0 : Green 3,10,0,0
+			Case	2 : Green 0,0,0,0 : Green 1,0,15,0 : Green 2,0,5,0 : Green 3,0,10,0
+			Case 11 : Green 0,0,0,0 : Green 1,0,0,15 : Green 2,0,0,5 : Green 3,0,0,10
+			Case 12 : Green 0,0,0,0 : Green 1,15,15,15 : Green 2,5,5,5 : Green 3,10,10,10
+
+			Case	3 : rad1=rad1 + 2 : If rad1>16 Then rad1=16
+			Case	4 : rad1=rad1 - 2 : If rad1<2 Then rad1=2
+			Case	5 : swing1=swing1+2 : If swing1>32 Then swing1=32
+			Case	6 : swing1=swing1-2 : If swing1<2 Then swing1=2
+			Case	7 : wave1=wave1+2 : If wave1>32 Then wave1=32
+			Case	8 : wave1=wave1-2 : If wave1<2 Then wave1=2
+			Case	9 : res1=res1+1 : If res1>8 Then res1=8
+			Case 10 : res1=res1-1 : If res1<1 Then res1=1
+
+			Case 13 : rad2=rad2 + 2 : If rad2>16 Then rad2=16
+			Case 14 : rad2=rad2 - 2 : If rad2<2 Then rad2=2
+			Case 15 : swing2=swing2+2 : If swing2>32 Then swing2=32
+			Case 16 : swing2=swing2-2 : If swing2<2 Then swing2=2
+			Case 17 : wave2=wave2+2 : If wave2>32 Then wave2=32
+			Case 18 : wave2=wave2-2 : If wave2<2 Then wave2=2
+			Case 19 : res2=res2+1 : If res2>8 Then res2=8
+			Case 20 : res2=res2-1 : If res2<1 Then res2=1
+		End Select
+		Gosub _Update_Info
+	End If
+
+	For y=20 To 80 Step res1
+		ANG= (ang1+y*wave1) MOD 360
+		Scroll 110+rad1*SS(ANG),y,90,res1,20,100+y
+	Next
+	ang1= ang1 + swing1 : If ang1 > 360 Then ang1= ang1 - 360
+
+	For x=20 To 120 Step res2
+		ANG= (ang2+x*wave2) MOD 360
+		Scroll x,100+rad2*SS(ANG),res2,120,150+x,100
+	Next
+	ang2= ang2 + swing2 : If ang2 > 360 Then ang2= ang2 - 360
+
+
+Until Inkey$<>""
+
+;--------------------------------------------------------------------
+._End
+
+Free Window 0
+Free Screen 0
+End
+
+;====================================================================
+._Update_Info
+
+	Format "##"
+	WLocate 40,28 : Print "Radi ",rad1
+	WLocate 40,38 : Print "Swng ",swing1
+	WLocate 40,48 : Print "Wave ",wave1
+	WLocate 40,58 : Print "Reso ",res1
+
+	WLocate 250,28 : Print "Radi ",rad2
+	WLocate 250,38 : Print "Swng ",swing2
+	WLocate 250,48 : Print "Wave ",wave2
+	WLocate 250,58 : Print "Reso ",res2
+
+	Return
+
+;--------------------------------------------------------------------

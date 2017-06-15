@@ -1,0 +1,73 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot1.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot1.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot1.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot1.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot1.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot1.bb
+
+;This is the scheme in its simplest form.
+;------------------------------------------------------
+;Set up bitmaps and/or screens in the usual way
+;i.e. give yourself something to draw on.
+WBStartup
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
+;------------------------------------------------------
+;Set up the palette. I usually use a 32 colour screen but plot
+;using the top 16 colours only. These I set to 16 monochrome
+;shades. This leaves half the colours to be manipulated
+;independently in DeLuxe Paint later on.
+;Colour 0 is best left black unless you like coloured borders.
+Green 0,0,0,0:For i=16 To 31:Green i,31-i,i-16,i-16:Next
+
+ShowScreen 0:Use BitMap 0:BlockScroll 0
+;------------------------------------------------------
+;It doesn't matter too much whether you plot horizontally first or
+;vertically first.
+;It pays to draw a small version first to see if it's going to be
+;interesting. (i.e. alter the 320 and 256 to ,say 100)
+For i=0 To 320
+;------------------------------------------------------
+;Give yourself a way to cancel if you don't fancy the result.
+	If Joyb(1)<>0:Pop For:Goto l1:EndIf
+;------------------------------------------------------
+;This calculates the x coordinate from the pixel position. -3 to 3
+;are good bounds to begin with.
+	x.f=-3+(6*i)/320
+;------------------------------------------------------
+;Do the same for the y coordinate.
+;x and y are floating point types here. See one of the other
+;examples for use of integers instead. Floating point variables are
+;slower than integers but they have the immense advantage, especially if
+;overflow checking is removed, that things like rounding and signs
+;take care of themselves no matter how convoluted the calculation.
+;This is not the case at all with integers, which, although they will
+;always give some sort of interesting picture, may produce
+;unpredictable "seams" and "jaggedness" due to unforeseen things
+;happening with overflow or the sign bit during heavy calculation.
+;It is possible, of course, to ensure this doesn't happen, but it is
+;easy to end up writing what almost amounts to your own specialised form of
+;floating point which is no faster than that provided anyway.
+	For j=0 To 256
+		y.f=3-(6*j)/256
+;------------------------------------------------------
+;This is really where all the action takes place.
+;This example uses a very simple one-line function of x and y.
+;Extremely complicated algorithms can be inserted here instead.
+		z.f=y*y*y+x*x*x-x-y
+;------------------------------------------------------
+;These lines calculate the colour from z and plot the point. Other
+;schemes are certainly possible. The exact nature of this section depends
+;on how the particular language you are using calculates
+;decimal parts of floating point numbers. What you want to end
+;up with is a sawtooth with a maximum of 1, a minimum of 0 and
+;no discontinuities. This can then be mapped onto the colour range
+;defined above and must produce a smooth gradation of colour for
+;any function.
+;With integer calculation you can simply extract
+;consecutive bits for a colour number.
+		zz.f=Frac(z)
+		If zz<0:zz+1:EndIf
+		zz*2:If zz>1:zz=2-zz:EndIf
+		c.w=Int(zz*16+16)
+		If c=32:c=31:EndIf
+		Point i,j,c
+Next:Next
+l1:MouseWait
+VWait 50
+

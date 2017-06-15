@@ -1,0 +1,122 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/old/makefont.bb
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3
+	MULU#40,d3:ADD.l d3,a1
+;	ASL.l#5,d3:ADD.l d3,a1:ADD.l d3,a1:ADD.l d3,a1
+	MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #40,a1:MOVE.l#40*256,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+Goto getfence
+
+Screen 0,4
+ScreensBitMap 0,0
+LoadBitMap 0,"font.iff",0
+Use SetCycle 0
+Use BitMap 0
+
+InitBank 0,32768,0
+
+blok.l=Bank(0)
+bm.l=Addr BitMap(0)
+
+LoadBitMap 0,"font.iff"
+Gosub getfont
+ReMap 1,8
+ReMap 5,10
+ReMap 7,11
+Gosub getfont
+ReMap 8,12
+ReMap 10,14
+ReMap 11,15
+Gosub getfont
+
+If ReadMem(0,"ram:font.bin")
+	Exists 0,Bank(0),blok-Bank(0)
+	CloseFile 0
+EndIf
+
+MouseWait
+End
+
+
+getfence:
+	Screen 0,4
+	ScreensBitMap 0,0
+	LoadBitMap 0,"frontend.iff",0
+	Use SetCycle 0
+	Use BitMap 0
+	InitBank 0,32768,0
+	blok.l=Bank(0)
+	bm.l=Addr BitMap(0)
+
+	h=4:yy=5
+	For y=0 To 3
+		If y=3 Then h=6
+		For x=0 To 4
+			For i=0 To h-1
+				getblock{blok,bm,x*16,yy+i*8}:blok+32
+			Next
+		Next
+		yy+34
+	Next
+
+	If ReadMem(0,"ram:fence.bin")
+		Exists 0,Bank(0),blok-Bank(0)
+		CloseFile 0
+	EndIf
+
+	MouseWait
+	End
+
+
+getfont:
+
+	For x=0 To 15
+		y=1
+		getblock{blok,bm,x*16,y}:blok+32
+		getblock{blok,bm,x*16+8,y}:blok+32
+		getblock{blok,bm,x*16,y+8}:blok+32
+		getblock{blok,bm,x*16+8,y+8}:blok+32
+;		Box x*16,1,x*16+15,16,-1
+	Next
+
+	For x=0 To 14
+		y=18
+		getblock{blok,bm,x*16,y}:blok+32
+		getblock{blok,bm,x*16+8,y}:blok+32
+		getblock{blok,bm,x*16,y+8}:blok+32
+		getblock{blok,bm,x*16+8,y+8}:blok+32
+;		Box x*16,18,x*16+15,33,-1
+	Next
+
+	For x=0 To 9
+		y=35
+		getblock{blok,bm,x*16,y}:blok+32
+		getblock{blok,bm,x*16+8,y}:blok+32
+		getblock{blok,bm,x*16,y+8}:blok+32
+		getblock{blok,bm,x*16+8,y+8}:blok+32
+;		Box x*16,35,x*16+15,50,-1
+	Next
+
+	For x=0 To 30
+		getblock{blok,bm,x*8,52}:blok+32
+;		Box x*8,52,x*8+7,59,-1
+	Next
+
+	For x=0 To 9
+		getblock{blok,bm,x*8,61}:blok+32
+;		Box x*8,61,x*8+7,68,-1
+	Next
+
+	Return

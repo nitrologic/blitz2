@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ShowB.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ShowB.bb
+
+; 
+; showb and showf program example 
+; 
+BLITZ                    ;blitz mode
+BitMap 0,640,200,2              ;create a bitmap 
+Circlef 320,100,80,1             ;put a circle on it
+Circlef 320,100,40,2             ;and another 
+Slice 0,44,320,200,$fffa,4,8,32,640,640   ;dual-playfield slice! 
+ShowF 0,160,0                ;show background bitmap
+
+For k=0 To 319                ;begin a loop
+ VWait                   ;wait for vertical blank 
+ ShowB 0,k,0                ;show foreground bitmap
+Next                     ;end of loop 
+
+MouseWait 
+
+
+
+

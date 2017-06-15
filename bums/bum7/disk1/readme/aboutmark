@@ -1,0 +1,206 @@
+
+                            Mark's CV (by Mark)
+
+
+  D.O.B. : 27/12/1967
+
+  Education : 11 years at high school. 2 months at Tech & 3 weeks at University.
+
+  Programming history :
+
+  Started tootling around in BASIC on a TRS-80 at about 13. Got into Z80 and
+  6502 assembler about a year later. Mainly self taught, but learnt heaps
+  looking through the Apple ]['s ROM (Steve Wozniak rules!). This is probably
+  how I picked up most of the theory behind writing compilers.
+  Went to a school which was pretty up with the computer scene, which helped a
+  lot.
+  Left school at 16 and, after some pretty unsuccessful attempts at tertiary
+  education, decided to leave the computer scene behind and explore the wilder
+  side of life...
+  5 years later, and with one mother of a hangover, got back into the swing
+  of things. At the time, software companies were dropping like flies, so
+  my first 3 comeback efforts were short-lived success stories. However, the
+  unemployment benefit back then was generous enough to actually live off
+  (not so in NZ these days!), so I kept at it...
+  These days, things are working out pretty good, and for the last couple of
+  years, I've actually generated some income for myself.
+  Still seem to have a knack for letting myself get ripped off though...
+
+
+                                 FIRST GAME
+
+ 'Shoot the pixel' on a TRS-80 computer at my old man's office. You fired by
+  hitting the 'break' key then typing 'goto 100' really quickly.
+
+
+                                 OTHER GAMES
+
+  Cosmic Kamikaze (Basic, Apple ][, Galaxians style game)
+  Magpie (first ASM game, Apple ][, a little like Defender)
+  Dinky Kong (first commercial game, VIC-20)
+  Zeron (VIC-20)
+  Mercenary (VIC-20, Scrambler with 16 zones)
+  A really hot version of Zaxxon on the Vic-20 which I enjoyed anyway...
+  Leapin' Louie (C16, a cheesy platform  game (first and last!))
+  Tomb of Tarabash (C16, an annoying, boring hit-the-switch-to-open-the
+                    door type game)
+  Sproing (C64, a weird cross between Q-BERK and crystal castles)
+  StarWarp (C64, vaguely similar to StarGate)
+  Zeron (Amiga, sold to Software Horizons - who promptly died)
+  Sorcerors Apprentice (Amiga, sold to CRL who...shit, not again!)
+  Oblivion (Amiga, share-where's-the-money? just about ready to give up here...)
+  Defender (Amiga, PD)
+  Overkill (Amiga, ripped off badly here courtesy of DIGISOFT Australia...)
+  Guardian (Amiga, refer to Amiga Power for a disturbingly frank appraisal)
+
+
+                                 OTHER SHIT
+
+  BASIC compilers on Apple ][, Vic-20 and Amiga, including Blitz Basics 1 & 2.
+  A multitasking GUI for the C64 which was way better than GEOS, but, well,
+  wasn't.
+  Assemblers on just about everything, including the classic 'Hendrix'
+  assembler and infamous 'Tokasm'.
+
+
+                            THOUGHTS ON THE AMIGA
+
+  On an absolute scale, the Amiga's a bit gutless. However, for the price I
+  think it's still way ahead of the competition (Sega, SNES etc.).
+  The CD32 should have had some fast RAM on it (software switchable 1M/2M CHIP
+  RAM would have been nice).
+  For games, the A1200 and CD32 are not actually that great an improvement
+  on the older Amigas - the extra colours are nice, but it takes the blitter
+  longer to move stuff around. The display fetch mode helps speed things up,
+  but I reckon they should have done the same thing with the blitter.
+
+
+                           THOUGHTS ON BLITZ BASIC
+
+  When I started out on Blitz 2, the main aim was to create a powerful
+  programming tool which could be extended and, eventually, maintained by
+  users. This seems to be what's happening, so, groovy.
+  I'd like to see Blitz majorly revamped with a new editor, new manuals and
+  so on, but at the moment there isn't really enough time or money to do this.
+  Acid has released the source code to TED to several developers so, with a bit
+  of luck, a new editor could be on it's way.
+
+
+                            THOUGHTS ON GUARDIAN
+
+  I don't know, I reckon the Amiga's at a bit of a loss when it comes to 3D
+  stuff. Guardian doesn't move as fast, have as much detail, or does as much
+  as I'd like it to. Fortunately, the Amiga does let you get away with a
+  number of cute tricks - like the colour cycling copper split horizon, and
+  64 pixel wide sprite-mountains.
+  The freedom of movement thing is also a bit of a problem as it's hard to
+  give the player a real incentive for flying all over the place - this is
+  mainly why I went for the defender-ish scenario.
+  On the plus side, Guardian's the first 3D game I actually enjoy playing.
+  Like most of the stuff I've written, it's basically a fast, blasty full
+  on shoot-em-up with cool explosions.
+  It has certainly been enlightening doing a 3D game - you've got to treat
+  just about every aspect of a game differently than if you're doing a 2D game,
+  especially the player control and alien intelligence.
+
+
+                    THOUGHTS ON THE GAMING SCENE IN GENERAL
+
+  I'm getting sick of all the CD hype. I think CD is great, but just because
+  it can do certain things, doesn't mean it should. At the moment, there seems
+  to be a lot of big-money marketing type dickheads around trying to push
+  their idea of a good game onto the public. I might be a bit of a purist
+  when it comes to games, but I don't see how playing back pre-rendered images
+  could be described as 'interactive' - which, surely, is what games are all
+  about.
+  There's also a scary kind of feeling around at the moment that the days of
+  the solo game maker are numbered. As more and more rich-kids are realising
+  how much money games can make them, the whole scene is turning into a
+  'corporate rock' type situation, where people are buying games not because
+  they're all that good, but because there's not really much else to choose
+  from.
+  I'm also tired of the Saturn/PSX crap. The machines aren't even around yet, but
+  the media have probably already sold more units than a good game would. Some
+  magazines have even had the gall to compare existing hardware with these
+  wonder machines. I'm sure they're gonna be great and everything, but
+  THEY'RE NOT HERE YET!
+  I'd like to see various magazines easing off on the CD32 'shovelware'
+  trip. It's weird how no one bats an eyelid when an Amiga to megadrive
+  conversion is identical, but an Amiga to CD32 conversion is always expected
+  to be a zillion times better.
+  Finally, I'd like to see some kind of developers association (better not say
+  'union') set up, as I've seen way too many developers ripped off.
+
+
+                          THOUGHTS ON THE FUTURE
+
+  I'd love to see gameplay diversify into many different areas, in a similar
+  way to the progress of the music industry. I'd also like to see some of the
+  older type games making a comeback - I'm getting sick of hearing that a
+  particular style of game has been deemed 'outdated', and I want my text
+  adventures back!
+
+
+                             THOUGHTS ON ACID
+
+  Where's the return key gone? Why are all the number keys blank? God I'm
+  thirsty...
+
+
+                                   LIKES
+
+  Music, computer games, mind altering substances, arguing for the hell of it,
+  beating Simon at Skidmarks, reconstructing source code from crashed disk
+  drives, playing the gat, jumping up and down on the off-beat, waking up
+  without a hangover.
+
+
+                                  DISLIKES
+
+  PCs, C programmers, highscore routines (guess what I'm doing next week!),
+  this font, violence, oppression, prejudice.
+
+
+                                 REFERENCE
+
+  Mark is a sporadic worker who's personal habits and distracted manner make
+  for a difficult person to work with.
+  He is unreliable, dishonest and extremely discourteous. I thouroughly
+  recomend Mark to any pub without a dress code.
+
+
+
+------------------------------------------------------------------------------
+
+
+                            RAGS TO RICHES
+
+  Acid software's mercurial rise to fame is indeed the stuff of fairy tales.
+From it's humble beginnings at the 'house of noise' (just up from the caravan
+park) to it's current premises in exotic Parnell, the story of Acid software
+is one of faith, hope and love, but not without it's fair share of heartache
+and despair.
+  So just what IS Acid software? To answer this multi-faceted question, we
+must turn our attention to what can only be described as a quite remarkable
+slice of history...
+
+                            IN THE BEGINNING
+
+  Once upon a time, two friends shared a flat in Auckland, NZ. Their names
+were Simon and Mark, and although they lived fairly contended and eventful
+lives, they both felt something was missing. "I know", said Simon one day,
+"Let's start a computer company". "Wow!" said Mark enthusiastically, "Great
+idea! We can import PC clones dirt cheap and flog them off for a killing!"
+"Well, that's not really what I had in mind", Simon explained. "I was thinking
+more of selling stuff we do ourselves". "Do?" murmered Mark. "Stuff? Wont
+that involve work?". "More than likely" declared Simon determinedly. "In
+fact, probably a lot of work. Still, at least we get to sit down all day...".
+"Count me in then!" agreed Mark, and promptly threw up and passed out.
+
+
+                                 LATER...
+
+  Acid's seminal project, Zeron, was nearing completion. A Defender clone
+(oops, variant), Zeron was destined to make the lads a small fortune. A deal
+had been signed with heavy weight publishers Software Horizons, and nothing
+

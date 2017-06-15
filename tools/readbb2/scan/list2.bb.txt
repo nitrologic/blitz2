@@ -1,0 +1,36 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/adu/art3/list2.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/adu/art3/list2.bb
+LoadShape 0,"brush.iff",0
+
+NEWTYPE .obj
+	x.q:y:xa:ya
+End NEWTYPE
+
+Dim List balls.obj(100)
+
+While AddItem(balls())
+	balls()\x=Rnd(300),Rnd(200),Rnd(6)-3,Rnd(6)-3
+Wend
+
+BLITZ
+
+BitMap 0,320,256,3
+BitMap 1,320,256,3
+
+Queue 0,100:Queue 1,100	 ;a queue for each bitmap
+
+Slice 0,44,3
+
+While Joyb(0)=0
+	VWait:Show db
+	db=1-db:Use BitMap db
+	UnQueue db								;Cls
+	ResetList balls()
+	While NextItem(balls())
+		USEPATH balls()
+		\x+\xa:\y+\ya
+		If NOT PColl(\x,\y,1,1,0,0,380,200)
+			\xa=-\xa:\ya=-\ya:\x+\xa:\y+\ya
+		EndIf
+		QBlit db,0,\x,\y
+	Wend
+Wend

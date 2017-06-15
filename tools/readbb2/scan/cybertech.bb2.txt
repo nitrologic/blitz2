@@ -1,0 +1,4040 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/Cybertech/CyberTech.bb2
+; []----------------------------------------------------------------------[]
+; |									 (C) 1993, 1994. All rights reserved.								 |
+; |																																				|
+; |					File: CyberTech.bb2																					 |
+; |				Author: Tim Caldwell																						|
+; |																																				|
+; | Modifications:																												 |
+; |	 Mon 01.11.93	Project started.																			 |
+; |	 Wed 05.01.94	Amiga Format release completed.												|
+; []----------------------------------------------------------------------[]
+
+WBStartup:NoCli
+SetErr
+	End
+End SetErr
+
+INCDIR	"BSource:Include/"
+Include "Scale.bbi"
+Include "Copper.bbi"
+Include "Palette.bbi"
+
+
+; EXEC: Memory Constants
+;
+#MEMF_CHIP = $2
+#MEMF_FAST = $4
+
+
+; Map Constants
+;
+#MapCols = 80
+#MapRows = 80
+
+#CNTRMask = $0F
+#BITSMask = $F0
+#RBOTMask = $10
+#DOORMask = $20
+#OBSTMask = $40
+#SPCLMask = $80
+
+
+; Screen Constants
+;
+#LORES			= $FFF8						 ; Flags for lo-res slice
+#LORES_DPF	= $7FFA						 ; Flags for AGA lo-res dual playfield slice
+
+#BlockSize	= 16
+#ShapeSize	= 24
+#ShapeMod	 = (#BlockSize*2)-#ShapeSize
+#BlockMod	 = $F
+#BlockShape = (#ShapeSize-#BlockSize)/2
+
+#ScrWidth	 = 320
+#ScrHeight	= 256
+#ScrBWidth	= #ScrWidth/#BlockSize
+#ScrBHeight = #ScrHeight/#BlockSize
+
+#FGNDOff		= #BlockSize*2
+#FGNDWidth	= #ScrWidth+(#FGNDOff*2)
+#FGNDHeight = #ScrHeight+(#FGNDOff*2)
+#BGNDWidth	= #MapCols*#BlockSize
+#BGNDHeight = #MapRows*#BlockSize
+
+#P1ScrollX	= (#ScrWidth-#FGNDOff)/2
+#P1ScrollY	= (#ScrHeight-#FGNDOff)/2
+
+#CompBGRWidth	= #ScrWidth
+#CompBGRHeight = #ScrHeight
+
+#IntroBGRHeight0 = #ScrHeight*3
+#IntroBGRHeight1 = #ScrHeight*4
+
+
+; Bitmap Constants
+;
+#BMPFgnd0	 = 0								 ; These bitmap are used in the actual
+#BMPFgnd1	 = 1								 ; game itself, and they are destroyed
+#BMPBgnd		= 2								 ; after each game is finished.
+#BMPCompF	 = 3
+#BMPCompB	 = 4
+#BMPTmp		 = 5
+
+#BMPIntroF0 = 0								 ; These bitmaps are used by the Intro,
+#BMPIntroF1 = 1								 ; and are destroyed when the Intro is
+#BMPIntroF2 = 2								 ; finished.
+#BMPIntroB0 = 3
+
+
+; Palette Constants
+;
+#PALGame			= 0
+#PALScanner	 = 1
+#PALTimer		 = 2
+#PALLoading	 = 3
+#PALComputer	= 4
+#PALTmp			 = 5
+
+#PALIntro0		= 0
+#PALIntro1		= 1
+#PALBlack		 = 2
+
+#RGBRed			 = 0
+#RGBGreen		 = 1
+#RGBBlue			= 2
+
+
+; DEMO: If the constant #RECORD_DEMO is set to 1 the game will run in RECORD
+;			 mode. This mode allows a 30 second demo to be created for a level.
+;			 Pressing the 'HELP' key during recording will abort the current level
+;			 and restart recording on the next level. Once enough of the action
+;			 has been grabbed, the demo is saved to a file with such as
+;			 'Level??.demo' where ?? is the level number in hex.
+#RECORD_DEMO = 0
+
+#DemoShapeX	 = #FGNDOff+(#BlockSize ASR 1)
+#DemoShapeY	 = #FGNDOff+(#BlockSize ASR 1)
+#DemoAnimRate = 40
+#MaxDemoSteps = 30*50					 ; 30 seconds @ 50 frames/sec
+
+
+; Computer Constants
+;
+#CompScrX	 = 2								 ; Computer screen start position: characters
+#CompScrY	 = 2
+#CompScrW	 = 25								; Computer sreen size: characters
+#CompScrH	 = 25
+
+#CompMapX	 = 230							 ; Computer map start position: pixels
+#CompMapY	 = 12
+#CompMapW	 = 80								; Computer map size: pixels
+#CompMapH	 = 80
+
+#CompDigX	 = 11								; Computer digit display start position: pixels
+#CompDigY	 = 230
+#CompDigW	 = 11								; Size of each digit: pixels
+#CompDigH	 = 16
+#CompDigits = 18
+#CompDig1X	= 209							 ; Position of last digit: pixels
+#CompDig1Y	= 230
+
+#CompKeys	 = 18+1							; Amount of keys on the computer
+#CKEY_CLF	 = 10								; Key legends for non-numeric keys
+#CKEY_CRT	 = 11
+#CKEY_CUP	 = 12
+#CKEY_CDN	 = 13
+#CKEY_SPACE = 14
+#CKEY_DEL	 = 15
+#CKEY_ESC	 = 16
+#CKEY_ENTER = 17
+
+#TextNormal = 0								 ; Computer text display modes:
+#TextJustL	= 0								 ;	 left justified
+#TextJustR	= 1								 ;	 right justified
+#TextJustC	= 2								 ;	 centred
+
+#CompFirstPage = 0							; Various computer pages
+#CompStatsPage = 2
+#CompBriefPage = 3
+#CompHiScrPage = 8
+
+
+; Player Constants
+;
+#MaxAmmo	 = 250
+#MaxHealth = 50
+#MaxKeys	 = 22
+#MaxLives	= 3
+
+#KeysInPack	 = 5
+#CostLaser		= 15000
+#CostRocket	 = 25000
+#CostPlasma	 = 35000
+#CostScanner	= 10000
+#CostAmmo		 = 3000
+#CostKeys		 = 4000
+#CostMedikit	= 5000
+#CostLives		= 20000
+
+#ScoreObject	= 100
+#ScoreDoor		= 100
+#ScoreRobot	 = 200
+#ScoreSwitch	= 1000
+#ScoreHostage = 5000
+#ScoreLevel	 = 10000
+
+
+; Robot Constants
+;
+#CreateLeft		 = 1
+#CreateRight		= 2
+#CreateTop			= 3
+#CreateBottom	 = 4
+
+#MaxRobots_FRAM = 10						; Machines with FAST RAM
+#MaxRobots_CRAM = 4						 ; Machines with CHIP RAM
+
+#RobotFrameRate = 8
+#RobotHitPoints = 10
+
+
+; Hostage Constants
+;
+#MaxHostages		= 10
+
+
+; Missile/Explosion Constants
+;
+#DoorHits				= 15
+#MaxDoors				= 8
+#ExplosionFrames = 3
+#MaxExplosions	 = 20
+#ExplosionRate	 = 5
+#MissileMoves		= 100
+
+#MaxMissiles_FRAM= 5						; Machines with FAST RAM
+#MaxMissiles_CRAM= 3						; Machines with CHIP RAM
+
+#MissileTypes		= 4
+#MSLGun					= 0
+#MSLLaser				= 1
+#MSLRocket			 = 2
+#MSLPlasma			 = 3
+
+#WPNGun					= $1
+#WPNLaser				= $2
+#WPNRocket			 = $4
+#WPNPlasma			 = $8
+
+#ScanModel1			= 1
+#ScanModel2			= 2
+#ScanModel3			= 3
+
+
+; Animation Constants
+;
+#MaxAnimations = 100
+
+#AnimMaxFrames = 6
+#AnimOnce			= 1
+#AnimConstant	= 0
+
+
+; IFF Blocks
+;
+#MaxIFFBlocks	 = 10
+#IFFBlocks			= 6
+
+#IFFMinWidth		= 64
+#IFFMaxWidth		= 128
+#IFFMinHeight	 = 64
+#IFFMaxHeight	 = 128
+#IFFResolution	= $40
+
+
+; Switch Constants
+;
+#MaxSwitches	 = 15
+#SwitchBlocks	= 5
+
+#SetObstacle	 = 1
+#ResetObstacle = 0
+
+
+; Shape Constants
+;
+#MaxBGRShapes	 = 200
+#ShapeMissile	 = #MaxBGRShapes
+#ShapeRobotAnim = #ShapeMissile+(#MissileTypes*8)
+#ShapeRobot		 = #ShapeRobotAnim+4
+#ShapeHostage	 = #ShapeRobot+8
+#ShapeExplosion = #ShapeHostage+8
+#ShapeDummy		 = #ShapeExplosion+3
+#ShapeCompKey	 = #ShapeDummy+1
+#ShapeCompDig	 = #ShapeCompKey+36
+#ShapeTimer		 = #ShapeCompDig+30
+#ShapeDemo			= #ShapeTimer+10
+#ShapeBouncy		= #ShapeDemo+1	; Temporary shapes which are freed
+
+
+; Sprite Constants
+;
+#SpriteP1			 = 0
+
+
+; File Constants
+;
+#MaxFilename	 = 64
+#MapHeaderLen	= 16
+#MaxParameters = 20
+
+
+; Error Definitions
+;
+#ERRNoFile	= 1
+#ERRFileBad = 2
+
+
+; Raw Keycode Constants
+;
+#RawKey_C		 = $33
+#RawKey_S		 = $21
+#RawKey_ESC	 = $45
+#RawKey_SPACE = $40
+#RawKey_ENTER = $44
+#RawKey_HELP	= $5F
+#RawKey_F1		= $50
+#RawKey_F2		= $51
+#RawKey_F3		= $52
+#RawKey_F4		= $53
+#RawKey_F5		= $54
+#RawKey_F6		= $55
+#RawKey_F7		= $56
+#RawKey_F8		= $57
+#RawKey_F9		= $58
+#RawKey_F10	 = $59
+
+
+; Sounds
+;
+#SNDPlayerDead	= 0
+#SNDFireAtDoor	= 1
+#SNDPlayerHurt1 = 2
+#SNDPlayerHurt2 = 3
+#SNDPlasma			= 4
+#SNDGun				 = 5
+#SNDRocket			= 6
+#SNDLaser			 = 7
+#SNDDoorOpen		= 8
+#SNDRobot			 = 9
+#SNDScanner		 = 10
+#SNDGlass			 = 11
+#SNDTimerLoop	 = 12
+#SNDGoingIn		 = 13
+#SNDHeartbeat	 = 14
+#SNDPickup			= 15
+#SNDExplosion	 = 16
+#SNDRobotDead	 = 17
+
+
+; Mission Types
+;
+#EscapeMission = 0
+#RescueMission = 1
+#SwitchMission = 2
+
+
+; Timer Constants
+;
+#TimerDigitY	= #FGNDOff+(#BlockSize ASR 1)
+#Timer1DigitX = #FGNDOff+#ScrWidth-((#BlockSize ASL 1)+(#BlockSize ASR 1))
+#Timer2DigitX = #Timer1DigitX+#BlockSize
+
+#TimerMode0	 = 0							 ; Start timer after last hostage freed
+#TimerMode1	 = 1							 ; Start timer at beginning of level
+#TimerMode2	 = 2							 ; Timer switched off when mission accomplished
+#TimerActive	= $80						 ; Timer active flag (bit 7)
+#TimerRes		 = 50							; Timer resolution (1/50 sec)
+
+
+; Audio Constants
+;
+#AudioLC0 = $1									; These constants define the various hardware
+#AudioLC1 = $4									; channels, and their stereo pairs.
+#AudioRC0 = $2
+#AudioRC1 = $8
+#AudioST0 = #AudioLC0|#AudioRC0
+#AudioST1 = #AudioLC1|#AudioRC1
+
+
+; Miscellaneous
+;
+#BlitzDelay = 40								; Time to wait before re-entering BLITZ mode
+#NiceDelay	= 50								; 1	second delay
+#MedmDelay	= 100							 ; 2	second delay
+#LongDelay	= 200							 ; 4	second delay
+#HugeDelay	= 3000							; 60 second delay
+#MaxBouncy	= 20								; Spirally text thingy
+#NULL			 = 0								 ; NULL pointer (APTR=$000000)
+
+#MaxHiScores		 = 10					 ; Entries in the high-score table
+#MaxMissionLines = 21					 ; Lines in mission description
+#MaxFatalObjects = 10					 ; Amount of fatal objects
+#MaxObjects			= 20					 ; Amount of shootable objects
+
+
+; Type Definitions
+;
+NEWTYPE .MapInfo
+	Loaded.b
+	Width.w
+	Height.w
+End NEWTYPE
+
+NEWTYPE .MapData
+	BShape.b
+	Flags.b
+End NEWTYPE
+
+NEWTYPE .Animation
+	X.w													 ; Animation position: blocks
+	Y.w
+
+	FrameRate.w									 ; Frame rate: VWAIT cycles
+	TimeToAnim.w									; Time to next anim: VWAIT cycles
+	Frame.w											 ; Current frame no
+	AnimFrames.w									; Total frames
+	Flags.w											 ; Flags: #AnimOnce OR #AnimConstant
+	Shapes.w[#AnimMaxFrames]			; Array of shapes (frames)
+End NEWTYPE
+
+NEWTYPE .Object
+	ShapeNo.w										 ; Shape of object
+	DescrNo.w										 ; Shape of object description
+	EmptyNo.w										 ; Shape to replace object with
+	HitCount.w										; If shootable object, hits required to break
+	Sample.w											; Sound to play (0=no sound)
+End NEWTYPE
+
+NEWTYPE .FatalObject
+	FirstShape.w									; First shape in fatal object range
+	LastShape.w									 ; Last shape in fatal object range
+	XDtn.w												; X direction player must be going in
+	YDtn.w												; Y direction player must be going in
+End NEWTYPE
+
+NEWTYPE .Switch
+	XDtn.w												; Direction player must face to operate switch
+	YDtn.w
+	X.w[#SwitchBlocks]						; Switch position: blocks
+	Y.w[#SwitchBlocks]
+	ShapeNo.w[#SwitchBlocks]			; Switch shapes
+	Sample.w											; Sound to play (0=no sound)
+End NEWTYPE
+
+NEWTYPE .IFFBlock
+	BlockNo.w										 ; IFF block no (FILE=BlockXX.iff)
+	X.w[#IFFBlocks]							 ; Positions to place block: blocks
+	Y.w[#IFFBlocks]
+End NEWTYPE
+
+NEWTYPE .GameScreen
+	X.w													 ; Viewport top left:		 pixels
+	Y.w
+
+	FBitmap.w										 ; No of bitmap to use for drawing purposes
+End NEWTYPE
+
+NEWTYPE .PlayerInfo
+	X.w													 ; Player position: pixels
+	Y.w
+	XDtn.w												; Players last direction: pixel offsets
+	YDtn.w
+
+	ShapeNo.w										 ; Shape to display
+	PStartShape.w								 ; Starting shape
+	AnimFrame.w									 ; Animation frame
+	TimeForAnim.w								 ; Time to next animation
+
+	Scanner.w										 ; Model of scanner
+	Weapons.w										 ; Which weapons do we have ?
+	MissileNo.w									 ; Current missile
+	MStartShape.w								 ; Starting shape
+	Missiles.w										; Max no of missiles on screen
+	OkToFire.w										; Time to next missile: VWAIT cycles
+
+	Score.l											 ; Pretty obvious !
+	Credits.l
+	Lives.w
+	Health.w
+	Ammo.w
+	Keys.w
+
+	SCredits.l										; Statistics: Total credits collected
+	SAmmo.w											 ;						 Total rounds fired
+	SHostages.w									 ;						 Total hostages freed
+	SRobots.w										 ;						 Total Robots killed
+End NEWTYPE
+
+NEWTYPE .Explosion
+	X.w													 ; Explosion position: pixels
+	Y.w
+
+	AnimFrames.w									; Animation frames
+	TimeToAnim.w									; Time to next animation: VWAIT cycles
+	FrameNo.w										 ; Current frame no
+End NEWTYPE
+
+NEWTYPE .Missile
+	X.w													 ; Missile position: pixels
+	Y.w
+	XDtn.b												; Missile direction: +-pixel offset
+	YDtn.b
+
+	MissileType.w								 ; Type of missile
+	Velocity.w										; Missile current velocity
+	Moves.w											 ; Moves left
+	ShapeNo.w										 ; Shape to display
+End NEWTYPE
+
+NEWTYPE .MissileData
+	MaxVelocity.w								 ; Maximum missile velocity
+	Accel.w											 ; Missile acceleration
+	Strength.w										; Missile explosive strength
+	FireRate.w										; Autofire rate
+	MaxMissiles.w								 ; Maximum amount of missiles on screen
+End NEWTYPE
+
+NEWTYPE .Robot
+	X.w													 ; Robot position: pixels
+	Y.w
+	XDtn.w												; Robot direction: +-pixel offset
+	YDtn.w
+
+	Attack.w											; Robot AI (well sort of!)
+	Moves.w
+	Health.w											; Robot health
+
+	AnimFrame.w									 ; Animation frame
+	TimeForAnim.w								 ; Time to next animation
+	ShapeNo.w										 ; Shape to use
+	StartShape.w									; StartingShape
+
+	MapX.w												; Starting map position: blocks
+	MapY.w
+	TimeToRegen.w								 ; Time to regeneration
+	BeenHit.w										 ; Robot has been hit
+End NEWTYPE
+
+NEWTYPE .Hostage
+	X.w													 ; Position of hostage: blocks
+	Y.w
+	ShapeNo.w										 ; Background shape to replace hostage with
+End NEWTYPE
+
+NEWTYPE .Timer
+	Mode.w
+	Delay.w
+	Counter.w
+End NEWTYPE
+
+NEWTYPE .Key
+	X.w													 ; Position of computer key: pixels
+	Y.w
+	ShapeNo.w										 ; Shape of key
+	RawCode.w										 ; Amiga keyboard raw code
+	Legend.w											; Computer key legend
+End NEWTYPE
+
+NEWTYPE .CMenuItem
+	X.w													 ; Item position
+	Y.w
+	*Text.s											 ; Pointer to text to display
+End NEWTYPE
+
+NEWTYPE .BouncyLetter
+	Angle.q											 ; Angle to display letter at
+	ShapeNo.w										 ; Shape of letter to display
+End NEWTYPE
+
+NEWTYPE .HiScoreEntry
+	Score.l
+	Name$
+End NEWTYPE
+
+
+; Variable Declarations
+;
+MaxLen DataPath$		 = #MaxFilename
+MaxLen Filename$		 = #MaxFilename
+MaxLen BgrShapeFile$ = #MaxFilename
+MaxLen ObstacleFile$ = #MaxFilename
+MaxLen PaletteFile$	= #MaxFilename
+MaxLen RobotFile$		= #MaxFilename
+MaxLen HostageFile$	= #MaxFilename
+
+Dim Map.MapData(#MapCols-1, #MapRows-1)
+Dim Obstacles.b(#MaxBGRShapes-1)
+Dim MData.MissileData(#MissileTypes-1)
+Dim JtoP.b(2, 2)
+Dim JtoA.b(2, 2)
+Dim Keys.Key(#CompKeys-1)
+Dim Bouncy.BouncyLetter(#MaxBouncy-1)
+Dim ParamStr$(#MaxParameters-1)
+Dim ParamNum.w(#MaxParameters-1)
+Dim Mission$(#MaxMissionLines-1)
+Dim CMenu1.CMenuItem(6)
+Dim CMenu2.CMenuItem(4)
+Dim CMenu3.CMenuItem(4)
+Dim *DefNames.s(#MaxHiScores-1)
+Dim Demo.b(#MaxDemoSteps-1)
+
+Dim List IFF.IFFBlock(#MaxIFFBlocks-1)
+Dim List Doors.Object(#MaxDoors-1)
+Dim List Animate.Animation(#MaxAnimations-1)
+Dim List Switches.Switch(#MaxSwitches-1)
+Dim List Objects.Object(#MaxObjects-1)
+Dim List Explosions.Explosion(#MaxExplosions-1)
+Dim List Hostages.Hostage(#MaxHostages-1)
+Dim List HiScores.HiScoreEntry(#MaxHiScores)
+Dim List FatalObjects.FatalObject(#MaxFatalObjects-1)
+
+DEFTYPE ._BitScaleArgs BitMapScaleStruct
+DEFTYPE .MapInfo MapInfo
+DEFTYPE .MapData *MapPiece
+DEFTYPE .MissileData *MisData
+DEFTYPE .GameScreen ScreenInfo, *Scr
+DEFTYPE .PlayerInfo Plyr, *Player
+DEFTYPE .HiScoreEntry *NewHiScore
+DEFTYPE .Object Medikit, Key, Credit100, Credit1000, Ammo, Exit
+DEFTYPE .Timer Timer
+DEFTYPE .w CompBgr, CompPage
+DEFTYPE .w Levels, LevelNo, LevelComplete, EndOfGame, GamePalette
+DEFTYPE .w MissionType, MissionSteps
+DEFTYPE .w MaxRobots, MaxMissiles
+DEFTYPE .w RobotHealth, MissionLines
+DEFTYPE .w ScanSize, FastRAM, FastRAMOnly
+DEFTYPE .w Jx, Jy, Jb, InDemo, DemoStep, DemoAnim
+DEFTYPE .w
+
+
+; [ DoesFileExist ]-------------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if the specified file exists.													|
+; |																																				|
+; | Parameters:																														|
+; |	 Filename$ - Name of the file to check.															 |
+; |																																				|
+; | Return:																																|
+; |	 True	- File exists.																								 |
+; |	 False - File doesn't exist.																					|
+; []----------------------------------------------------------------------[]
+Function.w DoesFileExist {Filename$}
+	If WriteMem (0, Filename$)
+		CloseFile 0
+		RetCode = True
+	Else
+		RetCode = False
+	EndIf
+	Function Return RetCode
+End Function
+
+; [ FadeOutPal24 ]--------------------------------------------------------[]
+; | Description:																													 |
+; |	 Performs a 24bit AGA fadeout. The whole palette is faded out.				|
+; []----------------------------------------------------------------------[]
+Statement FadeOutPal24 {}
+	For Shade = 0 To 31
+		For ColReg = 0 To 255
+			AGAGreen 0, ColReg, QLimit(ShowPalette(ColReg)-8,0,255), QLimit(NewPaletteMode(ColReg)-8,0,255), QLimit(CyclePalette(ColReg)-8,0,255)
+		Next ColReg
+		Use SetCycle 0
+	Next Shade
+End Statement
+
+; [ FadeInPal24 ]---------------------------------------------------------[]
+; | Description:																													 |
+; |	 Fades the whole or part of a 24bit AGA palette in.									 |
+; |																																				|
+; | Parameters:																														|
+; |	 Pal			- Number of palette to fade in															|
+; |	 StartReg - First colour register (0..31)														 |
+; |	 EndReg	 - Last colour register (StartReg..31)											 |
+; |	 Delay		- Time between each fade step (1/50 sec)										|
+; []----------------------------------------------------------------------[]
+Statement FadeInPal24 {Pal.w, StartReg.w, EndReg.w, Delay.w}
+	DEFTYPE .Palette *PalPtr
+	DEFTYPE .PaletteData *PalData
+	DEFTYPE .RgbComp *RgbComp
+
+	*PalPtr	= Addr SetCycle (Pal)
+	*PalData = *PalPtr\_PalData
+	*RgbComp = *PalData\_Rgbs[0]
+	For ColReg = 0 To 255
+		If ColReg >= StartReg AND ColReg <= EndReg
+			AGAGreen #PALTmp, ColReg, 0, 0, 0
+		Else
+			RedVal	 = *RgbComp\_Red	 & $FF
+			GreenVal = *RgbComp\_Green & $FF
+			BlueVal	= *RgbComp\_Blue	& $FF
+			AGAGreen #PALTmp, ColReg, RedVal, GreenVal, BlueVal
+		EndIf
+		*RgbComp+SizeOf.RgbComp
+	Next ColReg
+	Use SetCycle #PALTmp
+
+	For Shade = 0 To 255 Step 4
+		*RgbComp = *PalData\_Rgbs[StartReg]
+		For ColReg = StartReg To EndReg
+			RedVal	 = *RgbComp\_Red	 & $FF
+			GreenVal = *RgbComp\_Green & $FF
+			BlueVal	= *RgbComp\_Blue	& $FF
+			NewRed	 = QLimit (ShowPalette(ColReg)+4, 0, RedVal)
+			NewGreen = QLimit (NewPaletteMode(ColReg)+4, 0, GreenVal)
+			NewBlue	= QLimit (CyclePalette(ColReg)+4, 0, BlueVal)
+			AGARed ColReg, NewRed, NewGreen, NewBlue
+			*RgbComp+SizeOf.RgbComp
+		Next ColReg
+	Next Shade
+End Statement
+
+; [ BlackPalette ]--------------------------------------------------------[]
+; | Description:																													 |
+; |	 Sets the whole or part of a palette to black.												|
+; |																																				|
+; | Parameters:																														|
+; |	 Pal			- Number of palette to use																	|
+; |	 StartReg - First colour register (0..31)														 |
+; |	 EndReg	 - Last colour register (StartReg..31)											 |
+; []----------------------------------------------------------------------[]
+Statement BlackPalette {Pal.w, StartReg.w, EndReg.w}
+	For ColourReg = StartReg To EndReg
+		AGAGreen Pal, ColourReg, 0, 0, 0
+	Next ColourReg
+End Statement
+
+
+; GAME ENTRY POINT
+;	 This is the entry point into the game. This section has to be executed
+;	 while in Amiga mode (hence the routine's name), so no BLITZ statements
+;	 above this routine !
+;	 This routine also tries to find out if the machine we are running on
+;	 has any FAST RAM. If so, we make use of the fact that the game will
+;	 run faster by allowing more onscreen action. This approach is flawed
+;	 in that we can't guarantee that Workbench will actually run the game
+;	 in FAST memory, or that there is enough FAST memory free !
+;
+.InitAMIGA
+	If ##[$FE9A] (#MEMF_FAST) > 0
+		FastRAM		 = True
+		MaxRobots	 = #MaxRobots_FRAM
+		MaxMissiles = #MaxMissiles_FRAM
+	Else
+		FastRAM		 = False
+		MaxRobots	 = #MaxRobots_CRAM
+		MaxMissiles = #MaxMissiles_CRAM
+	EndIf
+	Dim List Missiles.Missile(MaxMissiles-1)
+	Dim List Robots.Robot(MaxRobots-1)
+
+	*Scr				= ScreenInfo
+	*Player		 = Plyr
+
+	InDemo			= False
+
+	DataPath$	 = "Data/"
+	CompDigit$	= " ABCDEFGHIJLNOPRSTUY0123456789"
+	HiScChar$	 = "ABCDEF123GHIJKL456MNOPQR789STUVWXYZ0"
+	CMenu1(0)\X = 3, 6,	"0	WEAPONS"
+	CMenu1(1)\X = 3, 8,	"1	SUPPLIES"
+	CMenu1(2)\X = 3, 10, "2	MISSION STATS"
+	CMenu1(3)\X = 3, 12, "3	MISSION BRIEFING"
+	CMenu1(4)\X = 3, 14, "4	CREDITS"
+	CMenu1(5)\X = 3, 16, "5	HIGH SCORES"
+	CMenu1(6)\X = 3, 18, "6	DISCONNECT"
+	CMenu2(0)\X = 2, 7,	"0	LASER			 $"+Str$(#CostLaser)
+	CMenu2(1)\X = 2, 9,	"1	ROCKETS		 $"+Str$(#CostRocket)
+	CMenu2(2)\X = 2, 11, "2	PLASMA			$"+Str$(#CostPlasma)
+	CMenu2(3)\X = 2, 13, "3	SCANR UPGR. $"+Str$(#CostScanner)
+	CMenu2(4)\X = 2, 15, "4	MAIN MENU"
+	CMenu3(0)\X = 2, 7,	"0	AMMO				$"+Str$(#CostAmmo)
+	CMenu3(1)\X = 2, 9,	"1	KEYS ("+Str$(#KeysInPack)+")		$"+Str$(#CostKeys)
+	CMenu3(2)\X = 2, 11, "2	MEDIKIT		 $"+Str$(#CostMedikit)
+	CMenu3(3)\X = 2, 13, "3	EXTRA LIFE	$"+Str$(#CostLives)
+	CMenu3(4)\X = 2, 15, "4	MAIN MENU"
+	BoughtMsg$	= "BOUGHT"
+	NoDoughMsg$ = "NOT ENOUGH CREDITS"
+	YouHaveMsg$ = "ALREADY BOUGHT"
+	UpgradeMsg$ = "FULLY UPGRADED"
+
+	*DefNames(9) = "TIM"
+	*DefNames(8) = "MIKEY"
+	*DefNames(7) = "TERRY"
+	*DefNames(6) = "ALAN"
+	*DefNames(5) = "ROB"
+	*DefNames(4) = "STE"
+	*DefNames(3) = "CHRIS"
+	*DefNames(2) = "BLITZ"
+	*DefNames(1) = "BASIC"
+	*DefNames(0) = "II"
+
+	If FastRAM
+		MData(#MSLGun)\MaxVelocity		= 10, 10, 1,	5, #MaxMissiles_FRAM
+		MData(#MSLLaser)\MaxVelocity	=	6,	3, 2,	8, #MaxMissiles_FRAM
+		MData(#MSLRocket)\MaxVelocity =	8,	4, 3,	8, #MaxMissiles_FRAM
+		MData(#MSLPlasma)\MaxVelocity =	5,	2, 2, 10, #MaxMissiles_FRAM
+	Else
+		MData(#MSLGun)\MaxVelocity		= 10, 10, 1,	5, #MaxMissiles_CRAM
+		MData(#MSLLaser)\MaxVelocity	=	8,	4, 2,	8, #MaxMissiles_CRAM
+		MData(#MSLRocket)\MaxVelocity =	8,	4, 3,	8, #MaxMissiles_CRAM
+		MData(#MSLPlasma)\MaxVelocity =	6,	3, 2, 10, #MaxMissiles_CRAM-1
+	EndIf
+
+	USEPATH HiScores()
+	For HiScoreNo = #MaxHiScores To 1 Step -1
+		If AddLast (HiScores())
+			\Score = 15000*HiScoreNo, *DefNames(HiScoreNo-1)
+		EndIf
+	Next HiScoreNo
+
+	Restore JtoPData
+	For y = 0 To 2
+		For x = 0 To 2:Read JtoP.b(x, y):Next x
+	Next y
+	Restore JtoAData
+	For y = 0 To 2
+		For x = 0 To 2:Read JtoA.b(x, y):Next x
+	Next y
+
+	Restore ComputerKeys
+	For KeyNo = 0 To #CompKeys-1
+		Read Keys(KeyNo)\X, Keys(KeyNo)\Y, Keys(KeyNo)\ShapeNo, Keys(KeyNo)\RawCode, Keys(KeyNo)\Legend
+		Keys(KeyNo)\ShapeNo+#ShapeCompKey
+	Next KeyNo
+
+	LoadShape #ShapeDummy, DataPath$+"Pointer.shape"
+	LoadMedModule 0, DataPath$+"Soundtrack00.med"
+
+	Gosub ShowTitleScreens
+
+	LoadSprites #SpriteP1,			 DataPath$+"Player00.sprites"
+	LoadShapes	#ShapeMissile,	 DataPath$+"Missile00.shapes"
+	LoadShapes	#ShapeExplosion, DataPath$+"Explosion00.shapes"
+	LoadShapes	#ShapeCompKey,	 DataPath$+"Computer02.shapes"
+	LoadShapes	#ShapeCompDig,	 DataPath$+"Computer03.shapes"
+	LoadShapes	#ShapeTimer,		 DataPath$+"Timer00.shapes"
+	LoadPalette #PALLoading,		 DataPath$+"ColourL0.palette"
+	LoadPalette #PALComputer,		DataPath$+"ColourC0.palette"
+	LoadBlitzFont 0, DataPath$+"2001.font"
+
+	SampleNo = 0
+	While DoesFileExist {DataPath$+"Sound"+Right$(Hex$(SampleNo), 2)+".iff"} = True
+		LoadSound SampleNo, DataPath$+"Sound"+Right$(Hex$(SampleNo), 2)+".iff"
+		SampleNo+1
+	Wend
+
+	VWait #BlitzDelay
+	Goto InitBLITZ
+
+; ShowTitleScreens:
+;	 This routine displays the two main title screens. The first screen
+;	 displays the game name (and FAST RAM), while the second screen shows
+;	 Mike's cool picture.
+;
+.ShowTitleScreens
+	Gosub AMIGAStartSoundtrack
+
+	BlackPalette {0, 0, 255}
+	Screen 0, 0, 0, 640, 512, 8, $8004, "", 0, 0:Use SetCycle 0
+	Window 0, 0, 0, 640, 512, $1900, "", 0, 0:MenusOff
+	WPointer #ShapeDummy
+
+	LoadScreen 0, DataPath$+"Picture01.iff", 0
+	If FastRAM
+		FadeInPal24 {0, 48, 95, 0}
+	Else
+		BlackPalette {0, 48, 95}
+	EndIf
+	Use SetCycle 0
+	Delay = 5*50
+	While Delay AND Joyb(1) = 0
+		Delay-1
+		VWait
+	Wend
+	FadeOutPal24 {}
+
+	BlackPalette {0, 0, 255}
+	Use SetCycle 0
+	ShowScreen 0
+	Screen 1, 0, 0, 640, 512, 8, $8804, "", 0, 0:Use SetCycle 0
+	ShowScreen 0
+	LoadScreen 1, DataPath$+"Picture00.iff", 0
+	ShowScreen 1
+	Use SetCycle 0
+	Delay = 15*50
+	While Delay AND Joyb(1) = 0
+		Delay-1
+		VWait
+	Wend
+
+	Gosub AMIGAStopSoundtrack
+	Free Window 0
+	Free Screen 1
+	Free Screen 0
+	Free MidHandle	#ShapeDummy
+	Return
+
+; AMIGAStartSoundtrack:
+;	 Starts playing a MED module in AMIGA mode. The 'PlayMed' command is
+;	 called every 1/50th sec under interrupt to keep the soundtrack
+;	 playing.
+;
+.AMIGAStartSoundtrack
+	SetInt 5
+		PlayMed
+	End SetInt
+	StartMedModule 0
+	Return
+
+; AMIGAStopSoundtrack:
+;	 Stops a MED module started by the 'AMIGAStartSoundtrack' routine.
+;
+.AMIGAStopSoundtrack
+	For VolLevel = 64 To 0 Step -1
+		VWait
+		SetMedVolume VolLevel
+	Next VolLevel
+	ClrInt 5
+	StopMed
+	Free DecodeMedModule 0
+	Return
+
+
+BLITZ ; The point of no return !
+
+
+; [ WaitKeyOrJoy ]--------------------------------------------------------[]
+; | Description:																													 |
+; |	 Waits for a specific key, or a joystick button, to be pressed. The	 |
+; |	 routine does not return until the key/button has been released.			|
+; |																																				|
+; | Parameters:																														|
+; |	 RawKeyCode - Raw code of key to cjeck for														|
+; []----------------------------------------------------------------------[]
+Statement WaitKeyOrJoy {RawKeyCode.w}
+	Exit = False
+	Repeat
+		If RawStatus (RawKeyCode)
+			While RawStatus (RawKeyCode):Wend
+			Exit = True
+		EndIf
+		If Joyb(1)
+			While Joyb(1):Wend
+			Exit = True
+		EndIf
+	Until Exit = True
+End Statement
+
+; [ GetColour ]-----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Returns the value of an RGB component of a given register from the	 |
+; |	 specified palette.																									 |
+; |																																				|
+; | Parameters:																														|
+; |	 Pal			 - Number of palette	(0..?)																|
+; |	 Reg			 - Number of register (0..255)															|
+; |	 Component - Component type must be ONE of:													 |
+; |								 #RGBRed	 - Red component															|
+; |								 #RGBGreen - Green component														|
+; |								 #RGBBlue	- Blue component														 |
+; []----------------------------------------------------------------------[]
+Function.w GetColour {Pal.w, Reg.w, Component.w}
+	DEFTYPE .Palette *PalPtr
+	DEFTYPE .PaletteData *PalData
+	DEFTYPE .RgbComp *RgbComp
+	DEFTYPE .l ColourVal
+
+	*PalPtr	= Addr SetCycle (Pal)
+	*PalData = *PalPtr\_PalData
+	*RgbComp = *PalData\_Rgbs[Reg]
+	Select Component
+		Case #RGBRed
+			ColourVal = (*RgbComp\_Red ASR 28)&$F
+		Case #RGBGreen
+			ColourVal = (*RgbComp\_Green ASR 28)&$F
+		Case #RGBBlue
+			ColourVal = (*RgbComp\_Blue ASR 28)&$F
+	End Select
+	Function Return ColourVal
+End Statement
+
+; [ FadeToPal ]-----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Fades from one palette to another palette.													 |
+; |																																				|
+; | Parameters:																														|
+; |	 Pal1		 - Number of palette to fade from														|
+; |	 Pal2		 - Number of palette to fade to															|
+; |	 StartReg - First colour register in range (0..31)										|
+; |	 EndReg	 - Last colour register in range (StartReg..31)							|
+; |	 Delay		- Time between each fade step (1/50 sec)										|
+; []----------------------------------------------------------------------[]
+Statement FadeToPal {Pal1.w, Pal2.w, StartReg.w, EndReg.w, Delay.w}
+	DEFTYPE .Palette *PalPtr
+	DEFTYPE .PaletteData *PalData1, *PalData2
+	DEFTYPE .RgbComp *RgbComp, *RgbComp1, *RgbComp2
+
+	If Pal1 <> #PALTmp
+		*PalPtr	 = Addr SetCycle (Pal1)
+		*PalData1 = *PalPtr\_PalData
+		*RgbComp = *PalData1\_Rgbs[0]
+		USEPATH *RgbComp
+		For ColReg = 0 To 31
+			StopCycle #PALTmp, ColReg, (\_Red ASR 28)&$F, (\_Green ASR 28)&$F, (\_Blue ASR 28)&$F
+			*RgbComp+SizeOf.RgbComp
+		Next ColReg
+	EndIf
+
+	*PalPtr	 = Addr SetCycle (Pal2)
+	*PalData2 = *PalPtr\_PalData
+
+	Use SetCycle #PALTmp
+	If Delay = 0 Then Shades = 0 Else Shades = 15
+	For Shade = 0 To Shades
+		*RgbComp2 = *PalData2\_Rgbs[StartReg]
+		For ColReg = StartReg To EndReg
+			OldRed	 = Blue(ColReg)
+			OldGreen = Palette(ColReg)
+			OldBlue	= PalRGB(ColReg)
+			RedVal	 = OldRed+Sgn(((*RgbComp2\_Red ASR 28)&$F)-OldRed)
+			GreenVal = OldGreen+Sgn(((*RgbComp2\_Green ASR 28)&$F)-OldGreen)
+			BlueVal	= OldBlue+Sgn(((*RgbComp2\_Blue ASR 28)&$F)-OldBlue)
+			StopCycle #PALTmp, ColReg, RedVal, GreenVal, BlueVal
+			Green ColReg, RedVal, GreenVal, BlueVal
+			*RgbComp2+SizeOf.RgbComp
+		Next ColReg
+		If Delay Then VWait Delay
+	Next Shade
+End Statement
+
+; [ FadeOutPal ]----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Fades out a range of colour registers within the current palette by	|
+; |	 a certain amount of shades (degrees of intensity).									 |
+; |																																				|
+; | Parameters:																														|
+; |	 StartReg - First colour register (0..31)														 |
+; |	 EndReg	 - Last colour register (StartReg..31)											 |
+; |	 Shades	 - Amount of shades to fade (steps in fade)									|
+; |	 Delay		- Time between each fade step (1/50 sec)										|
+; []----------------------------------------------------------------------[]
+Statement FadeOutPal {StartReg.w, EndReg.w, Shades.w, Delay.w}
+	For ColReg = 0 To 31
+		StopCycle #PALTmp, ColReg, Blue (ColReg), Palette (ColReg), PalRGB (ColReg)
+	Next ColReg
+	Use SetCycle #PALTmp
+	For Shade = 0 To QLimit (Shades-1, 0, 15)
+		For ColReg = StartReg To EndReg
+			Green ColReg, QLimit (Blue (ColReg)-1, 0, 15), QLimit (Palette (ColReg)-1, 0, 15), QLimit (PalRGB (ColReg)-1, 0, 15)
+		Next ColReg
+		If Delay Then VWait Delay
+	Next Shade
+End Statement
+
+; [ FadeInPal ]-----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Fades the whole or part of a palette in.														 |
+; |																																				|
+; | Parameters:																														|
+; |	 Pal			- Number of palette to fade in															|
+; |	 StartReg - First colour register (0..31)														 |
+; |	 EndReg	 - Last colour register (StartReg..31)											 |
+; |	 Delay		- Time between each fade step (1/50 sec)										|
+; []----------------------------------------------------------------------[]
+Statement FadeInPal {Pal.w, StartReg.w, EndReg.w, Delay.w}
+	For ColReg = 0 To 31
+		If ColReg >= StartReg AND ColReg <= EndReg
+			StopCycle #PALTmp, ColReg, 0, 0, 0
+		Else
+			RedVal	 = GetColour {Pal, ColReg, #RGBRed}
+			GreenVal = GetColour {Pal, ColReg, #RGBGreen}
+			BlueVal	= GetColour {Pal, ColReg, #RGBBlue}
+			StopCycle #PALTmp, ColReg, RedVal, GreenVal, BlueVal
+		EndIf
+	Next ColReg
+	Use SetCycle #PALTmp
+
+	For Shade = 0 To 15
+		For ColReg = StartReg To EndReg
+			RedVal	 = GetColour {Pal, ColReg, #RGBRed}
+			GreenVal = GetColour {Pal, ColReg, #RGBGreen}
+			BlueVal	= GetColour {Pal, ColReg, #RGBBlue}
+			Green ColReg, QLimit (Blue(ColReg)+1, 0, RedVal), QLimit (Palette(ColReg)+1, 0, GreenVal), QLimit (PalRGB(ColReg)+1, 0, BlueVal)
+		Next ColReg
+		If Delay Then VWait Delay
+	Next Shade
+End Statement
+
+; [ GetCompKey ]----------------------------------------------------------[]
+; | Description:																													 |
+; |	 This function sits in a loop until one of the computer keys are			|
+; |	 pressed. The joystick can also be used to simulate the cursor keys	 |
+; |	 and the ENTER key.																									 |
+; |																																				|
+; | Returns:																															 |
+; |	 The legend of the key pressed.																			 |
+; []----------------------------------------------------------------------[]
+Function.w GetCompKey {}
+	Shared Keys()
+
+	Repeat
+		For KeyNo = 0 To #CompKeys-1
+			If RawStatus (Keys(KeyNo)\RawCode)
+				KeyX = Keys(KeyNo)\X
+				KeyY = Keys(KeyNo)\Y
+				ShapeNo = Keys(KeyNo)\ShapeNo
+				VWait:Blit ShapeNo+#CompKeys-1, KeyX, KeyY
+				While RawStatus (Keys(KeyNo)\RawCode):Wend
+				VWait:Blit ShapeNo, KeyX, KeyY
+				Function Return Keys(KeyNo)\Legend
+			EndIf
+		Next KeyNo
+
+		Jx = Joyx(1):Jy = Joyy(1):Jb = Joyb(1)
+		If Jx OR Jy OR Jb
+			If Jx
+				If Jx = -1 Then KeyNo = #CKEY_CLF Else KeyNo = #CKEY_CRT
+			Else
+				If Jy
+					If Jy = -1 Then KeyNo = #CKEY_CUP Else KeyNo = #CKEY_CDN
+				Else
+					If Jb Then KeyNo = #CKEY_ENTER
+				EndIf
+			EndIf
+			KeyX = Keys(KeyNo)\X
+			KeyY = Keys(KeyNo)\Y
+			ShapeNo = Keys(KeyNo)\ShapeNo
+			VWait:Blit ShapeNo+#CompKeys-1, KeyX, KeyY
+			While Joyx(1):Wend
+			While Joyy(1):Wend
+			While Joyb(1):Wend
+			VWait:Blit ShapeNo, KeyX, KeyY
+			Function Return Keys(KeyNo)\Legend
+		EndIf
+	Forever
+End Function
+
+; [ WriteCompDigits ]-----------------------------------------------------[]
+; | Description:																													 |
+; |	 Simulates an LED display by writing 7 bar digits. The display can		|
+; |	 handle most letters with the following exceptions: KMQVWXZ. The			|
+; |	 digits 0..9 are supported; spaces are taken as blank digits (all		 |
+; |	 LED segments off).																									 |
+; |																																				|
+; | Parameters:																														|
+; |	 Digit$ - String containing text to display													 |
+; |	 Clear	- If this parameter is TRUE any digits not written to are		 |
+; |						cleared.																										|
+; []----------------------------------------------------------------------[]
+Statement WriteCompDigits {Digit$, Clear.w}
+	Shared CompDigit$
+
+	X = #CompDigX
+	Y = #CompDigY
+	Length = QLimit (Len (Digit$), 0, #CompDigits)
+	For DigitNo = 0 To Length-1
+		ShapeNo = Instr (CompDigit$, Mid$(Digit$, DigitNo+1, 1))-1
+		If ShapeNo < 0 Then ShapeNo = 0
+		Blit #ShapeCompDig+ShapeNo, X, Y
+		X+#CompDigW
+	Next DigitNo
+
+	If Clear = True
+		While DigitNo < #CompDigits
+			Blit #ShapeCompDig, X, Y
+			X+#CompDigW
+			DigitNo+1
+		Wend
+	EndIf
+End Statement
+
+; [ ClearCompScreen ]-----------------------------------------------------[]
+; | Description:																													 |
+; |	 Clears the computer screen in a given colour.												|
+; |																																				|
+; | Parameters:																														|
+; |	 ColourNo - Colour to clear the screen to (0..15)										 |
+; []----------------------------------------------------------------------[]
+Statement ClearCompScreen {ColourNo.w}
+	Boxf 11, 11, 219, 221, ColourNo
+End Statement
+
+; [ WriteCompText ]-------------------------------------------------------[]
+; | Description:																													 |
+; |	 Writes a single line of text to the computer screen. The screen			|
+; |	 size is currently 25 characters square; X = 0..24, Y = 0..24				 |
+; |																																				|
+; | Parameters:																														|
+; |	 X				- X position of text (0..24)																|
+; |	 Y				- Y position of text (0..24)																|
+; |	 Text$		- The text to write																				 |
+; |	 FGNDCol	- Foreground text colour																		|
+; |	 BGNDCol	- Background text colour																		|
+; |	 Mode		 - Text justification																				|
+; []----------------------------------------------------------------------[]
+Statement WriteCompText {X.w, Y.w, Text$, FGNDCol, BGNDCol, Mode.w}
+	Length = QLimit (Len(Text$), 0, #CompScrW)
+	Select Mode
+		Case #TextJustR
+			X = #CompScrW-Length
+		Case #TextJustC
+			X = (#CompScrW-Length) ASR 1
+	End Select
+	X = QLimit (#CompScrX+X, #CompScrX, #CompScrX+#CompScrW)
+	Y = QLimit (#CompScrY+Y, #CompScrY, #CompScrY+#CompScrH)
+	Length = QLimit (Len(Text$), 0, #CompScrW-X+#CompScrX)
+	Locate X, Y
+	Colour FGNDCol, BGNDCol
+	Print Left$ (Text$, Length)
+End Statement
+
+; [ ComputerMessage ]-----------------------------------------------------[]
+; | Description:																													 |
+; |	 Displays a message on the computer's LED display.										|
+; |																																				|
+; | Parameters:																														|
+; |	 Message$ - The message to display																		|
+; []----------------------------------------------------------------------[]
+Statement ComputerMessage {Message$}
+	WriteCompDigits {Message$, True}
+	VWait #MedmDelay
+End Statement
+
+; [ GetMenuSelection ]----------------------------------------------------[]
+; | Description:																													 |
+; |	 This routine provides simple menu selection. A pointer to the first	|
+; |	 element of a menu (CMenuItem structure) is passed to this function	 |
+; |	 along with the amount of items in the menu, and the default item.		|
+; |																																				|
+; | Parameters:																														|
+; |	 *First	- Pointer to first item in menu															|
+; |	 Items	 - Amount of items in the menu																|
+; |	 DefItem - The item to select by default (0..Items-1)								 |
+; []----------------------------------------------------------------------[]
+Function.w GetMenuSelection {*First.CMenuItem, Items.w, DefItem.w, Redisplay.w}
+	DEFTYPE .CMenuItem *MenuPtr
+
+	USEPATH *MenuPtr
+	If Redisplay = 0
+		ClearCompScreen {0}
+		WriteCompText {0,	0, "CyberTech A7000", 2, 0, #TextJustC}
+		WriteCompText {0, 23, "Use the NUMERIC KEYPAD or", 2, 0, #TextJustC}
+		WriteCompText {0, 24, "CURSOR keys to select.",		2, 0, #TextJustC}
+		*MenuPtr = *First
+		For ItemNo = 0 To Items-1
+			If ItemNo = DefItem
+				WriteCompText {\X, \Y, \Text, 2, 4, #TextNormal}
+			Else
+				WriteCompText {\X, \Y,	Left$(\Text, 3), 5, 0, #TextNormal}
+				WriteCompText {\X+3, \Y, Mid$(\Text, 4), 4, 0, #TextNormal}
+			EndIf
+			*MenuPtr+SizeOf.CMenuItem
+		Next ItemNo
+	EndIf
+
+	ItemSelected = False
+	*MenuPtr = *First+(DefItem*SizeOf.CMenuItem)
+	Repeat
+		Legend = GetCompKey {}
+		WriteCompText {\X, \Y,	Left$(\Text, 3), 5, 0, #TextNormal}
+		WriteCompText {\X+3, \Y, Mid$(\Text, 4), 4, 0, #TextNormal}
+		Select Legend
+			Case #CKEY_ESC
+				DefItem = Items-1
+				ItemSelected = True
+			Case #CKEY_CUP
+				DefItem = QWrap(DefItem-1, 0, Items)
+			Case #CKEY_CDN
+				DefItem = QWrap(DefItem+1, 0, Items)
+			Case #CKEY_ENTER
+				ItemSelected = True
+			Default
+				If Legend < Items
+					DefItem = Legend
+					ItemSelected = True
+				EndIf
+		End Select
+		*MenuPtr = *First+(DefItem*SizeOf.CMenuItem)
+		WriteCompText {\X, \Y, \Text, 2, 4, #TextNormal}
+	Until ItemSelected = True
+
+	Function Return DefItem
+End Function
+
+; [ RobotHitObstacle ]----------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if an Robot will hit an obstacle if moved to a new		 |
+; |	 position.																														|
+; |																																				|
+; | Parameters:																														|
+; |	 X			- X position to check (relative to background bitmap)				 |
+; |	 Y			- Y position to check (relative to background bitmap)				 |
+; |																																				|
+; | Returns:																															 |
+; |	 False	- No object would be hit																			|
+; |	 True	 - Robot would hit something																	 |
+; []----------------------------------------------------------------------[]
+Function.w RobotHitObstacle {X.w, Y.w}
+	Shared Map()
+	DEFTYPE .MapData *MapPiece
+
+	RetCode = False
+	StartX	= X ASR 4:EndX = (X+#ShapeSize-1) ASR 4
+	StartY	= Y ASR 4:EndY = (Y+#ShapeSize-1) ASR 4
+	USEPATH *MapPiece
+	For y = StartY To EndY
+		*MapPiece = Map(StartX, y)
+		For x = StartX To EndX
+			If \Flags & #OBSTMask Then RetCode = True
+			*MapPiece+SizeOf.MapData
+		Next x
+	Next y
+	Function Return RetCode
+End Function
+
+; [ MoveRobot ]-----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if an Robot can be moved.															|
+; |																																				|
+; | Parameters:																														|
+; |	 *Scr	 - Pointer to screen info structure														|
+; |	 *Robot - Pointer to Robot to move																		|
+; |																																				|
+; | Returns:																															 |
+; |	 0 - Ok to move Robot																								 |
+; |	 1 - Robot is off screen, so kill it !																|
+; |	 2 - Robot is on a block boundary: check for obstacles								|
+; []----------------------------------------------------------------------[]
+Function.w MoveRobot {*Scr.GameScreen, *Robot.Robot}
+	UNLK a4
+	MOVEA.l d0,a0			 ; *Scr
+	MOVEA.l d1,a1			 ; *Robot
+	CLR.w	 d4
+
+	MOVE.w	(a1),d1		 ; *Robot\X
+	ADD.w	 4(a1),d1		; *Robot\XDtn
+	MOVE.w	(a0),d3		 ; *Scr\X
+	SUB.w	 #32,d3
+	CMP.w	 d3,d1
+	BLT		 OffScreen
+	ADD.w	 #320+32,d3
+	CMP.w	 d3,d1
+	BGT		 OffScreen
+
+	MOVE.w	2(a1),d1		; *Robot\Y
+	ADD.w	 6(a1),d1		; *Robot\YDtn
+	MOVE.w	2(a0),d3		; *Scr\Y
+	SUB.w	 #32,d3
+	CMP.w	 d3,d1
+	BLT		 OffScreen
+	ADD.w	 #256+32,d3
+	CMP.w	 d3,d1
+	BGT		 OffScreen
+
+CalcAnim:
+	ADDQ.w	#1,16(a1)	 ; *Robot\TimeForAnim
+	CMPI.w	#12,16(a1)
+	BLT		 CalcShape
+	CLR.w	 16(a1)
+	MOVEQ	 #1,d0
+	EOR		 d0,14(a1)	 ; *Robot\AnimFrame
+	CLR.w	 16(a1)			; *Robot\TimeForAnim
+
+CalcShape:
+	MOVE.w	20(a1),d0	 ; *Robot\StartShape
+	MOVE.w	14(a1),d1	 ; *Robot\AnimFrame
+	ASL.w	 #2,d1
+	ADD.w	 d1,d0
+	MOVE.w	d0,18(a1)	 ; *Robot\ShapeNo
+
+CheckXL:
+	MOVE.w	(a1),d1		 ; *Robot\X
+	AND.w	 #$F,d1
+	MOVE.w	4(a1),d2		; *Robot\XDtn
+	CMPI.w	#0,d2
+	BGT		 CheckXR
+	BEQ		 CheckYT
+	CMPI.w	#0,d1
+	BEQ		 CheckObstacle
+CheckXR:
+	CMPI.w	#8,d1			 ; #ShapeMod
+	BEQ		 CheckObstacle
+CheckYT:
+	MOVE.w	2(a1),d1		; *Robot\Y
+	AND.w	 #$F,d1
+	MOVE.w	6(a1),d2		; *Robot\YDtn
+	CMPI.w	#0,d2
+	BGT		 CheckYB
+	BEQ		 Ok
+	CMPI.w	#0,d1
+	BEQ		 CheckObstacle
+CheckYB:
+	CMPI.w	#8,d1			 ; #ShapeMod
+	BEQ		 CheckObstacle
+
+Ok:
+	CLR.w	 d0					; Ok!
+	RTS
+
+OffScreen:
+	MOVEQ	 #1,d0			 ; Kill Robot
+	RTS
+
+CheckObstacle:
+	MOVEQ	 #2,d0			 ; Check for obstacle
+	RTS
+End Function
+
+; [ ResetRobot ]----------------------------------------------------------[]
+; | Description:																													 |
+; |	 Resets various elements of the Robot structure once an Robot has		 |
+; |	 been killed.																												 |
+; []----------------------------------------------------------------------[]
+Statement ResetRobot {}
+	Shared Robots(), RobotHealth, FastRAM
+
+	USEPATH Robots()
+	\X = (\MapX ASL 4)+#BlockShape, (\MapY ASL 4)+#BlockShape, 0, 0, 0, 0, RobotHealth
+	\ShapeNo		 = #ShapeRobotAnim
+	\TimeForAnim = #RobotFrameRate
+	If FastRAM
+		\TimeToRegen = QLimit (150+Rnd(100), 150, 200)
+	Else
+		\TimeToRegen = QLimit (100+Rnd(100), 100, 150)
+	EndIf
+End Statement
+
+; [ CreateRobots ]--------------------------------------------------------[]
+; | Description:																													 |
+; |	 Creates Robots in the direction that the screen has just been				|
+; |	 scrolled.																														|
+; |																																				|
+; | Parameters:																														|
+; |	 Where - #CreateLeft : area of the screen to create Robots						|
+; |					 #CreateRight																								 |
+; |					 #CreateTop																									 |
+; |					 #CreateBottom																								|
+; []----------------------------------------------------------------------[]
+Statement CreateRobots {Where.w}
+	Shared *Scr, Map(), Robots(), RobotHealth
+
+	USEPATH *Scr
+	Select Where
+		Case #CreateLeft
+			StartX = QLimit (\X-#FGNDOff, 0, #BGNDWidth-#FGNDOff) ASR 4
+			EndX = StartX
+			StartY = \Y ASR 4:EndY = StartY+(#ScrHeight ASR 4)-1
+			XDtn = 1:YDtn = 0
+		Case #CreateRight
+			StartX = QLimit (\X+#ScrWidth, 0, #BGNDWidth-#FGNDOff) ASR 4
+			EndX = StartX
+			StartY = \Y ASR 4:EndY = StartY+(#ScrHeight ASR 4)-1
+			XDtn = -1:YDtn = 0
+		Case #CreateTop
+			StartY = QLimit (\Y-#FGNDOff, 0, #BGNDHeight-#FGNDOff) ASR 4
+			EndY = StartY
+			StartX = \X ASR 4:EndX = StartX+(#ScrWidth ASR 4)-1
+			XDtn = 0:YDtn = 1
+		Case #CreateBottom
+			StartY = QLimit (\Y+#ScrHeight, 0, #BGNDHeight-#FGNDOff) ASR 4
+			EndY = StartY
+			StartX = \X ASR 4:EndX = StartX+(#ScrWidth ASR 4)-1
+			XDtn = 0:YDtn = -1
+	End Select
+
+	If EndX < #MapCols AND EndY < #MapRows
+		USEPATH Robots()
+		For MapY = StartY To EndY
+			For MapX = StartX To EndX
+				If Map(MapX, MapY)\Flags & #RBOTMask
+					If AddItem (Robots())
+						\X = (MapX ASL 4)+#BlockShape, (MapY ASL 4)+#BlockShape
+						\XDtn				= XDtn, YDtn
+						\Moves			 = QLimit (Rnd(127), #BlockSize, 127)
+						\MapX				= MapX, MapY
+						\StartShape	= #ShapeRobot
+						\ShapeNo		 = #ShapeRobot
+						\TimeForAnim = #RobotFrameRate
+						\TimeToRegen = 0
+						\Health			= RobotHealth
+					EndIf
+				EndIf
+			Next MapX
+		Next MapY
+	EndIf
+End Statement
+
+; [ CreateExplosion ]-----------------------------------------------------[]
+; | Description:																													 |
+; |	 Creates an animated explosion.																			 |
+; |																																				|
+; | Parameters:																														|
+; |	 X					- X position of explosion: pixels												 |
+; |	 Y					- Y position of explosion: pixels												 |
+; |	 StartFrame - Starting frame of explosion animation									 |
+; []----------------------------------------------------------------------[]
+Statement CreateExplosion {X.w, Y.w, StartFrame.b}
+	Shared Explosions(), *Scr
+
+	USEPATH Explosions()
+	If AddItem (Explosions())
+		\X = X, Y
+		\AnimFrames = #ExplosionFrames
+		\FrameNo		= StartFrame
+		\TimeToAnim = #ExplosionRate
+	EndIf
+End Statement
+
+; [ FreeHostage ]---------------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if the player is about to walk into a hostage, and so	|
+; |	 freeing it. A short animation is played once the hostage has been		|
+; |	 set free.																														|
+; |																																				|
+; | Parameters:																														|
+; |	 MapX - X position of switch: blocks																	|
+; |	 MapY - Y position of switch: blocks																	|
+; |																																				|
+; | Returns:																															 |
+; |	 True	- A hostage has been freed																		 |
+; |	 False - No hostage there !																					 |
+; []----------------------------------------------------------------------[]
+Function.w FreeHostage {MapX.w, MapY.w}
+	Shared *Scr, *Player, Map(), Hostages(), Animate()
+	Shared GamePalette, Timer, MissionType, MissionSteps
+
+	FoundHostage = False
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages()) AND FoundHostage = False
+		If \X = MapX AND \Y = MapY
+			FoundHostage = True
+			*Player\SHostages+1
+			Map(\X, \Y)\BShape = #ShapeHostage+6, Map(\X, \Y)\Flags & NOT #SPCLMask
+
+			USEPATH Animate()
+			If AddFirst (Animate())
+				\X = MapX ASL 4, MapY ASL 4, 5, 5, 0, 6, #AnimOnce
+				For ShapeNo = 0 To 5
+					\Shapes[ShapeNo] = #ShapeHostage+ShapeNo+1
+				Next ShapeNo
+			Else
+				Use BitMap #BMPBgnd
+				BlitColl Hostages()\ShapeNo, MapX ASL 4, MapY ASL 4
+				Use BitMap *Scr\FBitmap
+			EndIf
+		EndIf
+	Wend
+
+	If MissionType = #RescueMission AND FoundHostage = True
+		MissionSteps-1
+		If MissionSteps = 0 AND Timer\Mode = #TimerMode0
+			Timer\Mode = Timer\Mode|#TimerActive
+		EndIf
+	EndIf
+
+	Function Return FoundHostage
+End Function
+
+; [ ShootObject ]---------------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if a special object is shootable. If a special object	|
+; |	 is shot, it is replaced with a different object and a sample will be |
+; |	 played if available.																								 |
+; |																																				|
+; | Parameters:																														|
+; |	 MapX - X position of object: blocks																	|
+; |	 MapY - Y position of object: blocks																	|
+; |																																				|
+; | Returns:																															 |
+; |	 True	- The object was shootable																		 |
+; |	 False - The object wasn't of the shootable type											|
+; []----------------------------------------------------------------------[]
+Function.w ShootObject {MapX.w, MapY.w}
+	Shared *Scr, Map(), Obstacles(), Objects()
+
+	FoundObject = False
+	Object = Map(MapX, MapY)\BShape:If Object < 0 Then Object+256
+	USEPATH Objects()
+	ResetList Objects()
+	While NextItem (Objects()) AND FoundObject = False
+		If Object = \ShapeNo
+			FoundObject = True
+			Hits = (Map(MapX, MapY)\Flags+1) & #CNTRMask
+			Map(MapX, MapY)\Flags = (Map(MapX, MapY)\Flags & #BITSMask)|Hits
+			If Hits >= \HitCount
+				Map(MapX, MapY)\BShape = \EmptyNo, Obstacles(\EmptyNo)
+				If \Sample Then Sound \Sample, #AudioRC1
+				Use BitMap #BMPBgnd
+				BlitColl \EmptyNo, MapX ASL 4, MapY ASL 4
+				Use BitMap *Scr\FBitmap
+			EndIf
+		EndIf
+	Wend
+	Function Return FoundObject
+End Function
+
+; [ IsObjectFatal ]-------------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if the player has hit a fatal object. A fatal object	 |
+; |	 is an object that will kill the player if touched. Some objects can	|
+; |	 only kill the player if going in a particular direction (e.g. one		|
+; |	 way doors).																													|
+; |																																				|
+; | Parameters:																														|
+; |	 Object - Number of the object to check															 |
+; |	 MapX	 - X position of object: blocks																|
+; |	 MapY	 - Y position of object: blocks																|
+; |	 XDtn	 - X direction of player: pixel offset												 |
+; |	 YDtn	 - Y direction of player: pixel offset												 |
+; |																																				|
+; | Returns:																															 |
+; |	 True	- Object is fatal																							|
+; |	 False - Object is not fatal																					|
+; []----------------------------------------------------------------------[]
+Function.w IsObjectFatal {Object.w, MapX.w, MapY.w, XDtn.w, YDtn.w}
+	Shared *Player, Map(), FatalObjects()
+
+	ObjectIsFatal = False
+	USEPATH FatalObjects()
+	ResetList FatalObjects()
+	While NextItem (FatalObjects())
+		If Object >= \FirstShape AND Object <= \LastShape
+			If (\XDtn = 0 AND \YDtn = 0) OR (XDtn = \XDtn AND YDtn = \YDtn)
+				ObjectIsFatal = True
+				*Player\Health = 0
+			EndIf
+		EndIf
+	Wend
+	Function Return ObjectIsFatal
+End Function
+
+; [ OpenDoor ]------------------------------------------------------------[]
+; | Description:																													 |
+; |	 Tries to open a door.																								|
+; |																																				|
+; | Parameters:																														|
+; |	 MapX		- X starting position of door																|
+; |	 MapY		- Y starting position of door																|
+; |	 XOff		- X direction indicator																			|
+; |	 YOff		- Y direction indicator																			|
+; []----------------------------------------------------------------------[]
+Statement OpenDoor {MapX.w, MapY.w, XOff.w, YOff.w}
+	Shared *Scr, *Player, Map(), Doors()
+	DEFTYPE .MapData *MapPiece
+
+	Sound #SNDDoorOpen, #AudioLC1
+	*Player\Score+#ScoreDoor
+	Use BitMap #BMPBgnd
+	USEPATH *MapPiece
+	For y = MapY To MapY+YOff
+		*MapPiece = Map(MapX, y)
+		For x = MapX To MapX+XOff
+			If \Flags & #DOORMask
+				ResetList Doors()
+				While NextItem (Doors ())
+					If Doors()\ShapeNo = \BShape
+						\BShape = Doors()\EmptyNo, 0
+					EndIf
+				Wend
+				BlitColl \BShape, x ASL 4, y ASL 4
+			EndIf
+			*MapPiece+SizeOf.MapData
+		Next x
+	Next y
+	Use BitMap *Scr\FBitmap
+End Statement
+
+; [ OperateSwitch ]-------------------------------------------------------[]
+; | Description:																													 |
+; |	 Operates a switch. When a switch is triggered (by the player walking |
+; |	 into it, or shooting it) two map blocks may be changed from an			 |
+; |	 obstacle into floor, or vice versa. Any animation at these two			 |
+; |	 positions is stopped.																								|
+; |																																				|
+; | Parameters:																														|
+; |	 MapX - X position of switch: blocks																	|
+; |	 MapY - Y position of switch: blocks																	|
+; |	 XDtn - X direction of player/missile																 |
+; |	 YDtn - Y direction of player/missile																 |
+; []----------------------------------------------------------------------[]
+Statement OperateSwitch {MapX.w, MapY.w, XDtn.w, YDtn.w}
+	Shared *Scr, *Player
+	Shared Map(), Obstacles(), Switches(), Animate(), Robots()
+	Shared MissionType, MissionSteps, Timer, GamePalette
+
+	Use BitMap #BMPBgnd
+	USEPATH Switches()
+	ResetList Switches()
+	While NextItem (Switches())
+		If (\XDtn = 0 OR \XDtn = XDtn) AND (\YDtn = 0 OR \YDtn = YDtn)
+			If MapX = \X[0] AND MapY = \Y[0]
+				If \Sample Then Sound \Sample, #AudioRC1
+				*Player\Score+#ScoreSwitch
+				BlitColl \ShapeNo[0], MapX ASL 4, MapY ASL 4
+				Map(MapX, MapY)\BShape = \ShapeNo[0], Map(MapX, MapY)\Flags & NOT #SPCLMask
+				For SwitchNo = 1 To #SwitchBlocks-1
+					If NOT (\X[SwitchNo] = 0 AND \Y[SwitchNo] = 0)
+						X = \X[SwitchNo] ASL 4:Y = \Y[SwitchNo] ASL 4
+						Map(\X[SwitchNo], \Y[SwitchNo])\BShape = \ShapeNo[SwitchNo], Obstacles(\ShapeNo[SwitchNo])
+						BlitColl \ShapeNo[SwitchNo], X, Y
+
+						ResetList Animate()
+						While NextItem (Animate())
+							If Animate()\X = X AND Animate()\Y = Y
+								BlitColl Animate()\Shapes[Animate()\AnimFrames-1], \X, \Y
+								KillItem Animate()
+							EndIf
+						Wend
+
+						If Obstacles(\ShapeNo[SwitchNo]) & #OBSTMask
+							ResetList Robots()
+							While NextItem (Robots())
+								If PColl (X, Y, #BlockSize, #BlockSize, Robots()\X, Robots()\Y, #ShapeSize, #ShapeSize)
+									ResetRobot {}
+									CreateExplosion {X+#BlockShape, Y+#BlockShape, 0}
+									*Player\Score+#ScoreRobot
+								EndIf
+							Wend
+
+							If PColl (X, Y, #BlockSize, #BlockSize, *Player\X+*Scr\X, *Player\Y+*Scr\Y, #ShapeSize, #ShapeSize)
+								*Player\Lives = 1
+								*Player\Health = 0
+							EndIf
+						EndIf
+					EndIf
+				Next SwitchNo
+				KillItem Switches()
+
+				If MissionType = #SwitchMission
+					MissionSteps-1
+					If MissionSteps = 0
+						If Timer\Mode = #TimerMode0
+							Timer\Mode	= Timer\Mode|#TimerActive
+						EndIf
+						If Timer\Mode = #TimerMode2|#TimerActive
+							Volume #AudioRC0, 0, 0, 0, 0
+							Timer\Mode	= #TimerMode2
+							GamePalette = #PALGame
+							Use SetCycle #PALGame
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Wend
+	Use BitMap *Scr\FBitmap
+End Statement
+
+; [ SpecialObject ]-------------------------------------------------------[]
+; | Description:																													 |
+; |	 The player is about to move onto a special object, and this routine	|
+; |	 determines what the object is.																			 |
+; |																																				|
+; | Parameters:																														|
+; |	 MapX - X position of special object																	|
+; |	 MapY - Y position of special object																	|
+; |																																				|
+; | Returns:																															 |
+; |	 True	- Object is fatal; don't move player													 |
+; |	 False - Object isn't fatal																					 |
+; []----------------------------------------------------------------------[]
+Function.w SpecialObject {MapX.w, MapY.w}
+	Shared *Scr, *Player, Map(), Animate ()
+	Shared Medikit, Key, Credit100, Credit1000, Ammo, Exit
+	Shared Timer, LevelComplete, MissionSteps
+	DEFTYPE .Object *ObjectPtr
+
+	ObjectIsFatal = False
+	*ObjectPtr = 0
+	Object = Map(MapX, MapY)\BShape:If Object < 0 Then Object+256
+	USEPATH *Player
+	If Object = Medikit\ShapeNo
+		\Health = #MaxHealth
+		*ObjectPtr = Medikit
+	Else
+		If Object = Key\ShapeNo
+			\Keys+1
+			*ObjectPtr = Key
+		Else
+			If Object = Credit100\ShapeNo
+				\Credits+100
+				\SCredits+100
+				*ObjectPtr = Credit100
+			Else
+				If Object = Credit1000\ShapeNo
+					\Credits+1000
+					\SCredits+1000
+					*ObjectPtr = Credit1000
+				Else
+					If Object = Ammo\ShapeNo
+						\Ammo = #MaxAmmo
+						*ObjectPtr = Ammo
+					Else
+						If Object >= Exit\ShapeNo AND Object <= Exit\DescrNo AND MissionSteps <= 0
+							If Timer\Mode & #TimerActive Then Volume #AudioRC0, 0, 0, 0, 0
+							LevelComplete = True
+						Else
+							If IsObjectFatal {Object, MapX, MapY, Sgn(\XDtn), Sgn(\YDtn)} = False
+								If FreeHostage {MapX, MapY} = False
+									If Map(MapX, MapY)\Flags & #OBSTMask = 0
+										OperateSwitch {MapX, MapY, Sgn(\XDtn), Sgn(\YDtn)}
+									EndIf
+								EndIf
+							Else
+								ObjectIsFatal = True
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+
+	If *ObjectPtr <> #NULL
+		If *ObjectPtr\Sample Then Sound *ObjectPtr\Sample, #AudioRC1
+		\Score+#ScoreObject
+		Map(MapX, MapY)\BShape = *ObjectPtr\EmptyNo
+		Map(MapX, MapY)\Flags	= Map(MapX, MapY)\Flags & NOT #SPCLMask
+		USEPATH Animate()
+		If AddLast (Animate())
+			\X = MapX ASL 4, MapY ASL 4, 60, 1, 0, 2, #AnimOnce
+			\Shapes[0] = *ObjectPtr\DescrNo
+			\Shapes[1] = *ObjectPtr\EmptyNo
+		Else
+			Use BitMap #BMPBgnd
+			BlitColl *ObjectPtr\EmptyNo, MapX ASL 4, MapY ASL 4
+			Use BitMap *Scr\FBitmap
+		EndIf
+	EndIf
+	Function Return ObjectIsFatal
+End Function
+
+; [ PlayerHitObstacle ]---------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see if the player will hit an obstacle if moved to a new	 |
+; |	 position.																														|
+; |																																				|
+; | Parameters:																														|
+; |	 X - X position to check (relative to background bitmap)							|
+; |	 Y - Y position to check (relative to background bitmap)							|
+; |																																				|
+; | Returns:																															 |
+; |	 False - No object would be hit																			 |
+; |	 True	- Player would hit something																	 |
+; []----------------------------------------------------------------------[]
+Function.w PlayerHitObstacle {X.w, Y.w}
+	Shared *Player, Map()
+	DEFTYPE .MapData *MapPiece
+
+	RetCode = False
+	StartX	= X ASR 4:EndX = (X+#ShapeSize-1) ASR 4
+	StartY	= Y ASR 4:EndY = (Y+#ShapeSize-1) ASR 4
+	USEPATH *MapPiece
+	For y = StartY To EndY
+		*MapPiece = Map(StartX, y)
+		For x = StartX To EndX
+			If \Flags & #SPCLMask
+				If SpecialObject {x, y} = True Then RetCode = True
+			EndIf
+			If \Flags & #DOORMask
+				Doors+1
+			Else
+				If \Flags & #OBSTMask Then RetCode = True
+			EndIf
+			*MapPiece+SizeOf.MapData
+		Next x
+	Next y
+	If Doors > 1
+		If *Player\Keys > 0
+			*Player\Keys-1
+			OpenDoor {StartX, StartY, EndX-StartX, EndY-StartY}
+		Else
+			RetCode = True
+		EndIf
+	EndIf
+Function Return RetCode
+End Function
+
+; [ MissileHitObstacle ]--------------------------------------------------[]
+; | Description:																													 |
+; |	 Checks to see is there is an obstacle within a given map section.		|
+; |																																				|
+; | Parameters:																														|
+; |	 MapX	 - X position within map: blocks															 |
+; |	 MapY	 - Y position within map: blocks															 |
+; |	 Width	- Width of section to check: blocks													 |
+; |	 Height - Height of section to check: blocks													|
+; |	 XDtn	 - X direction of missile																			|
+; |	 YDtn	 - Y direction of missile																			|
+; |																																				|
+; | Returns:																															 |
+; |	 True	- Missile hit something																				|
+; |	 False - Missile has't hit anything																	 |
+; []----------------------------------------------------------------------[]
+Function.w MissileHitObstacle {MapX.w, MapY.w, Width.b, Height.b, XDtn.w, YDtn.w}
+	Shared *Player, Map()
+	DEFTYPE .MapData *MapPiece
+
+	FoundObstacle	= False
+	DoorAlreadyHit = False
+	For y = MapY To MapY+Height
+		*MapPiece = Map(MapX, y)
+		For x = MapX To MapX+Width
+			If *MapPiece\Flags & (#SPCLMask|#OBSTMask)
+				If ShootObject {x, y} = False
+					OperateSwitch {x, y, XDtn, YDtn}
+				EndIf
+			EndIf
+			If *MapPiece\Flags & #DOORMask = #DOORMask AND DoorAlreadyHit = False
+				Sound #SNDFireAtDoor, #AudioLC1
+				HitsToDoorOpen = (*MapPiece\Flags & #CNTRMask)-1
+				*MapPiece\Flags = (*MapPiece\Flags & #BITSMask)+HitsToDoorOpen
+				XMap = x:YMap = y
+				XDtn = 0:YDtn = 0
+				If Map(x-1, y)\Flags & #DOORMask
+					Map(x-1, y)\Flags = (Map(x-1, y)\Flags & #BITSMask)+HitsToDoorOpen
+					XMap-1:XDtn = 1
+				EndIf
+				If Map(x+1, y)\Flags & #DOORMask
+					Map(x+1, y)\Flags = (Map(x+1, y)\Flags & #BITSMask)+HitsToDoorOpen
+					XDtn = 1
+				EndIf
+				If Map(x, y-1)\Flags & #DOORMask
+					Map(x, y-1)\Flags = (Map(x, y-1)\Flags & #BITSMask)+HitsToDoorOpen
+					YMap-1:YDtn = 1
+				EndIf
+				If Map(x, y+1)\Flags & #DOORMask
+					Map(x, y+1)\Flags = (Map(x, y+1)\Flags & #BITSMask)+HitsToDoorOpen
+					YDtn = 1
+				EndIf
+				If HitsToDoorOpen = 0 Then OpenDoor {XMap, YMap, XDtn, YDtn}
+				FoundObstacle	= True
+				DoorAlreadyHit = True
+			Else
+				If *MapPiece\Flags & #OBSTMask Then FoundObstacle = True
+			EndIf
+			*MapPiece+SizeOf.MapData
+		Next x
+	Next y
+	Function Return FoundObstacle
+End Function
+
+
+; ***************************************************************
+;
+;								*****	**		 ** ****** ******
+;								**	** **		 **	 **			**
+;								*****	**		 **	 **		 **
+;								**	** **		 **	 **		**
+;								*****	****** **	 **	 ******
+;
+; InitBLITZ
+;	 This routine initialises the BLITZ mode only stuff. The game intro
+;	 and restart loop is also contained here.
+;
+.InitBLITZ
+	BLITZ
+	BlitzKeys On
+	Queue 0, 20
+	Queue 1, 20
+
+	Gosub FindDiskData
+	Repeat
+		Gosub Intro
+		Gosub NewGame
+		While EndOfGame = False AND LevelNo <> Levels
+			Gosub NewLevel
+			Gosub MainLoop
+		Wend
+		Gosub GameOver
+		Gosub EndGame
+	Forever
+	End
+
+
+; FindDiskData
+;	 This routine attempts to find the game data. To do this, it looks for
+;	 one of the intro files in the current data directory. If it finds it
+;	 first time then we know the game was installed to hard drive. If the
+;	 file can't be found the game is being run from floppy. In this case a
+;	 picture is displayed telling the user to insert the game data disk.
+;
+.FindDiskData
+	BitMap #BMPTmp, #ScrWidth, #ScrHeight, 5
+	Slice 0, 44, #ScrWidth, #ScrHeight, #LORES, 5, 8, 32, #ScrWidth, #ScrWidth
+	Show #BMPTmp
+	DisplayOff
+
+	QAMIGA
+	If DoesFileExist {DataPath$+"Intro00.iff"} = False
+		LoadBitMap #BMPTmp, DataPath$+"Disk00.iff"
+		VWait #BlitzDelay
+		BLITZ
+		FadeOutPal {0, 15, 15, 0}
+		DisplayOn
+		FadeInPal {#PALLoading, 0, 15, 2}
+		Use SetCycle #PALLoading
+		QAMIGA
+		DataPath$ = "Data/"
+		While DoesFileExist {DataPath$+"Intro00.iff"} = False:Wend
+	EndIf
+
+	Levels = 0
+	While DoesFileExist {DataPath$+"Level"+Right$(Hex$(Levels), 2)+".map"} = True
+		Levels+1
+	Wend
+
+	VWait #BlitzDelay
+	BLITZ
+	FadeOutPal {0, 15, 15, 4}
+	DisplayOff
+	FreeSlices
+	Free BitMap #BMPTmp
+	Return
+
+
+; Intro:
+;	 This is the game intro. This routine displays the games: name, credits
+;	 and scenario.
+;
+.Intro
+	For ColReg = 0 To 31
+		StopCycle #PALBlack, ColReg, 0, 0, 0
+	Next ColReg
+
+	BitMap #BMPTmp,		 #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF0, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF1, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroF2, #ScrWidth, #ScrHeight, 4
+	BitMap #BMPIntroB0, #ScrWidth, #ScrHeight*4, 4
+
+	QAMIGA
+	LoadBitMap #BMPTmp, DataPath$+"Disk01.iff"
+	VWait #BlitzDelay
+	BLITZ
+	DisplayOff
+	FreeSlices
+	Slice 0, 44, #ScrWidth, #ScrHeight, #LORES, 4, 8, 16, #ScrWidth, #ScrWidth
+	Show #BMPTmp
+	Use SetCycle #PALBlack
+	DisplayOn
+	FadeInPal {#PALLoading, 0, 15, 3}
+
+	QAMIGA
+	LoadMedModule 0, DataPath$+"Soundtrack03.med"
+	LoadBitMap	#BMPIntroF0, DataPath$+"Intro00.iff"
+	LoadBitMap	#BMPIntroF1, DataPath$+"Intro01.iff"
+	LoadBitMap	#BMPIntroF2, DataPath$+"Intro10.iff"
+	LoadBitMap	#BMPIntroB0, DataPath$+"Intro11.iff"
+	LoadPalette #PALIntro0, DataPath$+"ColourI0.palette"
+	LoadPalette #PALIntro1, DataPath$+"ColourI1.palette"
+	VWait #BlitzDelay
+	BLITZ
+
+	FadeOutPal {0, 15, 15, 4}
+	Gosub StartSoundtrack
+
+	LevelNo	 = 0
+	LoopCount = 0
+	Repeat
+		DisplayOff
+		FreeSlices
+		Slice 0, 44, #ScrWidth, #ScrHeight, #LORES, 4, 8, 16, #ScrWidth, #ScrWidth
+		DisplayOn
+
+		Use SetCycle #PALBlack
+		For ScreenNo = 0 To 1
+			Show ScreenNo
+			FadeInPal {#PALIntro0, 0, 15, 3}
+			Use SetCycle #PALIntro0
+			Delay = #LongDelay ASL 1
+			While Delay
+				Jb = Joyb(1)
+				If Jb OR RawStatus (#RawKey_ESC)
+					FadeOutPal {0, 15, 15, 4}
+					Pop For
+					If Jb Then Goto ExitIntro Else Goto ExitGame
+				EndIf
+				Delay-1:VWait
+			Wend
+			FadeOutPal {0, 15, 15, 4}
+		Next ScreenNo
+
+		DisplayOff
+		FreeSlices
+		Slice 0, 44, #ScrWidth, #ScrHeight, #LORES_DPF, 8, 8, 32, #ScrWidth, #ScrWidth
+		Poke.w #BPLCON0, $0711		; BPLCON0: Allow 8 bitplanes to be used
+		Poke.w #BPLCON3, $1000		; BPLCON3: Set colour bank for playfield 2
+
+		ColReg1 = 15
+		ColReg2 = 11
+		ColReg3 =	9
+		For CopperBar = 0 To 15
+			ColSplit 1, ColReg1, ColReg1, ColReg1, 15-CopperBar
+			ColSplit 2, ColReg2, ColReg2, ColReg2, 15-CopperBar
+			ColSplit 3, ColReg3, ColReg3, ColReg3, 15-CopperBar
+			ColSplit 1, ColReg1, ColReg1, ColReg1, 240+CopperBar
+			ColSplit 2, ColReg2, ColReg2, ColReg2, 240+CopperBar
+			ColSplit 3, ColReg3, ColReg3, ColReg3, 240+CopperBar
+			ColReg1 = QLimit (ColReg1-1, 0, 15)
+			ColReg2 = QLimit (ColReg2-1, 0, 15)
+			ColReg3 = QLimit (ColReg3-1, 0, 15)
+		Next CopperBar
+
+		ShowF #BMPIntroB0, 0, 0, 0
+		ShowB #BMPIntroF2, 0, 0, 0
+		Use SetCycle #PALBlack
+		DisplayOn
+
+		FadeInPal {#PALIntro1, 15, 31, 2}
+		Use SetCycle #PALIntro1
+		For LineNo = 0 To 720
+			ShowF #BMPIntroB0, 0, LineNo, 0
+			ShowB #BMPIntroF2, 0, 0, 0
+			VWait 2
+			Jb = Joyb(1)
+			If Jb OR RawStatus (#RawKey_ESC)
+				Use BitMap #BMPIntroB0:BlockScroll
+				FadeOutPal {15, 31, 15, 2}
+				Pop For
+				If Jb Then Goto ExitIntro Else Goto ExitGame
+			EndIf
+		Next LineNo
+		FadeOutPal {15, 31, 15, 2}
+
+		If LoopCount & $1
+			InDemo = True
+;		 LevelNo = rnd(Levels)
+			Goto ExitIntro
+		EndIf
+		LoopCount+1
+	Forever
+
+ExitIntro:
+	Gosub StopSoundtrack
+	DisplayOff
+	FreeSlices
+	Free BitMap #BMPIntroB0
+	Free BitMap #BMPIntroF0
+	Free BitMap #BMPIntroF1
+	Free BitMap #BMPIntroF2
+	Free BitMap #BMPTmp
+	VWait #BlitzDelay
+	Return
+
+ExitGame:
+	Gosub StopSoundtrack
+	VWait #BlitzDelay
+	AMIGA
+	End
+	BLITZ
+
+
+; NewGame:
+;	 Initialises the required variables to start a new game. This routine
+;	 also creates the game and computer bitmaps.
+;
+.NewGame
+	BitMap #BMPCompF, #ScrWidth,	#ScrHeight,	4
+	BitMap #BMPCompB, #ScrWidth*2,#ScrHeight,	4
+
+	QAMIGA
+	LoadBitMap #BMPCompF, DataPath$+"Computer00.iff"
+	LoadBitMap #BMPCompB, DataPath$+"Computer01.iff"
+	VWait #BlitzDelay
+	BLITZ
+
+	BitMap #BMPBgnd,	#BGNDWidth, #BGNDHeight, 4
+	BitMap #BMPFgnd0, #FGNDWidth, #FGNDHeight, 4
+	BitMap #BMPFgnd1, #FGNDWidth, #FGNDHeight, 4
+
+	Gosub CreateGameScreen
+	ShowF #BMPFgnd0, 0, 0, 0
+	ShowB #BMPBgnd,	0, 0, 0
+
+	SetCollHi								; Set sprite collision for odd colours
+
+	EndOfGame = False
+
+	USEPATH *Player
+	\PStartShape = #SpriteP1
+	\MStartShape = #ShapeMissile
+	\ShapeNo		 = \PStartShape
+	\AnimFrame	 = 0
+	\Scanner		 = #ScanModel1
+	\Weapons		 = #WPNGun
+	\MissileNo	 = #MSLGun
+	\Missiles		= 0
+	\OkToFire		= 0
+	\Score			 = 0, 0, #MaxLives, #MaxHealth, #MaxAmmo, 0
+	\SCredits		= 0, 0, 0, 0
+
+	*MisData = MData(#MSLGun)
+	Return
+
+
+; CreateGameScreen:
+;	 Creates the main game screen. The display is AGA dualplayfield, and
+;	 features a double-buffered foreground.
+;	 NOTE: At the moment it is necessary to set BPLCON0 manually as BLITZ
+;	 does not fully support the AGA screen modes while in BLITZ mode. If
+;	 you try to specify 8 bitplanes with the slice command, you actually
+;	 end up with a hires screen with 0 bitplanes !
+;
+.CreateGameScreen
+	DisplayOff
+	FreeSlices
+	Slice 0, 44, #ScrWidth, #ScrHeight, #LORES_DPF, 8, 8, 32, #FGNDWidth, #BGNDWidth
+	Poke.w #BPLCON0, $0711		; BPLCON0: Allow 8 bitplanes to be used
+	Poke.w #BPLCON3, $1000		; BPLCON3: Set colour bank for playfield 2
+	Poke.w #BPLCON4, $0000		; BPLCON4: Set colours for sprites
+	DisplayOn
+	Return
+
+
+; EndGame:
+;	 This routine clears things up after a game has ended. Any memory that has
+;	 been allocated is freed (eg. bitmaps etc.)
+.EndGame
+	DisplayOff
+	FreeSlices
+	Free BitMap #BMPBgnd
+	Free BitMap #BMPFgnd0
+	Free BitMap #BMPFgnd1
+	Free BitMap #BMPCompF
+	Free BitMap #BMPCompB
+	Return
+
+
+; NewLevel:
+;	 Loads a new level in from disk, then creates the map in the background
+;	 bitmap.
+;
+.NewLevel
+	Use BitMap #BMPFgnd0:BlockScroll
+	ShowF #BMPFgnd0
+	QAMIGA:LoadBitMap #BMPFgnd1, DataPath$+"Disk01.iff":VWait #BlitzDelay:BLITZ
+	Use SetCycle #PALLoading
+	FadeOutPal {0, 31, 15, 0}
+	Use BitMap #BMPFgnd1:ShowF #BMPFgnd1:*Scr\FBitmap = 1
+	FadeInPal {#PALLoading, 0, 15, 2}
+	Use SetCycle #PALLoading
+
+	If MapInfo\Loaded = True
+		For ShapeNo = 0 To #MaxBGRShapes-1
+			Free MidHandle ShapeNo
+		Next ShapeNo
+		For ShapeNo = #ShapeRobotAnim To #ShapeRobot+7
+			Free MidHandle ShapeNo
+		Next ShapeNo
+		For ShapeNo = #ShapeHostage To #ShapeHostage+7
+			Free MidHandle ShapeNo
+		Next ShapeNo
+	EndIf
+
+	ClearList IFF()
+	ClearList Doors()
+	ClearList Robots()
+	ClearList Animate()
+	ClearList Objects()
+	ClearList Switches()
+	ClearList Hostages()
+	ClearList Missiles()
+	ClearList Explosions()
+	ClearList FatalObjects()
+
+	DemoStep			= 0
+	DemoAnim			= 0
+	MissionSteps	= 0
+	MissionType	 = #RescueMission
+	MissionLines	= 0
+
+	LevelComplete = False
+	FastRAMOnly	 = False
+
+	Key\ShapeNo				= -1, -1, -1
+	Ammo\ShapeNo			 = -1, -1, -1
+	Medikit\ShapeNo		= -1, -1, -1
+	Credit100\ShapeNo	= -1, -1, -1
+	Credit1000\ShapeNo = -1, -1, -1
+
+	Gosub LoadLevel
+	Gosub ShowCompLevel
+	Gosub CreateScannerPalette
+	Gosub CreateTimerPalette
+	LevelNo+1
+
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages())
+		Map(\X, \Y)\Flags = Map(\X, \Y)\Flags | #SPCLMask
+	Wend
+	Gosub DrawLevel
+
+	USEPATH *Player
+	\X				= (QLimit (\X, 1, #MapCols-2) ASL 4)+#BlockShape
+	\Y				= (QLimit (\Y, 1, #MapRows-1) ASL 4)+#BlockShape
+	*Scr\X		= QLimit (\X-#P1ScrollX, 0, #BGNDWidth-#ScrWidth)
+	*Scr\Y		= QLimit (\Y-#P1ScrollY, 0, #BGNDHeight-#ScrHeight)
+	\ShapeNo	= \PStartShape+JtoP(Sgn(\XDtn)+1, Sgn(\YDtn)+1)
+	\Missiles = 0, 0
+	\X-*Scr\X
+	\Y-*Scr\Y
+
+	RobotHealth = QLimit (LevelNo+1, 2, 8)
+
+	If Timer\Mode <> #TimerMode0
+		Timer\Mode = Timer\Mode|#TimerActive
+		If Timer\Delay > 0 Then GamePalette = #PALGame Else GamePalette = #PALTimer
+	Else
+		GamePalette = #PALGame
+	EndIf
+	FadeOutPal {0, 31, 15, 3}:BlockScroll
+
+	If NOT InDemo
+		CompBgr = True:CompPage = #CompBriefPage
+		Gosub Computer
+	Else
+		ShowB #BMPBgnd, *Scr\X, *Scr\Y, #FGNDOff
+		ShowF 1-*Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
+		Use BitMap *Scr\FBitmap
+		Use SetCycle GamePalette
+	EndIf
+	Return
+
+
+; LoadLevel:
+;	 Loads a level from disk. A ".config" file is read for each level to
+;	 determine which files to load etc. This method allows additional levels
+;	 to be added to the game without having to modify the source code.
+;
+.LoadLevel
+	QAMIGA
+	Filename$ = "Level"+Right$(Hex$(LevelNo), 2)
+
+	If InDemo
+		If WriteMem (0, DataPath$+Filename$+".demo")
+			##[$BE14] 0, &Demo(0), #MaxDemoSteps*SizeOf.b
+			CloseFile 0
+		EndIf
+	EndIf
+
+	If WriteMem (0, DataPath$+Filename$+".config")
+		FileInput 0
+		While NOT DosBuffLen (0)
+			Input$ = UCase$ (Edit$ (80))
+			If Instr ("; ", Left$(Input$, 1)) = 0 AND Left$(Input$, 1) <> ""
+				Str = 0:Starts = 1:Ends = 1:Length = Len (Input$)
+				While Ends <= Length
+					While Instr (", "+Chr$(9), Mid$(Input$, Ends, 1)) = 0	AND Ends <= Length:Ends+1:Wend
+					ParamStr$(Str) = Mid$(Input$, Starts, Ends-Starts)
+					ParamNum(Str)	= Val (ParamStr$(Str))
+					Str+1
+					While Instr (", "+Chr$(9), Mid$(Input$, Ends, 1)) > 0 AND Ends <= Length:Ends+1:Wend
+					Starts = Ends
+				Wend
+
+				Select Asc (Left$ (ParamStr$(0), 1))
+					Case 64		 ; '@MissionDescr'
+						If MissionLines < #MaxMissionLines
+							Mission$(MissionLines) = Mid$ (Input$, 2)
+							MissionLines+1
+						EndIf
+					Case 65		 ; 'ANIM X,Y,R,C,S[,S[,S[,S[,S[,S]]]]]'
+						If NOT (FastRAM = False AND FastRAMOnly = True)
+							USEPATH Animate()
+							If AddItem (Animate())
+								\X = ParamNum(1), ParamNum(2)
+								\FrameRate = ParamNum(3), ParamNum(4)
+								\AnimFrames = Str-5
+								\Flags = #AnimConstant
+								For ShapeNo = 0 To Str-6
+									\Shapes[ShapeNo] = ParamNum(5+ShapeNo)
+								Next ShapeNo
+								If \TimeToAnim < \FrameRate Then \TimeToAnim = \FrameRate-\TimeToAnim
+								\X = \X ASL 4:\Y = \Y ASL 4
+								\Frame = 0
+							EndIf
+						EndIf
+					Case 66		 ; 'BULLETS S,S,S,N'
+						Ammo\ShapeNo = ParamNum(1), ParamNum(2), ParamNum(3)
+						Ammo\Sample	= ParamNum(4)
+					Case 67		 ; 'CREDIT S,S,S,S,S,S,N'
+						Credit100\ShapeNo	= ParamNum(1), ParamNum(2), ParamNum(3)
+						Credit1000\ShapeNo = ParamNum(4), ParamNum(5), ParamNum(6)
+						Credit100\Sample	 = ParamNum(7)
+						Credit1000\Sample	= Credit100\Sample
+					Case 68		 ; 'DOOR S,S'
+						If AddItem (Doors())
+							Doors()\ShapeNo = ParamNum(1), 0, ParamNum(2)
+						EndIf
+					Case 69		 ; 'EXIT S,S'
+						Exit\ShapeNo = ParamNum(1), ParamNum(2)
+					Case 70		 ; 'FATAL S,S,XD,YD'
+						USEPATH FatalObjects()
+						If AddItem (FatalObjects())
+							\FirstShape = ParamNum(1), ParamNum(2)
+							\XDtn = ParamNum(3), ParamNum(4)
+						EndIf
+					Case 72		 ; 'HOSTAGE X,Y,S'
+						USEPATH Hostages()
+						If AddItem (Hostages())
+							\X = ParamNum(1), ParamNum(2), ParamNum(3)
+						EndIf
+					Case 73		 ; 'IFF N,X1,Y1[,X2,Y2] etc'
+						USEPATH IFF()
+						If AddItem (IFF())
+							\BlockNo = ParamNum(1)
+							Parameter = 2
+							For PosNo = 0 To QLimit ((Str-Parameter)/2, 0, #IFFBlocks-1)-1
+								\X[PosNo] = ParamNum(Parameter)
+								\Y[PosNo] = ParamNum(Parameter+1)
+								Parameter+2
+							Next PosNo
+						EndIf
+					Case 75		 ; 'KEY S,S,S,N'
+						Key\ShapeNo = ParamNum(1), ParamNum(2), ParamNum(3)
+						Key\Sample	= ParamNum(4)
+					Case 76		 ; 'LEVEL B,P,A,H'
+						BgrShapeFile$ = "Background"+Right$(Hex$(ParamNum(1)),2)+".shapes"
+						ObstacleFile$ = "Background"+Right$(Hex$(ParamNum(1)),2)+".masks"
+						PaletteFile$	= "Colour"+Right$(Hex$(ParamNum(2)),2)+".palette"
+						RobotFile$		= "Robot"+Right$(Hex$(ParamNum(3)),2)+".shapes"
+						HostageFile$	= "Hostage"+Right$(Hex$(ParamNum(4)),2)+".shapes"
+					Case 77
+						Select Asc (Mid$ (ParamStr$(0), 2, 1))
+							Case 69 ; 'MEDIKIT S,S,S,N'
+								Medikit\ShapeNo = ParamNum(1), ParamNum(2), ParamNum(3)
+								Medikit\Sample	= ParamNum(4)
+							Case 73 ; 'MISSION ESCAPE|RESCUE|SWITCHES,N'
+								Select Asc (Left$ (ParamStr$(1), 1))
+									Case 69
+										MissionType	= #EscapeMission
+										MissionSteps = 0
+									Case 82
+										MissionType = #RescueMission
+										MissionSteps = ParamNum(2)
+									Case 83
+										MissionType = #SwitchMission
+										MissionSteps = ParamNum(2)
+								End Select
+						End Select
+					Case 79		 ; 'OBJECT S,S,N'
+						USEPATH Objects()
+						If AddItem (Objects())
+							\ShapeNo	= ParamNum(1), 0, ParamNum(2)
+							\HitCount = ParamNum(3), ParamNum(4)
+						EndIf
+					Case 80		 ; 'PLAYER X1,Y1,XD,YD'
+						*Player\X		= ParamNum(1), ParamNum(2)
+						*Player\XDtn = 2*Sgn(ParamNum(3)), 2*Sgn(ParamNum(4))
+					Case 82		 ; 'RAM'
+						FastRAMOnly = True
+					Case 83		 ; 'SWITCH XD,YD,N,X1,Y1,S1[,X2,Y2,S2[,X3,Y3,S3[,X4,Y4,S4]]]'
+						USEPATH Switches()
+						If AddItem (Switches())
+							\XDtn	 = ParamNum(1), ParamNum(2)
+							\Sample = ParamNum(3)
+							Parameter = 4
+							For SwitchNo = 0 To QLimit ((Str-Parameter)/3, 0, #SwitchBlocks-1)
+								\X[SwitchNo]			 = ParamNum(Parameter)
+								\Y[SwitchNo]			 = ParamNum(Parameter+1)
+								\ShapeNo[SwitchNo] = ParamNum(Parameter+2)
+								Parameter+3
+							Next SwitchNo
+						EndIf
+					Case 84		 ; 'TIMER M,T,D'
+						USEPATH Timer
+						\Mode		= ParamNum(1)
+						\Counter = ParamNum(2)*#TimerRes
+						\Delay	 = ParamNum(3)*#TimerRes
+				End Select
+			EndIf
+		Wend
+		CloseFile 0
+		DefaultInput
+	Else
+		EndOfGame = True
+		Return
+	EndIf
+
+	USEPATH MapInfo
+	Filename$ = Filename$+".map"
+	If WriteMem (0, DataPath$+Filename$)
+		Loc 0, #MapHeaderLen
+		##[$BE14] 0, &\Width,	SizeOf.w
+		##[$BE14] 0, &\Height, SizeOf.w
+		If \Width <> #MapCols OR \Height <> #MapRows
+			CloseFile 0
+			End
+		EndIf
+		##[$BE14] 0, &Map(0, 0), \Height*\Width*SizeOf.MapData
+		CloseFile 0
+	EndIf
+
+	If WriteMem (0, DataPath$+ObstacleFile$)
+		##[$BE14] 0, &Obstacles(0), #MaxBGRShapes*SizeOf.b
+		CloseFile 0
+	EndIf
+
+	LoadPalette #PALGame, DataPath$+"Colour00.palette"
+	LoadPalette #PALGame, DataPath$+PaletteFile$, 16
+
+	AutoCookie Off
+	LoadShapes 0, #MaxBGRShapes-1, DataPath$+BgrShapeFile$
+	AutoCookie On
+
+	LoadShapes #ShapeRobotAnim, #ShapeRobot+7, DataPath$+RobotFile$
+	LoadShapes #ShapeHostage, #ShapeHostage+7, DataPath$+HostageFile$
+
+	\Loaded = True
+	VWait #BlitzDelay:BLITZ
+	Return
+
+
+; DrawLevel:
+;	 This routine draws a level in the background playfield. This process
+;	 is in four stages:
+;
+;	 1) Draw the background shapes
+;	 2) Draw the first frame of all animations
+;	 3) Draw any hostages
+;	 4) Draw imported IFF sections
+;
+.DrawLevel
+	Use BitMap #BMPBgnd
+	For y = 0 To #BGNDHeight-#BlockSize Step #BlockSize
+		*MapPiece = Map(0, y ASR 4)
+		For x = 0 To #BGNDWidth-#BlockSize Step #BlockSize
+			ShapeNo = *MapPiece\BShape:If ShapeNo < 0 Then ShapeNo+256
+			BlitColl ShapeNo, x, y
+			If *MapPiece\Flags & #DOORMask Then *MapPiece\Flags = (#DOORMask|#OBSTMask)+#DoorHits
+			*MapPiece+SizeOf.MapData
+		Next x
+	Next y
+
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
+		BlitColl \Shapes[\Frame], \X, \Y
+	Wend
+
+	USEPATH Hostages()
+	ResetList Hostages()
+	While NextItem (Hostages())
+		TX = \X ASL 4:TY = \Y ASL 4
+		BlitColl #ShapeHostage, TX, TY
+	Wend
+
+	QAMIGA
+	USEPATH IFF()
+	ResetList IFF()
+	While NextItem (IFF())
+		Filename$ = "Block"+Right$(Hex$(\BlockNo), 2)+".iff"
+		ILBMDepth DataPath$+Filename$
+		IFFWidth	= QLimit (ILBMViewMode,	#IFFMinWidth,	#IFFMaxWidth)	& #IFFResolution
+		IFFHeight = QLimit (DecodeILBM, #IFFMinHeight, #IFFMaxHeight) & #IFFResolution
+		BitMap #BMPTmp, IFFWidth, IFFHeight, 4
+		LoadBitMap #BMPTmp, DataPath$+Filename$
+
+		For y = 0 To (IFFHeight/#IFFResolution)-1 Step #IFFResolution
+			For x = 0 To (IFFWidth/#IFFResolution)-1 Step #IFFResolution
+				Use BitMap #BMPTmp
+				GetaShape #ShapeDummy, x, y, #IFFResolution, #IFFResolution
+				Use BitMap #BMPBgnd
+				PosNo = 0
+				While NOT (\X[PosNo] = 0 AND \Y[PosNo] = 0)
+					TX = \X[PosNo] ASL 4:TY = \Y[PosNo] ASL 4
+					Blit #ShapeDummy, TX+x, TY+y
+					PosNo+1
+				Wend
+				Free MidHandle #ShapeDummy
+			Next x
+		Next y
+		Free BitMap #BMPTmp
+	Wend
+	VWait #BlitzDelay:BLITZ
+	Use BitMap *Scr\FBitmap
+	Return
+
+
+; CreateScannerPalette:
+;	 Creates the palette to be used by the scanner. The first 16 colours of
+;	 the palette is made up of the second 16 colours of the main palette,
+;	 palette 0. The second 16 colours are black (to hide the background
+;	 playfield).
+;
+.CreateScannerPalette
+	For PaletteEntry = 0 To 15
+		RedVal	 = GetColour {#PALGame, PaletteEntry+16, #RGBRed}
+		GreenVal = GetColour {#PALGame, PaletteEntry+16, #RGBGreen}
+		BlueVal	= GetColour {#PALGame, PaletteEntry+16, #RGBBlue}
+		StopCycle #PALScanner, PaletteEntry, RedVal, GreenVal, BlueVal
+	Next PaletteEntry
+	For PaletteEntry = 16 To 31
+		StopCycle #PALScanner, PaletteEntry, 0, 0, 0
+	Next PaletteEntry
+	Return
+
+
+; CreateTimerPalette:
+;	 Creates the palette to be used when the timer has been activated.
+;	 The first half of this palette (foreground playfield) is the same as
+;	 the main game palette. The second half of this palette is converted
+;	 to the red-scale equivalents of the second half of the main game
+;	 palette.
+;
+.CreateTimerPalette
+	For PaletteEntry = 0 To 15
+		RedVal	 = GetColour {#PALGame, PaletteEntry, #RGBRed}
+		GreenVal = GetColour {#PALGame, PaletteEntry, #RGBGreen}
+		BlueVal	= GetColour {#PALGame, PaletteEntry, #RGBBlue}
+		StopCycle #PALTimer, PaletteEntry, RedVal, GreenVal, BlueVal
+	Next PaletteEntry
+	For PaletteEntry = 16 To 31
+		RedVal	 = GetColour {#PALGame, PaletteEntry, #RGBRed}
+		GreenVal = GetColour {#PALGame, PaletteEntry, #RGBGreen}
+		BlueVal	= GetColour {#PALGame, PaletteEntry, #RGBBlue}
+		If GreenVal > RedVal Then RedVal = GreenVal
+		If BlueVal	> RedVal Then RedVal = BlueVal
+		StopCycle #PALTimer, PaletteEntry, RedVal, 0, 0
+	Next PaletteEntry
+	Return
+
+
+; MainLoop:
+;	 This is the main program control loop which takes care of updating
+;	 the screen, player, Robots, missiles and explosions etc.
+;
+.MainLoop
+	USEPATH *Scr
+	Sound #SNDGoingIn, #AudioST1
+	While LevelComplete = False
+		VWait
+		ShowF \FBitmap, #FGNDOff, #FGNDOff, \X
+		ShowB #BMPBgnd, \X, \Y, #FGNDOff
+		Gosub ShowSprites
+		\FBitmap = 1-\FBitmap
+		Use BitMap \FBitmap
+		UnQueue \FBitmap
+
+		If NOT InDemo
+			If RawStatus (#RawKey_S)		 Then Gosub Scanner
+			If RawStatus (#RawKey_ENTER) Then Gosub SwitchWeapon
+			If RawStatus (#RawKey_HELP)	Then LevelComplete = True
+			If RawStatus (#RawKey_C)
+				CompBgr = True:CompPage = #CompFirstPage
+				Gosub Computer
+			EndIf
+			If RawStatus (#RawKey_SPACE)
+				CompBgr = False:CompPage = #CompStatsPage
+				Gosub Computer
+			EndIf
+		EndIf
+		If RawStatus (#RawKey_ESC)
+			While RawStatus (#RawKey_ESC):Wend
+			*Player\Lives = 0
+			EndOfGame = True:LevelComplete = True
+		EndIf
+
+		Gosub MoveRobots
+		Gosub MovePlayer
+		Gosub MoveMissiles
+		Gosub MoveAnimations
+		Gosub MoveExplosions
+
+		If InDemo Then Gosub ShowInDemo
+
+		If Timer\Mode & #TimerActive
+			Gosub UpdateTimer
+			If Timer\Counter = 0 Then EndOfGame = True:LevelComplete = True
+		EndIf
+	Wend
+
+	Gosub HideSprites
+	Volume $F, 0, 0, 0, 0
+	If EndOfGame = False
+		*Player\Score+#ScoreLevel
+		If LevelNo = Levels
+			EndOfGame = True
+		Else
+			FadeOutPal {0, 31, 15, 4}
+			UnQueue 1-\FBitmap
+		EndIf
+	EndIf
+	Return
+
+
+; MovePlayer:
+;	 This routine checks the joysticks to see if the player is to move or fire
+;	 a missile.
+;
+.MovePlayer
+	USEPATH *Player
+	If \Health <= 0
+		If \Health = 0
+			Sound #SNDPlayerDead, #AudioST1
+			\ShapeNo = \PStartShape
+			\TimeForAnim = 0
+			\Lives-1
+			\Health-1
+		EndIf
+
+		\TimeForAnim+1
+		If \TimeForAnim = 4 Then \ShapeNo+1:\TimeForAnim = 0
+
+		If \ShapeNo = \PStartShape+8
+			\ShapeNo = \PStartShape+(\AnimFrame ASL 3)+JtoP(Sgn(\XDtn)+1, Sgn(\YDtn)+1)
+			If \Lives = 0
+				EndOfGame		 = True
+				LevelComplete = True
+			Else
+				\Health = #MaxHealth
+			EndIf
+		EndIf
+		Return
+	EndIf
+
+	If InDemo
+		Gosub PlaybackJoystick
+	Else
+		Jx = Joyx(1)
+		Jy = Joyy(1)
+		Jb = Joyb(1)
+	EndIf
+
+	CNIF #RECORD_DEMO=1
+		Gosub RecordJoystick
+	CEND
+
+	XDtn = Jx ASL 1
+	YDtn = Jy ASL 1
+	If NOT (XDtn = 0 AND YDtn = 0)
+		\XDtn = XDtn:\YDtn = YDtn
+		RealX = *Scr\X+\X:RealY = *Scr\Y+\Y
+		CheckX = False:CheckY = False
+		If (XDtn < 0 AND RealX & #BlockMod = 0) OR (XDtn > 0 AND RealX & #BlockMod = #ShapeMod) Then CheckX = True
+		If (YDtn < 0 AND RealY & #BlockMod = 0) OR (YDtn > 0 AND RealY & #BlockMod = #ShapeMod) Then CheckY = True
+
+		If CheckX = True
+			If PlayerHitObstacle {RealX+XDtn, RealY}
+				If YDtn = 0
+					If XDtn < 0 Then MapX = (RealX+XDtn) ASR 4 Else MapX = (RealX+XDtn+#ShapeSize) ASR 4
+					MapY = RealY ASR 4
+					If Map(MapX, MapY)\Flags & #OBSTMask = 0 OR Map(MapX, MapY-1)\Flags & #OBSTMask = 0
+						YDtn = -2
+					Else
+						MapY = (RealY+#ShapeSize) ASR 4
+						If Map(MapX, MapY)\Flags & #OBSTMask = 0 OR Map(MapX, MapY+1)\Flags & #OBSTMask = 0
+							YDtn = 2
+						EndIf
+					EndIf
+
+					If PlayerHitObstacle {RealX, RealY+YDtn} Then YDtn = 0
+				EndIf
+				XDtn = 0
+			EndIf
+		EndIf
+		If CheckY = True
+			If PlayerHitObstacle {RealX, RealY+YDtn}
+				If XDtn = 0
+					If YDtn < 0 Then MapY = (RealY+YDtn) ASR 4 Else MapY = (RealY+YDtn+#ShapeSize) ASR 4
+					MapX = RealX ASR 4
+					If Map(MapX, MapY)\Flags & #OBSTMask = 0 OR Map(MapX-1, MapY)\Flags & #OBSTMask = 0
+						XDtn = -2
+					Else
+						MapX = (RealX+#ShapeSize) ASR 4
+						If Map(MapX, MapY)\Flags & #OBSTMask = 0 OR Map(MapX+1, MapY)\Flags & #OBSTMask = 0
+							XDtn = 2
+						EndIf
+					EndIf
+
+					If PlayerHitObstacle {RealX+XDtn, RealY} Then XDtn = 0
+				EndIf
+				YDtn = 0
+			EndIf
+		EndIf
+		If CheckX = True AND CheckY = True AND XDtn <> 0 AND YDtn <> 0
+			If PlayerHitObstacle {RealX+XDtn, RealY+YDtn} = True Then XDtn = 0:YDtn = 0
+		EndIf
+	EndIf
+	If NOT (XDtn = 0 AND YDtn = 0)
+		\TimeForAnim+1
+		If \TimeForAnim >= 7 Then \AnimFrame = 1-\AnimFrame:\TimeForAnim = 0
+		If XDtn < 0 AND *Scr\X > 0 AND \X = #P1ScrollX
+			*Scr\X+XDtn:XDtn = 0
+			If *Scr\X & #BlockMod = 0 Then CreateRobots {#CreateLeft}
+		EndIf
+		If XDtn > 0 AND *Scr\X < #BGNDWidth-#ScrWidth AND \X = #P1ScrollX
+			*Scr\X+XDtn:XDtn = 0
+			If *Scr\X & #BlockMod = 0 Then CreateRobots {#CreateRight}
+		EndIf
+		If YDtn < 0 AND *Scr\Y > 0 AND \Y = #P1ScrollY
+			*Scr\Y+YDtn:YDtn = 0
+			If *Scr\Y & #BlockMod = 0 Then CreateRobots {#CreateTop}
+		EndIf
+		If YDtn > 0 AND *Scr\Y < #BGNDHeight-#ScrHeight AND \Y = #P1ScrollY
+			*Scr\Y+YDtn:YDtn = 0
+			If *Scr\Y & #BlockMod = 0 Then CreateRobots {#CreateBottom}
+		EndIf
+		\X+XDtn:\Y+YDtn
+	EndIf
+
+	\ShapeNo = \PStartShape+(\AnimFrame ASL 3)+JtoP(Sgn(\XDtn)+1, Sgn(\YDtn)+1)
+	##[$B40C]
+	If ##[$B40B] (0)
+		Px = *Player\X+*Scr\X
+		Py = *Player\Y+*Scr\Y
+		USEPATH Robots()
+		ResetList Robots()
+		While NextItem (Robots())
+			If \TimeToRegen = 0 AND \ShapeNo >= #ShapeRobot
+				If PColl (Px, Py, #ShapeSize, #ShapeSize, \X, \Y, #ShapeSize, #ShapeSize)
+					Sound #SNDPlayerHurt1+QAbs(\XDtn), #AudioRC1
+					CreateExplosion {\X+#BlockShape, \Y+#BlockShape, 0}
+					ResetRobot {}
+					*Player\SRobots+1
+					*Player\Score+#ScoreRobot
+					If *Player\Health Then *Player\Health-#RobotHitPoints
+				EndIf
+			EndIf
+		Wend
+	EndIf
+
+	If Jb AND *Player\OkToFire = 0 AND *Player\Missiles < *MisData\MaxMissiles AND *Player\Ammo > 0
+		*Player\OkToFire = *MisData\FireRate
+		USEPATH Missiles()
+		If AddItem (Missiles())
+			\X = *Scr\X+*Player\X, *Scr\Y+*Player\Y
+			If *Player\XDtn = 0
+				\X = \X+((#ShapeSize-#BlockSize) ASR 1)
+			Else
+				If *Player\XDtn < 0 Then \X-#BlockSize Else \X+#ShapeSize
+			EndIf
+			If *Player\YDtn = 0
+				\Y = \Y+((#ShapeSize-#BlockSize) ASR 1)
+			Else
+				If *Player\YDtn < 0 Then \Y-#BlockSize Else \Y+#ShapeSize
+			EndIf
+			\XDtn = Sgn(*Player\XDtn), Sgn(*Player\YDtn)
+			\Velocity = 0, #MissileMoves
+			\MissileType = *Player\MissileNo
+			\ShapeNo = *Player\MStartShape+JtoP(Sgn(*Player\XDtn)+1, Sgn(*Player\YDtn)+1)
+			*Player\Missiles+1:*Player\Ammo-1:*Player\SAmmo+1
+			Select *Player\MissileNo
+				Case #MSLGun
+					Sound #SNDGun, #AudioLC0
+				Case #MSLLaser
+					Sound #SNDLaser, #AudioLC0
+				Case #MSLRocket
+					Sound #SNDRocket, #AudioLC0
+				Case #MSLPlasma
+					Sound #SNDPlasma, #AudioLC0
+			End Select
+		EndIf
+	Else
+		If *Player\OkToFire > 0 Then *Player\OkToFire-1
+	EndIf
+	Return
+
+
+; MoveMissiles:
+;	 This routine moves the players missiles.
+;
+.MoveMissiles
+	DEFTYPE .MissileData *MisData
+
+	USEPATH Missiles()
+	ResetList Missiles()
+	While NextItem (Missiles())
+		MissileDead = False
+		Velocity = \Velocity
+		If Velocity = 0 Then FirstPos = True Else FirstPos = False
+		If Velocity < *MisData\MaxVelocity Then \Velocity+*MisData\Accel:Velocity = \Velocity
+		MapX	 = \X ASR 4
+		MapY	 = \Y ASR 4
+		Width	= ((\X+#BlockSize-1) ASR 4)-MapX
+		Height = ((\Y+#BlockSize-1) ASR 4)-MapY
+		If MissileHitObstacle {MapX, MapY, Width, Height, \XDtn, \YDtn} = True
+			Select \MissileType
+				Case #MSLGun
+					CreateExplosion {\X, \Y, 1}
+					MissileDead = True
+				Case #MSLLaser
+					CreateExplosion {\X, \Y, 0}
+					MissileDead = True
+				Case #MSLRocket
+					CreateExplosion {\X, \Y, 0}
+					MissileDead = True
+				Case #MSLPlasma
+					If FirstPos = True
+						\XDtn = -Sgn(\XDtn), -Sgn(\YDtn)
+						\X = (MapX+\XDtn) ASL 4, (MapY+\YDtn) ASL 4
+					Else
+						R1 = VPos & $1
+						If \XDtn = 0
+							\YDtn = -Sgn(\YDtn)
+							If R1 = 0 Then \XDtn = -1 Else \XDtn = 1
+						Else
+							If \YDtn = 0
+								\XDtn = -Sgn(\XDtn)
+								If R1 = 0 Then \YDtn = -1 Else \YDtn = 1
+							Else
+								If Map(MapX, MapY-Sgn(\YDtn))\Flags & #OBSTMask OR Map(MapX+1, MapY-Sgn(\YDtn))\Flags & #OBSTMask
+									\XDtn = -Sgn(\XDtn)
+									\X = (MapX+\XDtn) ASL 4
+								Else
+									\YDtn = -Sgn(\YDtn)
+									\Y = (MapY+\YDtn) ASL 4
+								EndIf
+							EndIf
+						EndIf
+					EndIf
+					\ShapeNo = #ShapeMissile+(\MissileType ASL 3)+JtoP(\XDtn+1, \YDtn+1)
+			End Select
+		EndIf
+
+		\Moves-1
+		If \Moves <= 0 Then MissileDead = True
+
+		If MissileDead = False
+			If ##[$CB09] (\ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff)
+				USEPATH Robots()
+				ResetList Robots()
+				While NextItem (Robots()) AND MissileDead = False
+					If \TimeToRegen = 0
+						If PColl (Missiles()\X, Missiles()\Y, #BlockSize, #BlockSize, \X, \Y, #ShapeSize, #ShapeSize)
+							\Health-*MisData\Strength
+							If \Health <= 0
+								CreateExplosion {\X+#BlockShape, \Y+#BlockShape, 0}
+								ResetRobot {}
+								*Player\SRobots+1
+								*Player\Score+#ScoreRobot
+							Else
+								\BeenHit = 2
+							EndIf
+							MissileDead = True
+						EndIf
+					EndIf
+				Wend
+				USEPATH Missiles()
+			Else
+				\X+(\XDtn*Velocity)
+				\Y+(\YDtn*Velocity)
+				X = \X-*Scr\X+#FGNDOff
+				Y = \Y-*Scr\Y+#FGNDOff
+				If X < 0 OR X >= #FGNDWidth-#BlockSize Then MissileDead = True
+				If Y < 0 OR Y >= #FGNDHeight-#BlockSize Then MissileDead = True
+			EndIf
+		EndIf
+
+		If MissileDead = False
+			If \MissileType = #MSLGun
+				If FirstPos = True
+					X = X-(\XDtn*Velocity)+(-\XDtn ASL 1)
+					Y = Y-(\YDtn*Velocity)+(-\YDtn ASL 1)
+					QBlit *Scr\FBitmap, \ShapeNo, X, Y
+				EndIf
+			Else
+				QBlit *Scr\FBitmap, \ShapeNo, X, Y
+			EndIf
+		Else
+			*Player\Missiles-1
+			KillItem Missiles()
+		EndIf
+	Wend
+	Return
+
+
+; MoveRobots:
+;	 This routine moves the Robots.
+;
+.MoveRobots
+	Px = *Player\X+*Scr\X
+	Py = *Player\Y+*Scr\Y
+	USEPATH Robots()
+	ResetList Robots()
+	While NextItem (Robots())
+		If \TimeToRegen > 0
+			\TimeToRegen-1
+		Else
+			If \ShapeNo < #ShapeRobot
+				\TimeForAnim-1
+				If \TimeForAnim = 0
+					If \ShapeNo = #ShapeRobotAnim Then Sound #SNDRobot, #AudioRC1
+					\TimeForAnim = #RobotFrameRate
+					\ShapeNo+1
+				EndIf
+				X = \X-*Scr\X+#FGNDOff
+				Y = \Y-*Scr\Y+#FGNDOff
+				If X < 0 OR X+#ShapeSize >= #FGNDWidth OR Y < 0 OR Y+#ShapeSize >= #FGNDHeight
+					KillItem Robots()
+				Else
+					QBlit *Scr\FBitmap, \ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff
+				EndIf
+			Else
+				If \Attack = True
+					If \XDtn <> 0
+						If \X = Px Then \XDtn = 0:\YDtn = Sgn(Px-\X)
+					Else
+						If \Y = Py Then \YDtn = 0:\XDtn = Sgn(Py-\Y)
+					EndIf
+					If \XDtn = 0 AND \YDtn = 0 Then \Attack = False:\Moves = 0
+				Else
+					If \Moves <= 0
+						If Rnd(1) > 0.5
+							\Attack = True
+							If Rnd(1) > 0.5
+								\XDtn = Sgn(Px-\X):\YDtn = 0
+							Else
+								\YDtn = Sgn(Py-\Y):\XDtn = 0
+							EndIf
+						Else
+							If Rnd(1) > 0.5
+								If Rnd(1) > 0.5 Then \XDtn = -1 Else \XDtn = 1
+								\YDtn = 0
+							Else
+								If Rnd(1) > 0.5 Then \YDtn = -1 Else \YDtn = 1
+								\XDtn = 0
+							EndIf
+							\Moves = QLimit (Rnd(127), #BlockSize, 127)
+						EndIf
+					EndIf
+				EndIf
+
+				RetCode = MoveRobot {*Scr, &Robots()}
+				If RetCode = 1
+					\X = \MapX ASL 4, \MapY ASL 4
+					If \X<*Scr\X-#FGNDOff OR \X>=*Scr\X+#ScrWidth+#ShapeMod OR \Y<*Scr\Y-#FGNDOff OR \Y>=*Scr\Y+#ScrHeight+#ShapeMod
+						KillItem Robots()
+					Else
+						ResetRobot {}
+					EndIf
+				Else
+					ObstacleHit = False
+					\ShapeNo+JtoA(Sgn(\XDtn)+1, Sgn(\YDtn)+1)
+					If RetCode = 2
+						If RobotHitObstacle {\X+\XDtn, \Y+\YDtn}
+							\Attack = False
+							\Moves = 0
+						Else
+							\Moves-1
+							\X+\XDtn:\Y+\YDtn
+						EndIf
+					Else
+						\Moves-1
+						\X+\XDtn:\Y+\YDtn
+					EndIf
+					If \BeenHit
+						\BeenHit-1
+						QBlitMode SolidMode
+						QBlit *Scr\FBitmap, \ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff
+						QBlitMode CookieMode
+					Else
+						QBlit *Scr\FBitmap, \ShapeNo, \X-*Scr\X+#FGNDOff, \Y-*Scr\Y+#FGNDOff
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Wend
+	Return
+
+
+; MoveAnimations:
+;	 This routine animates all of the background animations.
+;
+.MoveAnimations
+	MapX = QLimit (*Scr\X-#FGNDOff, 0, #BGNDWidth)
+	MapY = QLimit (*Scr\Y-#FGNDOff, 0, #BGNDHeight)
+	EndX = MapX+#FGNDWidth
+	EndY = MapY+#FGNDHeight
+	Use BitMap #BMPBgnd
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
+		\TimeToAnim-1
+		If \TimeToAnim = 0
+			\TimeToAnim = \FrameRate
+			If (\X >= MapX AND \X <= EndX) AND (\Y >= MapY AND \Y <= EndY)
+				BlitColl \Shapes[\Frame], \X, \Y
+			EndIf
+			\Frame+1
+			If \Frame = \AnimFrames
+				\Frame = 0
+				If \Flags = #AnimOnce
+					BlitColl \Shapes[\AnimFrames-1], \X, \Y
+					KillItem Animate()
+				EndIf
+			EndIf
+		EndIf
+	Wend
+	Use BitMap *Scr\FBitmap
+	Return
+
+
+; MoveExplosions:
+;	 This routine animates a short explosion sequence of three frames for
+;	 each explosion.
+;
+.MoveExplosions
+	USEPATH Explosions()
+	ResetList Explosions()
+	While NextItem (Explosions())
+		X = \X-*Scr\X+#FGNDOff
+		Y = \Y-*Scr\Y+#FGNDOff
+		If X < 0 OR X >= #FGNDWidth-#BlockSize OR Y < 0 OR Y >= #FGNDHeight-#BlockSize
+			KillItem Explosions()
+		Else
+			QBlit *Scr\FBitmap, #ShapeExplosion+\FrameNo, X, Y
+			\TimeToAnim-1:If \TimeToAnim = 0 Then \FrameNo+1:\TimeToAnim = #ExplosionRate
+			If \FrameNo >= #ExplosionFrames Then KillItem Explosions()
+		EndIf
+	Wend
+	Return
+
+
+; ShowSprites
+;	 Displays all sprites.
+;
+.ShowSprites
+	USEPATH *Player
+	ShowSprite \ShapeNo, \X, \Y, 0
+	Return
+
+
+; HideSprites:
+;	 Hides any sprites by placing them offscreen.
+;
+.HideSprites
+	ShowSprite #SpriteP1, #ScrWidth, #ScrHeight, 0
+	Return
+
+
+; HideAnimations:
+;	 Hides any animations that are currently on screen. Animations may be
+;	 slightly out of sync (usually 1/50th sec) to allow more things to
+;	 happen on the screen. However, once the display update is stopped (e.g.
+;	 on game over etc.) animations made up of more than one block will not
+;	 look right if they are played slightly out of sync.
+;
+.HideAnimations
+	MapX = QLimit (*Scr\X-#FGNDOff, 0, #BGNDWidth)
+	MapY = QLimit (*Scr\Y-#FGNDOff, 0, #BGNDHeight)
+	EndX = MapX+#FGNDWidth
+	EndY = MapY+#FGNDHeight
+	Use BitMap #BMPBgnd
+	USEPATH Animate()
+	ResetList Animate()
+	While NextItem (Animate())
+		If (\X >= MapX AND \X <= EndX) AND (\Y >= MapY AND \Y <= EndY)
+			ShapeNo = Map(\X ASR 4, \Y ASR 4)\BShape:If ShapeNo < 0 Then ShapeNo+256
+			BlitColl ShapeNo, \X, \Y
+		EndIf
+	Wend
+	Use BitMap *Scr\FBitmap
+	Return
+
+
+; ShowInDemo:
+;	 This routine shows the player that we are in a demo by displaying a
+;	 flashing 'D' in the top left hand corner of the screen.
+;
+.ShowInDemo
+	DemoAnim+1
+	If DemoAnim > 0
+		QBlit *Scr\FBitmap, #ShapeDemo, #DemoShapeX, #DemoShapeY
+		If DemoAnim = #DemoAnimRate Then DemoAnim = -#DemoAnimRate
+	EndIf
+	Return
+
+;
+; UpdateTimer:
+;	 Updates the countdown timer. Once the countdown timer has been activated,
+;	 the player has to complete the rest of the mission and find the lift.
+;
+.UpdateTimer
+	USEPATH Timer
+	If \Delay > 0
+		\Delay-1
+	Else
+		If \Delay = 0
+			LoopSound #SNDTimerLoop, #AudioRC0
+			GamePalette = #PALTimer
+			Use SetCycle #PALTimer
+			\Delay-1
+		EndIf
+		\Counter-1
+		Seconds = \Counter/#TimerRes
+		If Seconds <= 90
+			QBlit *Scr\FBitmap, #ShapeTimer+(Seconds/10),		 #Timer1DigitX, #TimerDigitY
+			QBlit *Scr\FBitmap, #ShapeTimer+(Seconds MOD 10), #Timer2DigitX, #TimerDigitY
+		EndIf
+	EndIf
+	Return
+
+
+; SwitchWeapon:
+;	 This routine allows the player to switch between the various weapons
+;	 that they have.
+;
+.SwitchWeapon
+	While RawStatus (#RawKey_ENTER):Wend	; Until key released
+
+	USEPATH *Player
+	Mask = 1 ASL (\MissileNo+1)
+	While \Weapons & Mask = 0
+		If Mask > #WPNPlasma
+			Mask = #WPNGun
+		Else
+			Mask = Mask ASL 1
+		EndIf
+	Wend
+	Weapon = Mask ASR 1:If Weapon > #MSLPlasma Then Weapon = #MSLPlasma
+	\MissileNo	 = Weapon
+	\MStartShape = #ShapeMissile+(Weapon ASL 3)
+	*MisData		 = MData(Weapon)
+	Return
+
+
+; GameOver:
+;	 Display the game over message. The first half of the current palette
+;	 (#PALGame) is modified so that text can be displayed in loadsa shades
+;	 of green.
+;
+.GameOver
+	Gosub HideAnimations
+	Use BitMap #BMPFgnd0:UnQueue 0:BlockScroll
+	Use BitMap #BMPFgnd1:UnQueue 1:BlockScroll
+
+	CNIF #RECORD_DEMO = 1
+		FadeOutPal {0, 31, 15, 4}
+		Gosub SaveDemo
+		Return
+	CEND
+
+	If InDemo
+		InDemo = False
+		FadeOutPal {0, 31, 15, 4}
+		Return
+	EndIf
+
+	FadeOutPal {16, 31, 4, 4}
+	Green 0, 0, 0, 0
+	For ColReg = 1 To 7
+		Green ColReg, (ColReg*2)+1, (ColReg*2)+1, 0
+	Next ColReg
+
+	QAMIGA
+	LoadMedModule 0, DataPath$+"Soundtrack02.med"
+	If *Player\Lives
+		LoadShapes #ShapeBouncy, DataPath$+"WellDone.shapes"
+	Else
+		LoadShapes #ShapeBouncy, DataPath$+"GameOver.shapes"
+	EndIf
+	VWait #BlitzDelay
+	BLITZ
+	Gosub StartSoundtrack
+
+	TextLen = 8
+	XOff = (#FGNDWidth	ASR 1)-(#BlockSize ASR 1)
+	YOff = (#FGNDHeight ASR 1)-(#BlockSize ASR 1)
+	MaxRad = (#FGNDHeight-#FGNDOff) ASR 1
+
+	ShapeNo = 0
+	For LetterNo = 0 To TextLen
+		If LetterNo <> 4
+			Bouncy(LetterNo)\ShapeNo = #ShapeBouncy+ShapeNo
+			ShapeNo+1
+		Else
+			Bouncy(LetterNo)\ShapeNo = 0
+		EndIf
+	Next LetterNo
+
+	DEFTYPE .BouncyLetter *BouncyPtr
+	USEPATH *BouncyPtr
+	For LoopCount = 0 To 10
+		RadInc.q = 0.02
+		Radius	 = MaxRad-#FGNDOff
+		For AngleNo = 0 To TextLen+1
+			Bouncy(AngleNo)\Angle = 1.536+(AngleNo*0.4)
+		Next AngleNo
+		While Radius > 0
+			Use BitMap *Scr\FBitmap
+			*BouncyPtr = Bouncy(0)
+			For Char = 0 To TextLen
+				If \ShapeNo
+					X = XOff+HSin(\Angle)*Radius
+					Y = YOff+HCos(\Angle)*Radius
+					QBlit *Scr\FBitmap, \ShapeNo, X, Y
+					\Angle-RadInc
+				EndIf
+				*BouncyPtr+SizeOf.BouncyLetter
+			Next Char
+			RadInc+0.0005
+			Radius-0.4
+			VWait
+			ShowF *Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
+			*Scr\FBitmap = 1-*Scr\FBitmap
+			UnQueue *Scr\FBitmap
+			If Joyb(1)
+				Pop While
+				Pop For
+				Goto HiScores
+			EndIf
+		Wend
+
+		RadInc.q = 0
+		For AngleNo = 0 To TextLen+1
+			Bouncy(AngleNo)\Angle = 1.536+(AngleNo*0.4)
+		Next AngleNo
+		While Radius < MaxRad-#FGNDOff
+			Use BitMap *Scr\FBitmap
+			*BouncyPtr = Bouncy(0)
+			For Char = 0 To TextLen
+				If \ShapeNo
+					X = XOff+HSin(\Angle)*Radius
+					Y = YOff+HCos(\Angle)*Radius
+					QBlit *Scr\FBitmap, \ShapeNo, X, Y
+				EndIf
+				*BouncyPtr+SizeOf.BouncyLetter
+			Next Char
+			Radius+RadInc
+			RadInc+0.1
+			VWait
+			ShowF *Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
+			*Scr\FBitmap = 1-*Scr\FBitmap
+			UnQueue *Scr\FBitmap
+			If Joyb(1)
+				Pop While
+				Pop For
+				Goto HiScores
+			EndIf
+		Wend
+
+		Delay = #NiceDelay
+		While Delay > 0
+			If Joyb(1)
+				Pop While
+				Pop For
+				Goto HiScores
+			Else
+				Delay-1
+			EndIf
+			VWait
+		Wend
+	Next LoopCount
+
+HiScores:
+	For ShapeNo = #ShapeBouncy To #ShapeBouncy+7
+		Free MidHandle ShapeNo
+	Next ShapeNo
+	Gosub StopSoundtrack
+	FadeOutPal {0, 31, 15, 4}
+	UnQueue 1-*Scr\FBitmap
+
+	USEPATH HiScores()
+	ResetList HiScores()
+	ScoreNo = 0
+	While NextItem (HiScores())
+		If *Player\Score > \Score
+			If ScoreNo
+				PrevItem HiScores()
+				RetCode = AddItem (HiScores())
+			Else
+				RetCode = AddFirst (HiScores())
+			EndIf
+			If RetCode
+				\Score = *Player\Score, ""
+				*NewHiScore.HiScoreEntry = HiScores()
+				LastItem HiScores()
+				KillItem HiScores()
+				CompBgr = True:CompPage = #CompHiScrPage
+				Gosub Computer
+			EndIf
+			Pop While:Return
+		EndIf
+		ScoreNo+1
+	Wend
+	Return
+
+
+; StartSoundtrack:
+;	 Starts playing a MED module in BLITZ mode. The 'PlayMed' command is
+;	 called every 1/50th sec under interrupt to keep the soundtrack
+;	 playing.
+;
+.StartSoundtrack
+	SetInt 5
+		PlayMed
+	End SetInt
+	StartMedModule 0
+	Return
+
+
+; StopSoundtrack:
+;	 Stops a MED module started by the 'StartSoundtrack' routine.
+;
+.StopSoundtrack
+	For VolLevel = 64 To 0 Step -1
+		VWait
+		SetMedVolume VolLevel
+	Next VolLevel
+	ClrInt 5
+	StopMed
+	Free DecodeMedModule 0
+	Return
+
+
+; ***************************************************************
+;
+;				 *****	****	 ****	**	** **	** ****** *****
+;				**		 **	** **	** *** ** *** ** **		 **	**
+;				 ****	**		 ****** ** *** ** *** ****	 *****
+;						** **	** **	** **	** **	** **		 **	**
+;				*****	 ****	**	** **	** **	** ****** **	**
+;
+; Scanner:
+;	 This routine displays a 'scan' of the background. A scan is a scaled
+;	 version of the background which allows the player to see more than
+;	 would normally be seen. This routine supports three models of scanner,
+;	 the higher the model number, the more resolutions available to it.
+;
+.Scanner
+	If Timer\Mode & #TimerActive <> 0 AND Timer\Delay = 0 Then Return
+
+	Gosub HideSprites
+	ShowF *Scr\FBitmap, 0, 0, *Scr\X
+	Green 0, 0, 0, 0
+	For ColReg = 1 To 13
+		Green ColReg, 0, ColReg+2, 0
+	Next ColReg
+	FadeOutPal {16, 31, 15, 2}
+	ShowF *Scr\FBitmap, 0, 0, 0
+	*Scr\FBitmap = 1-*Scr\FBitmap
+
+	Scanner = *Player\Scanner
+	Select Scanner
+		Case #ScanModel1 : ScanSize = 11
+		Case #ScanModel2 : ScanSize = 8
+		Case #ScanModel3 : ScanSize = 4
+	End Select
+
+	PrevScanSize = 0
+	While RawStatus (#RawKey_S):Wend			; Wait until key released
+	While NOT RawStatus (#RawKey_S)
+		If RawStatus (#RawKey_F1) Then ScanSize = 13
+		If RawStatus (#RawKey_F2) Then ScanSize = 12
+		If RawStatus (#RawKey_F3) Then ScanSize = 11
+		If RawStatus (#RawKey_F4)	AND Scanner > #ScanModel1 Then ScanSize = 10
+		If RawStatus (#RawKey_F5)	AND Scanner > #ScanModel1 Then ScanSize = 9
+		If RawStatus (#RawKey_F6)	AND Scanner > #ScanModel1 Then ScanSize = 8
+		If RawStatus (#RawKey_F7)	AND Scanner > #ScanModel2 Then ScanSize = 7
+		If RawStatus (#RawKey_F8)	AND Scanner > #ScanModel2 Then ScanSize = 6
+		If RawStatus (#RawKey_F9)	AND Scanner > #ScanModel2 Then ScanSize = 5
+		If RawStatus (#RawKey_F10) AND Scanner > #ScanModel2 Then ScanSize = 4
+		If ScanSize <> PrevScanSize
+			PrevScanSize = ScanSize
+			Gosub DrawScan
+			Sound #SNDScanner, #AudioST0
+			Use SetCycle #PALScanner
+			ShowF *Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
+			*Scr\FBitmap = 1-*Scr\FBitmap
+			Use BitMap *Scr\FBitmap:BlockScroll 0
+		EndIf
+	Wend
+	WaitKeyOrJoy {#RawKey_S}
+	Use BitMap 1-*Scr\FBitmap:BlockScroll 0
+	Use SetCycle GamePalette
+	Return
+
+
+; DrawScan:
+;	 This routine uses one of the Amigas graphic library functions to scale
+;	 down bitmap 2, and place the resulting image in one of the front
+;	 playfields bitmaps (the one not currently being displayed !)
+;
+.DrawScan
+	Cols		= #ScrWidth/ScanSize
+	CentreX = ((*Player\X+*Scr\X) ASR 4)-(Cols ASR 1)
+	StartX	= QLimit (CentreX, 0, #MapCols-1)
+	EndX		= QLimit (StartX+Cols, 0, #MapCols-1)
+	If EndX-StartX < Cols Then StartX = QLimit (EndX-Cols+1, 0, #MapCols-1)
+
+	Rows		= #ScrHeight/ScanSize
+	CentreY = ((*Player\Y+*Scr\Y) ASR 4)-(Rows ASR 1)
+	StartY	= QLimit (CentreY, 0, #MapRows-1)
+	EndY		= QLimit (StartY+Rows, 0, #MapRows-1)
+	If EndY-StartY < Rows Then StartY = QLimit (EndY-Rows+1, 0, #MapRows-1)
+
+	USEPATH BitMapScaleStruct
+	\bsa_SrcX				= StartX ASL 4, StartY ASL 4
+	\bsa_SrcWidth		= (EndX-StartX+1) ASL 4, (EndY-StartY+1) ASL 4
+	\bsa_XSrcFactor	= #BlockSize, #BlockSize
+	\bsa_DestX			 = #FGNDOff, #FGNDOff
+	\bsa_XDestFactor = ScanSize, ScanSize
+	\bsa_SrcBitMap	 = Addr BitMap (#BMPBgnd), Addr BitMap (*Scr\FBitmap)
+	##[$FF6D] (&BitMapScaleStruct)
+	Return
+
+
+; ***************************************************************
+;
+;	****	 ****	**	 ** *****	**	** ****** ****** *****
+; **	** **	** *** *** **	** **	**	 **	 **		 **	**
+; **		 **	** ******* *****	**	**	 **	 ****	 *****
+; **	** **	** ** * ** **		 **	**	 **	 **		 **	**
+;	****	 ****	**	 ** **			*****	 **	 ****** **	**
+;
+; The A7000 portable comuter provides access to the main CyberTech
+; computer via an infrared link. The computer allows the player to
+; purchase weapons and supplies. The computer interface is menu driven
+; and can be operated by using the keyboard or the joystick. The 'C'
+; key is used to access the computer from within the game.
+; This routine is also called at the beginning of each level to display
+; the mission briefing.
+; Pressing the space bar while playing the game provides instant access
+; to the mission statistics page.
+; A special page is available at the end of the game which allows the
+; player to enter their name if they have made it into the high score
+; table.
+;
+.Computer
+	While RawStatus (#RawKey_C):Wend			; Computer key
+	While RawStatus (#RawKey_SPACE):Wend	; Statistics key
+
+	Gosub HideSprites
+	DisplayOff
+	FreeSlices
+	Slice 0, 44, #ScrWidth, #ScrHeight, #LORES_DPF, 8, 8, 32, #ScrWidth, #ScrWidth*2
+	Poke.w #BPLCON0, $0711		; BPLCON0: Allow 8 bitplanes to be used
+	Poke.w #BPLCON3, $1000		; BPLCON3: Set colour bank for playfield 2
+	ShowF #BMPCompF
+	ShowB #BMPCompB
+	DisplayOn
+	Use SetCycle #PALComputer
+	Use BitMap #BMPCompF
+	BitMapOutput #BMPCompF
+
+	WriteCompDigits {"CONNECTING", True}
+	If CompPage = 0
+		CMenuItem = 0
+		ExitComputer = False
+	Else
+		CMenuItem = CompPage
+		ExitComputer = True
+	EndIf
+	Gosub StartCompBGR
+	WriteCompDigits {"READY", True}
+
+	USEPATH *Player
+	Repeat
+		Clear = 0
+		If CompPage = 0
+			CMenuItem = GetMenuSelection {&CMenu1(0), 7, CMenuItem, 0}
+		EndIf
+		Select CMenuItem
+			Case 0
+				SubMenuItem = 0
+				Repeat
+					WriteCompDigits {"CR "+Str$(\Credits), True}
+					SubMenuItem = GetMenuSelection {&CMenu2(0), 5, SubMenuItem, Clear}
+					Clear+1
+					Select SubMenuItem
+						Case 0
+							If \Weapons & #WPNLaser
+								ComputerMessage {YouHaveMsg$}
+							Else
+								If \Credits >= #CostLaser
+									\Credits-#CostLaser
+									\Ammo				= #MaxAmmo
+									\Weapons		 = \Weapons|#WPNLaser
+									\MissileNo	 = #MSLLaser
+									\MStartShape = #ShapeMissile+(#MSLLaser ASL 3)
+									ComputerMessage {BoughtMsg$}
+								Else
+									ComputerMessage {NoDoughMsg$}
+								EndIf
+							EndIf
+						Case 1
+							If \Weapons & #WPNRocket
+								ComputerMessage {YouHaveMsg$}
+							Else
+								If \Credits >= #CostRocket
+									\Credits-#CostRocket
+									\Ammo				= #MaxAmmo
+									\Weapons		 = \Weapons|#WPNRocket
+									\MissileNo	 = #MSLRocket
+									\MStartShape = #ShapeMissile+(#MSLRocket ASL 3)
+									ComputerMessage {BoughtMsg$}
+								Else
+									ComputerMessage {NoDoughMsg$}
+								EndIf
+							EndIf
+						Case 2
+							If \Weapons & #WPNPlasma
+								ComputerMessage {YouHaveMsg$}
+							Else
+								If \Credits >= #CostPlasma
+									\Credits-#CostPlasma
+									\Ammo				= #MaxAmmo
+									\Weapons		 = \Weapons|#WPNPlasma
+									\MissileNo	 = #MSLPlasma
+									\MStartShape = #ShapeMissile+(#MSLPlasma ASL 3)
+									ComputerMessage {BoughtMsg$}
+								Else
+									ComputerMessage {NoDoughMsg$}
+								EndIf
+							EndIf
+						Case 3
+							If \Scanner = #ScanModel3
+								ComputerMessage {UpgradeMsg$}
+							Else
+								If \Credits >= #CostScanner
+									\Credits-#CostScanner
+									\Scanner+1
+									ComputerMessage {BoughtMsg$}
+								Else
+									ComputerMessage {NoDoughMsg$}
+								EndIf
+							EndIf
+					End Select
+					*MisData = MData(\MissileNo)
+				Until SubMenuItem = 4
+			Case 1
+				SubMenuItem = 0
+				Repeat
+					WriteCompDigits {"CR "+Str$(\Credits), True}
+					SubMenuItem = GetMenuSelection {&CMenu3(0), 5, SubMenuItem, Clear}
+					Clear+1
+					Select SubMenuItem
+						Case 0
+							If \Credits >= #CostAmmo
+								\Credits-#CostAmmo
+								\Ammo = #MaxAmmo
+								ComputerMessage {BoughtMsg$}
+							Else
+								ComputerMessage {NoDoughMsg$}
+							EndIf
+						Case 1
+							If \Credits >= #CostKeys
+								\Credits-#CostKeys
+								\Keys+#KeysInPack
+								ComputerMessage {BoughtMsg$}
+							Else
+								ComputerMessage {NoDoughMsg$}
+							EndIf
+						Case 2
+							If \Credits >= #CostMedikit
+								\Credits-#CostMedikit
+								\Health = #MaxHealth
+								ComputerMessage {BoughtMsg$}
+							Else
+								ComputerMessage {NoDoughMsg$}
+							EndIf
+						Case 3
+							If \Credits >= #CostLives
+								\Credits-#CostLives
+								\Lives+1
+								ComputerMessage {BoughtMsg$}
+							Else
+								ComputerMessage {NoDoughMsg$}
+							EndIf
+					End Select
+				Until SubMenuItem = 4
+			Case 2
+				Gosub ShowMissionStats
+			Case 3
+				Gosub ShowMissionBriefing
+			Case 4
+				Gosub ShowCredits
+			Case 5
+				Gosub ShowHiScores
+			Case 6
+				ExitComputer = True
+			Case 8
+				Gosub GetHiScore
+		End Select
+	Until ExitComputer = True
+
+	ClearCompScreen {0}
+	Gosub StopCompBGR
+	If NOT EndOfGame
+		Gosub CreateGameScreen
+		ShowB #BMPBgnd, *Scr\X, *Scr\Y, #FGNDOff
+		ShowF 1-*Scr\FBitmap, #FGNDOff, #FGNDOff, *Scr\X
+		Use BitMap *Scr\FBitmap
+		Use SetCycle GamePalette
+		If Timer\Mode & #TimerActive AND Timer\Delay = -1 Then LoopSound #SNDTimerLoop, #AudioRC0
+	EndIf
+	Return
+
+
+; StartComputerBGR:
+;	 Starts the scrolling computer background. This routine is interrupt
+;	 driven, and is called every 1/50th of a second.
+;
+.StartCompBGR
+	If CompBgr
+		QAMIGA
+		LoadMedModule	0, DataPath$+"Soundtrack01.med"
+		VWait #BlitzDelay
+		BLITZ
+		StartMedModule 0
+	EndIf
+
+	IntRoutine:
+		BgrDtn = 1:BgrX = 0
+		SetInt 5
+			BgrX = QLimit (BgrX+BgrDtn, 0, 90)
+			If BgrX = 90 OR BgrX = 0 Then BgrDtn = -BgrDtn
+			ShowB #BMPCompB, BgrX, 0, 0
+
+			BgrRow = #CompMapY+BgrMap
+			If BgrHighlight
+				BgrColour = 1
+			Else
+				BgrColour = 6
+				BgrMap = QWrap(BgrMap+1, 0, #MapRows-1)
+			EndIf
+			BgrHighlight = 1-BgrHighlight
+			*MapPiece = Map(0, BgrRow-#CompMapY)
+			For X = 0 To #MapCols-1
+				Flags = *MapPiece\Flags
+				If Flags & #OBSTMask <> 0 AND Flags & #DOORMask = 0
+					Point #CompMapX+X, BgrRow, BgrColour
+				EndIf
+				*MapPiece+SizeOf.MapData
+			Next X
+
+			If CompBgr Then PlayMed
+		End SetInt
+	Return
+
+
+; StopCompBGR:
+;	 Stops the scrolling computer background, and releases the interrupt that
+;	 it used.
+;
+.StopCompBGR
+	If CompBgr
+		WriteCompDigits {"DISCONNECTING", True}
+		Gosub StopSoundtrack
+		FadeOutPal {0, 31, 15, 2}
+	Else
+		ClrInt 5
+	EndIf
+	Return
+
+
+; ShowMissionStats:
+;	 Displays mission statistics from within the computer.
+;
+.ShowMissionStats
+	Weapon$ = "G"
+	If \Weapons & #WPNLaser	Then Weapon$ = Weapon$+",L"
+	If \Weapons & #WPNRocket Then Weapon$ = Weapon$+",R"
+	If \Weapons & #WPNPlasma Then Weapon$ = Weapon$+",P"
+	ClearCompScreen {0}
+	WriteCompText { 0, 0, "Mission Statistics", 2, 0, #TextJustC}
+	WriteCompText { 5, 3, "SCORE:", 5, 0, #TextNormal}
+	WriteCompText {12, 3, Str$(\Score), 4, 0, #TextNormal}
+	WriteCompText { 3, 4, "CREDITS:", 5, 0, #TextNormal}
+	WriteCompText {12, 4, Str$(\Credits), 4, 0, #TextNormal}
+	WriteCompText { 4, 5, "HEALTH:", 5, 0, #TextNormal}
+	WriteCompText {12, 5, Str$((\Health*100)/#MaxHealth)+"%", 4, 0, #TextNormal}
+	WriteCompText { 6, 6, "AMMO:", 5, 0, #TextNormal}
+	WriteCompText {12, 6, Str$(\Ammo)+" ROUNDS", 4, 0, #TextNormal}
+	WriteCompText { 6, 7, "KEYS:", 5, 0, #TextNormal}
+	WriteCompText {12, 7, Str$(\Keys), 4, 0, #TextNormal}
+	WriteCompText { 5, 8, "LIVES:", 5, 0, #TextNormal}
+	WriteCompText {12, 8, Str$(\Lives), 4, 0, #TextNormal}
+	WriteCompText { 3, 9, "WEAPONS:", 5, 0, #TextNormal}
+	WriteCompText {12, 9, Weapon$, 4, 0, #TextNormal}
+
+	WriteCompText {0, 11, "CREDITS ACCUMULATED", 5, 0, #TextJustC}
+	WriteCompText {0, 12, "$"+Str$(\SCredits), 4, 0, #TextJustC}
+	WriteCompText {0, 14, "ROUNDS FIRED", 5, 0, #TextJustC}
+	WriteCompText {0, 15, Str$(\SAmmo), 4, 0, #TextJustC}
+	WriteCompText {0, 17, "HOSTAGES FREED", 5, 0, #TextJustC}
+	WriteCompText {0, 18, Str$(\SHostages), 4, 0, #TextJustC}
+	WriteCompText {0, 20, "CYBORGS KILLED", 5, 0, #TextJustC}
+	WriteCompText {0, 21, Str$(\SRobots), 4, 0, #TextJustC}
+	WriteCompText {0, 24, "Any key to continue", 2, 0, #TextJustC}
+	KeyNo = GetCompKey {}
+	Return
+
+
+; ShowMissionBriefing:
+;	 Displays the current mission briefing from within the computer.
+;
+.ShowMissionBriefing
+	ClearCompScreen {0}
+	WriteCompText {0, 0, "Mission Briefing", 2, 0, #TextJustC}
+	WriteCompText {0, 24, "Any key to continue", 2, 0, #TextJustC}
+
+	StartY = 2+(#MaxMissionLines-MissionLines) ASR 1
+	For LineNo = 0 To MissionLines-1
+		WriteCompText {0, StartY+LineNo, Mission$(LineNo), 5, 0, #TextJustC}
+	Next LineNo
+	KeyNo = GetCompKey {}
+	Return
+
+
+; ShowCredits:
+;	 Displays the game credits from within the computer.
+;
+.ShowCredits
+	ClearCompScreen {0}
+	WriteCompText {0, 0, "Credits", 2, 0, #TextJustC}
+	WriteCompText {0, 2, "CODE AND GRAPHICS", 5, 0, #TextJustC}
+	WriteCompText {0, 3, "Tim Caldwell", 4, 0, #TextJustC}
+	WriteCompText {0, 5, "MAIN PICTURE", 5, 0, #TextJustC}
+	WriteCompText {0, 6, "Mike Evans", 4, 0, #TextJustC}
+	WriteCompText {0, 8, "CyberTech LOGO", 5, 0, #TextJustC}
+	WriteCompText {0, 9, "Terry Robinson", 4, 0, #TextJustC}
+	WriteCompText {0, 11, "This game was written in", 4, 0, #TextJustC}
+	WriteCompText {0, 12, "BLITZ BASIC II for the", 4, 0, #TextJustC}
+	WriteCompText {0, 13, "Amiga Format November", 4, 0, #TextJustC}
+	WriteCompText {0, 14, "1993 competition.", 4, 0, #TextJustC}
+	WriteCompText {0, 16, "Send any comments or bug", 4, 0, #TextJustC}
+	WriteCompText {0, 17, "reports to:", 4, 0, #TextJustC}
+	WriteCompText {6, 19, "Tim Caldwell", 5, 0, #TextJustC}
+	WriteCompText {6, 20, "10 Gaunts Way", 4, 0, #TextJustC}
+	WriteCompText {6, 21, "Hallwood Park", 4, 0, #TextJustC}
+	WriteCompText {6, 22, "Runcorn", 4, 0, #TextJustC}
+	WriteCompText {6, 23, "Cheshire", 4, 0, #TextJustC}
+	WriteCompText {6, 24, "WA7 2FW", 4, 0, #TextJustC}
+	KeyNo = GetCompKey {}
+	Return
+
+
+; ShowHiScores:
+;	 Shows the high score table from within the computer.
+;
+.ShowHiScores
+	ClearCompScreen {0}
+	WriteCompText {0, 0, "High Score Table", 2, 0, #TextJustC}
+
+	YPos = 3
+	ResetList HiScores()
+	While NextItem (HiScores())
+		WriteCompText { 4, YPos, RSet$(Str$(HiScores()\Score), 8), 5, 0, #TextNormal}
+		WriteCompText {14, YPos, HiScores()\Name, 4, 0, #TextNormal}
+		YPos+2
+	Wend
+	WriteCompText {0, 24, "Any key to continue", 2, 0, #TextJustC}
+	KeyNo = GetCompKey {}
+	Return
+
+
+; GetHiScore:
+;	 Displays high scores, and allows the player to enter their name from
+;	 within the computer.
+;
+.GetHiScore
+	ClearCompScreen {0}
+	WriteCompText {0, 0, "! CONGRATULATIONS !", 2, 0, #TextJustC}
+	WriteCompDigits {"SCORE "+Str$(*NewHiScore\Score), True}
+
+	YPos = 3
+	ResetList HiScores()
+	While NextItem (HiScores())
+		If HiScores() <> *NewHiScore
+			WriteCompText { 4, YPos, RSet$(Str$(HiScores()\Score), 8), 5, 0, #TextNormal}
+			WriteCompText {14, YPos, HiScores()\Name, 4, 0, #TextNormal}
+		Else
+			WriteCompText { 4, YPos, RSet$(Str$(HiScores()\Score), 8), 2, 0, #TextNormal}
+			ScoreX = 14
+			ScoreY = YPos
+		EndIf
+		YPos+1
+	Wend
+
+	WriteCompText {4, 14, "A B C D E F 1 2 3", 4, 0, #TextNormal}
+	WriteCompText {4, 16, "G H I J K L 4 5 6", 4, 0, #TextNormal}
+	WriteCompText {4, 18, "M N O P Q R 7 8 9", 4, 0, #TextNormal}
+	WriteCompText {4, 20, "S T U V W X Y Z 0", 4, 0, #TextNormal}
+	WriteCompText {0, 23, "Use CURSOR keys and", 2, 0, #TextJustC}
+	WriteCompText {0, 24, "ENTER, ESC to accept.", 2, 0, #TextJustC}
+
+	XPos =	4:XOff = 0:OXOff = -1
+	YPos = 14:YOff = 0:OYOff = -1
+	NPos = 0
+	Accepted = False
+	USEPATH *NewHiScore
+	Repeat
+		If XOff <> OXOff OR YOff <> OYOff
+			If OXOff >= 0
+				WriteCompText {XPos+(OXOff ASL 1), YPos+(OYOff ASL 1), Mid$(HiScChar$,(OYOff*9)+OXOff+1,1), 4, 0, #TextNormal}
+			EndIf
+			WriteCompText {XPos+(XOff ASL 1), YPos+(YOff ASL 1), Mid$(HiScChar$,(YOff*9)+XOff+1,1), 2, 0, #TextNormal}
+			OXOff = XOff:OYOff = YOff
+		EndIf
+
+		KeyNo = GetCompKey {}
+		Select KeyNo
+			Case #CKEY_ESC
+				Accepted = True
+			Case #CKEY_CUP
+				YOff = QWrap(YOff-1, 0, 4)
+			Case #CKEY_CDN
+				YOff = QWrap(YOff+1, 0, 4)
+			Case #CKEY_CLF
+				XOff = QWrap(XOff-1, 0, 9)
+			Case #CKEY_CRT
+				XOff = QWrap(XOff+1, 0, 9)
+			Case #CKEY_DEL
+				If NOT (NPos = 7 AND Mid$(\Name, 8, 1) <> " ")
+					NPos = QLimit(NPos-1, 0, 7)
+				EndIf
+				\Name = Left$(\Name, NPos)+" "
+				WriteCompText {ScoreX, ScoreY, \Name, 2, 0, #TextNormal}
+			Case #CKEY_ENTER
+				\Name = Left$(\Name, NPos)+Mid$(HiScChar$, (YOff*9)+XOff+1, 1)
+				NPos = QLimit(NPos+1, 0, 7)
+				WriteCompText {ScoreX, ScoreY, \Name, 2, 0, #TextNormal}
+		End Select
+	Until Accepted = True
+	Return
+
+
+; ShowCompLevel:
+;	 Displays a mini level map in the computers secondary screen.
+;
+.ShowCompLevel
+	Use BitMap #BMPCompF
+	For Y = 0 To #MapRows-1
+		*MapPiece = Map(0, Y)
+		For X = 0 To #MapCols-1
+			Flags = *MapPiece\Flags
+			If Flags & #OBSTMask <> 0 AND Flags & #DOORMask = 0
+				Point #CompMapX+X, #CompMapY+Y, 6
+			Else
+				Point #CompMapX+X, #CompMapY+Y, 7
+			EndIf
+			*MapPiece+SizeOf.MapData
+		Next X
+	Next Y
+	Use BitMap *Scr\FBitmap
+	Return
+
+
+; ***************************************************************
+;
+;								 *****	****** **	 **	****
+;								 **	** **		 *** *** **	**
+;								 **	** ****	 ******* **	**
+;								 **	** **		 ** * ** **	**
+;								 *****	****** **	 **	****
+;
+; The following routines are used for creating and playing game
+; demonstrations. The record and save routines are only compiled
+; (and so included in the executable file) when the game is run
+; in 'record' mode. To run the game in record mode, the #RECORD_DEMO
+; constant needs to be set to 1.
+; When the game is in record mode the current joystick values, along
+; with the current weapon that the player is using, are saved for each
+; frame (every 1/50th sec) until the record buffer is full. When the
+; buffer is full, it is saved to a file such as 'LevelXX.demo' - where
+; XX is the level number.
+; A single byte of information is recorded for each frame:
+;
+;					bits 0-1 Joystick X
+;							 2-3 Joystick Y
+;								 4 Fire button
+;								 5-7 Weapon
+;
+
+CNIF #RECORD_DEMO = 1
+	.RecordJoystick
+		Select Jx
+			Case -1 : DemoRecord = $01
+			Case	1 : DemoRecord = $02
+			Default : DemoRecord = 0
+		End Select
+		Select Jy
+			Case -1 : DemoRecord = DemoRecord | $04
+			Case	1 : DemoRecord = DemoRecord | $08
+		End Select
+		If	Jb Then DemoRecord = DemoRecord | $10
+		DemoRecord = DemoRecord | (*Player\MissileNo ASL 5)
+		Demo(DemoStep) = DemoRecord
+		DemoStep+1
+		If DemoStep = #MaxDemoSteps
+			EndOfGame = True
+			LevelComplete = True
+		EndIf
+		Return
+
+	.SaveDemo
+		QAMIGA
+		If ReadMem (0, DataPath$+"Level"+Right$(Hex$(LevelNo-1), 2)+".demo")
+			Exists 0, &Demo(0), #MaxDemoSteps*SizeOf.b
+			CloseFile 0
+		EndIf
+		VWait #LongDelay:BLITZ
+		Return
+CEND
+
+.PlaybackJoystick
+	DemoRecord = Demo(DemoStep)
+	Select DemoRecord & $03
+		Case $00 : Jx = 0
+		Case $01 : Jx = -1
+		Case $02 : Jx = 1
+	End Select
+	Select DemoRecord & $0C
+		Case $00 : Jy = 0
+		Case $04 : Jy = -1
+		Case $08 : Jy = 1
+	End Select
+	Jb = DemoRecord & $10
+	*Player\MissileNo = (DemoRecord ASR 5) & $07
+	*Player\MStartShape = #ShapeMissile+(*Player\MissileNo ASL 3)
+	*MisData		 = MData(*Player\MissileNo)
+	DemoStep+1
+	If DemoStep = #MaxDemoSteps
+		EndOfGame = True
+		LevelComplete = True
+	EndIf
+	Return
+
+
+
+JtoPData:
+	Data.b 7, 0, 1, 6, 0, 2, 5, 4, 3
+JtoAData:
+	Data.b 0, 0, 0, 3, 0, 1, 0, 2, 0
+
+ComputerKeys:
+	Data.w 236, 161, 17, $0F, 0			 ; Keypad '0'
+	Data.w 236, 144,	0, $1D, 1			 ; Keypad '1'
+	Data.w 253, 144,	1, $1E, 2			 ; Keypad '2'
+	Data.w 270, 144,	2, $1F, 3			 ; Keypad '3'
+	Data.w 236, 127,	3, $2D, 4			 ; Keypad '4'
+	Data.w 253, 127,	4, $2E, 5			 ; Keypad '5'
+	Data.w 270, 127,	5, $2F, 6			 ; Keypad '6'
+	Data.w 236, 110,	6, $3D, 7			 ; Keypad '7'
+	Data.w 253, 110,	7, $3E, 8			 ; Keypad '8'
+	Data.w 270, 110,	8, $3F, 9			 ; Keypad '9'
+	Data.w 253, 178,	9, $4F, 10			; Cursor LEFT
+	Data.w 287, 178, 10, $4E, 11			; Cursor RIGHT
+	Data.w 270, 161, 11, $4C, 12			; Cursor UP
+	Data.w 270, 178, 12, $4D, 13			; Cursor DOWN
+	Data.w 236, 178, 13, $40, 14			; 'SPACE'
+	Data.w 287, 127, 14, $41, 15			; 'BACKSPACE'
+	Data.w 287, 110, 15, $45, 16			; 'ESCAPE'
+	Data.w 287, 144, 16, $43, 17			; Keypad 'ENTER'
+	Data.w 287, 144, 16, $44, 17			; 'RETURN'

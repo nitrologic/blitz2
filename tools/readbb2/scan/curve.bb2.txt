@@ -1,0 +1,60 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/curve.bb2
+
+Screen 0,3:ScreensBitMap 0,0:BlockScroll
+Green 0,0,0,0:Green 1,15,15,15
+
+Dim s(1000)
+
+Statement push{n}
+Shared s(),sp
+s(sp)=n:sp+1
+End Statement
+
+Function pull{}
+Shared s(),sp
+sp-1:Function Return s(sp)
+End Function
+
+Function avg{n1,n2}
+Function Return (n1+n2)/2
+End Function
+
+x1=0:y1=255
+x2=0:y2=0
+x3=160:y3=192
+Gosub curve
+
+BitMapOutput 0:NPrint np
+MouseWait
+End
+
+curve
+;
+xd=QAbs(x3-x1):yd=QAbs(y3-y1)
+md=xd:If yd>md Then md=yd		 ;md=max difference
+s=1/md
+x1a=(x2-x1)/md
+y1a=(y2-y1)/md
+x2a=(x3-x2)/md
+y2a=(y3-y2)/md
+ly=-1
+For k=0 To 1 Step s
+x4=(x2-x1)*k+x1
+y4=(y2-y1)*k+y1
+Point x4,y4,1:np+1:VWait
+x1+x1a:y1+y1a
+x2+x2a:y2+y2a
+Next
+Return
+
+pushall
+push{x1}:push{y1}:push{x2}:push{y2}
+push{x3}:push{y3}:push{x4}:push{y4}
+push{x5}:push{y5}:push{x6}:push{y6}
+Return
+
+pullall
+y6=pull{}:x6=pull{}:y5=pull{}:x5=pull{}
+y4=pull{}:x4=pull{}:y3=pull{}:x3=pull{}
+y2=pull{}:x2=pull{}:y1=pull{}:x1=pull{}
+Return

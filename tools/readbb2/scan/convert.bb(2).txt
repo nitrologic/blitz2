@@ -1,0 +1,191 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/code/convert.bb
+;
+; imagine to skidmarks car converter
+;
+
+; needs buttons for origin adjustment
+; needs docs
+; needs wbstartup!
+
+; needs header file
+
+; header: Name | Designer | Settings | BitMap
+
+
+NEWTYPE .handling
+	speed.w:accel.w:slide.w:steer.w
+	bounce.w:penalty.w:shadowx.w:shadowy.w
+	pad.w[8]
+End NEWTYPE
+
+NEWTYPE .header
+	name$
+	designer$
+	settings.handling
+	pic.b[64*32/4]
+End NEWTYPE
+
+Function.w pickcolor{ch.l,x.w,y.w,settings.l,shif.w}
+	MOVE.l d0,a0:MOVE 22(a0),d0:MOVE.l (a0),a0:MOVE.l d3,a1
+	ADD d1,a0:MOVE d2,d3:MULU d0,d3:ADD.ld3,a0:ADD.ld3,a0:ADD.ld3,a0
+	LSR d4,d1:MOVEQ#0,d4:MOVEQ#0,d5:MOVEQ#0,d6:ADD d1,d2
+	MOVE.b(a0),d4:ADD d0,a0:MOVE.b(a0),d5:ADD d0,a0:MOVE.b(a0),d6
+	MOVE d4,d7:ADD d5,d7:ADD d6,d7:EXT.l d7:DIVU #3,d7
+	MOVEQ#0,d0:CMP #250,d5:BPL dun ;SUB#5,d5:CMP d6,d5:BPL dun
+	SUB d4,d6:ADD #32,d6	;change this if red spotting bad
+	BPL notr:MOVEQ#3,d0:BTST#0,d2:BEQ dun
+	CMP (a1),d4:BPL nhi:MOVEQ#2,d0:BRA dun:nhi
+	CMP 2(a1),d4:BMI dun:MOVEQ#1,d0:BRA dun:notr:MOVEQ#1,d0
+	MOVE 4(a1),d1:BTST#0,d2:BEQ nd
+	MOVE 6(a1),d1:nd:CMP d1,d7:BPL dun:MOVEQ#2,d0:dun:AsmExit
+End Function
+
+f$="mini.pix/":fw=64:fh=32
+
+thresh=120
+
+.init
+	InitBank 0,800*512,0:InitBank 1,800*256,0
+	##[$CD10] 0,64,32,2:CludgeBitMap 0,0:BlockScroll 3:MakeCookie 0 ;aga
+	##[$CD10] 1,32,32,2:CludgeBitMap 1,1:BlockScroll 3:MakeCookie 1 ;ecs
+	##[$CD10] 2,64,32,2:CludgeBitMap 2,2:BlockScroll 3:MakeCookie 2 ;ecs show
+	##[$CD10] 3,60,30,2
+	Dim a.w(3):a(0)=160:a(1)=224:a(2)=64:a(3)=112
+	aga=1
+	MaxLen pa$=192:MaxLen fi$=192
+	StopCycle 0,0,8,10,12
+	StopCycle 0,1,12,12,12
+	StopCycle 0,2,3,3,3
+	StopCycle 0,3,14,6,8
+	t$="Imagine -> SkidMarks Frame Converter"
+	t$+"									 (c)1994 Acid Software"
+	Screen 0,0,0,640,256,2,$8000,t$,2,1:FadePalette 0
+	;
+	StringGadget 0,88,4,0,1,32,210:StringGadget 0,408,4,0,2,32,210
+	TextGadget 0,520,22,0,3, "	SELECT	"
+	TextGadget 0,520,35,0,4, " SHOW AGA "
+	TextGadget 0,520,48,0,5, " SHOW ECS "
+	TextGadget 0,520,61,0,6, " GENERATE "
+	TextGadget 0,520,230,0,7,"	 QUIT	 "
+	For y=0 To 3
+		TextGadget 0,446,22+y*13,0,8+y+y,"<"
+		TextGadget 0,490,22+y*13,0,9+y+y,">"
+	Next
+	Window 0,0,11,640,245,$1800,"",2,1,0
+	;
+	ResetString 12,22,610,52
+	ResetString 12,81,610,142
+	For x=0 To 7
+		For y=0 To 3
+			ResetString 40+x*70,84+y*35,60,30
+			ShapeGadget 0,40+x*70,84+y*35,0,50+x+y*8,3
+		Next
+	Next
+	ResetString 12,229,610,14
+	;
+	WLocate 8,6:Print "Car Name:":WLocate 328,6:Print "Designer:"
+	ClearString 0,1:Gosub carsettings
+
+.main
+	Repeat
+		ev.l=WaitEvent
+		If ev=$40
+			Select GadgetHit
+				Case 1:n$=GadgetPens(0,1):ClearString 0,2
+				Case 2:d$=GadgetPens(0,2)
+				Case 3
+					f$=FileRequest$("SELECT PIC.0001 OF 800",pa$,fi$)
+					If ##[$BE15](f$)
+						##[$A404] 0,f$
+						fw=Peek.w(Addr ##[$A401](0)+16)
+						fh=Peek.w(Addr ##[$A401](0)+18)
+						f$=UnLeft$(f$,8)
+						Gosub carsettings
+					Else
+						f$="":BeepScreen 0
+					EndIf
+				Case 4
+					If f$<>"" Then aga=1:For frame=1 To 32:Gosub convertframe:Next
+				Case 5
+					If f$<>"" Then aga=0:For frame=1 To 32:Gosub convertframe:Next
+				Case 6
+					If f$<>"" AND n$<>"" Then Gosub recordframes:Gosub makeheader
+				Case 7:End
+				;
+				Case 8:a(0)=QLimit(a(0)-4,0,256):Gosub carsettings
+				Case 9:a(0)=QLimit(a(0)+4,0,256):Gosub carsettings
+				Case 10:a(1)=QLimit(a(1)-4,0,256):Gosub carsettings
+				Case 11:a(1)=QLimit(a(1)+4,0,256):Gosub carsettings
+				Case 12:a(2)=QLimit(a(2)-4,0,256):Gosub carsettings
+				Case 13:a(2)=QLimit(a(2)+4,0,256):Gosub carsettings
+				Case 14:a(3)=QLimit(a(3)-4,0,256):Gosub carsettings
+				Case 15:a(3)=QLimit(a(3)+4,0,256):Gosub carsettings
+				;
+				Default
+					If GadgetHit>49
+						##[$CD10] 0,64,32,2:CludgeBitMap 0,0:BlockScroll 3:MakeCookie 0
+						frame=GadgetHit-49:Gosub convertframe
+					EndIf
+			End Select
+		EndIf
+	Forever
+
+.carsettings:
+	WLocate 14,24:NPrint "Path Name		= ",f$,"											"
+	WLocate 14,32:NPrint "Frame Width	= ",fw,"			"
+	WLocate 14,40:NPrint "Frame Height = ",fh,"			"
+	WLocate 14,48:NPrint "X Offset		 = ",ox,"			"
+	WLocate 14,56:NPrint "Y Offset		 = ",oy,"			"
+	WLocate 14,64:NPrint "Brightness	 = ",br,"			"
+	WLocate 372,25:NPrint "RedWhite:"
+	WLocate 372,38:NPrint "RedBlack:"
+	WLocate 372,51:NPrint "	GreyLo:"
+	WLocate 372,64:NPrint "	GreyHi:"
+	For y=0 To 3:WLocate 464,25+y*13:Print Right$(Str$(1000+a(y)),3):Next
+	Return
+
+.recordframes:
+	aga=1
+	For frame=1 To 800
+		Gosub convertframe
+		fr.l=frame-1
+		fr=(fr AND $ffe0)+((23-fr)AND31):WLocate 0,0:Print fr,"	"
+;		fr=Int(fr/32)*32+((fr+40) MOD 32)
+		SpriteMode 2:GetaSprite 0,0
+		##[$FEDB] Peek.l(Addr Sprite(0)),BankLoc(0)+fr*512,512
+		SpriteMode 0:GetaSprite 0,1
+		##[$FEDB] Peek.l(Addr Sprite(0)),BankLoc(1)+fr*256,256
+	Next
+	SaveBank 0,"ram:"+n$+".aga"
+	SaveBank 1,"ram:"+n$+".ecs"
+	Return
+
+.makeheader
+	frame=414:Gosub convertframe
+	car.header\settings\speed=2,-4,-4,1,12,10,20,8
+	If ReadMem(0,"ram:"+n$+".def")
+		FileOutput 0:NPrint n$:NPrint d$
+		Exists 0,&car\settings,SizeOf .handling
+		Exists 0,Peek.l(Addr BitMap(0)+8),64*32/4
+		CloseFile 0
+	EndIf
+	WindowOutput 0
+	Return
+
+.convertframe	;frame=1..800 -> shape 0
+	;
+	ff$=f$+"pic."+Right$(Str$(10000+frame),4)
+	If ##[$BE15](ff$)=0 Then BeepScreen 0:Return
+	##[$A404] 0,ff$:m.l=Addr ##[$A401](0):Use BitMap 0
+	For y=0 To 31:For x=0 To 63
+		c=pickcolor{m,x+ox,y+oy,&a(0),0}
+		Use BitMap 0:Point x,y,c
+		If ((x+y) AND 1)=0
+			c=pickcolor1{m,x+ox,y+oy,&a(0),1}
+			Use BitMap 1:Point x LSR 1,y,c
+			If aga=0 Then Use BitMap 2:Point (x AND 254),y,c:Point (x AND254)+1,y,c
+		EndIf
+	Next:Next
+	dx=(frame-1) AND 7:dy=Int((frame-1) LSR 3) AND 3
+	WBlit 2-aga-aga,38+dx*70,83+dy*35
+	Return

@@ -1,0 +1,632 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/djl/EPU-GUI.BB2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/djl/EPU-GUI.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/djl/EPU-GUI.BB2
+;EPU GUI by Code 16 (David Linsley & Chris Redpath). June-Oct 1994
+
+If NOT(FromCLI)
+  WBStartup         ;If run from Workbench then legally startup
+  WbToScreen 0      ;and open on Workbench screen
+Else
+  FindScreen 0      ;else open on front screen
+EndIf
+NoCli
+
+DecodeShapes 0,?fileicon   ; Decode included File Requester Icon
+                           ; Come on Simon include it as a command!
+;Open program icon
+success1.w=GetIconInfo(0,"PROGDIR:EPU_GUI")
+If success1=True
+  defdevice$=IconTool$(0,"DEVICE")   ; Read in Tooltype values
+  hotkey$=IconTool$(0,"CX_POPKEY")
+  openwin.w=NOT(IconSubTool$(IconTool$(0,"CX_POPUP"),"NO"))
+  If hotkey$=""
+    hotkey$="ctrl lalt e"  ; If no hotkey tooltype then set a default
+  EndIf EndIf Free IconInfo 0 ; Close Icon.
+
+;Make the Program a Commodity and set its kotkey.
+success2=MakeCommodity("EPU_GUI","EPU-GUI "+Chr$(169)+" D Linsley and C Redpath","GUI for EPU - THE disc expander")
+success3=SetHotKey(0,hotkey$)
+
+;If the icon, commodity or hotkey could not be found/set then exit.
+If (success1 AND success2 AND success3)=False Then End
+
+wintit$="EPU GUI by Code 16: Hotkey=<"+hotkey$+">" ;window title
+appear.b=False      ; Sate of interface - False = window closed
+
+;If another copy is runing then exit - so they dont get confused :-)
+If CommodityEvent=True
+  em.l=ExchangeMessage
+  Select em
+    Case CxUnique
+      End
+  End Select
+EndIf
+
+;Structure to store and send data to EPU
+NEWTYPE .epudata
+  dev.s
+  load.b
+  save.b
+  exam.b
+  exnext.b
+  hmode.b
+  blocksize.w
+  table.l
+  lib.s
+End NEWTYPE
+
+;Structure to store list of libraries for a gadtools List-View gadget
+NEWTYPE .dir
+  word.w
+  name.s
+End NEWTYPE
+
+
+MaxLen pa$=192
+MaxLen fi$=128
+
+Dim List directory.dir(32)   ; Maximum compression libraries
+Dim List inputbuffer$(10)    ; Store to load epu info file
+
+;Run EPU as a CLI command with paramaters.
+Statement run_epu{parm$,device$}
+parm$="EPU DEV "+device$+" "+parm$+" CHNG"
+Execute_ &parm$,0,0
+End Statement
+
+;Run EPU, store and process the data returned
+Function.w get_epudata{device$}
+SHARED inputbuffer$(),wintit$,appear
+
+;Dont change title of screen if window not open!
+If appear=True
+  WLocate 2,86
+  WTitle wintit$,"EPU installed on device "+device$+":"
+EndIf
+
+ClearList inputbuffer$()
+
+;Run EPU and save data as a file in T:
+parm$="EPU DEV "+Chr$(34)+device$+Chr$(34)+" INFO >t:epudata"
+Execute_ &parm$,0,0
+
+ResetList inputbuffer$()
+
+; Read in the info file showing current status of epu device specified
+If ReadFile(0,"t:epudata")
+  FileInput 0
+  count.b=0
+  Repeat
+    If AddItem(inputbuffer$())
+      inputbuffer$()=Edit$(80)
+    EndIf
+    count+1
+  Until count>5 OR Eof(0)
+  CloseFile 0
+  comm$="delete t:epudata >nil:" ; Delete the info file
+  Execute_ &comm$,0,0
+EndIf
+
+; Initialise Data
+ResetList inputbuffer$()
+devdata.epudata\load=0
+USEPATH devdata.epudata
+\load=False
+\save=False
+\exam=False
+\exnext=False
+\hmode=False
+\blocksize=0
+\table=0
+\lib=""
+devinst.w=0
+
+;Process returned file and set structure accordingly.
+If NextItem(inputbuffer$())
+If Instr(UCase$(inputbuffer$()),"EPU ")<=0
+  devinst.w=2  ; 0=not installed, 1=installed, 2=device non-existant.
+
+  ;If EPU is installed on the device then process the data.
+  If Instr(UCase$(inputbuffer$()),"DEVICE")<=0
+    devinst.w=1
+    While NextItem(inputbuffer$())
+      temp$=UCase$(inputbuffer$())
+      If Instr(temp$," LOAD ")
+        \load=True
+      EndIf
+      If Instr(temp$," SAVE ")
+        \save=True
+      EndIf
+      If Instr(temp$," EXAM ")
+        \exam=True
+      EndIf
+      If Instr(temp$," EXNEXT ")
+        \exnext=True
+      EndIf
+      If Instr(temp$," HMODE")
+        \hmode=True
+      EndIf
+      If Instr(temp$,"BLOCK")
+        posn=Instr(temp$,":")
+        If posn>0
+          \blocksize=Val(Right$(temp$,Len(temp$)-posn))
+        ;****** Debug Info ******
+        ;NPrint \blocksize
+        EndIf
+      EndIf
+      If Instr(temp$,"TABLE")
+        posn=Instr(temp$,":")
+        If posn>0
+          \table=Val(Right$(temp$,Len(temp$)-posn))
+        ;****** Debug Info ******
+        ;NPrint \table
+        EndIf
+      EndIf
+      If Instr(temp$,"LIBRARY")
+        posn=Instr(temp$,":")
+        If posn>0
+          temp$=StripLead$(Right$(temp$,Len(temp$)-posn),32)
+          If Left$(temp$,1)="E"
+            \lib=Left$(temp$,4)
+          Else
+            \lib=Mid$(temp$,4,Len(temp$)-3)
+          EndIf
+        ;****** Debug Info ******
+        ;NPrint \lib
+        EndIf
+      EndIf
+    Wend
+  EndIf
+EndIf
+EndIf
+
+;Set default tag value and set the gadtools to the correct state.
+tag.l=$80080000
+GTSetAttrs 0,14,tag+4,\load*-1
+GTSetAttrs 0,1,tag+4,\save*-1
+GTSetAttrs 0,2,tag+4,\exam*-1
+GTSetAttrs 0,3,tag+4,\exnext*-1
+GTSetAttrs 0,4,tag+4,\hmode*-1
+GTSetInteger 0,5,\blocksize
+GTSetInteger 0,6,\table
+GTSetString 0,7,\lib
+Function Return devinst.w  ; return value of EPU installed on that device
+End Function
+
+;Display warning and set structures if EPU is not installed on the device
+Statement not_installed{inst.w}
+SHARED wintit$,appear
+
+If appear=True
+  WLocate 2,86
+EndIf
+
+If inst=0                  ;Not installed
+  ; Initialise Data
+  devdata.epudata\load=0
+  USEPATH devdata.epudata
+  \load=True
+  \save=False
+  \exam=True
+  \exnext=True
+  \hmode=True
+  \blocksize=30
+  \table=1000
+  \lib="NUKE"
+If appear=True
+  WTitle wintit$,"EPU is not installed on this device!"
+EndIf
+
+Else
+
+If appear=True
+  WTitle wintit$,"Device does not exist!"
+EndIf
+; Initialise Data
+  devdata.epudata\load=0
+  USEPATH devdata.epudata
+  \load=False
+  \save=False
+  \exam=False
+  \exnext=False
+  \hmode=False
+  \blocksize=0
+  \table=0
+  \lib=""
+EndIf
+
+; set gadtools to the correct status
+
+  tag.l=$80080000
+  GTSetAttrs 0,14,tag+4,\load*-1
+  GTSetAttrs 0,1,tag+4,\save*-1
+  GTSetAttrs 0,2,tag+4,\exam*-1
+  GTSetAttrs 0,3,tag+4,\exnext*-1
+  GTSetAttrs 0,4,tag+4,\hmode*-1
+  GTSetInteger 0,5,\blocksize
+  GTSetInteger 0,6,\table
+  GTSetString 0,7,\lib
+
+BeepScreen 0 ; Flash the screen to give audio/visual warning
+
+End Statement
+
+;Make the parameter string to pass to EPU from the gadtools setting
+Function.s make_string{}
+tag.l=$80080000+4
+parm$="EPU DEV "+Chr$(34)      ; 34= "
+device$=GTGetString(0,8)
+posn=Instr(device$,":")        ; Strip colon off the device name
+If posn>0
+  device$=Left$(device$,posn-1)
+  parm$+device$+Chr$(34)+" "
+  If GTStatus(0,1) <>0
+    parm$+"SAVE "
+  Else
+    parm$+"NOSAVE "
+  EndIf
+  If GTStatus(0,14)<>0
+    parm$+"LOAD "
+  Else
+    parm$+"NOLOAD "
+  EndIf
+  If GTStatus(0,2)<>0
+    parm$+"EXAM "
+  Else
+    parm$+"NOEXAM "
+  EndIf
+  If GTStatus(0,3)<>0
+    parm$+"EXNEXT "
+  Else
+    parm$+"NOEXNEXT "
+  EndIf
+  If GTStatus(0,4)<>0
+    parm$+"HMODE "
+  Else
+    parm$+"LMODE "
+  EndIf
+  parm$+"BLOCK "+Str$(GTGetInteger(0,5))+" "
+  parm$+"TABLE "+Str$(GTGetInteger(0,6))+" "
+  parm$+"LIB "+GTGetString(0,7)
+EndIf
+  Function Return(parm$)
+End Function
+
+
+; Actual MAIN PROGRAM
+
+state.b=True       ; State of CX - True = enabled
+
+SetStatus On       ; Set Commodity status (for Exchange program)
+
+ClearList directory()
+ResetList directory()
+
+;Find EPU and XPK compression libraries, and place them in a link-list
+ChDir "LIBS:"
+entries.w=0
+
+While MoreEntries  ; More files in libs: 
+  fi$=UCase$(EntryName$) 
+  If Right$(fi$,8)=".LIBRARY" AND NOT(EntryDIR)    ; XPK lib?
+  If Left$(fi$,3)="XPK" AND Len(fi$)=15
+    fi$=Mid$(fi$,4,4)
+    If AddItem(directory())
+      directory()\name=fi$
+      entries+1
+    EndIf
+  EndIf
+  If Left$(fi$,3)="EPU"                            ; EPU lib?
+    fi$=Left$(fi$,4)
+    If AddItem(directory())
+      directory()\name=fi$
+      entries+1
+    EndIf
+  EndIf
+  EndIf
+Wend
+
+;Create the gadgets using WB2 and up gadtools.
+GTListView 1,0,12,0,140,100,"",0,directory()
+GTCheckBox 0,14,80,8,16,12,"Load  ",1
+GTCheckBox 0,1,80,20,16,12,"Save  ",1
+GTCheckBox 0,2,80,32,16,12,"Exam  ",1
+GTCheckBox 0,3,80,44,16,12,"ExNext",1
+GTCheckBox 0,4,80,56,16,12,"Hmode ",1
+GTInteger  0,5,80,70,64,12,"Block ",1,10
+GTInteger  0,6,220,70,96,12,"Table  ",1,1000
+GTString   0,7,220,54,96,12,"Library",1,16,"NUKE"
+GTString   0,8,220,8,96,12,"Device ",1,16,defdevice$ ; from tooltype
+GTShape    0,9,320,8,0,0
+GTShape    0,10,320,54,0,0
+GTButton   0,11,156,22,80,12,"Install",$10
+GTButton   0,12,256,22,80,12,"Remove",$10
+GTButton   0,13,156,38,180,12,"Modify User-Startup",$10
+GTButton   0,15,320,70,40,12,"Quit",$10
+
+;Set a required IDCMP flag for gadtools.
+AddIDCMP $400010
+
+;If CX_POPUP=YES then open the window.
+If openwin=True
+  Gosub _appear
+EndIf
+
+;****** Debug Info ******
+;Window 3,30,150,128,90,$100f,"Gadget Status",1,2
+
+;Get EPU data for the default device in the ToolTypes.
+device$=GTGetString(0,8)
+posn=Instr(device$,":")
+If posn>0
+  device$=Left$(device$,posn-1)
+  inst.w=get_epudata{device$}
+  If inst<>1
+    not_installed{inst}
+  EndIf
+Else
+  BeepScreen 0   ; Beep screen if no device
+EndIf
+
+tag.l=$80080000
+
+;Wait for an event to our program - intuition, Commodity or hotkey
+;Make sure it was for our window if an intuievent.
+Repeat
+  Repeat
+    VWait
+    ev.l=Event
+    ce.l=CommodityEvent
+    hk.l=HotKeyHit
+  Until (((ev=$200 OR ev=$40) AND EventWindow=0) OR ce=True OR hk=0)
+
+  gad.w=GadgetHit
+  eve.w=EventCode
+
+  ;Close the window if close gadget selected (hide interface)
+  If ev=$200
+    Gosub _disappear
+  EndIf
+
+;Process Exchange message and set interface accordingly
+  If ce=True
+    em.l=ExchangeMessage
+    Select em
+      Case CxAppear
+        Gosub _appear
+      Case CxDisAppear
+        Gosub _disappear
+      Case CxEnable
+        Gosub _enable
+      Case CxDisable
+        Gosub _disable
+      Case CxKill
+        Goto _kill
+    End Select
+  EndIf
+
+;Open display if the hotkey was pressed
+  If hk=0 Then Gosub _appear
+
+;If gadget selected then do the right thing
+  Use Window 0
+  If ev=$40 AND state=True AND appear=True
+
+;For gadgets 14,1-7 then RUN EPU to set the value
+    Select gad
+      Case 14
+        If eve=0
+          parm$="NOLOAD"
+        Else
+          parm$="LOAD"
+        EndIf
+        run_epu{parm$,device$}
+      Case 1
+        If eve=0
+          parm$="NOSAVE"
+        Else
+          parm$="SAVE"
+        EndIf
+        run_epu{parm$,device$}
+      Case 2
+        If eve=0
+          parm$="NOEXAM"
+        Else
+          parm$="EXAM"
+        EndIf
+        run_epu{parm$,device$}
+      Case 3
+        If eve=0
+          parm$="NOEXNEXT"
+        Else
+          parm$="EXNEXT"
+        EndIf
+        run_epu{parm$,device$}
+      Case 4
+        If eve=0
+          parm$="LMODE"
+        Else
+          parm$="HMODE"
+        EndIf
+        run_epu{parm$,device$}
+      Case 5
+        blocksize.l=GTGetInteger(0,5)
+        parm$="BLOCK "+UStr$(blocksize)
+        run_epu{parm$,device$}
+      Case 6
+        tablesize.l=GTGetInteger(0,6)
+        parm$="TABLE "+UStr$(tablesize)
+        run_epu{parm$,device$}
+    ;If user selected library by typing then run epu to set the change
+      Case 7
+        parm$="LIB "+GTGetString(0,7)
+        run_epu{parm$,device$}
+  ; Change device
+      Case 8
+        device$=GTGetString(0,8)
+        posn=Instr(device$,":")
+        If posn>0
+          device$=Left$(device$,posn-1)
+          inst.w=get_epudata{device$}
+          If inst<>1
+            not_installed{inst}
+          EndIf
+        Else
+          BeepScreen 0
+        EndIf
+  ;Select a device with the ASL path requester
+      Case 9
+        device$=ASLPathRequest$("Enter Device name",pa$)
+        posn=Instr(device$,":")
+        If posn>0
+          device$=Left$(device$,posn-1)
+          GTSetString 0,8,device$+":"
+          inst.w=get_epudata{device$}
+          If inst<>1
+            not_installed{inst}
+          EndIf
+        Else
+          BeepScreen 0
+        EndIf
+  ; Display a new window and select a compressor library
+      Case 10
+        Gosub _disable  ; Disable all gadgets in the main window
+        Window 1,380,110,186,134,$141E,"Select a Compressor",1,2
+
+        AttachGTList 1,1
+
+        ;Insert a slight delay before user can select a library
+        ResetTimer
+        Repeat
+          Wait
+        Until Ticks>30
+        Repeat
+          evil.l=WaitEvent
+        Until (evil=$200 OR evil=$40) AND EventWindow=1
+
+        If evil=$40
+          gade.w=GadgetHit
+          eva.w=EventCode
+
+      ;Find and set directory name from the item in the list selected.
+          If gade=0
+            ResetList directory()
+            For i.w=0 To eva
+              If NextItem(directory())
+              EndIf
+            Next i
+            GTEnable 0,7
+            GTSetString 0,7,directory()\name
+          EndIf
+        EndIf
+     ;Close window and run EPU to set the change
+        Free Window 1
+        Use Window 0
+        Gosub _enable
+        parm$="LIB "+GTGetString(0,7)
+        run_epu{parm$,device$}
+
+     ;Run EPU to install it on the selected device.
+      Case 11
+        parm$=make_string{}
+        Execute_ &parm$,0,0
+        device$=GTGetString(0,8)
+        posn=Instr(device$,":")
+        If posn>0
+          device$=Left$(device$,posn-1)
+          inst.w=get_epudata{device$}
+          If inst<>1
+            not_installed{inst}
+          EndIf
+        Else
+          BeepScreen 0
+        EndIf
+
+    ; Remove EPU from the selected device
+      Case 12
+        device$=GTGetString(0,8)
+        posn=Instr(device$,":")
+        If posn>0
+          device$=Left$(device$,posn-1)
+          parm$="EPU DEV "+device$+" KILL"
+          Execute_ &parm$,0,0
+          not_installed{0}
+        Else
+          BeepScreen 0
+        EndIf
+ 
+ ;Modify the User-Startup file so EPU is run on boot-up.
+      Case 13
+        parm$=make_string{}
+        If OpenFile(0,"S:User-Startup")
+          FileSeek 0,Lof(0)
+          FileOutput 0
+          NPrint ""
+          NPrint"This line added by EPU GUI"
+          NPrint ""
+          NPrint parm$
+          NPrint ""
+          DefaultOutput
+          CloseFile 0
+        EndIf
+
+  ;Quit the program
+      Case 15
+        Goto _kill
+    End Select
+  EndIf
+Forever
+
+;Close down application
+_kill:
+Gosub _disappear
+End
+
+;Open main window if not already done so
+_appear:
+If appear=False
+  Window 0,20,30,384,100,$100e,wintit$,1,2
+  AttachGTList 0,0 ; Attach the gadtools to the window
+  appear=True
+EndIf
+Return
+
+;Close the window if its open
+_disappear:
+If appear=True
+  CloseWindow 0
+  appear=False
+EndIf
+Return
+
+;Enable all the gadtools gadgets in the main window
+_enable:
+  state=True
+  For loop.b=1 To 15
+    GTEnable 0,loop
+  Next
+  Gosub _redraw
+Return
+
+;Disable the gadgets
+_disable:
+  state=False
+  For loop.b=1 To 15
+    GTDisable 0,loop
+  Next
+  Gosub _redraw
+Return
+
+;Redraw all the gadgets so they look as they should
+_redraw:
+  If appear=True
+    For loop.b=1 To 15
+      Redraw 0,loop
+    Next
+  EndIf
+Return
+
+;File Requester Icon. Wouldnt need to do this if Simon included Boopsi 
+;support, or if I waited till the book I`ve ordered from the book-shop 
+;comes in (Includes and AutoDocs)
+fileicon:
+IncBin "blitz-progs:epugui/filereq.shp"
+

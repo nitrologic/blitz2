@@ -1,0 +1,1259 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/pacdarts/ArrowsGame/Arrows.bb2
+;
+;	OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+; O			__			____		____		 ____							 _______		O
+; O		 /	\		|		\	|		\	 /		\	|				| /					 O
+; O		/		\	 |		/	|		/	/			\ |				| \					 O
+; O	 /------\	|---\	 |---\	 \			/ \				/	-------\	 O
+; O	/				\ |		\	|		\	 \		/	 \			/					 |	O
+; O	|				| |		|	|		|		\../		 \./\./		......./	 O
+; O																														 O
+; O																By Jim Brown.	12 July 1994	O
+;	OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO
+;
+;	This program must be supplied with the 'Arrows.doc' document.
+;	The program is shareware.	You may make a single copy for back
+;	up purposes only.	Enjoy the game.
+
+WBStartup
+
+cx=100 :cy=106 :allcpu.b=False
+angle.q=0 :rad.q=0 :editing.b=False
+gametype=0 :rank.w=0 :doubles.b=0
+winner.b=0 :mx.w=0 :my.w=0 :scry.w=0
+qx.q=0 :qy.q=0 :numlegs.b=1 :points.w=301
+cpu=False :quit=False :longwait.w=0
+kb$="QWERTYUIOPASDFGHJKLrZXCVBNM.rr?#"
+kb$+Chr$(34)+"		!cb" :kply.w=3
+MaxLen dat$=32
+
+NEWTYPE .player
+	ranking.w	 ; 1 to 20	(1=best)
+	stat.w			; 0=player 1=cpu
+	team.w			; 0=Red		1=Green
+	fig.w			 ; character image to use
+	name.s			; Name of human/CPU player
+	score.w		 ; Used during game
+	wongames.w	; How many games won / how many lives left
+	gam.w[6]		; Games involved in (0-5)
+End NEWTYPE
+
+NEWTYPE .darttype
+	x.w :y.w :frm.w	 ; holds darts positions and frame
+End NEWTYPE
+Dim dt.darttype(3)
+
+Dim p.player(16)
+Dim play(16),sel(16)
+Dim r.b(2,3),g.b(2,3),b.b(2,3)
+r(1,1)=12 :g(1,1)=13 :b(1,1)= 0	 ; colours used for the dart
+r(1,2)= 8 :g(1,2)= 9 :b(1,2)= 0	 ; set.	Human players use
+r(1,3)= 3 :g(1,3)= 3 :b(1,3)= 0	 ; yellow, CPU use Red set.
+r(2,1)= 4 :g(2,1)=11 :b(2,1)=14
+r(2,2)= 0 :g(2,2)= 7 :b(2,2)=11
+r(2,3)= 0 :g(2,3)= 2 :b(2,3)= 7
+
+;---------------------------------------------------------------
+;							load files, initialise display
+
+NoCli :File 2048
+LoadSprites 0,"arrows.sprites"
+LoadShapes 0,"arrows.shapes"
+LoadBlitzFont 0,"Arrow.font"
+BitMap 1,320,256,4 :BlockScroll 0 :LoadBitMap 1,"titlescreen.IFF"
+BitMap 0,320,512,4 :BlockScroll 0 :LoadBitMap 0,"dartboard.IFF",0
+LoadSound 1,"Hit1.snd" :LoadSound 2,"Hit2.snd"
+LoadSound 3,"Hit3.snd" :LoadSound 4,"hitwire.snd"
+LoadSound 5,"hitwall.snd" :LoadSound 6,"quickcheer.snd"
+LoadSound 7,"quickclap.snd" :LoadSound 8,"longclap.snd"
+LoadSound 9,"tapkey.snd"
+Use BitMap 0 :BitMapOutput 0 :Filter On
+
+For d=1 To 9
+	Poke.w Addr Sound(d)+4,372
+Next d
+For d=11 To 26 :Handle d,0,26 :Next d
+Buffer 0,9216 :Format "###"
+
+Dim segangle.b(20) :Restore segdat
+For d=1 To 20 :Read segangle(d) :Next d
+segdat
+Data.b 2,16,20,6,38,10,24,28,34,12
+Data.b 30,36,8,32,14,26,18,4,22,0
+
+VWait 20 :BLITZ :scry=256
+Slice 0,44,4 :Show 0,0,scry :Gosub datload
+Mouse On :Pointer 19,0 :MouseArea 24,24,296,238 :Use ##[$C70D] 0
+Use SetCycle 0 :Green 17,14,8,10 :Green 18,9,5,7 :Green 19,4,2,3
+
+;---------------------------------------------------------------
+;							 statements / functions
+
+Statement digit{value,x,y}					 ; Do 3 digit number on panel
+	Format "###"											 ; using 32*32 shapes.
+	d$=Str$(value) :VWait :flag=False
+	If value<0 Then flag=True
+	For d=1 To 3
+		value=Asc(Mid$(d$,d,1))-48
+		If value<0 OR value>9 OR flag=True Then value=10
+		Blit value,x+(32*(d-1)),y
+	Next d
+End Statement
+
+Statement waitbutton{onoff}	 ; Await for user to click Mouse
+	Shared mx,my,longwait,allcpu
+	longwait=0
+	If onoff=On
+		Repeat
+			If MouseXSpeed+MouseYSpeed<>0 Then longwait=0
+			VWait :If allcpu=True Then longwait+1
+			If Joyb(0)=1 Then Sound 9,8
+		Until Joyb(0)=1 OR longwait>=468
+	Else
+		Repeat
+			If MouseXSpeed+MouseYSpeed<>0 Then longwait=0
+			VWait :If allcpu=True Then longwait+1
+		Until Joyb(0)<>1 OR lonwait>=468
+	EndIf
+	mx=MouseX/8
+	my=(MouseY-8)/8+32
+	If longwait>=468
+		longwait=True
+		mx=0 :my=0
+	Else
+		longwait=False
+	EndIf
+End Statement
+
+Statement symbols{}							; Sticks figures/name on board
+	Shared p(),r(),g(),b(),play(),pl,cpu
+	Colour 1,3 :Locate 9,2.8 :Print p(play(pl))\name
+	If p(play(pl))\stat=1 Then cpu=True Else cpu=False
+	If p(play(pl))\team=1 Then xp=158 Else xp=9
+	If p(play(pl))\fig<11 OR p(play(pl))\fig>26 Then p(play(pl))\fig=11
+	BBlit 0,p(play(pl))\fig,xp,64
+	If p(play(pl))\stat=1 Then xp=2 Else xp=1
+	For d=0 To 8 Step 4
+		Green 21+d,r(xp,1),g(xp,1),b(xp,1)
+		Green 22+d,r(xp,2),g(xp,2),b(xp,2)
+		Green 23+d,r(xp,3),g(xp,2),b(xp,3)
+	Next d
+End Statement
+
+Statement pr{txt$,yp}		 ; Print text @ yp Y character position
+	Locate 0,yp :txt$=UCase$(txt$)
+	Print Left$(txt$,40)
+End Statement
+
+Statement ct{txt$,yp}		 ; Centre text @ yp Y character position
+	Locate 0,yp :txt$=UCase$(txt$)
+	txt$=StripLead$(txt$,32)
+	txt$=StripTrail$(txt$,32)
+	Print Centre$(txt$,40)
+End Statement
+
+Statement customgadget{t$,cx,cy}	; Make a custom gadget
+	t$=UCase$(Left$(t$,10))
+	Blit 31,cx*8-(((10-Len(t$))*8)/2+4),cy*8-3
+	Colour 1,10 :Locate cx,cy :Print t$ :Colour 1,0
+End Statement
+
+Statement hidedarts{}			; Hide the darts when viewing the
+	ShowSprite	0,-24,20,2	 ; bottom section of the screen
+	ShowSprite	6,-24,40,4
+	ShowSprite 12,-24,80,6
+End Statement
+
+Statement showdarts{}			; restore the darts to last position
+	Shared dt()
+	ShowSprite dt(1)\frm,dt(1)\x,dt(1)\y,2
+	ShowSprite dt(2)\frm,dt(2)\x,dt(2)\y,4
+	ShowSprite dt(3)\frm,dt(3)\x,dt(3)\y,6
+End Statement
+
+Statement cleanup{flag}				 ; Tidy the display up by clearing
+	Shared gameover,dt()					; any text, figures etc.
+	If gameover=0 Then VWait 109
+	hidedarts{} :dt(1)\x=-24,20,0
+	dt(2)\x=-24,40,4 :dt(3)\x=-24,80,6
+	If flag=0 Then UnBuffer 0
+	Colour 1,3
+	Locate 29,19.3 :NPrint "				 "
+	Locate 29,20.5 :NPrint "				 "
+	Locate 29,21.8 :NPrint "				 "
+	digit{-1,216,21} :digit{-1,216,87} :digit{-1,216,219}
+End Statement
+
+Statement flashwipe{}		 ; CLS the bottom screen area in a fancy
+	For d=318 To 0 Step -2	; way.
+		Boxf d,256,d+1,511,0
+	Next d
+	Locate 0,32 :Colour 1,0
+End Statement
+
+Statement showtop{spd}	 ; Scroll up to top at 'spd' speed
+	Shared scry,gameover
+	If scry=256
+		MouseArea 24,280,296,282
+		For scry=256 To 0 Step -spd
+			VWait :Show 0,0,scry
+		Next scry
+		scry=0
+	EndIf
+End Statement
+
+Statement showbottom{spd}	; Scroll down to bottom at 'spd' speed
+	Shared scry
+	If scry=0
+		For scry=0 To 256 Step spd
+			VWait :Show 0,0,scry
+		Next scry
+		scry=256 :MouseArea 222,214,224,216
+		VWait :MouseArea 24,24,296,238
+	EndIf
+End Statement
+
+Statement flashshow{}						; Copy the Mainscreen display to
+	Shared gametype,points				 ; bottom and set the buttons to
+	Shared numlegs,doubles,allcpu	; appropiate positions used
+	For d=0 To 312 Step 8
+		Scroll d,0,8,255,d,256,1
+	Next d
+	showbottom{8}
+	MouseArea 228,182,230,184
+	VWait :MouseArea 24,24,296,238
+	Blit 32,81,305+((gametype+doubles)*8)
+	Select points
+		Case 101 :d=305
+		Case 301 :d=313
+		Case 501 :d=321
+		Default : points=301 :d=313
+	End Select
+	Blit 32,225,d
+	Select numlegs
+		Case 1 :d=305
+		Case 3 :d=313
+		Case 5 :d=321
+		Default :numlegs=1 :d=305
+	End Select
+	Blit 32,273,d
+	allcpu=True
+End Statement
+
+Function.q ax{radsize,ang}		 ; gives a value between 0 and 6300
+	Shared cx										; from given radius and angle.
+	pos=cx+radsize*HSin(ang*Pi/20)
+	Function Return pos
+End Function
+
+Function.q ay{radsize,ang}		 ; gives a value between 0 and 6300
+	Shared cy										; from given radius and angle.
+	pos=cy+(-radsize)*HCos(ang*Pi/20)
+	Function Return pos
+End Function
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;										 MAIN TITLE SCREEN
+; This shows main selection screen and waits for user to click a
+; button/gadget etc.	If no action received after a while, shows
+; the Shareware info.	When button/gadget clicked, this section
+; handles all user stuff such as editing/selecting.
+
+.mainscreen:
+flashshow{} :waitbutton{Off}
+playgame=False :quit=False :gameover=False
+
+Repeat
+	waitbutton{On}
+
+	If my>=50 OR my<35 OR mx<8	; Outside of panel area clicked.
+		flashwipe{} :Colour 10,3 :ct{"arrows",36}
+		ct{" ",37} :ct{"written by jim brown using",38}
+		ct{">> blitz basic ii <<",39} :ct{" ",40}
+		ct{"this is shareware program.	you may",41}
+		ct{"make one copy for back-up purposes ",42}
+		ct{"only.	Hope you enjoy this game.	 ",43}
+		d$="C" :Gosub yesno
+	EndIf
+
+	If my>=38 AND my<=43	 ; If buttons section clicked
+		my-38
+
+		If mx>=10 AND mx<=27							; Game buttons clicked
+			Blit 33,81,305 :Blit 33,81,329
+			Blit 32,81,8*(38+my)+1 :gametype=my :doubles=0
+			If gametype=1 Then gametype=0 :doubles=1
+			t=0
+			For d=1 To 16
+				If p(d)\gam[gametype+doubles]=1 Then t+1 :play(t)=d
+			Next d
+		EndIf
+
+		If my<3
+
+			If mx>=28 AND mx<=33	 ; Points buttons clicked
+				Blit 33,225,305
+				Select my
+					Case 0 :points=101 :Blit 32,225,305
+					Case 1 :points=301 :Blit 32,225,313
+					Case 2 :points=501 :Blit 32,225,321
+				End Select
+			EndIf
+
+			If mx>=34 AND mx<=36	 ; Legs/Lives buttons clicked
+				Blit 33,273,305
+				Select my
+					Case 0 :numlegs=1 :Blit 32,273,305
+					Case 1 :numlegs=3 :Blit 32,273,313
+					Case 2 :numlegs=5 :Blit 32,273,321
+				End Select
+			EndIf
+
+		EndIf
+
+	EndIf
+
+	editing=False
+
+	If my=45	; - START - PLAYERS - QUIT - line
+
+		If mx>=30 AND mx<=39 Then Pop If :Pop Repeat :End ; QUIT
+		If mx>=9 AND mx<=18 Then playgame=True ; START
+
+		If mx>=20 AND mx<=28 ; PLAYERS gadget pressed
+			Select gametype
+				Case 0 :numplayers=2+(doubles*2)
+				d$="FOR STANDARD DARTS"
+				If doubles=1 Then d$="2 FROM RED, AND 2 FROM GREEN"
+				Case 2 :numplayers=16 :d$="FOR KILLER CONTEST"
+				Case 3 :numplayers=1 :d$="FOR ROUND THE BOARD GAME"
+				Case 4 :numplayers=1 :d$="TO TRY HIT THE NUMBER"
+				Case 5 :numplayers=1 :d$="FOR A PRACTICE GAME"
+			End Select
+			Gosub selectplayers :Gosub sortplayers
+			flashshow{}
+		EndIf
+
+	EndIf
+
+	If my=47	; - EDITOR - LOAD - SAVE - line
+
+		If mx>=9 AND mx<=18 ; ---------------- EDITOR
+			numplayers=1 :d$="TO EDIT" :editing=True :Gosub selectplayers
+			Colour 1,0 :ct{"** player editor **",32}
+			Colour 11,0 :ct{p(pl)\name,34}
+			quit=False :Blit 30,77,284 :flag=p(pl)\stat
+			customgadget{"<<",11,51} :customgadget{">>",27,51}
+			UnBuffer 0 :BBlit 0,p(pl)\fig,144,418 :rank=p(pl)\ranking
+			If p(pl)\stat=1 Then d$=" COMPUTER " Else d$="	HUMAN	 "
+			customgadget{d$,15,54}
+			If p(pl)\team=1 Then d$="GREEN TEAM" Else d$=" RED TEAM "
+			customgadget{d$,15,56}
+			customgadget{" FINISHED ",15,60} :t$=""
+			Repeat
+				waitbutton{On}
+				If mx>9 AND mx<30 AND my>39 AND my<48
+					qx=mx-9 :qy=my-39
+					d=Int(qx/2) :If d<>(qx/2) Then qx+1
+					d=Int(qy/2) :If d<>(qy/2) Then qy+1
+					qx/2 :qy/2 :d=10*(qy-1)+qx
+					char$=Mid$(kb$,d,1)
+					If char$="r" ; Return button hit
+						If t$<>"" Then p(pl)\name=Left$(t$+##[$B282](15),14)
+						Colour 11,0 :Locate 0,34 :Print ##[$B282](40)
+						ct{p(pl)\name,34} :t$="" :char$=""
+					EndIf
+					If char$="b" ; Backspace button hit
+						d=Len(t$) :char$=""
+						If d=1 Then t$=""
+						If d>1 Then t$=Left$(t$,d-1)
+					EndIf
+					If char$="c" Then t$="" :char$=""
+					If Len(t$)<14 Then t$+char$
+					Locate 13,38 :Colour 3,8 :Print Left$(t$+##[$B282](15),14)
+				EndIf
+				If my=51
+					If mx>=7 AND mx<=16 Then p(pl)\fig=QWrap(p(pl)\fig-1,11,27)
+					If mx>=23 AND mx<=32 Then p(pl)\fig=QWrap(p(pl)\fig+1,11,27)
+					UnBuffer 0 :BBlit 0,p(pl)\fig,144,418
+				EndIf
+				If mx>=15 AND mx<=24
+					If my=54
+						If p(pl)\stat=1
+							d$="	HUMAN	 " :p(pl)\ranking=10,0
+						Else
+							d$=" COMPUTER " :p(pl)\ranking=##[$B48C](3,15),1
+						EndIf
+						customgadget{d$,15,54}
+					EndIf
+					If my=56
+						If p(pl)\team=1
+							d$=" RED TEAM " :p(pl)\team=0
+						Else
+							d$="GREEN TEAM" :p(pl)\team=1
+						EndIf
+						customgadget{d$,15,56}
+					EndIf
+					If my=60 Then quit=True
+				EndIf
+				waitbutton{Off}
+			Until quit=True
+			If flag=p(pl)\stat Then p(pl)\ranking=rank
+			UnBuffer 0 :flashwipe{} :flashshow{} :mx=0 :my=0
+		EndIf
+
+		If mx>=20 AND mx<=28 ; --------------------------- LOAD
+			flashwipe{} :ct{"< load >",32} :allcpu=False
+			ct{"ready to load game data...",40}
+			d$="	 LOAD	 " :Gosub yesno
+			ct{"...loading...",48}
+			Gosub datload :flashwipe{}
+			ct{">> game data loaded <<",45} :VWait 90 :t=0
+			mx=0 :my=0 :flashshow{}
+		EndIf
+
+		If mx>=30 AND mx<=39 ; --------------------------- SAVE
+			flashwipe{} :ct{"< save >",32} :allcpu=False
+			ct{"about to save game data...",40}
+			ct{"ensure disk is unprotected",45}
+			ct{"before clicking 'save'",46} :d$="	 SAVE	 "
+			Gosub yesno :ct{"...saving...",48}
+			QAMIGA :VWait 20 :dat$="" :Format"##"
+			If ReadMem(0,"arrow.dat")
+				VWait 80 :FileOutput 0
+				For d=1 To 16
+					dat$="" :Format"##"
+					dat$+Str$(p(d)\ranking)+Str$(p(d)\stat)
+					dat$+Str$(p(d)\team)+Str$(p(d)\fig)
+					d$=p(d)\name+##[$B282](14) :d$=Left$(d$,14) :dat$+d$
+					Format"#"
+					For t=0 To 5
+						dat$+Str$(p(d)\gam[t])
+					Next t
+					NPrint dat$
+				Next d
+				dat$="" :Format "###"
+				dat$+Str$(gametype)+Str$(doubles)+Str$(points)
+				dat$+Str$(numlegs) :NPrint dat$ :Format"##"
+				VWait 10 :CloseFile 0
+			EndIf
+			VWait 163 :BLITZ :BitMapOutput 0 :flashwipe{}
+			ct{">> game data saved <<",45} :VWait 90
+			mx=0 :my=0 :flashshow{}
+		EndIf
+
+	EndIf
+
+	waitbutton{Off}
+Until playgame=True
+
+Gosub sortplayers
+flashwipe{}
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;											INTRODUCTION SCREEN
+; This part simply displays text concerned with the game chosen.
+; The player or players will also be shown where relevant.	These
+; players are the one's selected for the particular game.
+.intro
+
+Select gametype+doubles
+	Case 0 ; -----------SINGLES MATCH
+		t$="starting a game of darts" :d$="for 2 players"
+		numplayers=2 :Gosub dolist
+		pr{"to win the game, you must obtain "+Str$(points),42}
+		pr{"with the last dart finishing on a double.",43}
+		If numlegs=1
+			pr{"because there is only one leg chosen,",45}
+			pr{"first player to finish wins the match.",46}
+		Else
+			Format "#"
+			ct{"It's the best of "+Str$(numlegs)+" legs to win.",45}
+		EndIf
+	Case 1 ; -----------DOUBLES
+		t$="about to play a game of" :d$="doubles for 4 players."
+		numplayers=4 :Gosub dolist
+		pr{"this is a contest between the red and",44}
+		pr{"green team.	each player from his own",45}
+		pr{"team will throw three darts as normal",46}
+		pr{"and hit the appropiate double to win",47}
+		pr{"the match for that team.",48}
+		If numlegs=1
+			ct{"this is a single match contest.",50}
+		Else
+			Format "#"
+			ct{"It's the best of "+Str$(numlegs)+" legs to win.",50}
+		EndIf
+	Case 2 ; -----------KILLER
+		numplayers=kply
+		ct{"about to play 'killer'",32} :ct{"for "+UStr$(kply)+" players.",33}
+		pr{" for this game, your task is to hit",40}
+		pr{" any of the players doubles to kill",41}
+		If numlegs=1
+			pr{" off their single life.",42}
+		Else
+			pr{" off 1 of their "+UStr$(numlegs)+" lives.",42}
+		EndIf
+		ct{"last player to survive is the winner.",47}
+	Case 3 ; -----------ROUND THE BOARD
+		t$="playing 'round the board'" :d$="for a single player."
+		numplayers=1 :Gosub dolist
+		pr{"object of this game is to go around",42}
+		pr{"the board, starting at 1 and ending",43}
+		pr{"on the 20.	the 'requires' box will",44}
+		pr{"show you which number is needed.",45}
+		pr{"you have 6 lives or chances in which",47}
+		pr{"to complete this task (shown in the",48}
+		pr{"'remaining' box).	if you miss the",49}
+		pr{"current number, one life is lost.",50}
+		ct{"can you make it to 20?",52}
+	Case 4 ; -----------HIT THE NUMBER
+		t$="about to play 'hit the number'" :d$="for one player."
+		numplayers=1 :Gosub dolist
+		pr{"object of the game is to hit the",40}
+		pr{"number shown in the 'requires' box",41}
+		pr{"which is chosen randomly by the",42}
+		pr{"computer.	if you miss, you lose one",43}
+		pr{"extra throw.	try to hit double/treble",44}
+		pr{"of the number to gain extra throws.",45}
+		pr{"you have 10 throws to begin with.",47}
+		pr{"these are shown in 'remaining' box.",48}
+		pr{"game ends when your throws run out.",50}
+	Case 5 ; -----------PRACTICE
+		t$="beginning a 'practice' session" :d$="for one player only."
+		numplayers=1 :Gosub dolist
+		pr{"you may aim the arrow to hit any number",44}
+		pr{"on the board.	results are shown in the",45}
+		pr{"bottom area of the information panel.",46}
+		ct{"you have unlimited turns.",48}
+End Select
+
+d$="	 PLAY	 " :Gosub yesno
+
+;::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+;													MAIN GAME
+; Now the actual game is in progress.	The game will only finish
+; when the match/contest is over or user presses RMB and chooses
+; MENU from the gadgets.	An all CPU game can play on it's own
+; without the user having to click CONTINUE etc.	After the game
+; finishes, the Main Screen will return.
+.playgame
+
+quit=False :winner=False :t=0
+Select gametype
+Case 0 ;					Standard and Doubles
+	numplayers=2+(doubles*2)
+	Exchange play(1),play(2) :Exchange play(3),play(4)
+	For leg=1 To numlegs+1
+		gameover=False :flashwipe{}
+		If winner=0
+			For d=1 To 4 :p(play(d))\score=points :Next d
+			Colour 1,0 :Format "###" :d$="STANDARD ("
+			If doubles=1 Then d$="DOUBLES ("
+			ct{"PLAYING "+d$+Str$(points)+") MATCH",32}
+			Locate 8,38 :Print "PLAYER STATS:"
+			Locate 8,40 :Colour 3,8 :NPrint "NAME					 TYPE WON"
+			Colour 1,0 :Format "#"
+			For d=1 To numplayers
+				Locate 8,40+d
+				If p(play(d))\team=1 Then Colour 6,4 Else Colour 5,4
+				Print p(play(d))\name,"	" :Colour 1,4 :Format "#"
+				If p(play(d))\stat=1 Then Print "CPU	" Else Print "PLY	"
+				Print p(play(d))\wongames," "
+			Next d
+			Colour 11,0 :Locate 15,52
+			Print "LEG "+Str$(leg)+" OF "+Str$(numlegs)
+		Else
+			Colour 11,0 :ct{"WINNER OF THE MATCH IS",42}
+			Colour	1,0 :ct{p(winner)\name,44}
+			Blit p(winner)\fig,146,396
+			If doubles=1
+				If p(winner)\team=0 Then d$="RED" Else d$="GREEN"
+				Colour 4,0 :ct{"FOR THE "+d$+" TEAM",50}
+			EndIf
+		EndIf
+		showbottom{8} :play=False
+		If winner<>0 Then Sound 8,1 :VWait 33 :Sound 8,2
+		If winner=0 Then d$="PLAY MATCH" Else d$="C"
+		Gosub yesno :showtop{8} :Colour 1,3
+		Exchange play(1),play(2) :Exchange play(3),play(4)
+		Format "###" :Locate 9,1.2
+		If doubles=0 Then Print "STANDARD (",points,") "
+		If doubles=1 Then Print "DOUBLES (",points,")	"
+		Repeat
+			For pl=1 To numplayers
+				If gameover=False
+					symbols{} :req=p(play(pl))\score :remain=req
+					digit{req,216,21} :digit{req,216,87}
+				EndIf
+				throw=True
+				For dart=1 To 3
+					If gameover=False AND throw=True
+						If cpu=True Then attempt=0 :multi=1 :Gosub calc_cpu_shot
+						waitbutton{Off}
+						Gosub throwdart
+						remain=req-totalscore
+						If remain<2
+							throw=False :totalscore=0
+							If remain=0
+								If multi=2 OR (vl=50 AND multi=1)
+									VWait 30 :gameover=True :totalscore=0
+									BBlit 0,29,28,215 :Sound 6,4 :waitbutton{On}
+									p(play(pl))\wongames+1
+								Else
+									BBlit 0,28,126,178 :totalscore=0
+								EndIf
+							Else
+								BBlit 0,28,126,178 :totalscore=0
+							EndIf
+						EndIf
+						digit{remain,216,87}
+					EndIf
+				Next dart
+				If totalscore>99 Then VWait 30 :Sound 7,8
+				If totalscore=180 Then VWait 22 :BBlit 0,27,126,178 :Sound 6,4
+				p(play(pl))\score-totalscore
+				If doubles=1
+					If pl<=2 Then p(play(pl+2))\score-totalscore
+					If pl>=3 Then p(play(pl-2))\score-totalscore
+				EndIf
+				cleanup{0}
+			Next pl
+		Until gameover=True
+		If winner=False
+			For d=1 To numplayers
+				If p(play(d))\wongames=Int(numlegs/2+1) AND winner=0
+					 winner=play(d)
+				EndIf
+			Next d
+			If doubles=1
+				If p(play(1))\wongames>p(play(3))\wongames Then p(play(3))\wongames=p(play(1))\wongames
+				If p(play(2))\wongames>p(play(4))\wongames Then p(play(4))\wongames=p(play(2))\wongames
+				If p(play(3))\wongames>p(play(1))\wongames Then p(play(1))\wongames=p(play(3))\wongames
+				If p(play(4))\wongames>p(play(2))\wongames Then p(play(2))\wongames=p(play(4))\wongames
+			EndIf
+			If doubles=0
+				If winner=play(1)
+					If p(play(1))\ranking>p(play(2))\ranking
+						p(play(1))\ranking=QLimit(p(play(1))\ranking-1,1,20)
+						p(play(2))\ranking=QLimit(p(play(2))\ranking+2,1,20)
+					EndIf
+				EndIf
+				If winner=play(2)
+					If p(play(2))\ranking>p(play(1))\ranking
+						p(play(2))\ranking=QLimit(p(play(2))\ranking-1,1,20)
+						p(play(1))\ranking=QLimit(p(play(1))\ranking+2,1,20)
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+	Next leg
+Case 2 ;					Killer
+	numplayers=kply :flashwipe{}
+	For d=1 To numplayers
+		p(play(d))\score=0,numlegs
+	Next d :Gosub update_list
+	ct{"each player needs to nominate",52}
+	ct{"his own number from the board",53}
+	ct{"before the actual game starts",54}
+	gameover=False :Gosub yesno :showtop{8}
+	Colour 1,3 :Locate 9,1.2 :Print "KILLER				 "
+	For pl=1 To numplayers
+		quit=0 :symbols{}
+		Repeat
+			For dart=1 To 3
+				If quit=0
+					If cpu=True
+						For d=1 To ##[$B48C](8,17) :attempt=##[$B48C](1,20) :Next d
+						multi=1 :Gosub calc_cpu_shot
+					EndIf
+					Gosub throwdart :flag=0
+					If vl=50 OR vl=25 Then vl=0
+					If vl>0
+						For d=1 To numplayers
+							If p(play(d))\score=vl Then flag=True
+						Next d
+						If flag=0 Then p(play(pl))\score=vl :quit=True
+					EndIf
+				EndIf
+			Next dart
+			cleanup{0}
+		Until quit=True
+		Gosub update_list
+	Next pl :Colour 1,0
+	ct{"all players now have their own",52}
+	ct{"double and the game may begin",53}
+	showbottom{8} :Gosub yesno
+	showtop{8} :Gosub update_list :pl=##[$B48C](1,numplayers)
+	Repeat
+		If gameover=False
+			Repeat
+				pl+1 :If pl>numplayers Then pl=1
+			Until p(play(pl))\wongames>0
+			symbols{}
+		EndIf
+		For dart=1 To 3
+			If gameover=False
+				If cpu=True
+					multi=0
+					Repeat
+						d=##[$B48C](1,numplayers)
+						If d<>pl AND p(play(d))\wongames>0
+							attempt=p(play(d))\score :multi=2
+							Gosub calc_cpu_shot
+						EndIf
+					Until multi=2
+				EndIf
+				Gosub throwdart
+				If multi=2
+					For d=1 To numplayers
+						If p(play(d))\wongames>0 AND p(play(d))\score=vl
+							p(play(d))\wongames-1 :flashwipe{} :Colour 11,0
+							ct{p(play(d))\name,42} :Colour 1,0
+							ct{"has lost a life",44}
+							Blit p(play(d))\fig,146,396 :hidedarts{} :showbottom{16}
+							If d=pl Then Sound 6,4
+							VWait 14 :Sound 7,1
+							If p(play(d))\wongames=0
+								p(play(d))\score=0 :VWait 12 :Sound 7,2
+								ct{"and is out of the contest!",51}
+							EndIf
+							d$=" CONTINUE " :Gosub yesno
+							Gosub update_list
+							If offs=1
+								ct{"winner is "+p(winner)\name,44} :gameover=True
+								Blit p(winner)\fig,146,396 :Sound 8,2 :d$="C"
+							EndIf
+							Gosub yesno :showtop{16} :showdarts{}
+						EndIf
+					Next d
+				EndIf
+			EndIf
+		Next dart
+		cleanup{0}
+	Until gameover=True
+Case 3 ;					Round the board
+	pl=1 :p(play(pl))\score=0 :miss=6
+	Colour 1,3 :Locate 9,1.2 :Print "ROUND THE BOARD"
+	showtop{8} :symbols{} :attempt=1 :gameover=False
+	Repeat
+		For dart=1 To 3
+			If NOT gameover=True
+				digit{attempt,216,21} :digit{miss,216,87}
+				If cpu=True
+					multi=1 :VWait 11+p(pl)\ranking
+					Gosub calc_cpu_shot
+				EndIf
+				waitbutton{Off}
+				Gosub throwdart
+				If attempt=vl
+					attempt+1 :digit{attempt,216,21}
+				Else
+					miss-1 :digit{miss,216,87}
+				EndIf
+				If attempt>20
+					gameover=True :VWait 34 :Sound 7,1 :VWait 12 :Sound 6,2 :VWait 40
+				EndIf
+				If miss=0 Then gameover=True :VWait 34 :Sound 7,1 :VWait 40
+			EndIf
+		Next dart
+		cleanup{1}
+	Until gameover=True
+	flashwipe{}
+	If miss>0
+		ct{"congratulations!",40}
+		ct{"you made it around the board",45}
+		If miss>1
+			ct{"with "+UStr$(miss)+" lives intact.",46}
+		Else
+			ct{"with "+UStr$(miss)+" life left.",47}
+		EndIf
+	Else
+		ct{"sorry, out of lives...",40}
+		ct{"maybe next time hey?	",42}
+	EndIf
+	showbottom{8} :cleanup{0} :d$="C" :Gosub yesno
+Case 4 ;					Hit the number
+	pl=1 :p(play(pl))\score=0
+	Colour 1,3 :Locate 9,1.2 :Print "HIT THE NUMBER "
+	showtop{8} :symbols{} :attempt=1 :gameover=False :choice=1
+	throws=10 :sing=0 :doub=0 :treb=0 :miss=0
+	numthrows=0 :Colour 11,2 :ct{"game in progress",53} :Colour 1,0
+	Repeat
+		For dart=1 To 3
+			If NOT gameover=True
+				digit{attempt,216,21} :digit{throws,216,87}
+				If choice=1 OR attempt=50
+					For d=1 To ##[$B48C](10,35)
+						attempt=Int(Rnd(19)+1) :digit{attempt,216,21}
+					Next d
+					If ##[$B48C](1,33)=23 Then attempt=50
+					If ##[$B48C](1,22)=18 Then attempt=25
+				EndIf
+				multi=1
+				If cpu=True AND attempt<=20
+					If p(play(pl))\ranking<9 AND Rnd>.6 Then multi=3
+					If p(play(pl))\ranking<7 AND Rnd>.7 Then multi=2
+				EndIf
+				If cpu=True Then VWait 16+p(pl)\ranking :Gosub calc_cpu_shot
+				waitbutton{Off} :Gosub throwdart
+				If attempt=vl
+					Select multi
+						Case 1 :sing+1
+						Case 2 :doub+1 :throws+3
+						Case 3 :treb+1 :throws+2
+					End Select
+					choice=1
+					If vl=50 Then VWait 32 :Sound 7,1 :throws+4
+				Else
+					miss+1 :throws-1 :choice=0
+				EndIf
+				throws-1 :numthrows+1
+				If throws<0 Then throws=0
+				digit{throws,216,87}
+				If throws=0
+					gameover=True :VWait 34 :Sound 7,1 :VWait 12 :Sound 7,2 :VWait 40
+				EndIf
+			EndIf
+		Next dart
+		cleanup{1}
+	Until gameover=True
+	waitbutton{On} :cleanup{0}
+	flashwipe{} :ct{"END OF GAME",32}
+	Blit p(play(pl))\fig,146,322 :Colour 11,0 :Format"##" :d=numthrows
+	Locate 4,41 :Print "	 DARTS THROWN =	1 * " ,d
+	Locate 4,42 :Print "		SINGLES HIT = 10 * ",sing :d+(sing*10)
+	Locate 4,43 :Print "		DOUBLES HIT = 25 * ",doub :d+(doub*25)
+	Locate 4,44 :Print "		TREBLES HIT = 20 * ",treb :d+(treb*20)
+	Locate 4,45 :Print "SUBTRACT MISSES =	1 * ",miss :d-miss :Colour 14,0
+	Locate 4,47 :Print "		TOTAL SCORE = ",UStr$(d) :showbottom{8}
+	If d>=200 Then Sound 8,4
+	d$="C" :Gosub yesno
+Case 5 ;					Practice
+	numplayers=1 :pl=1
+	Colour 1,3 :Locate 9,1.2 :Print "PRACTICE			 " :showtop{8}
+	symbols{} :Colour 11,2 :ct{"game in progress",53} :Colour 1,0
+	Repeat
+		For dart=1 To 3
+			If cpu=True
+				d=##[$B48C](1,12)
+				Select d
+					Case 0 :multi=3 :attempt=20
+					Case 1 :multi=3 :attempt=19
+					Case 2 :multi=1 :attempt=50
+					Case 3 :multi=2 :attempt=11
+					Case 4 :multi=2 :attempt=3
+					Case 5 :multi=2 :attempt=20
+					Default :multi=1 :attempt=##[$B48C](1,20)
+				End Select
+				Gosub calc_cpu_shot
+			EndIf
+			waitbutton{Off} :Gosub throwdart
+		Next dart
+		waitbutton{Off}
+		cleanup{1}
+	Forever
+End Select
+
+Goto mainscreen
+
+;===============================================================
+;													LOAD
+; Loads up the players information.	This includes name, ranking,
+; team colour, CPU/Human etc. Also, Game/player settings, points,
+; and legs/lives are setup according to their status when last
+; 'SAVE' process was used.
+
+.datload
+	QAMIGA :VWait 20
+	If WriteMem(0,"arrow.dat")
+		VWait 20 :FileInput 0
+		For d=1 To 16
+			dat$=Edit$(30)
+			p(d)\ranking=Val(Mid$(dat$,1,2)),Val(Mid$(dat$,3,2))
+			p(d)\team=Val(Mid$(dat$,5,2)),Val(Mid$(dat$,7,2))
+			d$=Mid$(dat$,9,14)+##[$B282](14) :p(d)\name=Left$(d$,14)
+			p(d)\score=0,0
+			For t=0 To 5
+				p(d)\gam[t]=Val(Mid$(dat$,23+t,1))
+			Next t
+		Next d
+		dat$=Edit$(15)
+		gametype=Val(Mid$(dat$,1,3))
+		doubles=Val(Mid$(dat$,4,3))
+		points=Val(Mid$(dat$,7,3))
+		numlegs=Val(Mid$(dat$,10,3))
+		VWait 20 :CloseFile 0
+	EndIf
+	VWait 80 :BLITZ :BitMapInput
+ Return
+
+;---------------------------------------------------------------
+;													YES/NO
+; Displays one or two gadgets at bottom of the screen and waits
+; for the user to choose one.	CONTUE/PLAY/OK or CANCEL/MENU
+; etc can be chosen giving choice=1 or choice=2.	If d$="C" then
+; only lower gadget will be displayed giving a one choice (2).
+
+.yesno
+	MouseArea 222,214,224,216
+	VWait :MouseArea 24,24,296,238
+	choice=0
+	If d$<>"C" Then customgadget{d$,15,57}
+	customgadget{"	 MENU	 ",15,60}
+	Repeat
+		waitbutton{Off} :waitbutton{On}
+		If mx>=15 AND mx<=24
+			If my=57 AND d$<>"C" Then choice=1
+			If my=60 Then choice=2
+		EndIf
+		If longwait=True Then choice=1
+		If longwait=True AND d$="C" Then choice=2
+	Until choice<>0
+	If choice=2 OR gameover=True
+		gameover=True :cleanup{0} :Pop Gosub :Goto mainscreen
+	EndIf
+Return
+
+;----------------------------------------------------------------
+;										 SORT PLAYERS
+; Shuffles and sorts out players into play() array.	This is used
+; to mix up players, giving any of them a chance to throw first.
+; Also, if the 'Doubles' game is to be played, we need to check
+; that two players from RED and two from GREEN are chosen, then
+; we can sort them to RED..GREEN..RED..GREEN.. order.
+
+.sortplayers
+	t=0 :allcpu=True
+	For d=1 To 16
+		play(d)=0 :p(d)\score=0,0
+		If p(d)\gam[gametype+doubles]=1
+			t+1 :play(t)=d :If p(play(t))\stat=0 Then allcpu=False
+		EndIf
+	Next d
+	For d=1 To ##[$B48C](30,70)
+		sing=##[$B48C](1,t) :doub=##[$B48C](1,t) :Exchange play(sing),play(doub)
+	Next d
+	If doubles=1
+		d=p(play(1))\team+p(play(2))\team+p(play(3))\team+p(play(4))\team
+		If d<>2
+			flashwipe{} :Colour 1,8
+			ct{" must choose two players from each ",40}
+			ct{"	 team to play a game of doubles	",41}
+			d$="C" :Gosub yesno
+		EndIf
+		If p(play(1))\team=p(play(2))\team Then Exchange play(2),play(3)
+		If p(play(2))\team=p(play(3))\team Then Exchange play(3),play(4)
+	EndIf
+Return
+
+;---------------------------------------------------------------
+;									 CALCULATE CPU SHOT
+; Works out which value the CPU player should aim for in a game
+; of standard or doubles darts.	Once this is sussed, 'attempt'
+; will hold the value (1-20 or 25/50) which CPU is shooting for.
+; 'multi' will hold 1 for Single, 2 for double, and 3 for treble.
+; if attempt is already worked out, then the radius and angles
+; are worked out from this value.
+
+.calc_cpu_shot
+	rank=p(play(pl))\ranking
+	If attempt<>0 Then Goto setrad
+	If remain>63 Then attempt=20 :multi=3 :Goto setrad
+	If remain=50 Then attempt=50 :multi=1 :Goto setrad
+	If remain<41
+		If remain/2=Int(remain/2)
+			attempt=remain/2 :multi=2 :Pop If :Goto setrad
+		EndIf
+	EndIf
+	If Int(Rnd(rank+50))<6 AND remain>51 Then multi=1 :attempt=50 :Goto setrad
+	If rank<16 AND attempt=0 Then multi=3 :Gosub tryshot
+	If rank<9 AND attempt=0 Then multi=2 :Gosub tryshot
+	If attempt=0 Then attempt=##[$B48C](1,20) :multi=1 :Gosub tryshot
+	setrad
+	Select multi
+		Case 1 :rad=##[$B48C](35,48) ; single
+		Case 2 :rad=##[$B48C](48,52) ; double
+		Case 3 :rad=##[$B48C](31,35) ; treble
+	End Select
+	If attempt=50 OR attempt=25 AND multi=1
+		multi=1 :rad=##[$B48C](1,7)
+		angle=Rnd(39) :angle=Int(angle/2)*2
+	EndIf
+	If attempt<21 Then angle=segangle(attempt)
+Return
+tryshot
+	For d=20 To 1 Step -1
+		vl=d*multi
+		If Int(Rnd*12)=7 AND d>10 AND remain<70 Then d-5
+		If remain/2=Int(remain/2) ; even number
+			If vl/2=Int(vl/2) AND vl<remain-1 Then attempt=vl :Pop For :Goto doit
+		Else
+			If vl/2<>Int(vl/2) AND vl<remain-1 Then attempt=vl :Pop For :Goto doit
+		EndIf
+	Next d
+	doit:
+	attempt/multi
+Return
+
+; --------------------------------------------------------------
+;											 SELECT PLAYERS
+; This routine shows the player selction table.	From here, the
+; user chooses which players are to be involved in the current
+; game by selecting/deselecting players from the list.	Note that
+; the players chosen are unique to the particular game about to
+; be played.	The other games have their own selections.	This
+; routine is also called so the user can pick on player to edit.
+
+.selectplayers
+	flashwipe{} :Format "" :quit=False
+	t$="PLEASE SELECT "+Str$(numplayers)+" PLAYER"
+	If numplayers>1 Then t$+"S"
+	If numplayers=16 Then t$="CHOOSE AT LEAST 2 PLAYERS"
+	Colour 1,0 :ct{t$,33} :ct{d$,34}
+	selections=0 :Colour 11,12 :Locate 5,39
+	Print "NAME						TEAM TYPE RANK" :Colour 1,bkg
+	For d=1 To 16 :sel(d)=p(d)\gam[gametype+doubles]
+		pline=d :If editing=True Then sel(d)=0
+		If sel(d)=1 Then selections+1
+		Gosub doline
+	Next d
+	customgadget{"OK",20,60} :showbottom{8}
+	Repeat
+		waitbutton{On}
+		If my>39 AND my<56
+			pline=my-39 :pl=pline
+			If sel(pline)=0
+				If selections<numplayers Then selections+1 :sel(pline)=1
+			Else
+				If sel(pline)=1 Then selections-1 :sel(pline)=False
+			EndIf
+			Gosub doline
+		EndIf
+		If my=60
+			If mx>=16 AND mx<=25
+				If numplayers=16 AND selections>1 Then numplayers=selections :quit=True
+				If selections=numplayers Then quit=True
+			EndIf
+		EndIf
+		waitbutton{Off}
+	Until quit=True
+	If editing=False
+		For d=1 To 16
+			p(d)\gam[gametype+doubles]=sel(d)
+		Next d
+	EndIf
+	flashwipe{} :mx=0 :my=0 :kply=selections
+Return
+doline
+	If sel(pline)=1 Then Colour 1,8 Else Colour 1,3
+	Locate 5,pline+39 :Print p(pline)\name,"	 "
+	If p(pline)\team=0 Then Colour 5 Else Colour 6
+	Print "[]	" :Colour 1
+	If p(pline)\stat=0 Then Print "PLY	 " Else Print "CPU	 "
+	Format "##" :Print Str$(p(pline)\ranking)+" "
+Return
+
+;------------------------------------------------------------
+;									 DO PLAYER LIST
+; Does a simple list of active players for whichever game is
+; chosen.	If only solo player to play, the list will be modified
+; to give active players name.	This routine is used in the game
+; by the instructions to indicate which players are involved.
+
+.dolist
+	If numplayers<1 Then Return
+	Colour 1,0 :Format "###" :ct{t$,32} :ct{d$,33}
+	Colour 3,8 :Locate 10,36
+	If numplayers=1
+		Print "ACTIVE PLAYER IS: "
+	Else
+		Print "PARTICIPANTS ARE: "
+	EndIf
+	For d=1 To numplayers
+		If p(play(d))\team=1 Then Colour 6,4 Else Colour 5,4
+		Locate 10,36+d :Print p(play(d))\name," " :Colour 1,4
+		If p(play(d))\stat=1 Then Print "CPU" Else Print "PLY"
+	Next d
+	Colour 1,0 :Format "###"
+Return
+
+;------------------------------------------------------------
+;								 UPDATE PLAYER LIST
+; This is only used for the killer game.	Updates the list of
+; players when someone loses a life etc.	Only displays the
+; players who still have at least one life intact.
+
+.update_list
+	If numplayers<1 Then Return
+	flashwipe{} :ct{"playing 'killer'",32}
+	Locate 4,34 :Colour 3,8 :Print "NAME					 TYPE DOUBLE LIVES"
+	Colour 10,0 :winner=0 :offs=0
+	For t=1 To numplayers
+		If p(play(t))\wongames>0
+			offs+1 :Locate 4,34+offs
+			If p(play(t))\team=1 Then Colour 6,4 Else Colour 5,4
+			Print p(play(t))\name,"	" :Colour 1,4 :Format "##"
+			If p(play(t))\stat=1 Then Print "CPU	 " Else Print "PLY	 "
+			If p(play(t))\score=0 Then Print "--" Else Print p(play(t))\score
+			Format "#"	:Print "		 ",p(play(t))\wongames,"	"
+			winner=play(t)
+		EndIf
+	Next t :Colour 1,0
+Return
+
+;------------------------------------------------------------
+;									THROW DART
+; This is the single most important routine in the program.
+; More like the engine for the game really.	Doe's everything
+; from controlling the arrow for HUMAN/CPU player, to throwing
+; it at the board, updating the 'What Hit?' panel and doing the
+; various sound effects according to what the dart hit.
+; Calculates what was hit @ bx,by screen position like so:
+; hittype -> 0=board 1=wire 2=wall (for appropriate sfx)
+; multi	 -> 0=miss 1=single 2=double 3=treble
+; vl			-> value of segment hit.	0=miss, 1 - 20, 25, 50
+; angle	 -> 0 to 6300 gives segment 1 to 6 on up/right
+; segment values are calculated according to bx/by offsets
+; radius also calculated and stored in rad
+
+.throwdart
+
+	If cpu=True ; set up and mess up the bx/by aim for CPU player
+		bx=ax{rad,angle} :bx+Rnd(rank*1.5) :bx-Rnd(rank*1.5)
+		by=ay{rad,angle} :by+Rnd(rank*1.5) :by-Rnd(rank*1.5)
+	EndIf
+
+	If dart=1 Then totalscore=0
+	If Rnd>.5 Then px=##[$B48C](38,90) Else px=##[$B48C](108,158)
+	py=224 :delay=0
+
+	Repeat
+
+		If cpu=False
+			px=QLimit(px+MouseXSpeed*1.5,20,184)	; HUMAN to guide
+			If Joyb(0)=1 Then delay=900
+		Else
+			offs=0																; CPU to guide
+			If delay>28
+				If px<bx Then offs= ((bx-px)/5)
+				If px>bx Then offs=-((px-bx)/5)
+				If Int(px)=Int(bx) AND Rnd>.7 AND delay<58
+					offs+##[$B48C](0,rank)-##[$B48C](0,rank)
+					If multi=2 Then offs+##[$B48C](3,rank)-##[$B48C](3,rank)
+					offs=QLimit(offs,0,7)
+				EndIf
+			EndIf
+			px+offs :delay+1
+			If multi=2 OR vl=50 Then delay-.4
+		EndIf
+
+		If Joyb(0)=2								 ; If RMB pressed, interupt game
+			dt(3)\x=bx,by,18
+			hidedarts{} :showbottom{16} :d$=" CONTINUE "
+			Gosub yesno :showtop{16} :showdarts{} :Colour 1,3
+		EndIf
+
+		VWait :ShowSprite 18,px,py+14,6
+
+	Until delay>=(73+rank)
+	delay=0 :offs=QLimit(offs,7,8+(rank/2))
+
+	Repeat													; send dart up screen until the
+		py-9													; HUMAN/CPU	says stop or dart
+		If cpu=True									 ; reaches the upper limit
+			If py<by+offs Then delay=1
+		Else
+			If Joyb(0)<>1 Then delay=1
+		EndIf
+		VWait :ShowSprite 18,px,py+14,6
+	Until delay=1 OR py<55
+
+	ShowSprite 12,-24,80,6 :bx=px :by=py
+	bx+##[$B48C](3,5)-##[$B48C](3,5) :by+##[$B48C](4,7)-##[$B48C](3,5)	; shake up the
+	bx=QLimit(bx,20,184)	 :by=QLimit(by,33,233)		; bx/by coords
+	dartanim=##[$B48C](0,5)															; so dart won't
+																									; hit same spot
+	For d=1 To 29
+		dartanim=QWrap(dartanim+1,0,5)				 ; Spin dart onto board
+		If d<14 Then by-4 Else by+3
+		VWait :ShowSprite dartanim+(6*(dart-1)),bx,by,2*dart
+	Next d
+
+	dt(dart)\x=bx,by,dartanim+(6*(dart-1))
+	pix=Cls(bx,by)
+	bx-cx :by-cy
+	If by=0 Then by=1														 ; Now we need to
+	If bx=0 Then bx=1														 ; see where dart
+	angle=Abs((bx/by)*100)												; has landed. Was
+	rad=Tan(bx*bx+by*by)													; a single/double
+	hittype=0 :vl=0 :multi=1 :seg=0 :total=0			; hit? Maybe the
+	If pix=1 OR pix=7 Then hittype=1							; the wall was?
+	If rad<=3 Then vl=50 :seg=8 :Goto testsegs		; Or the Metal?
+	If rad<=7 Then vl=25 :seg=8 :Goto testsegs		; In any case,
+	If rad<=35 AND rad>=31 Then multi=3 ;treble	 ; pass a value to
+	If rad<=52 AND rad>=48 Then multi=2 ;double	 ; 'vl' depending
+	If angle<=15 Then seg=1 :Goto testsegs				; where dart hit.
+	If angle<=50 Then seg=2 :Goto testsegs				; 'multi' will be
+	If angle<=100 Then seg=3 :Goto testsegs			 ; 0=miss 1=single
+	If angle<=200 Then seg=4 :Goto testsegs			 ; 2=double or 3
+	If angle<=600 Then seg=5 :Goto testsegs			 ; for the treble
+	If angle<1 Then seg=6
+	seg=6
+	testsegs:
+	If rad>52 Then seg=0 :multi=0
+	If rad>64 Then seg=0 :multi=0 :hittype=2
+	Select seg
+		Case 1
+			If by>0 Then vl=3 Else vl=20
+		Case 2
+			If by>0
+				If bx>0 Then vl=17 Else vl=19
+			Else
+				If bx>0 Then vl=1 Else vl=5
+			EndIf
+		Case 3
+			If by>0
+				If bx>0 Then vl=2 Else vl=7
+			Else
+				If bx>0 Then vl=18 Else vl=12
+			EndIf
+		Case 4
+			If by>0
+				If bx>0 Then vl=15 Else vl=16
+			Else
+				If bx>0 Then vl=4 Else vl=9
+			EndIf
+		Case 5
+			If by>0
+				If bx>0 Then vl=10 Else vl=8
+			Else
+				If bx>0 Then vl=13 Else vl=14
+			EndIf
+		Case 6
+				If bx>0 Then vl=6 Else vl=11
+	End Select
+	Select hittype												 ; Play a sound depending on
+		Case 0 :Sound Rnd(2)+1,2						 ; on whether we hit the
+		Case 1 :Sound 4,2										; board, wire, or wall
+		Case 2 :Sound 5,2
+	End Select
+	Format "##"
+	Select multi
+		Case 0 :t$="MISSED	 "
+		Case 1 :t$="SINGLE "+Str$(vl)
+		Case 2 :t$="DOUBLE "+Str$(vl)						; This lot will be
+		Case 3 :t$="TREBLE "+Str$(vl)						; printed @ the
+	End Select																 ; bottom of panel.
+	If multi=1 AND vl=50 Then t$="BULLS-EYE"
+	Colour 1,3
+	Select dart
+		Case 1 :Locate 29,19.3 :Print t$
+		Case 2 :Locate 29,20.5 :Print t$
+		Case 3 :Locate 29,21.8 :Print t$
+	End Select
+	bx=-20 :by=50 :totalscore+(vl*multi) :digit{totalscore,216,219}
+Return
+
+; End of listing.	Feel free to tweek or modify the text, but
+; don't pass it off as your own work!		Jim Brown (Author)

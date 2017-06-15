@@ -1,0 +1,1265 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/devices.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/devices.bb
+;********************************************************
+;*																											*
+;*				BlitzII devices library Include file					*
+;*																											*
+;********************************************************
+
+INCDIR "include/"
+XInclude exec.bb
+XInclude utility.bb
+XInclude graphics.bb
+
+;*******************File:keymap.h
+
+NEWTYPE.KeyMap
+*km_LoKeyMapTypes.b
+*km_LoKeyMap.l
+*km_LoCapsable.b
+*km_LoRepeatable.b
+*km_HiKeyMapTypes.b
+*km_HiKeyMap.l
+*km_HiCapsable.b
+*km_HiRepeatable.b
+End NEWTYPE
+
+NEWTYPE.KeyMapNode
+kn_Node.Node
+kn_KeyMap.KeyMap
+End NEWTYPE
+
+NEWTYPE.KeyMapResource
+kr_Node.Node
+kr_List.List
+End NEWTYPE
+
+#KC_NOQUAL= 0
+#KC_VANILLA= 7
+#KCB_SHIFT= 0
+#KCF_SHIFT= $01
+#KCB_ALT= 1
+#KCF_ALT= $02
+#KCB_CONTROL= 2
+#KCF_CONTROL= $04
+#KCB_DOWNUP= 3
+#KCF_DOWNUP= $08
+#KCB_DEAD= 5
+#KCF_DEAD= $20
+#KCB_STRING= 6
+#KCF_STRING= $40
+#KCB_NOP= 7
+#KCF_NOP= $80
+#DPB_MOD= 0
+#DPF_MOD= $01
+#DPB_DEAD= 3
+#DPF_DEAD= $08
+#DP_2DINDEXMASK= $0f
+#DP_2DFACSHIFT= 4
+
+;*******************File:narrator.h
+
+#NDB_NEWIORB= 0
+#NDB_WORDSYNC= 1
+#NDB_SYLSYNC= 2
+#NDF_NEWIORB= (1LSL#NDB_NEWIORB)
+#NDF_WORDSYNC= (1LSL#NDB_WORDSYNC)
+#NDF_SYLSYNC= (1LSL#NDB_SYLSYNC)
+#ND_NoMem= -2
+#ND_NoAudLib= -3
+#ND_MakeBad= -4
+#ND_UnitErr= -5
+#ND_CantAlloc= -6
+#ND_Unimpl= -7
+#ND_NoWrite= -8
+#ND_Expunged= -9
+#ND_PhonErr= -20
+#ND_RateErr= -21
+#ND_PitchErr= -22
+#ND_SexErr= -23
+#ND_ModeErr= -24
+#ND_FreqErr= -25
+#ND_VolErr= -26
+#ND_DCentErr= -27
+#ND_CentPhonErr= -28
+#DEFPITCH= 110
+#DEFRATE= 150
+#DEFVOL= 64
+#DEFFREQ= 22200
+#MALE= 0
+#FEMALE= 1
+#NATURALF0= 0
+#ROBOTICF0= 1
+#MANUALF0= 2
+#DEFSEX= #MALE
+#DEFMODE= #NATURALF0
+#DEFARTIC= 100
+#DEFCENTRAL= 0
+#DEFF0PERT= 0
+#DEFF0ENTHUS= 32
+#DEFPRIORITY= 100
+#MINRATE= 40
+#MAXRATE= 400
+#MINPITCH= 65
+#MAXPITCH= 320
+#MINFREQ= 5000
+#MAXFREQ= 28000
+#MINVOL= 0
+#MAXVOL= 64
+#MINCENT= 0
+#MAXCENT= 100
+
+NEWTYPE.narrator_rb
+message.IOStdReq
+rate.w
+pitch.w
+mode.w
+sex.w
+*ch_masks.b
+nm_masks.w
+volume.w
+sampfreq.w
+mouths.b
+chanmask.b
+numchan.b
+flags.b
+F0enthusiasm.b
+F0perturb.b
+F1adj.b
+F2adj.b
+F3adj.b
+A1adj.b
+A2adj.b
+A3adj.b
+articulate.b
+centralize.b
+*centphon.b
+AVbias.b
+AFbias.b
+priority.b
+pad1.b
+End NEWTYPE
+
+NEWTYPE.mouth_rb
+voice.narrator_rb
+width.b
+height.b
+shape.b
+sync.b
+End NEWTYPE
+
+;*******************File:timer.h
+
+#UNIT_MICROHZ= 0
+#UNIT_VBLANK= 1
+#UNIT_ECLOCK= 2
+#UNIT_WAITUNTIL= 3
+#UNIT_WAITECLOCK= 4
+Macro TIMERNAME "#timer.#device":End Macro
+
+NEWTYPE.timeval
+tv_secs.l
+tv_micro.l
+End NEWTYPE
+
+NEWTYPE.EClockVal
+ev_hi.l
+ev_lo.l
+End NEWTYPE
+
+NEWTYPE.timerequest
+tr_node.IORequest
+tr_time.timeval
+End NEWTYPE
+
+#TR_ADDREQUEST= #CMD_NONSTD
+#TR_GETSYSTIME= (#CMD_NONSTD+1)
+#TR_SETSYSTIME= (#CMD_NONSTD+2)
+
+;*******************File:printer.h
+
+#PRD_RAWWRITE= (#CMD_NONSTD+0)
+#PRD_PRTCOMMAND= (#CMD_NONSTD+1)
+#PRD_DUMPRPORT= (#CMD_NONSTD+2)
+#PRD_QUERY= (#CMD_NONSTD+3)
+#aRIS= 0
+#aRIN= 1
+#aIND= 2
+#aNEL= 3
+#aRI= 4
+#aSGR0= 5
+#aSGR3= 6
+#aSGR23= 7
+#aSGR4= 8
+#aSGR24= 9
+#aSGR1= 10
+#aSGR22= 11
+#aSFC= 12
+#aSBC= 13
+#aSHORP0= 14
+#aSHORP2= 15
+#aSHORP1= 16
+#aSHORP4= 17
+#aSHORP3= 18
+#aSHORP6= 19
+#aSHORP5= 20
+#aDEN6= 21
+#aDEN5= 22
+#aDEN4= 23
+#aDEN3= 24
+#aDEN2= 25
+#aDEN1= 26
+#aSUS2= 27
+#aSUS1= 28
+#aSUS4= 29
+#aSUS3= 30
+#aSUS0= 31
+#aPLU= 32
+#aPLD= 33
+#aFNT0= 34
+#aFNT1= 35
+#aFNT2= 36
+#aFNT3= 37
+#aFNT4= 38
+#aFNT5= 39
+#aFNT6= 40
+#aFNT7= 41
+#aFNT8= 42
+#aFNT9= 43
+#aFNT10= 44
+#aPROP2= 45
+#aPROP1= 46
+#aPROP0= 47
+#aTSS= 48
+#aJFY5= 49
+#aJFY7= 50
+#aJFY6= 51
+#aJFY0= 52
+#aJFY3= 53
+#aJFY1= 54
+#aVERP0= 55
+#aVERP1= 56
+#aSLPP= 57
+#aPERF= 58
+#aPERF0= 59
+#aLMS= 60
+#aRMS= 61
+#aTMS= 62
+#aBMS= 63
+#aSTBM= 64
+#aSLRM= 65
+#aCAM= 66
+#aHTS= 67
+#aVTS= 68
+#aTBC0= 69
+#aTBC3= 70
+#aTBC1= 71
+#aTBC4= 72
+#aTBCALL= 73
+#aTBSALL= 74
+#aEXTEND= 75
+#aRAW= 76
+
+NEWTYPE.IOPrtCmdReq
+io_Message.Message
+*io_Device.Device
+*io_Unit.Unit
+io_Command.w
+io_Flags.b
+io_Error.b
+io_PrtCommand.w
+io_Parm0.b
+io_Parm1.b
+io_Parm2.b
+io_Parm3.b
+End NEWTYPE
+
+NEWTYPE.IODRPReq
+io_Message.Message
+*io_Device.Device
+*io_Unit.Unit
+io_Command.w
+io_Flags.b
+io_Error.b
+*io_RastPort.RastPort
+*io_ColorMap.ColorMap
+io_Modes.l
+io_SrcX.w
+io_SrcY.w
+io_SrcWidth.w
+io_SrcHeight.w
+io_DestCols.l
+io_DestRows.l
+io_Special.w
+End NEWTYPE
+
+#SPECIAL_MILCOLS= $0001
+#SPECIAL_MILROWS= $0002
+#SPECIAL_FULLCOLS= $0004
+#SPECIAL_FULLROWS= $0008
+#SPECIAL_FRACCOLS= $0010
+#SPECIAL_FRACROWS= $0020
+#SPECIAL_CENTER= $0040
+#SPECIAL_ASPECT= $0080
+#SPECIAL_DENSITY1= $0100
+#SPECIAL_DENSITY2= $0200
+#SPECIAL_DENSITY3= $0300
+#SPECIAL_DENSITY4= $0400
+#SPECIAL_DENSITY5= $0500
+#SPECIAL_DENSITY6= $0600
+#SPECIAL_DENSITY7= $0700
+#SPECIAL_NOFORMFEED= $0800
+#SPECIAL_TRUSTME= $1000
+#SPECIAL_NOPRINT= $2000
+#PDERR_NOERR= 0
+#PDERR_CANCEL= 1
+#PDERR_NOTGRAPHICS= 2
+#PDERR_INVERTHAM= 3
+#PDERR_BADDIMENSION= 4
+#PDERR_DIMENSIONOVFLOW= 5
+#PDERR_INTERNALMEMORY= 6
+#PDERR_BUFFERMEMORY= 7
+#PDERR_TOOKCONTROL= 8
+#SPECIAL_DENSITYMASK= $0700
+;#SPECIAL_DIMENSIONSMASK= \
+
+;*******************File:serial.h
+
+NEWTYPE.IOTArray
+TermArray0.l
+TermArray1.l
+End NEWTYPE
+
+#SER_DEFAULT_CTLCHAR= $11130000
+
+NEWTYPE.IOExtSer
+IOSer.IOStdReq
+io_CtlChar.l
+io_RBufLen.l
+io_ExtFlags.l
+io_Baud.l
+io_BrkTime.l
+io_TermArray.IOTArray
+io_ReadLen.b
+io_WriteLen.b
+io_StopBits.b
+io_SerFlags.b
+io_Status.w
+End NEWTYPE
+
+#SDCMD_QUERY= #CMD_NONSTD
+#SDCMD_BREAK= (#CMD_NONSTD+1)
+#SDCMD_SETPARAMS= (#CMD_NONSTD+2)
+#SERB_XDISABLED= 7
+#SERF_XDISABLED= (1LSL7)
+#SERB_EOFMODE= 6
+#SERF_EOFMODE= (1LSL6)
+#SERB_SHARED= 5
+#SERF_SHARED= (1LSL5)
+#SERB_RAD_BOOGIE= 4
+#SERF_RAD_BOOGIE= (1LSL4)
+#SERB_QUEUEDBRK= 3
+#SERF_QUEUEDBRK= (1LSL3)
+#SERB_7WIRE= 2
+#SERF_7WIRE= (1LSL2)
+#SERB_PARTY_ODD= 1
+#SERF_PARTY_ODD= (1LSL1)
+#SERB_PARTY_ON= 0
+#SERF_PARTY_ON= (1LSL0)
+#IO_STATB_XOFFREAD= 12
+#IO_STATF_XOFFREAD= (1LSL12)
+#IO_STATB_XOFFWRITE= 11
+#IO_STATF_XOFFWRITE= (1LSL11)
+#IO_STATB_READBREAK= 10
+#IO_STATF_READBREAK= (1LSL10)
+#IO_STATB_WROTEBREAK= 9
+#IO_STATF_WROTEBREAK= (1LSL9)
+#IO_STATB_OVERRUN= 8
+#IO_STATF_OVERRUN= (1LSL8)
+#SEXTB_MSPON= 1
+#SEXTF_MSPON= (1LSL1)
+#SEXTB_MARK= 0
+#SEXTF_MARK= (1LSL0)
+#SerErr_DevBusy= 1
+#SerErr_BaudMismatch= 2
+#SerErr_BufErr= 4
+#SerErr_InvParam= 5
+#SerErr_LineErr= 6
+#SerErr_ParityErr= 9
+#SerErr_TimerErr= 11
+#SerErr_BufOverflow= 12
+#SerErr_NoDSR= 13
+#SerErr_DetectedBreak= 15
+
+#SerErr_InvBaud= 3
+#SerErr_NotOpen= 7
+#SerErr_PortReset= 8
+#SerErr_InitErr= 10
+#SerErr_NoCTS= 14
+#IOSTB_XOFFREAD= 4
+#IOSTF_XOFFREAD= (1LSL4)
+#IOSTB_XOFFWRITE= 3
+#IOSTF_XOFFWRITE= (1LSL3)
+#IOSTB_READBREAK= 2
+#IOSTF_READBREAK= (1LSL2)
+#IOSTB_WROTEBREAK= 1
+#IOSTF_WROTEBREAK= (1LSL1)
+#IOSTB_OVERRUN= 0
+#IOSTF_OVERRUN= (1LSL0)
+#IOSERB_BUFRREAD= 7
+#IOSERF_BUFRREAD= (1LSL7)
+#IOSERB_QUEUED= 6
+#IOSERF_QUEUED= (1LSL6)
+#IOSERB_ABORT= 5
+#IOSERF_ABORT= (1LSL5)
+#IOSERB_ACTIVE= 4
+#IOSERF_ACTIVE= (1LSL4)
+
+Macro SERIALNAME "#serial.#device":End Macro
+
+;*******************File:console.h
+
+#CD_ASKKEYMAP= (#CMD_NONSTD+0)
+#CD_SETKEYMAP= (#CMD_NONSTD+1)
+#CD_ASKDEFAULTKEYMAP= (#CMD_NONSTD+2)
+#CD_SETDEFAULTKEYMAP= (#CMD_NONSTD+3)
+#SGR_PRIMARY= 0
+#SGR_BOLD= 1
+#SGR_ITALIC= 3
+#SGR_UNDERSCORE= 4
+#SGR_NEGATIVE= 7
+#SGR_NORMAL= 22
+#SGR_NOTITALIC= 23
+#SGR_NOTUNDERSCORE= 24
+#SGR_POSITIVE= 27
+#SGR_BLACK= 30
+#SGR_RED= 31
+#SGR_GREEN= 32
+#SGR_YELLOW= 33
+#SGR_BLUE= 34
+#SGR_MAGENTA= 35
+#SGR_CYAN= 36
+#SGR_WHITE= 37
+#SGR_DEFAULT= 39
+#SGR_BLACKBG= 40
+#SGR_REDBG= 41
+#SGR_GREENBG= 42
+#SGR_YELLOWBG= 43
+#SGR_BLUEBG= 44
+#SGR_MAGENTABG= 45
+#SGR_CYANBG= 46
+#SGR_WHITEBG= 47
+#SGR_DEFAULTBG= 49
+#SGR_CLR0= 30
+#SGR_CLR1= 31
+#SGR_CLR2= 32
+#SGR_CLR3= 33
+#SGR_CLR4= 34
+#SGR_CLR5= 35
+#SGR_CLR6= 36
+#SGR_CLR7= 37
+#SGR_CLR0BG= 40
+#SGR_CLR1BG= 41
+#SGR_CLR2BG= 42
+#SGR_CLR3BG= 43
+#SGR_CLR4BG= 44
+#SGR_CLR5BG= 45
+#SGR_CLR6BG= 46
+#SGR_CLR7BG= 47
+#DSR_CPR= 6
+#CTC_HSETTAB= 0
+#CTC_HCLRTAB= 2
+#CTC_HCLRTABSALL= 5
+#TBC_HCLRTAB= 0
+#TBC_HCLRTABSALL= 3
+#M_LNM= 20
+Macro M_ASM ">1":End Macro
+Macro M_AWM= "?7":End Macro
+
+;*******************File:gameport.h
+
+#GPD_READEVENT= (#CMD_NONSTD+0)
+#GPD_ASKCTYPE= (#CMD_NONSTD+1)
+#GPD_SETCTYPE= (#CMD_NONSTD+2)
+#GPD_ASKTRIGGER= (#CMD_NONSTD+3)
+#GPD_SETTRIGGER= (#CMD_NONSTD+4)
+#GPTB_DOWNKEYS= 0
+#GPTF_DOWNKEYS= (1LSL0)
+#GPTB_UPKEYS= 1
+#GPTF_UPKEYS= (1LSL1)
+
+NEWTYPE.GamePortTrigger
+gpt_Keys.w
+gpt_Timeout.w
+gpt_XDelta.w
+gpt_YDelta.w
+End NEWTYPE
+
+#GPCT_ALLOCATED= -1
+#GPCT_NOCONTROLLER= 0
+#GPCT_MOUSE= 1
+#GPCT_RELJOYSTICK= 2
+#GPCT_ABSJOYSTICK= 3
+#GPDERR_SETCTYPE= 1
+
+;*******************File:audio.h
+
+Macro AUDIONAME "#audio.#device":End Macro
+#ADHARD_CHANNELS= 4
+#ADALLOC_MINPREC= -128
+#ADALLOC_MAXPREC= 127
+#ADCMD_FREE= (#CMD_NONSTD+0)
+#ADCMD_SETPREC= (#CMD_NONSTD+1)
+#ADCMD_FINISH= (#CMD_NONSTD+2)
+#ADCMD_PERVOL= (#CMD_NONSTD+3)
+#ADCMD_LOCK= (#CMD_NONSTD+4)
+#ADCMD_WAITCYCLE= (#CMD_NONSTD+5)
+#ADCMD_ALLOCATE= 32
+#ADIOB_PERVOL= 4
+#ADIOF_PERVOL= (1LSL4)
+#ADIOB_SYNCCYCLE= 5
+#ADIOF_SYNCCYCLE= (1LSL5)
+#ADIOB_NOWAIT= 6
+#ADIOF_NOWAIT= (1LSL6)
+#ADIOB_WRITEMESSAGE= 7
+#ADIOF_WRITEMESSAGE= (1LSL7)
+#ADIOERR_NOALLOCATION= -10
+#ADIOERR_ALLOCFAILED= -11
+#ADIOERR_CHANNELSTOLEN= -12
+
+NEWTYPE.IOAudio
+ioa_Request.IORequest
+ioa_AllocKey.w
+*ioa_Data.b
+ioa_Length.l
+ioa_Period.w
+ioa_Volume.w
+ioa_Cycles.w
+ioa_WriteMsg.Message
+End NEWTYPE
+
+;*******************File:keyboard.h
+
+#KBD_READEVENT= (#CMD_NONSTD+0)
+#KBD_READMATRIX= (#CMD_NONSTD+1)
+#KBD_ADDRESETHANDLER= (#CMD_NONSTD+2)
+#KBD_REMRESETHANDLER= (#CMD_NONSTD+3)
+#KBD_RESETHANDLERDONE= (#CMD_NONSTD+4)
+
+;*******************File:hardblocks.h
+
+NEWTYPE.RigidDiskBlock
+rdb_ID.l
+rdb_SummedLongs.l
+rdb_ChkSum.l
+rdb_HostID.l
+rdb_BlockBytes.l
+rdb_Flags.l
+rdb_BadBlockList.l
+rdb_PartitionList.l
+rdb_FileSysHeaderList.l
+rdb_DriveInit.l
+rdb_Reserved1.l[6]
+rdb_Cylinders.l
+rdb_Sectors.l
+rdb_Heads.l
+rdb_Interleave.l
+rdb_Park.l
+rdb_Reserved2.l[3]
+rdb_WritePreComp.l
+rdb_ReducedWrite.l
+rdb_StepRate.l
+rdb_Reserved3.l[5]
+rdb_RDBBlocksLo.l
+rdb_RDBBlocksHi.l
+rdb_LoCylinder.l
+rdb_HiCylinder.l
+rdb_CylBlocks.l
+rdb_AutoParkSeconds.l
+rdb_Reserved4.l[2]
+rdb_DiskVendor.b[8]
+rdb_DiskProduct.b[16]
+rdb_DiskRevision.b[4]
+rdb_ControllerVendor.b[8]
+rdb_ControllerProduct.b[16]
+rdb_ControllerRevision.b[4]
+rdb_Reserved5.l[10]
+End NEWTYPE
+
+#IDNAME_RIGIDDISK= $5244534B
+#RDB_LOCATION_LIMIT= 16
+#RDBFB_LAST= 0
+#RDBFF_LAST= $01
+#RDBFB_LASTLUN= 1
+#RDBFF_LASTLUN= $02
+#RDBFB_LASTTID= 2
+#RDBFF_LASTTID= $04
+#RDBFB_NORElsl= 3
+#RDBFF_NORElsl= $08
+#RDBFB_DISKID= 4
+#RDBFF_DISKID= $10
+#RDBFB_CTRLRID= 5
+#RDBFF_CTRLRID= $20
+
+NEWTYPE.BadBlockEntry
+bbe_BadBlock.l
+bbe_GoodBlock.l
+End NEWTYPE
+
+NEWTYPE.BadBlockBlock
+bbb_ID.l
+bbb_SummedLongs.l
+bbb_ChkSum.l
+bbb_HostID.l
+bbb_Next.l
+bbb_Reserved.l
+bbb_BlockPairs.BadBlockEntry[61]
+End NEWTYPE
+
+#IDNAME_BADBLOCK= $42414442
+
+NEWTYPE.PartitionBlock
+pb_ID.l
+pb_SummedLongs.l
+pb_ChkSum.l
+pb_HostID.l
+pb_Next.l
+pb_Flags.l
+pb_Reserved1.l[2]
+pb_DevFlags.l
+pb_DriveName.b[32]
+pb_Reserved2.l[15]
+pb_Environment.l[17]
+pb_EReserved.l[15]
+End NEWTYPE
+
+#IDNAME_PARTITION= $50415254
+#PBFB_BOOTABLE= 0
+#PBFF_BOOTABLE= 1
+#PBFB_NOMOUNT= 1
+#PBFF_NOMOUNT= 2
+
+NEWTYPE.FileSysHeaderBlock
+fhb_ID.l
+fhb_SummedLongs.l
+fhb_ChkSum.l
+fhb_HostID.l
+fhb_Next.l
+fhb_Flags.l
+fhb_Reserved1.l[2]
+fhb_DosType.l
+fhb_Version.l
+fhb_PatchFlags.l
+fhb_Type.l
+fhb_Task.l
+fhb_Lock.l
+fhb_Handler.l
+fhb_StackSize.l
+fhb_Priority.l
+fhb_Startup.l
+fhb_SegListBlocks.l
+fhb_GlobalVec.l
+fhb_Reserved2.l[23]
+fhb_Reserved3.l[21]
+End NEWTYPE
+
+#IDNAME_FILESYSHEADER= $46534844
+
+NEWTYPE.LoadSegBlock
+lsb_ID.l
+lsb_SummedLongs.l
+lsb_ChkSum.l
+lsb_HostID.l
+lsb_Next.l
+lsb_LoadData.l[123]
+End NEWTYPE
+
+#IDNAME_LOADSEG= $4C534547
+
+;*******************File:clipboard.h
+
+#CBD_POST= (#CMD_NONSTD+0)
+#CBD_CURRENTREADID= (#CMD_NONSTD+1)
+#CBD_CURRENTWRITEID= (#CMD_NONSTD+2)
+#CBD_CHANGEHOOK= (#CMD_NONSTD+3)
+#CBERR_OBSOLETEID= 1
+
+NEWTYPE.ClipboardUnitPartial
+cu_Node.Node
+cu_UnitNum.l
+End NEWTYPE
+
+NEWTYPE.IOClipReq
+io_Message.Message
+*io_Device.Device
+*io_Unit.ClipboardUnitPartial
+io_Command.w
+io_Flags.b
+io_Error.b
+io_Actual.l
+io_Length.l
+*io_Data.b
+io_Offset.l
+io_ClipID.l
+End NEWTYPE
+
+#PRIMARY_CLIP= 0
+
+NEWTYPE.SatisfyMsg
+sm_Msg.Message
+sm_Unit.w
+sm_ClipID.l
+End NEWTYPE
+
+NEWTYPE.ClipHookMsg
+chm_Type.l
+chm_ChangeCmd.l
+chm_ClipID.l
+End NEWTYPE
+
+;*******************File:_Input.h
+
+#IND_ADDHANDLER= (#CMD_NONSTD+0)
+#IND_REMHANDLER= (#CMD_NONSTD+1)
+#IND_WRITEEVENT= (#CMD_NONSTD+2)
+#IND_SETTHRESH= (#CMD_NONSTD+3)
+#IND_SETPERIOD= (#CMD_NONSTD+4)
+#IND_SETMPORT= (#CMD_NONSTD+5)
+#IND_SETMTYPE= (#CMD_NONSTD+6)
+#IND_SETMTRIG= (#CMD_NONSTD+7)
+
+;*******************File:parallel.h
+
+NEWTYPE.IOPArray
+PTermArray0.l
+PTermArray1.l
+End NEWTYPE
+
+NEWTYPE.IOExtPar
+IOPar.IOStdReq
+io_PExtFlags.l
+io_Status.b
+io_ParFlags.b
+io_PTermArray.IOPArray
+End NEWTYPE
+
+#PARB_SHARED= 5
+#PARF_SHARED= (1LSL5)
+#PARB_SLOWMODE= 4
+#PARF_SLOWMODE= (1LSL4)
+#PARB_FASTMODE= 3
+#PARF_FASTMODE= (1LSL3)
+#PARB_RAD_BOOGIE= 3
+#PARF_RAD_BOOGIE= (1LSL3)
+#PARB_ACKMODE= 2
+#PARF_ACKMODE= (1LSL2)
+#PARB_EOFMODE= 1
+#PARF_EOFMODE= (1LSL1)
+#IOPARB_QUEUED= 6
+#IOPARF_QUEUED= (1LSL6)
+#IOPARB_ABORT= 5
+#IOPARF_ABORT= (1LSL5)
+#IOPARB_ACTIVE= 4
+#IOPARF_ACTIVE= (1LSL4)
+#IOPTB_RWDIR= 3
+#IOPTF_RWDIR= (1LSL3)
+#IOPTB_PARSEL= 2
+#IOPTF_PARSEL= (1LSL2)
+#IOPTB_PAPEROUT= 1
+#IOPTF_PAPEROUT= (1LSL1)
+#IOPTB_PARBUSY= 0
+#IOPTF_PARBUSY= (1LSL0)
+Macro PARALLELNAME "#parallel.#device":End Macro
+#PDCMD_QUERY= (#CMD_NONSTD)
+#PDCMD_SETPARAMS= (#CMD_NONSTD+1)
+#ParErr_DevBusy= 1
+#ParErr_BufTooBig= 2
+#ParErr_InvParam= 3
+#ParErr_LineErr= 4
+#ParErr_NotOpen= 5
+#ParErr_PortReset= 6
+#ParErr_InitErr= 7
+
+;*******************File:trackdisk.h
+
+#NUMSECS= 11
+#NUMUNITS= 4
+#TD_SECTOR= 512
+#TD_SECSHIFT= 9
+Macro TD_NAME "#trackdisk.#device":End Macro
+#TDF_EXTCOM= (1LSL15)
+#TD_MOTOR= (#CMD_NONSTD+0)
+#TD_SEEK= (#CMD_NONSTD+1)
+#TD_FORMAT= (#CMD_NONSTD+2)
+#TD_REMOVE= (#CMD_NONSTD+3)
+#TD_CHANGENUM= (#CMD_NONSTD+4)
+#TD_CHANGESTATE= (#CMD_NONSTD+5)
+#TD_PROTSTATUS= (#CMD_NONSTD+6)
+#TD_RAWREAD= (#CMD_NONSTD+7)
+#TD_RAWWRITE= (#CMD_NONSTD+8)
+#TD_GETDRIVETYPE= (#CMD_NONSTD+9)
+#TD_GETNUMTRACKS= (#CMD_NONSTD+10)
+#TD_ADDCHANGEINT= (#CMD_NONSTD+11)
+#TD_REMCHANGEINT= (#CMD_NONSTD+12)
+#TD_GETGEOMETRY= (#CMD_NONSTD+13)
+#TD_EJECT= (#CMD_NONSTD+14)
+#TD_LASTCOMM= (#CMD_NONSTD+15)
+#ETD_WRITE= (#CMD_WRITE|#TDF_EXTCOM)
+#ETD_READ= (#CMD_READ|#TDF_EXTCOM)
+#ETD_MOTOR= (#TD_MOTOR|#TDF_EXTCOM)
+#ETD_SEEK= (#TD_SEEK|#TDF_EXTCOM)
+#ETD_FORMAT= (#TD_FORMAT|#TDF_EXTCOM)
+#ETD_UPDATE= (#CMD_UPDATE|#TDF_EXTCOM)
+#ETD_CLEAR= (#CMD_CLEAR|#TDF_EXTCOM)
+#ETD_RAWREAD= (#TD_RAWREAD|#TDF_EXTCOM)
+#ETD_RAWWRITE= (#TD_RAWWRITE|#TDF_EXTCOM)
+
+NEWTYPE.IOExtTD
+iotd_Req.IOStdReq
+iotd_Count.l
+iotd_SecLabel.l
+End NEWTYPE
+
+NEWTYPE.DriveGeometry
+dg_SectorSize.l
+dg_TotalSectors.l
+dg_Cylinders.l
+dg_CylSectors.l
+dg_Heads.l
+dg_TrackSectors.l
+dg_BufMemType.l
+dg_DeviceType.b
+dg_Flags.b
+dg_Reserved.w
+End NEWTYPE
+
+#DG_DIRECT_ACCESS= 0
+#DG_SEQUENTIAL_ACCESS= 1
+#DG_PRINTER= 2
+#DG_PROCESSOR= 3
+#DG_WORM= 4
+#DG_CDROM= 5
+#DG_SCANNER= 6
+#DG_OPTICAL_DISK= 7
+#DG_MEDIUM_CHANGER= 8
+#DG_COMMUNICATION= 9
+#DG_UNKNOWN= 31
+#DGB_REMOVABLE= 0
+#DGF_REMOVABLE= 1
+#IOTDB_INDEXSYNC= 4
+#IOTDF_INDEXSYNC= (1LSL4)
+#IOTDB_WORDSYNC= 5
+#IOTDF_WORDSYNC= (1LSL5)
+#TD_LABELSIZE= 16
+#TDB_ALLOW_NON_3_5= 0
+#TDF_ALLOW_NON_3_5= (1LSL0)
+#DRIVE3_5= 1
+#DRIVE5_25= 2
+#TDERR_NotSpecified= 20
+#TDERR_NoSecHdr= 21
+#TDERR_BadSecPreamble= 22
+#TDERR_BadSecID= 23
+#TDERR_BadHdrSum= 24
+#TDERR_BadSecSum= 25
+#TDERR_TooFewSecs= 26
+#TDERR_BadSecHdr= 27
+#TDERR_WriteProt= 28
+#TDERR_DiskChanged= 29
+#TDERR_SeekError= 30
+#TDERR_NoMem= 31
+#TDERR_BadUnitNum= 32
+#TDERR_BadDriveType= 33
+#TDERR_DriveInUse= 34
+#TDERR_PostReset= 35
+
+NEWTYPE.TDU_PublicUnit
+tdu_Unit.Unit
+tdu_Comp01Track.w
+tdu_Comp10Track.w
+tdu_Comp11Track.w
+tdu_StepDelay.l
+tdu_SettleDelay.l
+tdu_RetryCnt.b
+tdu_PubFlags.b
+tdu_CurrTrk.w
+tdu_CalibrateDelay.l
+tdu_Counter.l
+End NEWTYPE
+
+#TDPB_NOCLICK= 0
+#TDPF_NOCLICK= (1LSL0)
+
+;*******************File:scsidisk.h
+
+#HD_SCSICMD= 28
+
+NEWTYPE.SCSICmd
+*scsi_Data.w
+scsi_Length.l
+scsi_Actual.l
+*scsi_Command.b
+scsi_CmdLength.w
+scsi_CmdActual.w
+scsi_Flags.b
+scsi_Status.b
+*scsi_SenseData.b
+scsi_SenseLength.w
+scsi_SenseActual.w
+End NEWTYPE
+
+#SCSIF_WRITE= 0
+#SCSIF_READ= 1
+#SCSIB_READ_WRITE= 0
+#SCSIF_NOSENSE= 0
+#SCSIF_AUTOSENSE= 2
+#SCSIF_OLDAUTOSENSE= 6
+#SCSIB_AUTOSENSE= 1
+#SCSIB_OLDAUTOSENSE= 2
+#HFERR_SelfUnit= 40
+#HFERR_DMA= 41
+#HFERR_Phase= 42
+#HFERR_Parity= 43
+#HFERR_SelTimeout= 44
+#HFERR_BadStatus= 45
+#HFERR_NoBoard= 50
+
+;*******************File:bootblock.h
+
+NEWTYPE.BootBlock
+bb_id.b[4]
+bb_chksum.l
+bb_dosblock.l
+End NEWTYPE
+
+#BOOTSECTS= 2
+Macro BBID_DOS "DOS",0:End Macro
+Macro BBID_KICK "KICK":End Macro
+#BBNAME_DOS= $444F5300
+#BBNAME_KICK= $4B49434B
+
+;*******************File:prtbase.h
+
+NEWTYPE.DeviceData
+dd_Device.Library
+*dd_Segment.b
+*dd_ExecBase.b
+*dd_CmdVectors.b
+*dd_CmdBytes.b
+dd_NumCommands.w
+End NEWTYPE
+
+#P_OLDSTKSIZE= $0800
+#P_STKSIZE= $1000
+#P_BUFSIZE= 256
+#P_SAFESIZE= 128
+
+NEWTYPE.PrinterData
+pd_Device.DeviceData
+pd_Unit.MsgPort
+*pd_PrinterSegment.b
+pd_PrinterType.w
+*pd_SegmentData.PrinterSegment
+*pd_PrintBuf.b
+*pd_PWrite.w
+*pd_PBothReady.w
+;Bummer: union {				 /* port I/O Request 0 */
+pd_p0.IOExtPar
+pd_s0.IOExtSer
+End NEWTYPE
+
+;#pd_PIOR0= pd_ior0.#pd_p0
+;#pd_SIOR0= pd_ior0.#pd_s0
+
+;newtype.IOExtPar=
+;pd_s1.IOExtSer
+;End NewType
+
+;#pd_PIOR1= #pd_ior1.#pd_p1
+;#pd_SIOR1= #pd_ior1.#pd_s1
+
+;newtype.timerequest=
+;pd_IORPort.MsgPort
+;pd_TC.Task
+;pd_OldStk.b[#P_OLDSTKSIZE]
+;pd_Flags.b
+;pd_pad.b
+;pd_Preferences.Preferences
+;pd_PWaitEnabled.b
+;pd_Flags1.b
+;pd_Stk.b[#P_STKSIZE]
+;End NewType
+
+#PPCB_GFX= 0
+#PPCF_GFX= $1
+#PPCB_COLOR= 1
+#PPCF_COLOR= $2
+#PPC_BWALPHA= $00
+#PPC_BWGFX= $01
+#PPC_COLORALPHA= $02
+#PPC_COLORGFX= $03
+#PCC_BW= $01
+#PCC_YMC= $02
+#PCC_YMC_BW= $03
+#PCC_YMCB= $04
+#PCC_4COLOR= $04
+#PCC_ADDITIVE= $08
+#PCC_WB= $09
+#PCC_BGR= $0A
+#PCC_BGR_WB= $0B
+#PCC_BGRW= $0C
+#PCC_MULTI_PASS= $10
+
+NEWTYPE.PrinterExtendedData
+*ped_PrinterName.b
+*ped_Init.w
+*ped_Expunge.w
+*ped_Open.w
+*ped_Close.w
+ped_PrinterClass.b
+ped_ColorClass.b
+ped_MaxColumns.b
+ped_NumCharSets.b
+ped_NumRows.w
+ped_MaxXDots.l
+ped_MaxYDots.l
+ped_XDotsInch.w
+ped_YDotsInch.w
+*ped_Commands.b
+*ped_DoSpecial.w
+*ped_Render.w
+ped_TimeoutSecs.l
+*ped_8BitChars.b
+ped_PrintMode.l
+*ped_ConvFunc.w
+End NEWTYPE
+
+NEWTYPE.PrinterSegment
+ps_NextSegment.l
+ps_runAlert.l
+ps_Version.w
+ps_Revision.w
+ps_PED.PrinterExtendedData
+End NEWTYPE
+
+;*******************File:inputevent.h
+
+#IECLASS_NULL= $00
+#IECLASS_RAWKEY= $01
+#IECLASS_RAWMOUSE= $02
+#IECLASS_EVENT= $03
+#IECLASS_POINTERPOS= $04
+#IECLASS_TIMER= $06
+#IECLASS_GADGETDOWN= $07
+#IECLASS_GADGETUP= $08
+#IECLASS_REQUESTER= $09
+#IECLASS_MENULIST= $0A
+#IECLASS_CLOSEWINDOW= $0B
+#IECLASS_SIZEWINDOW= $0C
+#IECLASS_REFRESHWINDOW= $0D
+#IECLASS_NEWPREFS= $0E
+#IECLASS_DISKREMOVED= $0F
+#IECLASS_DISKINSERTED= $10
+#IECLASS_ACTIVEWINDOW= $11
+#IECLASS_INACTIVEWINDOW= $12
+#IECLASS_NEWPOINTERPOS= $13
+#IECLASS_MENUHELP= $14
+#IECLASS_CHANGEWINDOW= $15
+#IECLASS_MAX= $15
+#IESUBCLASS_COMPATIBLE= $00
+#IESUBCLASS_PIXEL= $01
+#IESUBCLASS_TABLET= $02
+
+;newtype.IEPointerPixel=
+;*iepp_Screen.MyScreen
+;X.w
+;Y.w
+;End NewType
+
+;newtype.IEPointerTablet=
+;X.w
+;Y.w
+;X.w
+;Y.w
+;iept_Pressure.w
+;End NewType
+
+#IECODE_UP_PREFIX= $80
+#IECODE_KEY_CODE_FIRST= $00
+#IECODE_KEY_CODE_LAST= $77
+#IECODE_COMM_CODE_FIRST= $78
+#IECODE_COMM_CODE_LAST= $7F
+#IECODE_C0_FIRST= $00
+#IECODE_C0_LAST= $1F
+#IECODE_ASCII_FIRST= $20
+#IECODE_ASCII_LAST= $7E
+#IECODE_ASCII_DEL= $7F
+#IECODE_C1_FIRST= $80
+#IECODE_C1_LAST= $9F
+#IECODE_LATIN1_FIRST= $A0
+#IECODE_LATIN1_LAST= $FF
+#IECODE_LBUTTON= $68
+#IECODE_RBUTTON= $69
+#IECODE_MBUTTON= $6A
+#IECODE_NOBUTTON= $FF
+#IECODE_NEWACTIVE= $01
+#IECODE_NEWSIZE= $02
+#IECODE_REFRESH= $03
+#IECODE_REQSET= $01
+#IECODE_REQCLEAR= $00
+#IEQUALIFIER_LSHIFT= $0001
+#IEQUALIFIER_RSHIFT= $0002
+#IEQUALIFIER_CAPSLOCK= $0004
+#IEQUALIFIER_CONTROL= $0008
+#IEQUALIFIER_LALT= $0010
+#IEQUALIFIER_RALT= $0020
+#IEQUALIFIER_LCOMMAND= $0040
+#IEQUALIFIER_RCOMMAND= $0080
+#IEQUALIFIER_NUMERICPAD= $0100
+#IEQUALIFIER_REPEAT= $0200
+#IEQUALIFIER_INTERRUPT= $0400
+#IEQUALIFIER_MULTIBROADCAST= $0800
+#IEQUALIFIER_MIDBUTTON= $1000
+#IEQUALIFIER_RBUTTON= $2000
+#IEQUALIFIER_LEFTBUTTON= $4000
+#IEQUALIFIER_RELATIVEMOUSE= $8000
+#IEQUALIFIERB_LSHIFT= 0
+#IEQUALIFIERB_RSHIFT= 1
+#IEQUALIFIERB_CAPSLOCK= 2
+#IEQUALIFIERB_CONTROL= 3
+#IEQUALIFIERB_LALT= 4
+#IEQUALIFIERB_RALT= 5
+#IEQUALIFIERB_LCOMMAND= 6
+#IEQUALIFIERB_RCOMMAND= 7
+#IEQUALIFIERB_NUMERICPAD= 8
+#IEQUALIFIERB_REPEAT= 9
+#IEQUALIFIERB_INTERRUPT= 10
+#IEQUALIFIERB_MULTIBROADCAST= 11
+#IEQUALIFIERB_MIDBUTTON= 12
+#IEQUALIFIERB_RBUTTON= 13
+#IEQUALIFIERB_LEFTBUTTON= 14
+#IEQUALIFIERB_RELATIVEMOUSE= 15
+
+NEWTYPE.InputEvent
+*ie_NextEvent.InputEvent
+ie_Class.b
+ie_SubClass.b
+ie_Code.w
+ie_Qualifier.w
+ie_dead.l[0]						:;Union of bullshit here
+ie_addr.l[0]
+ie_EventAddress[0]
+ie_xy.l[0]
+ie_x.w[0]
+ie_X.w[0]
+ie_prev1DownCode.b[0]
+ie_Prev1DownCode.b
+ie_prev1DownQual.b[0]
+ie_Prev1DownQual.b
+ie_y.w[0]
+ie_Y.w[0]
+ie_prev2DownCode.b[0]
+ie_Prev2DownCode.b
+ie_prev2DownQual.b[0]
+ie_Prev2DownQual.b
+ie_TimeSstamp.timeval
+End NEWTYPE
+
+;*******************File:prtgfx.h
+
+#PCMYELLOW= 0
+#PCMMAGENTA= 1
+#PCMCYAN= 2
+#PCMBLACK= 3
+#PCMBLUE= #PCMYELLOW
+#PCMGREEN= #PCMMAGENTA
+#PCMRED= #PCMCYAN
+#PCMWHITE= #PCMBLACK
+
+NEWTYPE.PrtInfo
+*pi_render.w
+*pi_rp.RastPort
+*pi_temprp.RastPort
+*pi_RowBuf.w
+*pi_HamBuf.w
+;Bummer: union colorEntry *pi_ColorMap;	/* PRIVATE - DO NOT USE! */
+;Bummer: union colorEntry *pi_ColorInt;	/* color intensities For entire row */
+;Bummer: union colorEntry *pi_HamInt;		/* PRIVATE - DO NOT USE! */
+;Bummer: union colorEntry *pi_Dest1Int;	/* PRIVATE - DO NOT USE! */
+;Bummer: union colorEntry *pi_Dest2Int;	/* PRIVATE - DO NOT USE! */
+*pi_ScaleX.w
+*pi_ScaleXAlt.w
+*pi_dmatrix.b
+*pi_TopBuf.w
+*pi_BotBuf.w
+pi_RowBufSize.w
+pi_HamBufSize.w
+pi_ColorMapSize.w
+pi_ColorIntSize.w
+pi_HamIntSize.w
+pi_Dest1IntSize.w
+pi_Dest2IntSize.w
+pi_ScaleXSize.w
+pi_ScaleXAltSize.w
+pi_PrefsFlags.w
+pi_special.l
+pi_xstart.w
+pi_ystart.w
+pi_width.w
+pi_height.w
+pi_pc.l
+pi_pr.l
+pi_ymult.w
+pi_ymod.w
+pi_ety.w
+pi_xpos.w
+pi_threshold.w
+pi_tempwidth.w
+pi_flags.w
+End NEWTYPE
+
+;*******************File:conunit.h
+
+#CONU_LIBRARY= -1
+#CONU_STANDARD= 0
+#CONU_CHARMAP= 1
+#CONU_SNIPMAP= 3
+#PMB_ASM= #M_LNM+1
+#PMB_AWM= #PMB_ASM+1
+#MAXTABS= 80
+
+NEWTYPE.ConUnit
+cu_MP.MsgPort
+;*cu_Window.Window
+cu_XCP.w
+cu_YCP.w
+cu_XMax.w
+cu_YMax.w
+cu_XRSize.w
+cu_YRSize.w
+cu_XROrigin.w
+cu_YROrigin.w
+cu_XRExtant.w
+cu_YRExtant.w
+cu_XMinShrink.w
+cu_YMinShrink.w
+cu_XCCP.w
+cu_YCCP.w
+cu_KeyMapStruct.KeyMap
+cu_TabStops.w[80]	 ;#MAXTABS
+cu_Mask.b
+cu_FgPen.b
+cu_BgPen.b
+cu_AOLPen.b
+cu_DrawMode.b
+cu_Obsolete1.b
+*cu_Obsolete2.b
+cu_Minterms.b[8]
+*cu_Font.TextFont
+cu_AlgoStyle.b
+cu_TxFlags.b
+cu_TxHeight.w
+cu_TxWidth.w
+cu_TxBaseline.w
+cu_TxSpacing.w
+;cu_Modes.b[#PMB_AWM+7 Shr 3]
+;cu_RawEvents.b[#IECLASS_MAX+8 Shr 3]
+End NEWTYPE

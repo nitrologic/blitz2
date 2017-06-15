@@ -1,0 +1,133 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/Amos_Related/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/AMOS_Banks.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/Amos_Related/AMOS_Banks.bb2
+; AMOS BANK MANAGEMENT
+; --------------------
+
+*First_Bank.l=0
+#BANK_FILE=4
+
+Function.w ReadWord{}
+	DEFTYPE .w word: ##[$BE14] #BANK_FILE,&word,2: Function Return word
+End Function
+
+Function.l ReadLong{}
+	DEFTYPE .l long: ##[$BE14] #BANK_FILE,&long,4: Function Return long
+End Function
+
+Function.l FindBank {Seeked_Bank.l}
+	; Returns the address of the Bank pointer.
+	Shared *First_Bank
+	*Current_Bank.l=&*First_Bank
+	While *Current_Bank AND *Found.l=0
+		*Next_Bank.l=Peek.l(*Current_Bank)
+		If *Next_Bank
+			If Peek.l(*Next_Bank+8)=Seeked_Bank Then *Found=*Current_Bank
+		EndIf
+		*Current_Bank=*Next_Bank
+	Wend
+	Function Return *Found
+End Function
+
+Function.l Start {Number_Of_The_Bank.l}
+	*Bk.l=FindBank{Number_Of_The_Bank}
+	If *Bk Then Function Return (Peek.l(*Bk)+24)
+End Function
+
+Function.l Length {Number_Of_The_Bank.l}
+	*Bk.l=FindBank{Number_Of_The_Bank}
+	If *Bk Then Function Return (Peek.l(Peek.l(*Bk)+4))
+End Function
+
+Statement Erase {Number_Of_The_Bank.l}
+	; Clears a bank from memory if it finds it
+	*Bk_Pointer.l=FindBank {Number_Of_The_Bank}
+	If *Bk_Pointer
+		; The bank exists
+		*Bk_To_Erase.l=Peek.l(*Bk_Pointer)
+		Poke.l *Bk_Pointer,Peek.l(*Bk_To_Erase)
+		aux=##[$FE99](*Bk_To_Erase,(Peek.l(*Bk_To_Erase+4)))
+	End If
+End Statement
+
+Statement EraseAll{}
+	; Clears all memory banks (Call before End)
+	Shared *First_Bank
+	While *First_Bank: Erase {Peek.l(*First_Bank+8)}: Wend
+End Statement
+
+Function.b Load{F$,Destination_Bank.l}
+	If WriteMem(#BANK_FILE,F$)
+		FileInput #BANK_FILE: Banks_Left.b=1: Shared *First_Bank
+		While Banks_Left AND Error_Number.b<2
+			Banks_Left-1: Id$=Edit$(4)
+			Select Id$
+				Case "AmBs": Banks_Left=ReadWord{}: Destination_Bank=0
+				Case "AmSp": Flag.w=%0101: Id$="Sprites"
+				Case "AmIc": Flag.w=%1001: Id$="Icons"
+				Case "AmBk"; Standard AMOS bank
+					Number_Of_The_Bank=ReadWord{}: Flag.w=ReadWord{}
+					Length_Of_Bank.l=(ReadLong{} AND $FFFFFFF)-8+24: Name.s=Edit$(8)
+					If Number_Of_The_Bank=0 Then Number_Of_The_Bank=5; Sample bank
+					If Destination_Bank>0 Then Number_Of_The_Bank=Destination_Bank
+					If ##[$FE9A](Flag AND %10)>Length_Of_Bank
+						Erase {Number_Of_The_Bank}
+						*_Bank.l=##[$FE97](Length_Of_Bank,Flag AND %10)
+						Poke.l *_Bank,*First_Bank: *First_Bank=*_Bank
+						Poke.l *_Bank+4,Length_Of_Bank: Poke.l *_Bank+8,Number_Of_The_Bank
+						Poke.w *_Bank+12,Flag: Poke.s *_Bank+16,Name
+						##[$BE14] #BANK_FILE,*_Bank+24,Length_Of_Bank-24
+					Else
+						Loc #BANK_FILE,Eof(#BANK_FILE)+Length_Of_Bank-24
+						Error_Number=1; Not Enough Memory
+					EndIf
+				Default: Error_Number=3; Not An AMOS Bank
+			End Select
+		Wend
+		If Id$="Sprites" OR Id$="Icons"
+			Start_Object.w=1: Number_Of_Objects.w=ReadWord{}
+			*Start_Old_Bank.w=Start{1}
+			If Destination_Bank>0 AND *Start_Old_Bank
+				Start_Object.w+Peek.w(*Start_Old_Bank)
+				Number_Of_Objects+Start_Object-1
+			Else Destination_Bank=0
+			EndIf
+			Length_Of_Bank=26+Number_Of_Objects*8+64
+			If ##[$FE9A](0)>Length_Of_Bank
+				*_Bank=##[$FE97](Length_Of_Bank,0)
+				If Destination_Bank
+					Size.w=(Number_Of_Objects-Start_Object)*10
+					temp.b=##[$FEDB](*Start_Old_Bank,*_Bank+24,Size)
+				EndIf
+				Erase{1}: Poke.l *_Bank,*First_Bank: *First_Bank=*_Bank
+				Poke.l *_Bank+4,Length_Of_Bank: Poke.l *_Bank+8,1
+				Poke.l *_Bank+12,Flag: Poke.s *_Bank+16,Id$
+				For Adr.l=*_Bank+16+10*Start_Object To *_Bank+16+10*Number_Of_Objects Step 10
+					Poke.l Adr,ReadLong{}: Poke.l Adr+4,ReadLong{}
+					Poke.w Adr+8,ReadWord{}: Size.w=Peek.w(Adr)*Peek.w(Adr+2)*2
+					If ##[$FE9A](%10)>Size
+						*Image=##[$FE97](Size,0): ##[$BE14] #BANK_FILE,*Image,Size
+					Else Loc #BANK_FILE,Eof(#BANK_FILE)+Size: Error_Number.b=1
+					EndIf
+				Next Adr
+				##[$BE14] #BANK_FILE,*_Bank+Length_Of_File-64,64; *start=adr?
+			EndIf
+		EndIf
+		CloseFile #BANK_FILE
+	Else Error_Number=2; File Not Found
+	EndIf
+	Function Return Error_Number
+End Function
+
+; SOME EXAMPLE CODE
+;
+; Statement My_Error_Manage{ErrN.b}
+;	 Select ErrN
+;		 Case 0: NPrint "Loading sucessful."
+;		 Case 1: NPrint "Not Enough memory for all banks."
+;		 Case 2: NPrint "File Not Found."
+;		 Case 3: NPrint "Not an AMOS Bank."
+;		 Case 4: NPrint "Type of bank not currently supported."
+;	 End Select
+; End Statement
+;
+; My_Error_Manage {Load{"My_Bank.ABK",0}}
+; NPrint "Press button to Quit": MouseWait: EraseAll{}: End

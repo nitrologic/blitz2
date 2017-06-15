@@ -1,0 +1,351 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/TurboHockey/TurboHockey.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/TurboHockey/TurboHockey.bb2
+;												Turbo Hockey
+;								 Copyright 1993 Michael Boeh
+;
+;	 A very simple hockey game I wrote in less than 2 days!
+;	 Try doing that in anything but Blitz 2!
+;
+;
+;
+;
+;	Feel free to modify this code, or better yet, the graphics.
+;
+
+initialize
+
+WBStartup
+LoadSound 0,"HIT"
+LoadSound 1,"HESCORES"
+LoadSound 2,"collide"
+LoadSound 3,"bounce"
+LoadShapes 10,11,"goalies.shape"
+LoadSprites 9,"puck.sprite"
+LoadShapes 0,7,"HOCKEY.SHAPES"
+Dim speedx.q(5), speedy.q(5),posx.q(5),posy.q(5)
+Dim goaliex(3):Dim goaliey(3)
+BitMap 0,320,200,6
+LoadBitMap 0,"rink",1
+
+VWait 100
+BLITZ
+
+Use BitMap 0
+BitMap 1,320,10,2
+BitMap 2,320,10,2
+
+;Make the shapes into sprites
+For a = 0 To 7
+	GetaSprite a,a
+	Free MidHandle a
+Next a
+
+
+Dim current(2)										 ; the current sprite for the two players
+
+
+Slice 0,56,320,200,$fff8,6,8,32,320,320				;set up the slices
+Slice 1,44,320,10,$fff8,2,0,4,320,320
+
+
+Use BitMap 1:Use Slice 1:BlockScroll 1:Show 1
+Colour 0,1:BitMapOutput 1:Locate 0,.2
+Print" Los Angelos						Montreal "
+Green 0,15,15,15:Green 1,0,0,0
+Use Slice 0:Use BitMap 0
+Show 0
+
+Use SetCycle 1
+While Joyb(0) = 0 AND Joyb(1) = 0
+Wend
+
+
+
+start:
+goaliex(0) = 0:goaliex(1) = 306			 ;
+goaliey(0) = 89:goaliey(1) = 89				;
+BlitMode CookieMode										 ;	Position and draw goalies
+Blit 11,goaliex(0),goaliey(0)					;
+Blit 10,goaliex(1),goaliey(1)				 ;
+
+posx.q(0) = 50:posy.q(0) = 90							 ;
+posx.q(1) = 320-70:posy.q(1) = 90						;	 Initial position of players
+posy.q(2) = 98:posx.q(2)= 156								;	 and puck
+current(0) = 2:current(1) = 6					 ;
+who=2									; 0 = player0's puck 1=player1's puck	2=no one's
+For a = 1 To 2
+	speedx.q(a) = 0: speedy.q(a) = 0
+Next a
+While rrr <> 21
+	For a = 0 To 2
+
+		If a < 2
+			jy=Joyy(a):jx=Joyx(a):jr=Joyr(a)		; if a player, read the stick
+
+			If Joyb(a) = 1 AND who = a			; shoot the puck according to speed, direction, and position
+				 Sound 0,15
+					Select current(a)
+					 Case 0
+						 speedx.q(2)+0:speedy.q(2) -32
+					 Case 1
+						 speedx.q(2)+32:speedy.q(2)	-32
+					 Case 2
+						 speedx.q(2)+32:speedy.q(2) + 0
+					 Case 3
+						 speedx.q(2)+32:speedy.q(2) + 32
+
+					 Case 4
+						 speedx.q(2)+0:speedy.q(2) + 32
+					 Case 5
+						 speedx.q(2)-32:speedy.q(2) + 32
+					 Case 6
+						 speedx.q(2)-32:speedy.q(2) + 0
+					 Case 7
+						 speedx.q(2)-32:speedy.q(2)	-32
+					End Select
+					speedx.q(2) = speedx.q(2) * 1.5:speedy.q(2) = speedy.q(2) *	1.5
+
+					 who=2	 ; now no one has it
+			EndIf
+
+			If Joyb(a) = 1 AND who <> a	 ; if button is pressed and no puck, move the goalie according to the stick
+				jy=Joyy(a)
+				gy=goaliey(a)
+				If gy+2*jy > 74 AND gy+2*jy < 104
+					BlitMode EraseMode
+					Blit 11-a,goaliex(a),goaliey(a)
+					goaliey(a)+2*jy
+					BlitMode CookieMode
+					Blit 11-a,goaliex(a),goaliey(a)
+				EndIf
+			EndIf
+
+
+
+
+
+
+		EndIf
+
+
+
+;	These set the decelleratiion of players and puck
+		If speedx.q(a) <> 0 Then speedx.q(a) - (speedx.q(a)/QAbs(speedx.q(a)))
+		If speedy.q(a) <> 0 Then		speedy.q(a) - (speedy.q(a)/QAbs(speedy.q(a)))
+
+
+
+
+
+
+		If a < 2	speedx.q(a)+jx*3:speedy.q(a)+jy*3		; accellerate in dir of stick
+		If a < 2																	 ; test wall hits by players
+		; limit players speed to 50
+			speedx.q(a)=QLimit(speedx.q(a),-40,40)
+			speedy.q(a)=QLimit(speedy.q(a),-40,40)
+
+			If posx.q(a)+speedx.q(a)/10 > 290 Then speedx.q(a)*-1:Sound 3,15,60
+			If posx.q(a)+speedx.q(a)/10 < 13 Then speedx.q(a)*-1:Sound 3,15,60
+			If posy.q(a)+speedy.q(a)/10 > 177 Then speedy.q(a)*-1:Sound 3,15,60
+			If posy.q(a)+speedy.q(a)/10 < 7 Then speedy.q(a)*-1:Sound 3,15,60
+		Else
+			speedx.q(a)=QLimit(speedx.q(a),-80,80)
+			speedy.q(a)=QLimit(speedy.q(a),-80,80)
+
+			; test the position of puck and check for goal
+			If posx.q(a) > 316 AND posy.q(a) > 78 AND posy.q(a) < 115 AND who = 2 Then score1+1:Goto goal
+			If posx.q(a) < 3 AND posy.q(a) > 78 AND posy.q(a) < 115 AND who = 2 Then score0+1:Goto goal
+			px = posx.q(a)+speedx.q(a)/10:py=posy.q(a)+speedy.q(a)/10
+			If px > 304 AND (py< 78 OR py > 115)	Then speedx.q(a)*-1 : Sound 3,15,60
+			If px < 12 AND (py< 78 OR py > 115)Then speedx.q(a)*-1:Sound 3,15,60
+			If py > 190 Then speedy.q(a)*-1:Sound 3,15,60
+			If py < 5 Then speedy.q(a)*-1:Sound 3,15,60
+
+
+		EndIf
+
+
+
+
+		posx.q(a)+speedx.q(a)/10:posy.q(a)+speedy.q(a)/10
+		If a < 2
+			cur=jr	; take joy direction into cur
+;
+;			skate mark routine not yet used because I don't like the marks
+;
+;
+;			If cur < 8 AND current(a) <> cur
+;				If cur = 0 OR cur = 4
+;					skid = Int(Rnd(4)):If skid = 2 Then Line posx.q(a)+10,posy.q(a)+7,posx.q(a)+10,posy.q(a)+9,6
+;				EndIf
+;				If cur = 2 OR cur = 6
+;					skid = Int(Rnd(4)):If skid = 2 Then Line posx.q(a)+8,posy.q(a)+8,posx.q(a)+12,posy.q(a)+8,6
+;				EndIf
+			If cur < 8 Then current(a)=cur		; if stick has moved, change current sprite
+;			EndIf
+
+
+
+		EndIf
+	Next a
+
+; did puck hit the left goalie
+		If RectsHit(10,goaliex(0),goaliey(0),9,posx.q(2),posy.q(2))
+			Sound 3,15,60
+			If QAbs(speedx.q(2)) > 10
+				speedx.q(2) * -1
+				posx.q(2) = 22
+			Else
+				speedx.q(2) * -1
+				posx.q(2) = 30
+			EndIf
+			If who < 2
+				 who=2
+				 posx.q(2) + posx.q(2)/QAbs(posx.q(2)) * 30
+			EndIf
+		EndIf
+
+; did the puck hit the right goalie
+		If RectsHit(11,goaliex(1),goaliey(1),9,posx.q(2),posy.q(2))
+			Sound 3,15,60
+			If QAbs(speedx.q(2)) > 10
+				speedx.q(2) * -1
+				posx.q(2) = 320-23
+			Else
+				speedx.q(2) * -1
+				posx.q(2) = 320-35
+			EndIf
+			If who < 2
+				 who=2
+				 posx.q(2) - posx.q(2)/QAbs(posx.q(2)) * 30
+			EndIf
+		EndIf
+
+
+
+	##[$B40C]
+; Test player-player collision.	I didn't use SCOLL because the sticks
+; were too easily tangled
+	If SColl(current(0),posx.q(0),posy.q(0),current(1),posx.q(1),posy.q(1)) = -1
+		Sound 2,15
+		For b = 0 To 1
+			speedx.q(b)= -1*speedx.q(b):speedy.q(b)=-1*speedy.q(b)
+			posx.q(b)+speedx.q(b)/4:posy.q(b)+speedy.q(b)/4
+		 ShowSprite current(b),posx.q(b),posy.q(b),b*2
+		Next b
+	EndIf
+
+; if player hits puck, mark the possession
+	If DoColl(2,4) = -1 Then who = 1
+	If DoColl(0,4) = -1 Then who = 0
+
+;
+;	These position the puck on the player.	I could have made these one routine,
+;	but the code is small anyway and time was of the essence (cut & paste is QUICK!)
+;
+	If who = 1
+		speedx.q(2)=speedx.q(1):speedy.q(2)=speedy.q(1)
+		Select current(1)
+			Case 0
+				posx.q(2)=posx.q(1) + 6:posy.q(2)=posy.q(1) - 6
+			Case 1
+				posx.q(2)=posx.q(1) +21:posy.q(2)=posy.q(1) -5
+			Case 2
+				posx.q(2)=posx.q(1) + 20:posy.q(2)=posy.q(1) + 6
+
+			Case 3
+				posx.q(2)=posx.q(1) + 19:posy.q(2)=posy.q(1) + 16
+			Case 4
+				posx.q(2)=posx.q(1) + 6:posy.q(2)=posy.q(1) + 18
+			Case 5
+				posx.q(2)=posx.q(1) -5:posy.q(2)=posy.q(1) + 15
+			Case 6
+				posx.q(2)=posx.q(1) + -7:posy.q(2)=posy.q(1) + 6
+			Case 7
+				posx.q(2)=posx.q(1) + -6:posy.q(2)=posy.q(1) -3
+		End Select
+	EndIf
+	If who=0
+		speedx.q(2)=speedx.q(0):speedy.q(2)=speedy.q(0)
+		Select current(0)
+			Case 0
+				posx.q(2)=posx.q(0) + 6:posy.q(2)=posy.q( 0) - 6
+			Case 1
+				posx.q(2)=posx.q( 0) +21:posy.q(2)=posy.q( 0) -5
+			Case 2
+				posx.q(2)=posx.q(0) + 20:posy.q(2)=posy.q(0) + 6
+
+			Case 3
+				posx.q(2)=posx.q(0) + 19:posy.q(2)=posy.q(0) + 16
+			Case 4
+				posx.q(2)=posx.q(0) + 6:posy.q(2)=posy.q(0) + 18
+			Case 5
+				posx.q(2)=posx.q(0) -5:posy.q(2)=posy.q(0) + 15
+			Case 6
+				posx.q(2)=posx.q(0) + -7:posy.q(2)=posy.q( 0) + 6
+			Case 7
+				posx.q(2)=posx.q(0) + -6:posy.q(2)=posy.q(0) -3
+		End Select
+	EndIf
+ For a = 0 To 1
+ Next a
+
+			ShowSprite current(0),posx.q(0),posy.q(0),0		 ; show a player
+			ShowSprite current(1),posx.q(1),posy.q(1),2		 ; show a player
+
+			ShowSprite 9,posx.q(2),posy.q(2),4							; show a puck
+
+
+	VWait
+Wend
+End
+
+
+;The score routine, so simple, it explains itself
+goal:
+For a = 0 To 1
+	Sound 1,15
+	BlitMode EraseMode
+	Blit 11-a,goaliex(a),goaliey(a)
+	goaliey(a)+2*jy
+	Locate 15,.2:Print score1:Locate 35,.2:Print score0
+Next a
+If score0=3
+	Use Slice 1:Use BitMap 2:BlockScroll 1:Show 2
+	Colour 0,1:BitMapOutput 2:Locate 0,.2
+	Print"				 Montreal Wins!!!!				 ":score0=0:score1=0
+	Use BitMap 0:BitMapOutput 1
+	Use Slice 0
+EndIf
+If score1=3
+	Use Slice 1:Use BitMap 2:BlockScroll 1:Show 2
+	Colour 0,1:BitMapOutput 2:Locate 0,.2
+	Print"				 Los Angelos Wins!!!!				 ":score0=0:score1=0
+
+	Use BitMap 0:BitMapOutput 1
+	Use Slice 0
+EndIf
+
+
+
+
+While Joyb(0) = 0 AND Joyb(1) = 0
+	BlitzKeys On
+	If RawStatus($45) = -1 Then End
+	BlitzKeys Off
+Wend
+While Joyb(0) <> 0 OR Joyb(1) <> 0
+	BlitzKeys On
+	If RawStatus($45) = -1 Then End
+	BlitzKeys Off
+Wend
+While Joyb(0) = 0 AND Joyb(1) = 0
+	BlitzKeys On
+	If RawStatus($45) = -1 Then End
+	BlitzKeys Off
+Wend
+Use Slice 1
+Show 1
+Use Slice 0
+Locate 15,.2:Print score1:Locate 35,.2:Print score0
+
+Goto start

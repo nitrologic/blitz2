@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/End.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/End.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/End.bb
+
+;
+; end program example 
+; 
+
+Gosub there 
+MouseWait 
+End 
+there:
+NPrint "Hello!" 
+Return
+

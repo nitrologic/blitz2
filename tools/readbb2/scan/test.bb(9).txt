@@ -1,0 +1,200 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/junk/code/test.bb,/Users/simon/Google Drive/amiga/w/skid/skidw/test.bb,/Users/simon/Google Drive/amiga/w/skid2/skidpc/test.bb
+;
+; skid 1.1 interface
+;
+
+; displayadjust?
+; multiple sprites added (16)
+; cars & tracks as sprites
+
+BitMap 0,608,124,4 ;37696 bytes (16 color main interface)
+LoadShape 0,"mouse.iff":GetaSprite 0,0
+LoadBitMap 0,"banner.iff"
+LoadBank 0,"readme"
+LoadShape 0,"mouse.iff":GetaSprite 0,0
+
+StopCycle 0,0,0,0,0:StopCycle 0,1,5,5,5:StopCycle 0,2,12,10,10:StopCycle 0,3,15,15,15
+
+BLITZ
+
+Mouse On:MouseArea 0,0,640,140:VWait						 ;settle down mouse!
+BlitzKeys On:BitMapInput
+InitCopList 0,44,124,$114,8,4,18+18							;ui at top
+DisplayAdjust 0,-4,8,0,16,0
+
+mo=Off:VWait 10
+
+SetInt 5
+	DisplaySprite 0,0,MouseX,MouseY,0
+End SetInt
+
+DisplayBitMap 0,0:DisplayPalette 0,0
+
+CreateDisplay 0
+
+BitMapOutput 0
+
+Gosub setupui
+
+n=0:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+
+Repeat
+	VWait
+	ev.w=##[$BA92]
+	If ev=-1 Then Gosub handleit
+	a=BlitzKey				 ;:Locate 0,0:Print a,"	"
+Until a=27
+
+End
+
+Repeat
+	a=Asc(Inkey$)
+	If mo=On Then ##[$BA87] 0,MouseX,MouseY
+	If a=28 OR Joyx(1)=-1 Then ##[$BA87] 0,-1
+	If a=29 Then ##[$BA87] 0,1
+	If a=30 Then ##[$BA87] 1,0
+	If a=31 Then ##[$BA87] -1,0
+	If a=13 Then ##[$BA89]:Gosub handleit
+	If a=-1 AND flag Then ##[$BA88]:flag=0
+Until a=27
+
+End
+
+handleit:
+	If n=0
+		If ##[$BA8F]=12
+			n=1:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]:Return
+		EndIf
+		If ##[$BA8F]=14
+			n=2:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]:Return
+		EndIf
+		If ##[$BA8F]=24
+			n=3:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+			Gosub readtrackdisk:Return
+		EndIf
+		If ##[$BA8F]=23
+			n=4:Use ##[$BA81] n:##[$BA87] 10:##[$BA85]
+		EndIf
+		If ##[$BA8F]=15 Then AMIGA:SaveBitmap 0,"ram:test",0:End:BLITZ
+	EndIf
+	If n=1
+		If ##[$BA8F]=10 Then n=0:Use ##[$BA81] n:##[$BA87] 12:##[$BA85]:Return
+	EndIf
+	If n=2
+		If ##[$BA8F]=13 Then n=0:Use ##[$BA81] n:##[$BA87] 14:##[$BA85]:Return
+	EndIf
+	If n=3
+		If ##[$BA8F]=13
+			n=0:Use ##[$BA81] n:##[$BA87] 14:##[$BA85]:
+			CustomColors 0,0,81,0,0,16:Return
+		EndIf
+	EndIf
+	If n=4
+		If ##[$BA8F]=13 Then n=0:Use ##[$BA81] n:##[$BA87] 14:##[$BA85]:Return
+	EndIf
+	Return
+
+setupui:
+	##[$BA82] 0,0,40
+	##[$BA84] 0,0,0,38,608,11,0,"V1.1 (C)1994 ACID SOFTWARE"
+	##[$BA84] 0,1,0,50,254,75,0
+	##[$BA84] 0,2,256,50,352,76,0
+	##[$BA84] 0,10,4,52,121,11,2,"PLAY";:SetBoxColor 10,3
+	##[$BA84] 0,11,4,64,121,11,2,"SINGLE|SPLIT SCREEN"
+	##[$BA84] 0,12,4,76,121,11,2,"SERIAL LINKUP"
+	##[$BA84] 0,13,4,88,121,11,2,"OPTIONS"
+	##[$BA84] 0,14,4,100,121,11,2,"README"
+	##[$BA84] 0,15,4,112,121,11,2,"QUIT"
+	##[$BA84] 0,20,128,52,121,11,2,"NOVICE|ROOKIE|PRO|INSANE"
+	##[$BA84] 0,21,128,64,121,11,2,"LAPS=4|LAPS=6|LAPS=12|LAPS=20"
+	##[$BA84] 0,22,128,76,121,11,2,"MATCH RACING|CHAMPIONSHIP|PRACTISE"
+	##[$BA84] 0,23,128,88,121,11,2,"LOAD CARS"
+	##[$BA84] 0,24,128,100,121,11,2,"SELECT TRACK"
+	##[$BA84] 0,25,128,112,121,11,2,"PONG"
+
+	##[$BA82] 1,0,40
+	##[$BA84] 1,0,0,38,608,11,0,"V1.1 (C)1994 ACID SOFTWARE"
+	##[$BA84] 1,1,0,50,608,75,0
+	##[$BA84] 1,10,4,52,41,11,2,"EXIT"
+	##[$BA84] 1,11,50,52,77,11,2,"ANSWER"
+	##[$BA84] 1,12,136,52,97,11,2,"ORIGINATE"
+	##[$BA84] 1,13,240,52,81,11,2,"HANGUP"
+	##[$BA84] 1,14,331,52,146,11,4,"INIT$="
+	##[$BA84] 1,15,486,52,114,11,4,"DIAL$="
+	For y=0 To 4
+		##[$BA84] 1,20+y,4,64+y*12,41,11,2,"DIAL"
+		##[$BA84] 1,25+y,50,64+y*12,158,11,4,"NAME:"
+		##[$BA84] 1,30+y,210,64+y*12,112,11,4,"PH:"
+		a$="F"+Str$(y+1)+":":##[$BA84] 1,35+y,331,64+y*12,270,11,4,a$
+	Next
+
+	##[$BA82] 2,0,20
+	##[$BA84] 2,0,0,38,608,11,0,"V1.1 (C)1994 ACID SOFTWARE"
+	##[$BA84] 2,1,0,50,608,75,0
+	##[$BA84] 2,2,6,64,596,58,1
+	##[$BA84] 2,10,034,52,116,11,2,"ABOUT ACID"
+	##[$BA84] 2,11,174,52,116,11,2,"ABOUT V1.1"
+	##[$BA84] 2,12,324,52,116,11,2,"ABOUT SERIAL"
+	##[$BA84] 2,13,464,52,116,11,2,"EXIT"
+	##[$BA84] 2,14,50,66,96,30,6
+
+	##[$BA82] 3,0,20
+	##[$BA84] 3,0,0,38,608,11,0,"V1.1 (C)1994 ACID SOFTWARE"
+	##[$BA84] 3,1,0,50,608,28,0 ;was 75
+	##[$BA84] 3,10,034,52,116,11,2,"READ FLOPPY"
+	##[$BA84] 3,11,174,52,116,11,2,"READ HD"
+	##[$BA84] 3,12,324,52,116,11,2,"HD INSTALL"
+	##[$BA84] 3,13,464,52,116,11,2,"CANCEL"
+	For i=0 To 5
+		a$="SELECT#"+Str$(i+1)
+		##[$BA84] 3,14+i,8+i*100,64,96,11,2,a$
+	Next
+
+	##[$BA82] 4,0,20
+	##[$BA84] 4,0,0,38,608,11,0,"V1.1 (C)1994 ACID SOFTWARE"
+	##[$BA84] 4,1,0,50,608,28,0 ;was 75
+	##[$BA84] 4,10,034,52,116,11,2,"READ FLOPPY"
+	##[$BA84] 4,11,174,52,116,11,2,"READ HD"
+	##[$BA84] 4,12,324,52,116,11,2,"HD INSTALL"
+	##[$BA84] 4,13,464,52,116,11,2,"CANCEL"
+	Return
+
+readtrackdisk:
+	#xs=123:#ys=32
+	NEWTYPE .header
+		plan.l [80*#ys*2]
+		trk.w
+		grcol.w[48]
+		typ.w[6]
+		text.b[32]
+		pad.w[32]
+	End NEWTYPE
+	InitBank 3,SizeOf.header,2
+	*thisone.header=Bank(3)
+	QAMIGA
+	If WriteMem (0,pp$+"track4")	;yeah right..
+		Loc 0,28
+	;	ReadMem 0,&trkoff(0),4*7
+		##[$BE14] 0,*thisone,20622
+		CloseFile 0
+	EndIf
+	BLITZ
+	tc=0:tt=0
+	For i=0 To 15
+		rr.w=*thisone\grcol[i*3+0] &15
+		gg.w=*thisone\grcol[i*3+1] &15
+		bb.w=*thisone\grcol[i*3+2] &15
+		cc.w=rr+gg+bb:If cc>tc Then tc=cc:tt=i
+		StopCycle 1,i,rr,gg,bb
+	Next
+	##[$D007] 1,640,#ys*2,4,*thisone
+	For y=0 To 1:For x=0 To 2
+		Use BitMap 1:GetaShape 0,x*123,y*32,123,32:Scale 0,100/123,26/32
+		Use BitMap 0:Blit 0,1+x*101+y*303,83
+	Next:Next
+	Use BitMap 0:For x=0 To 5:xx=x*101+1:Box xx,82,xx+100,82+27,tt:Next
+
+	CustomColors 0,0,81,1,0,16
+	CustomColors 0,18,109,0,0,16
+
+	Return

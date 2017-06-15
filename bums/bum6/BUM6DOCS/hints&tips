@@ -1,0 +1,10 @@
+Hints & Tips
+
+When using machine code in statements put the UNLK a4 just before
+the RTS. Having it at the start was causing the debugger to get
+VERY confused!
+
+If the debugger comes up with no message it is usally because
+there is no current object, ie oops, Mark just fixed this one...
+
+

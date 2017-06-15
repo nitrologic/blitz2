@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/EXAMPLES/medplayer.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/EXAMPLES/medplayer.bb
+;
+; med test program
+;
+
+LoadMedModule 0,"lambada.med"		 ;filename goes here
+
+StartMedModule 0
+
+BLITZ
+
+SetInt 5
+		PlayMed
+End SetInt
+
+While Joyb(0)=0:Wend
+
+For l=64 To 0 Step -1
+	VWait
+	SetMedVolume l
+Next
+
+End

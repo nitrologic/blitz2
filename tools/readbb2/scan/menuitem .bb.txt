@@ -1,0 +1,23 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/MenuItem .bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/MenuItem .bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/MenuItem .bb
+
+; 
+; toggle items in menu example
+; 
+MenuTitle 0,0,"Testing"         ;create a menu title
+MenuItem 0,0,0,0,"Load   ","L"    ;and an item (with shortcut!) 
+MenuItem 0,0,0,1,"Save","S"       ;another item...
+MenuItem 0,1,0,2," ASCII ?"      ;this is a toggle item! 
+MenuItem 0,0,0,3,"QUIT!!!!!"
+
+Screen 0,3           ;an intuition screen
+
+Window 0,0,12,320,DispHeight-12,$100f,"Select a Menu...",1,2
+
+SetMenu 0 
+
+Repeat                         ;wait for 'QUIT'... 
+
+;check for certain menus here...
+
+Until WaitEvent=256 AND MenuHit=0 AND ItemHit=3 
+

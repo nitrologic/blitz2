@@ -1,0 +1,29 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/linetest.bb2
+;
+BLITZ
+
+BitMap 0,320,256,1:Slice 0,44,1:Show 0
+
+x1=0:y1=0:x2=160:y2=128
+Gosub bline
+
+MouseWait
+
+End
+
+bline
+x=x1
+dx=x2-x1
+dy=y2-y1
+e_noinc=dx+dx
+e=e_noinc-dy
+e_inc=e-dy
+
+For y=y1 To y2
+	Point x,y,1
+	If e<0 Then e+e_noinc Else x+1:e+e+inc
+Next
+
+Return
+
+

@@ -1,0 +1,56 @@
+
+
+;* * * * * * * * * * * * * * * * * * * * * * * *
+;*                                             *
+;*      Benutzung von Areabefehle              *
+;*                                             *
+;*---------------------------------------------*
+;*  Demo von: Michael Paulwitz / Berlin        *
+;*            im Februar 1994 (PD)             *
+;* * * * * * * * * * * * * * * * * * * * * * * *
+
+
+WBStartup
+
+
+Screen 0,11
+Window 0,0,0,640,256,$1000,"Betriebssystembefehle Area... werden verwendet !",2,3
+
+gx = 30
+gy = 30
+s = 20
+cmax = 3
+*myscreen=Peek.l (Addr Window(0))
+*rp.RastPort=RastPort(0)
+*buf=AllocRaster_(640,256)
+InitTmpRas_ tmpras.TmpRas,*buf,!RASSIZE {640,256}
+buf$=String$(" ",250)
+*ai.AreaInfo=AllocMem_(SizeOf.AreaInfo,#MEMF_CLEAR)
+InitArea_ *ai.AreaInfo,&buf$,30
+*rp\TmpRas=tmpras
+*rp\AreaInfo=*ai
+For n = 1 To 7
+  SetAPen_ *rp,n
+  AreaEllipse_ *rp,gx/2+n*20,gy/2+n*20,gx/2,gy/2
+  AreaEnd_ *rp
+  SetDrMd_ *rp,JAM1
+  SetAPen_ *rp,4
+  WColour n
+  feh = AreaMove_ (*rp,130+n*2,30)
+   Print "!",feh
+  feh = AreaDraw_ (*rp,140+n*2,40)
+   Print "!",feh
+  feh = AreaDraw_ (*rp,130+n*2,40)
+   Print "!",feh
+  feh = AreaDraw_ (*rp,20,5+n*4)
+   Print "!",feh
+  feh = AreaDraw_ (*rp,10,25)
+   Print "!",feh
+   AreaEnd_ *rp
+
+Next n
+FreeMem_ *ai,SizeOf.AreaInfo
+FreeRaster_ *buf,640,256
+
+MouseWait
+

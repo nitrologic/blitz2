@@ -1,0 +1,94 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/gfx/bakup/makeclouds.bb
+Goto top
+
+Function.w chkblock{b0.l,b1.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE count(pc),d2:MOVE.l a1,a3
+	EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVEM.l (a0),d0-d7:BRA nxchk2
+dochk2:
+	CMP.l	(a1),d0:BNE bad
+	CMP.l 4(a1),d1:BNE bad
+	CMP.l 8(a1),d2:BNE bad
+	CMP.l 12(a1),d3:BNE bad
+	CMP.l 16(a1),d4:BNE bad
+	CMP.l 20(a1),d5:BNE bad
+	CMP.l 24(a1),d6:BNE bad
+	CMP.l 28(a1),d7:BNE bad
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+bad:
+	ADD#32,a1
+nxchk2:
+	CMP.l a1,a2:BNE dochk2:MOVEM.l d0-d7,(a1):ADD#1,count
+	SUB.l a3,a1:MOVE.l a1,d0:LSR.l#5,d0:AsmExit
+End Function
+
+count:Dc.w 0
+
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3
+	MULU#40,d3:ADD.l d3,a1
+;	ASL.l#5,d3:ADD.l d3,a1:ADD.l d3,a1:ADD.l d3,a1
+	MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #40,a1:MOVE.l#40*304,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d7:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d4:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+.top
+
+f$="clouds3"
+
+.doselect
+	InitBank 0,65536,65536
+	InitBank 1,256,65536
+	Screen 0,0,0,320,304,4,0,"",1,2
+	ScreensBitMap 0,0:BlockScroll
+	blok.l=Bank(0)
+	blok2.l=Bank(1)
+	bm.l=Addr BitMap(0)
+	LoadBitMap 0,f$+".iff",0
+	StopCycle 0,0,0,0,0
+	Use SetCycle 0
+	Poke.w ?count,1
+
+	Dim map.w(39,37)
+
+	For x=0 To 39
+		For y=0 To 37
+			getblock{blok2,bm,x*8,y*8}
+			map(x,y)=chkblock{blok2,Bank(0)}
+		Next
+	Next
+
+;	Dim map.w(39,29)
+;
+;	For x=0 To 39
+;		For y=0 To 29
+;			getblock{blok2,bm,x*8,y*8}
+;			map(x,y)=chkblock{blok2,Bank(0)}
+;		Next
+;	Next
+
+	count.w=Peek.w(?count)
+
+	If ReadMem(0,f$+".bin")
+		Exists 0,&count,2
+		For i=0 To 15
+			r.w=Blue(i):g.w=Palette(i):b.w=PalRGB(i)
+			col.w=(b*256+g*16+r) AND $eee:Exists 0,&col,2
+		Next
+;		WriteMem 0,&map(0,0),40*30*2
+		Exists 0,&map(0,0),40*38*2
+		Exists 0,Bank(0),count*32
+		CloseFile 0
+	EndIf
+
+	MouseWait:End

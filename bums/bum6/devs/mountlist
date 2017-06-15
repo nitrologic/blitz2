@@ -1,0 +1,140 @@
+/* MountList for V1.3 */
+
+/*  Mount Entry for the new Console Handler */
+
+NEWCON: 
+    Handler = L:Newcon-Handler
+    Priority = 5
+    StackSize = 1000
+#
+
+/* This is an example of a non-filing system mount using a handler written
+   in C.
+*/
+ 
+SPEAK:     
+    Handler = L:Speak-Handler
+    Stacksize = 6000
+    Priority = 5
+    GlobVec = -1
+#
+
+/*  This is an example of an alternative type of non-filing device mount,
+    used to mount the non-buffered serial handler
+*/
+
+AUX:
+    Handler = L:Aux-Handler
+    Stacksize = 1000
+    Priority = 5
+#
+/*  This is a non-filing system device */
+
+PIPE:      
+    Handler = L:Pipe-Handler
+    Stacksize = 6000
+    Priority = 5
+    GlobVec = -1
+#
+
+/* This is an example of a mount list entry for using the recoverable 
+   ram disk.  Depending on the amount of memory you wish to devote to
+   it, you may want to change the HighCyl value.
+*/
+
+RAD:       Device = ramdrive.device
+           Unit   = 0
+           Flags  = 0
+           Surfaces  = 2
+           BlocksPerTrack = 11
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 0  ;  HighCyl = 21
+           Buffers = 5
+           BufMemType = 1
+#
+
+/* Mount a 5.25" disk drive to be mounted as DF2: */
+
+DF2:       Device = trackdisk.device
+           Unit   = 2
+           Flags  = 1
+           Surfaces  = 2
+           BlocksPerTrack = 11
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 0  ;  HighCyl = 39
+           Buffers = 20
+           BufMemType = 3
+#
+
+DH0:       Device = X500.device
+           FileSystem = l:FastFileSystem
+           Unit   = 1
+           Flags  = 0
+           Surfaces  = 2
+           BlocksPerTrack = 33
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 2  ;  HighCyl =1333
+           Buffers = 30
+           GlobVec = -1
+           BufMemType = 1
+           Maxtransfer = 32
+#
+
+
+DH1:       Device = X500.device
+           FileSystem = l:FastFileSystem
+           Unit   = 2
+           Flags  = 0
+           Surfaces  = 2
+           BlocksPerTrack = 33
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 0  ;  HighCyl =1333
+           Buffers = 30
+           GlobVec = -1
+           BufMemType = 1
+           Maxtransfer = 32
+#
+
+DH2:       Device = X500.device
+           FileSystem = l:FastFileSystem
+           Unit   = 1
+           Flags  = 0
+           Surfaces  = 8
+           BlocksPerTrack = 34
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 668  ;  HighCyl = 1000
+           Buffers = 30
+           GlobVec = -1
+           BufMemType = 1
+#
+
+DH3:       Device = X500.device
+           FileSystem = l:FastFileSystem
+           Unit   = 1
+           Flags  = 0
+           Surfaces  = 8
+           BlocksPerTrack = 34
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 1001  ;  HighCyl = 1333
+           Buffers = 30
+           GlobVec = -1
+           BufMemType = 1
+#
+
+DF1:       Device = trackdisk.device
+           Unit   = 2
+           Flags  = 1
+           Surfaces  = 2
+           BlocksPerTrack = 11
+           Reserved = 2
+           Interleave = 0
+           LowCyl = 0  ;  HighCyl = 79
+           Buffers = 20
+           BufMemType = 3  */
+#

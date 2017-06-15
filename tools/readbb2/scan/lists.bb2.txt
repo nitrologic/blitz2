@@ -1,0 +1,45 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/exec/lists.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/lists.bb2
+;
+; $VER: lists.bb2 40.0 (28.02.94)
+;
+
+XInclude "exec/nodes.bb2"
+
+;/*
+; *	Full featured list header.
+; */
+NEWTYPE.List
+*lh_Head.Node
+*lh_Tail.Node
+*lh_TailPred.Node
+lh_Type.b
+l_pad.b
+End NEWTYPE
+;/* word aligned */
+
+;/*
+; * Minimal List Header - no type checking
+; */
+NEWTYPE.MinList
+*mlh_Head.MinNode
+*mlh_Tail.MinNode
+*mlh_TailPred.MinNode
+End NEWTYPE
+;/* longword aligned */
+
+
+;/*
+; * Check for the presence of any nodes on the given list.	These
+; * macros are even safe to use on lists that are modified by other
+; * tasks.	However; if something is simultaneously changing the
+; * list, the result of the test is unpredictable.
+; *
+; * Unless you first arbitrated for ownership of the list, you can't
+; * _depend_ on the contents of the list.	Nodes might have been added
+; * or removed during or after the macro executes.
+; *
+; *	 If !IsListEmpty{list} Then NPrint("List is empty")
+; */
+Macro IsListEmpty:`1\lh_TailPred=*`1:End Macro
+
+Macro IsMsgPortEmpty:`1\mp_MsgList\lh_TailPred=*`1\mp_MsgList:End Macro

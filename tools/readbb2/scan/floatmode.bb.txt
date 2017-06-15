@@ -1,0 +1,16 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/FloatMode.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/FloatMode.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/FloatMode.bb
+
+; 
+;floatmode program example
+; 
+a.f=10240.25
+NPrint a
+FloatMode 1 
+NPrint a
+FloatMode -1
+NPrint a
+MouseWait 
+
+
+
+

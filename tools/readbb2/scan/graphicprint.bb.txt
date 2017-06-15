@@ -1,0 +1,88 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/GraphicPrint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/GraphicPrint.bb
+NoCli
+WBStartup
+WbToScreen 0
+##[$FFB5]
+Repeat
+	MaxLen pa$ = 160
+	MaxLen fi$ = 64
+	pa$ = "Work:RushPrograms/Quiz/pics/"
+	pic$ = FileRequest$("Select Picture to PRINT..",pa$,fi$)
+	##[$FFB4]
+	If pic$ <> ""
+		ILBMDepth pic$
+		Screen 0,0,0,ILBMViewMode,DecodeILBM,##[$D087],##[$D088],"",1,2
+		Window 0,0,0,ILBMViewMode,DecodeILBM,$0800,"",0,1
+		cols = 2^##[$D087]
+		For i = 0 To cols - 1
+		 Green i,0,0,0
+		Next i
+		LoadScreen 0,pic$,0
+		Use SetCycle 0
+	Else
+	 End
+	EndIf
+	xpos.w = 0
+	ypos.w = 0
+	wid.w = ILBMViewMode
+	ht.w = DecodeILBM
+	Window 1,ILBMViewMode/3,DecodeILBM/3,ILBMViewMode/3,DecodeILBM/8,0,"Printing",0,1
+	WLocate 2,3
+	Print "Please Wait"
+	Gosub HardCopy
+Forever
+HardCopy:
+		pio.l = ##[$FE97](100,65536)
+		pport.l = pio + 62
+		If pio = 0
+			End
+		EndIf
+		frastport.l = RastPort(0)
+		fwindo.l = frastport - 50
+		fwidth.w = Peek.w(fwindo + 112)
+		fheight.w = Peek.w(fwindo + 114)
+		fscreen.l = Peek.l(fwindo + 46)
+		fviewport.l = fscreen + 44
+		fcolormap.l = Peek.l(fviewport + 4)
+		fvpmode.w = Peek.w(fviewport + 32)
+		psigBit.w = ##[$FEAD](-1)
+		If psigBit = -1
+			f.l = ##[$FE99](pio,100)
+			End
+		End If
+		psigTask.l = ##[$FEA7](0)
+		Poke pport + 8,4
+		Poke.l pport + 10,pport + 34
+		Poke pport + 15,psigBit
+		Poke.l pport + 16,psigTask
+		Poke.l pport + 20,pport + 24
+		Poke.l pport + 28,pport + 20
+		Poke pport + 34,Asc("P")
+		Poke pport + 35,Asc("R")
+		Poke pport + 36,Asc("T")
+		##[$FEB1](pport)
+		Poke pio + 8,5
+		Poke.l pio + 14,pport
+		Poke.w pio + 28,11
+		Poke.l pio + 32,frastport
+		Poke.l pio + 36,fcolormap
+		Poke.l pio + 40,fvpmode
+		Poke.w pio + 44,xpos
+		Poke.w pio + 46,ypos
+		Poke.w pio + 48,wid
+		Poke.w pio + 50,ht
+		Poke.l pio + 52,wid
+		Poke.l pio + 56,ht * 4
+		Poke.w pio + 60,4
+		status.w = ##[$FEC0]("printer.device" + Chr$(0),0,pio,0)
+		If status <> 0
+			f = ##[$FE99](pio,100)
+			##[$FEAE](psigBit)
+			End
+		EndIf
+		ercond.w = ##[$FEC2](pio)
+		##[$FEC1](pio)
+		##[$FEB2](pport)
+		f = ##[$FE99](pio,100)
+		##[$FEAE](psigBit)
+Return

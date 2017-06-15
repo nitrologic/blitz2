@@ -1,0 +1,356 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/userlibprogs/neil/ReqToolsEZDemo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/userlibprogs/neil/ReqToolsEZDemo.bb
+; wow this is one painful demo of Australian humour, if your mouse
+; button is broken don't run this!
+
+WBStartup:NoCli
+
+NEWTYPE.TA
+	ta_Name.s
+	ta_YSize.w
+	ta_Style.b
+	ta_Flags.b
+End NEWTYPE
+
+MaxLen fi$=108
+
+NEWTYPE.MyScreenMode
+	DisplayID.l
+	DisplayWidth.w
+	DisplayHeight.w
+	DisplayDepth.w
+	OverscanType.w
+	AutoScroll.l
+End NEWTYPE
+
+DEFTYPE.MyScreenMode *mysm
+
+DEFTYPE.TA *mytext
+
+#REQPOS_POINTER			=0
+#REQPOS_CENTERWIN		=1
+#REQPOS_CENTERSCR		=2
+#REQPOS_TOPLEFTWIN	 =3
+#REQPOS_TOPLEFTSCR	 =4
+
+#EZREQB_NORETURNKEY	=0
+#EZREQF_NORETURNKEY	=1 LSL #EZREQB_NORETURNKEY
+#EZREQB_LAMIGAQUAL	 =1
+#EZREQF_LAMIGAQUAL	 =1 LSL #EZREQB_LAMIGAQUAL
+#EZREQB_CENTERTEXT	 =2
+#EZREQF_CENTERTEXT	 =1 LSL #EZREQB_CENTERTEXT
+
+#SCREQB_SIZEGADS		 =13
+#SCREQF_SIZEGADS		 =1 LSL #SCREQB_SIZEGADS
+#SCREQB_DEPTHGAD		 =14
+#SCREQF_DEPTHGAD		 =1 LSL #SCREQB_DEPTHGAD
+#SCREQB_NONSTDMODES	=15
+#SCREQF_NONSTDMODES	=1 LSL #SCREQB_NONSTDMODES
+#SCREQB_GUIMODES		 =16
+#SCREQF_GUIMODES		 =1 LSL #SCREQB_GUIMODES
+#SCREQB_AUTOSCROLLGAD=18
+#SCREQF_AUTOSCROLLGAD=1 LSL #SCREQB_AUTOSCROLLGAD
+#SCREQB_OVERSCANGAD	=19
+#SCREQF_OVERSCANGAD	=1 LSL #SCREQB_OVERSCANGAD
+
+bodytext$="Welcome to ReqTools for Blitz Basic II!"+Chr$(10)
+bodytext$+"---------------------------------------"+Chr$(10)+Chr$(10)
+bodytext$+"This little demonstration will show you the features"+Chr$(10)
+bodytext$+"of the EZ requesters that have been implemented."
+ret.l=##[$9B01]("Hello!!",bodytext$,"Show Me")
+
+bodytext$="Number One:"+Chr$(10)
+bodytext$+"The larch :-)"
+ret.l=##[$9B01]("Request",bodytext$,"Be Serious!")
+
+bodytext$="Number One:"+Chr$(10)
+bodytext$+"The String requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZGetString(Title$,BodyText$,MaxChars [,DefaultString])"
+ret.l=##[$9B01]("Request",bodytext$,"Show Me")
+
+bodytext$="Please enter a bit of text"+Chr$(10)
+bodytext$+" (Up to 20 characters)"
+sRet$=##[$9B08]("Enter Text",bodytext$,20,"A Bit Of Text")
+
+If sRet$=""
+	ret=##[$9B01]("Awwww","You didn't enter anything!","Nope")
+Else
+	bodytext$="You entered '"+sRet$+"'"
+	ret=##[$9B01]("RTEZGetString",bodytext$,"I Sure Did")
+EndIf
+
+bodytext$="Number Two:"+Chr$(10)
+bodytext$+"The Number requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZGetLong(Title$,BodyText$ [,DefaultValue])"
+ret=##[$9B01]("Request",bodytext$,"Show Me")
+
+ret=##[$9B06]("Enter number","Please enter a number")
+
+bodytext$="You entered '"+Str$(ret)+"'"
+ret=##[$9B01]("RTEZGetLong",bodytext$,"That I Did")
+
+bodytext$="An extension to the requester is the ability to"+Chr$(10)
+bodytext$+"specify a range for the user to enter.	This is"+Chr$(10)
+bodytext$+"done with the command:"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZGetLongRange(Title$,BodyText$,Min.l,Max.l [,DefaultValue])"
+ret=##[$9B01]("Request",bodytext$,"Sound Interesting")
+
+ret=##[$9B07]("Enter number","Please enter a number",111,666,123)
+
+bodytext$="You entered '"+Str$(ret)+"'"
+If ret=666
+	bodytext$+Chr$(10)+"(You Devil!)"
+EndIf
+ret=##[$9B01]("RTEZGetLong",bodytext$,"How True")
+
+bodytext$="Number Three:"+Chr$(10)
+bodytext$+"The Message requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZRequest(Title$,BodyText$,GadgetText$)"+Chr$(10)+Chr$(10)
+bodytext$+"(You've been using this one all the time)"
+ret=##[$9B01]("Request",bodytext$,"Show Me This One")
+
+bodytext$="This requester allows you to have text split over"+Chr$(10)
+bodytext$+"two or more lines, like this, using Chr$(10)."
+ret=##[$9B01]("Request",bodytext$,"Go on")
+
+bodytext$="Or you can be stupid and have a big line of text that is hard to read."
+ret=##[$9B01]("Request",bodytext$,"I Won't Do That")
+
+bodytext$="There can be one centered gadget, like this."
+ret=##[$9B01]("Request",bodytext$,"So This Is New?")
+
+bodytext$="You can also have two or more responses"+Chr$(10)
+bodytext$+"to ask the user questions."+Chr$(10)+Chr$(10)
+bodytext$+"What do you think of the demo so far?"
+ret=##[$9B01]("Request",bodytext$,"Great|So-So|Rubbish")
+
+Select ret
+	Case 0:
+		ret=##[$9B01]("Request","Too bad, I really hoped you'd like it.","Tough")
+	Case 2:
+		ret=##[$9B01]("Request","Try running the demo again...","Ok")
+	Case 1:
+		ret=##[$9B01]("Request","I'm really happy for you, then.","Thanks")
+End Select
+
+bodytext$="If you like, you can have a really stupid number"+Chr$(10)
+bodytext$+"of responses, like this:"
+ret=##[$9B01]("Request",bodytext$,"1|2|3|4|5|6|7|8|9|0")
+
+bodytext$="You entered '"+Str$(ret)+"'"
+ret=##[$9B01]("Bloody heck!",bodytext$,"That WAS A Stupid Number Of Responses!")
+
+bodytext$="Another command allows the use of an IDCMP flag."+Chr$(10)
+bodytext$+"So, you can have a requester that responds to events"+Chr$(10)
+bodytext$+"other than clicking a mouse button.	This requester, for"+Chr$(10)
+bodytext$+"example, has the DiskInserted flag set."+Chr$(10)+Chr$(10)
+bodytext$+"Try inserting a disk!"+Chr$(10)+Chr$(10)
+bodytext$+"The command is"+Chr$(10)
+bodytext$+"RTEZFlagsRequest(Title$,BodyText$,GadgetText$,IDCMPFlags)"
+
+ret=##[$9B10]("Insert A Disk",bodytext$,"I don't think so",$8000)
+
+If ret=$8000
+	ret=##[$9B01]("Well!","You put in a disk!","So I Had One Lying Around")
+Else
+	ret=##[$9B01]("Request","You didn't put a disk in!","No Way!")
+
+	bodytext$="Well, this is another ReqTools feature.	You can have a requester"+Chr$(10)
+	bodytext$+"with NO gadgets, just an IDCMP flag."+Chr$(10)+Chr$(10)
+	bodytext$+"Now you'll HAVE to insert a disk!"
+
+	ret=##[$9B10]("Insert A Disk - NOW!",bodytext$,"",$8000)
+
+	ret=##[$9B01]("You put in a disk!","See?	I told you so.","Yeah, Don't Rub It In")
+EndIf
+
+bodytext$="Another (optional) feature is to have the requester be able"+Chr$(10)
+bodytext$+"to move to the mouse pointer, like this."+Chr$(10)+Chr$(10)
+bodytext$+"RTEZRequest(Title$,BodyText$,GadgetText$,ReqPosition)"
+ret=##[$9B01]("Request",bodytext$,"Impressive",#REQPOS_POINTER)
+
+bodytext$="Further optional features are to have text centered"+Chr$(10)
+bodytext$+"within the requester, and you can also set"+Chr$(10)
+bodytext$+"any of the gadgets below as the 'DefaultResponse'"+Chr$(10)
+bodytext$+"(What happens when you hit the Return key)"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZRequest(Title$,BodyText$,GadgetText$,ReqPos,DefResponse,Flags)"
+ret=##[$9B01]("Request",bodytext$,"Neat|Cool|Hey, Man!",#REQPOS_TOPLEFTSCR,0,#EZREQF_CENTERTEXT)
+
+Select ret
+	Case 1
+		ret=##[$9B01]("Statement","What a timid response","I know")
+	Case 2
+		ret=##[$9B01]("Comment","Right back atcha!","Yo!")
+	Case 0
+		ret=##[$9B01]("^%&*#@*&$#*&","Child of the 60's, eh?",")+_L&*%&^")
+End Select
+
+bodytext$="As an alternative, you can define your own keyboard"+Chr$(10)
+bodytext$+"shortcuts, using the underscore character before the"+Chr$(10)
+bodytext$+"character that you wish to be the short cut."+Chr$(10)+Chr$(10)
+bodytext$+"For example, the 'Ok' gadget is defined '_Ok'."
+ret=##[$9B01]("Shortcuts",bodytext$,"_Ok|I _See")
+
+bodytext$="Number Four:"+Chr$(10)
+bodytext$+"The File Requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZLoadFileRequest(Title$,FileName$)"+Chr$(10)
+bodytext$+"RTEZSaveFileRequest(Title$,FileName$)"
+
+ret=##[$9B01]("Request",bodytext$,"I Want T_o See This")
+
+name$=##[$9B02]("Pick a File",fi$)
+
+If name$<>""
+	bodytext$="You picked '"+name$+"'"
+	ret=##[$9B01]("Request",bodytext$,"How True")
+Else
+	ret=##[$9B01]("Request","You didn't pick a file","S_o What?")
+EndIf
+
+bodytext$="The SaveFile request is a bit different."
+
+ret=##[$9B01]("Request",bodytext$,"Let's Have A L_ook")
+
+name$=##[$9B09]("Pick a File",fi$)
+
+If name$<>""
+	bodytext$="You picked '"+name$+"'"
+	ret=##[$9B01]("Request",bodytext$,"You're Go_od At This, Aren't You?")
+Else
+	ret=##[$9B01]("Request","You didn't pick a file","S_o What?")
+EndIf
+
+bodytext$="Both the LoadFile and SaveFile requesters have their"+Chr$(10)
+bodytext$+"directories in seperate buffers, so you are not continually"+Chr$(10)
+bodytext$+"waiting for them to reload the directories."+Chr$(10)+Chr$(10)
+bodytext$+"With a simple command, you can also enable pattern matching."
+
+ret=##[$9B01]("Request",bodytext$,"This I Want T_o See")
+
+pat$=""
+While pat$=""
+	pat$=##[$9B08]("Pattern Request","Please enter a pattern",10,"#?")
+Wend
+
+##[$9B0E] 0,pat$
+
+name$=##[$9B02]("Pick a File",fi$)
+
+If name$<>""
+	bodytext$="You picked '"+name$+"'"
+	ret=##[$9B01]("Request",bodytext$,"It W_orks!")
+Else
+	ret=##[$9B01]("Request","You didn't pick a file","So What?")
+EndIf
+
+bodytext$="Another File Requester available is the Path requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZPathRequest(Title$)"
+
+ret=##[$9B01]("Request",bodytext$,"Get _On With It")
+
+name$=##[$9B0B]("Pick a Path...")
+
+If name$<>""
+	bodytext$="You picked '"+name$+"'"
+	ret=##[$9B01]("Request",bodytext$,"This Is S_o Impressive")
+Else
+	ret=##[$9B01]("Request","You didn't pick a path","Big Deal")
+EndIf
+
+bodytext$="Yet another FileRequester is the MultiFile requester"+Chr$(10)
+bodytext$+"This allows you to pick a number of files, and these are"+Chr$(10)
+bodytext$+"returned in a linked list."+Chr$(10)+Chr$(10)
+bodytext$+"Look at all the gadgets you get now!"+Chr$(10)
+bodytext$+"Pick a few files..."+Chr$(10)+Chr$(10)
+bodytext$+"FileList=RTEZMultiLoadFile(Title$)"
+ret=##[$9B01]("Yet More Information",bodytext$,"This Is Great!")
+
+ret=##[$9B13]("Select file(s)")
+
+If ret
+	name$=##[$9B14]
+	FileCounter.w=1
+	While name$<>"" AND ret
+		title$="File #"+Str$(FileCounter)
+		bodytext$="File Name:"+name$
+		ret=##[$9B01](title$,bodytext$,"Next|I Get The Picture")
+		name$=##[$9B14]
+		FileCounter+1
+	Wend
+Else
+	ret=##[$9B01]("Request","You didn't pick files!","So Sue Me.")
+EndIf
+
+bodytext$="Naturally, you can enable the pattern matching"+Chr$(10)
+bodytext$+"and the default path for RTEZMultiLoadFile"
+ret=##[$9B01]("Information",bodytext$,"Naturally.")
+
+bodytext$="Number Five:"+Chr$(10)
+bodytext$+"The Palette Requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZPaletteRequest(Title$,FirstColour)"
+
+ret=##[$9B01]("Request",bodytext$,"Enlighten Me")
+
+ret=##[$9B05]("Play with these",0)
+
+If ExecVersion>36
+	bodytext$="Number Six:"+Chr$(10)
+	bodytext$+"The ScreenMode request"+Chr$(10)+Chr$(10)
+	bodytext$+"RTEZScreenModeRequest(Title$)"
+
+	ret=##[$9B01]("Request",bodytext$,"Don't Just Sit There")
+
+	*mysm=##[$9B04]("Pick A Mode")
+
+	bodytext$="You Picked:"+Chr$(10)
+	bodytext$+"	Mode:	 $"+Hex$(*mysm\DisplayID)+Chr$(10)
+	bodytext$+"	Width:	"+Str$(*mysm\DisplayWidth)+Chr$(10)
+	bodytext$+"	Height: "+Str$(*mysm\DisplayHeight)+Chr$(10)
+	bodytext$+"	Depth:	"+Str$(*mysm\DisplayDepth)+Chr$(10)
+
+	ret=##[$9B01]("Request",bodytext$,"Very Impressive")
+
+	bodytext$="The ScreenMode request can be enhanced or simplifed by"+Chr$(10)
+	bodytext$+"supplying DisplayFlags.	This is the fully extended requester."+Chr$(10)+Chr$(10)
+	bodytext$+"RTEZScreenModeRequest(Title$,DisplayFlags)"
+
+	ret=##[$9B01]("Request",bodytext$,"Well, Where Is It?")
+
+	MyModes.l=#SCREQF_OVERSCANGAD|#SCREQF_AUTOSCROLLGAD|#SCREQF_SIZEGADS|#SCREQF_DEPTHGAD|#SCREQF_NONSTDMODES
+
+	*mysm=##[$9B04]("Pick A Mode",MyModes)
+
+	bodytext$="You Picked:"+Chr$(10)
+	bodytext$+"	Mode:			 $"+Hex$(*mysm\DisplayID)+Chr$(10)
+	bodytext$+"	Width:			 "+Str$(*mysm\DisplayWidth)+Chr$(10)
+	bodytext$+"	Height:			"+Str$(*mysm\DisplayHeight)+Chr$(10)
+	bodytext$+"	Depth:			 "+Str$(*mysm\DisplayDepth)+Chr$(10)
+	bodytext$+"	OverscanType:"+Str$(*mysm\OverscanType)+Chr$(10)
+	bodytext$+"	AutoScroll:	"+Str$(*mysm\AutoScroll)
+
+	ret=##[$9B01]("Request",bodytext$,"Most Impressive")
+
+Else
+	bodytext$="Hmmm.	You don't seem to have System 2.0 installed."+Chr$(10)+Chr$(10)
+	bodytext$+"I can't show you the ScreenMode requester, then."+Chr$(10)+Chr$(10)
+	bodytext$+"Install it now!"
+	ret=##[$9B01]("Request",bodytext$,"I Will")
+EndIf
+
+bodytext$="Number Seven:"+Chr$(10)
+bodytext$+"The Font Requester"+Chr$(10)+Chr$(10)
+bodytext$+"RTEZFontRequest(Title$)"
+
+ret=##[$9B01]("Request",bodytext$,"I'm Waiting")
+
+*mytext=##[$9B03]("Pick a font")
+
+bodytext$="You Picked:"+Chr$(10)
+bodytext$+"	Name:	"+*mytext\ta_Name+Chr$(10)
+bodytext$+"	YSize: "+Str$(*mytext\ta_YSize)
+
+ret=##[$9B01]("Request",bodytext$,"That's Clever")
+
+bodytext$="Well, that's all the requesters that are available."+Chr$(10)+Chr$(10)
+bodytext$+"Be sure to check the docs to find out all you can do."
+
+ret=##[$9B01]("The End",bodytext$,"I'd Prefer T_o Check The Nurses")

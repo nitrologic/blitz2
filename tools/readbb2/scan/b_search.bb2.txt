@@ -1,0 +1,225 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/B_search.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/u/oz/bin/B_search.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/B_search.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/u/oz/bin/B_search.bb2
+; BS the Binary Searcher V1.0
+; 26-9-93
+
+poss.l=0
+DEFTYPE.b left,right,cs
+
+
+Function$ Grab_Line{}
+Shared cs,poss,left,right,gl.w
+
+While (Asc(Inkey$)<>10)
+	If Eof(0)>1
+		Loc 0,(Eof(0)-2)
+	Else
+		If Eof(0)=1
+			Loc 0,0:Pop If :Pop While:Goto grab
+		EndIf
+	EndIf
+Wend
+
+.grab:
+poss=Eof(0)
+Grabbed_Line$=Edit$(256)
+gl.w=Len(Grabbed_Line$)
+Print "." ; to count number of accesses
+
+If right
+	Grabbed_Line$=LSet$(Grabbed_Line$,right)
+EndIf
+If left<Len(Grabbed_Line$)
+	Grabbed_Line$=UnRight$(Grabbed_Line$,left)
+EndIf
+
+If cs=0 Then Grabbed_Line$=UCase$(Grabbed_Line$)
+
+Function Return Grabbed_Line$
+End Function
+
+Function.b rep_check {word$,rep$}
+Shared cs.b
+
+n.w=Len(word$)	: star$="*"
+rep$=Replace$(rep$,"#?",star$)
+If Instr(rep$,star$)
+	If (Left$(rep$,1)=star$) AND (Right$(rep$,1)<>star$)
+		rep$=Replace$(rep$,star$,"")
+		t.b=Len(rep$)
+		If Right$(word$,t)=rep$
+			found.b=True
+		EndIf
+	Else
+		If (Left$(rep$,1)<>star$) AND (Right$(rep$,1)=star$)
+			rep$=Replace$(rep$,star$,"")
+			t.b=Len(rep$)
+			If Left$(word$,t)=rep$
+				found.b=True
+			EndIf
+		Else
+			If (Left$(rep$,1)=star$) AND (Right$(rep$,1)=star$)
+				rep$=Replace$(rep$,star$,"")
+				If Instr(word$,rep$)
+					found.b=True
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+Else
+	If word$=rep$
+		found.b=True
+	EndIf
+EndIf
+
+Function Return found
+End Function
+
+
+Function.b B_Search{low.l,high.l,word$}
+Shared poss,search_to.l,search_from.l
+
+poss=0 : last_get.l=-1
+
+Repeat
+	If poss=last_get
+		nomatches.b=True
+		Pop Repeat
+		Goto finish
+	Else
+		Loc 0,(low+high)/2
+	EndIf
+	last_get=poss
+	n_word$=Grab_Line{}
+	If rep_check{n_word$,word$}
+		middle.l=poss
+		mid_len.w=gl
+		Pop Repeat
+		Goto low
+	Else
+		If n_word$>word$
+			high=poss
+		Else
+			low=poss+gl+1
+		EndIf
+	EndIf
+Forever
+
+.low:
+highest.l=high : high=middle.l
+wonce.b=0
+last_get=-1
+Repeat
+	If poss=last_get
+		If wonce
+			Pop Repeat
+			Goto high
+		Else
+			search_from.l=middle
+			Pop Repeat
+			Goto high
+		EndIf
+	Else
+		Loc 0,(low+high)/2
+	EndIf
+	last_get=poss
+	n_word$=Grab_Line{}
+	If rep_check{n_word$,word$}
+		wonce+1
+		search_from.l=poss
+		high=poss
+	Else
+		low=poss+gl+1
+	EndIf
+Forever
+
+.high:
+wonce=0
+last_get=-1
+low=middle+mid_len
+high=highest
+
+Repeat
+	If poss=last_get
+		If wonce
+		Else
+			search_to.l=middle
+		EndIf
+		Pop Repeat
+		Goto finish
+	Else
+		Loc 0,(low+high)/2
+	EndIf
+	last_get=poss
+	n_word$=Grab_Line{}
+
+	If rep_check{n_word$,word$}
+		wonce+1
+		search_to.l=poss
+		low=poss+gl+1
+	Else
+		high=poss
+	EndIf
+Forever
+
+.finish:
+If nomatches
+	matches.b=False
+Else
+	matches.b=True
+EndIf
+
+Function Return matches
+End Function
+
+Statement Usage{}
+	NPrint "Usage: FROM N=LEFT_OFFSET N=RIGHT_OFFSET CASE=CASE_SENSITIVE PATTERN"
+End Statement
+
+
+.main:
+; the main loop
+
+If Par$(1)="?"
+Usage{}
+	End
+EndIf
+cs.b=0
+x.b=1
+FFile$=Par$(x)
+x+1
+left.b=Val(Par$(x))
+	If left>0 OR Par$(x)="0" Then x+1
+right.b=Val(Par$(x))
+	If right>0 OR Par$(x)="0" Then x+1
+If UCase$(Par$(x))="CASE" Then cs=1 : x+1 : Else CaseSense Off
+pat$=Par$(x)
+If cs=0 Then pat$=UCase$(pat$)
+If pat$="" Then Usage{} : End
+
+NPrint ""
+NPrint "Binary Searcher 1.0 by Perry Mowbray"
+
+ If WriteMem(0,FFile$)
+		FileInput 0
+		Print "Searching"
+		If B_Search{0,FileSeek(0),pat$}=True
+			NPrint ""
+			Loc 0,search_from
+			Repeat
+				NPrint "	",Edit$(256)
+			Until Eof(0)>search_to
+		Else
+			NPrint ""
+			NPrint "	No matches"
+		EndIf
+		CloseFile 0
+ Else
+	 NPrint "Can't open ",FFile$
+ EndIf
+
+
+End
+
+
+
+

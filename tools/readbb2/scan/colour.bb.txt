@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Colour.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Colour.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Colour.bb
+
+; 
+; colourful program example 
+; 
+Screen 0,3           ;open an Intuition screen 
+ScreensBitMap 0,0        ;use it's bitmap
+BitMapOutput 0         ;send Print statements
+
+Locate 0,2   
+
+For k=0 To 7          ;loop 1...
+ For J=0 To 7         ;loop 2...
+  If k<>j           ;some trickery... 
+   Colour k,j
+   Print "* "
+  EndIf 
+ Next
+Next
+
+MouseWait 
+

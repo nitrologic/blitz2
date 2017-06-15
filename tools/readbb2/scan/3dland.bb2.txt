@@ -1,0 +1,171 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Examples/3dland.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Examples/3dland.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Examples/3dland.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/3dland.bb2
+;
+; funny sort of program by acid worker blackbourn
+;
+
+BitMap 0,320,256,2:BitPlanesBitMap 0,4,1:BitPlanesBitMap 0,8,2
+BitMap 1,320,256,2:BitPlanesBitMap 1,5,1:BitPlanesBitMap 1,9,2
+BLITZ
+InitCopList 0,44,256,$0002,0,4,0
+CreateDisplay 0
+
+Dim qsin(512),qcos(512),quot(512):c=2*Pi/512
+For cnt.w=0 To 512
+	rr=cnt*c
+	qsin(cnt)=HSin(rr)
+	qcos(cnt)=HCos(rr)
+	If cnt>1
+		rr=150*16/(cnt)
+		quot(cnt)=rr		 ; range 0<x<32
+	EndIf
+Next:c=1/c
+
+
+;RGB 0,7,7,7
+;RGB 1,7,4,3
+;RGB 2,3,7,7
+;RGB 3,3,3,3
+
+AGAGreen 0,0,221,221,221
+AGAGreen 0,3,119,85,68
+AGAGreen 0,1 ,255,0,0
+AGAGreen 0,2,34,221,187
+DisplayPalette 0,0
+
+NEWTYPE .xyz
+	x.q:y:z
+	rx:ry:rz
+	sx.q:sy.q
+End NEWTYPE
+
+Dim pt.xyz(5000):pts.w=0
+NEWTYPE .lin
+	a.w:b	:col
+End NEWTYPE
+Dim lin.lin(5000):lins.w=0
+
+r1.f= 3.5:r2.f=1
+a1.f=-1:a2.f=2
+b1.f=0:b2.f=0
+DEFTYPE.f xx1,yy1,xx2,yy2
+
+#size=8
+For ii.w=-#size To #size
+	ang1=2*Pi/#size*ii
+	xx1=HSin(ang1)*r1+a1
+	yy1=HCos(ang1)*r1+b1
+	For jj.w=-#size To #size
+		ang2=2*Pi/#size*jj
+		xx2=HSin(ang2)*r2+a2
+		yy2=HCos(ang2)*r2+b2
+
+		dist=(xx1-xx2)*(xx1-xx2)+(yy1-yy2)*(yy1-yy2)
+		dist=Tan(dist)*0.8
+;		dist=Sqr(ii*ii+jj*jj+0.1)
+;		yy=Cos(dist*1.5)*-1;*Exp(-dist*0.4)*-4
+		pt(pts)\x=ii,5-dist ,jj:pts+1
+
+		If jj<#size Then lin(lins)\a=pts-1,pts						:lins+1
+		If ii<#size Then lin(lins)\a=pts-1,pts+#size+#size:lins+1
+	Next
+Next
+
+CNIF 1=0
+lin(lins)\a=1,2 :lins+1
+lin(lins)\a=2,3 :lins+1
+lin(lins)\a=3,0 :lins+1
+lin(lins)\a=4,5 :lins+1
+lin(lins)\a=5,6 :lins+1
+lin(lins)\a=6,7 :lins+1
+lin(lins)\a=7,4 :lins+1
+lin(lins)\a=4,0 :lins+1
+lin(lins)\a=5,1 :lins+1
+lin(lins)\a=6,2 :lins+1
+lin(lins)\a=7,3 :lins+1
+CEND
+
+Statement Process{qc,qs}
+Shared pt(),pts
+	*p.xyz=pt(0)
+	For pt.w=0 To pts
+		;*p.xyz=pt(0)
+;		*p+SizeOf.xyz
+		x=*p\x
+		y=*p\y
+		z=*p\z
+
+		tx=x*qc-z*qs
+		ty=y
+		tz=x*qs+z*qc
+
+		*p\rx=tx
+		*p\ry=ty*0.866 - tz ASR 1
+		*p\rz=ty ASR 1 + tz*0.866
+
+		*p+SizeOf.xyz
+	Next
+End Statement
+
+Statement Position{e.l}
+Shared pt(),pts,quot()
+	*eye.xyz=e
+
+	For pt.w=0 To pts
+		*p.xyz=pt(pt)
+		x=*p\rx-*eye\x
+		y=*p\ry-*eye\y
+		z=*p\rz-*eye\z
+
+;		fac=150/z
+		If z<0 Then z=-z
+		If (z>0) AND (z<32)
+			idx=z ASL 4;*16
+			fac=quot(idx)
+;			fac=150/z
+		Else
+			fac=0
+		EndIf
+
+		*p\sx=x*fac+*eye\sx
+		*p\sy=y*fac+*eye\sy
+	Next
+End Statement
+
+Statement Draw{}
+Shared pt(),lin(),lins
+	*l.lin=lin(0)
+	For li.w=0 To lins
+;		*a.xyz=pt(lin(li)\a)
+;		*b.xyz=pt(lin(li)\b)
+		*a.xyz=pt(*l\a)
+		*b.xyz=pt(*l\b)
+		Line *a\sx,*a\sy,*b\sx,*b\sy,1
+		*l+SizeOf.lin
+	Next
+End Statement
+
+R.xyz\x=-0.3,0,-4:R\sx=150,100
+B.xyz\x= 0.3,0,-4:B\sx=170,100
+
+theta=Rnd :Mouse On:MouseArea 0,0,320,300
+Repeat
+;	MOVE #0,$dff180
+	VWait:DisplayBitMap 0,db
+:db=1-db:Use BitMap db:BlockScroll
+
+
+	mx=(160-MouseX)*0.1:mz=(MouseY-200)*0.1
+	theta+0.1
+;	mx=Sin(theta)*3 :mz=Cos(theta)*-3-7
+	R\x=mx-0.3,-2,mz
+	B\x=mx+0.3,-2,mz
+
+	idx.q=(theta*c) AND 511
+	Process{qcos(idx),qsin(idx)}
+
+	Position{&R}:Use BitMap db+8:Draw{}
+	Position{&B}:Use BitMap db+4:Draw{}
+Until Joyb(0)<>0
+End
+
+

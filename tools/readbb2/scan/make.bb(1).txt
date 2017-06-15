@@ -1,0 +1,89 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/cars/make.bb
+;
+; compress cars (72 longs each)
+;
+
+f$="cow"
+
+LoadBank 0,f$+".dat"
+src.l=Bank(0)
+
+InitBank 1,256000,65536
+dest.l=Bank(1)
+
+ofs.l=800*2
+
+For i.l=0 To 799
+	;
+	src.l=Bank(0)+i*288
+	;
+;	ff=(i AND 31):If ff>3 AND ff<21
+	;
+	If (i AND 1)=0
+	;
+		Poke.w dest+i*2,ofs/4
+		Poke.w dest+i*2+2,ofs/4
+		;
+		For jj=0 To 2
+			;
+			j=0
+			;
+			Repeat
+				If Peek.l(src)=0
+					rp.w=0
+					While Peek.l(src)=0 AND j<24:rp-1:src+4:j+1:Wend
+					Poke.w dest+ofs,rp:ofs+2
+				Else
+					ofd.l=ofs
+					ofs+2
+					rp=-1
+					While Peek.l(src)<>0 AND j<24
+						Poke.l dest+ofs,Peek.l(src)
+						ofs+4:src+4:rp+1:j+1
+					Wend
+					Poke.w dest+ofd,rp+1
+				EndIf
+			Until j=24
+			;
+			Poke.w dest+ofs,0:ofs+2
+			;
+		Next
+		;
+		ofs-2:Poke.w dest+ofs,$8000:ofs+2
+		If (ofs AND 2)<>0 Then ofs+2
+	EndIf
+Next
+
+;For i.l=0 To 799
+;	;
+;	ff=(i AND 31):n.l=i
+;	If ff<4 OR ff>20
+;		ff=(8-ff)AND31
+;		roll.w=(n ASR 5) MOD 5
+;		pitch.w=Int(n/160)
+;		Exchange roll,pitch
+;		roll=4-roll
+;		pitch=4-pitch
+;		ff=pitch*160+roll*32+ff
+;		;
+;		Poke.w dest+i*2,-Peek.w(dest+ff*2)
+;	EndIf
+;Next
+
+NPrint ofs
+NPrint src-Bank(0)
+
+If ReadMem (0,f$+".car")Then Exists 0,Bank(1),ofs:CloseFile 0
+
+MouseWait
+End
+
+;_segacar:		 ;car.w,frame.w,dest.l,color.w
+;	;
+;	LEA vd,a0:SWAP d2:BSET#30,d2:MOVE.l d2,4(a0)
+;	MOVE.l $ff0004,a1:ADD d1,d1:MOVE 0(a1,d1),d1:EXT.l d1:ASL.l#2,d1:ADD.l d1,a1
+;	MOVEQ#0,d1
+;	nxw:MOVE (a1)+,d0:BMI bab
+;	bob:MOVE.l (a1)+,(a0):DBRA d0,bob:BRA nxw
+;	bab:NEG d0:BMI xit:SUBQ#1,d0:bib:MOVE.l d1,(a0):DBRA d0,bib:BRA nxw
+;	xit:RTS

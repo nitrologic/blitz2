@@ -1,0 +1,411 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/loadinc.bb,/Users/simon/Google Drive/amiga/w/sega/shit/shit/loadinc.bb
+;SM
+;			Loaderface	 01/10/93
+;
+
+;BUGS:
+
+;CALLS:
+;Statement CopCon{src,dest}
+;Statement GetExo24{fname$}	;#exo24
+;Statement GetExo{fname$}		;#exo
+;Statement GetMap{fname$}		;#map
+;Statement PutMap{fname$}		;#pmap
+;Function GetNames{}				 ;#freq
+
+;====================================================================
+
+Statement CopCon{src,dest}
+	Shared con()
+	For i.w=0 To (SizeOf.frend-1) Step 2
+		Poke.w &con(dest)+i,Peek.w(&con(src)+i)
+	Next
+;	con(dest)\lti=con(src)\lti
+;	con(dest)\ltj=con(src)\ltj
+;	con(dest)\rti=con(src)\rti
+;	con(dest)\rtj=con(src)\rtj
+
+End Statement	 ;CopCon
+
+;--------------------------------------------------------------------
+
+DEFTYPE .w pts,pts1,pts2,pts3
+CNIF #exo24
+Statement GetExo24{fname$}	;all24 only!
+	Shared maptr.l,con(),condt,pts,pts1,pts2,pts3
+
+;		bez.ij\i=0:io.l=&bez\i
+		extn$=".Exo":pax.w=Off
+		If ##[$BE15](fname$+".Pax") Then extn$=".Pax":pax.w=On
+
+		If WriteMem(0,fname$+extn$)
+			FileInput 0
+			##[$BE14] 0,maptr.l,2*64*64
+			pts=Cvi(Inkey$(2)):pts1=pts+1:pts2=pts+2:pts3=pts+3
+			For cnt2.w=0 To pts
+				cnt=cnt2-0
+				If cnt<0 Then cnt+pts1
+				If cnt=>pts1 Then cnt-pts1
+				con(cnt)\lti=Cvq(Inkey$(4)) ASL 9	 ;n.b. note the subtle asr #7's..
+				con(cnt)\ltj=Cvq(Inkey$(4)) ASL 9
+				con(cnt)\rti=Cvq(Inkey$(4)) ASL 9
+				con(cnt)\rtj=Cvq(Inkey$(4)) ASL 9
+				kringe.s=Inkey$(4)
+				If pax Then kringe.s=Inkey$(24)
+			Next
+			DefaultInput
+			CloseFile 0
+		Else
+			BitMapOutput 0:Locate 1,5:Print "Can't get "+fname$+".EXO"
+			VWait 100
+			End
+		EndIf
+		For src=0 To 6:CopCon{src,pts1+src}:Next
+
+;			Use BitMap 0
+;			For dtf=1 To pts2 Step 0.05
+;				dtp=QFrac(dtf)
+;				FindLo{dtf,condt,io}:dtil=bez\i:dtjl=bez\j
+;														 dtir=bez\k:dtjr=bez\l
+;				side.q=(centre(dtf	)*(1-dtp))/1024
+;				side+	(centre(dtf+1)*	 dtp )/1024
+;				dil=side*dtir+(1-side)*dtil
+;				djl=side*dtjr+(1-side)*dtjl
+;				sx=mapx{dil,djl}:sy=mapy{dil,djl}
+;				Line sx,sy,1
+;			Next
+		VWait 80
+	End Statement
+CEND
+
+
+;------------------------------------------------------------------------------
+
+CNIF #exo
+Statement GetExo{fname$}
+	Shared maptr.l,con(),pts,pts1,pts2,pts3,peg(),bound(),area()
+
+		If WriteMem(0,fname$+".EXO")
+			FileInput 0
+			##[$BE14] 0,maptr.l,2*64*64
+			pts=Cvi(Inkey$(2)):pts1=pts+1:pts2=pts+2:pts3=pts+3
+			For cnt.w=0 To pts
+				con(cnt)\lti=Cvq(Inkey$(4))
+				con(cnt)\ltj=Cvq(Inkey$(4))
+				con(cnt)\rti=Cvq(Inkey$(4))
+				con(cnt)\rtj=Cvq(Inkey$(4))
+				con(cnt)\lpost=Cvi(Inkey$(2))
+				con(cnt)\rpost=Cvi(Inkey$(2))
+;				kringe.s=Inkey$(4)
+			Next
+			##[$BE14] 0,&peg(0)	,SizeOf.post*#maxpost
+			##[$BE14] 0,&bound(0),SizeOf.edge*#maxedge
+			##[$BE14] 0,&area(0) ,SizeOf.ngon*#maxngon
+			For impact.w=0 To pts:Attach{impact}:Next
+			DefaultInput
+			CloseFile 0
+		Else
+			End
+		EndIf
+		For src=0 To 6:CopCon{src,pts1+src}:Next
+		VWait 20
+	End Statement		 ;GetExo (fname)
+CEND
+
+;------------------------------------------------------------------------------
+
+CNIF #map
+Statement GetMap{fname$}
+	Shared maptr.l,con(),pts,pts1,pts2,pts3
+
+		If WriteMem(0,fname$+".MAP")
+			FileInput 0
+			##[$BE14] 0,maptr.l,2*64*64
+			pts=Cvi(Inkey$(2)):pts1=pts+1:pts2=pts+2:pts3=pts+3
+			For cnt.w=0 To pts
+				con(cnt)\lti=Cvi(Inkey$(2))
+				con(cnt)\ltj=Cvi(Inkey$(2))
+				con(cnt)\rti=Cvi(Inkey$(2))
+				con(cnt)\rtj=Cvi(Inkey$(2))
+			Next
+			DefaultInput
+			CloseFile 0
+		Else
+			End
+		EndIf
+		For src=0 To 7:CopCon{src,pts1+src}:Next
+		VWait 80
+	End Statement		 ;GetMap
+CEND
+
+;------------------------------------------------------------------------------
+
+CNIF #pmap
+Statement PutMap{fname$}
+	Shared maptr.l,con(),pts
+
+		bez.ij\i=0:io.l=&bez\i
+
+		If ReadMem(0,fname$+".MAP")
+			FileOutput 0
+			Exists 0,maptr.l,2*64*64
+			Print Mki$(pts)
+			For cnt.w=0 To pts
+				d.w=con(cnt)\lti:Print Mki$(d) ;=Cvq(Inkey$(4)) ASL 9
+				d.w=con(cnt)\ltj:Print Mki$(d) ;=Cvq(Inkey$(4)) ASL 9
+				d.w=con(cnt)\rti:Print Mki$(d) ;=Cvq(Inkey$(4)) ASL 9
+				d.w=con(cnt)\rtj:Print Mki$(d) ;=Cvq(Inkey$(4)) ASL 9
+			Next
+			DefaultOutput
+			CloseFile 0
+		Else
+			End
+		EndIf
+
+		VWait 50
+	End Statement		 ;GetMap
+CEND
+
+
+;------------------------------------------------------------------------------
+
+
+Function.w GetNames{}
+; does some brutal stuff.. shape 80, blitz:freeslices, sprite 19
+; bitmap 8.. turns errors off!
+Shared m$,t$,path$(),maxpath.w
+
+CNIF #freq
+		#MaxNam=27
+		DEFTYPE .w sel,cnt ,succ,juice,done,choice ,hightrack,blurb
+
+		VWait 2:BLITZ:VWait 2:DisplayOff
+		Dim req.map(#MaxNam),devpri.w(maxpath+1)
+
+		succ=On:done=Off:m$="":t$="":hightrack.w=0
+
+		InitCopList 9,44,256,4,8,0,0:CreateDisplay 9:DisplayBitMap 9,0
+		BitMapOutput 0:Use BitMap 0:Boxf 0,0,1024,512,0
+		BitPlanesBitMap 0,8,4
+
+		Locate 0,30:Print Centre$("Please Insert",40)
+		Locate 0,31:Print Centre$("A Map Disk",40)
+
+		olderr.l=Peek.l(Peek.l(Peek.l(4)+276)+184)
+		Poke.l Peek.l(Peek.l(4)+276)+184,-1		:; turn errors off!
+
+		nam.s="Quit":Gosub slurp
+
+		sel=-1:choice.w=Off
+		DisplayOn:QAMIGA
+
+		Repeat
+			VWait 3
+
+			For idx.w=maxpath.w To 1 Step -1
+				If ##[$BE15] (path$(idx)+"Maps/Maps.Here")
+					If NOT devpri(idx)
+						devpri(idx)=On
+
+						If WriteMem(0,path$(idx)+"Maps/Maps.Here")
+							FileInput 0
+							Repeat
+								fi$=Edit$("",79)
+								If fi$<>"-1"
+									cnt=QLimit(Instr(fi$," ")-1,0,79)
+									If cnt=0
+										nam.s=fi$:com.s=""
+									Else
+										nam.s=	 Left$(fi$,cnt)
+										com.s=UnRight$(fi$,Instr(fi$,";"))	 :; we pray..
+									EndIf
+									Gosub slurp
+									choice=On
+
+								EndIf
+							Until fi$="-1"
+							CloseFile 0:DefaultInput
+						EndIf
+					EndIf
+				Else
+					If devpri(idx)
+						For blurb=0 To hightrack-1
+							req(blurb)\id[idx]=Off
+						Next
+						devpri(idx)=Off:choice=On
+						blacken.w=On
+					EndIf
+				EndIf
+			Next
+
+			If blacken
+				BitMapOutput 0
+				For blurb=0 To hightrack-1
+					choice.w=On
+					For c.w=1 To maxpath
+						If req(blurb)\id[c.w] Then choice=Off
+					Next
+					If choice Then Colour 1 Else Colour 2
+					Locate	3,5+blurb:Print req(blurb)\nam
+					Locate 20,5+blurb:Print req(blurb)\com
+				Next
+				blacken.w=Off
+			EndIf
+
+
+			BLITZ:Mouse On
+			Use BitMap 8:VWait:dum=MouseYSpeed
+			For juice=5 To 0 Step -1
+				VWait
+				cnt.w=QLimit(sel+(MouseYSpeed+4) ASR 3,0,hightrack-1)
+				If sel<>cnt
+					Boxf 24,(sel+5)*8,128,(sel+5)*8+7,0
+					sel=cnt:juice=0
+					Boxf 24,(sel+5)*8,128,(sel+5)*8+7,1
+				EndIf
+				If (Joyb(0)<>0) Then done=On
+			Next
+			Mouse Off:QAMIGA
+		Until done
+
+		Poke.l Peek.l(Peek.l(4)+276)+184,olderr.l		:; turn errors on!
+		If sel>0
+			t$=req(sel)\nam
+			For idx.w=maxpath.w To 1 Step -1
+				If req(sel)\id[idx]=On Then m$=path$(idx)
+			Next
+			m$+"Maps/"
+			Function Return On
+		Else
+			Function Return Off
+		EndIf
+
+
+	.slurp
+		choice.w=Off:blurb=-1
+		Repeat
+			blurb+1
+			If nam=req(blurb)\nam Then choice=On
+			If hightrack=blurb
+				If blurb=#MaxNam Then blurb-1
+				hightrack=blurb+1
+				choice=On
+			EndIf
+		Until choice
+		req(blurb)\nam=nam.s
+		If idx=0
+			If req(blurb)\com<>"" Then req(blurb)\com="Serial"
+		Else
+			req(blurb)\com=com
+		EndIf
+		req(blurb)\id[idx]=On
+		blacken=On
+	Return
+
+	CELSE
+		m$="Maps/":t$="Blob"
+		Function Return On
+	CEND
+End Function ; GetNames
+
+
+
+
+
+CNIF 1=0
+#freq=On
+
+Function.w GetNames{}
+; does some brutal stuff.. shape 80, blitz:freeslices, sprite 19
+; bitmap 8.. turns errors off!
+Shared m$,t$
+;CNIF #freq
+		#MaxNam=24
+
+		Dim nam.s(#MaxNam), com.s(#MaxNam)
+		VWait 2:BLITZ:VWait 2
+		DisplayOff
+		InitCopList 9,44,256,4,8,0,0
+		CreateDisplay 9:DisplayBitMap 9,0
+;		Slice 0,44,320,256,$fff8,4,8,16,1024+#dp+#dp,1024+#dp+#dp:Show 0
+		DisplayOn
+
+		QAMIGA
+		done.w=Off:BitMapOutput 0
+		Use BitMap 0:Boxf 0,0,32,32,0:Line 0,0,32,32,1
+		GetaShape 80,0,0,32,32:GetaSprite 19,80: Free MidHandle 80
+		Boxf 0,0,1024,516,0
+		Poke.l Peek.l(Peek.l(4)+276)+184,-1		:; turn errors off!
+		Locate 0,22
+		Print Centre$("Please Insert a Track Disk",80)
+
+		m$="":t$=""
+		Repeat
+			VWait
+			nu$="maps:"		:Gosub slurp
+			nu$="df2:maps/":Gosub slurp
+			nu$="df1:maps/":Gosub slurp
+			nu$="df0:maps/":Gosub slurp
+		Until m$<>""
+
+		BLITZ
+
+		BitMapOutput 0:Use BitMap 0:done=Off
+		Boxf 0,0,1024,516,0
+		For cnt=0 To hightrack.w-1
+			Locate	3,5+cnt:Print nam.s(cnt)
+			Locate 20,5+cnt:Print com.s(cnt)
+		Next
+		Mouse On:BlitzKeys On:sel=-1
+		BitPlanesBitMap 0,8,4:Use BitMap 8
+
+		Repeat
+;			ShowSprite 19,MouseX,MouseY,0
+			DisplaySprite 9,19,MouseX,MouseY,0
+			cnt=Int((MouseY)ASR 3)-5
+			If (-1<cnt) AND (cnt<(hightrack))
+				Boxf 24,(cnt+5)*8,128,(cnt+5)*8+7,1
+			EndIf
+			If sel<>cnt
+				If (-1<sel) AND (sel<(hightrack))
+					Boxf 24,(sel+5)*8,128,(sel+5)*8+7,0
+				EndIf
+				sel=cnt
+			EndIf
+			If Joyb(0)<>0
+				If (-1<cnt) AND (cnt< (hightrack)) Then done=On
+			EndIf
+			If RawStatus($45) Then QAMIGA:Function Return Off:BLITZ
+		Until done
+		Mouse Off:BlitzKeys Off:t$=nam(sel):QAMIGA
+;	CELSE
+		m$="Maps/":t$="Blob"
+;	CEND
+	Function Return On
+
+	.slurp
+		If nu$<>m$
+			If WriteMem(0,nu$+"Maps.Here")
+				FileInput 0
+				hightrack.w=0:m$=nu$
+				Repeat
+					fi$=Edit$("",79)
+					If fi$<>"-1"
+						cnt=QLimit(Instr(fi$," ")-1,0,79)
+						If cnt<>0
+							nam.s(hightrack)=	 Left$(fi$,cnt)
+							com.s(hightrack)=UnRight$(fi$,Instr(fi$,";"))	 :; we pray..
+						Else
+							nam.s(hightrack)=fi$:com.s(hightrack)=""
+						EndIf
+						hightrack+1
+					EndIf
+				Until fi$="-1"
+				CloseFile 0:DefaultInput
+			EndIf
+		EndIf
+	Return
+
+End Function ; GetNames
+CEND
+; end of LoadINC.bb

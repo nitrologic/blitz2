@@ -1,0 +1,4 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Right$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Right$.bb
+
+Print Right$("Hello there",5): ; Will just print there
+

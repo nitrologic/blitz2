@@ -1,0 +1,39 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/compare.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/code/compare.bb
+;
+; find undocumented blitz2 commands
+;
+
+Dim c$(1000)
+If WriteMem(0,"commands")
+	FileInput 0
+	While NOT DosBuffLen(0)
+		a$=Edit$(80)
+		a$=Replace$(a$,"()","")
+		c$(n)=a$
+		n+1
+	Wend
+	CloseFile 0
+EndIf
+
+CaseSense Off
+
+If ReadMem(1,"missing")
+	FileOutput 1
+	If WriteMem(0,"blitzlist")
+		FileInput 0
+		While NOT DosBuffLen(0)
+			a$=Edit$(1024)
+			If Left$(a$,4)="		"
+				a$=Mid$(a$,5):l=Instr(a$," "):If l>1 Then a$=Left$(a$,l-1)
+				For i=0 To n-1
+					If a$=c$(i) Then Pop For:Goto nx
+				Next
+				NPrint a$
+				nx
+			EndIf
+		Wend
+	EndIf
+EndIf
+
+MouseWait
+End

@@ -1,0 +1,20 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SubItemOff.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SubItemOff.bb
+
+; 
+; subitemoff example
+; 
+MenuTitle 0,0,"Test"
+MenuItem 0,0,0,0,"More "+Chr$(187)+" "
+SubItemOff 60,8 
+SubItem 0,0,0,0,0,"One Sub Menu Item..."
+SubItem 0,0,0,0,1,"Two Sub Menu Items.."
+MenuItem 0,0,0,1,"QUIT" 
+Screen 0,3
+Window 0,0,0,320,DispHeight,$100f,"Select a menu...",1,2
+SetMenu 0 
+Repeat
+Until WaitEvent=256 AND MenuHit=0 AND ItemHit=1 
+
+
+
+

@@ -1,0 +1,104 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/resources/disk.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/resources/disk.bb2
+;
+; $VER: disk.bb2 40.0 (01.03.94)
+;
+
+XInclude"exec/types.bb2"
+
+XInclude"exec/lists.bb2"
+
+XInclude"exec/ports.bb2"
+
+XInclude"exec/interrupts.bb2"
+
+XInclude"exec/libraries.bb2"
+
+
+;/********************************************************************
+;*
+;* Resource structures
+;*
+;********************************************************************/
+
+
+NEWTYPE.DiscResourceUnit
+dru_Message.Message
+dru_DiscBlock.Interrupt
+dru_DiscSync.Interrupt
+dru_Index.Interrupt
+End NEWTYPE
+
+NEWTYPE.DiscResource
+dr_Library.Library
+*dr_Current.DiscResourceUnit
+dr_Flags.b
+dr_pad.b
+*dr_SysLib.Library
+*dr_CiaResource.Library
+dr_UnitID.l[4]
+dr_Waiting.List
+dr_DiscBlock.Interrupt
+dr_DiscSync.Interrupt
+dr_Index.Interrupt
+*dr_CurrTask.Task
+End NEWTYPE
+
+;/* dr_Flags entries */
+#DRB_ALLOC0=0;/* unit zero is allocated */
+#DRB_ALLOC1=1;/* unit one is allocated */
+#DRB_ALLOC2=2;/* unit two is allocated */
+#DRB_ALLOC3=3;/* unit three is allocated */
+#DRB_ACTIVE=7;/* is the disc currently busy? */
+
+#DRF_ALLOC0=(1LSL0);/* unit zero is allocated */
+#DRF_ALLOC1=(1LSL1);/* unit one is allocated */
+#DRF_ALLOC2=(1LSL2);/* unit two is allocated */
+#DRF_ALLOC3=(1LSL3);/* unit three is allocated */
+#DRF_ACTIVE=(1LSL7);/* is the disc currently busy? */
+
+
+
+;/********************************************************************
+;*
+;* Hardware Magic
+;*
+;********************************************************************/
+
+
+#DSKDMAOFF=$4000;/* idle command For dsklen register */
+
+
+;/********************************************************************
+;*
+;* Resource specific commands
+;*
+;********************************************************************/
+
+;/*
+; * DISKNAME is a generic macro to get the name of the resource.
+; * This way if the name is ever changed you will pick up the
+; *	change automatically.
+; */
+
+Macro DISKNAME:"disk.resource":End Macro
+
+
+#DR_ALLOCUNIT=(#LIB_BASE-0*#LIB_VECTSIZE)
+#DR_FREEUNIT=(#LIB_BASE-1*#LIB_VECTSIZE)
+#DR_GETUNIT=(#LIB_BASE-2*#LIB_VECTSIZE)
+#DR_GIVEUNIT=(#LIB_BASE-3*#LIB_VECTSIZE)
+#DR_GETUNITID=(#LIB_BASE-4*#LIB_VECTSIZE)
+#DR_READUNITID=(#LIB_BASE-5*#LIB_VECTSIZE)
+
+#DR_LASTCOMM=(#DR_READUNITID)
+
+;/********************************************************************
+;*
+;* drive types
+;*
+;********************************************************************/
+
+#DRT_AMIGA=($00000000)
+#DRT_37422D2S=($55555555)
+#DRT_EMPTY=($FFFFFFFF)
+#DRT_150RPM=($AAAAAAAA)

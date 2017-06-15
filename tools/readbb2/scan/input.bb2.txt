@@ -1,0 +1,15 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/devices/input.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/devices/input.bb2
+;
+; $VER: input.bb2 40.0 (02.03.94)
+;
+
+XInclude"exec/io.bb2"
+
+#IND_ADDHANDLER=(#CMD_NONSTD+0)
+#IND_REMHANDLER=(#CMD_NONSTD+1)
+#IND_WRITEEVENT=(#CMD_NONSTD+2)
+#IND_SETTHRESH=(#CMD_NONSTD+3)
+#IND_SETPERIOD=(#CMD_NONSTD+4)
+#IND_SETMPORT=(#CMD_NONSTD+5)
+#IND_SETMTYPE=(#CMD_NONSTD+6)
+#IND_SETMTRIG=(#CMD_NONSTD+7)

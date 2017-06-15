@@ -1,0 +1,156 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/amigamode/ARexx/bpaint.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/amigamode/ARexx/bpaint.bb,/Users/simon/Google Drive/amiga/w/disks/bums/bum2/arexx/bpaint.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/arexx/bpaint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/arexx/bpaint.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/arexx/bpaint.bb
+Include arexxres.bb
+
+NoCli
+Dim arg$(32)
+Dim arg(32)
+;-- Blitz Paint, A Barfy paint programme with a Arexx interface
+
+;FIXES --
+;I have converted the loop to a repeat until loop which works better
+;I have moved the wait into this loop THIS IS WERE IT SHOULD BE!!
+;I have assigned ev.l so that we can act on the intuimessages as well
+;I have used IsRexxMsg() so we only react to RexxMsg (we could get anything here?)
+;I have added error checking so that we only attempt to get
+;the result string when there is one and only reply to messages that require it
+;otherwise we go around in circles
+;I have added $400 to the window flags so we can't draw over the borders
+;I have added a while loop to the draw routine to keep it going as you only get one msg per advent with BB2
+;I COULD NOT EVEN GET YOUR EXAMPLES TO CRASH?	I dont know what was going on there? Worries me abit!
+
+
+
+
+;****************************** functions and statements *******************************************
+
+Statement reqsingle{ti$,tex$,tex2$,tex3$,tex4}
+TextGadget 1,200,48,0,1,"THANKS!"
+Window 1,80,182,480,64,$1002,ti$,1,2,1
+WLocate 8,6
+Print Centre$(tex$,57)
+WLocate 8,16
+Print Centre$(tex2$,57)
+WLocate 8,26
+Print Centre$(tex3$,57)
+If ti$="ARexx Error"
+	WLocate 266,26:Print tex4
+EndIf
+Repeat
+	Repeat
+		wev.l=WaitEvent
+	Until EventWindow=1
+	If wev=64
+		If GadgetHit=1 Then Goto endfunc
+	EndIf
+	If ev=$400
+		i$=Inkey$
+		If i$=Chr$(13) Then Goto endfunc
+	EndIf
+Forever
+
+endfunc
+Free Window 1:Use Window 0
+End Statement
+
+Statement breakout{command$}
+Shared argnum
+Shared arg$()
+;numspace=0
+;step 1 identify number of arguments not needed cos of bug?
+;For count = 0 To Len(command$)
+;	If Mid$(command$,count,1)=Chr$(32)
+;	 numspace+1
+;	EndIf
+;Next count
+;Dim arg$(numspace)														;dynamically allocate argument arrary)
+
+;right now seperate the lil barstards
+argnum=0																			;RESET argnum
+wordpos = 0																	 ;internal wordposition counter
+For count= 0 To Len(command$)								 ;loop for each character
+	If Mid$(command$,wordpos,1)=Chr$(32)				;are we at end of word
+		arg$(argnum)=Left$(command$,(wordpos-1))	;yep then grab word into array
+		command$=UnRight$(command$,wordpos)			 ;and remove it from command$
+		argnum+1																	;upto next bit in array
+		wordpos=0																 ;reset wordlength counter
+	EndIf
+ wordpos+1																		;not at end of word so inc wordlength
+Next count																		;and loop again
+arg$(argnum)=command$												 ;to get here must have processed all spaces!
+End Statement
+
+;************ the programme ********************************
+.setup
+Screen 0,10,"BLITZpaint	(port name BPAINT2)"
+Window 0,120,12,400,150,$8|$400,"Blitzpaint",0,1,0
+Activate 0
+WindowOutput 0
+
+.rexxstuff
+;-- The arexx interface
+port.l=CreateMsgPort("BPAINT2")									;Open our message port
+msgptr.l=CreateRexxMsg(port,"rexx","BPAINT2")		;Create our rexxmsg structure
+SendRexxCommand msgptr,"dh0:bb2/finalrexx/mystuff/roger3",#RXCOMM|#RXFF_RESULT
+
+Repeat
+	Wait:ev.l=Event
+	rmsg.l=##[$FEBA](port)
+	If IsRexxMsg(rmsg) Then Gosub handlerexx
+	If ev = $8:While Event = NULL:WPlot WMouseX,WMouseY,1:Wend:EndIf
+Until ev = $200
+End
+
+handlerexx
+	If IsRexxMsg(rmsg)
+
+		If GetRexxResult(rmsg,1)
+			tex2$="Error: "+RexxError(GetRexxResult(rmsg,2))
+			tex3$="SEVERITY: "
+			tex4=GetRexxResult(rmsg,1)
+			reqsingle {"ARexx Error","Your Script has terminated with",tex2$,tex3$,tex4}
+			;Return
+		EndIf
+
+		If GetRexxResult(rmsg,2) > 256
+				tex2$=GetResultString(rmsg)
+				reqsingle{"Script Result","Your Script result is",tex2$,"",tex4}
+		Else
+			If GetRexxResult(rmsg,2)
+				NPrint "Severity",GetRexxResult(rmsg,1)
+			EndIf
+		EndIf
+
+breakout{GetRexxCommand(rmsg,1)}
+ Select arg$(0)
+	Case "MYBOX"
+			Gosub strint					;convert params to int's
+														;returned in arg()
+			WBox arg(1),arg(2),arg(3),arg(4),1
+
+	Case "MYLINE"
+			Gosub strint
+			WLine arg(1),arg(2),arg(3),arg(4),1
+
+	Case "MYCIRC"
+			Gosub strint
+			WCircle arg(1),arg(2),arg(3),1
+
+	Case "MYPLOT"
+			Gosub strint
+			WPlot arg(1),arg(2),1
+ End Select
+
+		If rmsg <> msgptr
+			ReplyRexxMsg rmsg,0,0,"ALL OK!"
+		EndIf
+EndIf
+Return
+
+
+;*********************************************subroutines
+
+.strint
+For i = 1 To argnum
+	arg(i)=Val(arg$(i))
+Next i
+Return

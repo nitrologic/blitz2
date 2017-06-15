@@ -1,0 +1,75 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/examples/blitzballs.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/examples2/blitzballs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/examples/blitzballs.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/examples2/blitzballs.bb2
+;	this is my	blitz version of
+;		the other basic prog. in the N.Z. AMIGA MAG. No.2
+;	 the shapes are moved 1.5 deg on each bitmap
+;		 written by V. A. HILL
+;	hope it be of interest to somebody?
+; if you are wondering which other basic
+; spelt backwards it is SOMA
+#scw=320:#sh=256:#xoff=#scw/2:#yoff=#sh/2
+#rd=110
+u.f=6.28/720
+DEFTYPE.w r,deh,sup,cx,dx,dy,sc,sn,cs
+Dim x.w(1500),y.w(1500)
+w.f=0:Print "Please Wait"
+cy=0
+For w=0 To 6.28 Step u
+	x(cy)=HSin(w)*#rd:y(cy)=HCos(w)*#rd
+	x(cy+720)=x(cy):y(cy+720)=y(cy)
+	cy=cy+1
+Next w
+For cy=0 To 20
+	x(cy+1440)=x(cy):y(cy+1440)=y(cy)
+Next cy
+Gosub makeshape
+BLITZ
+For d=0 To 7
+	BitMap d,#scw,#sh,2
+Next d
+Slice 0,44,2
+Use Slice 0
+Green 0,0,0,0
+Green 1,15,9,9
+Green 2,10,0,0
+Green 3,12,0,0
+Repeat
+r=0:sc=0
+Repeat
+	For deh=0 To 720 Step 24
+		For sup=0 To 21 Step 3
+		VWait
+		Show sc
+		Use BitMap sc
+		sn=deh+r+sup
+		cs=deh+sup
+		dx=x(sn)+#xoff
+		dy=y(cs)+#yoff
+		Blit 0,dx,dy
+		sc=sc+1
+		Next sup
+	 sc=0
+	Next deh
+r=r+16
+Until r>720
+Until Joyb(0)=1
+AMIGA
+End
+makeshape:
+Screen 0,2
+ScreensBitMap 0,0
+BlockScroll
+Circlef 12,20,11,3
+Circle 12,20,11,2
+Point 14,20,1
+Point 14,19,1
+Circle 12,20,10,2
+Circle 13,20,10,2
+Circle 13,20,9,3
+GetaShape 0,0,9,24,32
+DecodeShapes 0
+BlockScroll
+Free BitMap 0
+Free Screen 0
+Return
+
+

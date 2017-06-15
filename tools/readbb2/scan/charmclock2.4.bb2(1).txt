@@ -1,0 +1,1260 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/bum8/clock/CharmClock2.4.bb2
+;Noe som ble en klokke!
+
+SetErr:Gosub Error:End:End SetErr
+
+CloseEd
+
+NoCli
+
+WBStartup
+
+If WBDepth < 2
+	Gosub SorryMac
+	End
+EndIf
+
+If WBHeight < 390
+	Md = 2
+	Mde = 4
+Else
+	Md = 1
+	Mde = 1
+EndIf
+
+NEWTYPE .hand:x0.w:y0:x1:y1:x2:y2:x3:y3:End NEWTYPE
+
+.InitClock:
+
+FindScreen 0
+
+InitSound 0,640
+	For i = 0 To 639
+		If i MOD 16 < 8
+			SoundData 0,i,127
+		Else
+			SoundData 0,i,-128
+		EndIf
+	Next i
+
+WinX.w					 = 15
+WinY.w					 = 340
+WinOWidth.w			= 115
+WinOHeight.w		 = 70
+WinEvent.l			 = 0
+WinOutLPen.b		 = 1
+WinBackPen.b		 = 2
+WinHandPen.b		 = 1
+WinSecsPen.b		 = 3
+WinPipsPen.b		 = 1
+WinTextPen.b		 = 1
+WinDatePen.b		 = 2
+WinDateBackPen.b = 3
+WinBackgPen.b		= 0
+WinBitPlanes.b	 = WBDepth
+WinSecounds			= True
+WinSound.b			 = 1
+Priority.b			 = -128
+AlarmHour.b	 = 0
+AlarmMinute.b = 0
+Alarm = False
+WinCols = 8
+WinFlags = $900
+
+Start.b = True
+Gosub ReadConfig
+Gosub InitMenu
+Start = False
+
+;Stop times...
+
+AlSMin = AlarmMinute + 5
+If AlSMin > 59 Then AlSHour = AlarmHour + 1
+AlSMin = AlSMin MOD 60
+AlSHour = AlSHour MOD 24
+
+;************************ Check for illegal sizes!
+
+If WinBitplanes = 2
+	WinCols = 4
+	SubItem 0,3,1,10,0,"	4 Colours"
+	SubItem 0,1,1,10,1,"	8 Colours"
+	MenuColour 0,1,10,1,Off
+Else
+	WinBitplanes = 3
+EndIf
+
+If WBWidth < WinOWidth
+	WinWidth = 91
+EndIf
+
+If WBHeight < WinOHeight
+	WinHeight = 91
+EndIf
+
+If WBHeight < WinY
+	WinY=10
+	WinX=WBWidth-(WinOWidth+10)
+	WinOHeight = WinOHeight*11/16
+EndIf
+
+If WBWidth < WinX
+	WinX=WBWidth-(WinOWidth+10)
+EndIf
+
+;**************************************************
+
+TitleU	= True
+Running = True
+
+##[$FEA8] ##[$FEA7](0),Priority
+
+
+SizeLimits 40,40,249,249
+BitMap 0,250,250,WinBitPlanes
+BitMap 1,48,24,WinBitPlanes
+BitMapOutput 0
+
+Dim x.f(59)
+Dim y.f(59)
+Dim x1.f(59)
+Dim y1.f(59)
+Dim x2.f(59)
+Dim y2.f(59)
+
+
+For i = 0 To 59
+
+x(i)=(HSin ((Pi)-((i/30)*Pi)))
+y(i)=(HCos ((Pi)-((i/30)*Pi)))
+
+Next i
+
+x1(0) = x(59):y1(0) = y(59):x2(58) = x(59):y2(58) = y(59)
+x1(1) = x(0) :y1(1) = y(0) :x2(59) = x(0) :y2(59) = y(0)
+
+For i = 2 To 59
+	x1(i) = x(i-1)
+	y1(i) = y(i-1)
+	x2(i-2) = x(i-1)
+	y2(i-2) = y(i-1)
+Next i
+
+Gosub MakeCharmShape
+Gosub MakeDateShape
+Gosub Refresh
+
+;*****************************************************************
+
+.Main:
+
+Repeat
+
+	h = 5 * (Hours MOD 12)
+	m = Mins
+	s = Secs
+	Pause = 10
+
+	For i = 1 To 4
+		If m >= (12*i) Then h = h + 1
+	Next i
+
+	WinEvent.l = Event
+	If WinEvent <> 0 Then Gosub WhatEvent
+
+	If WinEvent <> 0 OR TitleU = True
+		WTitle "","CharmClock V2.4	"+Chr$(169)+"1994 by Vegard Riseng - FreeWare"
+		TitleU = False
+	EndIf
+
+	If (s <> OS)
+
+		Gosub Update
+		If WinSound <> 0 Then Gosub Beep
+	EndIf
+
+	If Alarm = True
+		If (AlarmHour = Hours AND (AlarmMinute <= m)) Then AlarmSound = True
+		If (AlarmHour = Hours AND (AlSMin < m)) Then AlarmSound = False
+		If (AlSHour = Hours AND (AlSMin >= m)) Then AlarmSound = True
+		If (AlSHour = Hours AND (AlSMin < m)) Then AlarmSound = False
+		If AlarmSound = True
+			Gosub AlarmBeep
+		EndIf
+	EndIf
+
+	If ((((AlarmHour + 1) MOD 24) = Hours) AND AlarmMinute = m)
+		Alarm = False
+		Gosub InitMenu
+	EndIf
+
+	##[$FE1B] Pause
+
+Until Running = False
+
+Free BitMap 0
+Free BitMap 1
+Free Window 0
+
+End
+
+;*****************************************************************
+
+
+
+.WhatEvent:
+
+			WinY = WindowY
+			WinX = WindowX
+
+	If WinEvent = $2	 ;Resized window
+
+			WinOWidth	 = WindowWidth
+			WinOHeight	= WindowHeight
+			Gosub Refresh
+
+	EndIf
+
+
+	If WinEvent = $4	 ;Corrupted Window
+
+			Gosub Refresh
+
+	EndIf
+
+
+	If WinEvent = $200 Then Running = False
+
+If WinEvent = 256
+	If MenuHit = 0
+		If ItemHit = 0 Then Gosub About
+		If ItemHit = 2 Then Gosub Defaults
+		If ItemHit = 3 Then Gosub ReadConfig
+		If ItemHit = 4 Then Gosub SaveConfig
+		If ItemHit = 6 Then Running = False
+	EndIf
+
+; Here comes a study in nested if statements!
+
+	If MenuHit = 1					;Settings Menu
+
+		If ItemHit = 0			;Outline Pen
+			If SubHit = 0
+				WinOutLPen = 0
+			EndIf
+			If SubHit = 1
+				WinOutLPen = 1
+			EndIf
+			If SubHit = 2
+				WinOutLPen = 2
+			EndIf
+			If SubHit = 3
+				WinOutLPen = 3
+			EndIf
+			If SubHit = 4
+				WinOutLPen = 4
+			EndIf
+			If SubHit = 5
+				WinOutLPen = 5
+			EndIf
+			If SubHit = 6
+				WinOutLPen = 6
+			EndIf
+			If SubHit = 7
+				WinOutLPen = 7
+			EndIf
+			Gosub Refresh
+			Gosub Update
+		EndIf
+
+		If ItemHit = 1			;Clock Background Pen
+			If SubHit = 0
+				WinBackPen = 0
+			EndIf
+			If SubHit = 1
+				WinBackPen = 1
+			EndIf
+			If SubHit = 2
+				WinBackPen = 2
+			EndIf
+			If SubHit = 3
+				WinBackPen = 3
+			EndIf
+			If SubHit = 4
+				WinBackPen = 4
+			EndIf
+			If SubHit = 5
+				WinBackPen = 5
+			EndIf
+			If SubHit = 6
+				WinBackPen = 6
+			EndIf
+			If SubHit = 7
+				WinBackPen = 7
+			EndIf
+			Gosub MakeCharmShape
+			Gosub Refresh
+			Gosub Update
+		EndIf
+
+
+		If ItemHit = 4			;Pips Pen
+			If SubHit = 0
+				WinPipsPen = 0
+			EndIf
+			If SubHit = 1
+				WinPipsPen = 1
+			EndIf
+			If SubHit = 2
+				WinPipsPen = 2
+			EndIf
+			If SubHit = 3
+				WinPipsPen = 3
+			EndIf
+			If SubHit = 4
+				WinPipsPen = 4
+			EndIf
+			If SubHit = 5
+				WinPipsPen = 5
+			EndIf
+			If SubHit = 6
+				WinPipsPen = 6
+			EndIf
+			If SubHit = 7
+				WinPipsPen = 7
+			EndIf
+			Gosub Refresh
+			Gosub Update
+		EndIf
+
+		If ItemHit = 2			;Hour and Minute Hand Pen
+			If SubHit = 0
+				WinHandPen = 0
+			EndIf
+			If SubHit = 1
+				WinHandPen = 1
+			EndIf
+			If SubHit = 2
+				WinHandPen = 2
+			EndIf
+			If SubHit = 3
+				WinHandPen = 3
+			EndIf
+			If SubHit = 4
+				WinHandPen = 4
+			EndIf
+			If SubHit = 5
+				WinHandPen = 5
+			EndIf
+			If SubHit = 6
+				WinHandPen = 6
+			EndIf
+			If SubHit = 7
+				WinHandPen = 7
+			EndIf
+		EndIf
+
+		If ItemHit = 3			;Secounds Hand Pen
+			If SubHit = 0
+				WinSecsPen = 0
+			EndIf
+			If SubHit = 1
+				WinSecsPen = 1
+			EndIf
+			If SubHit = 2
+				WinSecsPen = 2
+			EndIf
+			If SubHit = 3
+				WinSecsPen = 3
+			EndIf
+			If SubHit = 4
+				WinSecsPen = 4
+			EndIf
+			If SubHit = 5
+				WinSecsPen = 5
+			EndIf
+			If SubHit = 6
+				WinSecsPen = 6
+			EndIf
+			If SubHit = 7
+				WinSecsPen = 7
+			EndIf
+		EndIf
+
+		If ItemHit = 5			;Date Text Pen
+			If SubHit = 0
+				WinDatePen = 0
+			EndIf
+			If SubHit = 1
+				WinDatePen = 1
+			EndIf
+			If SubHit = 2
+				WinDatePen = 2
+			EndIf
+			If SubHit = 3
+				WinDatePen = 3
+			EndIf
+			If SubHit = 4
+				WinDatePen = 4
+			EndIf
+			If SubHit = 5
+				WinDatePen = 5
+			EndIf
+			If SubHit = 6
+				WinDatePen = 6
+			EndIf
+			If SubHit = 7
+				WinDatePen = 7
+			EndIf
+			Gosub MakeDateShape
+		EndIf
+
+		If ItemHit = 6			;Date Background Pen
+			If SubHit = 0
+				WinDateBackPen = 0
+			EndIf
+			If SubHit = 1
+				WinDateBackPen = 1
+			EndIf
+			If SubHit = 2
+				WinDateBackPen = 2
+			EndIf
+			If SubHit = 3
+				WinDateBackPen = 3
+			EndIf
+			If SubHit = 4
+				WinDateBackPen = 4
+			EndIf
+			If SubHit = 5
+				WinDateBackPen = 5
+			EndIf
+			If SubHit = 6
+				WinDateBackPen = 6
+			EndIf
+			If SubHit = 7
+				WinDateBackPen = 7
+			EndIf
+			Gosub MakeDateShape
+		EndIf
+
+		If ItemHit = 7			;Window Text Pen ("Charm" Text)
+			If SubHit = 0
+				WinTextPen = 0
+			EndIf
+			If SubHit = 1
+				WinTextPen = 1
+			EndIf
+			If SubHit = 2
+				WinTextPen = 2
+			EndIf
+			If SubHit = 3
+				WinTextPen = 3
+			EndIf
+			If SubHit = 4
+				WinTextPen = 4
+			EndIf
+			If SubHit = 5
+				WinTextPen = 5
+			EndIf
+			If SubHit = 6
+				WinTextPen = 6
+			EndIf
+			If SubHit = 7
+				WinTextPen = 7
+			EndIf
+			Gosub MakeCharmShape
+		EndIf
+
+		If ItemHit = 8			;Window Background Pen
+			If SubHit = 0
+				WinBackgPen = 0
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 1
+				WinBackgPen = 1
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 2
+				WinBackgPen = 2
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 3
+				WinBackgPen = 3
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 4
+				WinBackgPen = 4
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 5
+				WinBackgPen = 5
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 6
+				WinBackgPen = 6
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 7
+				WinBackgPen = 7
+				Gosub Refresh
+				Gosub Update
+			EndIf
+		EndIf
+
+		If ItemHit = 10			 ;How many colours??
+			If SubHit= 0
+				WinCols = 4
+				Gosub MakeCharmShape
+				Gosub MakeDateShape
+				Gosub InitMenu
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit= 1
+				If WinBitplanes = 3
+					WinCols = 8
+				EndIf
+				Gosub MakeCharmShape
+				Gosub MakeDateShape
+				Gosub InitMenu
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 2
+				If Mde = 1 Then Mde = 4 Else Mde = 1
+				If Md = 1 Then Md = 2 Else Md = 1
+				Gosub Refresh
+				Gosub Update
+			EndIf
+			If SubHit = 3
+				If WinFlags = $900 OR WinFlags = $52b
+					If WinFlags = $900
+						WinFlags = $800
+						MenuColour 0,1,12,On
+					Else
+						WinFlags = $42f
+						MenuColour 0,1,12,Off
+					EndIf
+				Else
+					If WinFlags = $800
+						WinFlags = $900
+						MenuColour 0,1,12,On
+					Else
+						WinFlags = $52b
+						MenuColour 0,1,12,On
+					EndIf
+				EndIf
+				Gosub Refresh
+			EndIf
+			If SubHit = 4
+				If WinFlags = $900 OR WinFlags = $800
+					If WinFlags = $900
+						WinFlags = $52b
+						MenuColour 0,1,12,Off
+					Else
+						WinFlags = $42f
+						MenuColour 0,1,12,On
+					EndIf
+				Else
+					If WinFlags = $52b
+						WinFlags = $900
+						MenuColour 0,1,12,On
+					Else
+						WinFlags = $800
+						MenuColour 0,1,12,On
+					EndIf
+				EndIf
+				Gosub Refresh
+			EndIf
+		EndIf
+
+		If ItemHit = 16			 ;Secounds On/Off
+			If SubHit = 0
+				WinSecounds = True
+			EndIf
+			If SubHit = 1
+				WinSecounds = False
+				WinBackPenm = WinBackPen MOD WinCols
+				Line WinWidth/2,WinHeight/2,(WinWidth/2)+(x(OS)*((WinWidth/2)-9)),(WinHeight/2)+(y(OS)*((WinHeight/2)-11)),WinBackPenm
+			EndIf
+		EndIf
+
+		If ItemHit = 14			 ;Sound Off/Hour/30Mins/15Mins
+			If SubHit = 0
+				WinSound = 0
+			EndIf
+			If SubHit = 1
+				WinSound = 1
+			EndIf
+			If SubHit = 2
+				WinSound = 2
+			EndIf
+			If SubHit = 3
+				WinSound = 3
+			EndIf
+		EndIf
+
+		If ItemHit = 12 Gosub SizePos
+
+	EndIf
+
+	If MenuHit = 2					;Alarm Menu
+		If ItemHit = 0				;Alarm On/Off
+
+			If SubHit = 0 Then Alarm = True
+			If SubHit = 1 Then Alarm = False
+		EndIf
+
+		If ItemHit = 1 Then Gosub AlarmSet
+	EndIf
+
+	If MenuHit = 3					;Task Priority Menu
+
+		If ItemHit = 0
+			Priority = -128
+		EndIf
+
+		If ItemHit = 1
+			Priority = -112
+		EndIf
+
+		If ItemHit = 2
+			Priority = -96
+		EndIf
+
+		If ItemHit = 4
+			Priority = -80
+		EndIf
+
+		If ItemHit = 5
+			Priority = -64
+		EndIf
+
+		If ItemHit = 6
+			Priority = -48
+		EndIf
+
+		If ItemHit = 7
+			Priority = -32
+		EndIf
+
+		If ItemHit = 8
+			Priority = -16
+		EndIf
+
+		If ItemHit = 9
+			Priority = 0
+		EndIf
+
+		##[$FEA8] ##[$FEA7](0),Priority
+	EndIf
+
+
+
+		TitleU = True
+	EndIf
+
+
+
+	Return
+
+.About:
+
+	title$="About Charm Clock..."+Chr$(0)
+	reqtext$="Charm Clock 2.4"+Chr$(10)
+	reqtext$+Chr$(169)+" 1994 by Vegard Riseng"+Chr$(10)+Chr$(10)
+	reqtext$+"Freeware - Enjoy!"+Chr$(10)+Chr$(10)
+	reqtext$+"A new Workbench clock,"+Chr$(10)
+	reqtext$+"made configurable for"+Chr$(10)
+	reqtext$+"your pleasure!"+Chr$(10)+Chr$(10)
+	reqtext$+"Made with Blitz Basic 2"+Chr$(0)
+	gadgets$=" OK! "+Chr$(0)
+
+	easy.EasyStruct\es_StructSize=SizeOf.EasyStruct
+	easy\es_Title=&title$
+	easy\es_TextFormat=&reqtext$
+	easy\es_GadgetFormat=&gadgets$
+
+	##[$FFDD] 0,easy,0,0
+
+	Return
+
+.SorryMac:
+
+	title$="Sorry, Mac..."+Chr$(0)
+	reqtext$="		Charm Clock 2.4"+Chr$(10)
+	reqtext$+"needs at least 4 colours!"+Chr$(10)
+	gadgets$=" Goodbye! "+Chr$(0)
+
+	easy.EasyStruct\es_StructSize=SizeOf.EasyStruct
+	easy\es_Title=&title$
+	easy\es_TextFormat=&reqtext$
+	easy\es_GadgetFormat=&gadgets$
+
+	##[$FFDD] 0,easy,0,0
+
+.Error:
+
+	title$="Shit..."+Chr$(0)
+	reqtext$="Something fucked"+Chr$(10)
+	reqtext$+"up... Terminating"+Chr$(10)
+	reqtext$+"CharmClock V2.4"
+	gadgets$=" Goodbye! "+Chr$(0)
+
+	easy.EasyStruct\es_StructSize=SizeOf.EasyStruct
+	easy\es_Title=&title$
+	easy\es_TextFormat=&reqtext$
+	easy\es_GadgetFormat=&gadgets$
+
+	##[$FFDD] 0,easy,0,0
+ Return
+
+.Refresh:
+
+	Free Window 0
+
+	Window 0,WinX,WinY,WinOWidth,WinOHeight,(WinFlags OR $1000),"",0,1
+	BitMapOutput 0
+
+	SetMenu 0
+
+	WinHeight = InnerHeight
+	WinWidth = InnerWidth
+
+	Boxf 0,0,WinWidth,WinHeight,WinBackgPen MOD WinCols
+
+	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-Md,(WinHeight/2)-Mde,WinOutLPen MOD WinCols
+	Circlef WinWidth/2,WinHeight/2,(WinWidth/2)-5,(WinHeight/2)-6,WinBackPen MOD WinCols
+
+	If WinHeight >= 70 AND WinWidth >=85 Then x = 1 Else x = 5
+
+	For a = 0 To 59 Step x
+		xp=(WinWidth/2)+(x(a)*((WinWidth/2)-7))
+		yp=(WinHeight/2)+(y(a)*((WinHeight/2)-(8)))
+		Point xp,yp,WinPipsPen MOD WinCols
+		If a MOD 5 = 0
+			Point xp-1,yp,WinPipsPen MOD WinCols
+			Point xp+1,yp,WinPipsPen MOD WinCols
+			Point xp,yp-1,WinPipsPen MOD WinCols
+			Point xp,yp+1,WinPipsPen MOD WinCols
+		EndIf
+	Next a
+
+	Return
+
+.Update:
+
+	Delete:
+
+	WinBackPenm = WinBackPen MOD WinCols
+	xrad = WinWidth/2
+	yrad = WinHeight/2
+
+	xp1=xrad+(x1(OH)*(WinWidth/5))
+	yp1=yrad+(y1(OH)*(WinHeight/5))
+	xp2=xrad+(x2(OH)*(WinWidth/5))
+	yp2=yrad+(y2(OH)*(WinHeight/5))
+	xp3=xrad+(x(OH)*((WinWidth/3)-4))
+	yp3=yrad+(y(OH)*((WinHeight/3)-4))
+
+	Hour.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
+
+	Polyf 4,Hour,WinBackPen MOD WinCols
+	Poly	4,Hour,WinBackPen MOD WinCols
+
+	xp1=xrad+(x1(OM)*(WinWidth/5))
+	yp1=yrad+(y1(OM)*(WinHeight/5))
+	xp2=xrad+(x2(OM)*(WinWidth/5))
+	yp2=yrad+(y2(OM)*(WinHeight/5))
+	xp3=xrad+(x(OM)*(xrad-10))
+	yp3=yrad+(y(OM)*(yrad-10))
+
+	Minute.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
+
+	Polyf 4,Minute,WinBackPen MOD WinCols
+	Poly	4,Minute,WinBackPen MOD WinCols
+
+	If WinSecounds = True
+		Line xrad,yrad,xrad+(x(OS)*(xrad-10)),yrad+(y(OS)*(yrad-11)),WinBackPenm
+	EndIf
+
+	If WinHeight >= 70 AND WinWidth >=85
+
+		Blit 0,(WinWidth/2)-20,(WinHeight*5/8)
+		Blit 1,(WinWidth-26),(WinHeight/2)-4
+		If Alarm = True
+			If (((AlarmHour = Hours) AND (AlarmMinute <= m)) OR ((((AlarmHour + 1) MOD 24) = Hours) AND AlarmMinute > m))
+				OS = s AND 1
+				If OS = 0
+					Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
+				Else
+					Blit 2,(WinWidth/2)-20,(WinHeight*0.31)
+				EndIf
+			Else
+				Blit 2,(WinWidth/2)-20,(WinHeight*0.31)
+			EndIf
+		Else
+			Boxf (WinWidth/2)-20,(WinHeight*0.31),(WinWidth/2)+20,(WinHeight*0.31)+8,WinBackPen MOD WinCols
+		EndIf
+	EndIf
+
+	Draw:
+
+	WinHandPenm = WinHandPen MOD WinCols
+	WinSecsPenm = WinSecsPen MOD WinCols
+
+	xp1=xrad+(x1(h)*(WinWidth/5))
+	yp1=yrad+(y1(h)*(WinHeight/5))
+	xp2=xrad+(x2(h)*(WinWidth/5))
+	yp2=yrad+(y2(h)*(WinHeight/5))
+	xp3=xrad+(x(h)*((WinWidth/3)-4))
+	yp3=yrad+(y(h)*((WinHeight/3)-4))
+
+	Hour.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
+
+	Polyf 4,Hour,WinHandPenm
+	Poly	4,Hour,WinHandPenm
+
+	xp1=xrad+(x1(m)*(WinWidth/5))
+	yp1=yrad+(y1(m)*(WinHeight/5))
+	xp2=xrad+(x2(m)*(WinWidth/5))
+	yp2=yrad+(y2(m)*(WinHeight/5))
+	xp3=xrad+(x(m)*(xrad-10))
+	yp3=yrad+(y(m)*(yrad-10))
+
+	Minute.hand\x0=xrad,yrad,xp1,yp1,xp3,yp3,xp2,yp2
+
+	Polyf 4,Minute,WinHandPenm
+	Poly	4,Minute,WinHandPenm
+
+	If WinSecounds = True
+		Line xrad,yrad,xrad+(x(s)*(xrad-10)),yrad+(y(s)*(yrad-11)),WinSecsPenm
+	EndIf
+
+
+	BitMaptoWindow 0,0,0,0,0,0,WinWidth,WinHeight
+
+	OH = h : OM = m : OS = s
+
+	Return
+
+
+.Beep:
+	If WinSound = 3 AND ((OM = 15 AND OS = 0) OR (OM = 45 AND OS = 0))
+		Sound 0,3
+	EndIf
+	If WinSound >= 2 AND (OM = 30 AND OS = 0)
+		Sound 0,3
+	EndIf
+	If WinSound >= 1 AND (OM = 0 AND OS = 0)
+		Sound 0,3
+		##[$FE1B] 5
+		Sound 0,3
+		Pause = Pause - 5
+	EndIf
+	Return
+
+
+.AlarmSet:
+
+	PropGadget 0,10,10,$40,1,150,8
+	PropGadget 0,10,24,$40,2,150,8
+	TextGadget 0,10,60,0,3," SET "
+	TextGadget 0,150,60,0,4," CANCEL "
+	SetHProp 0,1,(AlarmHour/23),(1/8)
+	SetHProp 0,2,(AlarmMinute/59),(1/14)
+	Window 1,20,20,240,90,$142e,"Alarm Settings",0,1,0
+	WLocate 164,10:Print "Hours"
+	WLocate 164,24:Print "Minutes"
+	WLocate 10,42:Print "Alarm Time:"
+
+	Repeat
+		ev.l = Event
+		WLocate 104,42
+		TempHour.b = 24*HPropPot(0,1)
+		If TempHour < 10 Then Print "0"
+		Print TempHour:Print ":"
+		TempMinute.b = 60*HPropPot(0,2)
+		If TempMinute < 10 Then Print "0"
+		Print TempMinute
+	Until ev = $200 OR (ev = $40 AND GadgetHit >=3)
+		If ev = $40 AND GadgetHit = 3
+			AlarmHour = TempHour
+			AlarmMinute = TempMinute
+			Alarm = True
+			SubItem 0,4,2,0,0,"	On"
+			SubItem 0,2,2,0,1,"	Off"
+		EndIf
+
+	;Stop Times...
+
+	AlSMin = AlarmMinute + 5
+	If AlSMin > 59 Then AlSHour = AlarmHour + 1
+	AlSMin = AlSMin MOD 60
+	AlSHour = AlSHour MOD 24
+
+	Free Window 1
+	Use Window 0
+	Use BitMap 0
+	BitMapOutput 0
+	Return
+
+.AlarmBeep:
+	Sound 0,3
+	##[$FE1B] 5
+	Sound 0,3
+	Pause = Pause - 5
+	Return
+
+.SizePos:
+
+	Window 2,WinX,WinY,WinOWidth,WinOHeight,$100b,"Move/Size Me!",0,1
+
+	Repeat
+
+	WX = WindowX
+	WY = WindowY
+	WW = WindowWidth
+	WH = WindowHeight
+
+	Until Event = $200
+
+	If WW > 249 Then WinOWidth = 249 Else WinOWidth = WW
+	If WH > 249 Then WinOHeight = 249 Else WinOHeight = WH
+	WinX = WX
+	WinY = WY
+
+	Free Window 2
+
+	Gosub Refresh
+	Gosub Update
+
+	Return
+
+
+
+
+.SaveConfig:
+
+	If ReadMem(0,"Env:CharmClock.pre")
+		Gosub WriteIt
+	EndIf
+
+	If ReadMem(0,"EnvArc:CharmClock.pre")
+		Gosub WriteIt
+	EndIf
+
+	Use Window 0
+	BitMapOutput 0
+
+	Return
+
+.WriteIt:
+
+	FileOutput 0
+
+	NPrint WinX:NPrint WinY:NPrint WinOWidth:NPrint WinOHeight
+	NPrint WinOutLPen:NPrint WinBackPen:NPrint WinHandsPen
+	NPrint WinSecsPen:NPrint WinPipsPen:NPrint WinTextPen
+	NPrint WinDatePen:NPrint WinDateBackPen:NPrint WinBackgPen
+	NPrint WinSecounds:NPrint WinSound
+	NPrint AlarmHour:NPrint AlarmMinute
+	NPrint Alarm
+	NPrint WinCols:NPrint Priority:NPrint WinFlags
+
+	CloseFile 0
+
+	Return
+
+
+
+.ReadConfig:
+
+	If WriteMem(0,"Env:CharmClock.pre")
+		Gosub ReadIt
+	Else
+		If WriteMem(0,"EnvArc:CharmClock.pre")
+			Gosub ReadIt
+		EndIf
+	EndIf
+
+	If WinBitPlanes = 2
+		If WinCols = 8
+			Gosub Defaults
+		EndIf
+	EndIf
+
+	If Start = False
+		If WBWidth < WinWidth
+			WinWidth = 91
+		EndIf
+		If WBHeight < WinHeight
+			WinHeight = 91
+		EndIf
+		If WBHeight < WinY
+			WinY=10
+			WinX=WBWidth-(WinWidth+10)
+		EndIf
+		If WBWidth < WinX
+			WinX=WBWidth-(WinWidth+10)
+		EndIf
+		Use Window 0
+		BitMapOutput 0
+		Gosub Refresh
+		Gosub Update
+		Gosub InitMenu
+	EndIf
+
+	Return
+
+.ReadIt:
+
+	FileInput 0
+
+	WinX=Val(Edit$(5)):WinY=Val(Edit$(5)):WinOWidth=Val(Edit$(5)):WinOHeight=Val(Edit$(5))
+	WinOutLPen=Val(Edit$(5)):WinBackPen=Val(Edit$(5)):WinHandsPen=Val(Edit$(5))
+	WinSecsPen=Val(Edit$(5)):WinPipsPen=Val(Edit$(5)):WinTextPen=Val(Edit$(5))
+	WinDatePen=Val(Edit$(5)):WinDateBackPen=Val(Edit$(5)):WinBackgPen=Val(Edit$(5))
+	WinSecounds=Val(Edit$(5)):WinSound=Val(Edit$(5))
+	AlarmHour=Val(Edit$(5)):AlarmMinute=Val(Edit$(5))
+	Alarm=Val(Edit$(5))
+	WinCols=Val(Edit$(5)):Priority=Val(Edit$(5)):WinFlags=Val(Edit$(5))
+
+	CloseFile 0
+
+	;Stop times...
+
+	AlSMin = AlarmMinute + 5
+	If AlSMin > 59 Then AlSHour = AlarmHour + 1
+	AlSMin = AlSMin MOD 60
+	AlSHour = AlSHour MOD 24
+
+	Return
+
+
+
+.Defaults
+	WinX.w					 = 15
+	WinY.w					 = 340
+	WinOWidth.w			 = 115
+	WinOHeight.w			= 70
+	WinEvent.l			 = 0
+	WinOutLPen.b		 = 1
+	WinBackPen.b		 = 2
+	WinHandPen.b		 = 1
+	WinSecsPen.b		 = 3
+	WinPipsPen.b		 = 1
+	WinTextPen.b		 = 1
+	WinDatePen.b		 = 2
+	WinDateBackPen.b = 3
+	WinBackgPen.b		= 0
+	WinSecounds			= True
+	WinSound.b			 = 1
+	Priority.b			 = -128
+	AlarmHour.b	 = 0
+	AlarmMinute.b = 0
+	Alarm = False
+	WinCols = 4
+	WinFlags = $900
+
+	If WBHeight < WinY
+		WinY=10
+		WinX=WBWidth-(WinWidth+10)
+	EndIf
+
+	If Start = False
+		Gosub Refresh
+		Gosub Update
+		Gosub InitMenu
+	EndIf
+
+	Return
+
+.InitMenu:
+
+MenuChecked 0
+
+MenuTitle 0,0,"Project"
+	MenuItem 0,0,0,0,"About CharmClock"
+	MenuItem 0,0,0,1,"----------------"
+	MenuItem 0,0,0,2,"Reset To Default"
+	MenuItem 0,0,0,3,"Last Saved			"
+	MenuItem 0,0,0,4,"Save Settings	 "
+	MenuItem 0,0,0,5,"----------------"
+	MenuItem 0,0,0,6,"Quit"
+MenuTitle 0,1,"Settings"
+	MenuItem 0,0,1,0,"Outline Pen		"+Chr$(187)
+		If WinOutLPen = 0 Then	SubItem 0,4,1,0,0,"	Pen 0" Else SubItem 0,2,1,0,0,"	Pen 0"
+		If WinOutLPen = 1 Then	SubItem 0,4,1,0,1,"	Pen 1" Else SubItem 0,2,1,0,1,"	Pen 1"
+		If WinOutLPen = 2 Then	SubItem 0,4,1,0,2,"	Pen 2" Else SubItem 0,2,1,0,2,"	Pen 2"
+		If WinOutLPen = 3 Then	SubItem 0,4,1,0,3,"	Pen 3" Else SubItem 0,2,1,0,3,"	Pen 3"
+		If WinOutLPen = 4 Then	SubItem 0,4,1,0,4,"	Pen 4" Else SubItem 0,2,1,0,4,"	Pen 4"
+		If WinOutLPen = 5 Then	SubItem 0,4,1,0,5,"	Pen 5" Else SubItem 0,2,1,0,5,"	Pen 5"
+		If WinOutLPen = 6 Then	SubItem 0,4,1,0,6,"	Pen 6" Else SubItem 0,2,1,0,6,"	Pen 6"
+		If WinOutLPen = 7 Then	SubItem 0,4,1,0,7,"	Pen 7" Else SubItem 0,2,1,0,7,"	Pen 7"
+	MenuItem 0,0,1,1,"Background Pen "+Chr$(187)
+		If WinBackPen = 0	Then SubItem 0,4,1,1,0,"	Pen 0" Else SubItem 0,2,1,1,0,"	Pen 0"
+		If WinBackPen = 1	Then SubItem 0,4,1,1,1,"	Pen 1" Else SubItem 0,2,1,1,1,"	Pen 1"
+		If WinBackPen = 2	Then SubItem 0,4,1,1,2,"	Pen 2" Else SubItem 0,2,1,1,2,"	Pen 2"
+		If WinBackPen = 3	Then SubItem 0,4,1,1,3,"	Pen 3" Else SubItem 0,2,1,1,3,"	Pen 3"
+		If WinBackPen = 4	Then SubItem 0,4,1,1,4,"	Pen 4" Else SubItem 0,2,1,1,4,"	Pen 4"
+		If WinBackPen = 5	Then SubItem 0,4,1,1,5,"	Pen 5" Else SubItem 0,2,1,1,5,"	Pen 5"
+		If WinBackPen = 6	Then SubItem 0,4,1,1,6,"	Pen 6" Else SubItem 0,2,1,1,6,"	Pen 6"
+		If WinBackPen = 7	Then SubItem 0,4,1,1,7,"	Pen 7" Else SubItem 0,2,1,1,7,"	Pen 7"
+	MenuItem 0,0,1,2,"Hands Pen			"+Chr$(187)
+		If WinHandPen = 0	Then SubItem 0,4,1,2,0,"	Pen 0" Else SubItem 0,2,1,2,0,"	Pen 0"
+		If WinHandPen = 1	Then SubItem 0,4,1,2,1,"	Pen 1" Else SubItem 0,2,1,2,1,"	Pen 1"
+		If WinHandPen = 2	Then SubItem 0,4,1,2,2,"	Pen 2" Else SubItem 0,2,1,2,2,"	Pen 2"
+		If WinHandPen = 3	Then SubItem 0,4,1,2,3,"	Pen 3" Else SubItem 0,2,1,2,3,"	Pen 3"
+		If WinHandPen = 4	Then SubItem 0,4,1,2,4,"	Pen 4" Else SubItem 0,2,1,2,4,"	Pen 4"
+		If WinHandPen = 5	Then SubItem 0,4,1,2,5,"	Pen 5" Else SubItem 0,2,1,2,5,"	Pen 5"
+		If WinHandPen = 6	Then SubItem 0,4,1,2,6,"	Pen 6" Else SubItem 0,2,1,2,6,"	Pen 6"
+		If WinHandPen = 7	Then SubItem 0,4,1,2,7,"	Pen 7" Else SubItem 0,2,1,2,7,"	Pen 7"
+	MenuItem 0,0,1,3,"Secounds Pen	 "+Chr$(187)
+		If WinSecsPen = 0	Then SubItem 0,4,1,3,0,"	Pen 0" Else SubItem 0,2,1,3,0,"	Pen 0"
+		If WinSecsPen = 1	Then SubItem 0,4,1,3,1,"	Pen 1" Else SubItem 0,2,1,3,1,"	Pen 1"
+		If WinSecsPen = 2	Then SubItem 0,4,1,3,2,"	Pen 2" Else SubItem 0,2,1,3,2,"	Pen 2"
+		If WinSecsPen = 3	Then SubItem 0,4,1,3,3,"	Pen 3" Else SubItem 0,2,1,3,3,"	Pen 3"
+		If WinSecsPen = 4	Then SubItem 0,4,1,3,4,"	Pen 4" Else SubItem 0,2,1,3,4,"	Pen 4"
+		If WinSecsPen = 5	Then SubItem 0,4,1,3,5,"	Pen 5" Else SubItem 0,2,1,3,5,"	Pen 5"
+		If WinSecsPen = 6	Then SubItem 0,4,1,3,6,"	Pen 6" Else SubItem 0,2,1,3,6,"	Pen 6"
+		If WinSecsPen = 7	Then SubItem 0,4,1,3,7,"	Pen 7" Else SubItem 0,2,1,3,7,"	Pen 7"
+	MenuItem 0,0,1,4,"Pips Pen			 "+Chr$(187)
+		If WinPipsPen = 0 Then	SubItem 0,4,1,4,0,"	Pen 0" Else SubItem 0,2,1,4,0,"	Pen 0"
+		If WinPipsPen = 1 Then	SubItem 0,4,1,4,1,"	Pen 1" Else SubItem 0,2,1,4,1,"	Pen 1"
+		If WinPipsPen = 2 Then	SubItem 0,4,1,4,2,"	Pen 2" Else SubItem 0,2,1,4,2,"	Pen 2"
+		If WinPipsPen = 3 Then	SubItem 0,4,1,4,3,"	Pen 3" Else SubItem 0,2,1,4,3,"	Pen 3"
+		If WinPipsPen = 4 Then	SubItem 0,4,1,4,4,"	Pen 4" Else SubItem 0,2,1,4,4,"	Pen 4"
+		If WinPipsPen = 5 Then	SubItem 0,4,1,4,5,"	Pen 5" Else SubItem 0,2,1,4,5,"	Pen 5"
+		If WinPipsPen = 6 Then	SubItem 0,4,1,4,6,"	Pen 6" Else SubItem 0,2,1,4,6,"	Pen 6"
+		If WinPipsPen = 7 Then	SubItem 0,4,1,4,7,"	Pen 7" Else SubItem 0,2,1,4,7,"	Pen 7"
+	MenuItem 0,0,1,5,"Date Pen			 "+Chr$(187)
+		If WinDatePen = 0 Then SubItem 0,4,1,5,0,"	Pen 0" Else SubItem 0,2,1,5,0,"	Pen 0"
+		If WinDatePen = 1 Then SubItem 0,4,1,5,1,"	Pen 1" Else SubItem 0,2,1,5,1,"	Pen 1"
+		If WinDatePen = 2 Then SubItem 0,4,1,5,2,"	Pen 2" Else SubItem 0,2,1,5,2,"	Pen 2"
+		If WinDatePen = 3 Then SubItem 0,4,1,5,3,"	Pen 3" Else SubItem 0,2,1,5,3,"	Pen 3"
+		If WinDatePen = 4 Then SubItem 0,4,1,5,4,"	Pen 4" Else SubItem 0,2,1,5,4,"	Pen 4"
+		If WinDatePen = 5 Then SubItem 0,4,1,5,5,"	Pen 5" Else SubItem 0,2,1,5,5,"	Pen 5"
+		If WinDatePen = 6 Then SubItem 0,4,1,5,6,"	Pen 6" Else SubItem 0,2,1,5,6,"	Pen 6"
+		If WinDatePen = 7 Then SubItem 0,4,1,5,7,"	Pen 7" Else SubItem 0,2,1,5,7,"	Pen 7"
+	MenuItem 0,0,1,6,"Date Back Pen	"+Chr$(187)
+		If WinDateBackPen = 0 Then	SubItem 0,4,1,6,0,"	Pen 0" Else SubItem 0,2,1,6,0,"	Pen 0"
+		If WinDateBackPen = 1 Then	SubItem 0,4,1,6,1,"	Pen 1" Else SubItem 0,2,1,6,1,"	Pen 1"
+		If WinDateBackPen = 2 Then	SubItem 0,4,1,6,2,"	Pen 2" Else SubItem 0,2,1,6,2,"	Pen 2"
+		If WinDateBackPen = 3 Then	SubItem 0,4,1,6,3,"	Pen 3" Else SubItem 0,2,1,6,3,"	Pen 3"
+		If WinDateBackPen = 4 Then	SubItem 0,4,1,6,4,"	Pen 4" Else SubItem 0,2,1,6,4,"	Pen 4"
+		If WinDateBackPen = 5 Then	SubItem 0,4,1,6,5,"	Pen 5" Else SubItem 0,2,1,6,5,"	Pen 5"
+		If WinDateBackPen = 6 Then	SubItem 0,4,1,6,6,"	Pen 6" Else SubItem 0,2,1,6,6,"	Pen 6"
+		If WinDateBackPen = 7 Then	SubItem 0,4,1,6,7,"	Pen 7" Else SubItem 0,2,1,6,7,"	Pen 7"
+	MenuItem 0,0,1,7,"Text Pen			 "+Chr$(187)
+		If WinTextPen = 0 Then	SubItem 0,4,1,7,0,"	Pen 0" Else SubItem 0,2,1,7,0,"	Pen 0"
+		If WinTextPen = 1 Then	SubItem 0,4,1,7,1,"	Pen 1" Else SubItem 0,2,1,7,1,"	Pen 1"
+		If WinTextPen = 2 Then	SubItem 0,4,1,7,2,"	Pen 2" Else SubItem 0,2,1,7,2,"	Pen 2"
+		If WinTextPen = 3 Then	SubItem 0,4,1,7,3,"	Pen 3" Else SubItem 0,2,1,7,3,"	Pen 3"
+		If WinTextPen = 4 Then	SubItem 0,4,1,7,4,"	Pen 4" Else SubItem 0,2,1,7,4,"	Pen 4"
+		If WinTextPen = 5 Then	SubItem 0,4,1,7,5,"	Pen 5" Else SubItem 0,2,1,7,5,"	Pen 5"
+		If WinTextPen = 6 Then	SubItem 0,4,1,7,6,"	Pen 6" Else SubItem 0,2,1,7,6,"	Pen 6"
+		If WinTextPen = 7 Then	SubItem 0,4,1,7,7,"	Pen 7" Else SubItem 0,2,1,7,7,"	Pen 7"
+	MenuItem 0,0,1,8,"Win Back Pen	 "+Chr$(187)
+		If WinBackgPen = 0 Then	SubItem 0,4,1,8,0,"	Pen 0" Else SubItem 0,2,1,8,0,"	Pen 0"
+		If WinBackgPen = 1 Then	SubItem 0,4,1,8,1,"	Pen 1" Else SubItem 0,2,1,8,1,"	Pen 1"
+		If WinBackgPen = 2 Then	SubItem 0,4,1,8,2,"	Pen 2" Else SubItem 0,2,1,8,2,"	Pen 2"
+		If WinBackgPen = 3 Then	SubItem 0,4,1,8,3,"	Pen 3" Else SubItem 0,2,1,8,3,"	Pen 3"
+		If WinBackgPen = 4 Then	SubItem 0,4,1,8,4,"	Pen 4" Else SubItem 0,2,1,8,4,"	Pen 4"
+		If WinBackgPen = 5 Then	SubItem 0,4,1,8,5,"	Pen 5" Else SubItem 0,2,1,8,5,"	Pen 5"
+		If WinBackgPen = 6 Then	SubItem 0,4,1,8,6,"	Pen 6" Else SubItem 0,2,1,8,6,"	Pen 6"
+		If WinBackgPen = 7 Then	SubItem 0,4,1,8,7,"	Pen 7" Else SubItem 0,2,1,8,7,"	Pen 7"
+	MenuItem 0,0,1,9,"----------------"
+	MenuItem 0,0,1,10,"Window				 "+Chr$(187)
+		If WinCols = 4 Then SubItem 0,3,1,10,0,"	4 Colours" Else SubItem 0,1,1,10,0,"	4 Colours"
+		If WinCols = 8 Then SubItem 0,3,1,10,1,"	8 Colours" Else SubItem 0,1,1,10,1,"	8 Colours"
+		If Mde = 1 Then SubItem 0,3,1,10,2,"	Interlaced?" Else SubItem 0,1,1,10,2,"	Interlaced?"
+		If WinFlags = $900 OR WinFlags = $52b Then SubItem 0,3,1,10,3,"	Use Backdrop?" Else SubItem 0,1,1,10,3,"	Use Backdrop?"
+		If WinFlags = $800 OR WinFlags = $900 Then SubItem 0,3,1,10,4,"	Borderless?" Else SubItem 0,1,1,10,4,"	Borderless?"
+	MenuItem 0,0,1,11,"----------------"
+	MenuItem 0,0,1,12,"Position/Size..."
+	MenuItem 0,0,1,13,"----------------"
+	MenuItem 0,0,1,14,"Sound					"+Chr$(187)
+		If WinSound = 0 Then SubItem 0,4,1,14,0,"	Off" Else SubItem 0,2,1,14,0,"	Off"
+		If WinSound = 1 Then SubItem 0,4,1,14,1,"	Every Hour" Else SubItem 0,2,1,14,1,"	Every Hour"
+		If WinSound = 2 Then SubItem 0,4,1,14,2,"	Every 30 Min" Else SubItem 0,2,1,14,2,"	Every 30 Min"
+		If WinSound = 3 Then SubItem 0,4,1,14,3,"	Every 15 Min" Else SubItem 0,2,1,14,3,"	Every 15 Min"
+	MenuItem 0,0,1,15,"----------------"
+	MenuItem 0,0,1,16,"Secounds hand	"+Chr$(187)
+		If WinSecounds = True Then SubItem 0,4,1,16,0,"	On" Else SubItem 0,2,1,16,0,"	On"
+		If WinSecounds = False Then SubItem 0,4,1,16,1,"	Off" Else SubItem 0,2,1,16,1,"	Off"
+MenuTitle 0,2,"Alarm"
+	MenuItem 0,1,2,0,"Alarm					"+Chr$(187)
+		If Alarm = True Then SubItem 0,4,2,0,0,"	On " Else SubItem 0,2,2,0,0,"	On"
+		If Alarm = False Then SubItem 0,4,2,0,1,"	Off" Else SubItem 0,2,2,0,1,"	Off"
+	MenuItem 0,0,2,1,"Set Timer..."
+MenuTitle 0,3,"Task Priority"
+		If Priority = -128 Then MenuItem 0,4,3,0,"	-128" Else MenuItem 0,2,3,0,"	-128"
+		If Priority = -112 Then MenuItem 0,4,3,1,"	-112" Else MenuItem 0,2,3,1,"	-112"
+		If Priority =	-96 Then MenuItem 0,4,3,2,"	 -96" Else MenuItem 0,2,3,2,"	 -96"
+		If Priority =	-80 Then MenuItem 0,4,3,3,"	 -80" Else MenuItem 0,2,3,3,"	 -80"
+		If Priority =	-64 Then MenuItem 0,4,3,4,"	 -64" Else MenuItem 0,2,3,4,"	 -64"
+		If Priority =	-48 Then MenuItem 0,4,3,5,"	 -48" Else MenuItem 0,2,3,5,"	 -48"
+		If Priority =	-32 Then MenuItem 0,4,3,6,"	 -32" Else MenuItem 0,2,3,6,"	 -32"
+		If Priority =	-16 Then MenuItem 0,4,3,7,"	 -16" Else MenuItem 0,2,3,7,"	 -16"
+		If Priority =		0 Then MenuItem 0,4,3,8,"		 0" Else MenuItem 0,2,3,8,"		 0"
+
+MenuColour 0,0,1,Off	 ;These are "Menu Bars...."
+MenuColour 0,0,5,Off
+MenuColour 0,1,9,Off
+MenuColour 0,1,11,Off
+MenuColour 0,1,13,Off
+MenuColour 0,1,15,Off
+
+If Start = False
+	SetMenu 0
+EndIf
+
+Return
+
+.MakeCharmShape
+	Use BitMap 1
+	BitMapOutput 1
+	Locate 0,0
+	Colour WinTextPen MOD WinCols, WinBackPen MOD WinCols
+	Print "Charm"
+	GetaShape 0,0,0,40,8
+	Boxf 0,0,40,8,0
+	Locate 0,0
+	Print "Alarm"
+	GetaShape 2,0,0,40,8
+	Use BitMap 0
+	BitMapOutput 0
+Return
+
+.MakeDateShape
+	Use BitMap 1
+	BitMapOutput 1
+
+	da$=Date$(SystemDate)
+
+	If Days < 10
+		Colour WinDatePen MOD WinCols,WinDateBackPen MOD WinCols
+		Locate 0,1
+		Print " ",Days
+	EndIf
+
+	If Days >=10
+		Colour WinDatePen MOD WinCols,WinDateBackPen MOD WinCols
+		Locate 0,1
+		Print Days
+	EndIf
+
+	Line 0,7,16,7,WinDateBackPen MOD WinCols
+
+	GetaShape 1,0,7,16,9
+	Use BitMap 0
+	BitMapOutput 0
+Return

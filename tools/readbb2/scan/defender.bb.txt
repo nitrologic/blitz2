@@ -1,0 +1,2345 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/acidpd/defender/defender.bb,/Users/simon/Google Drive/amiga/w/disks/pddisks/pddisk1/defender/defender.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/pddisks/pddisk1/defender/defender.bb
+;
+If NumPars Then spatt=Val(Par$(1)):If spatt Then spatt-1
+;
+For k=1 To 100
+VWait:##[$FF89]
+Next
+
+Filter Off
+
+LoadBlitzFont 0,"defender.font"
+
+For k=1 To 16
+If k<>7
+	LoadSound k,"sound"+Str$(k)
+EndIf
+Next
+
+LoadSprites 0,"sprites1"
+
+LoadSprites 30,"scanner.sprites"
+
+;LoadShapes 0,"shapes3"
+##[$CD0F] 0,?shapes3
+
+For k=0 To 11
+If k>5
+	Handle k,0,ShapeHeight(k)/2
+Else
+	Handle k,ShapeWidth(k)-1,ShapeHeight(k)/2
+EndIf
+GetaSprite k+12,k
+Next
+
+LoadShapes 0,"shapes"
+##[$CD0F] 0,?shapes
+;LoadShapes 41,"shapes2"
+##[$CD0F] 41,?shapes2
+
+LoadShape 46,"littleship"
+LoadShape 47,"littlesmart"
+;
+BitMap 10,320,62,5
+LoadBitMap 10,"titlescreen.iff",3
+Scroll 0,0,280,62,20,0
+Boxf 0,0,19,63,0
+;
+LoadShape 24,"bullet"
+LoadShape 25,"bomb"
+LoadPalette 0,"palette"
+LoadPalette 2,"littleship"
+
+BitMap 0,16,16,3
+For k=1 To 7
+Read tc.w,bc.w
+Point 0,0,tc:Point 1,0,tc
+Point 0,1,bc:Point 1,1,bc
+GetaShape 29+k,0,0,2,2
+Next
+
+Data.w 6,6,3,2,3,1
+Data.w 1,1,4,4,5,5
+Data.w 3,0
+
+BitMap 0,16,16,1
+Point 0,0,1:Point 1,0,1:Point 0,1,1:Point 1,1,1
+GetaShape 40,0,0,2,2
+
+DecodeShapes 22:DecodeShapes 23
+
+NEWTYPE.exi
+;
+n.w
+o
+s
+;
+End NEWTYPE
+
+NEWTYPE.sta
+x.w
+y.w
+b.w
+End NEWTYPE
+
+Dim ex(100),ey(100),ei.exi(6)
+Dim hs.l(10),hs$(10)
+Dim sta.sta(32)
+
+For k=1 To 10
+Read hs(k),hs$(k)
+Next
+
+Data.l 10000
+Data$ "MAK"
+Data.l 9000
+Data$ "AXE"
+Data.l 8000
+Data$ "ROD"
+Data.l 7000
+Data$ "ALI"
+Data.l 6000
+Data$ "CAM"
+Data.l 5000
+Data$ "PAL"
+Data.l 4000
+Data$ "MON"
+Data.l 3000
+Data$ "AMI"
+Data.l 2000
+Data$ "ZAP"
+Data.l 1000
+Data$ "POW"
+;
+Repeat
+	Read a$
+	If a$
+		Read ei(a)\s
+		If WriteMem(0,a$+".adds")
+			FileInput 0
+			n=Cvq(Inkey$(4))
+			ei(a)\n=n,o
+			LoadShapes 50+o,a$+".frags"
+			For k=1 To n
+			ex(o)=Cvq(Inkey$(4)):ey(o)=Cvq(Inkey$(4))
+			o+1
+			Next
+			CloseFile 0
+		EndIf
+		a+1
+	EndIf
+Until a$=""
+
+Data$ hume
+Data.w 0
+Data$ lander
+Data.w 150
+Data$ mutant
+Data.w 200
+Data$ pod
+Data.w 1000
+Data$ swarmer
+Data.w 150
+Data$ bomber
+Data.w 250
+Data$ baiter
+Data.w 200
+Data$ ""
+
+Dim y.b(2047)
+
+If WriteMem(0,"mounts")
+	FileInput 0
+	For k=0 To 2047
+	y(k)=Asc(Inkey$)
+	Next
+	CloseFile 0:DefaultInput
+EndIf
+
+NEWTYPE.lander
+;
+*hume.obj
+pys.q
+;
+mxs.q
+mys.q
+;
+otb2.w
+otr2
+;
+End NEWTYPE
+
+NEWTYPE.swarmer
+;
+mo.w		;mode - 0 = happy - if angry, wait till timer goes down
+				;to be happy again
+xs.q
+ya.q		;y acceleration
+;
+t.w
+;
+otb2.w	;when angry!
+otr2		;when angry!
+;
+End NEWTYPE
+
+NEWTYPE.bomber
+;
+ya.q
+;
+End NEWTYPE
+
+NEWTYPE.baiter
+;
+t.w
+ot
+;
+End NEWTYPE
+
+NEWTYPE.obj
+;
+;this stuff for animation routine...
+;
+x.q
+y
+xs
+ys
+s.q	 ;shape#
+t.w	 ;timer	;always counted down!
+;
+;this is custom stuff...
+;
+f.w	 ;flags - type : >0 = blowup-able, 0 = dead, <0=not blowupable
+e		 ;explosion type
+;
+xs2.q ;for use by any...
+ys2
+;
+otb.w ;base for fire timer
+otr	 ;range
+;
+sx.w	;scanner x/y for old dot position
+sy.w	;
+;
+;here's a cheesy way of doing a 'C' like union....
+;
+lander.lander[0]
+swarmer.swarmer[0]
+bomber.bomber[0]
+baiter.baiter[0]
+;
+pad.b[24]
+;
+End NEWTYPE
+
+NEWTYPE.exp
+;
+x.q
+y
+xs
+ys
+s.w
+t
+a		 ;acd subtract when gone
+;
+End NEWTYPE
+
+NEWTYPE.laser
+;
+x.q
+y.q
+xs.q
+s.w
+;
+End NEWTYPE
+
+NEWTYPE.glow
+;
+c.q[3]
+;
+a.q
+cn.q
+;
+End NEWTYPE
+
+Dim List a.obj(300)
+Dim List b.exp(200)
+Dim List c.laser(3)
+Dim g.glow(10)
+
+Queue 0,700
+Queue 1,700
+
+For k=0 To 10:For j=0 To 2:g(k)\c[j]=3:Next j,k
+
+g(0)\c[0]=15:g(0)\a=.5,1
+g(1)\c[1]=15:g(1)\a=1,2
+g(2)\c[2]=15:g(2)\a=1 LSR 5
+g(3)\c[0]=15:g(3)\a=1,1
+g(4)\c[0]=15:g(4)\a=1.5,1
+
+USEPATH a()
+
+While AddLast(a())
+	\sx=160
+Wend
+ClearList a():hsx=160
+
+hsp=1 LSR 7
+
+VWait 250 ;wait for drive light to turn off!
+
+BLITZ:BlitzKeys On
+
+slit=44:If NTSC Then slit=28
+slit2=slit-16
+pmode=2:pmode2=1
+
+.intro
+;
+Gosub introsetup
+;
+DisplayOn
+;
+SetInt 5
+	ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
+	Gosub doint2
+	Green 9,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+	Gosub cycleshapes
+	g=0:Gosub hueadd
+	PushItem a():ResetList a()
+	While NextItem(a())
+		\s=QWrap(\s+.25,\xs2,\ys2)
+	Wend
+	PopItem a()
+End SetInt
+;
+Restore warpins
+For j=1 To 6
+Gosub alloff
+Read x,y,s,xs,n$
+AddLast a()
+\x=x+16,y,0,0:\xs2=s,xs
+\s=s:\e=j
+Gosub blowin
+Gosub allon
+Repeat
+	VWait
+	k=Asc(Inkey$)
+	If k=129 Then npl=0:Goto newgame
+	If k=130 Then npl=1:Goto newgame
+Until acd=0
+Locate x LSR 3-4,y LSR 3
+Print Centre$(n$,11)
+Next
+;
+Colour 4,0:Locate 7,13
+Print "PROGRAMMED IN BLITZ BASIC 2"
+Colour 2,0
+Locate 10,16
+Print "(F1)	 ONE PLAYER GAME"
+Locate 10,17
+Print "(F2)	 TWO PLAYER GAME"
+;
+pstats
+Locate 10,19:Colour 3,0
+Print "(F3) PLAYER 1:":Colour 2,0
+If pmode=1 Then Print "JOYSTICK" Else Print "KEYBOARD"
+Locate 10,20:Colour 3,0
+Print "(F4) PLAYER 2:":Colour 2,0
+If pmode2=1 Then Print "JOYSTICK" Else Print "KEYBOARD"
+;
+introwait
+j2=350
+Repeat
+VWait:j2-1
+i$=Inkey$
+Select Asc(i$)
+Case 129
+	npl=0:Pop Select:Goto newgame
+Case 130
+	npl=1:Pop Select:Goto newgame
+Case 131
+	pmode=3-pmode:Pop Select:Goto pstats
+Case 132
+	pmode2=3-pmode2:Pop Select:Goto pstats
+Case 133
+	paln=1-paln
+	For k=1 To 6
+	Green k,Blue(k),PalRGB(k),Palette(k)
+	Next:Pop Select:Goto introwait
+End Select
+Until j2=0
+;
+;blurb...
+;
+Gosub introsetup
+Restore blurb:Locate 0,1:Colour 4,0:Use BitMap 0
+Repeat
+Read i$
+If Len(i$)<3
+	Select i$
+	Case "*"
+		Locate 0,CursY+1.5
+	Case "!"
+	Default
+		Print "(":k=Val(i$)
+		Blit k,CursX LSL 3+8-ShapeWidth(k)/2,CursY LSL 3+4-ShapeHeight(k)/2
+		Locate CursX+2,CursY:Print ")"
+	End Select
+Else
+	Print i$
+EndIf
+Until i$="!"
+;
+DisplayOn
+;
+SetInt 5
+	Green 9,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+	Gosub cycleshapes
+	g=0:Gosub hueadd
+End SetInt
+;
+j2=500
+While j2
+	VWait:j2-1
+	;
+	k=Asc(Inkey$)
+	If k=129 Then npl=0:Goto newgame
+	If k=130 Then npl=1:Goto newgame
+	If Joyb(0) OR k<>-1 Then Goto intro
+Wend
+;
+;high score table!
+.hiscores
+;
+Gosub introsetup
+;
+Use BitMap 2:BlockScroll
+;
+Locate 15,2:Print "HALL OF FAME"
+Boxf 120,24,215,25,3
+;
+Colour 2,0
+For k=1 To 10
+Locate 10,k+5:Print hs$(k)
+Locate 23,k+5:Print RSet$(Str$(hs(k)),7)
+Next
+;
+DisplayOn
+;
+SetInt 5
+	ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
+	Gosub doint2
+	Green 9,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+	Green 10,g(1)\c[0],g(1)\c[1],g(1)\c[2]
+	Gosub cycleshapes
+	g=0:Gosub hueadd:g=1:Gosub hueadd
+End SetInt
+
+j=0:j2=350
+While j2
+	VWait:j2-1
+	;
+	k=Asc(Inkey$)
+	If k=129 Then npl=0:Goto newgame
+	If k=130 Then npl=1:Goto newgame
+	If Joyb(0) OR k<>-1 Then Goto intro
+	;
+	If j
+		j-1
+	Else
+		x3=Rnd(160)+96:y3=Rnd(100)+66:x4=Int(Rnd(3))+2
+		For j=1 To 16
+		Gosub alloff
+		AddFirst b()
+		b()\x=x3,y3
+		b()\xs=(Rnd-.5)LSL x4,(Rnd-.5)LSL x4,50+Rnd(o),48,0
+		Gosub allon
+		Next
+		j=Int(Rnd(16))+8
+	EndIf
+Wend
+Goto intro
+
+warpins
+Data 56,32,4,8
+Data$ "LANDER 150"
+Data 160,32,8,9
+Data$ "MUTANT 150"
+Data 264,32,9,13
+Data$ "POD 1000"
+Data 56,72,13,14
+Data$ "SWARMER 150"
+Data 160,72,14,18
+Data$ "BOMBER 250"
+Data 264,72,18,22
+Data$ "BAITER 200"
+
+blurb
+Data$ "PROTECT HUMANOIDS ","1"," FROM INVADING","*"
+Data$ "LANDERS ","4",". LANDERS WILL ATTEMPT TO","*"
+Data$ "STEAL HUMANOIDS IN ORDER TO MUTATE INTO","*"
+Data$ "DANGEROUS MUTANTS ","8",". WHEN ALL 10","*"
+Data$ "HUMANOIDS ARE LOST, YOU MUST FACE THE","*"
+Data$ "HAZARDOUS ENVIRONMENT OF HYPERSPACE!","*"
+Data$ "HUMANOIDS ARE REPLENISHED EVERY 5 WAVES.","*"
+Data$ "PODS ","9"," RELEASE DEADLY SWARMERS ","13","*"
+Data$ "WHEN DESTROYED.","*"
+Data$ "BOMBERS ","14"," RELEASE MINES ","25"," WHICH","*"
+Data$ "MUST BE AVOIDED.","*"
+Data$ "BAITERS ","18"," APPEAR IF YOU TAKE TOO LONG","*"
+Data$ "TO COMPLETE AN ATTACK WAVE."
+;
+Data$ "!"
+
+.newgame	;npl=number of players (1 or 0)
+;
+cmode=pmode:cmode2=pmode2
+;
+sco.l=0
+lsco.l=0
+sco2.l=0
+lsco2.l=0
+;
+nliv=2
+nliv2=3
+;
+nsmt=3
+nsmt2=3
+;
+pat=spatt
+pat2=0
+;
+nhum=10
+nhum2=10
+;
+flg=-1				;flag for print player number!
+;
+ply=0
+;
+Gosub shutup:Gosub gameon
+
+.newpattern
+;
+pat+1
+;
+If pat=1 OR pat MOD 5=0 Then nhum=10:spc=0
+;
+wlan=25:If pat<5 Then wlan=20:If pat=1 Then wlan=15
+nmut=0
+If spc
+	nmut=wlan:wlan=0
+EndIf
+;
+npod=3:If pat<3 Then npod=1:If pat=1 Then npod=0
+;
+nbom=6:If pat<3 Then nbom=3:If pat=1 Then nbom=0
+;
+nlan=0:nswa=0
+;
+land=512:lanc=0 ;If pat<10 Then land=768
+;
+baic=2048
+baid=1000-pat*70:If baid<512 Then baid=512
+;
+;difficulty bit.
+;
+lxsb=1:lxsr=0
+lysb=.5:lysr=0
+lpysb=.5:lpysr=0
+;
+lotb=100:lotr=100
+lotb2=50:lotr2=50
+;
+sxsb=1:sxsr=1
+sotb=80:sotr=100
+sotb2=40:sotr2=40
+;
+bxsb=1:bxsr=0
+botb=80:botr=100
+;
+batt=100
+batotb=50:batotr=20
+
+k2=pat:If k2>50 Then k2=50	;hardest level!
+;
+For k=1 To k2-1
+;
+;lander...
+;
+If lxsb<3 Then lxsb+.13
+lxsr+.025
+If lysb<2 Then lysb+.05
+lysr+.025
+If lpysb<2 Then lpysb+.1
+lpysr+.025
+;
+If lotb>20 Then lotb-5
+If lotr>20 Then lotr-2
+;
+If lotb2>10 Then lotb2-5
+If lotr2>10 Then lotr2-2
+;
+;swarmer...
+;
+If sxsb<2 Then sxsb+.05
+sxsr+.025
+If sotb>30 Then sotb-3
+If sotr>30 Then sotr-2
+;
+If sotb2>10 Then sotb2-4
+If sotr2>10 Then sotr2-2
+;
+;bomber...
+;
+If bxsb<3 Then bxsb+.1
+bxsr+.0125
+If botb>10 Then botb-4
+If botr>10 Then botr-2
+;
+;baiter...
+;
+If batt>25 Then batt-7
+If batotb>10 Then batotb-5
+If batotr-10 Then batotr-2
+;
+Next
+
+.newlife
+;
+Gosub makemounts:Gosub scancolour:Gosub scanclean
+;
+ClearList a():ClearList b()
+;
+act=0:acd=0:aaa=0:sca=0:Gosub addall
+;
+rx=48:y=96:s=0:x=rx:die=0:xs=0:hcl=0:spi=0:smb=0:upo=0
+mo=0:mo2=0:pdd=32
+;
+ClearList c()
+ShowSprite s,x,y,0
+;
+x3=((mo-864) LSR 4)&127
+Use Slice 0
+ShowB 3,x3-95,0
+Use Slice 2
+ShowB 4,mo,0
+Use Slice 1
+ShowB 5,mo2,0
+;
+If flg
+	flg=0
+	If npl
+		Gosub animoff:Gosub allstats
+		BitMapOutput 0:Colour 1,0
+		Locate 18,10
+		Print "PLAYER	",ply+1
+		BitMapOutput 2:Colour 1,7
+		For k=1 To 40
+		VWait:DisplayOn
+		Green 1,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+		Gosub cycleplayer
+		g=0:Gosub hueadd
+		Next:BlockScroll
+	EndIf
+EndIf
+;
+DisplayOn:Gosub animon
+
+.main
+While Joyb(0)=0
+	;
+	Repeat
+	Until frame<>oframe
+	oframe=frame
+	;
+	ResetList a()
+	;
+	act3=act
+	;
+	While act3
+		act3-1
+		If NextItem(a())
+			;
+			;check if shot...
+			;
+			If \f>0
+				If \x<336
+					;
+					If \f<>1 AND \f<>5
+						If RectsHit(\s,\x,\y,s,xp,yp)
+							If \f=6
+								If hsnd=0 Then hsnd=11
+								Gosub scanerase
+								k=41:sca+500:Gosub addbonus
+								\f=0:KillItem a():act-1:hcl+1:Goto isdone
+								;
+							Else
+								die=-1:Gosub blowup:Goto isdone
+							EndIf
+						EndIf
+					EndIf
+					;
+					MOVE #$0020,$dff09a
+					;
+					ResetList c()
+					While NextItem(c())
+						If SpritesHit(c()\s,c()\x,c()\y,\s,\x,\y)
+							;
+							KillItem c():Gosub blowup:Goto isdone
+							;
+						EndIf
+					Wend
+					;
+					MOVE #$c020,$dff09a
+					;
+				EndIf
+			EndIf
+			;
+			Select a()\f
+			;
+			Case 1
+				;
+				y3=y(mo+\x-12 AND 2047)+136
+				;
+				If QAbs(\y-y3)>2
+					If \y<y3
+						\ys=.25
+					Else
+						\ys=-.25
+					EndIf
+				Else
+					\ys=0
+				EndIf
+				;
+				\s+hsp:If \s=2 OR \s=4 Then \s-2
+				;
+			Case 2			;lander 1...cruising mountains...
+				;
+				;have I found my humanoid?
+				;
+				*hume.obj=\lander\hume
+				If *hume=0 OR *hume\f<>1
+					Gosub findhume
+				Else
+					If QAbs(\x-*hume\x AND 2047)<8 ;yeah! pick up!
+						;
+						;mean fire time!
+						;
+						Exchange \otb,\lander\otb2
+						Exchange \otr,\lander\otr2
+						;
+						;move me to front of list - I don't want
+						;to warp out!
+						;
+						MOVE #$0020,$dff09a
+						;
+						\xs=0,0
+						\f=3
+						;
+						KillItem a():PushItem a():AddFirst a():PopItem a()
+						;
+						MOVE #$c020,$dff09a
+						Pop Select:Goto isdone
+						;
+					Else
+						\s=QWrap(\s+.25,4,8)
+					EndIf
+				EndIf
+				;
+				x3=mo+\x-12 AND 2047
+				;
+				If QAbs(y(x3)+84-\y)>2
+					If \y<y(x3)+84
+						\ys=\ys2
+					Else
+						\ys=-\ys2
+					EndIf
+				Else
+					\ys=0
+				EndIf
+				Gosub fire
+				;
+			Case 3	;lander going in for pickup!
+				;
+				*hume.obj=\lander\hume
+				;
+				If *hume\f<>1		 ;hume still groovy?
+					Exchange \otb,\lander\otb2
+					Exchange \otr,\lander\otr2
+					\f=2:\xs=\xs2:Gosub findhume
+				Else
+					If \y<*hume\y-14	;still above hume?
+						\ys=\lander\pys
+						;
+						\xs=0
+						If QAbs(\x-*hume\x)>2
+							;correct x a bit
+							;
+							If \x<*hume\x
+								\xs=1
+							Else
+								If \x>*hume\x
+									\xs=-1
+								EndIf
+							EndIf
+						EndIf
+					Else
+						hsnd=3:hdly=0
+						*hume\xs=0,-\lander\pys:*hume\f=5
+						\xs=0,-\lander\pys:\f=4
+					EndIf
+				EndIf
+				Gosub fire
+				;
+			Case 4	;lander picking up hume
+				If \y<4 OR \y>210
+					*hume.obj=\lander\hume
+					If *hume\f=5
+						;make a mutant!
+						*hume\f=7
+						nmut+1
+						Gosub mutate
+						\ys=QAbs(\ys)
+					Else
+						Gosub scanerase
+						\f=0:act-1:KillItem a():wlan+1
+					EndIf
+					nlan-1:If nlan=0 Then lanc=0
+					Pop Select:Goto isdone
+				Else
+					Gosub fire
+				EndIf
+			Case 5	;hume going up with lander!
+			Case 6	;hume falling to ground.
+				;
+				If \y>=y(mo+\x-12 AND 2047)+136
+					If \y-\ys2>64
+						Gosub blowup:Pop Select:Goto isdone
+					Else
+						If hsnd=0 Then hsnd=12
+						\f=1:k=45:sca+250:Gosub addbonus
+					EndIf
+				EndIf
+				;
+			Case 7	;suicide humanoid!
+				;
+				Gosub blowup:Pop Select:Goto isdone
+				;
+			Case 8	;mutant
+				;
+				;calc correct x speed
+				;
+				If (\x-xp AND 2047)>1024
+					\xs=\xs2	;go rite
+					If s Then Gosub yaway Else Gosub yhome
+				Else
+					\xs=-\xs2
+					If s Then Gosub yhome Else Gosub yaway
+				EndIf
+				If Rnd<.25 Then \ys=-\ys
+				;
+				Gosub fire
+				;
+			Case 9	;pod
+				;
+				\s=QWrap(\s+.25,9,13)
+				;
+			Case 10 ;swarmer
+				;
+				If \y<yp
+					\ys=QLimit(\ys+\swarmer\ya,-3,3)
+				Else
+					\ys=QLimit(\ys-\swarmer\ya,-3,3)
+				EndIf
+				;
+				If \swarmer\mo	;angry?
+					If \swarmer\t
+						\swarmer\t-1
+						Gosub fire
+					Else
+						\swarmer\mo=0
+						Gosub swarmswap
+					EndIf
+				Else	;happy! go angry?
+					xd=QAbs(\x-xp)
+					If xd<320
+						If (\x-xp AND 2047)>1024	;swarmer is left of me!
+							If xd>200 AND s>0
+								\xs=QAbs(\xs)
+								\swarmer\xs=QAbs(\swarmer\xs)
+								Gosub sgoangry
+							Else
+								If s=0 Then Gosub fire
+							EndIf
+						Else	;swarmer is to right
+							If xd>200 AND s=0
+								\xs=-QAbs(\xs)
+								\swarmer\xs=-QAbs(\swarmer\xs)
+								Gosub sgoangry
+							Else
+								If s Then Gosub fire
+							EndIf
+						EndIf
+					EndIf
+				EndIf
+				;
+			Case 11 ;bomber!
+				;
+				\ys+\bomber\ya
+				;
+				If QAbs(\ys)>2
+					k=(Rnd/100+.01)
+					If \bomber\ya>0
+						\bomber\ya=-k
+					Else
+						\bomber\ya=k
+					EndIf
+				EndIf
+				;
+				\s=QWrap(\s+.0625,14,18)
+				;
+				Gosub bomb
+				;
+			Case 12 ;baiter
+				;
+				If \baiter\t
+					\baiter\t-1
+				Else
+					\baiter\t=\baiter\ot
+					Gosub baitercalc
+				EndIf
+				\s=QWrap(\s+.25,18,22):Gosub fire
+				;
+			Case -1 ;bullet/bomb
+				If \t<0 OR \y<8
+					\f=0:act-1:KillItem a()
+					Pop Select:Goto isdone
+				Else
+					If RectsHit(24,\x,\y,s,xp,yp)
+						die=-1
+					EndIf
+				EndIf
+			Case -2 ;bonus
+				If \t<0
+					\f=0:act-1:KillItem a()
+					Pop Select:Goto isdone
+				Else
+					If \s<45 Then \s=QWrap(\s+.125,41,45)
+				EndIf
+			End Select
+			;
+			.scanner
+			If \e>=0 AND \e<7 ;plot on scanner
+				x3=((\x+864) LSR 4)&127+95:y3=Int(\y LSR 3)
+				If x3<>\sx OR y3<>\sy
+					Gosub alloff
+					Use BitMap 2
+					BlitMode EraseMode
+					Blit 30,\sx,\sy
+					BlitMode CookieMode
+					Blit \e+30,x3,y3
+					\sx=x3:\sy=y3
+					Use BitMap db
+					Gosub allon
+				EndIf
+			EndIf
+			;
+			isdone
+			;
+		EndIf
+	Wend
+	;
+	;
+	;**************** OUTSIDE LOOP STUFF ******************
+	;
+	.outside
+	;
+	If sca
+		sco+sca:sca=0:Gosub score
+	EndIf
+	;
+	;space?
+	;
+	If nhum=0
+		;
+		cmode|4:Gosub alloff
+		ClearList a():ClearList c()
+		Use Slice 0:Green 9,0,0,0:Use Slice 1
+		Gosub scanclean
+		act=0:aaa=0:acd=0
+		mox2=-4:moud=0:Gosub allon
+		;
+		Sound 14,15
+		;
+		Repeat
+			If moud
+				moud-1
+			Else
+				moud=16:If Rnd<.1 Then Sound 14,15
+				Gosub alloff
+				Use BitMap 4
+				Point mo+mox2,y(mo+mox2 AND 2047),0
+				Point mo+mox2+1,y(mo+mox2+1 AND 2047),0
+				Point mo+mox2+2,y(mo+mox2+2 AND 2047),0
+				Point mo+mox2+3,y(mo+mox2+3 AND 2047),0
+				Use BitMap db
+				Gosub allon
+				;
+				For k=1 To 3
+				Gosub alloff
+				If AddFirst(b())
+					b()\x=mox2+17,y(mo+mox2+1 AND 2047)+128
+					b()\xs=(Rnd-.5)LSL 2,(Rnd-.5)LSL 4
+					b()\s=Rnd(o)+50,24,0
+				EndIf
+				Gosub allon
+				Next
+				mox2+4
+			EndIf
+		Until mox2>=324
+		;
+		Repeat
+		Until NOT FirstItem(b())
+		;
+		Gosub alloff
+		spc=-1:nhum=-1:cmode&3:Gosub makemounts
+		nmut+nlan+wlan:nlan=0:wlan=0
+		Gosub addall
+		Gosub allon
+		;
+	EndIf
+	;
+	.died
+	If die
+		;
+		Gosub shutup:ocmode=cmode
+		cmode=0
+		For k=1 To 3
+		VWait 5
+		Green 17,15,15,15:Green 18,15,15,15:Green 19,15,15,15
+		VWait 5
+		Green 17,0,0,0:Green 18,0,0,0:Green 19,0,0,0
+		Next
+		;
+		Gosub alloff
+		ClearList a():ClearList b():ClearList c()
+		;
+		x3=40:If NTSC Then x3=30
+		;
+		aaa=0:act=0:acd=0
+		;
+		For k=1 To x3
+		If AddLast(b())
+			x3=(Rnd-.5)LSL 3:y3=(Rnd-.5)LSL 2
+			b()\x=xp,yp,x3+xs,y3,40,128,1:acd+1
+		EndIf
+		Next
+		;
+		Gosub allon:Sound 15,15
+		Repeat:Until acd=0
+		Gosub animoff
+		cmode=ocmode
+		;
+		If npl
+			If nliv2
+				If nliv=0 Then Gosub playerover
+				Gosub swapplayer
+			Else
+				If nliv=0 Then Goto gameover
+			EndIf
+			nliv-1
+		Else
+			If nliv=0 Then Goto gameover
+			nliv-1
+		EndIf
+		;
+		DisplayOff
+		flg=-1:If pat Then Goto newlife Else pat=spatt:Goto newpattern
+		;
+		gameover
+		;
+		BitMapOutput 0:Colour 1,0
+		Gosub gameover2
+		;
+		If sco2>sco Then Gosub swapplayer:Gosub allstats
+		;
+		Green 2,15,15,15:x2=0:BitMapOutput 0
+		;
+		For j=0 To npl
+		For k=1 To 10
+		If sco>hs(k)
+			BlockScroll:Colour 1,0
+			Locate 9,10
+			Print "CONGRATULATIONS PLAYER ",ply+1,"!"
+			Locate 3,12
+			Print "YOU HAVE QUALIFIED FOR THE HALL OF FAME"
+			Locate 8,14
+			Print "PLEASE ENTER YOUR INITIALS:"
+			n$="":x=0:Colour 2,0
+			;
+			Repeat:Until Inkey$=""	;flush keyboard queue!
+			;
+			Gosub acursor
+			Repeat
+				VWait
+				Green 1,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+				Gosub cycleplayer
+				Gosub cycleshapes
+				g=0:Gosub hueadd
+				i$=UCase$(Inkey$)
+				If i$>=" " AND i$<="Z" AND x<3
+					Locate 21+x,16:Print i$:n$=Left$(n$,2)+i$
+					If x<2 Then Gosub acursor:x+1:Gosub acursor
+				EndIf
+				If i$=Chr$(8) AND x>0
+					If Len(n$)=3
+						n$=Left$(n$,2)
+					Else
+						Gosub acursor:x-1:Gosub acursor:n$=Left$(n$,x)
+					EndIf
+					Locate 21+x,16:Print " "
+			 EndIf
+			Until i$=Chr$(13)
+			For x=9 To k Step -1
+			hs(x+1)=hs(x):hs$(x+1)=hs$(x)
+			Next
+			hs(k)=sco:hs$(k)=n$:x2=-1
+			Pop For:Goto onedone
+		EndIf
+		Next
+		onedone:Gosub swapplayer:Gosub allstats
+		Next
+		If x2 Then Goto hiscores Else Goto intro
+		;
+		acursor
+		Boxf (21+x)LSL 3,136,(21+x)LSL 3+7,137,-1
+		Return
+		;
+		playerover
+		BitMapOutput 0:Colour 1,0
+		Locate 18,10
+		Print "PLAYER	",ply+1
+		;
+		gameover2
+		Locate 18,12
+		Print "GAME OVER"
+		For k=1 To 150
+		VWait
+		Green 1,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+		Gosub cycleplayer
+		g=0:Gosub hueadd
+		Next
+		Colour 1,7:BitMapOutput 2
+		Return
+		;
+	EndIf
+	;
+	.patdone
+	;
+	If wlan | nlan | nmut | npod | nswa | nbom=0
+		;
+		;pattern wiped out!
+		;
+		If pdd
+			pdd-1
+		Else
+			;
+			Repeat:Until smb=0:Gosub shutup
+			;
+			Gosub animoff
+			;
+			BitMapOutput 0:Colour 1,0
+			Locate 12,8
+			Print "ATTACK WAVE ",pat," COMPLETE"
+			If nhum>0
+				Colour 2,0
+				Locate 17,10:sca=pat:If sca>5 Then sca=5
+				sca*100:Print "BONUS X ",sca
+				For k=1 To nhum
+				Blit 1,k*16+96,96:sco+sca
+				Next
+			EndIf
+			;
+			BitMapOutput 2:Colour 1,7:Gosub score:sca=0
+			;
+			For k=1 To 200
+			VWait
+			Green 1,g(0)\c[0],g(0)\c[1],g(0)\c[2]
+			Green 2,g(1)\c[0],g(1)\c[1],g(1)\c[2]
+			Gosub cycleplayer
+			g=0:Gosub hueadd:g=1:Gosub hueadd
+			Next:BlockScroll:DisplayOff
+			;
+			Goto newpattern
+			;
+		EndIf
+	EndIf
+	;
+	;add landers?
+	;
+	If lanc=0
+		If aaa=0 AND nlan<15
+			If wlan
+				If wlan<=5 Then na=wlan Else na=5
+				nlan+na:wlan-na:Gosub addlanders
+			EndIf
+			lanc=land
+		EndIf
+	EndIf
+	;
+	;add baiter ?
+	;
+	If baic=0
+		If aaa=0
+			baic=baid:If baid>64 Then baid-8
+			Gosub addbaiter
+		EndIf
+	EndIf
+	;
+	;update dude on scanner!
+	;
+	x3=((mo-864) LSR 4)&127
+	Gosub alloff
+	Use Slice 0
+	ShowB 3,x3-95,0
+	ShowSprite 30,149+xp LSR 4,yp LSR 3,0
+	Use Slice 1
+	Gosub allon
+	;
+	If RawStatus($44)
+		If lsmb AND nsmt>0
+			;
+			nsmt-1:Gosub shipssmarts
+			;
+			;smart bomb!
+			;
+			smb=-1:msnd=14
+			;
+			ResetList a():act3=act
+			While NextItem(a()) AND act3
+				act3-1
+				If \x<336
+					If \f<>1 AND \f<>5 AND \f<>6 AND \f<>-1
+						Gosub blowup
+					EndIf
+				EndIf
+			Wend
+			lsmb=0
+			spi+1:smb=16
+		EndIf
+	Else
+		lsmb=-1
+	EndIf
+	;
+	If hcl
+		If y+24>=y(mo+xp-12 AND 2047)+136
+			;
+			Gosub alloff
+			;
+			k=41:x3=xp-12:y3=y+24:sca+500:Gosub addbonus2
+			;
+			If hsnd=0 Then hsnd=12
+			AddFirst a():\x=xp,y(mo+xp-12 AND 2047)+136
+			Gosub addahume:\sx=hsx,hsy
+			hcl-1
+			;
+			Gosub allon
+			;
+		Else
+			x3=((xp+864) LSR 4)&127+95:y3=Int((y+28) LSR 3)
+			If x3<>hsx OR y3<>hsy
+				Gosub alloff
+				Use BitMap 2
+				BlitMode EraseMode
+				Blit 30,hsx,hsy
+				BlitMode CookieMode
+				Blit 30,x3,y3
+				hsx=x3:hsy=y3
+				Use BitMap db
+				Gosub allon
+			EndIf
+		EndIf
+	EndIf
+	;
+	Gosub mcolour ;cycle mountains
+	;
+	Gosub cycleshapes
+	;
+	Gosub cycleplayer
+	;
+;	If Rnd<.1 ;do something to stars
+		If Rnd<.5 ;move a star
+			k=Rnd(nsta)+1
+			Gosub alloff:Use BitMap sta(k)\b
+			Point sta(k)\x,sta(k)\y,0:Point sta(k)\x+320,sta(k)\y,0
+			x2=Rnd(320):If k<17 Then y2=Rnd(112) Else y2=Rnd(88)
+			c=Rnd(3)+1
+			Point x2,y2,c:Point x2+320,y2,c:sta(k)\x=x2,y2
+			Use BitMap db:Gosub allon
+		Else			;change a colour
+			Gosub calckrgb
+			k=Rnd(3)+10
+			Green k,kr,kg,kb
+		EndIf
+;	EndIf
+	;
+	;now for sounds...
+	;
+	.sounds
+	;
+	If esnd
+		Sound esnd,1:esnd=0
+	EndIf
+	;
+	If hdly
+		hdly-1
+	Else
+		If hsnd
+			Sound hsnd,2:hsnd=0:hdly=32
+		EndIf
+	EndIf
+	;
+	If th
+		If ths=0 Then LoopSound 1,4,32:ths=-1
+	Else
+		If ths Then Volume 4,0:ths=0
+	EndIf
+	;
+	If msnd
+		Sound msnd,8:msnd=0
+	EndIf
+	;
+Wend
+
+End
+
+;******************* SUBROUTINES ********************
+
+calckrgb
+kr=Rnd LSL 4:kg=Rnd LSL 4:kb=Rnd LSL 4
+Return
+
+shutup
+Volume 15,0,0,0,0
+esnd=0:hsnd=0:ths=0
+Return
+
+.introsetup
+Gosub freeall
+;
+BitMap 0,352,232,3
+BitMap 1,352,232,3
+BitMap 2,320,232,3:BitMapOutput 2:Colour 1,0
+;
+Slice 0,slit,320,231,$fff0,5,8,32,320,320
+Use SetCycle 3:Show 10
+;
+Slice 1,slit+64,320,168,$fff2,6,8,32,352,320
+Use SetCycle 0:Gosub paln
+;
+Green 10,15,6,8:Green 11,8,6,15:Green 12,15,15,15
+ShowF 0:ShowB 2
+;
+ClearList a():ClearList b()
+act=0:acd=0:aaa=0:xs=0:xa=0:smb=0
+;
+Return
+
+cycleshapes
+Green 7,g(3)\c[0],g(3)\c[1],g(3)\c[2]
+g=3:Goto hueadd
+
+.cycleplayer
+Gosub alloff
+Use Slice 0
+Green 1,g(4)\c[0],g(4)\c[1],g(4)\c[2]
+Use Slice 1
+Gosub allon
+g=4:Goto hueadd
+
+.dispon
+DisplayOn
+Return
+
+scanclean
+Use BitMap 2
+Boxf 0,0,319,27,7
+Boxf 160-65,0,160+64,27,0
+Gosub allstats
+Use BitMap db:Return
+
+mcolour
+If spc
+Else
+	Green 9,g(2)\c[0],g(2)\c[1],g(2)\c[2]
+	Gosub alloff
+	Use Slice 0
+	Green 9,g(2)\c[0]LSR 1,g(2)\c[1]LSR 1,g(2)\c[2]LSR 1
+	Use Slice 1
+	Gosub allon
+	g=2:Gosub hueadd
+EndIf
+Return
+
+.hueadd
+;
+USEPATH g(g)
+;
+cn2=\cn
+c2=\c[cn2]+\a:\c[cn2]=c2
+;
+If c2>=15 OR c2<=3
+	If \a>0
+		\cn=QWrap(cn2-1,0,3)
+	Else
+		\cn=QWrap(cn2+2,0,3)
+	EndIf
+	\a=-\a
+EndIf
+Return
+
+USEPATH a()
+
+addall
+na=nhum:Gosub addhumes
+na=npod:Gosub addpods
+na=nlan:Gosub addlanders
+na=nbom:Gosub addbombers
+na=nmut:Gosub addmutants
+na=nswa:Gosub addswarmers
+Return
+
+.swapplayer
+;
+If npl
+	ply=1-ply
+	;
+	Exchange sco,sco2
+	Exchange lsco,lsco2
+	Exchange nliv,nliv2
+	Exchange nsmt,nsmt2
+	Exchange pat,pat2
+	Exchange spc,spc2
+	Exchange cmode,cmode2
+	;
+	Exchange wlan,wlan2
+	Exchange nlan,nlan2
+	Exchange nhum,nhum2
+	Exchange nmut,nmut2
+	Exchange npod,npod2
+	Exchange nswa,nswa2
+	Exchange nbom,nbom2
+	Exchange land,land2
+	Exchange lanc,lanc2
+	;
+	Exchange baic,baic2
+	Exchange baid,baid2
+	;
+EndIf
+;
+Return
+
+allstats
+If npl
+	Gosub stats
+	Gosub swapplayer
+	Colour 6,7
+	Gosub stats
+	Gosub swapplayer
+	Colour 1,7
+Else
+	Gosub stats
+EndIf
+Return
+
+.stats
+Gosub shipssmarts
+;
+score
+If sco-lsco>=10000
+	lsco+10000
+	nliv+1:nsmt+1:Gosub shipssmarts
+	Sound 16,8
+EndIf
+If ply
+	Locate 30,0
+Else
+	Locate 2,0
+EndIf
+;
+Print RSet$(Str$(sco),8)
+;
+Return
+
+shipssmarts
+If ply
+	lsx=296
+Else
+	lsx=72
+EndIf
+;
+Gosub alloff:Use BitMap 2
+;
+lss=nliv:lss2=0:lsy=10:lsx2=lsx
+While lss
+	lss-1
+	Blit 46,lsx,lsy
+	lsx-8:lss2+1
+	If lss2=8
+		lsx=lsx2
+		lsy+4
+	EndIf
+	If lss2=16 Then lss=0
+Wend
+;
+lss=nsmt:lss2=0:lsy=18:lsx=lsx2
+While lss
+	lss-1
+	Blit 47,lsx,lsy
+	lsx-8:lss2+1
+	If lss2=8
+		lsx=lsx2
+		lsy+4
+	EndIf
+	If lss2=16 Then lss=0
+Wend
+;
+If lss2<16
+	BlitMode SolidMode
+	Blit 47,lsx,lsy
+	BlitMode CookieMode
+EndIf
+;
+Use BitMap db:Gosub allon
+;
+Return
+
+.addbonus
+;
+x3=\x:y3=\y
+;
+addbonus2
+If aaa Then Return
+;
+x4=Rnd LSR 1:y4=Rnd LSR 1
+If x3>176 Then x4=-x4
+If y3>104 Then y4=-y4
+;
+Gosub alloff:PushItem a()
+;
+If AddLast(a())
+	;
+	\x=x3,y3,x4+xs,y4
+	;
+	\f=-2:\s=k:\e=-1
+	;
+	\t=64
+	;
+	act+1
+	;
+EndIf
+;
+PopItem a():Gosub allon
+;
+Return
+
+sgoangry
+\swarmer\t=40
+\swarmer\mo=-1:esnd=10
+;
+swarmswap
+Exchange \otb,\swarmer\otb2
+Exchange \otr,\swarmer\otr2
+Exchange \xs,\swarmer\xs
+;
+rndfire
+\t=Rnd(\otr)+\otb
+Return
+
+bomb
+;
+If \t<0
+	;
+	Gosub rndfire:If aaa Then Return
+	;
+	If \x<336
+		;
+		x3=\x:y3=\y
+		Gosub alloff:PushItem a()
+		;
+		If AddLast(a())
+			\x=x3,y3,0,0
+			\f=-1:\e=-1:\s=25:\t=96
+			act+1
+		EndIf
+		;
+		PopItem a():Gosub allon
+		;
+	EndIf
+	;
+EndIf
+Return
+
+.fire
+;
+If \t<0
+	;
+	Gosub rndfire:If aaa Then Return
+	;
+	If \x<336
+		;
+		x3=\x:y3=\y
+		xd=xp-x3:yd=yp-y3
+		;
+		If QAbs(xd)>QAbs(yd)
+			yd=yd/QAbs(xd):xd=Sgn(xd)
+		Else
+			xd=xd/QAbs(yd):yd=Sgn(yd)
+		EndIf
+		;
+		Gosub alloff:PushItem a()
+		;
+		If AddLast(a())
+			esnd=8
+			\x=x3,y3
+			\xs=xd LSL 1+xs,yd LSL 1
+			\f=-1:\e=-1:\s=24:\t=128
+			act+1
+		EndIf
+		;
+		PopItem a():Gosub allon
+		;
+	EndIf
+	;
+EndIf
+Return
+
+baitercalc
+;
+If (\x-xp AND 2047)>1024	;left of player
+	xd=QAbs(xp-\x)
+Else	;rite of player
+	xd=-QAbs(xp-\x)
+EndIf
+;
+yd=yp-16:If y3>yp Then yd=yp+16
+yd-\y
+;
+If QAbs(xd)>QAbs(yd)
+	yd=yd/QAbs(xd):xd=Sgn(xd)
+Else
+	xd=xd/QAbs(yd):yd=Sgn(yd)
+EndIf
+;
+\xs=xd LSL 1+xs,yd LSL 1
+;
+Return
+
+.addbaiter
+;
+x3=Rnd(320)+16:y3=Rnd(200)+16
+;
+Gosub alloff:PushItem a()
+;
+If AddLast(a())
+	\x=x3,y3,0,0
+	\f=12:\e=6:\s=18
+	;
+	\otb=batotb,Rnd(batotr):Gosub rndfire
+	;
+	\baiter\t=0,batt
+	;
+	Gosub blowin
+EndIf
+;
+PopItem a():Gosub allon
+;
+Return
+
+.yhome
+If \y<yp Then \ys=\ys2 Else \ys=-\ys2
+Return
+
+.yaway
+If \y<yp
+	If QAbs(\x-xp)LSR 2>QAbs(\y-yp)
+		\ys=-\ys2
+	Else
+		\ys=\ys2
+	EndIf
+Else
+	If QAbs(\x-xp)LSR 2>QAbs(\y-yp)
+		\ys=\ys2
+	Else
+		\ys=-\ys2
+	EndIf
+EndIf
+Return
+
+.findhume
+;
+If nhum
+	PushItem a():ResetList a():k=Int(Rnd(nhum))
+	While NextItem(a())
+		If a()\f=1
+			k-1
+			If k<0	;pick this one!
+				*hume.obj=a()
+				PopItem a():a()\lander\hume=*hume
+				Return
+			EndIf
+		EndIf
+	Wend
+	PopItem a()
+EndIf
+a()\lander\hume=0
+Return
+
+.addhumes
+;
+For j=1 To na
+AddFirst a()
+;
+\x=Rnd(2048)
+\y=y(\x-12 AND 2047)+136
+Gosub addahume
+;
+Next
+Return
+
+addahume
+;
+\xs=(Rnd-.5)ASR 2,0
+;
+\f=1	;humanoid
+\s=0:If \xs<0 Then \s=2
+\e=0:act+1
+Return
+
+.addpods
+For j=1 To na
+AddLast a()
+\x=Rnd(352)
+\y=Rnd(192)
+\xs=(Rnd-.5) LSL 1
+\ys=Rnd+.125:If Rnd>.5 Then \ys=-\ys
+;
+\f=9
+\s=9
+\e=3
+;
+Gosub blowin
+Next
+Return
+
+.addswarmers
+For j=1 To na
+AddLast a()
+x3=Rnd(320)+1024:y3=Rnd(192)
+Gosub addswarmer
+Gosub blowin
+Next
+Return
+
+.addswarmer
+\x=x3,y3
+\xs=Rnd(sxsr)+sxsb:If Rnd<.5 Then \xs=-\xs
+\ys=Rnd+1:If Rnd>.5 Then \ys=-\ys
+;
+\f=10
+\s=13
+\e=4
+;
+\otb=sotb,Rnd(sotr):Gosub rndfire
+;
+\swarmer\mo=0
+\swarmer\xs=\xs LSL 1
+\swarmer\ya=Rnd/20+.01
+\swarmer\otb2=sotb2,Rnd(sotr2)
+;
+Return
+
+.addbombers
+xd=0
+For j=1 To na
+AddLast a()
+;
+If xd
+	xd-1
+Else
+	xb3=Rnd(1376)+672
+	xb4=Rnd(bxsr)+bxsb:If Rnd>.5 Then xb4=-xb4
+	xd=2
+EndIf
+;
+\x=xb3 AND 2047,Rnd(192):xb3+64
+\xs=xb4,Rnd+.5
+;
+\f=11
+\s=14
+\e=5
+;
+\otb=botb,Rnd(botr):Gosub rndfire
+;
+\bomber\ya=(Rnd/100)+.01
+;
+Gosub blowin
+;
+Next
+Return
+
+mutate
+\f=8:\s=8:\e=2
+\xs2=\lander\mxs:\ys2=\lander\mys
+Return
+
+.addmutants
+lios=0
+For j=1 To na
+Gosub addlander
+If \x<336 Then \x+336
+\y=Rnd(192)
+Gosub mutate
+\otb=\lander\otb2
+\otr=\lander\otr2
+Gosub blowin
+Next
+Return
+
+.addlanders
+;
+lios=0
+For j=1 To na
+Gosub alloff
+Gosub addlander
+Gosub findhume
+Gosub blowin
+Gosub allon
+;
+Next
+Return
+
+addlander
+AddLast a()
+;
+If lios
+	\x=Rnd(768)+640
+Else
+	\x=Rnd(2048)
+	If \x<656 OR \x>1744 Then lios=-1
+EndIf
+;
+\y=64
+;
+\xs=Rnd(lxsr)+lxsb:If Rnd>.5 Then \xs=-\xs
+\xs2=\xs
+;
+\ys=0
+\ys2=Rnd(lysr)+lysb
+;
+\f=2	;lander 1
+\s=4
+\e=1
+;
+\otb=lotb,Rnd(lotr):Gosub rndfire
+;
+\lander\pys=Rnd(lpysr)+lpysb
+\lander\mxs=QAbs(\xs)*1.5
+\lander\mys=\ys2*1.5
+\lander\otb2=lotb2,Rnd(lotr2)
+;
+Return
+
+.blowin
+;
+If \x<656 OR \x>1744
+	ei=\e
+	o=ei(ei)\o:msnd=13
+	;
+	For k=1 To ei(ei)\n
+	;
+	If AddFirst(b())
+		nf+1:acd+1
+		x3=ex(o):y3=ey(o)
+		b()\xs=-x3,-y3
+		b()\x=ShapeWidth(\s)LSR 1+\x+x3*54,ShapeHeight(\s)LSR 1+\y+y3*54
+		b()\s=50+o,54,1
+		o+1
+	EndIf
+	;
+	Next
+EndIf
+aaa+1:Return
+
+scanerase
+If \e>=0 AND \e<7
+	;
+	Gosub alloff
+	;
+	BlitMode EraseMode
+	Use BitMap 2
+	Blit 30,\sx,\sy
+	Use BitMap db
+	BlitMode CookieMode
+	;
+	Gosub allon
+	;
+EndIf
+Return
+
+.blowup
+;
+Gosub scanerase
+;
+f=\f
+;
+If f=1 OR (f>4 AND f<8) Then nhum-1:msnd=6
+If f>1 AND f<5 Then nlan-1:esnd=5:If nlan=0 Then lanc=0
+If f=8 Then nmut-1:If msnd=0 Then msnd=6
+If f=9 Then npod-1:esnd=6
+If f=10 Then nswa-1:esnd=5
+If f=11 Then nbom-1:esnd=5
+If f=12 Then If msnd=0 Then msnd=6
+;
+Select f
+Case 4
+	*hume.obj=\lander\hume
+	If *hume\f=5
+		If hsnd=0 Then hsnd=4
+		*hume\ys=0:*hume\f=6:*hume\ys2=\y
+	EndIf
+Case 9	;pod obliterated!
+	;
+	Gosub alloff:x3=\x:y3=\y:PushItem a()
+	;
+	ResetList a():act4=act
+	While act4
+		NextItem a():act4-1
+	Wend
+	;
+	For k=1 To Rnd(5)+2
+	AddItem a():nswa+1
+	Gosub addswarmer:act+1:If Rnd>.1 Then act3+1
+	Next
+	;
+	PopItem a():Gosub allon
+	;
+End Select
+;
+ei=\e:o=ei(ei)\o:sca+ei(ei)\s
+;
+For k=1 To ei(ei)\n
+;
+Gosub alloff
+;
+If AddFirst(b())
+	nf+1
+	x3=ex(o):y3=ey(o)
+	b()\x=\x,\y,x3,y3,50+o,24,0
+	o+1
+EndIf
+;
+Gosub allon
+;
+Next
+;
+\f=0:act-1:KillItem a()
+;
+Return
+
+freeall
+DisplayOff:ClrInt 5:FreeSlices
+For k=0 To 9:Free BitMap k:Next
+VWait 12:Return
+
+.gameon
+;
+Gosub freeall
+;
+BitMap 0,352,232,3	;action bitmaps!
+BitMap 1,352,232,3	;ditto for double buffering!
+;
+BitMap 2,320,30,3	 ;for panel - front bitmap
+BitMapOutput 2:Colour 1,7
+BitMap 3,256,30,2	 ;for back of panel - scrolling little mounts!
+;
+y3=23
+;
+For x=0 To 2047 Step 16
+y3=y(x) LSR 3+14
+Line x LSR 4-1,y2,x LSR 4,y3,1
+y2=y3
+Next
+;
+Scroll 0,0,128,30,128,0
+
+BitMap 4,2048+320,88,2	;for mounts!
+BitMap 5,640,112,2	;for stars!
+;
+For k=1 To 16
+x=Rnd(320):y=Rnd(112):c=Rnd(3)+1
+Point x,y,c:Point x+320,y,c
+sta(k)\x=x,y,5
+Next
+;
+Slice 0,slit,320,231,$fff2,5,8,32,320,256
+;
+ShowF 2:ShowB 3,-95,0
+;
+ShowSprite 31,160,14,2
+ShowSprite 32,95,14,4
+ShowSprite 33,224,14,5
+;
+Use SetCycle 2:Gosub paln
+;
+Green 17,15,15,15
+Green 21,15,15,15
+;
+Slice 1,slit+31,320,200,$fffa,5,8,32,352,640
+ShowB 5:ShowF 0
+;
+Slice 2,slit+31+112,320,88,$418a,$4002,0,0,352,2048+320
+ShowB 4
+;
+Use Slice 1
+;
+Return
+
+scancolour
+;
+Use Slice 0:Use BitMap 2
+;
+k=pat MOD 6+2
+;
+Green 25,Blue(k),Palette(k),PalRGB(k)
+Green 29,Blue(k),Palette(k),PalRGB(k)
+;
+Line 0,28,319,28,k
+;
+Use Slice 1
+;
+Return
+
+.makemounts
+;
+Use BitMap 4
+Boxf 0,0,639,87,0
+If spc
+	nsta=32:For k=1 To 16
+	x2=Rnd(320):y2=Rnd(88):c=Rnd(3)+1
+	Point x2,y2,c:Point x2+320,y2,c
+	sta(k+16)\x=x2,y2,4
+	Next
+	Use Slice 0:Green 9,0,0,0:Use Slice 1
+Else
+	nsta=16:For x2=0 To 2047
+	y2=y(x2):Point x2,y2,1:If x2<320 Then Point x2+2048,y2,1
+	Next
+	Gosub mcolour
+	;
+EndIf
+;
+Return
+
+.player
+;
+;x=ship x,y=ship y,s=ship sprite (0=rite else left)
+;
+;xs=x speed
+;
+;set vars: ya,th,re,fi
+;
+ya=0:th=0:re=0:fi=0
+;
+Select cmode&3	;control mode!
+;
+Case 1	;joystick
+	If Joyy(1)<0 Then ya=-2 Else If Joyy(1)>0 Then ya=2
+	;
+	Select Joyx(1)
+	Case -1 ;joystick left
+		If s Then th=-1 Else re=-1
+	Case 1	;right
+		If s Then re=-1 Else th=-1
+	End Select
+	;
+	If Joyb(1)
+		If lf Then fi=-1:lf=0
+	Else
+		lf=-1
+	EndIf
+Case 2	;keyboard
+	If RawStatus($20) Then ya=-2 Else If RawStatus($31) Then ya=2
+	;
+	If RawStatus($40)
+		If lre Then re=-1:lre=0
+	Else
+		lre=-1
+	EndIf
+	;
+	If RawStatus($3a) Then th=-1
+	;
+	If RawStatus($61)
+		If lf Then fi=-1:lf=0
+	Else
+		lf=-1
+	EndIf
+	;
+End Select
+;
+y=QLimit(y+ya,3,195)
+;
+If xs>0
+	xs-.075:If xs<0 Then xs=0
+Else
+	xs+.075:If xs>0 Then xs=0
+EndIf
+;
+If th
+	If s
+		xs=QLimit(xs-.25,-8,8)
+	Else
+		xs=QLimit(xs+.25,-8,8)
+	EndIf
+EndIf
+;
+If re ;reverse?
+	s=6-s
+EndIf
+;
+x2=rx+QAbs(xs)LSL 2:If s Then x2=320-x2
+xa=QLimit(x2-x,-2,2)
+x+xa
+;
+s2=QWrap(s2+.5,0,6)
+;
+ShowSprite s+s2,x,y,0:xp=x+16:yp=y+16
+;
+If th
+	If s
+		ShowSprite s2+18,x+12,y,2
+	Else
+		ShowSprite s2+12,x-12,y,2
+	EndIf
+	lth=-1
+Else
+	If lth
+		ShowSprite 12,352,100,2
+		lth=0
+	EndIf
+EndIf
+;
+xa=xs-xa
+;
+If cmode<4
+	PushItem c()
+	If fi ;fire?
+		If AddLast(c())
+			esnd=2
+			x2=8:ss2=22:If s Then x2=-8:ss2=23
+			c()\x=x+16,y+17,x2,ss2
+		EndIf
+	EndIf
+	;
+	mo2=QWrap(mo2+xa ASR 3,0,320):ShowB 5,mo2,0
+	mo=QWrap(mo+xa,0,2048)
+	;
+	Use Slice 2
+	If spc
+		ShowB 4,mo2,0
+	Else
+		ShowB 4,mo,0
+	EndIf
+	Use Slice 1
+	;
+	USEPATH c()
+	ResetList c()
+	While NextItem(c())
+		\x+\xs
+		If \x>=8 AND \x<336+8
+			QBlit db,\s,\x,\y
+		Else
+			KillItem c()
+		EndIf
+	Wend
+	USEPATH a()
+	;
+	If hcl
+		QBlit db,0,x+16,y+24
+	EndIf
+	;
+	PopItem c()
+Else
+	xs=0:xa=0
+EndIf
+;
+Return
+
+.animoff
+ClrInt 5
+animoff2
+ShowSprite 0,352,100,0
+ShowSprite 0,352,100,2
+For k=9 To 15
+Green k,0,0,0
+Next
+Use Slice 0:Green 9,0,0,0:ShowSprite 30,352,24,0
+Use Slice 1
+FlushQueue 0:FlushQueue 1
+Gosub scanclean
+Use BitMap 1:BlockScroll:db=0
+Use BitMap db:BlockScroll:ShowF 0,16,16
+Return
+
+alloff
+MOVE #$20,$dff09a
+Return
+
+allon
+MOVE #$c020,$dff09a
+Return
+
+paln
+If paln
+	For pk=1 To 6
+	Green pk,Blue(pk),PalRGB(pk),Palette(pk)
+	Next
+EndIf
+Return
+
+.animon
+;
+Use SetCycle 0:Gosub paln
+If paln
+	For k=17 To 19
+	Green k,Blue(k),PalRGB(k),Palette(k)
+	Next
+EndIf
+For k=9 To 15
+Gosub calckrgb
+Green k,kr,kg,kb
+Next
+;
+SetInt 5
+	;
+	If VPos<slit2 Then Gosub doint
+	;
+End SetInt
+;
+Return
+
+.doint
+;
+ShowF db,16,16:db=1-db:Use BitMap db:UnQueue db
+;
+Gosub player
+;
+If lanc Then lanc-1
+;
+If baic Then baic-1
+;
+frame+1
+;
+doint2
+;
+If smb
+	If smb>0
+		smb-1:Green 0,smb,smb,smb
+	Else
+		Goto intdone
+	EndIf
+EndIf
+;
+PushItem a()
+;
+;******************* ANIMATION UPDATE *******************
+;
+ResetList a():act2=act
+;
+While act2
+	act2-1
+	If NextItem(a())
+		If VPos<200
+			;
+			If \f=6 Then \ys+.01 ;kludge for humanoids
+			;
+			;enough time to do this alien...
+			;
+			\x=QWrap(\x+\xs-xa,0,2048)
+			\y=QWrap(\y+\ys,0,216)
+			\t-1
+			;
+			If \x>=0 AND \x<=336
+				QBlit db,\s,\x,\y
+			EndIf
+			;
+		Else
+			;
+			;abort aliens...
+			;
+			;Poke.w $dff180,$f00
+			;
+			Repeat
+				If \x>=0 AND \x<336
+					\x=QWrap(\x+1024,0,2048)
+					Goto animout
+				EndIf
+			Until NOT NextItem(a())
+			;
+			Goto animout
+			;
+		EndIf
+	EndIf
+Wend
+;
+While NextItem(a())
+	\x=QWrap(\x-xa,0,2048)
+Wend
+;
+animout
+;
+;Poke.w $dff180,4
+;
+;***************** EXPLOSIONS UPDATE ********************
+;
+USEPATH b()
+;
+If FirstItem(b())
+	Repeat
+		;
+		\x=QWrap(\x+\xs-xa,0,2048)
+		\y=\y+\ys
+		\t-1
+		If \t>0
+			If VPos<256
+				If \x>=0 AND \x<336
+					If \y>=8 AND \y<216
+						QBlit db,\s,\x,\y
+						Use BitMap 1-db
+						QBlit 1-db,\s,\x,\y
+						Use BitMap db
+					EndIf
+				EndIf
+			EndIf
+		Else
+			If acd
+				acd-\a:If acd=0 Then act+aaa:aaa=0
+			EndIf
+			KillItem b()
+		EndIf
+	Until NOT NextItem(b())
+Else
+	act+aaa:aaa=0
+EndIf
+;
+expout
+PopItem a():USEPATH a()
+;
+intdone
+Return
+
+shapes:IncBin "shapes"
+shapes2:IncBin "shapes2"
+shapes3:IncBin "shapes3"

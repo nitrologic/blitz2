@@ -1,0 +1,12 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/FileRequest$.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/FileRequest$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/FileRequest$.bb
+
+; 
+; file request example program
+; 
+WbToScreen 0               ;use workbench 
+WBenchToFront_              ;workbench to front
+MaxLen pa$=160              ;set 'path' string var 
+MaxLen fi$=64              ;set 'file' string var 
+a$=FileRequest$("Select a File",pa$,fi$) ;do file requester 
+WBenchToBack_              ;Workbench to back 
+

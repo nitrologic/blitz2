@@ -1,0 +1,1087 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/graphics.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/graphics.bb
+;********************************************************
+;*																											*
+;*				 BlitzII graphics.library Include file				*
+;*																											*
+;********************************************************
+
+INCDIR "include/"
+XInclude exec.bb
+XInclude utility.bb
+
+;*****************File:graphint.h
+
+NEWTYPE.Isrvstr
+is_Node.Node
+*Iptr.Isrvstr
+*code.w
+*ccode.w
+Carg.w
+End NEWTYPE
+
+;*****************File:collide.h
+
+#BORDERHIT= 0
+#TOPHIT= 1
+#BOTTOMHIT= 2
+#LEFTHIT= 4
+#RIGHTHIT= 8
+
+;*****************File:gels.h
+
+#SUSERFLAGS= $00FF
+#VSPRITE= $0001
+#SAVEBACK= $0002
+#OVERLAY= $0004
+#MUSTDRAW= $0008
+#BACKSAVED= $0100
+#BOBUPDATE= $0200
+#GELGONE= $0400
+#VSOVERFLOW= $0800
+#BUSERFLAGS= $00FF
+#SAVEBOB= $0001
+#BOBISCOMP= $0002
+#BWAITING= $0100
+#BDRAWN= $0200
+#BOBSAWAY= $0400
+#BOBNIX= $0800
+#SAVEPRESERVE= $1000
+#OUTSTEP= $2000
+#ANFRACSIZE= 6
+#ANIMHALF= $0020
+#RINGTRIGGER= $0001
+
+NEWTYPE.VSprite
+*NextVSprite.VSprite
+*PrevVSprite.VSprite
+*DrawPath.VSprite
+*ClearPath.VSprite
+OldY.w:OldX
+Flags.w
+Y.w:X
+Height.w
+Width.w
+Depth.w
+MeMask.w
+HitMask.w
+*ImageData.w
+*BorderLine.w
+*CollMask.w
+*SprColors.w
+;*VSBob.Bob
+PlanePick.b
+PlaneOnOff.b
+VUserExt.w
+End NEWTYPE
+
+NEWTYPE.Bob
+Flags.w
+*SaveBuffer.w
+*ImageShadow.w
+*Before.Bob
+*After.Bob
+*BobVSprite.VSprite
+*BobComp.AnimComp
+*DBuffer.DBufPacket
+BUserExt.w
+End NEWTYPE
+
+NEWTYPE.AnimComp
+Flags.w
+Timer.w
+TimeSet.w
+*NextComp.AnimComp
+*PrevComp.AnimComp
+*NextSeq.AnimComp
+*PrevSeq.AnimComp
+*AnimCRoutine.w
+YTrans.w
+XTrans.w
+*HeadOb.AnimOb
+*AnimBob.Bob
+End NEWTYPE
+
+NEWTYPE.AnimOb
+*NextOb.AnimOb:*PrevOb
+Clock.l
+AnOldY.w:AnOldX
+AnY.w:AnX
+YVel.w:XVel
+YAccel.w:XAccel
+RingYTrans.w:RingXTrans
+*AnimORoutine.w
+*HeadComp.AnimComp
+AUserExt.w
+End NEWTYPE
+
+NEWTYPE.DBufPacket
+BufY.w:BufX
+*BufPath.VSprite
+*BufBuffer.w
+End NEWTYPE
+
+#B2NORM= 0
+#B2SWAP_= 1
+#B2BOBBER= 2
+
+NEWTYPE.collTable
+*collPtrs.w[16]
+End NEWTYPE
+
+;*****************File:scale.h
+
+NEWTYPE.BitScaleArgs
+bsa_SrcX.w:bsa_SrcY
+bsa_SrcWidth.w:bsa_SrcHeight
+bsa_XSrcFactor.w:bsa_YSrcFactor
+bsa_DestX.w:bsa_DestY
+bsa_DestWidth.w:bsa_DestHeight
+bsa_XDestFactor.w:bsa_YDestFactor
+*bsa_SrcBitMap.BitMap
+*bsa_DestBitMap.BitMap
+bsa_Flags.l
+bsa_XDDA.w:bsa_YDDA
+bsa_Reserved1.l
+bsa_Reserved2.l
+End NEWTYPE
+
+;*****************File:videocontrol.h
+
+#VTAG_END_CM= $00000000
+#VTAG_CHROMAKEY_CLR= $80000000
+#VTAG_CHROMAKEY_SET= $80000001
+#VTAG_BITPLANEKEY_CLR= $80000002
+#VTAG_BITPLANEKEY_SET= $80000003
+#VTAG_BORDERBLANK_CLR= $80000004
+#VTAG_BORDERBLANK_SET= $80000005
+#VTAG_BORDERNOTRANS_CLR= $80000006
+#VTAG_BORDERNOTRANS_SET= $80000007
+#VTAG_CHROMA_PEN_CLR= $80000008
+#VTAG_CHROMA_PEN_SET= $80000009
+#VTAG_CHROMA_PLANE_SET= $8000000A
+#VTAG_ATTACH_CM_SET= $8000000B
+#VTAG_NEXTBUF_CM= $8000000C
+#VTAG_BATCH_CM_CLR= $8000000D
+#VTAG_BATCH_CM_SET= $8000000E
+#VTAG_NORMAL_DISP_GET= $8000000F
+#VTAG_NORMAL_DISP_SET= $80000010
+#VTAG_COERCE_DISP_GET= $80000011
+#VTAG_COERCE_DISP_SET= $80000012
+#VTAG_VIEWPORTEXTRA_GET= $80000013
+#VTAG_VIEWPORTEXTRA_SET= $80000014
+#VTAG_CHROMAKEY_GET= $80000015
+#VTAG_BITPLANEKEY_GET= $80000016
+#VTAG_BORDERBLANK_GET= $80000017
+#VTAG_BORDERNOTRANS_GET= $80000018
+#VTAG_CHROMA_PEN_GET= $80000019
+#VTAG_CHROMA_PLANE_GET= $8000001A
+#VTAG_ATTACH_CM_GET= $8000001B
+#VTAG_BATCH_CM_GET= $8000001C
+#VTAG_BATCH_ITEMS_GET= $8000001D
+#VTAG_BATCH_ITEMS_SET= $8000001E
+#VTAG_BATCH_ITEMS_ADD= $8000001F
+#VTAG_VPMODEID_GET= $80000020
+#VTAG_VPMODEID_SET= $80000021
+#VTAG_VPMODEID_CLR= $80000022
+#VTAG_USERCLIP_GET= $80000023
+#VTAG_USERCLIP_SET= $80000024
+#VTAG_USERCLIP_CLR= $80000025
+
+;*****************File:gfx.h
+
+NEWTYPE.Rectangle
+MinX.w:MinY.w
+MaxX.w:MaxY.w
+End NEWTYPE
+
+NEWTYPE.Rect32
+MinX.l:MinY.l
+MaxX.l:MaxY.l
+End NEWTYPE
+
+NEWTYPE.BitMap
+BytesPerRow.w
+Rows.w
+Flags.b
+Depth.b
+pad.w
+*Planes.w[8]
+End NEWTYPE
+
+NEWTYPE.point
+x.w
+y.w
+End NEWTYPE
+
+Macro RASSIZE ((`2)*(((`1)+15)LSR3&$FFFE)):End Macro
+
+;*****************File:Text.h
+
+#FS_NORMAL= 0
+#FSB_UNDERLINED= 0
+#FSF_UNDERLINED= $01
+#FSB_BOLD= 1
+#FSF_BOLD= $02
+#FSB_ITALIC= 2
+#FSF_ITALIC= $04
+#FSB_EXTENDED= 3
+#FSF_EXTENDED= $08
+#FSB_COLORFONT= 6
+#FSF_COLORFONT= $40
+#FSB_TAGGED= 7
+#FSF_TAGGED= $80
+#FPB_ROMFONT= 0
+#FPF_ROMFONT= $01
+#FPB_DISKFONT= 1
+#FPF_DISKFONT= $02
+#FPB_REVPATH= 2
+#FPF_REVPATH= $04
+#FPB_TALLDOT= 3
+#FPF_TALLDOT= $08
+#FPB_WIDEDOT= 4
+#FPF_WIDEDOT= $10
+#FPB_PROPORTIONAL= 5
+#FPF_PROPORTIONAL= $20
+#FPB_DESIGNED= 6
+#FPF_DESIGNED= $40
+#FPB_REMOVED= 7
+#FPF_REMOVED= (1LSL7)
+
+NEWTYPE.TextAttr
+*ta_Name.b
+ta_YSize.w
+ta_Style.b
+ta_Flags.b
+End NEWTYPE
+
+NEWTYPE.TTextAttr
+*tta_Name.b
+tta_YSize.w
+tta_Style.b
+tta_Flags.b
+;*tta_Tags.TagItem
+End NEWTYPE
+
+#MAXFONTMATCHWEIGHT= 32767
+
+NEWTYPE.TextFont
+tf_Message.Message
+tf_YSize.w
+tf_Style.b
+tf_Flags.b
+tf_XSize.w
+tf_Baseline.w
+tf_BoldSmear.w
+tf_Accessors.w
+tf_LoChar.b
+tf_HiChar.b
+*tf_CharData.b
+tf_Modulo.w
+*tf_CharLoc.b
+*tf_CharSpace.b
+*tf_CharKern.b
+End NEWTYPE
+
+#TE0B_NOREMFONT= 0
+#TE0F_NOREMFONT= $01
+
+NEWTYPE.TextFontExtension
+tfe_MatchWord.w
+tfe_Flags0.b
+tfe_Flags1.b
+*tfe_BackPtr.TextFont
+*tfe_OrigReplyPort.MsgPort
+;*tfe_Tags.TagItem
+*tfe_OFontPatchS.w
+*tfe_OFontPatchK.w
+End NEWTYPE
+
+#CT_COLORMASK= $000F
+#CT_COLORFONT= $0001
+#CT_GREYFONT= $0002
+#CT_ANTIALIAS= $0004
+#CTB_MAPCOLOR= 0
+#CTF_MAPCOLOR= $0001
+
+NEWTYPE.ColorFontColors
+cfc_Reserved.w
+cfc_Count.w
+*cfc_ColorTable.w
+End NEWTYPE
+
+NEWTYPE.ColorTextFont
+ctf_TF.TextFont
+ctf_Flags.w
+ctf_Depth.b
+ctf_FgColor.b
+ctf_Low.b
+ctf_High.b
+ctf_PlanePick.b
+ctf_PlaneOnOff.b
+*ctf_ColorFontColors.ColorFontColors
+*ctf_CharData.b[8]
+End NEWTYPE
+
+NEWTYPE.TextExtent
+te_Width.w
+te_Height.w
+te_Extent.Rectangle
+End NEWTYPE
+
+;*****************File:clip.h
+
+NEWTYPE.Layer
+*front.Layer:*back.Layer
+*ClipRect.ClipRect
+*rp.RastPort
+bounds.Rectangle
+reserved.b[4]
+priority.w
+Flags.w
+*SuperBitMap.BitMap
+*SuperClipRect.ClipRect
+*Window.b
+Scroll_X.w:Scroll_Y
+*cr.ClipRect:*cr2.ClipRect:*crnew.ClipRect
+*SuperSaveClipRects.ClipRect
+*_cliprects.ClipRect
+*LayerInfo.Layer_Info
+Lock.SignalSemaphore
+*BackFill.Hook
+reserved1.l
+*ClipRegion.Region
+*saveClipRects.Region
+Width.w:Height
+reserved2.b[18]
+*DamageList.Region
+End NEWTYPE
+
+NEWTYPE.ClipRect
+*Next.ClipRect
+*prev.ClipRect
+*lobs.Layer
+*BitMap.BitMap
+bounds.Rectangle
+*_p1.ClipRect
+*_p2.ClipRect
+reserved.l
+;If #NEWCLIPRECT_1_1
+Flags.l
+;End If Macro
+End NEWTYPE
+
+#CR_NEEDS_NO_CONCEALED_RASTERS= 1
+#ISLESSX= 1
+#ISLESSY= 2
+#ISGRTRX= 4
+#ISGRTRY= 8
+
+;*****************File:regions.h
+
+NEWTYPE.RegionRectangle
+*Next.RegionRectangle:*Prev.RegionRectangle
+bounds.Rectangle
+End NEWTYPE
+
+NEWTYPE.Region
+bounds.Rectangle
+*RegionRectangle.RegionRectangle
+End NEWTYPE
+;*****************File:copper.h
+
+#COPPER_MOVE= 0
+#COPPER_WAIT= 1
+#CPRNXTBUF= 2
+#CPR_NT_LOF= $8000
+#CPR_NT_SHT= $4000
+#CPR_NT_SYS= $2000
+
+NEWTYPE.CopIns
+OpCode.w
+*nxtlist.CopList[0]
+VWaitPos.w[0]
+DestAddr.w
+HWaitPos.w[0]
+DestData.w
+End NEWTYPE
+
+NEWTYPE.cprlist
+*Next.cprlist
+*start.w
+MaxCount.w
+End NEWTYPE
+
+NEWTYPE.CopList
+*Next.CopList
+*_CopList.CopList
+*_ViewPort.ViewPort
+*CopIns.CopIns
+*CopPtr.CopIns
+*CopLStart.w
+*CopSStart.w
+Count.w
+MaxCount.w
+DyOffset.w
+;If #V1_3
+*Cop2Start.w
+*Cop3Start.w
+*Cop4Start.w
+*Cop5Start.w
+;End If Macro
+End NEWTYPE
+
+NEWTYPE.UCopList
+*Next.UCopList
+*FirstCopList.CopList
+*CopList.CopList
+End NEWTYPE
+
+NEWTYPE.copinit
+vsync_hblank.w[2]
+diwstart.w[4]
+diagstrt.w[4]
+sprstrtup.w[(2*8*2)]
+wait14.w[2]
+norm_hblank.w[2]
+genloc.w[4]
+jump.w[(2*2)]
+wait_forever.w[2]
+sprstop.w[4]
+End NEWTYPE
+
+;*****************File:gfxbase.h
+
+NEWTYPE.bltnode
+*n.bltnode
+*function.w
+stat.b
+blitsize.w
+beamsync.w
+*cleanup.w
+End NEWTYPE
+
+NEWTYPE.GfxBase
+LibNode.Library
+*ActiView.View
+*copinit.copinit
+*cia.l
+*blitter.l
+*LOFlist.w
+*SHFlist.w
+*blthd.bltnode:*blttl.bltnode
+*bsblthd.bltnode:*bsblttl.bltnode
+vbsrv.Interrupt:timsrv.Interrupt:bltsrv.Interrupt
+TextFonts.List
+*DefaultFont.TextFont
+Modes.w
+VBlank.b
+Debug.b
+BeamSync.w
+system_bplcon0.w
+SpriteReserved.b
+bytereserved.b
+Flags.w
+BlitLock.w
+BlitNest.w
+BlitWaitQ.List
+*BlitOwner.Task
+TOF_WaitQ.List
+DisplayFlags.w
+*SimpleSprites.SimpleSprite
+MaxDisplayRow.w
+MaxDisplayColumn.w
+NormalDisplayRows.w
+NormalDisplayColumns.w
+NormalDPMX.w
+NormalDPMY.w
+*LastChanceMemory.SignalSemaphore
+*LCMptr.w
+MicrosPerLine.w
+MinDisplayColumn.w
+ChipRevBits0.b
+crb_reserved.b[5]
+monitor_id.w
+hedley.l[8]
+hedley_sprites.l[8]
+hedley_sprites1.l[8]
+hedley_count.w
+hedley_flags.w
+hedley_tmp.w
+*hash_table.l
+current_tot_rows.w
+current_tot_cclks.w
+hedley_hint.b
+hedley_hint2.b
+nreserved.l[4]
+*a2024_sync_raster.l
+control_delta_pal.w
+control_delta_ntsc.w
+*current_monitor.MonitorSpec
+MonitorList.List
+*default_monitor.MonitorSpec
+*MonitorListSemaphore.SignalSemaphore
+*DisplayInfoDataBase.w
+*ActiViewCprSemaphore.SignalSemaphore
+*UtilityBase.l
+*ExecBase.l
+End NEWTYPE
+
+#NTSC= 1
+#GENLOC= 2
+#PAL= 4
+#TODA_SAFE= 8
+#BLITMSG_FAULT= 4
+#GFXB_BIG_BLITS= 0
+#GFXB_HR_AGNUS= 0
+#GFXB_HR_DENISE= 1
+#GFXF_BIG_BLITS= 1
+#GFXF_HR_AGNUS= 1
+#GFXF_HR_DENISE= 2
+
+;*****************File:display.h
+
+#GRAPHICS_DISPLAY_H
+
+#MODE_640= $8000
+#PLNCNTMSK= $7
+#PLNCNTSHFT= 12
+#PF2PRI= $40
+#COLORON= $0200
+#DBLPF= $400
+#HOLDNMODIFY= $800
+#INTERLACE= 4
+#PFA_FINE_SCROLL= $F
+#PFB_FINE_SCROLL_SHIFT= 4
+#PF_FINE_SCROLL_MASK= $F
+#DIW_HORIZ_POS= $7F
+#DIW_VRTCL_POS= $1FF
+#DIW_VRTCL_POS_SHIFT= 7
+#DFTCH_MASK= $FF
+#VPOSRLOF= $8000
+
+;*****************File:sprite.h
+
+#SPRITE_ATTACHED= $80
+
+NEWTYPE.SimpleSprite
+*posctldata.w
+height.w
+x.w:y.w
+num.w
+End NEWTYPE
+
+;*****************File:gfxnodes.h
+
+NEWTYPE.ExtendedNode
+*xln_Succ.Node
+*xln_Pred.Node
+xln_Type.b
+xln_Pri.b
+*xln_Name.b
+xln_Subsystem.b
+xln_Subtype.b
+xln_Library.l
+*xln_Init.l
+End NEWTYPE
+
+#SS_GRAPHICS= $02
+#VIEW_EXTRA_TYPE= 1
+#VIEWPORT_EXTRA_TYPE= 2
+#SPECIAL_MONITOR_TYPE= 3
+#MONITOR_SPEC_TYPE= 4
+
+;*****************File:view.h
+
+NEWTYPE.ViewPort
+*Next.ViewPort
+*ColorMap.ColorMap
+*DspIns.CopList
+*SprIns.CopList
+*ClrIns.CopList
+*UCopIns.UCopList
+DWidth.w:DHeight.w
+DxOffset.w:DyOffset.w
+Modes.w
+SpritePriorities.b
+ExtendedModes.b
+*RasInfo.RasInfo
+End NEWTYPE
+
+NEWTYPE.View
+*ViewPort.ViewPort
+*LOFCprList.cprlist
+*SHFCprList.cprlist
+DyOffset.w:DxOffset.w
+Modes.w
+End NEWTYPE
+
+NEWTYPE.ViewExtra
+n.ExtendedNode
+*View.View
+*Monitor.MonitorSpec
+End NEWTYPE
+
+NEWTYPE.ViewPortExtra
+n.ExtendedNode
+*ViewPort.ViewPort
+DisplayClip.Rectangle
+End NEWTYPE
+
+#EXTEND_VSTRUCT= $1000
+#GENLOCK_VIDEO= $0002
+#LACE= $0004
+#SUPERHIRES= $0020
+#PFBA= $0040
+#EXTRA_HALFBRITE= $0080
+#GENLOCK_AUDIO= $0100
+#DUALPF= $0400
+#HAM= $0800
+#EXTENDED_MODE= $1000
+#VP_HIDE= $2000
+#SPRITES= $4000
+#HIRES_= $8000
+#VPF_A2024= $40
+#VPF_AGNUS= $20
+#VPF_TENHZ= $20
+
+NEWTYPE.RasInfo
+*Next.RasInfo
+*BitMap.BitMap
+RxOffset.w:RyOffset.w
+End NEWTYPE
+
+NEWTYPE.ColorMap
+Flags.b
+Type.b
+Count.w
+*ColorTable.w
+*cm_vpe.ViewPortExtra
+*TransparencyBits.w
+TransparencyPlane.b
+reserved1.b
+reserved2.w
+*cm_vp.ViewPort
+*NormalDisplayInfo.b
+*CoerceDisplayInfo.b
+*cm_batch_items.TagItem
+VPModeID.l
+End NEWTYPE
+
+#COLORMAP_TYPE_V1_2= $00
+#COLORMAP_TYPE_V1_4= $01
+#COLORMAP_TYPE_V36= #COLORMAP_TYPE_V1_4
+#COLORMAP_TRANSPARENCY= $01
+#COLORPLANE_TRANSPARENCY= $02
+#BORDER_BLANKING= $04
+#BORDER_NOTRANSPARENCY= $08
+#VIDEOCONTROL_BATCH= $10
+#USER_COPPER_CLIP= $20
+
+;*****************File:monitor.h
+
+NEWTYPE.MonitorSpec
+ms_Node.ExtendedNode
+ms_Flags.w
+ratioh.l
+ratiov.l
+total_rows.w
+total_colorclocks.w
+DeniseMaxDisplayColumn.w
+BeamCon0.w
+min_row.w
+*ms_Special.SpecialMonitor
+ms_OpenCount.w
+*ms_transform.l
+*ms_translate.l
+*ms_scale.l
+ms_xoffset.w
+ms_yoffset.w
+ms_LegalView.Rectangle
+*ms_maxoscan.l
+*ms_videoscan.l
+DeniseMinDisplayColumn.w
+DisplayCompatible.l
+DisplayInfoDataBase.List
+DisplayInfoDataBaseSemaphore.SignalSemaphore
+ms_reserved00.l
+ms_reserved01.l
+End NEWTYPE
+
+#TO_MONITOR= 0
+#FROM_MONITOR= 1
+#STANDARD_XOFFSET= 9
+#STANDARD_YOFFSET= 0
+#REQUEST_NTSC= 1
+#REQUEST_PAL= 2
+#REQUEST_SPECIAL= 4
+#REQUEST_A2024= 8
+Macro DEFAULT_MONITOR_NAME "default.monitor":End Macro
+Macro NTSC_MONITOR_NAME "ntsc.monitor":End Macro
+Macro PAL_MONITOR_NAME "pal.monitor":End Macro
+#STANDARD_MONITOR_MASK= (#REQUEST_NTSC|#REQUEST_PAL)
+#STANDARD_NTSC_ROWS= 262
+#STANDARD_PAL_ROWS= 312
+#STANDARD_COLORCLOCKS= 226
+#STANDARD_DENISE_MAX= 455
+#STANDARD_DENISE_MIN= 93
+#STANDARD_NTSC_BEAMCON= ($0000)
+;#STANDARD_PAL_BEAMCON= (#DISPLAYPAL)
+;#SPECIAL_BEAMCON= (#VARVBLANK|#LOLDIS|#VARVSYNC|#VARBEAM|#CSBLANK)
+#MIN_NTSC_ROW= 21
+#MIN_PAL_ROW= 29
+#STANDARD_VIEW_X= $81
+#STANDARD_VIEW_Y= $2C
+#STANDARD_HBSTRT= $06
+#STANDARD_HSSTRT= $0B
+#STANDARD_HSSTOP= $1C
+#STANDARD_HBSTOP= $2C
+#STANDARD_VBSTRT= $0122
+#STANDARD_VSSTRT= $02A6
+#STANDARD_VSSTOP= $03AA
+#STANDARD_VBSTOP= $1066
+#VGA_COLORCLOCKS= (#STANDARD_COLORCLOCKS/2)
+#VGA_TOTAL_ROWS= (#STANDARD_NTSC_ROWS*2)
+#VGA_DENISE_MIN= 59
+#MIN_VGA_ROW= 29
+#VGA_HBSTRT= $08
+#VGA_HSSTRT= $0E
+#VGA_HSSTOP= $1C
+#VGA_HBSTOP= $1E
+#VGA_VBSTRT= $0000
+#VGA_VSSTRT= $0153
+#VGA_VSSTOP= $0235
+#VGA_VBSTOP= $0CCD
+Macro VGA_MONITOR_NAME "vga.monitor":End Macro
+#VGA70_COLORCLOCKS= (#STANDARD_COLORCLOCKS/2)
+#VGA70_TOTAL_ROWS= 449
+#VGA70_DENISE_MIN= 59
+#MIN_VGA70_ROW= 35
+#VGA70_HBSTRT= $08
+#VGA70_HSSTRT= $0E
+#VGA70_HSSTOP= $1C
+#VGA70_HBSTOP= $1E
+#VGA70_VBSTRT= $0000
+#VGA70_VSSTRT= $02A6
+#VGA70_VSSTOP= $0388
+#VGA70_VBSTOP= $0F73
+;#VGA70_BEAMCON= (#SPECIAL_BEAMCON^#VSYNCTRUE)
+Macro VGA70_MONITOR_NAME "vga70.monitor":End Macro
+#BROADCAST_HBSTRT= $01
+#BROADCAST_HSSTRT= $06
+#BROADCAST_HSSTOP= $17
+#BROADCAST_HBSTOP= $27
+#BROADCAST_VBSTRT= $0000
+#BROADCAST_VSSTRT= $02A6
+#BROADCAST_VSSTOP= $054C
+#BROADCAST_VBSTOP= $1C40
+;#BROADCAST_BEAMCON= (#LOLDIS|#CSBLANK)
+#RATIO_FIXEDPART= 4
+#RATIO_UNITY= (1LSL#RATIO_FIXEDPART)
+
+NEWTYPE.AnalogSignalInterval
+asi_Start.w
+asi_Stop.w
+End NEWTYPE
+
+NEWTYPE.SpecialMonitor
+spm_Node.ExtendedNode
+spm_Flags.w
+*do_monitor.w
+*reserved1.w
+*reserved2.w
+*reserved3.w
+hblank.AnalogSignalInterval
+vblank.AnalogSignalInterval
+hsync.AnalogSignalInterval
+vsync.AnalogSignalInterval
+End NEWTYPE
+
+;*****************File:rastport.h
+
+NEWTYPE.AreaInfo
+*VctrTbl.w
+*VctrPtr.w
+*FlagTbl.b
+*FlagPtr.b
+Count.w
+MaxCount.w
+FirstX.w:FirstY.w
+End NEWTYPE
+
+NEWTYPE.TmpRas
+*RasPtr.b
+Size.l
+End NEWTYPE
+
+NEWTYPE.GelsInfo
+sprRsrvd.b
+Flags.b
+*gelHead.VSprite
+*gelTail.VSprite
+*nextLine.w
+*lastColor.w
+*collHandler.collTable
+leftmost.w:rightmost:topmost:bottommost
+*firstBlissObj.b:lastBlissObj.b
+End NEWTYPE
+
+NEWTYPE.RastPort
+*Layer.Layer
+*BitMap.BitMap
+*AreaPtrn.w
+*TmpRas.TmpRas
+*AreaInfo.AreaInfo
+*GelsInfo.GelsInfo
+Mask.b
+FgPen.b
+BgPen.b
+AOlPen.b
+DrawMode.b
+AreaPtSz.b
+linpatcnt.b
+dummy.b
+Flags.w
+LinePtrn.w
+cp_x.w:cp_y
+minterms.b[8]
+PenWidth.w
+PenHeight.w
+*Font.TextFont
+AlgoStyle.b
+TxFlags.b
+TxHeight.w
+TxWidth.w
+TxBaseline.w
+TxSpacing.w
+*RP_User.b
+longreserved.l[2]
+;Unless #GFX_RASTPORT_1_2
+wordreserved.w[7]
+reserved.b[8]
+;End If Macro
+End NEWTYPE
+
+#JAM1= 0
+#JAM2= 1
+#COMPLEMENT= 2
+#INVERSVID= 4
+#FRST_DOT= $01
+#ONE_DOT= $02
+#DBUFFER= $04
+#AREAOUTLINE= $08
+#NOCROSSFILL= $20
+
+;*****************File:gfxmacros.h
+
+#BITSET= $8000
+#BITCLR= 0
+#AGNUS
+
+Macro SetOPen `1\AOlPen=`2:End Macro
+Macro SetDrPt `1\LinePtrn=`2:End Macro
+Macro SetWrMsk `1\Mask=`2:End Macro
+Macro SetAfPt `1\AreaPtrn=`2:End Macro
+Macro BNDRYOFF `1\Flags&=#AREAOUTLINE:End Macro
+Macro DrawCircle ##[$FF1A](`1,`2,`3,`4,`4):End Macro
+Macro AreaCircle ##[$FF1B](`1,`2,`3,`4,`4):End Macro
+
+;*****************File:layers.h
+
+#LAYERSIMPLE= 1
+#LAYERSMART= 2
+#LAYERSUPER= 4
+#LAYERUPDATING= $10
+#LAYERBACKDROP= $40
+#LAYERREFRESH= $80
+#LAYER_CLIPRECTS_LOST= $100
+#LMN_REGION= -1
+
+NEWTYPE.Layer_Info
+*top_layer.Layer
+*check_lp.Layer
+*obs.ClipRect
+FreeClipRects.MinList
+Lock.SignalSemaphore
+gs_Head.List
+longreserved.l
+Flags.w
+fatten_count.b
+LockLayersCount.b
+LayerInfo_extra_size.w
+*blitbuff.w
+*LayerInfo_extra.w
+End NEWTYPE
+
+#NEWLAYERINFO_CALLED= 1
+#ALERTLAYERSNOMEM= $83010000
+
+;*****************File:displayinfo.h
+
+#DTAG_DISP= $80000000
+#DTAG_DIMS= $80001000
+#DTAG_MNTR= $80002000
+#DTAG_NAME= $80003000
+
+NEWTYPE.QueryHeader
+StructID.l
+DisplayID.l
+SkipID.l
+Length.l
+End NEWTYPE
+
+NEWTYPE.DisplayInfo
+Header.QueryHeader
+NotAvailable.w
+PropertyFlags.l
+Resolution.point
+PixelSpeed.w
+NumStdSprites.w
+PaletteRange.w
+SpriteResolution.point
+pad.b[4]
+reserved.l[2]
+End NEWTYPE
+
+#DI_AVAIL_NOCHIPS= $0001
+#DI_AVAIL_NOMONITOR= $0002
+#DI_AVAIL_NOTWITHGENLOCK= $0004
+#DIPF_IS_LACE= $00000001
+#DIPF_IS_DUALPF= $00000002
+#DIPF_IS_PF2PRI= $00000004
+#DIPF_IS_HAM= $00000008
+#DIPF_IS_ECS= $00000010
+#DIPF_IS_PAL= $00000020
+#DIPF_IS_SPRITES= $00000040
+#DIPF_IS_GENLOCK= $00000080
+#DIPF_IS_WB= $00000100
+#DIPF_IS_DRAGGABLE= $00000200
+#DIPF_IS_PANELLED= $00000400
+#DIPF_IS_BEAMSYNC= $00000800
+#DIPF_IS_EXTRAHALFBRITE= $00001000
+
+NEWTYPE.DimensionInfo
+Header.QueryHeader
+MaxDepth.w
+MinRasterWidth.w
+MinRasterHeight.w
+MaxRasterWidth.w
+MaxRasterHeight.w
+Nominal.Rectangle
+MaxOScan.Rectangle
+VideoOScan.Rectangle
+TxtOScan.Rectangle
+StdOScan.Rectangle
+pad.b[14]
+reserved.l[2]
+End NEWTYPE
+
+NEWTYPE.MonitorInfo
+Header.QueryHeader
+*Mspc.MonitorSpec
+ViewPosition.point
+ViewResolution.point
+ViewPositionRange.Rectangle
+TotalRows.w
+TotalColorClocks.w
+MinRow.w
+Compatibility.w
+pad.b[36]
+reserved.l[2]
+End NEWTYPE
+
+#MCOMPAT_MIXED= 0
+#MCOMPAT_SELF= 1
+#MCOMPAT_NOBODY= -1
+#DISPLAYNAMELEN= 32
+
+NEWTYPE.NameInfo
+Header.QueryHeader
+Name.b[32]							;#DISPLAYNAMELEN
+reserved.l[2]
+End NEWTYPE
+
+#INVALID_ID= 0
+#MONITOR_ID_MASK= $FFFF1000
+#DEFAULT_MONITOR_ID= $00000000
+#NTSC_MONITOR_ID= $00011000
+#PAL_MONITOR_ID= $00021000
+#LORES_KEY= $00000000
+#HIRES_KEY= $00008000
+#SUPER_KEY= $00008020
+#HAM_KEY= $00000800
+#LORESLACE_KEY= $00000004
+#HIRESLACE_KEY= $00008004
+#SUPERLACE_KEY= $00008024
+#HAMLACE_KEY= $00000804
+#LORESDPF_KEY= $00000400
+#HIRESDPF_KEY= $00008400
+#SUPERDPF_KEY= $00008420
+#LORESLACEDPF_KEY= $00000404
+#HIRESLACEDPF_KEY= $00008404
+#SUPERLACEDPF_KEY= $00008424
+#LORESDPF2_KEY= $00000440
+#HIRESDPF2_KEY= $00008440
+#SUPERDPF2_KEY= $00008460
+#LORESLACEDPF2_KEY= $00000444
+#HIRESLACEDPF2_KEY= $00008444
+#SUPERLACEDPF2_KEY= $00008464
+#EXTRAHALFBRITE_KEY= $00000080
+#EXTRAHALFBRITELACE_KEY= $00000084
+#VGA_MONITOR_ID= $00031000
+#VGAEXTRALORES_KEY= $00031004
+#VGALORES_KEY= $00039004
+#VGAPRODUCT_KEY= $00039024
+#VGAHAM_KEY= $00031804
+#VGAEXTRALORESLACE_KEY= $00031005
+#VGALORESLACE_KEY= $00039005
+#VGAPRODUCTLACE_KEY= $00039025
+#VGAHAMLACE_KEY= $00031805
+#VGAEXTRALORESDPF_KEY= $00031404
+#VGALORESDPF_KEY= $00039404
+#VGAPRODUCTDPF_KEY= $00039424
+#VGAEXTRALORESLACEDPF_KEY= $00031405
+#VGALORESLACEDPF_KEY= $00039405
+#VGAPRODUCTLACEDPF_KEY= $00039425
+#VGAEXTRALORESDPF2_KEY= $00031444
+#VGALORESDPF2_KEY= $00039444
+#VGAPRODUCTDPF2_KEY= $00039464
+#VGAEXTRALORESLACEDPF2_KEY= $00031445
+#VGALORESLACEDPF2_KEY= $00039445
+#VGAPRODUCTLACEDPF2_KEY= $00039465
+#VGAEXTRAHALFBRITE_KEY= $00031084
+#VGAEXTRAHALFBRITELACE_KEY= $00031085
+#A2024_MONITOR_ID= $00041000
+#A2024TENHERTZ_KEY= $00041000
+#A2024FIFTEENHERTZ_KEY= $00049000
+#PROTO_MONITOR_ID= $00051000
+
+;*****************File:
+
+;#InitAnimate= *`1=#NULL
+;#RemBob(b)= b\Flags=#BOBSAWAY
+;#TA_DeviceDPI= (1|#TAG_USER)
+;#tf_Extension= #tf_Message.#mn_ReplyPort
+
+;#NXTLIST= #u3.#nxtlist
+;#VWAITPOS= #u3.#u4.#u1.#VWaitPos
+;#DESTADDR= #u3.#u4.#u1.#DestAddr
+;#HWAITPOS= #u3.#u4.#u2.#HWaitPos
+;#DESTDATA= #u3.#u4.#u2.#DestData
+
+;#CINIT(c,n)= #UCopperListInit(#c,n)
+;#CMove(c,a,b)= {#CMove(#c,&#a,b)
+;#CWait(c,a,b)= {#CWait(#c,#a,b)
+;#CEND(c)= {#CWait(#c,10000,255)
+
+;If #AGNUS
+;#TOBB(a)= ((#long)(a))
+;#TOBB(a)= ((#long)(a)Shr1)
+;End If Macro
+
+;#ON_DISPLAY= *custom\dmacon=#BITSET|#DMAF_RASTER
+;#OFF_DISPLAY= *custom\dmacon=#BITCLR|#DMAF_RASTER
+;#ON_SPRITE= *custom\dmacon=#BITSET|#DMAF_SPRITE
+;#OFF_SPRITE= *custom\dmacon=#BITCLR|#DMAF_SPRITE
+;#ON_VBLANK= *custom.\intena=#BITSET|#INTF_VERTB
+;#OFF_VBLANK= *custom\intena=#BITCLR|#INTF_VERTB
+

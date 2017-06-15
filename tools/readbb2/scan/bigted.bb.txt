@@ -1,0 +1,172 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/bigted.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/bigted.bb
+
+DEFTYPE.l
+
+#allocmem=-198
+#freemem=-210
+#allocsignal=-330
+#freesignal=-336
+#opendevice=-444
+#closedevice=-450
+#doio=-456
+
+Function.l opencon{w.l} ;w=window
+MOVE.l #34+128,d0:MOVE.l #$10001,d1:MOVE.l 4,a6:JSR allocmem(a6):MOVE.l d0,rp
+MOVEQ #-1,d0:JSR allocsignal(a6):MOVE.l rp(pc),a0:LEA 34(a0),a1
+MOVE.l a0,14(a1):MOVE.b d0,15(a0)
+MOVE.l 276(a6),16(a0):LEA 24(a0),a2:MOVE.l a2,20(a0)
+MOVE.l a0,28(a0)
+GetReg d0,w:MOVE.l d0,40(a1):MOVE.l #132,36(a1)
+LEA conname(pc),a0:MOVEQ #0,d0:MOVEQ #0,d1
+JSR opendevice(a6):Function Return Peek.l(?rp)+34
+conname:Dc.b "console.device",0:Event
+rp:Dc.l 0
+End Function
+
+Statement closecon{io.l}
+MOVE.l 4,a6:GetReg a1,io:JSR closedevice(a6)
+GetReg a1,io:MOVEQ #0,d0:MOVE.b -34+15(a1),d0:JSR freesignal(a6)
+GetReg a1,io:LEA -34(a1),a1:MOVE.l #128+34,d0:JSR freemem(a6)
+End Statement
+
+Statement doio{io.l,com.l,dat.l,ln.l}
+MOVE.l 4,a6:GetReg a1,io
+GetReg d0,com:MOVE d0,28(a1)
+GetReg d0,dat:MOVE.l d0,40(a1)
+GetReg d0,ln:MOVE.l d0,36(a1)
+JSR doio(a6)
+End Statement
+
+Statement ioprint{io,k$}
+doio{io,3,&k$,Len(k$)}
+End Statement
+
+Screen 0,0,0,640,200,2,$8000,"",1,2
+s=Peek.l(Addr Screen(0))
+Poke.l ?scrn,s
+w=##[$FF9E](?newwindow):Poke.l Addr Window(0),w:Use Window 0
+;LoadFont 0,"diamond.font",8:WindowFont 0
+
+io=opencon{w}:iow=io ;AllocMem_(128,$10001)
+;Poke.l iow+$14,Peek.l(io+$14)
+;Poke.l iow+$18,Peek.l(io+$18)
+
+cu=Peek.l(io+$18)
+
+l$=Chr$(0)
+t$=Chr$(0)
+c$=Chr$($9b)
+
+;ioprint{iow,c$+"11;12{"}
+;
+ioprint{iow,c$+"32;40;1m"}
+ioprint{iow,"For "}
+;
+ioprint{iow,c$+"32;40;0m"}
+ioprint{iow,"k=1 "}
+;
+ioprint{iow,c$+"32;40;1m"}
+ioprint{iow,"To "}
+;
+ioprint{iow,c$+"32;40;0m"}
+ioprint{iow,"1000"}
+
+Repeat
+	cx=Peek.w(cu+62)
+	;WLocate 0,0:Print Peek.w(cu+62),"	",Peek.w(cu+64),"	"
+	;Print Peek.w(cu+42),"	",Peek.w(cu+44),"	"
+	;Print Peek.w(cu+50),"	",Peek.w(cu+52),"	"
+	;Print Peek.w(cu+54),"	",Peek.w(cu+56),"	"
+	doio{io,2,&l$,1}
+	Select l$
+	Case Chr$(8)
+		ioprint{iow,Chr$(8)+c$+"P"}
+	Case Chr$(13)
+		ioprint{iow,c$+"E"}
+	Case Chr$(127)
+		ioprint{iow,c$+"P"}
+	Case c$
+		co$=c$
+		Repeat
+			doio{io,2,&t$,1}
+			co$+t$
+		Until t$>="@"
+		Select t$
+		Case "|"	;raw key report
+		Select Val(Mid$(co$,2)) ;event type
+		Case 11 ;window close...
+		Case 12 ;new size!		;pick up maxw and maxh
+		End Select
+		co$=""
+		Case "A"
+		Case "B"
+		Case "C"
+		Case "D"
+		Default
+			co$=""
+		End Select
+		If co$ Then ioprint{iow,co$}
+	Default
+		WLocate 320,0:Print Asc(l$)
+		If l$>=" "
+			ioprint{iow,c$+"@"}
+			doio{iow,3,&l$,1}
+		EndIf
+	End Select
+Until l$=Chr$(27)
+
+Poke.l Addr Window(0),0
+;FreeMem_ iow,128
+closecon{io}
+##[$FF88] w
+End
+
+askcursxy ;ask for xy pos of cursx
+;
+ioprint{iow,c$+"6n"}
+co$=""
+Repeat
+	doio{io,2,&t$,1}
+	co$+t$
+Until t$="R"
+;
+cy=Val(Mid$(co$,2))-1
+cx=Instr(co$,";")
+cx=Val(Mid$(co$,cx+1))-1
+;
+;WLocate 0,0:Print cx,"	",cy,"	"
+;
+Return
+
+askwindwh ;ask for wh size of window
+;
+ioprint{iow,c$+" q"}
+co$=""
+Repeat
+	doio{io,2,&t$,1}
+	co$+t$
+Until t$="r"
+;
+ww=Instr(co$,";"):co$=Mid$(co$,ww+1)
+ww=Instr(co$,";"):co$=Mid$(co$,ww+1)
+;
+wh=Val(co$)-1
+ww=Instr(co$,";")
+ww=Val(Mid$(co$,ww+1))-1
+;
+;WLocate 0,8:Print ww,"	",wh,"	"
+;
+Return
+
+newwindow
+Dc 0,0,640,200
+Dc.b 0,1
+Dc.l $80000000,$100f
+Dc.l 0,0
+Dc.l name
+scrn:Dc.l 0,0
+Dc 320,64,-1,-1
+Dc 15
+
+name:Dc.b "BIG TED!",0
+Event

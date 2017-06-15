@@ -1,0 +1,1540 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/STARTREK/startrek.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/STARTREK/startrek.bb2
+;
+;Allrighty - a cool space game type thingy!
+;
+;Loosely based on the old Star-Trek.
+
+BLITZ
+
+.newtypes
+
+NEWTYPE.obj
+n$			;name
+;
+l$			;location - "*" then on ship!
+c$			;code when moved to ship
+c2$		 ;code when moved off ship
+;
+l2$		 ;location 2
+c3$		 ;code when moved to location 2
+c4$		 ;code when moved off location 2
+End NEWTYPE
+
+NEWTYPE.alien
+x.q
+y
+z
+m.w		 ;-1 = active, 1=missile
+xs.w		;-1,0,1
+ys.w		;-1,0,1
+zs.w		;-1,0,1
+xsh.w	 ;x shift
+ysh.w	 ;y shift
+t.w		 ;aggro timer
+ht.w		;homein timer
+ft.w		;fire timer
+dz.w
+s.w		 ;shape offset
+End NEWTYPE
+
+NEWTYPE.reply ;conversation reply
+r$						;reply text
+c.w					 ;leads to conv#
+End NEWTYPE
+
+NEWTYPE.conv	;conversation
+t$						;speech
+n.w					 ;number of replies
+r.reply[4]		;5 possible replys
+End NEWTYPE
+
+NEWTYPE.gadget
+x.w
+y
+w
+h
+id
+i$
+End NEWTYPE
+
+NEWTYPE.star
+x.q ;on screen x!
+y	 ;on screen y!
+xs	;add to x
+ys	;y add
+xa	;add to speed (acc)
+ya	;add to speed (acc)
+;
+t.w
+c	 ;colour of star
+;
+lx
+ly
+End NEWTYPE
+
+NEWTYPE.zoom
+x.q
+y.q
+xs.q
+ys.q
+c.w	 ;colour
+End NEWTYPE
+
+NEWTYPE.opt
+f.w	 ;flag number - less than 0 then test every turn
+p.w	 ;test type - 0=false, 1=true, 2=false&togg, 3=true&togg
+c$		;code
+End NEWTYPE
+
+DEFTYPE.opt *opt
+
+NEWTYPE.prog
+l$		;location
+n.w	 ;number of o's
+o.opt[5]
+End NEWTYPE
+
+.arrays
+
+Dim List a.alien(127)
+Dim List p.prog(100)
+Dim l$(100)
+Dim f.w(100)
+Dim List g.gadget(100)
+Dim List s.star(39) ;39)
+Dim List z.zoom(64)
+Dim nc.w(5)						 ;nav color codes
+Dim no(4)							 ;number of each object
+Dim c.conv(50)					;50 conversations
+Dim m1(255),m2(255)		 ;magnification for z moves
+Dim m3(255),m4(255)
+Dim m5(255)
+Dim cx.w(1),cy.w(1)
+Dim List o.obj(20)
+
+nc(0)=4:nc(1)=5:nc(2)=3:nc(3)=6:nc(4)=1:nc(5)=2
+
+.macros
+
+Macro bwait
+BTST #6,$dff002
+'loop:BTST #6,$dff002:BNE 'loop
+End Macro
+
+.prox
+
+Statement changeobj{f$,t$}
+Shared o()
+ResetList o()
+While NextItem(o())
+	If o()\n=f$ Then o()\n=t$:Statement Return
+Wend
+End Statement
+
+USEPATH g()
+
+Function zconv{n,z}
+Function Return n/(z LSR 2+1)
+End Function
+
+Statement wind{x,y,w,h}
+Boxf x,y,x+w-1,y+h-1,0
+Line x,y,x+w-2,y,2
+Line x,y,x,y+h-2,2
+Line x+w-1,y+1,x+w-1,y+h-1,1
+Line x+1,y+h-1,x+w-1,y+h-1,1
+End Statement
+
+Statement addzone{x,y,w,h,id}
+Shared g()
+AddLast g()
+\x=x,y,w,h,id,""
+End Statement
+
+Statement addgad{t$,x,y,id}
+Shared g()
+Locate x,y:Colour 4,0:Print t$
+w=Len(t$)LSL 3+8:h=11:x LSL 3-4:y LSL 3-2
+addzone{x,y,w,h,id}:\i=t$
+w+x-1:h+y-1
+Line x,y,w-1,y,1:Line x,y,x,h-1,1
+Line w,y+1,w,h,2:Line x+1,h,w,h,2
+End Statement
+
+Statement addgad2{t$,x,y,id}
+x2=x LSL 3-4:y2=y LSL 3-2
+h=11:w=Len(t$) LSL 3+8
+Boxf x2-2,y2-1,x2+w+1,y2+h,0
+addgad{t$,x,y,id}
+End Statement
+
+Statement killgad{id}
+Shared g()
+ResetList g()
+While NextItem(g())
+	If \id=id Then KillItem g():Statement Return
+Wend
+End Statement
+
+Statement addgad3{t$,x,y,id}
+killgad{id}
+addgad2{t$,x,y,id}
+End Statement
+
+Statement turnoff{id}
+Shared g()
+ResetList g()
+While NextItem(g())
+	If \id=id
+		Line \x,\y,\x+\w-2,\y,1
+		Line \x,\y,\x,\y+\h-2,1
+		Line \x+\w-1,\y,\x+\w-1,\y+\h-1,2
+		Line \x+1,\y+\h-1,\x+\w-1,\y+\h-1,2
+		Locate Int(\x LSR 3)+1,Int(\y LSR 3)+1
+		Colour 4,0:Print \i
+	EndIf
+Wend
+End Statement
+
+Statement turnoff2{id}
+Repeat
+	VWait
+Until Joyb(0)=0
+turnoff{id}
+End Statement
+
+Statement turnon{id}
+Shared g()
+ResetList g()
+While NextItem(g())
+	If \id=id
+		Line \x,\y,\x+\w-2,\y,2
+		Line \x,\y,\x,\y+\h-2,2
+		Line \x+\w-1,\y,\x+\w-1,\y+\h-1,1
+		Line \x+1,\y+\h-1,\x+\w-1,\y+\h-1,1
+		Locate Int(\x LSR 3)+1,Int(\y LSR 3)+1
+		Colour 5,0:Print \i
+	EndIf
+Wend
+End Statement
+
+Function chkzones{}
+Shared g(),lb
+If Joyb(0)
+	If lb
+		lb=0
+		x=MouseX LSL 1:y=MouseY
+		ResetList g()
+		While NextItem(g())
+			If x>=\x AND y>=\y
+				If x<\x+\w AND y<\y+\h
+					id=\id:If \i Then turnon{id}
+					Function Return id
+				EndIf
+			EndIf
+		Wend
+	EndIf
+Else
+	lb=-1
+EndIf
+Function Return 0
+End Function
+
+Statement clsw{}
+Shared g()
+Boxf 4,20,330,135,2
+Line 331,20,331,136,1
+Line 331,136,4,136,1
+ResetList g()
+While NextItem(g())
+	If \id>0 Then KillItem g()
+Wend
+End Statement
+
+Statement prnt{k$}
+Shared tsp
+For k=1 To Len(k$) Step tsp
+Print Chr$(91):Locate CursX-1,CursY
+VWait
+Print Mid$(k$,k,tsp)
+Next
+End Statement
+
+Statement cr{}
+Shared cx,cy
+cx=0
+If cy<15
+	cy+1
+Else
+	VWait
+	Scroll 44 LSL 3,16,280,120,44 LSL 3,8
+	Boxf 44 LSL 3,128,44 LSL 3+279,128+7,0
+EndIf
+End Statement
+
+Statement cprnt{k$}
+Shared cx,cy
+Colour 1,0:k$+" "
+Repeat
+	k=Instr(k$," ")
+	If k
+		k2$=Left$(k$,k-1):k$=Mid$(k$,k+1)
+		If Left$(k2$,1)="." Then cr{}:k2$=Mid$(k2$,2)
+		k2=Len(k2$)
+		If cx+k2>35 Then cr{}
+		Locate 44+cx,1+cy:prnt{k2$}:cx+k2
+		If cx<35 Then prnt{" "}:cx+1
+	EndIf
+Until k=0
+End Statement
+
+Statement cprntcr{k$}
+cr{}:cr{}:cprnt{k$}
+End Statement
+
+.exec
+Statement exec{k$}
+Shared f(),oc,ocb$,occ$
+While Left$(k$,1)="_"
+	k2$=Mid$(k$,2,1):k$=Mid$(k$,3)
+	Select k2$
+	Case "T"
+		Gosub getval:f(v)=1
+	Case "F"
+		Gosub getval:f(v)=0
+	Case "C"
+		Gosub getval:Gosub getchars:b$=c$:Gosub getchars
+		If oc<>v
+			oc=v:ocb$=b$:occ$=c$
+			cprntcr{"INCOMING COMMUNICATION..."}
+		EndIf
+	Default
+		cprntcr{"ILLEGAL INSTRUCTION IN PROG"}
+	End Select
+Wend
+If k$ Then cprntcr{k$}
+Statement Return
+;
+getval
+Gosub getchars:v=Val(c$):Return
+
+getchars
+k$=StripLead$(k$,32):k=Instr(k$," ")
+If k
+	c$=Left$(k$,k-1):k$=Mid$(k$,k+1)
+Else
+	c$=k$:k$=""
+EndIf
+Return
+;
+End Statement
+
+Function$ co{gx,gy,sx,sy}
+Function Return Chr$(gx+65)+Chr$(gy+49)+"/"+Chr$(sx+65)+Chr$(sy+49)
+End Function
+
+Statement stpal{p,n}
+StopCycle p,n+1,15,15,15
+StopCycle p,n+2,11,11,13
+StopCycle p,n+3,6,6,8
+End Statement
+
+Statement stpal2{}
+stpal{1,0}
+End Statement
+
+QAMIGA
+.amigaprox
+
+USEPATH p()
+
+Statement doif{t$,o}
+Shared p(),f(),k
+k+1
+If Mid$(t$,2,1)="T"
+	\o[k]\p=1+o
+Else
+	\o[k]\p=o
+EndIf
+If Mid$(t$,3,1)="E"
+	\o[k]\f=-Val(Mid$(t$,4))
+Else
+	\o[k]\f=Val(Mid$(t$,3))
+EndIf
+End Statement
+
+Function$ findl{v,c}
+Shared l$(),nc()
+If l$(v) Then Function Return l$(v)
+filoop
+Repeat
+	x=Int(Rnd(64))LSL 1:y=Int(Rnd(64))
+Until Cls(x,y)=nc(c)
+x LSR 1
+gx=Int(x LSR 3):sx=x&7
+gy=Int(y LSR 3):sy=y&7
+l$=co{gx,gy,sx,sy}
+For k=1 To 100
+If l$(k)=l$ Then Pop For:Goto filoop
+Next
+l$(v)=l$
+Function Return l$
+End Function
+
+Function$ ed{}
+edloop
+If DosBuffLen(0) Then Function Return ""
+t$=Edit$(128)
+If t$="" Then Goto edloop
+k=Instr(t$,"\")
+If k
+	t$=Left$(t$,k-1):If t$="" Then Goto edloop
+EndIf
+edloop2
+k=Instr(t$,"@")
+If k
+	k$=Mid$(t$,k+1,2):v=Val(Mid$(t$,k+4,2))
+	Select k$
+	Case "FS"
+		j$=findl{v,0}
+	Case "FP"
+		j$=findl{v,1}
+	Case "ES"
+		j$=findl{v,2}
+	Case "EP"
+		j$=findl{v,3}
+	Case "NP"
+		j$=findl{v,4}
+	End Select
+	t$=Left$(t$,k-1)+j$+Mid$(t$,k+6)
+	Goto edloop2
+EndIf
+Function Return UCase$(StripTrail$(t$,32))
+End Function
+
+Function ved{}
+Function Return Val(ed{})
+End Function
+
+.diskio
+LoadShape 0,"pointer":GetaSprite 0,0
+LoadShape 0,"sight":DecodeShapes 0:GetaSprite 1,0
+LoadShape 0,"grid":GetaSprite 2,0
+LoadPalette 0,"shapes.iff":StopCycle 0,0,0,0,0
+LoadShape 0,"galaxy.iff"
+;LoadBlitzFont 0,"st.font"
+LoadShape 7,"starship.iff":DecodeShapes 7
+BitMap 0,144,80,3:Blit 0,0,0
+
+If WriteMem(0,"prog")
+	FileInput 0
+	Repeat
+		f$=ed{}
+		If f$
+			Select Left$(f$,1)
+			Case "$"
+				Gosub conv
+			Case "!"
+				Gosub obj
+			Default
+				Gosub evnt
+			End Select
+		EndIf
+	Until f$=""
+	CloseFile 0:DefaultInput
+Else
+	End
+EndIf
+
+sw=.25
+sw2=sw+sw
+sw3=32-sw
+sw4=2
+sw5=sw+sw+sw
+
+For z=0 To sw3 Step sw
+z2=z LSL sw4
+m1(z2)=zconv{1,QWrap(z-sw,0,32)}/zconv{1,z}
+m2(z2)=zconv{1,QWrap(z+sw,0,32)}/zconv{1,z}
+m3(z2)=zconv{8,z}
+m4(z2)=zconv{1,QWrap(z-sw2,0,32)}/zconv{1,z}
+m5(z2)=zconv{1,QWrap(z-sw5,0,32)}/zconv{1,z}
+Next
+
+BLITZ
+
+.begin
+;
+Queue 0,64:Queue 1,64
+Gosub initstars
+stpal2{}
+BitMap 0,640,256,2	;stars & hyperspace!
+BitMap 1,640,144,3	;panel
+BitMap 2,320,256,4	;for pretty pix of planets & people
+BitMap 3,144,80,3	 ;for nav stuff
+;
+BlockScroll 2
+For x=0 To 128 Step 16
+Line x,0,x,64,7
+Next
+For y=0 To 64 Step 8
+Line 0,y,128,y,7
+Next
+GetaShape 1,0,0,129,65
+GetaShape 2,0,0,16,8
+GetaShape 8,0,0,1,1
+;
+BitMap 4,448,192,3	;DB bitmaps for arcade section!
+BitMap 5,448,192,3	;						 "
+;
+Use BitMap 1:BitMapOutput 1
+
+Slice 0,32,320,128,$fffa,5,8,32,640,640
+*sl0.slice=Addr Slice(0):Gosub go4cols
+Use SetCycle 1:Show 0
+
+Slice 1,162,640,144,$fff1,3,8,32,640,640
+Use SetCycle 0:Show 1
+Green 0,0,0,0:Green 8,0,8,0
+Green 17,15,15,15:Green 18,0,0,0
+ColSplit 0,15,0,8,2
+ColSplit 0,8,8,8,3
+ColSplit 0,8,0,15,140
+ColSplit 0,0,0,0,141
+
+Use Slice 0
+
+Gosub kludge
+
+x=1
+For k=1 To 5
+Read o$
+addgad{o$,x,1,-k}:x+Len(o$)+1
+Next
+Data$ " NAV "," COMMS "," TRANSFER "," COMP "," STATUS "
+
+clsw{}
+
+x=348:y=6:w=328-40:h=131:tsp=2
+
+Line x,y,x+w-2,y,2
+Line x,y,x,y+h-2,2
+Line x+w-1,y,x+w-1,y+h-1,1
+Line x+w-1,y+h-1,x+1,y+h-1,1
+
+;text area: X = 1 -> 40 ; Y = 3 -> 15
+
+wa=.25
+
+.int5
+SetInt 5
+		;
+		If ss
+			Use BitMap 0:Gosub dostars
+			If wp Then Gosub warpeffects
+			Use BitMap 1
+		Else
+			If ce
+				Gosub commeffects
+			Else
+				If ss2
+					Gosub dostarfield
+				Else
+					If nve
+						Gosub naveffect1
+					EndIf
+				EndIf
+			EndIf
+		EndIf
+		;
+End SetInt
+
+a1=32:ss=-1:VWait 2:ss=0
+
+ps=0:pl$=l$(1)
+px=(Asc(Mid$(pl$,1))-65)LSL 3+(Asc(Mid$(pl$,4))-65)
+py=(Asc(Mid$(pl$,2))-49)LSL 3+(Asc(Mid$(pl$,5))-49)
+Gosub mousea:ps=0:Gosub doplanet:Gosub newloc
+
+.main
+While Joyb(0)<>2
+	VWait:Gosub handleloc
+	g=chkzones{}
+	If g<0 AND g<>lg
+		turnoff{lg}:lg=g:Gosub nveoff:Colour 1,2
+		On -lg Gosub donav,docomms,dotele
+	Else
+		If g>0
+			Colour 1,2
+			On ac Gosub navact1,navact2,commsact1,teleact1
+		EndIf
+	EndIf
+Wend
+
+CELSE
+AMIGA
+DefaultOutput
+NPrint Hex$(*sl0\_BPLCON1)
+
+cp.l=CopLoc
+While be.l<>$fffffffe
+	be=Peek.l(cp)
+	NPrint Hex$(cp),":",Hex$(be)
+	cp+4
+Wend
+MouseWait
+BLITZ
+CELSE
+
+End
+
+;********************** SUBROUTINES ********************
+.
+.subs
+
+godualpf
+VWait:Repeat:Until VPos>160
+*sl0\_flags=$fffa
+*sl0\_numbitplanes=5
+slp.l=*sl0\_BPLCON1
+Poke.w slp-4,$5600
+Poke.w slp+24,14
+Poke.w slp+28,38
+Return
+
+go4cols
+VWait:Repeat:Until VPos>160
+*sl0\_flags=$fff8
+*sl0\_numbitplanes=2
+slp.l=*sl0\_BPLCON1
+Poke.w slp-4,$2200
+Poke.w slp+24,38
+Poke.w slp+28,38
+Return
+
+go16cols
+VWait:Repeat:Until VPos>160
+*sl0\_flags=$fff8
+*sl0\_numbitplanes=4
+slp.l=*sl0\_BPLCON1
+Poke.w slp-4,$4200
+Poke.w slp+24,-2
+Poke.w slp+28,-2
+Return
+
+dostarfield
+;
+USEPATH a()
+;
+ShowF 4+db,64,32:ShowB 0,x,y
+db=1-db:Use BitMap 4+db:UnQueue db
+;
+If cy(db)
+	Line 64+0,32+127,64+cx(db),32+cy(db),0
+	Line 64+319,32+127,64+cx(db),32+cy(db),0
+	cy(db)=0
+EndIf
+;
+mx=MouseX:my=MouseY
+;
+gf=0
+;
+If Joyb(0)=1
+	If lb
+		lb=0
+		Line 64+0,32+127,64+mx,32+my,6
+		Line 64+319,32+127,64+mx,32+my,6
+		cx(db)=mx:cy(db)=my:gf=-1
+	EndIf
+Else
+	lb=-1
+EndIf
+;
+xs=(mx-160)ASR 5:ys=(my-64)ASR 4
+x=QWrap(x+xs,0,320):y=QWrap(y+ys,0,128)
+;
+If ast
+	If at
+		at-1
+	Else
+		at=Int(Rnd(6))
+		If ala
+			asa+1:ala-1
+			FirstItem a():AddItem a()
+			If ala&7
+				\x=Rnd(96)-48+(MouseX-160),Rnd(64)-32+(MouseY-64)LSL 1,Rnd+31,3
+			Else
+				\x=Rnd(320)-160,Rnd(128)-64,Rnd+31,3
+			EndIf
+			\s=64:If Rnd>.8 Then \m=4
+		EndIf
+	EndIf
+Else
+	If ala
+		ala-.125
+		If ala=Int(ala)
+			asa+1
+			FirstItem a():AddItem a()
+			\x=Rnd(384)-192,Rnd(160)-80,sw3,0,0,0,0
+			\dz=Int(Rnd(16))+4:\s=64
+		EndIf
+	EndIf
+EndIf
+;
+FirstItem a():lz=32
+While NextItem(a())
+	;
+	sx=\x-xs:sy=\y-ys:sz=\z:z2=sz LSL sw4
+	If QAbs(sx)<192
+		If QAbs(sy)<80
+			QBlit db,\s+sz,224+sx,96+sy
+		EndIf
+	EndIf
+	;
+	Select \m
+	;
+	Case 0
+		sx=QWrap(sx,-192,192)
+		sy=QWrap(sy,-80,80)
+		If t
+			t-1
+		Else
+			t=Int(Rnd(64))+64
+			If na<4
+				na+1
+				If Rnd>.75
+					If Rnd>.5 Then sy=64 Else sy=-64
+					sz=0:\m=-1,0,0,1:\ft=\dz LSL 1
+				Else
+					\m=-1,0,0,-1
+				EndIf
+			EndIf
+		EndIf
+		Gosub chkdieswap
+	Case -1
+		If \ft
+			\ft-1
+		Else
+			\ft=Rnd(64)+32
+			PushItem a()
+			If AddItem(a())
+				\x=sx,sy,sz,1:\s=96
+				Gosub homein
+			EndIf
+			PopItem a()
+		EndIf
+		;
+		If \zs				;moving on z axis...
+			If \zs<0
+				sx*m1(z2):sy*m1(z2):sz-sw
+			Else
+				sx*m2(z2):sy*m2(z2):sz+sw
+			EndIf
+			Select sz
+			Case \dz
+				\zs=0:\t=Int(Rnd(64))+32,0
+			Case sw3
+				\m=0:na-1
+			Case -sw
+				sz=sw3:\m=0:na-1
+			End Select
+		Else					;moving on x/y axis...
+			If \t
+				\t-1
+				If \ht
+					\ht-1
+				Else
+					Gosub homein:\ht=Int(Rnd(16))+16
+				EndIf
+				Gosub xymover
+			Else
+				If Rnd>.5 Then \xs=0,0,1 Else \xs=0,0,-1
+			EndIf
+		EndIf
+		Gosub chkdieswap
+	Case 1	;missile
+		Gosub xymover:sx*m4(z2):sy*m4(z2):sz-sw2
+		If sz<sw2
+			KillItem a()
+			If QAbs(sx)<48 AND QAbs(sy)<24 Then MOVE #$f00,$dff180
+		Else
+			Gosub chkdieswap
+		EndIf
+	Case 2	;explosion
+		\s+4
+		If \s+sz>159
+			KillItem a()
+		Else
+			Gosub chkswap
+		EndIf
+	Case 3		;fast asteroid
+		sx*m4(z2):sy*m4(z2):sz-sw2
+		If sz<sw2
+			KillItem a()
+			If QAbs(sx)<96 AND QAbs(sy)<48 Then MOVE #$f00,$dff180
+		Else
+			Gosub chkswap
+		EndIf
+	Case 4		;fast asteroid
+		sx*m1(z2):sy*m1(z2):sz-sw
+		If sz<sw
+			KillItem a()
+			If QAbs(sx)<96 AND QAbs(sy)<48 Then MOVE #$f00,$dff180
+		Else
+			Gosub chkswap
+		EndIf
+	End Select
+	;
+	lz=\z
+	;
+Wend
+;
+Return
+
+.arcade
+;
+ast=1-ast
+;
+Use BitMap 0
+Boxf 0,128,639,255,0:Boxf 320,0,639,127,0:!bwait
+ResetList s()
+While NextItem(s())
+x=s()\x:y=s()\y:c=s()\c
+Point x+320,y,c:Point x,y+128,c:Point x+320,y+128,c
+Wend
+stpal{1,8}
+;ShowB 0,0,0:ShowF 4,64,32
+x=0:y=0:na=0:cy(0)=0:cy(1)=0
+;
+QAMIGA
+If ast
+	LoadShapes 64,"asteroids.3dshapes"
+	LoadPalette 1,"asteroid"
+Else
+	LoadShape 64,"starship.iff",1
+	LoadShape 96,"starbomb.iff"
+	LoadShape 128,"bang.iff"
+EndIf
+BLITZ
+ClearList a():AddFirst a():Use SetCycle 1
+Gosub mouseb:Gosub godualpf:ala=0:asa=0:ss2=-1
+;
+If ast
+	;
+	ala=1024		;asteroids left to add
+	;
+Else
+	DecodeShapes 64:DecodeShapes 96:DecodeShapes 128
+	k=ShapeWidth(64)
+	For z=1 To 31
+	k2=zconv{k,z}/k
+	CopyShape 64,z+64
+	Scale z+64,k2,k2,1:DecodeShapes z+64
+	CopyShape 96,z+96
+	Scale z+96,k2,k2,1:DecodeShapes z+96
+	CopyShape 128,z+128
+	Scale z+128,k2,k2,1:DecodeShapes z+128
+	Next
+	;
+	ala=8	 ;left to add
+	;
+EndIf
+;
+Repeat
+	VWait
+Until asa+ala=0 OR Joyb(0)=2
+;
+Repeat
+	VWait:FirstItem a()
+Until NOT NextItem(a())
+;
+VWait 2:ss2=0:Use BitMap 0:stpal2{}:x=Int(x):y=Int(y)
+Gosub go4cols:Show 0,x,y:Use SetCycle 1
+While x OR y
+If x
+	If x>160 Then x=QWrap(x+1,0,320) Else x=QWrap(x-1,0,320)
+EndIf
+If y
+	If y>64 Then y=QWrap(y+1,0,128) Else y=QWrap(y-1,0,128)
+EndIf
+VWait:Show 0,x,y
+Wend
+;
+Use BitMap 1:ss2=0:Goto mousea
+
+xymover
+Select \xs
+Case -1
+	sx-m3(z2)LSR \xsh
+Case 1
+	sx+m3(z2)LSR \xsh
+End Select
+Select \ys
+Case -1
+	sy-m3(z2)LSR \ysh
+Case 1
+	sy+m3(z2)LSR \ysh
+End Select
+Return
+
+chkdieswap
+;
+If gf
+	If SpritesHit(sz+\s,sx,sy,8,mx-160,my-64)
+		If \m<0 Then na-1
+		If \s=64 Then asa-1:\s=128:\m=2
+	EndIf
+EndIf
+;
+chkswap
+\x=sx,sy,sz
+If sz>lz	;have to swap?
+	KillItem a():PrevItem a():AddItem a():NextItem a()
+EndIf
+Return
+
+homein
+If sx<0 Then \xs=1 Else \xs=-1
+If sy<0 Then \ys=1 Else \ys=-1
+\xsh=Int(Rnd(3)),Int(Rnd(3))+2
+Return
+
+mousea
+Mouse Off:Use Slice 0:ShowSprite 1,-32,64,0
+Use Slice 1:MouseArea 0,7,159,136:Mouse On
+Pointer 0,0:Use Slice 0:Return
+
+mouseb
+Mouse Off:Use Slice 1:ShowSprite 0,-32,64,0
+Use Slice 0:MouseArea 0,8,320,120:Mouse On
+Pointer 1,0:Return
+
+.newloc ;new location arrived at
+;
+;pl$=coordinates
+;px=x (0-63), py=y (0-63)
+;
+dit=-1:oc=0
+Gosub findloc
+Gosub handleloc
+dit=0
+;
+Return
+
+.findloc
+USEPATH p()
+ResetList p()
+While NextItem(p())
+	If \l=pl$ Then pc=-1:Return
+Wend
+pc=0:Return
+
+.handleloc
+If pc=0 Then Return
+;
+For po=0 To \n
+*opt=\o[po]:fn=QAbs(*opt\f):fp=*opt\p
+If *opt\f<0 OR dit
+	If fp&1 ;true?
+		If f(fn) Then Pop For:Goto doit
+	Else
+		If f(fn)=0 Then Pop For:Goto doit
+	EndIf
+EndIf
+Next
+;
+Return
+;
+doit
+If *opt\c Then exec{*opt\c}
+If fp&2 Then f(fn)=1-f(fn)
+Return
+
+.handlecomms
+FadeOut 1:Gosub go16cols:Show 2,0,0
+QAMIGA
+Use BitMap 2:Boxf 0,0,351,127,0
+LoadShape 3,ocb$,2:Handle 3,ShapeWidth(3)/2,ShapeHeight(3)-1
+Blit 3,160,127
+LoadShape 3,occ$
+For k=3 To 6
+Handle k,ShapeWidth(k)/2,ShapeHeight(k)-1
+Next:Blit 3,160,127
+Use BitMap 1
+BLITZ
+FadeIn 2:Return
+
+.speech
+tsp=1:cea=.5:ce2=0:ce=3
+exec{c(cc)\t}:Repeat:VWait:Until Int(ce)=3
+ce=0:tsp=2
+Select cc ;special case conversations...
+Case 9
+	changeobj{"LITHIUM","BOMB"}
+End Select
+Return
+
+commeffects
+If ce2
+	ce2-1
+Else
+	Use BitMap 2
+	Blit ce,160,127:ce+cea
+	If ce<=3
+		cea=-cea:ce+cea:ce2=Int(Rnd(4))
+	Else
+		If ce>=6 Then cea=-cea:ce+cea
+	EndIf
+	Use BitMap 1
+EndIf
+Return
+
+USEPATH g()
+
+.kludge
+ca.l=CopLoc
+While Peek.l(ca)<>$ffe1 fffe
+	If Peek.l(ca)=$fffffffe Then Return
+	ca+4
+Wend
+Poke.l ca,$ffdf fffe
+Return
+
+mapkey
+For k=0 To 4
+Boxf 160,k LSL 3+49,167,k LSL 3+53,nc(k)
+Next:Colour 1,2
+Locate 22,6: prnt{"FRIENDLY STARBASE"}
+Locate 22,7: prnt{"FRIENDLY PLANET"}
+Locate 22,8: prnt{"ENEMY STARBASE"}
+Locate 22,9: prnt{"ENEMY PLANET"}
+Locate 22,10:prnt{"NEUTRAL"}
+Return
+
+.navact2	;nav action 2 - object selected or galaxy map
+;
+If g=65
+	turnoff2{65}:Gosub nveoff:Colour 1,2:Goto donav
+EndIf
+If g=66
+	pl$=co{gx,gy,sx,sy}
+	px=gx LSL 3+sx:py=gy LSL 3+sy
+	pm=px MOD 17+py MOD 39
+	ps=so
+	If nve Then Gosub nveoff:Box 19+ix+1,48+iy+1,19+ix+14,48+iy+7,2
+	Gosub dowarp:Gosub doplanet:turnoff{66}
+	nve=2:Goto newloc
+EndIf
+If g=67
+	Gosub mapkey:turnoff2{67}:Return
+EndIf
+;
+g-1:sx=g & 7:sy=Int(g LSR 3)
+so=Cls(19+sx LSL 4+8,48+sy LSL 3+4)
+For k=0 To 5
+If so=nc(k) Then so=k:k=5
+Next
+;
+addgad3{"WARP TO "+co{gx,gy,sx,sy},16,15,66}
+addgad3{"MAP KEY",33,15,67}
+Return
+
+nveoff
+nve=0:VWait:Use Slice 1:ShowSprite 2,-64,64,1:Use Slice 0
+Return
+
+.naveffect1
+;
+Use Slice 1
+ix=MouseX-9:iy=MouseY-48
+If ix>=0 AND ix<63 AND iy>=0 AND iy<63
+	ShowSprite 2,ix&$7ff8+9,iy&$7ff8+48,1
+Else
+	ShowSprite 2,-64,64,1
+EndIf
+Use Slice 0
+;
+ix=Int(px&7) LSL 4:iy=Int(py&7) LSL 3
+;
+If nvc
+	nvc-1
+Else
+	nvc=25
+	Select nve
+	Case 1
+		Line 19,48+py,19+127,48+py,-1
+		Line 19+px+px,48,19+px+px,48+63,-1
+	Case 2
+		Box 19+ix+1,48+iy+1,19+ix+14,48+iy+7,-1
+	End Select
+EndIf
+Return
+
+.navact1	;nav action 1 - zoom in on selected sector
+Gosub nveoff:VWait:Blit 1,19,48:Blit 0,19,48
+g-1:x=g & 7:y=Int(g LSR 3):x2=x LSL 4:y2=y LSL 3
+gx=x:gy=y
+Use BitMap 3:Blit 1,0,0
+Scroll 19+x2,48+y2,16,8,x2,y2,1:Use BitMap 1
+For k=1 To 3
+VWait 10:Scroll 0,0,128,64,19,48,3
+VWait 10:Blit 2,19+x2,48+y2
+Next:Scroll 0,0,128,64,19,48,3
+Colour 3,2
+For k=1 To 8
+Locate k+k+1,5:Print Chr$(k+64)
+Locate 1,k+5:Print k
+Next
+Use BitMap 3
+ClearList z():USEPATH z()
+For k=0 To 14 Step 2
+For j=0 To 7
+If Cls(x2+k,y2+j)<>2 AND Cls(x2+k,y2+j)<>7
+	AddLast z()
+	fx=x2+k+19:fy=y2+j+48					 ;source x,y
+	dx=k LSL 3+19+8:dy=j LSL 3+48+4 ;dest x,y
+	\x=fx,fy
+	\xs=(dx-fx) ASR 4
+	\ys=(dy-fy) ASR 4
+	\c=Cls(x2+k,y2+j)
+EndIf
+Next j,k
+Use BitMap 1
+For k=1 To 16
+VWait:Blit 1,19,48:!bwait
+ResetList z()
+While NextItem(z())
+	\x+\xs:\y+\ys:Point \x,\y,\c ;:Plot \x+1,\y,\c
+Wend
+Next
+ResetList z()
+While NextItem(z())
+	Boxf \x-3,\y-1,\x+2,\y+1,\c
+Wend
+Locate 1,3:Colour 1,2
+prnt{Centre$("SECTOR MAP - GALAXY COORDINATES "+Chr$(gx+65)+Chr$(gy+49),40)}
+USEPATH g()
+addgad2{"GALAXY MAP",2,15,65}
+ac=2
+If gx=Int(px LSR 3) AND gy=Int(py LSR 3) Then nve=2 Else nve=3
+Return
+
+.teleact1
+USEPATH o()
+If g>18
+	turnoff2{g}
+	Select g
+	Case 19
+		ly1+1:Gosub refleft
+	Case 20
+		If ly1 Then ly1-1:Gosub refleft
+	Case 21
+		ly2+1:Gosub refrite
+	Case 22
+		If ly2 Then ly2-1:Gosub refrite
+	Case 23
+		If tk$
+			Gosub findit
+			If f
+				cprntcr{"ENERGIZING..."}
+				If tk$<>"*"
+					exec{\c}
+					If \l2=pl$ Then exec{\c4}
+					\l="*":If ly1 Then ly1-1
+				Else
+					exec{\c2}
+					If \l2=pl$ Then exec{\c3}:KillItem o() Else \l=pl$:If ps=5 Then KillItem o()
+					If ly2 Then ly2-1
+				EndIf
+				y=15 LSL 3-2:Boxf 8,y-1,325,y+11,2:killgad{23}
+				Gosub refleft:Gosub refrite:tk$=""
+			EndIf
+		EndIf
+	End Select
+Else
+	If g<8 Then ty=ly1+g-1:tk$=pl$ Else ty=ly2+g-8:tk$="*"
+	Gosub findit
+	If f
+		x=2 LSL 3-4:y=15 LSL 3-2:Boxf x-2,y-1,325,y+11,0
+		addgad3{"TRANSFER",2,15,23}
+		Locate 11,15:Colour 4,0:Print RSet$(\n,29)
+	EndIf
+EndIf
+Return
+
+findit
+k=0
+ResetList o()
+While NextItem(o())
+	If \l=tk$
+		If k>=ty Then f=-1:Return Else k+1
+	EndIf
+Wend
+f=0:Return
+
+reflist ;ly=list offset, x=x axis, k$=match location
+k=0:y=5:Colour 4,0
+ResetList o()
+While NextItem(o())
+	If \l=k$
+		If k>=ly
+			Locate x,y:Print RSet$(\n,17):y+1:If y>11 Then Goto out
+		Else
+			k+1
+		EndIf
+	EndIf
+Wend
+If y<14 Then Locate x,y:Print RSet$("",17)
+out
+Return
+
+refleft:x=2:ly=ly1:k$=pl$:Goto reflist
+
+refrite:x=23:ly=ly2:k$="*":Goto reflist
+
+.dotele
+clsw{}
+Locate 1,3:prnt{Centre$("TRANSFER TO SHIP",21)+Centre$("TELEPORT FROM SHIP",19)}
+y2=11 LSL 3
+For k=0 To 168 Step 168
+Boxf k+12,38,k+157,y2+9,0
+Line k+11,37,k+157,37,1
+Line k+11,37,k+11,y2+9,1
+Next
+
+id=0
+For x=2 To 23 Step 21
+For y=5 To 11
+id+1:addzone{x LSL 3,y LSL 3,17 LSL 3,8,id}
+Next y,x
+
+addgad2{"MORE",2,13,19}
+addgad2{"LESS",15,13,20}
+
+addgad2{"MORE",23,13,21}
+addgad2{"LESS",36,13,22}
+
+ly1=0:ly2=0:Gosub refleft:Gosub refrite
+USEPATH g()
+ac=4:tk$="":Return
+
+.donav
+clsw{}:id=0
+For y=0 To 7
+For x=0 To 7
+id+1:addzone{x LSL 4+19,y LSL 3+48,16,8,id}
+Next x,y
+Locate 1,3:prnt{Centre$("GALAXY MAP",40)}
+Blit 1,19,48
+Colour 3,2
+For k=1 To 8
+Locate k+k+1,5:Print Chr$(k+64)
+Locate 1,k+5:Print k
+Next
+Blit 0,19,48:Gosub mapkey
+ac=1:nve=1:Return
+
+.makeopts
+If c(cc)\n<0 Then Return
+Colour 1,2:Locate 1,3:prnt{Centre$("SELECT REPLY",40)}
+For k=0 To c(cc)\n
+	y=k*2+5
+	Boxf 48,y LSL 3-3,293,y LSL 3+9,0:!bwait
+	addgad2{"	",6,y,k+3}
+	Locate 10,y:Colour 4,0:prnt{RSet$(c(cc)\r[k]\r,26)}
+Next
+ccs=0:Return
+
+posscomms
+Gosub speech
+If c(cc)\n>=0
+	Gosub makeopts
+Else
+	Gosub commscls
+	cprntcr{"COMMUNICATIONS HAVE BEEN TERMINATED"}
+EndIf
+Return
+
+.commsact1
+If g<3 Then turnoff2{g}
+Select g
+Case 1
+	If oc
+		cc=oc:oc=0:Gosub handlecomms:Gosub posscomms
+	Else
+		If cc
+			cprntcr{"COMMUNICATION CHANNEL ALREADY ACTIVE"}
+		Else
+			cprntcr{"ALL YOU HEAR IS SUB SPACE CRACKLE."}
+		EndIf
+	EndIf
+Case 2
+	If cc
+		If ccs	;selected reply
+			cc=c(cc)\r[ccs-3]\c:Boxf 8,24,327,97,2
+			ResetList g()
+			While NextItem(g())
+				If g()\id>2 Then KillItem g()
+			Wend
+			Gosub posscomms
+		Else
+			cprntcr{"PLEASE SELECT A REPLY FIRST"}
+		EndIf
+	Else
+		cprntcr{"THERE IS NO ONE TO REPLY TO."}
+	EndIf
+Default
+	If ccs Then If ccs<>g Then turnoff{ccs}
+	ccs=g
+End Select
+Return
+
+.docomms
+clsw{}
+addgad2{"OPEN COMMUNICATION CHANNEL",2,15,1}
+addgad2{"SEND REPLY",30,15,2}
+If cc Then Gosub makeopts
+ac=3:Return
+
+.warpeffects
+wc+wa:If wc=0 OR wc=7 Then wa=-wa
+For ik=1 To 3
+Green ik,15,0,wc+ik+ik
+Next
+If wc2 Then wc2-1:Green 0,wc2 LSR 1,0,wc2
+If Rnd>.9 Then wc2=8
+Return
+
+.doplanet
+If ps=3 Then Gosub arcade
+QAMIGA
+Select ps
+Case 0
+	LoadShape 3,"starbase.iff",1
+Case 2
+	LoadShape 3,"starbase.iff",1
+Case 5
+Default
+	k=pm MOD 4
+	k$="planet"+Chr$(49+k)+".iff"
+	LoadShape 3,k$,1
+End Select
+BLITZ:stpal2{}:If ps=5 Then Return
+If ps=1 OR ps=3
+	k2=pm MOD 6:Use SetCycle 1
+	For k=4 To 15
+	Select k2
+	Case 0
+	StopCycle 1,k,Palette(k),PalRGB(k),Blue(k)
+	Case 1
+	StopCycle 1,k,Palette(k),Blue(k),PalRGB(k)
+	Case 2
+	StopCycle 1,k,PalRGB(k),Blue(k),Palette(k)
+	Case 3
+	StopCycle 1,k,PalRGB(k),Palette(k),Blue(k)
+	Case 4
+	Green k,Blue(k),PalRGB(k),Palette(k)
+	End Select
+	Next
+EndIf
+Handle 3,ShapeWidth(3)/2,0
+Use BitMap 2:BlockScroll:!bwait
+ResetList s()
+While NextItem(s())
+	Point s()\x,s()\y,s()\c
+	Point Rnd(320),Rnd(128)+128,Rnd(3)+1
+Wend:Blit 3,160,128
+Use BitMap 1
+Select ps
+Case 0
+	cprntcr{"DOCKING AT STARBASE..."}
+Case 2
+	cprntcr{"APPROACHING ENEMY STARBASE..."}
+Case 5
+Default
+	cprntcr{"ENTERING PLANETARY ORBIT..."}
+End Select
+yo=0:ys=0:ya=1 LSR 7:yo2=ShapeHeight(3)
+Gosub go16cols:Use SetCycle 1
+While yo<yo2
+yo+ys:If yo<yo2 LSR 1+1 Then ys+ya Else ys-ya
+VWait:Show 2,0,yo
+Wend
+Return
+
+commscls
+cc=0:FadeOut 2:Show 2,0,yo
+Use BitMap 2:Boxf 0,0,351,127,0:!bwait
+ResetList s()
+While NextItem(s())
+	Point s()\x,s()\y,s()\c
+Wend
+Use BitMap 1:FadeIn 1
+Return
+
+scrollstars
+;cprntcr{"BREAKING PLANETARY ORBIT..."}
+ys=0:ya=1 LSR 7:yo2=yo
+While yo>0
+	VWait:Show 2,0,yo
+	yo-ys:If yo>yo2 LSR 1-1 Then ys+ya Else ys-ya
+Wend
+VWait:Show 2,0,0:yo=0
+Return
+
+.dowarp
+;
+If cc Then cprntcr{"TERMINATING COMMUNICATIONS"}:Gosub commscls
+If yo Then Gosub scrollstars
+;
+Gosub go4cols:Show 0,0,0
+;
+VWait:ss=-1
+;
+For a1=16 To 4 Step -1
+VWait a1+5
+Next
+;
+VWait 50
+;
+For k=14 To 0 Step -2
+VWait:Green 0,k,k,k
+Next
+;
+wp=-1
+For a1=4 To 12
+VWait a1
+Next
+;
+VWait 20
+;
+For a1=12 To 4 Step -1
+VWait a1
+Next
+;
+wp=0:Use SetCycle 1
+;
+For a1=4 To 16
+VWait a1+5
+Next
+;
+ss=0:Return
+
+.dostars
+USEPATH s()
+ResetList s()
+While NextItem(s())
+	Point \lx,\ly,0
+	ixa=\xa ASR a1:\xs+ixa:\x+\xs:ix=\x
+	If ix>=0 AND ix<320
+		iya=\ya ASR a1:\ys+iya:\y+\ys:iy=\y
+		If iy>=0 AND iy<128
+			Point ix,iy,\c:\lx=ix,iy
+		Else
+			Goto ifix2
+		EndIf
+	Else
+		ifix2
+		\x=Rnd(320):\y=Rnd(128)
+		If wp
+			\xs=Rnd-.5,Rnd-.5
+			\xa=160-\x
+			\ya=64-\y
+		Else
+			\xs=0,0
+			\xa=\x-160
+			\ya=\y-64
+		EndIf
+		\lx=-1
+	EndIf
+Wend
+USEPATH g()
+Return
+
+initstars
+USEPATH s()
+
+While AddLast(s())
+	\x=Rnd(320):\y=Rnd(128)
+	\xs=0,0
+	\xa=\x-160
+	\ya=\y-64
+	;
+	\c=Rnd(3)+1
+	;
+	\lx=-1,-1
+Wend
+USEPATH g()
+Return
+
+.amigasubs
+
+QAMIGA
+
+Macro init
+Repeat
+	t$=ed{}
+	If t$<>"#"
+End Macro
+
+Macro finit
+	EndIf
+Until t$="#"
+End Macro
+
+Function$ ced{}
+!init
+	k$+t$
+!finit
+Function Return k$
+End Function
+
+.obj
+USEPATH o()
+AddLast o()
+\n=Mid$(f$,2),ed{}
+\c=ced{},ced{},ed{},ced{},ced{}
+Return
+
+.conv ;f$="$ conv number"
+k=Val(Mid$(f$,2))
+USEPATH c(k)
+;
+;fetch conversation text...
+;
+\t=ced{}
+;
+;fetch replies...
+;
+k2=-1
+!init
+	k2+1:\r[k2]\r=t$:\r[k2]\c=ved{}
+!finit
+\n=k2
+Return
+
+.evnt ;t$=coords
+USEPATH p()
+AddLast p():\l=f$:k=-1
+Repeat
+	f$=ed{}
+	If f$<>"#"
+		Select Left$(f$,1)
+		Case "?"
+			doif{f$,0}
+		Case "*"
+			doif{f$,2}
+		Default
+			##[$FF8C] 0
+			DefaultOutput
+			NPrint f$
+			MouseWait
+			End
+		End Select
+		\o[k]\c=ced{}
+	EndIf
+Until f$="#"
+\n=k
+Return
+
+BLITZ

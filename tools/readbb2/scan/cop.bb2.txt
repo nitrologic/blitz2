@@ -1,0 +1,459 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/sw/cop.bb2
+;
+;colour split creator
+;
+w=320 ;display
+h=200
+d=8
+
+ni=50+14 ;number of intervals
+i=4	 ;interval size
+
+ndi=h/4 ;number of displayed intervals...
+mc=ni-ndi
+
+msp=28	;spin max...
+spst=2	;spin step...
+
+tos=44	;top of slice
+
+#bank1=$2000:#bank2=$4000
+#dual1=$1400:#dual2=$1800
+
+#lonyb=$0200
+
+Dim r.w(ni),g.w(ni),b.w(ni)
+Dim r2.w(15),g2.w(15),b2.w(15)
+Dim r3.w(15),g3.w(15),b3.w(15)
+Dim cl$(h)
+Dim bo.l(msp+msp),co.l(msp+msp) ;bitmap offset, copper offset...
+
+Function$ h{n}
+Function Return Mid$(Hex$(n),7)
+End Statement
+
+Function.w hipart{r.w,g.w,b.w}
+;
+Function Return (r&$f0) LSL 4 + (g&$f0) + (b&$f0) LSR 4
+;
+End Function
+
+Function.w lopart{r.w,g.w,b.w}
+;
+Function Return (r&$f) LSL 8 + (g&$f) LSL 4 + (b&$f)
+;
+End Function
+
+PropGadget 0,8,16,128,1,12,128
+PropGadget 0,32,16,128,2,12,128
+PropGadget 0,56,16,128,3,12,128
+SetVProp 0,1,0,1/256
+SetVProp 0,2,0,1/256
+SetVProp 0,3,0,1/256
+TextGadget 0,10,184,0,4,"SPREAD"
+TextGadget 0,10,196,0,5," PICK "
+TextGadget 0,10,208,0,6,"SPIN!!"
+
+Screen 0,0,0,320,h+24,d,0,"Copper split creator for 3d game",1,0:Green 0,0,0,0
+AddIDCMP 16
+Window 1,0,0,320,h+24,$1900,"",0,0
+
+ScreensBitMap 0,0
+
+For y=0 To ni-1
+If y<ni/2
+	r(y)=0:g(y)=0:b(y)=128
+Else
+	r(y)=0:g(y)=128:b(y)=0
+EndIf
+Next
+
+tc=0:Gosub loadcols
+
+k=2
+For y=12 To h+11 Step i
+Boxf 32,y,w-1,y+i-1,k
+k+1
+Next
+
+Repeat
+	Gosub pickaline
+	Gosub options
+Forever
+
+.options
+Gosub openwindow0
+Repeat
+ev.l=WaitEvent
+Select ev
+Case 32
+	If GadgetHit<4
+		Repeat
+			Gosub calcprop:Gosub printprop
+		Until WaitEvent=64
+		Gosub showprop
+	EndIf
+Case 64
+	If GadgetHit<4
+		Gosub calcprop:Gosub showprop
+	Else
+		Select GadgetHit
+		Case 4
+			y1=co
+			Gosub closewindow0
+
+			Gosub pickaline
+			;
+			;loop to do colours
+			;
+			y2=co:If y2<y1 Then Exchange y1,y2
+			;
+			r1=ShowPalette(y1):g1=NewPaletteMode(y1):b1=CyclePalette(y1)
+			r2=ShowPalette(y2):g2=NewPaletteMode(y2):b2=CyclePalette(y2)
+			;
+			yd=(y2-y1)
+			ra=(r2-r1)/yd:ga=(g2-g1)/yd:ba=(b2-b1)/yd
+			;
+			For k=y1+1 To y2-1
+			r1+ra:g1+ga:b1+ba
+			AGARed k,r1,g1,b1
+			Next
+			;
+			Gosub openwindow0
+		Case 5
+			Gosub closewindow0:Gosub pickaline:Gosub openwindow0
+		Case 6
+			Gosub closewindow0:Gosub spin:Gosub openwindow0
+		End Select
+	EndIf
+End Select
+Until ev=512
+Gosub closewindow0
+Return
+
+.spin	;OK, now to spin landscape around.....
+;
+numsp=(msp+msp)/spst+1 ;number of spins
+;
+If ReadMem(0,"horizon.bin")
+	FileOutput 0
+	Print String$(Chr$(0),numsp LSL 3)
+	WindowOutput 1
+Else
+	Return
+EndIf
+;
+ali$=Mki$(0)
+Gosub savecols:Boxf 0,12,319,h+11,0
+;
+BitMap 3,w,256,4 ;shapes created...
+BitMap 2,w,h,4
+BitMap 1,w,h+msp*4,8
+spin=0:ca=1/i:bb=w/8:mo=Peek.w(Addr BitMap(3)):tsh=0 ;total shapes
+;
+For k=0 To ni-1
+AGARed k+2,r(k),g(k),b(k)
+Next
+;
+Screen 1,0,24,w,h,4,0,"",0,0,2:For k=1 To 15:Green k,k,0,k:Next
+;
+For yo=msp To -msp Step -spst
+;
+fir=0:las=w-1:ste=1
+;
+If yo<0
+	Exchange fir,las:ste=-ste
+EndIf
+;
+col=2:Use BitMap 1:BlockScroll
+For l=0 To ni*i-1
+Line 0,msp+l+yo,w-1,msp+l-yo,col
+col+ca
+Next
+;
+For k=1 To 15
+r2(k)=-1:g2(k)=-1:b2(k)=-1
+r3(k)=-1:g3(k)=-1:b3(k)=-1
+Next
+;
+c=Cls(fir,msp+msp)-2
+r2(0)=r(c):g2(0)=g(c):b2(0)=b(c):bc=1 ;base colour!
+;
+c=Cls(fir,msp+msp+1)-2
+r3(0)=r(c):g3(0)=g(c):b3(0)=b(c):bc2=1	;ditto!
+;
+Use BitMap 0:Scroll 0,msp+msp,w,h,0,12,1:WLocate 0,12
+;
+nsh=0:y2=-1:bpa.l=0:lam.l=120 ;bitplane at!,last modulo
+;
+For y=msp+msp To msp+msp+h-1
+;
+y2+1
+;
+Use BitMap 1
+;
+c=Cls(fir,y)-2:If c<0 Then ##[$FF8C] 0:WLocate 0,12:Print "FUCKUP!"
+If r(c)<>r2(0) OR g(c)<>g2(0) OR b(c)<>b2(0)
+	;
+	;new start colour!
+	;
+	r2(0)=r(c):g2(0)=g(c):b2(0)=b(c)
+	;
+	If Cls(fir,y)<>Cls(las,y)
+		Repeat
+			bc+1:If bc=16 Then bc=1
+		Until r2(bc)=r2(0) AND g2(bc)=g2(0) AND b2(bc)=b2(0)
+	EndIf
+	;
+EndIf
+;
+tbc=bc:cc=0:ln=0:lc=-1:cch$="":ccl$=""
+
+For x=fir To las Step ste
+
+If Cls(x,y)<>lc
+	;
+	;color change here! compare rgbs with last scan line colour
+	;
+	lc=Cls(x,y):l2=lc-2
+	;
+	If r2(tbc)<>r(l2) OR g2(tbc)<>g(l2) OR b2(tbc)<>b(l2)
+		cch$+Mki$($180+tbc+tbc)+Mki$(hipart{r(l2),g(l2),b(l2)})
+		ccl$+Mki$($180+tbc+tbc)+Mki$(lopart{r(l2),g(l2),b(l2)})
+		r2(tbc)=r(l2):g2(tbc)=g(l2):b2(tbc)=b(l2):cc+1
+	EndIf
+	;
+	If ln
+		Use BitMap 2
+		Line lx,y2,x-ste,y2,ln
+		Use BitMap 1
+	EndIf
+	;
+	ln=tbc:lx=x
+	tbc+1:If tbc=16 Then tbc=1
+	;
+	;If tbc=bc
+	;	;too many colours!
+	;	WLocate 0,12:Print "TOO MANY COLOURS!":MouseWait
+	;EndIf
+	;
+EndIf
+;
+Next
+
+Use BitMap 2:Line lx,y2,las,y2,ln
+GetaShape 0,0,y2,w,1	 ;what this scan line looks like...
+;
+d0.l=Peek.l(Addr MidHandle(0)+14)
+d1.l=d0+bb
+d2.l=d1+bb
+d3.l=d2+bb
+;
+e0.l=Peek.l(Addr BitMap(3)+8)
+e1.l=Peek.l(Addr BitMap(3)+12)
+e2.l=Peek.l(Addr BitMap(3)+16)
+e3.l=Peek.l(Addr BitMap(3)+20)
+;
+For k=0 To nsh-1
+;
+For j=0 To bb-1 Step 4
+If Peek.l(d0+j)<>Peek.l(e0+j) OR Peek.l(d1+j)<>Peek.l(e1+j) OR Peek.l(d2+j)<>Peek.l(e2+j) OR Peek.l(d3+j)<>Peek.l(e3+j)
+	e0+mo:e1+mo:e2+mo:e3+mo:Pop For:Goto out2
+EndIf
+Next
+;
+;shapes are same!
+;
+sa.l=k*mo:Pop For:Goto out3
+out2
+Next
+;
+Use BitMap 3:BlitColl 0,0,nsh:sa=nsh*mo:nsh+1:tsh+1
+out3
+sa LSL 2
+;
+.calccop
+;
+;cop wait...
+cl$(y2)=Chr$(y2+tos)+Chr$(1)+Mki$($fffe)
+;
+;bank select...select one for dualplayfield while writing to other...
+;
+If y2&1
+	con.l=#bank1+#dual2
+	con2.l=#bank2+#dual1
+Else
+	con.l=#bank2+#dual1
+	con2.l=#bank1+#dual2
+EndIf
+;
+cl$(y2)+Mki$($106)+Mki$(con)
+;
+If y2>1
+	;
+	If cch$ Then cl$(y2-1)+cch$
+	If ccl$
+		If Right$(cl$(y2-1),4)=Mki$($106)+Mki$(con2)
+			;DisplayBeep_ 0
+			cl$(y2-1)=UnLeft$(cl$(y2-1),4)
+		EndIf
+		cl$(y2-1)+Mki$($106)+Mki$(con2+#lonyb)+ccl$
+	EndIf
+	;
+Else
+	If y2
+		ch$+Mki$($106)+Mki$(#bank2+#dual1)+cch$
+		ch$+Mki$($106)+Mki$(#bank2+#dual1+#lonyb)+ccl$
+	Else
+		ch$=Mki$($106)+Mki$(#bank1+#dual2)+cch$
+		ch$+Mki$($106)+Mki$(#bank1+#dual2+#lonyb)+ccl$
+	EndIf
+EndIf
+;
+;set up mod...
+If y2
+	tmo.l=sa.l-(bpa+40)
+	If tmo<>lam
+		cl$(y2-1)=Left$(cl$(y2-1),4)+Mki$($10a)+Mki$(tmo)+Mid$(cl$(y2-1),5)
+		lam=tmo
+	EndIf
+	bpa=sa
+EndIf
+;
+For k=0 To 15		 ;double buffer dualplayfield banks...
+Exchange r2(k),r3(k)
+Exchange g2(k),g3(k)
+Exchange b2(k),b3(k)
+Exchange bc,bc2
+Next
+;
+Use BitMap 0
+If cc>6 AND y2>1
+	WLocate 0,12:Print "OVER SIX CHANGES...",cc:##[$FF8C] 0:MouseWait
+	Line 0,y2+12,w-1,y2+12,-1
+EndIf
+Next
+;
+While Eof(0)&7:Exists 0,&ali$,2:Wend
+;
+.writecop
+spin+1
+bo(spin)=Eof(0)
+e0.l=Peek.l(Addr BitMap(3)+8)
+e1.l=Peek.l(Addr BitMap(3)+12)
+e2.l=Peek.l(Addr BitMap(3)+16)
+e3.l=Peek.l(Addr BitMap(3)+20)
+For k=0 To nsh-1
+Exists 0,e0,mo
+Exists 0,e1,mo
+Exists 0,e2,mo
+Exists 0,e3,mo
+e0+mo:e1+mo:e2+mo:e3+mo
+Next
+;
+co(spin)=Eof(0)
+Exists 0,&ch$,Len(ch$)
+For k=0 To h-1
+Exists 0,&cl$(k),Len(cl$(k))
+Next
+;
+Boxf w/2-1,12,w/2,11+h/2,-1:WLocate 0,12:Print nsh
+;
+Next
+;
+Loc 0,0:FileOutput 0
+For k=1 To numsp:Print Mkl$(bo(k)),Mkl$(co(k)):Next:Use Window 1
+;
+WLocate 160,12:Print tsh
+;
+Free Screen 1:Free BitMap 1:Free BitMap 2:Free BitMap 3:Use Screen 0
+;
+Return
+
+.closewindow0
+Free Window 0:Boxf 16,y,31,y+i-1,0:Use Window 1
+Return
+
+.openwindow0
+r_=ShowPalette(co)
+g_=NewPaletteMode(co)
+b_=CyclePalette(co)
+Boxf 16,y,31,y+i-1,co
+Window 0,w-80,0,80,224,$100a,"",1,0,0
+WBox 6,166,69,179,co
+WLocate 6,136:Print "R	G	B"
+Gosub showprop
+Return
+
+.calcprop
+r_=255-Int(VPropPot(0,1)*256)
+g_=255-Int(VPropPot(0,2)*256)
+b_=255-Int(VPropPot(0,3)*256)
+AGARed co,r_,g_,b_
+Return
+
+.showprop
+SetVProp 0,1,(255-r_)/256,1/256:Redraw 0,1
+SetVProp 0,2,(255-g_)/256,1/256:Redraw 0,2
+SetVProp 0,3,(255-b_)/256,1/256:Redraw 0,3
+printprop
+WLocate 2,144:Print h{r_}," ",h{g_}," ",h{b_}
+Return
+
+.pickaline
+oy=-1:FlushEvents
+While oy<0
+	Repeat
+		ev.l=WaitEvent
+		Select ev
+		Case 1024
+			i$=Inkey$
+			If i$=Chr$(28) AND tc>0
+				Gosub savecols
+				If Qualifier&3=0 Then tc-1 Else tc=0
+				Gosub loadcols
+			EndIf
+			If i$=Chr$(29) AND tc<mc
+				Gosub savecols
+				If Qualifier&3=0 Then tc+1 Else tc=mc
+				Gosub loadcols
+			EndIf
+			If i$=Chr$(13)
+				Gosub savecols:tc=(te/i):Gosub loadcols
+			EndIf
+		Case 16
+			y=Int(EMouseY/i)*i
+			If y>=12
+				If y<>oy
+					Gosub lineatoy:oy=y:Gosub lineatoy
+				EndIf
+			EndIf
+		End Select
+	Until ev=8
+Wend
+;
+co=(y-12)/i+2
+;
+.lineatoy
+If oy>=0 Then Boxf 0,oy,w-1,oy+i-1,-1
+Return
+
+savecols
+co=tc:co2=2
+For k=0 To ndi-1
+r(co)=ShowPalette(co2)
+g(co)=NewPaletteMode(co2)
+b(co)=CyclePalette(co2)
+co+1:co2+1
+Next
+Return
+
+loadcols
+co=tc:co2=2
+For k=0 To ndi-1
+AGARed co2,r(co),g(co),b(co)
+co+1:co2+1
+Next
+WLocate 0,12:Print RSet$(Str$(tc),2)
+WLocate 0,h-8+11:Print tc+ndi-1
+Return

@@ -1,0 +1,200 @@
+Library Name:
+  rifxlib #66
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, looks pretty useful this one...
+
+Authors Docs:
+
+
+Reflective Images Effects Library
+=================================
+
+By Stephen McNamara, with help from Steve Matty
+(c)1994 Reflective Images
+
+Note: The library has had a lot of the commands inside it expanded so that
+they work on any size bitmap.  At the moment the following, though, will
+only work on lorez bitmaps: ZoomX8, Derez and ZoomXY
+
+None of the commands in this library use the blitter chip, any
+blitter source code that anybody has please send to me.
+
+Command list:
+    FadeInBitmap source#,dest#,delay[,offset1,offset2,height]
+    ClearBitmap source#,delay[,offset,height]
+    ZoomX2 source#,dest#,add_source,add_dest,width,height
+    ZoomX4 source#,dest#,add_source,add_dest,width,height
+    ZoomX8 source#,dest#,add_source,add_dest,width,height
+    addval.w=ADDValue(bitmap#,x,y)
+    InitZoomXY source#,dest#,add_source,add_dest
+    ZoomXY xzoom_value,yzoom_value,height
+    Derez source#,dest#,add_source,add_dest,derez_value,height
+(Slow)    PlanarToChunky bitmap_addr,dest_address,width,height,depth
+(Slow)    ChunkyToPlanar source_address,bitmap_addr,width,height,depth
+
+
+No instructions for the planar<>chunky commands since their not really that
+useful at the moment.  If anybody has some working code thats good
+then.......................
+
+
+Statement: FadeInBitmap
+========================================================================
+Modes : Amiga/Blitz
+Syntax: FadeInBitmap source#,dest#,delay[,offset1,offset2,height]
+
+  This is used to make an any width, any height, bitmap appear on another
+  one in a nice way.  Source# and dest# should be bitmap object numbers
+   and delay is the 'slow-down' value for the fade.  This is necessary
+  because this routine works very fast - at full speed it looks just like
+  a slow screen copy.  You should note that the delay is taken as being a
+  word, thus don't pass 0 or you'll actually get a delay of 65535.  This
+  routine will adjust itself to take into account the depth of the bitmap,
+  WARNING: the depth of the destination bitmap should be AT LEAST as big
+  as the depth of the source# bitmap because the depth of the fade is taken
+  from the source# bitmap.
+  The optional parameters in this command allow you to set respectively:
+  the source bitmap y offset, the destination bitmap y offset and the
+  height of the fade (in pixels).  If these parameters are left out then
+  the fade automatically occurs across the full size of the bitmap.
+  
+  See: ClearBitmap
+
+Statement: ClearBitmap
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ClearBitmap source#,delay[,offset,height]
+
+  This is used to clear an any width, any height, bitmap in a very pleasant
+  way.  The parameters are the same as for FadeInBitmap except that
+  only one bitmap is needed.  The delay parameter i used for the same
+  reason as in FadeInBitmap - to slow down the effect.  The optional
+  parameters allow you to set a y start value for the clear and the
+  height (in pixels) of the clear.
+
+  See: FadeInBitmap
+
+Statement: ZoomX2
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ZoomX2 source#,dest#,add_source,add_dest,width,height
+
+  This command does a very fast X2 zoom.  It works with two bitmaps - one
+  source and one dest (note: these can be the same bitmap but you should
+  be careful that the zoom is not done over the source data).  The two
+  parameters add_source and add_dest allow you to specify the position of
+  the start of the zoom, they specified as byte offsets from the top left
+  corner of the bitmaps (byte 0).  These values can be calculated by the
+  following method:
+
+    add_source=(Y x BITMAP_WIDTH (in bytes) + (X / 8)
+
+  or by using the built in command ADDValue.  Width and height are both
+  specified in pixels.
+
+  NOTE: There is no clipping on this command - be careful not to zoom off
+        the edges of bitmaps.
+  You can zoom from a bitmap to a different size bitmap BUT the
+  destination bitmap must be as deep as the source and big enough
+  to hold the zoomed data.
+
+  See: ZoomX4, ZoomX8 and ADDValue
+
+Statement: ZoomX4
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ZoomX4 source#,dest#,add_source,add_dest,width,height
+
+  This is exactly the same as ZoomX2 except that a times 4 zoom is done
+  by this command.
+
+  Note: You can zoom from a bitmap to a different size bitmap BUT the
+  destination bitmap must be as deep as the source and big enough
+  to hold the zoomed data.
+
+  See: ZoomX2, ADDValue
+
+Statement: ZoomX8
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ZoomX8 source#,dest#,add_source,add_dest,width,height
+
+  This is exactly the same as ZoomX2 except that a times 8 zoom is done
+  by this command
+
+  See: ZoomX2, ADDValue
+
+Function: ADDValue
+========================================================================
+Modes : Amiga/Blitz
+Syntax: addval.w=ADDValue(bitmap#,x,y)
+
+  This function can be used the calculate the add_source and add_dest
+  values used in all the zoom commands.  Just give the bitmap number, x
+  co-ordinate and the y co-ordinate and you'll get an answer back that can
+  be used straight in the ZoomXn commands.
+
+  See: ZoomX2, ZoomX4, ZoomX8 and ZoomXY
+
+Statement: InitZoomXY
+========================================================================
+Modes : Amiga/Blitz
+Syntax: InitZoomXY source#,dest#,add_source,add_dest
+
+  This command initialises the ZoomXY routine to the bitmaps you want it
+  to work on.  You MUST use this routine before calling ZoomXY.  The
+  parameters are the same as the first four parameter for the ZoomXn
+  commands - source and dest bitmaps and add_source/dest values.
+
+  See: ZoomXY
+
+Statement: ZoomXY
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ZoomXY xzoom_value,yzoom_value,height
+
+  This command does a zoom based on the values you give it.  You should
+  note, though, that zoom values should be integer values (no fractional
+  part).  The height is the height in pixels that the source data should be
+  zomed to.  Please note that this command is different to the other zoom
+  commands in that the output of it is clipped to fit inside 320 pixels.
+
+  This command should only be used after InitZoomXY has been called.
+  This routine has an extra feature in that if you give both zoom values
+  as 1 then a bitmap copy is done from the source to the dest using the
+  offsets given and the height.
+
+  See: InitZoomXY
+
+Statement: Derez
+========================================================================
+Modes : Amiga/Blitz
+Syntax: Derez source#,dest#,add_source,add_dest,derez_value,height
+
+  This command is used to derez a low resolution bitmap onto another one.
+  The bitmaps are source# and dest#, add_source and add_dest are used to
+  control the start position of the derez (see ZoomX2 and ADDValue to see
+  how these are calculated).  The derez value if obviously the amount that
+  each pixel will be derezed to in both the x and y directions, the height
+  is the height of the derez - the derez is clipped to fit inside this in 
+  the y direction and inside 320 pixels in the x direction.
+  This routine has an extra feature in that if you give derez_value as 1
+  then a bitmap copy is done from the source to the dest using the offsets
+  given and the height.
+
+Statement: ReduceX2
+========================================================================
+Modes : Amiga/Blitz
+Syntax: ReduceX2 source#,dest#,add_source,add_dest,width,height
+
+  This command halves the given rectangle of one bitmap and pastes it onto
+the destination bitmap.  Width should be a multiple of 16, width and height
+should describe a rectangular area that will be reduced (these values
+should be in pixels).
+
+  See ZoomX2 and other commands for more information about the syntax of
+this command.

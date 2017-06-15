@@ -1,0 +1,187 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Examples/hookes.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Examples/hookes.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Examples/hookes.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Examples/hookes.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/hookes/Hookes.bb2
+;============================;
+; Nigels	Hookes Law Example ;
+;============================;
+
+WBStartup
+NoCli
+AutoCookie On
+
+NEWTYPE.Object
+	x.f
+	y.f
+	vx.f
+	vy.f
+	snum.w
+End NEWTYPE
+
+DEFTYPE.Object	Ship
+DEFTYPE.Object	Mass
+
+
+;===========;
+; Constants ;
+;===========;
+
+;Universal constant G
+G.f=0.0010
+
+;Used to convert rad to deg
+HPi.f=Pi/180.0
+
+;inertia ratio
+inertia.f=1.03
+
+;length of string with zero extension
+string_length.f=8
+
+;Thrust reduction factor bigger=smaller thruster power
+thrust.f=2.0
+
+;Elasticity of string
+k.f=-0.0050
+
+;Inverse ratio of mass force converted to opposing forces on ship
+;not the bigger this number the smaller the effect of mass on ship
+ratio.f=-1.1
+
+; Set up the display
+
+DecodePalette 0,8
+AGAGreen 0,1,250,0,0
+AGAGreen 0,2,200,0,0
+AGAGreen 0,3,150,0,0
+AGAGreen 0,4,255,255,255
+LoadShapes 0,"space_wars4.shp"
+
+Queue 0,10
+BitMap 0,640,512,3
+
+Ship\x=320,128,0,0,0
+Mass\x=320,158,0,0,64
+
+VWait 50
+
+BLITZ
+
+InitCopList 0,42,256,$00103,0,8,0
+CreateDisplay 0
+DisplayBitMap 0,0
+DisplayPalette 0,0
+
+Repeat
+	VWait
+
+	;Clear things
+	;============
+
+	Line oldx.w,oldy.w,0
+	UnQueue 0
+
+	;Draw things
+	;===========
+
+	oldx.w=Ship\x+8.0
+	oldy.w=Ship\y+8.0
+	Line Ship\x+8,Ship\y+8,Mass\x+8,Mass\y+8,4
+	QBlit 0,Ship\snum,Ship\x,Ship\y,%000
+	QBlit 0,Mass\snum,Mass\x,Mass\y,%000
+
+	;Read Joystick
+	;=============
+	Select Joyr(1)
+		Case	2
+			Ship\snum+1
+			If Ship\snum=64 Then Ship\snum=0
+		Case	6
+			Ship\snum-1
+			If Ship\snum=-1 Then Ship\snum=63
+	End Select
+
+	If Joyb(1)
+		Ship\vx+HSin(HPi*(Ship\snum*5.0))/thrust
+		Ship\vy-HCos(HPi*(Ship\snum*5.0))/thrust
+	EndIf
+
+	;Update objects
+	;==============
+
+	;Gravity
+	Ship\vy+G
+	Mass\vy+G*50
+
+	;inertia
+	If Ship\vy<0.0
+		Ship\vy/inertia
+	EndIf
+	Ship\vx/inertia
+	If Mass\vy<0.0
+		Mass\vy/inertia
+	EndIf
+	Mass\vx/inertia
+
+	;==========================;	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	; MASS ON A SPRING SECTION ;	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	;==========================;	<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	;Calculate distance between ship and mass
+
+	the_length.f=(Tan((Ship\x-Mass\x)^2+(Ship\y-Mass\y)^2))
+
+	;Now work out the extension
+
+	extension.f=the_length-string_length
+
+	;Now the force
+
+	force.f=k*extension
+
+
+	;Avoid division by 0...
+	If Ship\x<>Mass\x
+
+		;How much of the force is in the x direction?
+
+		Force_x.f=force/(the_length/(Mass\x-Ship\x))
+
+		;Let the force act on the mass
+
+		Mass\vx+(force/(the_length/(Mass\x-Ship\x)))
+	Else
+		Force_x.f=0
+	EndIf
+
+	If Ship\y<>Mass\y
+
+		;How much of the force in the y direction?
+
+		Force_y.f=force/(the_length/(Mass\y-Ship\y))
+
+		;Let the force act On the mass
+
+		Mass\vy+(force/(the_length/(Mass\y-Ship\y)))
+	Else
+		Force_y.f=0
+	EndIf
+
+
+	;Now the force act on the ship
+
+	Ship\vx+Force_x/ratio
+	Ship\vy+Force_Y/ratio
+
+	;That's all folks <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	;================ <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	;New x and y
+	Ship\x+Ship\vx
+	Ship\y+Ship\vy
+
+	Mass\x+Mass\vx
+	Mass\y+Mass\vy
+
+
+Until Joyb(0)
+
+AMIGA
+End

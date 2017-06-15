@@ -1,0 +1,32 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/exec/exec.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/exec/exec.bb2
+;#ifndef EXEC_EXEC_H
+#EXEC_EXEC_H=
+;/*
+;** $VER: exec.h 39.0 (15.10.91)
+;** Includes Release 40.5
+;**
+;** Include all other Exec include files in a non-overlapping order.
+;**
+;** (C) Copyright 1985-1993 Commodore-Amiga, Inc.
+;**		 All Rights Reserved
+;*/
+
+XInclude"exec/types.bb2"
+XInclude"exec/nodes.bb2"
+XInclude"exec/lists.bb2"
+XInclude"exec/alerts.bb2"
+XInclude"exec/errors.bb2"
+XInclude"exec/initializers.bb2"
+XInclude"exec/resident.bb2"
+XInclude"exec/memory.bb2"
+XInclude"exec/tasks.bb2"
+XInclude"exec/ports.bb2"
+XInclude"exec/interrupts.bb2"
+XInclude"exec/semaphores.bb2"
+XInclude"exec/libraries.bb2"
+XInclude"exec/io.bb2"
+XInclude"exec/devices.bb2"
+XInclude"exec/execbase.bb2"
+
+;#endif /* EXEC_EXEC_H */
+;/* EXEC_EXEC_H */

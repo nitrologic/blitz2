@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/adu/art3/list1.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/adu/art3/list1.bb
+LoadShape 0,"brush.iff",0
+
+BLITZ
+
+BitMap 0,320,256,3
+
+Slice 0,44,3
+
+Show 0
+
+Blit 0,100,100
+
+MouseWait

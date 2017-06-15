@@ -1,0 +1,133 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABC3/vr/fly/bbflight.bb,/Users/simon/Google Drive/amiga/w/abc/vr/fly/bbflight.bb
+;INCDIR "BLITZ2:"
+
+;INCLUDE "debug.bb"
+
+.progtop
+
+;WBStartup
+
+NPrint "hello"
+
+NEWTYPE .var
+
+	obdatlen.l
+	noofmobs.w
+	noofbobs.w
+	mobbase.l
+	bobpbase.l
+	bobbase.l
+	obpbase.l
+	obbase.l
+	coordsbase.l
+	rotcoordsbase.l
+
+	obdataadd.l
+
+End NEWTYPE
+
+NEWTYPE .mob
+	mbobpointer.w
+	mattrib.w
+	mjoysteps.w
+	mdpitch.w
+	mrudsteps.w
+	mdroll.w
+	mdesthrust.w
+	mdyaw.w
+
+	mposx.l
+	mposy.l
+	mposz.l
+
+	mviewoffset.w
+	mhighttorot.w
+	msmallstall.w
+	mbigstall.w
+
+	mlift.b
+	mrotspeed.b
+	mthrustdamp.b
+	mmodeldamp.b
+
+	mfspeed.w
+	mvspeed.w
+	mthrust.w
+	mbrake.b
+	unused.b
+	unused2.w
+
+	mdamage.w
+
+End NEWTYPE
+
+
+USEPATH test.var
+
+;lock.l=Lock_("dh4:",-2)		 ;lock directory read only
+;oldlock.l=CurrentDir_(lock)						;make current dir
+
+
+If NOT(WriteMem (0,"objectfile") ) Goto exit
+	Fields 0,\rotcoordsbase,\coordsbase,\obbase,\obpbase,\bobbase,\bobpbase,\mobbase,\noofbobs,\noofmobs,\obdatlen
+	;Fields 0,rotcoordsbase.l,coordsbase.l,obbase.l,obpbase.l,bobbase.l,bobpbase.l,mobbase.l,noofbobs.w,noofmobs.w,obdatlen.l
+	Get 0,0
+
+	NPrint Hex$(\obbase)
+
+
+	\obdataadd=##[$FE97](\obdatlen,0)
+	If \obdataadd=0 Goto exit
+
+	\mobbase=\mobbase+\obdataadd			 ;offset basepointers To alocated memory
+	\bobpbase=\bobpbase+\obdataadd
+	\bobbase=\bobbase+\obdataadd
+	\obpbase=\obpbase+\obdataadd
+	\obbase=\obbase+\obdataadd
+	\coordsbase=\coordsbase+\obdataadd
+	\rotcoordsbase=\rotcoordsbase+\obdataadd
+
+	NPrint Hex$(\obdataadd),Hex$(\obdatlen)
+
+	##[$BE14] 0,\obdataadd,\obdatlen
+
+	CloseFile 0
+
+	*mob1.mob=\mobbase							;map 1st mob onto .mob newtype
+	NPrint *mob1\mdamage						;test - should be 60 :)
+
+bcptr.l=##[$FE15]("flight")
+If bcptr.l=0 Goto exitandfreemem
+flightadd.l=bcptr*4
+
+While *mob1\mdamage<>0
+
+	MOVEM.l d0-d7/a0-a6,-(a7)
+	GetReg d0,&test
+	GetReg a0,flightadd.l
+	JSR (a0)
+	MOVEM.l (a7)+,d0-d7/a0-a6
+
+	NPrint "enter new damage value (0 to exit)"
+	*mob1\mdamage=Edit(2)
+
+End While
+
+
+If ##[$FE16](bcptr) NPrint "unloaded" Else NPrint "fail unload"
+
+exitandfreemem:
+
+If ##[$FE99](\obdataadd,\obdatlen) NPrint "freed" Else NPrint "fail free"
+
+
+exit:
+
+;CurrentDir_ oldlock		 ;reset current dir
+;If UnLock_(lock.l) NPrint "unlock" Else NPrint "fail unlock"						;don't know why this dosn't want to unlock
+
+
+End
+
+
+

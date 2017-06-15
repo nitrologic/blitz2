@@ -1,0 +1,20 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/USED.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/USED.bb
+
+; 
+; used example
+; 
+BitMap 0,320,200,1
+BitMap 1,320,200,1
+Use BitMap 0
+
+NPrint Used BitMap ;used returns currently used object number 
+
+MouseWait 
+
+See also:
+
+Use
+
+
+
+

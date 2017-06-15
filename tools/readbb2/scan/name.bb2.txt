@@ -1,0 +1,37 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/utility/name.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/utility/name.bb2
+;/*****************************************************************************/
+
+
+;
+; $VER: name.bb2 40.0 (03.03.94)
+;
+
+;/*****************************************************************************/
+
+
+XInclude"exec/types.bb2"
+
+
+;/*****************************************************************************/
+
+
+;/* The named object structure */
+NEWTYPE.NamedObject
+*no_Object.w ;/* Your pointer, for whatever you want */
+End NEWTYPE
+
+;/* Tags for AllocNamedObject() */
+#ANO_NameSpace=4000;/* Tag to define namespace */
+#ANO_UserSpace=4001;/* tag to define userspace */
+#ANO_Priority=4002;/* tag to define priority */
+#ANO_Flags=4003;/* tag to define flags	*/
+
+;/* Flags for tag ANO_Flags */
+#NSB_NODUPS=0
+#NSB_CASE=1
+
+#NSF_NODUPS=(1LSL#NSB_NODUPS);/* Default allow duplicates */
+#NSF_CASE=(1LSL#NSB_CASE);/* Default to caseless... */
+
+
+;/*****************************************************************************/

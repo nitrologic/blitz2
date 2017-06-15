@@ -1,0 +1,111 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/segaquad.bb
+Function.w dosegaquad{verts.l,sprdata.l,table.l} ; returns ystart verts=xy xy xy xy
+	;
+	MOVEM.l a4-a6,-(a7):
+	;
+	MOVE.l d0,a0:MOVE.l d2,a4:MOVE.l d1,a5:LEA 96(a5),a6	;a2a3=spstrt/end
+	;
+	MOVEM.l (a0),d0-d3																		;getverts
+	CMP d0,d1:BPL notcl2:EXG d0,d3:EXG d0,d2:EXG d0,d1
+	CMP d0,d1:BPL notcl2:EXG d0,d3:EXG d0,d2:EXG d0,d1
+	CMP d0,d1:BPL notcl2:EXG d0,d3:EXG d0,d2:EXG d0,d1:notcl2
+	CMP d3,d0:BMI notan2:EXG d0,d1:EXG d0,d2:EXG d0,d3
+	CMP d3,d0:BMI notan2:EXG d0,d1:EXG d0,d2:EXG d0,d3
+	CMP d3,d0:BMI notan2:EXG d0,d1:EXG d0,d2:EXG d0,d3:notan2
+	;
+deltay
+	MOVE d1,d4:SUB d0,d4:ADD d4,d4
+	MOVE d2,d5:SUB d1,d5:ADD d5,d5
+	MOVE d3,d6:SUB d2,d6:ADD d6,d6
+	MOVE d0,d7:SUB d3,d7:ADD d7,d7
+	MOVE d0,-(a7)
+	;
+deltax
+	SWAP d0:SWAP d1:SWAP d2:SWAP d3:MOVE d0,a0
+	SUB d1,d0:MULS dtab+64(pc,d4),d0:SWAP d4:MOVE d0,d4
+	SUB d2,d1:MULS dtab+64(pc,d5),d1:SWAP d5:MOVE d1,d5
+	SUB d3,d2:MULS dtab+64(pc,d6),d2:SWAP d6:MOVE d2,d6
+	SUB a0,d3:MULS dtab+64(pc,d7),d3:SWAP d7:MOVE d3,d7
+	;
+	MOVE a0,d0:ROR#5,d0:MOVE d0,d1:SWAP d0:MOVE d1,d0
+	;
+	MOVEQ#2,d3:SWAP d3:SUB.l d3,d4:BRA nxwrite
+	;
+dtab:IncBin divtable
+	;
+nxwrite:
+	SUB d4,d0:SWAP d0:SUB d7,d0:SWAP d0:MOVE.l d0,d1
+	ROL.l#5,d1:ROR#5,d1:LSR.l#7,d1:AND#$3ff0,d1:MOVEM.l 0(a4,d1),a1-a3
+	MOVE.l a3,192(a5):MOVE.l a2,96(a5):MOVE.l a1,(a5)+
+	CMP.l a5,a6:BEQ dunquad
+chkr
+	SUB.l d3,d4:BPL chkl
+	MOVE.l d5,d4:BMI dunpoly:SUB.l d3,d4:MOVE.l d6,d5
+chkl:
+	ADD.l d3,d7:BMI nxwrite
+	MOVE.l d6,d7:BPL dunpoly:MOVE.l d5,d6:BRA nxwrite
+dunpoly:
+	MOVEQ#0,d0:wipe:MOVE.l d0,192(a5):MOVE.l d0,96(a5):MOVE.l d0,(a5)+
+	CMP.l a5,a6:BNE wipe:dunquad:MOVE (a7)+,d0:MOVEM.l (a7)+,a4-a6:AsmExit
+	;
+End Function
+
+;
+; test sega quad routine
+;
+
+;Goto maketable
+
+Screen 0,1
+ScreensBitMap 0,0
+BlockScroll 1
+bm.l=Peek.l(Addr BitMap(0)+8)
+BitMapOutput 0:Locate 20,0
+
+Repeat
+	ang=SMouseX/320*Pi
+	For mine.w=0 To 3
+		angplus=ang+mine*Pi/2;1.5
+;		temp=
+		Poke.w ?mypoly+mine*4	,(HSin(angplus)+1.5)*8
+		Poke.w ?mypoly+mine*4+2,(-HCos(angplus)+1.5)*8
+	Next
+	Locate 20,0
+	NPrint dosegaquad{?mypoly,bm,?mytable}
+
+;	Cls
+;	VWait
+;	Polyf 4,?mypoly,1
+;	VWait
+
+Until Joyb(0)<>0
+MouseWait
+End
+
+mypoly:Dc.w 8,0,20,10,10,20,3,6
+
+mytable:IncBin polytable
+
+End
+
+makediv:
+	Dim div.w(64)
+	For i=-32 To 32
+		If i<>0 Then div(i+32)=2048/(i+.5) Else div(i+32)=2048
+	Next
+	If ReadMem(0,"divtable") Then Exists 0,&div(0),65*2:CloseFile 0
+	End
+
+maketable:
+	Dim table.b(16*32*32):j=0
+	For rs=0 To 31
+		For ls=0 To 31
+			For i=ls To rs
+				jj=j+Int(i/2)
+				If (i AND 1) Then table(jj)+$f Else table(jj)+$f0
+			Next
+			j+16
+		Next
+	Next
+	If ReadMem(0,"polytable") Then Exists 0,&table(0),32*32*16:CloseFile 0
+	End

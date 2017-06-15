@@ -1,0 +1,119 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/net/debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/debugger/examples/Test_CopperTrace.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_CopperTrace.bb2
+;LES Debugger v1.21 Test program
+;Testing copper disassembly
+
+;AGA colour split routine
+;Don't look at the code here - just compile and run it, then look around
+;the copper window in the debugger - lot easier to follow than the blitz
+;stuff here :)
+
+;Some hardware register values for our use
+#bplmod1=$108
+#bplmod2=$10a
+#bplcon3=$106
+#color00=$180
+#color01=$182
+#color02=$184
+#color03=$186
+
+;Our copper list
+InitCopList 0,44,256,$10004,8,16,7*200						 ; 7 instructions on 200 lines
+BitMap 0,320,256,4
+
+DisplayBitMap 0,0
+offset.w=44
+
+ad.l=Peek.l(Addr CopList(0)+28)						 ; Get the custom area address
+
+;Top half of the display
+For h.w=0 To 99
+	Poke.w ad,((h+offset) LSL 8)+1						; Wait!
+	Poke.w ad+2,$fffe
+	ad+4
+	Poke.w ad,#bplcon3												; High nibbles
+	Poke.w ad+2,$0c00
+	ad+4
+
+	n.w=((h*2) AND $f0) ASR 4
+	vl.w=n																		; Colour values
+	vl=(vl ASL 4)+n
+	vl=(vl ASL 4)+n
+	Poke.w ad,#color00
+	Poke.w ad+2,vl
+	ad+4
+	Poke.w ad,#color01
+	Poke.w ad+2,(vl AND $f00)
+	ad+4
+
+	Poke.w ad,#bplcon3												; Low nibbles
+	Poke.w ad+2,$0e00
+	ad+4
+
+	n=((h*2) AND $f)
+	vl.w=n																		; Colour values
+	vl=(vl ASL 4)+n
+	vl=(vl ASL 4)+n
+	Poke.w ad,#color00
+	Poke.w ad+2,vl
+	ad+4
+	Poke.w ad,#color01
+	Poke.w ad+2,(vl AND $f00)
+	ad+4
+Next h
+
+;Bottom half of the display
+For h.w=99 To 0 Step -1
+	Poke.w ad,((offset+198-h) LSL 8)+1				; Wait!
+	Poke.w ad+2,$fffe
+	ad+4
+	Poke.w ad,#bplcon3												; High nibbles
+	Poke.w ad+2,$0c00
+	ad+4
+
+	n.w=((h*2) AND $f0) ASR 4
+	vl.w=n																		; Colour values
+	vl=(vl ASL 4)+n
+	vl=(vl ASL 4)+n
+	Poke.w ad,#color00
+	Poke.w ad+2,vl
+	ad+4
+	Poke.w ad,#color01
+	Poke.w ad+2,(vl AND $f)
+	ad+4
+
+	Poke.w ad,#bplcon3												; Low nibbles
+	Poke.w ad+2,$0e00
+	ad+4
+
+	n=((h*2) AND $f)
+	vl.w=n																		; Colour values
+	vl=(vl ASL 4)+n
+	vl=(vl ASL 4)+n
+	Poke.w ad,#color00
+	Poke.w ad+2,vl
+	ad+4
+	Poke.w ad,#color01
+	Poke.w ad+2,(vl AND $f)
+	ad+4
+Next h
+
+;Open the copper trace window at the custom area of copper list 0
+##[$9985] Addr CopList(0),28
+
+;Stop the program to let you look at the window
+Stop
+
+;Step the following commands to create and view the nice display :)
+BLITZ
+CreateDisplay 0
+
+;Draw some cute polygons
+Polyf 3,?coords,1
+Polyf 3,?coords2,1
+
+;Just wait for you to quit
+MouseWait
+End
+
+coords: Dc.w 0,0,319,0,159,99							; Polygon coordinates
+coords2:Dc.w 0,199,159,99,319,199

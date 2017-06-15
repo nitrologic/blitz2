@@ -1,0 +1,518 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/games/af/nevernoidii/NeverNoidIIE/Source/EditorII.bb
+; NeverNoid-2 The Editor
+; copyright 1987-1993
+; by A.A. van de Woestijne & R.H. Keizer
+
+drive$="sys:"
+Gosub InitVariables
+Gosub InitMap
+Gosub Loadroutine
+VWait 150
+BLITZ
+Gosub InitScreen
+Gosub BackBlockPrint
+Gosub Background
+Gosub ShowLevel
+Gosub ShowBlock
+Gosub LevelBankPrint
+Gosub PrintBlocks
+
+
+.MainRoutine
+Repeat
+	Gosub Joystick
+	Gosub KeyRead
+	Gosub BlockHits
+	Gosub MoveSprite
+	Gosub BlitIt
+Until RawStatus (69)
+End
+
+.InitVariables:
+drawblock=0
+hits=1
+sy=1
+lvl=0
+bckgrnd=65
+delete.b=0
+min1=121:min2=124:sec1=121:sec2=121
+playtime=18
+lvbnk.b=1
+maxextras=10
+extras=0
+Return
+
+.InitMap:
+NEWTYPE .blocks
+	blocknr.b
+	hits
+	extra
+	lr
+	points
+End NEWTYPE
+Dim level.blocks(31,15,15)
+size.l=32*16*16*6
+Dim info.blocks(31)
+infosize.l=32*6
+Dim BlockMap.b(4,12)
+Return
+
+.Loadroutine:
+AMIGA
+BitMap 0,320,256,4
+LoadBitMap 0,drive$+"graphics/EditorScreen",0
+LoadShapes 0,drive$+"graphics/blokken216"
+LoadShape 120,drive$+"graphics/Cursor.Iff"
+LoadShapes 121,drive$+"graphics/EditorText"
+LoadShape 160,drive$+"graphics/t116.iff"
+LoadShape 161,drive$+"graphics/t216.iff"
+LoadShape 162,drive$+"graphics/t316.iff"
+GetaSprite 0,120
+Free MidHandle 120
+Return
+
+.InitScreen:
+BLITZ
+Slice 0,44,320,256,$fff8,4,8,16,320,320
+Show 0
+Use SetCycle 0
+Buffer 0,8000
+BitMapOutput 0 : Colour 2
+Return
+
+.BlitIt:
+VWait
+If lvl<9 Then Blit 121,124,4 : Blit 122+lvl,132,4
+If lvl>8 Then If lvl<19 Then Blit 122,124,4 : Blit 112+lvl,132,4
+If lvl>18 Then If lvl<29 Then Blit 123,124,4 : Blit 102+lvl,132,4
+If lvl>28 Then If lvl<39 Then Blit 124,124,4 : Blit 92+lvl,132,4
+If score= 5 Then Blit 121,278,89 : Blit 126,285,89
+If score=10 Then Blit 122,278,89 : Blit 121,285,89
+If score=15 Then Blit 122,278,89 : Blit 126,285,89
+If score=20 Then Blit 123,278,89 : Blit 121,285,89
+If score=25 Then Blit 123,278,89 : Blit 126,285,89
+If score=30 Then Blit 124,278,89 : Blit 121,285,89
+UnBuffer 0
+If btext=1 Then BBlit 0,160,45,200
+If btext=2 Then BBlit 0,161,50,202
+If btext=3 Then BBlit 0,162,15,202
+Blit 131,195,4
+Blit min1,180,4 : Blit min2,188,4
+Blit sec1,202,4 : Blit sec2,210,4
+Blit 121+lvbnk,72,4 : Blit 121,64,4
+Return
+
+
+.MapToTime:
+ti=info(lvl)\points
+If ti>0
+	If ti=3 Then min2=121 : sec1=124
+	If ti=6 Then min2=122 : sec1=121
+	If ti=9 Then min2=122 : sec1=124
+	If ti=12 Then min2=123 : sec1=121
+	If ti=15 Then min2=123 : sec1=124
+	If ti=18 Then min2=124 : sec1=121
+	If ti=21 Then min2=124 : sec1=124
+	If ti=24 Then min2=125 : sec1=121
+	If ti=27 Then min2=125 : sec1=124
+	If ti=30 Then min2=126 : sec1=121
+EndIf
+Return
+
+.Joystick:
+waiting+1
+If waiting<3 Then Return
+waiting=0
+fire=0
+If x AND 1 Then If sx=2 Then fire=1
+If Joyx(1)=1 Then x+sx
+If Joyx(1)=-1 Then x-sx
+If Joyy(1)=1 Then y+sy
+If Joyy(1)=-1 Then y-sy
+If x<fire Then x=fire
+If x>(14-fire) Then x=14-fire
+If y<0 Then y=0
+If y>15 Then y=15
+sx=1
+If Joyb(1)=1 Gosub BlockDrop : sx=2
+ShowSprite 0,x ASL 3+50,y ASL 3+67,0
+Return
+
+.KeyRead
+BitMapOutput 0
+BlitzKeys On
+BlitzRepeat 15,4
+char$=Inkey$
+If char$=Chr$(31)
+	xc-1 : change=1 : delete=0
+	If xc<0 Then xc=0
+	If RawStatus(97) Then xc=0
+	Gosub MoveSprite
+EndIf
+If char$=Chr$(30)
+	xc+1 : change=1 : delete=0
+	If xc>4 Then xc=4
+	If RawStatus(97) Then xc=4
+	Gosub MoveSprite
+EndIf
+If char$=Chr$(28)
+	yc-1 : change=1 : delete=0
+	If yc<0 Then yc=0
+	If RawStatus(97) Then yc=0
+	Gosub MoveSprite
+EndIf
+If char$=Chr$(29)
+	yc+1 : change=1 : delete=0
+	If yc>12 Then yc=12
+	If RawStatus(97) Then yc=12
+	Gosub MoveSprite
+EndIf
+If drawblock>30 AND drawblock<52
+	extrablock=drawblock
+Else
+	extrablock=0
+EndIf
+If change Then Gosub ShowBlock : change=0
+If char$="-"
+	lvl-1
+	If lvl<0 Then lvl=31
+	Gosub BlitIt
+	Gosub ShowLevel
+EndIf
+If char$="="
+	lvl+1
+	If lvl>31 Then lvl=0
+	Gosub BlitIt
+	Gosub ShowLevel
+EndIf
+If char$="[" Then bckgrnd-2 : Gosub BackBlock : Gosub ShowLevel
+If char$="]" Then bckgrnd+2 : Gosub BackBlock : Gosub ShowLevel
+If char$=Chr$(127) Then delete=1-delete : Gosub ShowBlock
+If char$="c" Then Gosub ClearLevel : Gosub BackBlock : Gosub Background
+If char$="l"
+	BlitzKeys Off
+	btext=1 : Gosub BlitIt : QAMIGA : Gosub LoadMap : btext=0
+	VWait 150 : BLITZ : UnBuffer 0 : Gosub ShowLevel
+EndIf
+If char$="s"
+	BlitzKeys Off
+	btext=2 : Gosub BlitIt : Gosub FillIn : Gosub BlockCount
+	QAMIGA : Gosub SaveMap : btext=0
+	VWait 250 : BLITZ : UnBuffer 0
+EndIf
+If char$="t" Then Gosub Time : Gosub FillIn
+If char$="b" Then lvbnk+1 : Gosub LevelBankPrint
+If char$="C"
+	btext=3 : Gosub BlitIt : Gosub ClearMap : UnBuffer 0
+	Gosub ShowLevel : btext=0
+EndIf
+If char$="e" Then extras=1-extras : soep=1 : Gosub ShowLevel : soep=0
+Return
+
+.BlockHits:
+hitsnr=1
+If drawblock=30 Then hitsnr=2
+If drawblock=61 Then hitsnr=3
+If drawblock=62 Then hitsnr=3
+If drawblock=63 Then hitsnr=4
+Return
+
+.BlockScore:
+score=5
+If drawblock>14 Then If drawblock<30 Then score=10
+If drawblock=30 Then score=20
+If drawblock=52 Then score=15
+If drawblock=53 Then score=15
+If drawblock=54 Then score=10
+If drawblock>30 Then If drawblock<52 Then score=20
+If drawblock=55 Then score=30
+If drawblock=56 Then score=15
+If drawblock=57 Then score=20
+If drawblock=58 Then score=15
+If drawblock=59 Then score=15
+If drawblock=60 Then score=10
+If drawblock=61 Then score=20
+If drawblock=62 Then score=20
+If drawblock=63 Then score=25
+Return
+
+.FillIn:
+If playtime<3 Then playtime=18
+info(lvl)\points=playtime
+Return
+
+.Time:
+sec1+3
+If sec1 > 126
+	sec1=121
+	min2+1
+EndIf
+If min2 =126 Then If sec1>121 Then sec1=124 : min2=121
+If min2 > 126 Then min2=121 : sec1=124
+playtime=((sec1-121)+(6*(min2-121))) : Gosub FillIn
+Return
+
+.BlockDrop:
+If delete
+	If level(lvl,x,y)\lr=1
+		If x AND 1
+			Blit bckgrnd+1,x ASL 3+50,y ASL 3+67
+			Blit bckgrnd,x ASL 3+58,y ASL 3+67
+		Else
+			Blit bckgrnd,x ASL 3+50,y ASL 3+67
+			Blit bckgrnd+1,x ASL 3+58,y ASL 3+67
+		EndIf
+	EndIf
+Else
+	If level(lvl,x,y)\lr=0
+		If level(lvl,x+1,y)\lr=0
+			If extrablock=0
+				Blit drawblock,x ASL 3+50,y ASL 3+67
+			EndIf
+		EndIf
+	Else
+		If level(lvl,x,y)\lr=1 Then If level(lvl,x,y)\blocknr<>64
+			If info(lvl)\extra<maxextras
+				Blit drawblock,x ASL 3+50,y ASL 3+67
+			Else
+				If extrablock=0
+					Blit drawblock,x ASL 3+50,y ASL 3+67
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+EndIf
+For t=0 To 1
+	If delete
+		If level(lvl,x,y)\lr=1
+			If level(lvl,x+t,y)\extra>0
+				If t=0 Then info(lvl)\extra-1
+			EndIf
+			For soup=0 To 1
+			level(lvl,x+soup,y)\blocknr=0,0,0,0,0
+			Next soup
+		EndIf
+	Else
+		If extrablock>0
+			If info(lvl)\extra < maxextras
+				If level(lvl,x,y)\lr=1 Then If level(lvl,x,y)\extra=0 Then If level(lvl,x,y)\blocknr<>64
+					For soup=0 To 1
+					level(lvl,x+soup,y)\extra=extrablock
+					Next soup
+					If t=0 Then info(lvl)\extra+1
+				EndIf
+			Else info(lvl)\extra=maxextras
+			EndIf
+		Else
+			If level(lvl,x,y)\lr<>2 Then If level(lvl,x+1,y)\lr<>1
+				For soup=0 To 1
+				level(lvl,x+soup,y)\lr=1+soup
+				level(lvl,x+soup,y)\blocknr=drawblock
+				level(lvl,x+soup,y)\hits=hitsnr
+				level(lvl,x+soup,y)\points=score
+				Next soup
+				If level(lvl,x,y)\extra<>0
+					If t=0 Then info(lvl)\extra=-1
+					level(lvl,x+t,y)\extra=0
+				EndIf
+			EndIf
+		EndIf
+	EndIf
+Next t
+Return
+
+.BackBlock
+If bckgrnd<65 Then bckgrnd=85
+If bckgrnd>85 Then bckgrnd=65
+info(lvl)\blocknr=bckgrnd
+Return
+
+.ShowBlock
+If delete
+	Blit bckgrnd,296,73 : Blit bckgrnd+1,304,73
+Else Blit drawblock,296,73
+EndIf
+Return
+
+.BackBlockPrint
+bckgrnd=info(lvl)\blocknr
+If bckgrnd<65 OR bckgrnd>85 Then bckgrnd=65
+Return
+
+.Background:
+If lvl<0 Then lvl=31
+If lvl>31 Then lvl=0
+bckgrnd=info(lvl)\blocknr
+If bckgrnd=0 Then info(lvl)\blocknr=65 : bckgrnd=65
+For yz=19 To 240 Step 8
+	For xz=2 To 210 Step 16
+		Blit bckgrnd,xz,yz
+		Blit bckgrnd+1,xz+8,yz
+	Next xz
+Next yz
+Return
+
+.ShowLevel
+If soep=0 Then Gosub Background
+xz=0 : yz=0
+For yzs=67 To 187 Step 8
+	For xzs=50 To 170 Step 8
+		If level(lvl,xz,yz)\lr=1
+			Blit level(lvl,xz,yz)\blocknr,xzs,yzs
+			If extras
+				If level(lvl,xz,yz)\extra>0
+					Blit level(lvl,xz,yz)\extra,xzs,yzs
+				EndIf
+			EndIf
+			xzs+8:xz+1
+		EndIf
+		xz+1
+	Next xzs
+	xz=0 : yz+1
+Next yzs
+Gosub MapToTime
+Gosub BackBlockPrint
+Gosub BackBlock
+Return
+
+.ClearLevel
+For yz=0 To 15
+	For xz=0 To 15
+		level(lvl,xz,yz)\blocknr=0,0,0,0,0
+	Next xz
+Next yz
+	info(lvl)\blocknr=0
+	info(lvl)\points=3
+	info(lvl)\extra=0
+Return
+
+.ClearMap
+For lvl=0 To 31
+	Gosub ClearLevel
+Next
+Return
+
+.BlockCount
+lvlmem=lvl
+For lvl=0 To 31
+	blockcount=0
+	For yz=0 To 15
+		For xz=0 To 15
+			If level(lvl,xz,yz)\lr=1 Then If level(lvl,xz,yz)\blocknr<>64
+			blockcount+level(lvl,xz,yz)\hits
+			xz+1
+			EndIf
+		Next xz
+	Next yz
+	info(lvl)\hits=blockcount
+Next lvl
+lvl=lvlmem
+Return
+
+.LoadMap
+a$=drive$+"Custom"+Str$(lvbnk)
+b$=drive$+"Custom"+Str$(lvbnk)+"Info"
+If WriteMem (0,a$)
+	If FileSeek(0)=size Then ##[$BE14] 0,&level(0,0,0),size
+	CloseFile 0
+EndIf
+If WriteMem (2,b$)
+	If FileSeek(2)=infosize Then ##[$BE14] 2,&info(0),infosize
+	CloseFile 2
+EndIf
+Return
+
+.SaveMap
+a$=drive$+"Custom"+Str$(lvbnk)
+b$=drive$+"Custom"+Str$(lvbnk)+"Info"
+If ReadMem (1,a$)
+	Exists 1,&level(0,0,0),size : CloseFile 1
+EndIf
+If ReadMem (3,b$)
+	Exists 3,&info(0),infosize : CloseFile 3
+EndIf
+Return
+
+.LevelBankPrint:
+If lvbnk>3 Then lvbnk=1
+Return
+
+blockdata:
+Data 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24
+Data 25,26,27,28,29,30,61,62,63,64,52,53,54,56,55,57,58,59,60,31,32,33,34,35,36
+Data 37,38,39,40,41,42,43,44,45,46,47,48,49,50,51
+
+.PrintBlocks:
+Restore blockdata
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,108
+	BlockMap(xw,0)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,116
+	BlockMap(xw,1)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,124
+	BlockMap(xw,2)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,132
+	BlockMap(xw,3)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,140
+	BlockMap(xw,4)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,148
+	BlockMap(xw,5)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,156
+	BlockMap(xw,6)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4 +232,164
+	BlockMap(xw,7)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,172
+	BlockMap(xw,8)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,180
+	BlockMap(xw,9)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,188
+	BlockMap(xw,10)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,196
+	BlockMap(xw,11)=bl
+Next xw
+For xw=0 To 4
+	Read bl
+	Blit bl,xw ASL 4+232,204
+	BlockMap(xw,12)=bl
+Next xw
+Return
+
+.MoveSprite:
+ShowSprite 0,xc ASL 4+232,yc ASL 3+108,4
+drawblock=BlockMap(xc,yc)
+Gosub BlockScore
+Return

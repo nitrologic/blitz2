@@ -1,0 +1,92 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/bum5/gadtools.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/bum5/gadtools.bb2,/Users/simon/Google Drive/amiga/w/disks/bums/bum5/EXAMPLES/gadtools.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/EXAMPLES/gadtools.bb2
+;
+; gadtools demo (sorry out of time for flash stuff)
+;
+
+#tag=$80080000
+#GTCB_Checked=#tag+4			; State of checkbox
+#GTLV_Top=#tag+5					; Top visible one in listview
+#GTLV_ReadOnly=#tag+7		 ; TRUE if listview is to be ReadOnly
+#GTMX_Active=#tag+10			; Active one in mx gadget
+#GTTX_Text=#tag+11				; Text to display
+#GTNM_Number=#tag+13			; Number to display
+#GTCY_Active=#tag+15			; The active one in the cycle gad
+#GTPA_Color=#tag+17			 ; Palette color
+#GTPA_ColorOffset=#tag+18 ; First color to use in palette
+#GTSC_Top=#tag+21				 ; Top visible in scroller
+#GTSC_Total=#tag+22			 ; Total in scroller area
+#GTSC_Visible=#tag+23		 ; Number visible in scroller
+#GTSL_Level=#tag+40			 ; Slider level
+#GTSL_MaxLevelLen=#tag+41 ; Max length of printed level
+#GTSL_LevelFormat=#tag+42 ; Format string for level
+#GTSL_LevelPlace=#tag+43	; Where level should be placed
+#GTLV_Selected=#tag+54		 ; Set ordinal number of selected
+#GTMX_Spacing=#tag+61			; Added to font height to
+
+#_LEFT=1				 ;positioning of the optional gadget label Text$
+#_RIGHT=2
+#_ABOVE=4
+#_BELOW=8
+#_IN=$10
+#_High=$20			 ;highlight
+#_Disable=$40		;turned off
+#_Immediate=$80	;activate on gadgetdown
+#_BoolValue=$100 ;checkbox on
+#_Scaled=$200		;scale arrows for slider
+#_Vertical=$400	;make slider/scroller vertical
+
+FindScreen 0
+
+NEWTYPE .test
+ a.w:b$:c$
+End NEWTYPE
+
+Dim List a.test(20):For i= 1 To 10:AddItem a():a()\b="ITEM "+Str$(i):Next
+
+LoadFont 1,"helvetica.font",12:Use IntuiFont 1
+
+TextGadget 2,0,0,0,0,""
+
+GTButton 2,1,110,0,80,15,"GT_BUTTON",0
+
+GTCheckBox 2,2,110,20,80,15,"GT_CHECKBOX",$200
+
+GTCycle 2,3,110,40,80,15,"GTC_YCLE",$0,"A|B|C"
+
+GTInteger 2,4,110,65,80,17,"GT_INTEGER",$0,1234
+
+GTListView 2,5,90,90,120,55,"GT_LISTVIEW",#_LEFT,a()
+
+GTMX 2,6,300,10,80,15,"GTMX",$1,"OPTION 1|OPTION 2|OPTION 3"
+
+GTNumber 2,7,300,50,180,15,"GTNUMBER",$0,7878
+
+GTPalette 2,8,300,70,170,16,"GT_PALETTE",$1,2
+
+GTScroller 2,9,320,100,180,20,"GTSCROLLER",$800,5,50
+
+f$="%2ld":GTTags #GTSL_LevelFormat,&f$,#GTSL_MaxLevelLen,4
+GTSlider 2,10,320,120,200,20,"GTSLIDER",2,0,10
+
+GTText 2,11,320,145,200,18,"GTTEXT",1,"FUCKING HELL"
+
+Window 0,20,0,600,220,$100f,"HELLO",1,2,2
+
+AttachGTList 2,0
+
+ButtonId 2,4,"55"
+ClearString 0,4
+GTChangeList 2,5
+GTChangeList 2,5,a()
+GTSetAttrs 2,6,#GTMX_Active,1
+
+GTSetAttrs 2,11,#GTTX_Text,"FAR OUT BOOGY BOY"
+
+Repeat
+	ev.l=WaitEvent
+	If ev=$20
+		NPrint ev,"	",GadgetHit,"	",EventCode,"	",EventQualifier
+	EndIf
+Until ev=$200
+
+End

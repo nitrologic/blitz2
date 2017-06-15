@@ -1,0 +1,157 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/damen/Demo.bb2
+;
+LoadShapes 0,"blitz_products:shapes/blitzfonts-2c"
+VWait
+;
+BLITZ
+BitMap 0,640,256,2
+BitMap 1,640,256,2
+BitMap 2,640,512,2
+Slice 0,44,320,256,$fffa,4,8,32,640,640
+;
+DisplayOff
+Queue 0,40
+Queue 1,40
+;
+GetaShape 0,0,0,1,1
+;
+Dim XS(127),YS(127)
+Dim Y1(240),Y2(240),XP(40),I(140)
+Gosub ssin
+;
+For lop=0 To 14
+		ColSplit 9,0,0,lop,lop
+		ColSplit 9,0,0,14-lop,242+lop
+Next
+;
+Restore copper
+For lop=1 To 46
+		Read a,b,c
+		For pos=1 To 4
+		ColSplit 1,a,b,c,yp+pos
+		Next
+		yp+4
+Next
+;
+;
+For LOP=0 To 19
+XP(LOP)=19+LOP*18
+Next
+;
+SCN$="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.:"
+TE$="										THE WAVE PRESENTS SOME SINUS TEXT.."
+TE$=TE$+"...CODE BY JOOP DAMEN.............................."
+TL=Len(TE$)
+;
+For lop=0 To TL
+M$=Mid$(TE$,lop,1):I(lop)=Instr(SCN$,M$)
+Next
+;
+DIS=18
+;
+;
+Use BitMap 2
+For y=0 To 512 Step 32
+For x=0 To 640	Step 32
+		COL=1-COL
+		Boxf x,y,x+32,y+32,COL
+Next
+Next
+;
+;	---- MAIN LOOP ----
+;
+DisplayOn
+While Joyb(0)=0
+	 VWait
+	 ShowF db,32,0,XS(I):db=1-db:Use BitMap db:UnQueue db
+	 ;
+	 I=QWrap(I+1,1,127)
+	 ShowB 2,XS(I),YS(I)
+	 ;
+	 DIS-3
+	 If DIS=0
+	 DIS=18
+	 POS+1
+	 TEX=QWrap(TEX+1,0,TL)
+	 EndIf
+	 ;
+	 For LOP=0 To 19
+			 QBlit db,I(LOP+TEX),XP(LOP)+DIS,Y2(POS+LOP)
+			 QBlit db,I(LOP+TEX),XP(LOP)+DIS,Y1(POS+LOP)
+	 Next
+	 POS=QWrap(POS-1,0,157)
+Wend
+End
+;
+;
+;
+ssin:
+For A=1 To 127
+	 s+.05
+	 XS(A)=160+HSin(s)*160
+	 YS(A)=128+HCos(s)*128
+Next A
+;
+For LOP=0 To 230
+		S+.08
+		Y1(LOP)=127+HCos(S)*111
+		Y2(LOP)=127-HCos(S)*111
+Next
+Return
+;
+;
+copper:
+Data 15,0,0
+Data 15,1,0
+Data 15,2,0
+Data 15,3,0
+Data 15,4,0
+Data 15,5,0
+Data 15,6,0
+Data 15,7,0
+Data 15,8,0
+Data 15,9,0
+;
+Data 15,10,0
+Data 15,11,0
+Data 15,12,0
+Data 15,13,0
+Data 15,14,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+Data 15,15,0
+;
+Data 10,15,0
+Data 9,15,0
+Data 8,15,0
+Data 7,15,0
+Data 6,15,0
+Data 5,15,0
+Data 4,15,0
+Data 3,15,0
+Data 2,15,0
+Data 1,15,0
+Data 0,15,0
+Data 0,15,0
+;
+Data 0,15,2
+Data 0,15,3
+Data 0,15,4
+Data 0,15,5
+Data 0,15,6
+Data 0,15,7
+Data 0,15,8
+Data 0,15,9
+Data 0,15,10
+Data 0,15,11
+Data 0,15,12
+Data 0,15,13
+Data 0,15,15
+Data 0,15,15
+Data 0,15,15
+Data 0,15,15
+Data 0,15,15
+Data 0,15,15
+Data 0,0,0

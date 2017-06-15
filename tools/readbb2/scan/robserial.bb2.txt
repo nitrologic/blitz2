@@ -1,0 +1,79 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/net/RobSerial.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/RobSerial.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/RobSerial.bb2
+Function.b initserial{devname$,unit.l,baud.l,serflags.b,buffsize.l}
+	Shared *SerialMP.MsgPort, *SerialIO.IOExtSer
+
+	result.l = False
+	*SerialMP = 0
+	*SerialIO = 0
+
+	*SerialMP = ##[$FEE2]
+	If *SerialMP
+		*SerialIO = ##[$FEE0](*SerialMP, SizeOf .IOExtSer)
+		If *SerialIO
+			*SerialIO\io_SerFlags = serflags
+			*SerialIO\io_RBufLen = buffsize
+			If ##[$FEC0] (&devname$,unit,*SerialIO,0) = 0
+				*SerialIO\io_SerFlags = serflags
+				*SerialIO\io_Baud = baud
+				*SerialIO\io_BrkTime = 250000
+				*SerialIO\IOSer\io_Command = #SDCMD_SETPARAMS
+				*SerialIO\io_StopBits = 1
+				*SerialIO\io_ReadLen = 8
+				*SerialIO\io_WriteLen = 8
+				##[$FEC2] (*SerialIO)
+				result.l = True
+			Else
+				##[$FEE1](*SerialIO)
+				*SerialIO = 0
+				##[$FEE3](*SerialMP)
+				*SerialMP = 0
+			EndIf
+		Else
+			##[$FEE3] (*SerialMP)
+			*SerialMP = 0
+		EndIf
+	EndIf
+
+	Function Return result
+End Function
+
+Statement shutdownserial{}
+	Shared *SerialMP.MsgPort, *SerialIO.IOExtSer
+
+	If *SerialIO
+		*SerialIO\IOSer\io_Command = #CMD_FLUSH
+		##[$FEC2] (*SerialIO)
+		*SerialIO\IOSer\io_Command = #CMD_CLEAR
+		##[$FEC2] (*SerialIO)
+
+		##[$FEC1] (*SerialIO)
+
+		##[$FEE1] (*SerialIO)
+		*SerialIO = 0
+		If *SerialMP
+			##[$FEE3] (*SerialMP)
+			*SerialMP = 0
+		EndIf
+	EndIf
+
+End Statement
+
+
+Function.b CheckCarrier{}
+	Shared *SerialIO
+
+
+	If *SerialIO
+		*SerialIO\IOSer\io_Command = #SDCMD_QUERY
+		##[$FEC2] (*SerialIO)
+		If (*SerialIO\io_Status AND 32)
+			result.b = False
+		Else
+			result.b = True
+		EndIf
+	Else
+		result.b = False
+	EndIf
+
+	Function Return result
+End Function

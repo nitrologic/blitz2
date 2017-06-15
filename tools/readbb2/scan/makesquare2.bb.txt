@@ -1,0 +1,246 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/makesquare2.bb
+
+Function.l jin{a.q,b.q}
+	SWAP d1:MOVE d1,d0:SWAP d0:AsmExit
+End Function
+
+Function.l jfr{a.q,b.q}
+	SWAP d0:MOVE d1,d0:SWAP d0:AsmExit
+End Function
+
+Screen 0,4
+ScreensBitMap 0,0
+Use BitMap 0
+
+
+#sqs=32;20
+#dep=4
+
+big=#sqs-1
+mass=#sqs
+stp=1/mass
+siz=mass *#sqs
+
+qc1=HCos(-0.3)
+qs1=HSin(-0.3)
+
+
+NEWTYPE .xy
+;	x.w:y.w
+	y.w:x.w
+End NEWTYPE
+
+Dim rd.xy(big,big),bl.xy(big,big)
+
+Dim xx1.w(big,big),xx2.w(big,big),yy.w(big,big)
+Dim colr.l(63,63),colb.l(63,63)
+Dim ev.w(big,big)
+
+NEWTYPE.d
+
+	i.l
+	f.l
+End NEWTYPE
+
+
+
+Dim deln.d(big,big),dele.d(big,big),dels.d(big,big),delw.d(big,big)
+Dim dtln.d(big,big),dtle.d(big,big),dtls.d(big,big),dtlw.d(big,big)
+Dim lc.d(big,big)
+Dim lt.d(big,big)
+
+
+For ii=0 To big
+	i=ii/mass
+	For jj=0 To big
+		j=jj/mass
+
+
+		x=(i-0.5)
+;		y=0
+		y=HSin(jj/mass*Pi *2)*HCos(ii/mass*Pi*2)
+		ev(ii,jj)=(y+1)*64*2
+		y=y *-0.1
+		z=(j-0.5)
+
+		tx=x
+		ty=y*qc1-z*qs1
+		tz=y*qs1+z*qc1 + 1.5
+
+		sx1=((tx-0.06)/tz)*160+168
+		sx2=((tx+0.06)/tz)*160+152
+		sy=100-(ty/tz)*160
+
+
+;		sx1=ii*16+20+jj*8
+;		sx1=ii*16 + 20
+;		sy=80-jj*16+ii*4
+
+;		sx1=ii*16+jj*4+20
+;		sy=jj*16+ii*3+20
+
+
+		Point sx1,sy,1
+;		Plot sx2,sy,2
+
+
+
+		xx1(ii,jj)=sx1; ASL 2
+		xx2(ii,jj)=sx2; ASL 2
+		yy(ii,jj) =sy ; ASL 2
+
+		rd(ii,jj)\x=sx1 ASL 4
+		rd(ii,jj)\y=sy ASL 2
+;		bl(ii,jj)\x=sx2 ASL 4,sy ASL 2
+
+
+	Next
+Next
+
+For ii=0 To 63
+	For jj=0 To 63
+		col=QLimit(Int(Rnd(8))+8,8,15)&$ff
+
+
+		temp=(col ASL 8)+col
+		colr(ii,jj)=temp ASL 16+ temp
+
+		colb(ii,jj)=col ASL 4
+	Next
+Next
+
+BitMapOutput 0
+scalfac=1/7
+For ii=0 To big-1
+	For jj=0 To big-1
+
+
+
+		dx=(xx1(ii+1,jj)-xx1(ii,jj))*scalfac
+		dy=( yy(ii+1,jj)-yy(ii,jj) )*scalfac
+		deln(ii,jj)\i=jin{dx,dy}
+		deln(ii,jj)\f=jfr{dx,dy}
+
+		dx=(xx1(ii+1,jj+1)-xx1(ii+1,jj))*scalfac
+		dy=( yy(ii+1,jj+1)-yy(ii+1,jj) )*scalfac
+		dele(ii,jj)\i=jin{dx,dy}
+		dele(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx1(ii,jj+1)-xx1(ii+1,jj+1))*scalfac
+		dy=( yy(ii,jj+1)-yy(ii+1,jj+1) )*scalfac
+		dels(ii,jj)\i=jin{dx,dy}
+		dels(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx1(ii,jj)-xx1(ii,jj+1)		)*scalfac
+		dy=( yy(ii,jj)-yy(ii,jj+1)		 )*scalfac
+		delw(ii,jj)\i=jin{dx,dy}
+		delw(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=xx1(ii,jj)
+		dy=yy(ii,jj)
+		lc(ii,jj)\i=jin{dx,dy}
+		lc(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii+1,jj)-xx2(ii,jj))*scalfac
+		dy=( yy(ii+1,jj)-yy(ii,jj) )*scalfac
+		dtln(ii,jj)\i=jin{dx,dy}
+		dtln(ii,jj)\f=jfr{dx,dy}
+
+		dx=(xx2(ii+1,jj+1)-xx2(ii+1,jj))*scalfac
+		dy=( yy(ii+1,jj+1)-yy(ii+1,jj) )*scalfac
+		dtle(ii,jj)\i=jin{dx,dy}
+		dtle(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii,jj+1)-xx2(ii+1,jj+1))*scalfac
+		dy=( yy(ii,jj+1)-yy(ii+1,jj+1) )*scalfac
+		dtls(ii,jj)\i=jin{dx,dy}
+		dtls(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=(xx2(ii,jj)-xx2(ii,jj+1)		)*scalfac
+		dy=( yy(ii,jj)-yy(ii,jj+1)		 )*scalfac
+		dtlw(ii,jj)\i=jin{dx,dy}
+		dtlw(ii,jj)\f=jfr{dx,dy}
+
+
+		dx=xx2(ii,jj)
+		dy=yy(ii,jj)
+		lt(ii,jj)\i=jin{dx,dy}
+		lt(ii,jj)\f=jfr{dx,dy}
+
+
+
+	Next
+Next
+
+;	movei	$000000f0,!bx			 ;16,0
+;	movei	$00280130,!cx			 ;30,10
+;	movei	$003c0088,!dx			 ;18,15
+;	movei	$00280018,!ax			 ;2,14
+;rd(0,0)\y=0
+;rd(0,0)\x=$f0
+;rd(1,0)\y=$28
+;rd(1,0)\x=$130
+
+;rd(0,1)\y=$3c
+;rd(0,1)\x=$88
+;rd(1,1)\y=$28
+;rd(1,1)\x=$18
+
+
+CNIF On
+	If ReadMem (0,"square.dat")
+		Exists 0,&rd(0,0)	,mass*mass*4
+		Exists 0,&colr(0,0),64*64*4
+;		WriteMem 0,&bl(0,0)	,mass*mass*4
+;		WriteMem 0,&colb(0,0),mass*mass*1
+		CloseFile 0
+	EndIf
+	If ReadMem (0,"eval.dat")
+		Exists 0,&ev(0,0),mass*mass ASL 1
+		CloseFile 0
+	EndIf
+CEND
+CNIF 1=0
+If ReadMem (0,"square.dat")
+	Exists 0,&deln(0,0),mass*mass*SizeOf.d
+	Exists 0,&dele(0,0),mass*mass*SizeOf.d
+	Exists 0,&dels(0,0),mass*mass*SizeOf.d
+	Exists 0,&delw(0,0),mass*mass*SizeOf.d
+	Exists 0,&lc(0,0),mass*mass*SizeOf.d
+	Exists 0,&colr(0,0),mass*mass
+
+	Exists 0,&dtln(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtle(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtls(0,0),mass*mass*SizeOf.d
+	Exists 0,&dtlw(0,0),mass*mass*SizeOf.d
+	Exists 0,&lt(0,0),mass*mass*SizeOf.d
+	Exists 0,&colr(0,0),mass*mass
+EndIf
+CEND
+
+
+
+MouseWait
+End
+
+
+
+CNIF 1=0
+	 1,0	 8,0
+	 7,1	 7,1
+	 3,1	 6,2
+	 5,3
+	 1,1	 4,4
+	 2,3
+	 1,3	 2,6
+	 1,7	 1,7
+
+
+
+CEND

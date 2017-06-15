@@ -1,0 +1,53 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/damen/1stStarfield.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/damen/1stStarfield.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/damen/1stStarfield.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/damen/1stStarfield.bb2
+;
+; My first starfield in Blitz2
+;
+
+NoCli
+
+NEWTYPE .p
+	speed.w
+	x.w
+	y.w
+End NEWTYPE
+
+Dim List star.p(39)
+
+USEPATH star()
+
+BLITZ
+BitMap 0,320,256,2
+BitMap 1,320,256,2
+
+Slice 0,44,2
+Green 1,15,15,15
+db=0
+Gosub fillspace
+While Joyb(0)=0
+	VWait
+	Show db:db=1-db:Use BitMap db
+	BlockScroll
+	Gosub drawstars
+Wend
+
+End
+
+.fillspace
+	USEPATH star()
+	ResetList star()
+	While AddItem(star())
+		\speed=Rnd(10)
+		If \speed=0 Then \speed=1
+		\x=Rnd(319)
+		\y=Rnd(250)
+	Wend
+Return
+
+.drawstars
+	USEPATH star()
+	ResetList star()
+	While NextItem(star())
+		Point \x,\y,1
+		\y=QWrap(\y+\speed,0,250)
+	Wend
+Return

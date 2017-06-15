@@ -1,0 +1,26 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/usec.bb
+;
+; create contents from userguide text
+;
+
+If ReadMem(0,"ram:user.contents")
+	FileOutput 0
+	For i=1 To 11
+		If WriteMem(1,"ascii/u"+Str$(i))
+			FileInput 1
+			While NOT DosBuffLen(1)
+				a$=Edit$(2048)
+				a=Len(a$)
+				If a>4 AND a<60
+					If Right$(b$,1)<>":"
+						b$=Left$(a$,1)
+						If b$<>Chr$(9) AND b$<>" " AND b$<>Chr$($ad) AND b$<>"#" Then NPrint a$
+					EndIf
+				EndIf
+			Wend
+			CloseFile 1
+		EndIf
+	Next
+	CloseFile 0
+EndIf
+End

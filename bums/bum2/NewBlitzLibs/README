@@ -1,0 +1,20 @@
+This drawer contains new/updated files for the BlitzLibs: volume,
+this is only relevant for people wishing to develop Blitz 2 libraries.
+
+We decided to drop the .info files for all the .obj files, so if
+I was you I'd delete them all, they were the wrong names anyway!
+
+So the new .obj files in basic.lha do not show up from
+workbench, but they are there! If you are not familiar with the
+CLI this drawers not for you in any case....
+
+The new libmacs.res file contains several constants documented in
+the magazine that were previously omitted.
+
+More developers documentation such as source for amigalibs.res will
+be available shortly.
+
+Thanks,
+
+Simon.
+

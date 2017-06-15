@@ -1,0 +1,25 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/simvbr.bb2
+DEFTYPE.l
+
+v=##[$FE97](1024,1)
+o=cr_vbr
+
+For k=0 To 1023 Step 4
+Poke.l v+k,Peek.l(o+k)
+Next
+
+GetReg d0,v:MOVE.l d0,there
+MOVE.l 4,a6
+JSR -150(a6)
+MOVE.l there(pc),d1:Dc $4e7b,$1801
+JSR -156(a6)
+
+For k=8 To 1023 Step 4
+Poke.l o+k,0
+Next
+
+NPrint "Vector Base Register now = ",v
+
+End
+
+there:Dc.l 0

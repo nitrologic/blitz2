@@ -1,0 +1,190 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af2/isoed/isoed.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af2/isoed/isoed.bb
+;
+; IsoBlaster Map Editor V0.1 by Simon Armstrong
+;
+
+DEFTYPE .w					;all variables default to integer type
+MaxLen pa$=160			;fix length of strings for use with Blitz2
+MaxLen fi$=64			 ;filerequester
+
+NEWTYPE .block			;information for each block
+	btype.w:bheight
+End NEWTYPE
+
+Dim map.block(63,63) ;the array to hold all the blocks
+
+#numshapes=3						 ;number of shapes in blocks.shapes file
+#size=64*64*SizeOf.block ;size of array for loading & saving
+
+; the following macros are the same as functions returning
+; the screen position of the 3D isometric coordinate {`1,`2,`3}
+
+Macro px 320+(`1-`2) ASL 4:End Macro
+Macro py -160+(`1+`1+`2+`2-`3) ASL 2:End Macro
+Macro pp 320+(`1-`2) ASL 4,py -160+(`1+`1+`2+`2-`3) ASL 2:End Macro
+
+BitMap 0,640,512,3		 ;8 color hires lace bitmap
+
+Buffer 0,1024					;buffer to undo buffer blits
+
+LoadShapes 0,"blocks.shapes"	;tiles for the ground
+LoadPalette 0,"blocks.iff"		;palette for backrground
+
+Screen 0,0,0,640,512,3,$8004,"ISO EDITOR",1,2,0
+
+Use SetCycle 0
+
+MenuTitle 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD			","L"
+MenuItem 0,0,0,1,"SAVE			","S"
+MenuItem 0,0,0,2,"REDRAW		","R"
+MenuItem 0,0,0,3,"QUIT			","Q"
+
+MenuTitle 0,1,"MODE"
+MenuItem 0,4,1,0,"	DRAW			","D"
+MenuItem 0,2,1,1,"	ADJUST		","A"
+MenuItem 0,2,1,2,"	GROUP		 ","G"
+MenuItem 0,2,1,3,"	JOIN			","J"
+
+MenuTitle 0,2,"BLOCKS"
+For i=0 To #numshapes
+	Handle i,ShapeWidth(i)/2,ShapeHeight(i)
+	ShapeItem 0,0,2,i,i
+Next
+
+AddIDCMP $10	 ;tell window to report mouse movements (smelly!)
+
+Window 0,0,0,640,512,$1800,"",1,2 ;dummy window
+SetMenu 0												 ;to attach menu system to
+
+Gosub clearmap:Gosub drawmap:cb=1
+
+BBlitMode $f3a	;when doing buffer blits invert colors
+
+; MAIN LOOP IS HERE, HANDLES MENUS, MOUSE BUTTONS AND MOVEMENTS
+
+Repeat
+	ev.l=WaitEvent
+	Select ev
+		Case $100
+			If MenuHit=0 AND ItemHit=0 Then Gosub doload:Gosub drawmap
+			If MenuHit=0 AND ItemHit=1 Then Gosub dosave
+			If MenuHit=0 AND ItemHit=2 Then Gosub drawmap
+			If MenuHit=0 AND ItemHit=3 Then SaveScreen 0,"ram:ty": End
+			If MenuHit=1 Then mode=ItemHit
+			If MenuHit=2 Then cb=ItemHit
+		Case $8
+			If mode=0 Then Gosub colorblock
+			If mode=1 Then Gosub moveblock
+			If mode=2 Then Gosub group
+			If mode=3 Then Gosub join
+			Gosub drawmap
+		Case $10
+			Gosub isocursor
+ End Select
+Forever
+
+.group:
+	Gosub getxyzxyz	;get two points when user drags mouse
+	For yy=y To y1:For xx=x To x1 ;then colour them all in the same
+		map(xx,yy)\btype=cb
+	Next xx,yy:Return
+
+.join:
+	Gosub getxyzxyz				;get two points from user
+	z1=map(x,y)\bheight		;work out topleft and botright height
+	z2=map(x1,y1)\bheight
+	dz=z2-z1:num=(y1-y+1)*(x1-x+1)-1:z1*num
+	If num=0 Then Return
+	For yy=y To y1:For xx=x To x1	 ;adjust height using integer maths
+		map(xx,yy)\bheight=z1/num:z1+dz
+	Next xx,yy:Return
+
+.getxyzxyz
+	Gosub findblock:x1=x:y1=y:z1=z	;let user drag select two points
+	Repeat
+		Line !pp{x1,y1,z1}-12,!pp{x,y,z}-12,-1:ev.l=WaitEvent
+		Line !pp{x1,y1,z1}-12,!pp{x,y,z}-12,-1:Gosub findblock
+	Until ev<>$10
+	UnBuffer 0
+	If x1<x Then Exchange x1,x
+	If y1<y Then Exchange y1,y
+	Return
+
+.isocursor
+	Gosub findblock:UnBuffer 0
+	If map(x,y)\btype>-1 Then BBlit 0,cb,!px{x,y,z},!py{x,y,z}
+	Return
+
+.moveblock
+	Gosub findblock
+	USEPATH map(x,y)
+	If \btype>-1					;if block is on bitmap
+		cy=!py{x,y,0}			 ;get current height
+		Repeat							;then let user adjust height
+			ev.l=WaitEvent
+			z=QLimit((cy-SMouseY)/4,0,16)
+			UnBuffer 0:BBlit 0,cb,!px{x,y,z},!py{x,y,z}
+		Until ev<>$10
+		UnBuffer 0:\btype=cb,z
+		For i=1 To z:Blit \btype,!px{x,y,i},!py{x,y,i}:Next
+	EndIf
+	Return
+
+.colorblock
+	UnBuffer 0
+	Repeat
+		ev.l=WaitEvent				;let user paint blocks willy nilly
+		Gosub findblock			 ;which block are they pointing to
+		If map(x,y)\btype>-1	;is it a legal block
+			map(x,y)\btype=cb	 ;yes then set and draw
+			Blit cb,!px{x,y,z},!py{x,y,z}
+		EndIf
+	Until ev<>$10
+	Return
+
+.findblock
+	z=16:sx=SMouseX:sy=SMouseY+16+z*4
+	Repeat																;loop up from below
+		x=Int((sx+sy+sy-0) ASR 5)					 ;solve the isometric equation
+		y=Int((sy+sy-sx+640) ASR 5)				 ;calulating x,y
+		If map(x,y)\bheight=z Then Return	 ;has below got right height?
+		z-1:sy-4														;no then loop up
+	Until z=-1
+	x=0:y=0
+	Return
+
+.drawmap:
+	BlockScroll
+	For x=0 To 63:For y=0 To 63					 ;draw from back to front
+		b=map(x,y)\btype
+		If b>0
+			For z=1 To map(x,y)\bheight:Blit b,!px{x,y,z},!py{x,y,z}:Next
+		EndIf
+	Next y,x
+	Return
+
+.clearmap	;if block's completely on bitmap set 1,1 else make illegal
+	For x=0 To 63:For y=0 To 63
+		If PColl(!px{x,y,0},!py{x,y,0},32,32,32,128,640-64,512-128)
+			map(x,y)\btype=1,1
+		Else
+			map(x,y)\btype=-1
+		EndIf
+	Next y,x
+	Return
+
+.doload
+	a$=FileRequest$("LOAD MAP",pa$,fi$)							;do a file request
+	If WriteMem(0,a$)																;if file there
+		If FileSeek(0)=#size Then ##[$BE14] 0,&map(0,0),#size ;read it into map
+		CloseFile 0																		;array (raw!)
+	EndIf
+	Return
+
+.dosave
+	a$=FileRequest$("SAVE MAP",pa$,fi$)
+	If ReadMem(0,a$)
+		Exists 0,&map(0,0),#size:CloseFile 0		;write array to file raw
+	EndIf
+	Return

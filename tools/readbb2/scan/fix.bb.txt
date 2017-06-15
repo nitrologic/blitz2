@@ -1,0 +1,8 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/out/cmfix/fix.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/cmfix/fix.bb
+f$=Par$(1)
+LoadBank 0,f$
+##[$FEDB] ?fix+32,Bank(0)+40,18*4
+SaveBank 0,f$+"fix"
+End
+
+fix:IncBin ourcm

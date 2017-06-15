@@ -1,0 +1,323 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/Killer.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Killer.bb2
+;================================================================
+; Draw a nice	starfield + cute ship animation....
+; Written by Stephen McNamara of Leading Edge Software
+;
+; Alter #num to change the number of stars in the field,
+; Higher numbers for faster processors!
+; Try:		#num=300 for a standard 1200
+;				 #num=800 for a fastram 1200
+;				 #num=1000 (?)for a 030 50 mhz
+;				 #num=???	for a 500/600
+;================================================================
+
+#num=400
+
+WBStartup
+
+DEFTYPE.w
+DEFTYPE.l h
+
+; Lowres bitmap star field drawer
+; Table points to a structure:
+;														 +0=num of stars
+;														 +2=null field
+;														 +4=list of x,y,speed co-ordinates (words)
+BLITZ
+Statement Drawfield {table.l,bitm.l,deltax.w,ytable.l}
+.SDrawfield:
+	MOVEM.l	 a4-a6,-(a7)
+
+	MOVE.l		d0,a0
+	MOVE.l		d1,a6
+	ADDQ.l		#8,a6
+	MOVEM.l	 (a6)+,a1-a4
+
+	MOVE.l		d3,a5
+
+	MOVE.l		d2,d4
+	MOVE.w		(a0),d7
+	SUBQ.w		#1,d7
+	ADDQ.l		#6,a0
+
+	LEA			 'jump_table(pc),a6
+	MOVEQ.l	 #0,d3
+	MOVEQ.l	 #0,d2
+	MOVEQ.l	 #0,d0
+	MOVEQ.l	 #0,d1
+'loop
+	MOVE.w		(a0)+,d0
+	MOVE.w		(a0),d1
+	MOVE.w		2(a0),d2
+	ASL.w		 #1,d2
+
+	MOVE.w		d1,d3
+	ADD.w		 d0,d3
+	CMPI.w		#320,d3
+	BLT			 'okay
+	SUB.w		 #320,d3
+'okay:
+	MOVE.w		d3,d5
+	ASR.w		 #3,d3
+	ADD.w		 0(a5,d2.w),d3
+
+	NOT.b		 d5
+	BCLR			d5,0(a1,d3.w)
+	BCLR			d5,0(a2,d3.w)
+	BCLR			d5,0(a3,d3.w)
+
+	SUB.w		 d0,d1
+	BPL			 'no_x_shift
+	ADD.w		 #320,d1
+'no_x_shift:
+	MOVE.w		d1,(a0)
+	ADDQ.l		#4,a0
+
+	MOVE.w		d1,d3
+	ASR.w		 #3,d3
+
+	ADD.w		 0(a5,d2.w),d3
+
+	NOT.b		 d1
+
+	SUBQ.w		#1,d0
+	ROL.w		 #1,d0
+	MOVE.w		'jump_table(pc,d0.w),d2
+	JMP			 'jump_table(pc,d2.w)
+
+'jump_table:
+	Dc.w			'test1-'jump_table
+	Dc.w			'test2-'jump_table
+	Dc.w			'test3-'jump_table
+	Dc.w			'test4-'jump_table
+	Dc.w			'test5-'jump_table
+	Dc.w			'test6-'jump_table
+	Dc.w			'test7-'jump_table
+	Dc.w			'test8-'jump_table
+	Dc.w			'test9-'jump_table
+	Dc.w			'test10-'jump_table
+	Dc.w			'test11-'jump_table
+	Dc.w			'test12-'jump_table
+	Dc.w			'test13-'jump_table
+	Dc.w			'test14-'jump_table
+	Dc.w			'test15-'jump_table
+	Dc.w			'test15-'jump_table
+	Dc.w			'test15-'jump_table
+
+'test1:
+	BSET			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test2:
+	BCLR			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test3:
+	BSET			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test4:
+	BCLR			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test5:
+	BSET			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test6:
+	BCLR			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test7:
+	BSET			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test8:
+	BCLR			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test9:
+	BSET			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test10:
+	BCLR			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test11:
+	BSET			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BCLR			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test12:
+	BCLR			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test13:
+	BSET			d1,0(a1,d3.w)
+	BCLR			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test14:
+	BCLR			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+
+'test15:
+	BSET			d1,0(a1,d3.w)
+	BSET			d1,0(a2,d3.w)
+	BSET			d1,0(a3,d3.w)
+	DBRA			d7,'loop
+	MOVEM.l	 (a7)+,a4-a6
+	AsmExit
+End Statement
+
+QAMIGA
+.Loadstuff:
+path$=""
+LoadShapes 0,path$+"Killer.shapes"
+LoadPalette 0,path$+"Killer.pal"
+
+.Initialise:
+NEWTYPE .dotplot
+	spd.w
+	x.w
+	y.w
+End NEWTYPE
+
+Dim plots.dotplot(#num),shipframes.w(28)
+
+Restore myframes
+For h=0 To 27
+	Read shipframes(h)
+Next h
+
+plots(0)\spd=#num
+plots(0)\x=0
+plots(0)\y=0
+
+For h=1 To #num
+	plots(h)\x=Int(Rnd(319))
+	plots(h)\y=Int(Rnd(255))
+	plots(h)\spd=Int(Rnd(7))+1
+Next h
+
+BitMap 0,320,256,5
+BitMap 1,320,256,5
+BLITZ
+InitCopList 0,$10005
+DisplayBitMap 0,0
+
+DisplayPalette 0,0
+CreateDisplay 0
+
+BitPlanesBitMap 0,2,%111
+BitPlanesBitMap 1,3,%111
+
+Queue 0,5
+Queue 1,5
+
+x=0
+ad.l=?ytable
+ad2.l=ad
+vll.w=Peek.w(Addr BitMap(0))
+total.w=0
+For y=0 To 255
+	Poke.w ad2,total
+	total+vll
+	ad2+2
+Next y
+
+fram.w=0
+
+Repeat
+	VWait
+	DisplayBitMap 0,dbuffer
+	dbuffer=1-dbuffer
+	UnQueue dbuffer
+	Drawfield{&plots(0),Addr BitMap(dbuffer),-1,ad}
+	Use BitMap dbuffer
+	QBlit dbuffer,shipframes(fram ASR 1),160,128
+	fram+1
+	If fram>56 Then fram=0
+	x+1 : If x>240 Then x=0
+Until Joyb(0)
+End
+
+myframes:
+	Data.w 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14
+	Data.w 13,12,11,10,9,8,7,6,5,4,3,2,1
+
+ytable:
+	Event
+	Dc.w 0,40,80,120,160,200,240,280,320,360,400,440,480,520,560,600
+	Dc.w 640,680,720,760,800,840,880,920,960,1000,1040,1080,1120,1160,1200,1240
+	Dc.w 1280,1320,1360,1400,1440,1480,1520,1560,1600,1640,1680,1720,1760,1800,1840,1880
+	Dc.w 1920,1960,2000,2040,2080,2120,2160,2200,2240,2280,2320,2360,2400,2440,2480,2520
+	Dc.w 2560,2600,2640,2680,2720,2760,2800,2840,2880,2920,2960,3000,3040,3080,3120,3160
+	Dc.w 3200,3240,3280,3320,3360,3400,3440,3480,3520,3560,3600,3640,3680,3720,3760,3800
+	Dc.w 3840,3880,3920,3960,4000,4040,4080,4120,4160,4200,4240,4280,4320,4360,4400,4440
+	Dc.w 4480,4520,4560,4600,4640,4680,4720,4760,4800,4840,4880,4920,4960,5000,5040,5080
+	Dc.w 5120,5160,5200,5240,5280,5320,5360,5400,5440,5480,5520,5560,5600,5640,5680,5720
+	Dc.w 5760,5800,5840,5880,5920,5960,6000,6040,6080,6120,6160,6200,6240,6280,6320,6360
+	Dc.w 6400,6440,6480,6520,6560,6600,6640,6680,6720,6760,6800,6840,6880,6920,6960,7000
+	Dc.w 7040,7080,7120,7160,7200,7240,7280,7320,7360,7400,7440,7480,7520,7560,7600,7640
+	Dc.w 7680,7720,7760,7800,7840,7880,7920,7960,8000,8040,8080,8120,8160,8200,8240,8280
+	Dc.w 8320,8360,8400,8440,8480,8520,8560,8600,8640,8680,8720,8760,8800,8840,8880,8920
+	Dc.w 8960,9000,9040,9080,9120,9160,9200,9240,9280,9320,9360,9400,9440,9480,9520,9560
+	Dc.w 9600,9640,9680,9720,9760,9800,9840,9880,9920,9960,10000,10040,10080,10120,10160,10200
+
+	NPrint ";-)"

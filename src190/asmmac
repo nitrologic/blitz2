@@ -1,0 +1,546 @@
+;tnum	set	0
+	opt	m+
+	;
+a	macro
+	dc.l	n\@
+	dc	tnum
+tnum	set	tnum+1
+	dc.b	'\1',0,0
+	even
+	dc	\2
+	;
+	dc	\3,\4
+	dc.b	(\5<<4)+\6,(\7<<4)+\8
+	dc	(\9<<12)+\a
+	dc.l	\b
+	dc	\c
+n\@	;
+	endm
+
+c	macro
+	dc.l	toktnum
+	dc	tnum
+tnum	set	tnum+1
+	dc.b	'EndAsm',0,0
+	even
+	endm
+
+ndn	equ	$fffe
+nan	equ	$fffd
+nian	equ	$fffb
+nanp	equ	$fff7
+npan	equ	$ffef
+ndan	equ	$ffdf
+ndanxi	equ	$ffbf
+nabsw	equ	$ff7f
+nabsl	equ	$feff
+ndpc	equ	$fdff
+ndpcxi	equ	$fbff
+nimm	equ	$f7ff
+nccr	equ	$efff
+nsr	equ	$dfff
+nusp	equ	$bfff
+nmem	equ	$7fff
+nall	equ	0
+
+dn	equ	1
+an	equ	2
+ian	equ	4
+anp	equ	8
+pan	equ	16
+dan	equ	32
+danxi	equ	64
+absw	equ	128
+absl	equ	256
+dpc	equ	512
+dpcxi	equ	1024
+imm	equ	2048
+ccr	equ	4096
+sr	equ	8192
+usp	equ	16384
+mem	equ	32768
+all	equ	$fff
+
+byte	equ	$ff0
+word	equ	$f1f
+long	equ	$2ff
+sall	equ	$210
+nosz	equ	$fff
+	;
+byteword	equ	$f10
+wordlong	equ	$10f
+	
+	;the last parameter is a 'do it yourself' subroutine
+	;that allows you to do your own error chking for
+	;silly opmodes!
+	;
+	;size/ea's have already been created
+	;
+	;d1=opcode,d2=srcreg,d3=srcea,d4=destreg,d5=destea
+	;
+	;return ne if no can do!
+
+opabcd	a	ABCD,$c100,dn^pan,dn^pan,9,0,0,0,15,byte,abcdchk,0,0
+	
+	;add <ea>,d0
+opadd	a	ADD,$d000,all,$1fd,0,3,9,15,6,sall,addchk,$8003
+
+opaddi	a	ADDI,$600,imm,$1fd,15,15,0,3,6,sall,0,0
+
+opadda	a	ADDA,$d0c0,all,2,0,3,9,15,8,wordlong,0,0
+
+opaddq	a	ADDQ,$5000,imm,$1ff,15,15,0,3,6,sall,0,1
+
+opaddx	a	ADDX,$d100,dn^pan,dn^pan,0,15,9,15,6,sall,abcdchk,0
+
+opand	a	AND,$c000,all&nan,$1fd,0,3,9,15,6,sall,addchk,0
+
+opandi	a	ANDI,$200,imm,$1fd^ccr^sr^imm,15,15,0,3,6,sall,andichk,0
+
+opasl	a	ASL,$e100,imm^$1fd,1,15,15,15,15,15,sall,aslchk,1
+
+opasr	a	ASR,$e000,imm^$1fd,1,15,15,15,15,15,sall,aslchk,1
+
+opbcc	a	BCC,$6400,dpc,0,15,15,15,15,15,0,0,2
+
+opbcs	a	BCS,$6500,dpc,0,15,15,15,15,15,0,0,2
+
+opbeq	a	BEQ,$6700,dpc,0,15,15,15,15,15,0,0,2
+
+opbge	a	BGE,$6C00,dpc,0,15,15,15,15,15,0,0,2
+
+opbgt	a	BGT,$6E00,dpc,0,15,15,15,15,15,0,0,2
+
+opbhi	a	BHI,$6200,dpc,0,15,15,15,15,15,0,0,2
+
+opble	a	BLE,$6F00,dpc,0,15,15,15,15,15,0,0,2
+
+opbls	a	BLS,$6300,dpc,0,15,15,15,15,15,0,0,2
+
+opblt	a	BLT,$6D00,dpc,0,15,15,15,15,15,0,0,2
+
+opbmi	a	BMI,$6B00,dpc,0,15,15,15,15,15,0,0,2
+
+opbne	a	BNE,$6600,dpc,0,15,15,15,15,15,0,0,2
+
+opbpl	a	BPL,$6A00,dpc,0,15,15,15,15,15,0,0,2
+
+opbvc	a	BVC,$6800,dpc,0,15,15,15,15,15,0,0,2
+
+opbvs	a	BVS,$6900,dpc,0,15,15,15,15,15,0,0,2
+
+opbchg	a	BCHG,$140,imm^dn,$1fd,15,15,0,3,15,sall,bitchk,0
+
+opbclr	a	BCLR,$180,imm^dn,$1fd,15,15,0,3,15,sall,bitchk,0
+
+opbset	a	BSET,$1c0,imm^dn,$1fd,15,15,0,3,15,sall,bitchk,0
+
+opbtst	a	BTST,$100,imm^dn,$1fd,15,15,0,3,15,sall,bitchk,0
+
+opbra	a	BRA,$6000,dpc,0,15,15,15,15,15,nosz,0,2
+
+opbsr	a	BSR,$6100,dpc,0,15,15,15,15,15,nosz,0,2
+
+opchk	a	CHK,$4180,$ffd,dn,0,3,9,15,15,word,0,0
+
+opclr	a	CLR,$4200,$1fd,0,0,3,15,15,6,sall,0,0
+
+opcmp	a	CMP,$b000,all,dn,0,3,9,15,6,sall,0,$8003
+
+opcmpi	a	CMPI,$c00,imm,$1fd,15,15,0,3,6,sall,0,0
+
+opcmpa	a	CMPA,$b0c0,all,an,0,3,9,15,8,wordlong,0,0
+
+opcmpm	a	CMPM,$b108,anp,anp,0,15,9,15,6,sall,0,0
+
+opdbcc	a	DBCC,$54C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbcs	a	DBCS,$55C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbeq	a	DBEQ,$57C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbge	a	DBGE,$5CC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbgt	a	DBGT,$5EC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbhi	a	DBHI,$52C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdble	a	DBLE,$5FC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbls	a	DBLS,$53C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdblt	a	DBLT,$5DC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbmi	a	DBMI,$5BC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbne	a	DBNE,$56C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbpl	a	DBPL,$5AC8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbvc	a	DBVC,$58C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbvs	a	DBVS,$59C8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbf	a	DBF,$51c8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdra	a	DBRA,$51c8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdbt	a	DBT,$50c8,dn,dpc,15,15,15,15,15,nosz,0,5
+
+opdivs	a	DIVS,$81c0,$ffd,dn,0,3,9,15,15,word,0,0
+
+opdivu	a	DIVU,$80c0,$ffd,dn,0,3,9,15,15,word,0,0
+
+opeor	a	EOR,$b100,dn,$1fd,9,15,0,3,6,sall,0,$8002
+
+opeori	a	EORI,$a00,imm,$1fd^ccr^sr^imm,15,15,0,3,6,sall,andichk,0
+
+opexg	a	EXG,$c100,dn^an,dn^an,9,15,0,15,15,long,exgchk,0
+
+opext	a	EXT,$4800,dn,0,0,15,15,15,6,$32f,0,0
+
+opillegal	a	ILLEGAL,$4afc,0,0,15,15,15,15,15,nosz,0,0
+
+opjmp	a	JMP,$4ec0,$7e4,0,0,3,15,15,15,nosz,0,0
+
+opjsr	a	JSR,$4e80,$7e4,0,0,3,15,15,15,nosz,0,0
+
+oplea	a	LEA,$41c0,$7e4,an,0,3,9,15,15,long,0,0
+
+oplink	a	LINK,$4e50,an,imm,0,15,15,15,15,nosz,0,0
+
+oplsl	a	LSL,$e108,imm^$1fd,1,15,15,15,15,15,sall,lslchk,1
+
+oplsr	a	LSR,$e008,imm^$1fd,1,15,15,15,15,15,sall,lslchk,1
+
+opmove	a	MOVE,0,all^ccr^sr^usp,$1fd^ccr^sr^usp,0,3,9,6,15,sall,movechk,$8001
+
+opmovep	a	MOVEP,$108,dn^dan,dn^dan,9,15,0,15,6,$10f,movepchk,0
+
+opmovea	a	MOVEA,$40,all,an,0,3,9,15,12,$23f,0,0
+
+opmoveq	a	MOVEQ,$7000,imm,dn,15,15,9,15,15,long,0,3
+
+opmovem	a	MOVEM,$4880,mem^$7fc,mem^$7fc,0,3,0,3,6,$10f,movemchk,0
+
+opmuls	a	MULS,$c1c0,$ffd,dn,0,3,9,15,15,word,0,0
+
+opmulu	a	MULU,$c0c0,$ffd,dn,0,3,9,15,15,word,0,0
+
+opnbcd	a	NBCD,$4800,$1fd,0,0,3,15,15,15,byte,0,0
+
+opneg	a	NEG,$4400,$1fd,0,0,3,15,15,6,sall,0,0
+
+opnegx	a	NEGX,$4000,$1fd,0,0,3,15,15,6,sall,0,0
+
+opnop	a	NOP,$4e71,0,0,15,15,15,15,15,nosz,0,0
+
+opnot	a	NOT,$4600,$1fd,0,0,3,15,15,6,sall,0,0
+
+opor	a	OR,$8000,all&nan,$1fd,0,3,9,15,6,sall,addchk,$8002
+
+opori	a	ORI,0,imm,$1fd^ccr^sr^imm,15,15,0,3,6,sall,andichk,0
+
+oppea	a	PEA,$4840,$7e4,0,0,3,15,15,15,long,0,0
+
+opreset	a	RESET,$4e70,0,0,15,15,15,15,15,nosz,0,0
+
+oprol	a	ROL,$e118,imm^$1fd,1,15,15,15,15,15,sall,rolchk,1
+
+opror	a	ROR,$e018,imm^$1fd,1,15,15,15,15,15,sall,rolchk,1
+
+oproxl	a	ROXL,$e110,imm^$1fd,1,15,15,15,15,15,sall,roxlchk,1
+
+oproxr	a	ROXR,$e010,imm^$1fd,1,15,15,15,15,15,sall,roxlchk,1
+
+oprte	a	RTE,$4e73,0,0,15,15,15,15,15,nosz,0,0
+
+oprtr	a	RTR,$4e77,0,0,15,15,15,15,15,nosz,0,0
+
+oprts	a	RTS,$4e75,0,0,15,15,15,15,15,nosz,0,0
+
+opsbcd	a	SBCD,$8100,dn^pan,dn^pan,9,0,0,0,15,byte,abcdchk,0
+
+opscc	a	SCC,$54c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opscs	a	SCS,$55c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opseq	a	SEQ,$57c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsge	a	SGE,$5Cc0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsgt	a	SGT,$5Ec0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opshi	a	SHI,$52c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsle	a	SLE,$5Fc0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsls	a	SLS,$53c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opslt	a	SLT,$5Dc0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsmi	a	SMI,$5Bc0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsne	a	SNE,$56c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opspl	a	SPL,$5Ac0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsvc	a	SVC,$58c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsvs	a	SVS,$59c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opst	a	ST,$50c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opsf	a	SF,$51c0,$1fd,0,0,3,15,15,15,byte,0,0
+
+opstop	a	STOP,$4e72,imm,0,15,15,15,15,15,nosz,0,0
+
+opsub	a	SUB,$9000,all,$1fd,0,3,9,15,6,sall,addchk,$8003
+
+opsubi	a	SUBI,$400,imm,$1fd,15,15,0,3,6,sall,0,0
+
+opsuba	a	SUBA,$90c0,all,2,0,3,9,15,8,wordlong,0,0
+
+opsubq	a	SUBQ,$5100,imm,$1ff,15,15,0,3,6,sall,0,1
+
+opsubx	a	SUBX,$9100,dn^pan,dn^pan,0,15,9,15,6,sall,abcdchk,0
+
+opswap	a	SWAP,$4840,dn,0,0,15,15,15,15,word,0,0
+
+optas	a	TAS,$4ac0,$1fd,0,0,3,15,15,15,byte,0,0
+
+optrap	a	TRAP,$4e40,imm,0,15,15,15,15,15,nosz,0,4
+
+optrapv	a	TRAPV,$4e76,0,0,15,15,15,15,15,nosz,0,0
+
+optst	a	TST,$4a00,$1fd,0,0,3,15,15,6,sall,0,0
+
+opunlk	a	UNLK,$4e58,an,0,0,15,15,15,15,nosz,0,0
+
+;-----------The End------------;
+
+	c
+
+;-----------The code-----------;
+
+	;d1=opcode
+	;d2=src  reg,d3=src  mode
+	;d4=dest reg,d5=dest mode
+	;d6.l=src  longint
+	;d7.l=dest longint
+	;d0.l=extraword1<<16+extraword2
+	;all changes get used in assembly!
+
+noerror	moveq	#0,d0
+	rts
+
+eaerror	moveq	#-1,d0
+	rts
+
+szerror	moveq	#-2,d0
+	rts
+
+swapem	moveq	#1,d0
+	rts
+
+movemchk	cmp	d3,d5
+	beq	eaerror
+	cmp	#15,d3
+	beq	.regsrc
+	cmp	#15,d5
+	bne	eaerror
+.regdest	;
+	moveq	#0,d0
+	bset	d3,d0
+	and	#$813,d0
+	bne	eaerror
+	bset	#10,d1
+	bra	swapem
+	;
+.regsrc	;
+	moveq	#0,d0
+	bset	d5,d0    
+	and	#$e0b,d0
+	bne	eaerror
+	cmp	#4,d5
+	bne	noerror
+	moveq	#15,d0
+.loop	lsl	#1,d2
+	roxr	#1,d6
+	dbf	d0,.loop
+	move	d6,d2
+	bra	noerror
+
+movepchk	cmp	d3,d5
+	beq	eaerror
+	tst	d3
+	bne	noerror
+	bset	#7,d1
+	bra	noerror
+
+movechk	cmp	#12,d3
+	bcs	.notfrom
+	;
+	cmp	#12,d5
+	bcc	eaerror
+	cmp	#12,d3
+	beq	.fromccr
+	cmp	#13,d3
+	beq	.fromsr
+	cmp	#14,d3
+	beq	.fromusp
+	;
+	bra	eaerror
+	;
+.notfrom	cmp	#12,d5
+	bcs	.dosize
+	;
+	cmp	#12,d3
+	bcc	eaerror
+	cmp	#12,d5
+	beq	.toccr
+	cmp	#13,d5
+	beq	.tosr
+	cmp	#14,d5
+	beq	.tousp
+	;
+	bra	eaerror
+	;
+.dosize	move	#$1000,d1
+	tst	d6
+	beq	noerror
+	move	#$3000,d1
+	cmp	#4,d6
+	beq	noerror
+	move	#$2000,d1
+	bra	noerror
+
+.fromusp	cmp	#1,d5	;to address reg?
+	bne	eaerror
+	move	#$4e68,d1
+	or	d4,d1
+.usp	moveq	#0,d2
+	moveq	#0,d3
+	moveq	#0,d4
+	moveq	#0,d5
+	bra	noerror
+.tousp	cmp	#1,d3
+	bne	eaerror
+	move	#$4e60,d1
+	or	d2,d1
+	bra	.usp
+	;
+.fromccr	move	#$42c0,d1
+.from	cmp	#4,d6
+	bne	szerror
+	moveq	#0,d3
+	moveq	#0,d2
+	bra	swapem
+.fromsr	move	#$40c0,d1
+	bra	.from
+	;
+.toccr	move	#$44c0,d1
+.to	cmp	#4,d6
+	bne	szerror
+	moveq	#0,d5
+	moveq	#0,d4
+	bra	noerror
+.tosr	move	#$46c0,d1
+	bra	.to
+
+exgchk	cmp	d3,d5
+	beq	.skip
+	or	#$88,d1
+	tst	d3
+	beq	noerror
+	bra	swapem
+.skip	tst	d3
+	beq	.data
+	or	#$48,d1
+	bra	noerror
+.data	or	#$40,d1
+	bra	noerror
+
+bitchk	tst	d3
+	bne	.notdn
+	lsl	#8,d2
+	lsl	#1,d2
+	or	d2,d1
+	bra	noerror
+.notdn	cmp	#8,d6
+	bcc	szerror
+	eor	#$900,d1
+	bra	noerror
+
+roxlchk	move	#$e4c0,d0
+	bra	aslchk2
+
+rolchk	move	#$e6c0,d0
+	bra	aslchk2
+
+lslchk	move	#$e2c0,d0
+	bra	aslchk2
+
+aslchk	move	#$e0c0,d0
+aslchk2	tst	d5
+	bmi	.word
+	bne	eaerror
+	lsl	#4,d6
+	or	d6,d1
+	or	d4,d1
+	cmp	#11,d3
+	beq	noerror
+	tst	d3
+	bne	eaerror
+	lsl	#8,d2
+	lsl	#1,d2
+	or	d2,d1
+	bset	#5,d1
+	bra	noerror
+.word	moveq	#0,d5	;dummy d0
+	tst	d3
+	beq	eaerror
+	cmp	#4,d6
+	bne	szerror
+	and	#$100,d1
+	or	d0,d1
+	movem	d2-d3,-(a7)
+	cmp	#7,d3
+	bcs	.skip
+	move	d3,d2
+	subq	#7,d2
+	moveq	#7,d3
+.skip	or	d2,d1
+	lsl	#3,d3
+	or	d3,d1
+	movem	(a7)+,d2-d3
+	bra	noerror
+
+abcdchk	cmp	d3,d5
+	bne	eaerror
+	tst	d3
+	beq	.ok
+	bset	#3,d1
+	cmp	d3,d3
+.ok	rts
+
+addchk	tst	d5	;if dest is dn, ok
+	beq	.ok
+	tst	d3
+	bne	eaerror	;src not dn - fuct
+	bset	#8,d1	;turn into dn,<ea>
+	bra	swapem
+.ok	rts
+
+andichk	cmp	#12,d5	;dest ccr?
+	bne	.notccr
+	tst	d6
+	bne	szerror
+	bra	noerror
+.notccr	cmp	#13,d5	;or ccr?
+	bne	noerror
+	cmp	#4,d6
+	bne	szerror
+	bra	noerror
+
+

@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/StringText$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/StringText$.bb
+
+; 
+; activated string gadget example 
+; 
+StringGadget 0,128,16,0,1,40,160    ;make a string gadget 
+TextGadget 0,8,180,0,2," EXIT "     ;and an exit gadget 
+Screen 0,3               ;open screen and window 
+
+
+Window 0,0,0,320,200,$100f,"StringText$ demo...",1,2,0
+
+WLocate 4,8
+Print "Type your name:" 
+ActivateString 0,1           ;turn on string gadget
+
+Repeat                 ;wait for 'EXIT'
+ a.l=WaitEvent 
+ If a=64 AND GadgetHit=1     ;string entry complete? 
+   WLocate 8,96 
+   Print Centre$("Hello there "+StringText$(0,1),38)
+   ClearString 0,1
+   Redraw 0,1 
+   ActivateString 0,1 
+ EndIf 
+Until a=64 AND GadgetHit=2
+

@@ -1,0 +1,29 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/WJam.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/WJam.bb
+
+; 
+; wjam examples 
+; 
+Screen 0,3                   ;open Intuition screen and window.. 
+Window 0,0,0,320,200,0,"DrawModes",0,1
+Print "OverLapping characters" ;print some stuff in different modes
+WJam 0
+
+Print "Hello" 
+WLocate 0,0 
+Print "Bye" 
+WJam 1
+Print "Overwriting characters"
+Print "Hello" 
+WLocate 0,16
+Print "Bye" 
+Print "Bye" 
+Print "Complemented characters disappear" 
+WJam 2
+Print "Hello" 
+WLocate 0,32
+Print "Hello" 
+WJam 4
+Print "This is in inverse video"
+MouseWait 
+End 
+

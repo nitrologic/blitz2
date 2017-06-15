@@ -1,0 +1,229 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/oldconvert.bb
+Goto blockout
+;Goto hereboy
+
+
+AMIGA
+
+BitMap 0,32,32,8
+DecodePalette 0,256
+##[$CE18] 0,0,63,	 0,64,0,0,240,0						 ;greens = 0..12
+##[$CE18] 0,64,127, 64,32,0,192,128,64				 ;browns = 13..25
+##[$CE18] 0,128,130, 64,64,64,192,192,192		 ;greys = 26..28
+##[$CE18] 0,131,133, 64,0,0,192,0,0					 ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+BitMap 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+##[$CE18] 0,0,127,0,64,0,0,240,0
+##[$CE18] 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End
+
+;
+; 3530 / 3532 / 3531 / 4608
+;
+
+blockout:
+
+Statement getblock{blok.l,bm.l,x.w,y.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l 8(a1),a1
+	LSR#3,d2:ADD d2,a1:EXT.l d3:ASL.l#7,d3:ADD.l d3,a1:MOVEQ#7,d2
+nxline:
+	MOVE.l a1,a2:ADD #128,a1:MOVE.l#128*516,d0
+	MOVE.b (a2),d4:ADD.l d0,a2:MOVE.b (a2),d5:ADD.l d0,a2
+	MOVE.b (a2),d6:ADD.l d0,a2:MOVE.b (a2),d7:MOVEQ#7,d3
+nxnib:
+	ASL.b #1,d4:ROXL.l#1,d0
+	ASL.b #1,d5:ROXL.l#1,d0
+	ASL.b #1,d6:ROXL.l#1,d0
+	ASL.b #1,d7:ROXL.l#1,d0
+	DBRA d3,nxnib:MOVE.l d0,(a0)+:DBRA d2,nxline:AsmExit
+End Function
+
+Statement flipblock{blok1.l,blok2.l}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVEQ#7,d0:MOVEQ#15,d7
+	nxf:MOVE.l (a0)+,d1:MOVEQ#0,d2
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	LSR.l#4,d2:MOVE d1,d3:AND.l d7,d3:ROR.l#4,d3:OR.l d3,d2:LSR.l#4,d1
+	MOVE.l d2,(a1)+:DBRA d0,nxf:AsmExit
+End Statement
+
+Function.w testblock{b0.l,b1.l,n.w}
+	MOVE.l d0,a0:MOVE.l d1,a1:MOVE d2,a3:EXT.l d2:ASL.l#5,d2:LEA 0(a1,d2.l),a2
+	MOVEM.l (a0),d0-d7:BRA nxchk
+dochk:
+	CMP.l 0(a1),d0:BNE flop
+	CMP.l 4(a1),d1:BNE flop
+	CMP.l 8(a1),d2:BNE flop
+	CMP.l 12(a1),d3:BNE flop
+	CMP.l 16(a1),d4:BNE flop
+	CMP.l 20(a1),d5:BNE flop
+	CMP.l 24(a1),d6:BNE flop
+	CMP.l 28(a1),d7:BNE flop:MOVE a3,d0:AsmExit
+flopo
+	CMP.l 0(a1),d7:BNE flop1
+	CMP.l 4(a1),d6:BNE flop1
+	CMP.l 8(a1),d5:BNE flop1
+	CMP.l 12(a1),d4:BNE flop1
+	CMP.l 16(a1),d3:BNE flop1
+	CMP.l 20(a1),d2:BNE flop1
+	CMP.l 24(a1),d1:BNE flop1
+	CMP.l 28(a1),d0:BNE flop1:MOVE a3,d0:AsmExit
+flop1:
+	CMP.l 32(a1),d0:BNE flop2
+	CMP.l 36(a1),d1:BNE flop2
+	CMP.l 40(a1),d2:BNE flop2
+	CMP.l 44(a1),d3:BNE flop2
+	CMP.l 48(a1),d4:BNE flop2
+	CMP.l 52(a1),d5:BNE flop2
+	CMP.l 56(a1),d6:BNE flop2
+	CMP.l 60(a1),d7:BNE flop2:MOVE a3,d0:AsmExit
+flop2:
+	CMP.l 32(a1),d7:BNE flop3
+	CMP.l 36(a1),d6:BNE flop3
+	CMP.l 40(a1),d5:BNE flop3
+	CMP.l 44(a1),d4:BNE flop3
+	CMP.l 48(a1),d3:BNE flop3
+	CMP.l 52(a1),d2:BNE flop3
+	CMP.l 56(a1),d1:BNE flop3
+	CMP.l 60(a1),d0:BNE flop3:MOVE a3,d0:AsmExit
+flop;3:
+flop3
+	ADD#32,a1
+nxchk:
+	CMP.l a1,a2:BNE dochk:MOVEM.l d0-d7,(a1):MOVE a3,d0:ADDQ#1,d0:AsmExit
+End Function
+
+BitMap 0,1024,516,4
+LoadBitMap 0,"f1.ami",0
+
+InitBank 0,64,0
+InitBank 1,8192*32,0
+n.w=0:nn.w=0
+bm.l=Addr BitMap(0)
+
+For y=0 To 383 Step 8				;515 Step 8
+	For x=0 To 767 Step 8			;1023 Step 8
+		getblock{Bank(0),bm,x,y}
+		flipblock{Bank(0),Bank(0)+32}
+		n=testblock{Bank(0),Bank(1),n}
+		nn+1
+	Next
+	Print "."
+Next
+NPrint ""
+NPrint n,"/",nn
+MouseWait
+End
+
+hereboy
+
+LoadPalette 0,"sega.palette"
+
+BitMap 0,768,384,8
+BitMap 1,768,384,4
+
+LoadBitMap 0,"f1.256"
+
+InitCopList 0,$13014
+DisplayPalette 0,0
+DisplayBitMap 0,1
+BLITZ
+CreateDisplay 0
+
+Mouse On
+MouseArea 0,0,768-320,384-256
+SetInt 5
+	DisplayBitMap 0,1,MouseX,MouseY
+End SetInt
+
+
+For y=0 To 383
+	oddy=y&1
+	For x=0 To 767
+		oddx=x&1
+		Use BitMap 0:p=Cls(x,y)
+;		p=(y/16)
+		c=0
+		If p>63 AND p<128 Then c=1:p-64
+		If p>127 AND p<131 Then c=2:p-128
+		If p>130 AND p<133 Then c=3:p-131
+
+		If c=2 OR c=3
+			p=(c-2)*8+2-p
+		Else
+			;If c=0 Then	Else p=Int(p ASR 2) ASR 2
+			If c=1 Then p=p/5*4
+			p=p ASR 4
+
+			ord=(x AND 1)*2 + (y AND 1)
+			Select ord
+				Case 0:dith=0
+				Case 3:dith=0.25
+				Case 1:dith=0.5
+				Case 2:dith=0.75
+			End Select
+
+			dith*4
+			ord=(x AND 2) + (y AND 2)/2
+			Select ord
+				Case 0:dith+0
+				Case 3:dith+0.25
+				Case 1:dith+0.5
+				Case 2:dith+0.75
+			End Select
+			dith/4
+
+;			dith1=((x+y)AND1)
+;			dith2=(((x AND 2)+(y AND 2))AND2)/2
+			p=11-c*8+p+dith;+(dith1 OR dith2)-(dith1 AND dith2)
+
+
+;			Select (p&1)
+;				Case 0:dith=0
+;				Case 1:dith=(oddx AND oddy)
+;				Case 1:dith=(oddx OR oddy)-(oddx AND oddy)
+;				Case 3:dith=(oddx OR oddy)
+;			End Select
+;			dith=(oddx OR oddy)-(oddx AND oddy)
+;			p=11-c*8+Int(p/2)+dith
+		EndIf
+
+		Use BitMap 1:Point x,y,p
+	Next
+Next
+
+MouseWait
+
+
+AMIGA
+
+SaveBitmap 1,"f1.ami",0
+
+End
+
+AMIGA
+
+BitMap 0,32,32,5
+DecodePalette 0,32
+##[$CE18] 0,0,12,	 0,64,0,0,240,0					 ;greens = 0..12
+##[$CE18] 0,13,25, 64,32,0,192,128,64			 ;browns = 13..25
+##[$CE18] 0,26,28, 64,64,64,192,192,192		 ;greys = 26..28
+##[$CE18] 0,29,31, 64,0,0,192,0,0					 ;reds = 29..31
+SaveBitmap 0,"palette.999",0
+End
+
+BitMap 0,1024,512,8
+LoadBitMap 0,"f1.aff",0
+##[$CE18] 0,0,127,0,64,0,0,240,0
+##[$CE18] 0,128,255,64,32,0,192,128,64
+SaveBitmap 0,"f1.gbr",0
+End

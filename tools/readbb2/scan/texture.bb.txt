@@ -1,0 +1,35 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/texture.bb
+Screen 0,4
+ScreensBitMap 0,0
+LoadPalette 0,"gfx/cars.iff"
+FadePalette 0
+
+BlockScroll
+
+For y=0 To 140
+	For x=0 To 63
+		t-1
+		If t<0
+			t=Rnd(1+y/28)
+			;c=QLimit(y/80+1+Rnd(2),1,7)
+
+			fac=y/140
+			mmin=fac*6/7
+			c=(Rnd-0.5)*(Rnd-0.5)/7+mmin
+			c=QLimit(c+1,1,7)
+		EndIf
+		Point x,y,c
+	Next
+Next
+
+For x=1 To 4
+	Scroll 0,0,64,200,x*64,0
+Next
+
+
+
+SaveBitmap 0,"ram:road.iff",0
+
+MouseWait
+End
+

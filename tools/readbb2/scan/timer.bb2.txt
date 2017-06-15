@@ -1,0 +1,36 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/devices/timer.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/devices/timer.bb2
+;
+; $VER: timer.bb2 40.0 (03.03.94)
+;
+
+XInclude"exec/types.bb2"
+XInclude"exec/io.bb2"
+
+;/* unit defintions */
+#UNIT_MICROHZ=0
+#UNIT_VBLANK=1
+#UNIT_ECLOCK=2
+#UNIT_WAITUNTIL=3
+#UNIT_WAITECLOCK=4
+
+Macro TIMERNAME:"timer.device": End Macro
+
+NEWTYPE.timeval
+tv_secs.l
+tv_micro.l
+End NEWTYPE
+
+NEWTYPE.EClockVal
+ev_hi.l
+ev_lo.l
+End NEWTYPE
+
+NEWTYPE.timerequest
+tr_node.IORequest
+tr_time.timeval
+End NEWTYPE
+
+;/* IO_COMMAND to use for adding a timer */
+#TR_ADDREQUEST=#CMD_NONSTD
+#TR_GETSYSTIME=(#CMD_NONSTD+1)
+#TR_SETSYSTIME=(#CMD_NONSTD+2)

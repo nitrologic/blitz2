@@ -1,0 +1,152 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/testsign.bb
+
+Statement dosign{s.l,d.l,l.l,flip.w}
+	MOVE.l a4,-(a7):MOVE.l d0,a0:MOVE.l d1,a1:MOVE.l d2,a2:MOVE #4,a4
+	MOVE d3,d4:LEA 80(a1),a1:MOVEQ#0,d0:MOVEQ#0,d1:MOVEQ#0,d2:MOVEQ#0,d3
+	MOVEM.l d0-d3,-(a1):MOVEM.l d0-d3,-(a1):MOVEM.l d0-d3,-(a1)
+	MOVEM.l d0-d3,-(a1):MOVEM.l d0-d3,-(a1)
+	MOVEQ#0,d0:MOVE.b (a0),d0:ADDQ#8,a0:ASL#4,d0:TST d4:BEQ flipped
+	LEA 0(a2,d0),a3:MOVEM (a3)+,d0-d7:OR d0,(a1)+:OR d1,(a1)+
+dirty:
+	MOVEQ#0,d0:MOVE.b (a0),d0:ADDQ#8,a0:ASL#4,d0:LEA 0(a2,d0),a3
+	OR (a3)+,d2:OR (a3)+,d3:OR (a3)+,d4:OR (a3)+,d5:OR (a3)+,d6:OR (a3)+,d7
+	MOVEM (a3)+,d0-d1:OR d2,(a1)+:OR d3,(a1)+
+	MOVEQ#0,d2:MOVE.b (a0),d2:ADDQ#8,a0:ASL#4,d2:LEA 0(a2,d2),a3
+	OR (a3)+,d4:OR (a3)+,d5:OR (a3)+,d6:OR (a3)+,d7:OR (a3)+,d0:OR (a3)+,d1
+	MOVEM (a3)+,d2-d3:OR d4,(a1)+:OR d5,(a1)+
+	MOVEQ#0,d4:MOVE.b (a0),d4:ADDQ#8,a0:ASL#4,d4:LEA 0(a2,d4),a3
+	OR (a3)+,d6:OR (a3)+,d7:OR (a3)+,d0:OR (a3)+,d1:OR (a3)+,d2:OR (a3)+,d3
+	MOVEM (a3)+,d4-d5:OR d6,(a1)+:OR d7,(a1)+
+	MOVEQ#0,d6:MOVE.b (a0),d6:ADDQ#8,a0:ASL#4,d6:LEA 0(a2,d6),a3
+	OR (a3)+,d0:OR (a3)+,d1:OR (a3)+,d2:OR (a3)+,d3:OR (a3)+,d4:OR (a3)+,d5
+	MOVEM (a3)+,d6-d7:OR d0,(a1)+:OR d1,(a1)+
+	SUBQ#1,a4:CMP #0,a4:BNE dirty
+	OR d2,(a1)+:OR d3,(a1)+:OR d4,(a1)+:OR d5,(a1)+:OR d6,(a1)+:OR d7,(a1)+
+	MOVE.l (a7)+,a4:AsmExit
+flipped
+	ADD#16,a2:LEA 0(a2,d0),a3:MOVEM -16(a3),d0-d7
+	EXG d0,d7:EXG d1,d6:EXG d2,d5:EXG d3,d4:OR d0,(a1)+:OR d1,(a1)+
+dirty2:
+	MOVEQ#0,d0:MOVE.b (a0),d0:ADDQ#8,a0:ASL#4,d0:LEA 0(a2,d0),a3
+	OR -(a3),d2:OR -(a3),d3:OR -(a3),d4:OR -(a3),d5:OR -(a3),d6:OR -(a3),d7
+	MOVEM -4(a3),d0-d1:EXG d0,d1:OR d2,(a1)+:OR d3,(a1)+
+	MOVEQ#0,d2:MOVE.b (a0),d2:ADDQ#8,a0:ASL#4,d2:LEA 0(a2,d2),a3
+	OR -(a3),d4:OR -(a3),d5:OR -(a3),d6:OR -(a3),d7:OR -(a3),d0:OR -(a3),d1
+	MOVEM -4(a3),d2-d3:EXG d2,d3:OR d4,(a1)+:OR d5,(a1)+
+	MOVEQ#0,d4:MOVE.b (a0),d4:ADDQ#8,a0:ASL#4,d4:LEA 0(a2,d4),a3
+	OR -(a3),d6:OR -(a3),d7:OR -(a3),d0:OR -(a3),d1:OR -(a3),d2:OR -(a3),d3
+	MOVEM -4(a3),d4-d5:EXG d4,d5:OR d6,(a1)+:OR d7,(a1)+
+	MOVEQ#0,d6:MOVE.b (a0),d6:ADDQ#8,a0:ASL#4,d6:LEA 0(a2,d6),a3
+	OR -(a3),d0:OR -(a3),d1:OR -(a3),d2:OR -(a3),d3:OR -(a3),d4:OR -(a3),d5
+	MOVEM -4(a3),d6-d7:EXG d6,d7:OR d0,(a1)+:OR d1,(a1)+
+	SUBQ#1,a4:CMP #0,a4:BNE dirty2
+	OR d2,(a1)+:OR d3,(a1)+:OR d4,(a1)+:OR d5,(a1)+:OR d6,(a1)+:OR d7,(a1)+
+	MOVE.l (a7)+,a4:AsmExit
+End Statement
+
+
+Dim dsign.l(1):Dim signl.w(4095)	; (8K long!)
+signbmap=1
+signshape=1		;needs two (+1)
+
+;------------------------------------
+;g$="gfx:"
+Gosub initsign
+BitMapOutput signbmap:NPrint "LAP1":NPrint "23.5"
+
+;-------------------
+BitMap 0,1024,516,4
+Screen 0,-32,0,1024,512,4,$0,"KickMe",1,2,0
+
+BitPlanesBitMap 0,2,4
+
+Restore bob
+Dim nam.s(12),sx.w(12),sy.w(12),stype.w(12)
+For cnt.w=0 To 11
+	NPrint cnt
+	Read sx(cnt),sy(cnt),stype(cnt)
+	If stype(cnt)=0 Then sy(cnt)-8:sx(cnt)+2 Else sx(cnt)+0:sy(cnt)-1
+	sx(cnt)-1:sy(cnt)+1
+Next
+For cnt.w=0 To 11
+	Read nam.s(cnt)
+Next
+
+For cnt.w=0 To 11
+	##[$FFB5]
+;	LoadBitMap 0,"Maps:"+nam(cnt)+".iff",0
+	##[$FFB4]
+	FadePalette 0
+	signx=sx(cnt):signy=sy(cnt):signflip=stype(cnt)
+	Gosub drawsign
+	Gosub drawsign
+	Gosub drawsign
+	Gosub drawsign
+	MouseWait
+	SaveBitmap 0,"ram:test.iff"
+	End
+Next
+End
+
+.bob
+Data.w 45,17,1
+Data.w 460,302,0
+Data.w 845, 50,1
+
+Data.w 607,312,0
+Data.w 300, 86,0
+Data.w 435,354,1
+
+Data.w 459,107,1
+Data.w 340,117,1
+Data.w 419,104,0
+
+Data.w 186,126,0
+Data.w 352, 54,0
+Data.w 690,201,1
+
+Data.s "cross"
+Data.s "Format"
+Data.s "blob"
+Data.s "power"
+Data.s "spot"
+Data.s "fold"
+Data.s "hook"
+Data.s "warble"
+Data.s "twirl"
+Data.s "jyro"
+Data.s "one"
+Data.s "twistie"
+
+
+drawsign:
+	signframe=(signframe+1)&3
+	dosign {ssign.l+signframe,dsign(signflip),signtable.l,signflip}
+	Use BitMap 2
+	If signflip
+		Blit signshape+1,signx+signframe ASL 4,signy+signframe ASL 3
+	Else
+		Blit signshape,signx+signframe ASL 4,signy-signframe ASL 3
+	EndIf
+	Return
+
+initsign:
+	For i.w=0 To 255
+		e.w=i*8
+		If i AND $80 Then signl(e+0)=$8000
+		If i AND $40 Then signl(e+0)+$2000
+		If i AND $20 Then signl(e+2)=$0800
+		If i AND $10 Then signl(e+2)+$0200
+		If i AND $08 Then signl(e+4)=$0080
+		If i AND $04 Then signl(e+4)+$0020
+		If i AND $02 Then signl(e+6)=$0008
+		If i AND $01 Then signl(e+6)+$0002
+	Next
+	signtable.l=&signl(0)
+	BitMap signbmap,64,16,1:ssign.l=Peek.l(Addr BitMap(signbmap)+8)
+	LoadShape signshape,"sign.iff"
+	CopyShape signshape,signshape+1
+	XFlip signshape:Handle signshape,0,0
+	dsign(0)=Peek.l(Addr MidHandle(signshape)+14)
+	dsign(1)=Peek.l(Addr MidHandle(signshape+1)+14)
+	Return

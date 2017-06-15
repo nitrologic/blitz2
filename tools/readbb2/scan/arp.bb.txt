@@ -1,0 +1,29 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/arp.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/arp.bb
+;********************************************************
+;*																											*
+;*					 BlitzII arp.library Include file					 *
+;*																											*
+;********************************************************
+
+NEWTYPE FileRequester=
+ *fr_Hail.b							; Hailing Text
+ *fr_File.b							; *Filename array (FCHARS+1)
+ *fr_Dir.b							 ; *Directory array (DSIZE+1)
+ *fr_Window.l						;Window ; Window requesting or NULL
+ fr_FuncFlags.b					; Set bitdef;s below
+ fr_reserved1.b					; Set To NULL
+ *fr_Function.w					; Func To Call For wildcards
+ fr_reserved2.l					; RESERVED
+End NEWTYPE
+
+#FCHARS= 32							; Directory name sizes
+#DSIZE= 33
+
+#FR_DoWildFunc=128
+#FR_DoMsgFunc=64
+#FR_DoColor=32
+#FR_NewIDCMP=16
+#FR_NewWindFunc=8
+#FR_AddGadFunc=4
+#FR_GEventFunc=2
+#FR_ListFunc=1

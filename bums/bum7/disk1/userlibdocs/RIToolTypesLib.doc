@@ -1,0 +1,311 @@
+Library Name:
+  ritooltypeslib #59
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, hmm, if bum came out a bit more
+  often we wouldn't end up with several libraries that do the same
+  thing....
+
+Authors Docs:
+
+
+Reflective Images Tooltypes Library
+===================================
+
+Release: #2
+
+By Stephen McNamara, inspired by the collection of tooltype functions by
+Mark Tiffany.
+
+(c)1994 Reflective Images
+
+This library contains commands to allow the reading, comparing and setting
+of tooltypes in a .info file.  All tooltype names are case insignificant
+but as a general sort of rule they should really be completely uppercase.
+
+This library attempts to open the system Icon.library, if the opening of
+this library fails ALL commands in this library will be unusable.  Almost
+every function in this library relies on the Icon.library completely.
+
+Command list:
+      GetIconObject filename$
+      PutIconObject filename$[,icontype]
+      FreeIconObject
+      FindToolValue tooltype$
+      FindToolNumber toolnum#
+      MatchToolValue tooltype$,value$
+      PutToolValue tooltype$,value$
+      NewToolType tooltype$,value$
+      ClearToolTypes
+
+New commands for this version:
+      SetIconHit width#,height#
+      ShapeToIcon shape#[,shape#]
+      SetIconType type#
+      IconRender value#
+      IconDefaultTool tool$
+      bool=FindToolType(tool$)
+Changed commands:
+      FindToolValue - now returns "" if the tooltype was
+found but did not have a value (e.g. DONOTWAIT).  You should now use
+FindToolType to check for the existance of a tooltype and then use
+FindToolValue to get its value.
+      PutIconObject - now has an optional parameter that
+lets you set the type of the file.  See SetIconType for more information
+about possible values for this command.
+
+
+Statement/Function: GetIconObject
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : GetIconObject filename$
+   suc.l=GetIconObject (filename$)
+
+  This command reads in a .info file from disk.  The filename given will
+have '.info' added to the end of it and will be loaded into memory (chip or
+fast depending on what is available for allocation) as a diskobject.
+Please refer to the Amiga hardware includes for information about the
+diskobject structure (or see your Blitz Basic Amigalibs resident file).
+
+  If used as a function, this command will return either FALSE for failure
+or the address of the allocated diskobject in memory.
+
+
+Statement/Function: PutIconObject
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : PutIconObject filename$[,icontype]
+   suc.l=PutIconObject (filename$)
+
+  This command takes a diskobject structure reserved and initialised by
+GetIconObject and saves it out to disk as a .info file for the specified
+file.  All current tooltypes and values will be saved with the file.
+  The optional parameter allows you to set the type of the file associated
+with the .info file.  See SetIconType for possible values for this
+parameter.  Note that if you leave out this parameter the icontype will not
+be changed.
+
+
+Statement/Function: FreeIconObject
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : FreeIconObject
+   suc.l=FreeIconObject
+
+  This command will free up the diskobject that is currently being used.
+It will not save out any tooltype changes and will free up the memory
+without ANY changes being made to the .info file loaded from disk.
+  All changes will be lost when you use this command!
+
+
+Function: FindToolValue
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : toolval$=FindToolValue(tooltype$)
+
+  This function returns the value of the selected tooltype.  The return
+value is a string, and is the part of the tooltype string after the "=" in
+the tooltype entry.  The tooltype$ string that you pass can be in either
+lower case or uppercase since all testing in done in uppercase, although as
+a general rule, all tooltypes should be in uppercase.
+  This function will return a null string if the named tooltype was not
+found in the list of tooltypes for the file.  If the selected tooltype did
+not have an actual value (e.g. DONOTWAIT) then this function will also
+return a null string - you can though use a combination of this command and
+FindToolType to cover this situation.
+
+
+Function: FindToolNumber
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : toolval$=FindToolNumber(tooltype$)
+
+  This command will return the FULL tooltype string in the selected
+tooltype position.  If the tooltype number does not exist then "" will be
+returned.
+
+  Example:  tooltypes: "DONOTWAIT"
+         "CLOCKX=157"
+
+  FindToolNumber(0) will return "DONOTWAIT"
+  FindToolNumber(1) will return "CLOCKX"
+  FindToolNumber(49) will return ""
+
+
+Function: MatchToolValue
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : suc.l=MatchToolValue(tooltype$,value$)
+
+  This command searchs the current list of tooltypes for the selected
+tooltype and, if found, attempts to match the values of it with the given
+value.  This command uses the operating system call MatchToolType(), it
+is able to cope with a tool having more than one value,
+
+      e.g. LANGUAGE=ENGLISH|FRENCH
+      (the | is used to show OR, thus this tooltype
+       means that LANGUAGE equals ENGLISH or FRECH)
+    When using match toolvalue with this tooltype, TRUE will be
+    returned when you use value$="ENGLISH" or "FRENCH" but not
+    (I think) both.
+
+  You should note that for this command, the case of VALUE$ is
+insignificant.
+
+
+Statement/Function: SetToolValue
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : SetToolValue tooltype$,value$
+   suc.l=SetToolValue (tooltype$,value$)
+
+  This command will attempt to set a tooltype that is currently defined to
+the specified value.  When used as a function, this command will return
+TRUE for success or FALSE for failure, possible failures include: no icon
+file loaded and tooltype not found.  When used, this command attempts to
+allocate memory to store the new tooltype information in, it does not
+attempt to free up the old memory allocated to the tooltype.  This means
+that you should keep alterations of tooltypes to a minimum.  The best way
+to manage tooltypes is:
+
+    1. Open the icon
+    2. Read the tooltypes
+    3. Close the icon
+    4. ... do your program ...
+    5. Open the icon
+    6. Alter the tooltypes
+    7. Save the icon
+
+  Using this series of events, you'll keep memory usage (which will be
+fairly small anyway...) to the very minimum.
+
+
+Statement/Function: NewToolType
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : NewToolType tooltype$,value$
+   suc.l=NewToolType (tooltype$,value$)
+
+  This command allocates a new tooltype in the currently loaded .info file
+and sets its value.  No check is done to see is the tooltype already
+exists and the new tooltype is added to the end of the current list of
+tooltypes.
+
+
+Statement: ClearToolTypes
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : ClearToolTypes
+
+  This command is used to clear all the tooltype information from the
+currently loaded .info file.  It does not attempt, though, to free up all
+the memory reserved to store tooltype names and values, you should
+therefore not used this command too many times in a row.  Once you have
+used this command, any attempt to read tooltype values will fail.
+
+
+Statement: SetIconHit
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : SetIconHit width#,height#
+
+  This command sets the size of the 'hit-box' around the image in the
+currently loaded .info file.  This is only of use if your info file has an
+image associated with it.  You should note that the hit box should never be
+smaller, horizontally or vertically, than the actual size of the image.
+  When Workbench renders an image for a file onto a window, it
+automatically puts a 3d box border around it.  The size of the hit box
+determines the size of this border.  Your image will always be located in
+the top left border of the hit box.
+
+
+Statement: ShapeToIcon
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : ShapeToIcon shape#[,shape#]
+
+  This command lets you change the images associated with the currently
+loaded .info file.  What it does is to set up the .info file in memory so
+that when it is saved out next, the images you give are saved out with it.
+Using this command does not actually copy any shape data around memory, all
+it does it place a pointer in the .info to the shape data.  You should
+therefore not delete a shape WITHOUT first saving the .info file to disk
+(that is of course if you want to keep your changes).
+  When you use this command, the hit box area for the .info file is
+automatically set to the size of the first shape given.  It is important,
+therefore, that the second shape is not larger than the first.  When you
+give a second shape, this shape is set up to be the 'alternate render'
+image, this means that this is the second image associated with the .info
+file (remember the two windows in the IconEditor?)
+
+
+Statement: SetIconType
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : SetIconType type#
+
+  This command lets you specify the type of the file associated with the
+currently loaded .info file.  The type describes whether or not the file is
+a tool or project etc...., and can take the following values:
+
+      1 Disk
+      2 Drawer
+      3 Tool
+      4 Project
+      5 Trashcan
+
+  This command is identical to the menu in the IconEditor 'Type'.
+
+
+Statement: IconRender
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : IconRender mode#
+
+  This command lets you specify what Workbench should do to the icons
+image when the user clicks on it.  It lets you choose whether a separate
+image should be displayed or whether the current image should just be
+modified.  Mode# is made up of several different values that should be
+added together to create different effects, these are:
+
+      0 Complement the select box
+      1 Draw a box around the image
+      2 Draw the alternate image
+      3 Don't highlight
+      4 Double image icon
+
+  Thus if you wanted an icon to change to a second image when selected, and
+the icon has a second image, you would set the render to 6 (4+2).  This
+would mean that you had a second image (4) and that you wanted it to be
+displayed when you select the icon (2).
+  Note: when you use ShapeToIcon with two shape numbers the IconRender is
+automatically set to 6.
+
+
+Statement: IconDefaultTool
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : IconDefaultTool tool$
+
+  This command lets you set the default tool for the current .info file.
+The default tool only applies for project files (see SetIconType) and is
+the program that is run when you double click the icon file (e.g. all
+Blitz2 source code files saved out with icons have the default tool
+'Blitz2:Blitz2').
+  This command can be used to make a file saved out by your program
+double-clickable.  I have used it myself to make map files saved out from
+my editor automatically load the editor when selected.
+
+
+Statement: FindToolType
+------------------------------------------------------------------------
+Modes  : Amiga
+Syntax : bool=FindToolType (tool$)
+
+  This command simply returns true or false to say whether or not the given
+tooltype was found in the currently loaded .info file.
+
+>>END

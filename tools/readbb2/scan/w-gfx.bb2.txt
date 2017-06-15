@@ -1,0 +1,61 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/vs/W-Gfx/W-Gfx.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/vs/W-Gfx/W-Gfx.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/vs/W-Gfx/W-Gfx.bb2
+; #####################################
+; #																	 #
+; #			Window Gfx Include File			#
+; #																	 #
+; #							V1.00								#
+; #																	 #
+; #			 Last Updated 27/6/94				#
+; #																	 #
+; # You see that Final Copy ][ there? #
+; #	 You see those nifty outlines?	 #
+; #	 Thats what this does that is!	 #
+; # (I can see you're not impressed!) #
+; #																	 #
+; #	 I will be adding more to this	 #
+; #						 Honest!							 #
+; #																	 #
+; # And if you're going to ask - YES! #
+; # All 4 lines of this include file	#
+; # are freeware - copy it modify it, #
+; # even sleep with it for all I care #
+; #	Just mention me somewhere......	#
+; #																	 #
+; #####################################
+;
+; FUNCTIONS
+; =========
+; WOutline{x1,y1,x2,y2,HighLite,Shadow}
+;					top left corner		 = x1,y1
+;					bottom right corner = x2,y2
+;					HighLite = highlight colour - pen 1 for WB2+
+;					Shadow	 = Shadow colour		- pen 2 for WB2+
+;
+; REQUIREMENTS
+; ============
+; Errrr, Blitz Basic 2?	 Some common sense?	 An Amiga?	 ;}
+;
+
+; COMMENTS
+; ========
+; DONT GET CONFUSED WITH POSITIONING!
+;
+; ,---- That point there is top left - NOT the one diagonally down+right
+; V
+; ,===============,
+; I,--------------I,
+; I|							I|
+; I|							I|
+; I|							I|
+; I|							I|
+; '==============='|
+;	'---------------' <--- Likewise this is bottom right - NOT the one diagonally
+;
+; Oh, and changing the highlite and shadow round looks quite cool too.
+
+Statement WOutline{x1,y1,x2,y2,HighLite,Shadow}
+	WLine x1,y1,x2-1,y1,x2-1,y2-1,x1,y2-1,x1,y1,HighLite
+	WLine x1+1,y1+1,x2,y1+1,x2,y2,x1+1,y2,x1+1,y1+1,Shadow
+End Statement
+
+; Yes - thats it.	Sorry!

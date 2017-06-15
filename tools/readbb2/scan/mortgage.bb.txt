@@ -1,0 +1,324 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum7/disk1/code/mortgage.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum7/disk1/code/mortgage.bb
+;----=================================================----
+;----====								 Mortgage								====----
+;----====																				 ====----
+;----====		 A Blitz BASIC 2 example mortgage		====----
+;----====			calculating program that has a		 ====----
+;----====					font-sensitive layout					====----
+;----====																				 ====----
+;----==== THIS PROGRAM REQUIRES BLITZ VERSION 1.8 ====----
+;----====				AND MOST LIBS UPTO BUM 6				 ====----
+;----====																				 ====----
+;----====								written by							 ====----
+;----====							David Maziarka						 ====----
+;----====																				 ====----
+;----====			 This code and executable are			====----
+;----====																				 ====----
+;----====							 Public Domain						 ====----
+;----====																				 ====----
+;----=================================================----
+
+;amigalibs.res NEEDS TO BE RESIDENT!
+
+#calpri=0
+#calint=1
+#calyrs=2
+#calpay=3
+
+#principal=4
+#interest=5
+#numofyrs=6
+#payment=7
+
+#apaid=8
+#ipaid=9
+
+#sched=10
+
+#win1=0
+
+
+
+NoCli
+WBStartup
+##[$FFB5]
+WbToScreen 0
+
+DEFTYPE.Screen *wbscreen
+DEFTYPE.Window *win
+DEFTYPE.EasyStruct req
+DEFTYPE.IntuiText text
+
+;IF YOU USE LockPubScreen ALWAYS REMEMBER TO DO A
+;UnlockPubScreen BEFORE YOU END !!!!
+
+*wbscreen=##[$FFD1](0) ;	 THIS LINE TELLS US HOW MUCH
+bh.b=*wbscreen\BarHeight-10 ;<--TALLER THEIR SCREEN FONT IS
+ww.w=*wbscreen\Width				;	 VS. A FONT WITH A HEIGHT OF
+wh.w=*wbscreen\Height			 ;	 8
+
+
+font$=Peek$(*wbscreen\Font\ta_Name) ;WHAT SCREEN FONT AND SIZE DO
+fontsize.w=*wbscreen\Font\ta_YSize	;THEY USE FOR THIER WB?
+
+LoadFont 0,font$,fontsize:Use IntuiFont 0
+
+a$="Interest Rate (%)"							;THIS JUST TELLS ME HOW MANY
+text\IText=&a$											;PIXELS a$ IS SO I CAN ADJUST
+text\ITextFont=Addr IntuiFont(0)		;THE SIZE OF THE WINDOW AND
+fxsize.l=##[$FFB3](text)-119 ;MOVE THE GADGETS TO TO RT
+
+
+SetErr																;I USE THIS ERROR ROUTINE
+	 PutReg d0,err.l										;BECAUSE THE DEBUGGER DOES
+	 title$="ERROR:"										;NOT YET SUPPORT 31khz
+	 gadget$="OK"											 ;DISPLAYS
+	 req\es_Title=&title$,err,&gadget$
+	 ##[$FFDD] 0,req,0,0
+	 ##[$FFD2] 0,*wbscreen
+	 End
+End SetErr
+
+;MAKE SURE WORKBENCH IS TALL ENOUGH FOR OUR WINDOW (INCLUDING
+;THEIR SCREEN FONT). IF IT IS NOT THEN SHOW REQUESTER AND
+;END.
+
+;SINCE I ADDED THE WINDOW FLAG 'WA_AutoAdjust', I DON'T NEED
+;THE FOLLOWING LINES BECAUSE intuition TAKES CARE OF IT.
+
+;If wh<208+bh OR ww<500
+;	 title$="Startup Error"+Chr$(0)
+;	 reqtext$="Mortgage Needs A Screen Height of "+Str$(208+bh)+Chr$(0)
+;	 gadget$="OK"+Chr$(0)
+;	 req\es_Title=&title$,&reqtext$,&gadget$
+;	 EasyRequestArgs_ 0,req,0,0
+;	 UnlockPubScreen_ 0,*wbscreen
+;	 End
+;EndIf
+
+
+Gosub gadget0
+Gosub menu0
+
+;REFRESHWINDOW =$4				 ;YOU NEED amigalibs.res FOR THIS
+:MOUSEMOVE		 =$10				;PROGRAM AND IN IT THESE ARE DEFINED.
+;GADGETDOWN		=$20				;I JUST USED THE REAL (BELOW) NUMBERS
+;GADGETUP			=$40				;SO I COULD GET THEM TO FIT ON ONE
+;MENUPICK			=$100			 ;LINE.
+;CLOSEWINDOW	 =$200			 ;
+;ACTIVEWINDOW	=$40000		 ;
+;INACTIVEWINDOW=$80000
+;INTUITICKS		=$400000
+
+#IDCMP=$40|$100|$200
+
+#tag=$80080000
+#strtag=$80032000
+
+DefaultIDCMP #IDCMP
+i=wh/2-((208+bh)/2)											 ;CENTER THE WINDOW BUT
+i=QLimit(i-i/4,0,400)										 ;PLACE IT UP A LITTLE
+Window #win1,ww/2-((364+fxsize)/2),i,364+fxsize,115+bh*7,$2|$4|$8|$1000|$00200000|#WA_AutoAdjust,"Mortgage",1,2,0
+AttachGTList #win1,#win1
+
+GTBevelBox 0,4,11+bh,356+fxsize,102+bh*6,0
+
+SetMenu 0
+MenuColour 0,0,2,Off
+
+DEFTYPE .f
+
+currentstring.w=#principal
+ClearString #win1,currentstring
+
+sched=1200:sched2=12
+
+Gosub about
+
+.main
+	 ev.l=WaitEvent
+	 gh.l=GadgetHit
+	 code.l=EventCode
+	 menu.l=MenuHit
+	 mitem.l=ItemHit
+
+	 Select ev
+
+			Case 512 ;#CloseWindow
+				 Gosub quit
+
+			Case #GADGETUP
+				 If gh>#principal-1 AND gh<#payment+1
+						currentstring=QWrap(gh+1,#principal,#payment+1)
+						ClearString 0,currentstring
+				 EndIf
+
+				 If gh>#calpri-1 AND gh<#calpay+1
+;						n=lenght*12
+;						i=interest/1200
+;						d=1-(1/(1+i)^n)
+						prin=Val(GTGetString(#win1,#principal))
+						interest=Val(GTGetString(#win1,#interest))
+						lenght=Val(GTGetString(#win1,#numofyrs))
+						payment=Val(GTGetString(#win1,#payment))
+
+						Select gh
+							 Case #calpri
+									If interest<=0 OR lenght<=0 OR payment<=0:Gosub error:Else
+										 prin=payment/(interest/sched)*(1-(1/(1+(interest/sched))^(lenght*sched2)))
+										 GTSetString #win1,#principal,Str$(prin)
+									EndIf
+
+							 Case #calint
+									If prin<=0 OR lenght<=0 OR payment<=0:Gosub error:Else
+										 li=0:hi=payment/prin:z=0
+										 While Abs(z-payment)>=.000001
+												z=prin*((li+hi)/2)/(1-(1/(1+((li+hi)/2))^(lenght*sched2)))
+												If z<payment Then li=(li+hi)/2
+												If z>payment Then hi=(li+hi)/2
+										 Wend
+										 interest=((li+hi)/2)*sched
+										 GTSetString #win1,#interest,Str$(interest)
+									EndIf
+
+							 Case #calyrs
+									If interest<=0 OR prin<=0 OR payment<=0:Gosub error:Else
+										 length=(Sin(payment/(payment-prin*(interest/sched)))/Sin(1+(interest/sched)))/sched2
+										 GTSetString #win1,#numofyrs,Str$(length)
+									EndIf
+
+							 Case #calpay
+									If interest<=0 OR lenght<=0 OR prin<=0:Gosub error:Else
+										 payment=prin*(interest/sched)/(1-(1/(1+(interest/sched))^(lenght*sched2)))
+										 GTSetString #win1,#payment,Str$(payment)
+									EndIf
+
+						End Select
+
+						total=(lenght*sched2)*payment
+						GTSetString #win1,#apaid,Str$(total)
+						totalint=((lenght*sched2)*payment)-prin
+						GTSetString #win1,#ipaid,Str$(totalint)
+						Redraw #win1,#apaid
+						Redraw #win1,#ipaid
+				 EndIf
+
+				 If gh=#sched
+						Select code
+							 Case 0
+									sched=1200:sched2=12
+							 Case 1
+									sched=2600:sched2=26
+						End Select
+
+				 EndIf
+
+.memumain
+			Case #MENUPICK
+				 Select menu
+						Case 0
+							 Select mitem
+									Case 0
+										 Gosub about
+									Case 1
+										 Gosub help
+									Case 3
+										 Gosub quit
+							 End Select
+				 End Select
+
+	 End Select
+Goto main
+
+
+.error
+	 text$="You need Values in three"
+	 text$+"|of the four strings."
+	 ##[$B58D] "ERROR!",text$,"OK"
+Return
+
+
+.quit
+	 If ##[$B58D]("Mortgage","Quit Mortgage?","OK|CANCEL")=0 Then Return
+	 ##[$FFD2] 0,*wbscreen
+
+End
+
+
+.help
+	 text$="This program allows you to enter any three of"
+	 text$+"|the four related values and then calculate"
+	 text$+"|the fourth.	Enter any of the three values,"
+	 text$+"|then the forth can be calculated by pressing"
+	 text$+"|the 'Cal' button to right of the stringgadget"
+	 text$+"|of the value needed.	The cycle gadget is used"
+	 text$+"|to change the payment from a monthly one over"
+	 text$+"|to a biweekly payment.	A biweekly payment"
+	 text$+"|is a plan better because it allows you to lower"
+	 text$+"|the amount paid per month or you can pay the"
+	 text$+"|mortgage off years earlier."
+
+	 ##[$B58D] "Mortgage Help",text$,"OK"
+Return
+
+
+.about
+	 text$="				Mortgage				 "
+	 text$+"|			version 1.00			 "
+	 text$+"|												 "
+	 text$+"|			 written by				"
+	 text$+"|		 David Maziarka			"
+	 text$+"|												 "
+	 text$+"|	designed and compiled	"
+	 text$+"|					 in						"
+	 text$+"|			Blitz BASIC 2			"
+
+	 ##[$B58D] "About Mortgage",text$,"OK"
+Return
+
+
+.gadget0
+	 GTButton #win1,#calpri,284+fxsize,4,54,14+bh,"Cal",0
+	 GTButton #win1,#calint,284+fxsize,20+bh,54,14+bh,"Cal",0
+	 GTButton #win1,#calyrs,284+fxsize,36+bh*2,54,14+bh,"Cal",0
+	 GTButton #win1,#calpay,284+fxsize,52+bh*3,54,14+bh,"Cal",0
+
+	 GTTags #STRINGA_ReplaceMode,True
+	 GTString #win1,#principal,162+fxsize,4,116,14+bh,"Principal",129,10
+	 GTTags #STRINGA_ReplaceMode,True
+	 GTString #win1,#interest,162+fxsize,20+bh,116,14+bh,"Interest Rate (%)",129,10
+	 GTTags #STRINGA_ReplaceMode,True
+	 GTString #win1,#numofyrs,162+fxsize,36+bh*2,116,14+bh,"Number of Years",129,10
+	 GTTags #STRINGA_ReplaceMode,True
+	 GTString #win1,#payment,162+fxsize,52+bh*3,116,14+bh,"",129,10
+
+	 GTText #win1,#apaid,17,84+bh*5,(318+fxsize)/2,12+bh,"Amount Paid",132,""
+	 GTText #win1,#ipaid,((318+fxsize)/2)+21,84+bh*5,(318+fxsize)/2,12+bh,"Interest Paid",132,""
+
+	 GTCycle #win1,#sched,17,52+bh*3,144+fxsize,14+bh,"",0,"Pay Monthly|Pay Biweekly"
+
+Return
+
+
+.menu0
+	 If ExecVersion=39
+			MenuChecked 1
+	 Else
+			MenuChecked 2
+	 EndIf
+
+;	I needed To do this a$ thing because 'String$' is broken
+;	under version 1.8
+	 a$=""
+	 For i=0 To 15
+			a$=a$+Chr$(45)
+	 Next
+
+	 MenuGap 4,0
+	 MenuTitle 0,0,"Project"
+	 MenuItem 0,0,0,0,"About"
+	 MenuItem 0,0,0,1,"Help"
+	 MenuItem 0,0,0,2,a$
+	 MenuItem 0,0,0,3,"Quit"
+
+Return

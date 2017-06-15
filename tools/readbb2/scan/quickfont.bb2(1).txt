@@ -1,0 +1,85 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/QuickFont.bb2
+;==================================================================
+; Draw some fast 8x8 text using the CPU instead of the blitter....
+; Printing has to be adjusted manually for different width bitmaps
+;	(set up for high res)
+; Written by Stephen McNamara of Leading Edge Software
+;
+; Uses the FNS font 8_High.FNS - please CD into the directory
+;	where this is *before* compiling
+;==================================================================
+
+Function.l NiceFont {bit.l,x.w,y.w,ad.l}
+	MOVEM.l	 d0-d7/a0-a6,-(a7)
+
+	ASR.w		 #3,d1
+	MULU.w		#80,d2
+
+	MOVE.l		d0,a0
+	MOVE.l		8(a0),a0
+	MOVE.l		d2,d7
+	ADD.l		 d1,d7
+
+	ADD.l		 d7,a0
+
+	MOVE.l		d3,a1
+	LEA			 font_dat(pc),a2
+
+mainloop:
+	MOVE.b		(a1)+,d0
+	ANDI.l		#$ff,d0
+
+	SUB.b		 #32,d0
+	BMI			 exit
+
+drawloop:
+	MOVE.l		d0,d1
+	MULU.w		#16,d1
+
+	LEA			 256(a2),a3
+	ADD.l		 d1,a3
+
+;a3=address of character
+;a0=bitplane address
+;d0=character
+;d1=size of character
+
+	MOVE.l		a0,a4
+																; Adjust offsets to these for low res:
+	MOVE.b		(a3),(a4)					 ; (a4)
+	MOVE.b		2(a3),80(a4)				; 40(a4)
+	MOVE.b		4(a3),160(a4)			 ; 80(a4)
+	MOVE.b		6(a3),240(a4)			 ; 120(a4)
+	MOVE.b		8(a3),320(a4)			 ; 160(a4)
+	MOVE.b		10(a3),400(a4)			; 200(a4)
+	MOVE.b		12(a3),480(a4)			; 240(a4)
+	MOVE.b		14(a3),560(a4)			; 280(a4)
+																; Offsets are just even-byte widths of screen
+	ADD.l		 #1,a0
+	BRA			 mainloop
+
+exit:
+	MOVEM.l	 (a7)+,d0-d7/a0-a6
+	AsmExit
+
+	INCDIR ""
+	Event
+font_dat:
+	IncBin "fns:8_High.FNS"
+
+End Statement
+
+Screen 0,0,0,640,256,2,$8000,"Hello",2,1
+
+ScreensBitMap 0,0
+Use BitMap 0
+BitMapOutput 0
+
+a$="Hello world"
+a$=a$+a$+a$+a$
+
+For loop.l=0 To 25
+	l.l=NiceFont {Addr BitMap(0),0,12+loop*8,&a$}
+Next loop
+MouseWait
+End

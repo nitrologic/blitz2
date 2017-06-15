@@ -1,0 +1,103 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/libmacs.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/libmacs.bb
+Macro LibHeader= ;number,startup,returncodetype,Close
+			MOVEQ #0,d0:RTS
+			Dc.w			`1
+			Dcb.l		 4,0
+			Dc.l			`2			;"start up routine
+			Dc.w			`3			;"Data returned by init!
+			Dc.l			`4			;"clean up routine
+			Dcb.l		 4,0		 ;and 1 more
+			End Macro
+
+Macro LibBottom=
+			Dc.w			-1			;"End of subs
+			Dc.l			0
+			End Macro
+
+Macro plist=
+			CSIF			"`1">""
+			Dc.b			`1
+			!plist		{`2,`3,`4,`5,`6,`7,`8,`9}
+			CEND
+			End Macro
+
+Macro Statement_=
+			Dc				1,0,0
+			End Macro
+
+Macro Function_=				 ;returntype
+			Dc	2+{`1Select8},0,0
+			End Macro
+
+Macro Parameters=				;type,type..
+			Dc	`0
+			!plist {`1,`2,`3,`4,`5,`6,`7,`8,`9}
+			Event
+			End Macro
+
+Macro LinkLib=					 ;lib,reg
+			Dc	`1,`2
+			End Macro
+
+Macro LibName=					 ;name,remarks
+			Dc			0
+			Dc.l		0,_`1,0
+			Dc			-1
+			Dc.l		0
+			Dc			0
+			Dc.b		"`1",0
+			Dc.b		`2,0			 ;Help Text needs Quotes when passed
+			Event
+			End Macro
+
+#byte		= 1
+#word		= 2
+#long		= 3
+#quick	 = 4
+#float	 = 5
+#address = 6
+#string	= 7
+
+#LibReturnl	= 1
+#LibReturnw	= -1
+
+#MemLib			= 65530
+#_Intuition	= 255
+#Graphics		= 254
+#Exec				= 253
+#StringLib	 = 240
+#MemAccLib	 = 235
+#FileIO			= 230
+#BlitzDOS		= 225
+
+#SwitchLib	 = 220
+#ScreensLib	= 215
+#CopLib			= 210
+#ShapeLib		= 205
+#BlitLib		 = 200
+#SpriteLib	 = 195
+#SoundLib		= 190
+#AnimLib		 = 185
+
+#GfxLib			= 180
+#Lib3D			 = 175
+#LinxLib		 = 170
+#MidiLib		 = 165
+#MusicLib		= 160
+
+#regd0	 = $0000
+#regd1	 = $0100
+#regd2	 = $0200
+#regd3	 = $0300
+#regd4	 = $0400
+#regd5	 = $0500
+#regd6	 = $0600
+#regd7	 = $0700
+#rega0	 = $1000
+#rega1	 = $1100
+#rega2	 = $1200
+#rega3	 = $1300
+#rega4	 = $1400
+#rega5	 = $1500
+#rega6	 = $1600
+#rega7	 = $1700

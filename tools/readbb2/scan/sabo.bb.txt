@@ -1,0 +1,368 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/SABOTAGE/sabo.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/SABOTAGE/sabo.bb
+.start
+DEFTYPE.q
+DEFTYPE.q shapnum
+mx=160:my=200
+;
+; -- Sabotage, A little Blitz 2 8 bit conversion
+
+; Info for the programmer
+; ****************************************
+; *																			*
+; * Shapes 0 - 6 Gun Emplacement				 *
+; * Shape	7		 Our Fire								*
+; * Shape	8		 Helicopter L						*
+; * Shape	9		 Helicopter R						*
+; * Shape 10		 Mr Manny the Terrorist	*
+; * Shape 11		 Mr Mannys Chute				 *
+; *																			*
+; ****************************************
+;
+; ****************************************
+; *																			*
+; * Colour 0		 Bkgrnd Transparent			*
+; * Colour 1 - 3 Our Gun YAY!!!					*
+; * Colour 4		 Our Fire								*
+; * Colour 5 - 6 Helicopters (Boo Hiss)	*
+; * Colour 7 - 8 Mr Manny etc (Kerspaat) *
+; *																			*
+; ****************************************
+;
+.varsetup																						;--Setup Variables for Game
+		NEWTYPE.fire
+		ubx.w	;bullet xpos
+		uby		;bullet ypos
+		ubvx	 ;bullet xvol
+		ubvy	 ;bullet yvol
+		End NEWTYPE
+
+		NEWTYPE.heli
+		hx.w		;helis xpos
+		hy			;			ypos
+		hvx		 ;	 hor vol
+		flag		; direction
+		shap		;	shape nr
+		End NEWTYPE
+
+		NEWTYPE.para
+		 mx.w			;	 manny x
+		 my			;	 manny y
+		 mvy		 ;	 manny y vol
+		 px			;	 chute x
+		 py			;				 y
+		 pvy		 ;		 y vol
+		 flag
+		End NEWTYPE
+
+		Dim List nme.heli(5)
+		Dim List gunfire.fire(10)
+		Dim xstart(6),ystart(6),vxstart(6),vystart(6)		;set array
+		Dim List men.para(5)
+
+		For i = 0 To 6
+		 Read xstart(i),ystart(i),vxstart(i),vystart(i)	;build table
+		Next i
+
+		Data 150,215,-8,-4														 ;xstart,ystart,xvol,yvol
+		Data 150,212,-5,-4
+		Data 157,210,-2,-4
+		Data 159,210,0,-6
+		Data 163,210,2,-4
+		Data 170,212,5,-4
+		Data 170,215,8,-4
+
+.fileload																						;--Load our files
+		AMIGA																						;amiga mode
+		LoadShapes 0,"sabo.shapes"
+		LoadPalette 0,"sabo.iff"			;pallete info
+		LoadSound 0,"gun.sfx"
+		LoadSound 1,"boom.sfx"
+		LoadSound 2,"die1.sfx"
+		Dim x(200),y(200)
+LoadShapes 0,"sabo.shapes"
+LoadPalette 0,"sabo.iff"
+If OpenFile(0,"sabo.xyt")
+		FileInput 0
+		For k=1 To 200
+		x(k)=Cvi(Inkey$(2)):y(k)=Cvi(Inkey$(2))
+		Next
+		Else
+End
+EndIf
+		CloseFile 0:DefaultInput
+		For i = 0 To 11																	;use it please
+		 Handle i,ShapeWidth(i)/2,ShapeHeight(i)-1
+		Next i
+		VWait 250																				 ;wait for disk access to end
+
+.titlescreen																				 ; --Intro
+		BLITZ																						;Blitz mode Speeeeeeeeeeeeeeeed
+		BitMap 0,320,256,4															 ;give us a bitmap please
+		BlockScroll 0																						;clear please
+		BitMapOutput 0																	 ;output to bitmap 0
+		Slice 0,44,320,256,$fff8,4,8,16,320,320
+		Use SetCycle 0
+		Show 0
+		Queue 0,2
+		Buffer 0,240
+
+For k=1 To 196
+ sx=(mx-x(k))/10
+ sy=(my-y(k))/10
+ cx=mx
+ cy=my
+For i = 0 To 9
+VWait:UnBuffer 0
+cx-sx
+cy-sy
+BBlit 0,7,cx,cy
+Next i
+FlushBuffer 0
+Next k
+Locate 5,10
+NPrint "By Roger Lockerbie"
+NPrint "Press Joystick Fire to Begin"
+.loop
+ If Joyb(0)<>0 Then Goto loop
+Free BitMap 0
+FreeSlices
+ .newgame
+		;--Setup Variables for Game
+		shapnum = 3																			;start gun straight up
+		shgt=30																					;start height of helicopters
+		speed=2																					;helispeed
+		scr=0																							;ya score
+		killnum=20
+		rand=100
+.scrsetup																						; --Setup Bitmap and Slice etc
+		BLITZ																						;Blitz mode Speeeeeeeeeeeeeeeed
+		BitMap 0,320,256,4															 ;give us a bitmap please
+		BitMap 1,320,256,4
+		BlockScroll 0																						;clear please
+		BitMapOutput 0																	 ;output to bitmap 0
+		Slice 0,44,320,256,$fff8,4,8,16,320,320
+			 Use SetCycle 0
+		Show 0																					 ;show our slice on bitmap
+
+.guncntrl																						;move us
+
+			 Queue 0,30
+			 Queue 1,30
+			 Repeat
+
+				Select Joyr(1)
+						Case 7
+						 shapnum-.25
+
+						Case 6
+						 shapnum-.25
+						Case 5
+						 shapnum-.25
+						Case 1
+						 shapnum+.25
+						Case 2
+						 shapnum+.25
+						Case 3
+						 shapnum+.25
+				End Select
+
+					If shapnum<0 Then shapnum=0
+					If shapnum>6 Then shapnum=6
+					If Joyb(1)=1 AND delay = 4 ;delay ok to fire
+					 scr-1
+					 Sound 0,12
+					 USEPATH gunfire()
+					 If AddItem(gunfire())
+						\ubx=xstart(shapnum)							 ; set our fire off and velocity
+						\uby=ystart(shapnum)							 ; "
+						\ubvx=vxstart(shapnum)						 ; "
+						\ubvy=vystart(shapnum)						 ; "
+					 EndIf
+					EndIf
+					VWait
+					Show db:db=1-db:UnQueue db:Use BitMap db:BitMapOutput db
+
+					QBlit db,shapnum,160,220
+
+					 ResetList gunfire()
+					 While NextItem(gunfire())
+						\ubx=\ubx+\ubvx:\uby=\uby+\ubvy
+						If \ubx>=319 OR \ubx<=1 OR \uby<=1 Then KillItem gunfire() Else QBlit db,7,\ubx,\uby
+					Wend
+
+.donefire
+			 delay+1:If delay=8 Then delay=0	;fire delay
+.doheli
+
+						heli=Int(Rnd(10))
+
+						 If heli<2	AND hdelay=5	;do a helicopter
+							;heli right
+							USEPATH nme()
+							 If AddItem(nme())
+								\hy=shgt
+								\hx=20
+								\hvx=speed
+								\flag=0
+							 EndIf
+							EndIf
+
+							If heli>8 AND hdelay = 7 ;do one
+							;heli left
+							USEPATH nme()
+							 If AddItem(nme())
+								\hy=shgt+25
+								\hx=300
+								\hvx=speed
+								\flag=-1
+							 EndIf
+							EndIf
+
+procheliandmen																	 ;process helicopter list
+					 ResetList nme()								 ; and do collisions
+					 While NextItem(nme())
+						 If Int(Rnd(rand))=1
+						 USEPATH men()
+						 ResetList men()
+							If AddItem(men())
+								\px=nme()\hx
+								\py=nme()\hy+10
+								\pvy=Rnd(1)+1
+								\mx=\px
+								\my=\py+6
+								\mvy=\pvy
+							EndIf
+						USEPATH nme()
+						EndIf
+						 ResetList gunfire()
+						 USEPATH gunfire()
+						 While NextItem(gunfire())
+							 If SpritesHit(7,\ubx,\uby,8,nme()\hx,nme()\hy)
+								 scr+30
+								 kill+1
+								 Sound 1,3
+								 KillItem nme()
+								 KillItem gunfire()
+								 Goto kludge
+							 EndIf
+						 Wend
+
+						USEPATH nme()
+
+						If \flag
+						 \hx=\hx-\hvx
+						 \shap=8
+						Else
+						\hx=\hx+\hvx
+						\shap=9
+						EndIf
+						If \hx>=300 OR \hx<=20 Then KillItem nme() Else QBlit db,\shap,\hx,\hy
+					kludge
+					Wend
+
+.doneheli
+					 hdelay+1:If hdelay=20 Then hdelay=0	;fire delay
+
+.procmen
+					ResetList men()
+					 While NextItem(men())
+						men()\py=men()\py+men()\pvy
+						men()\my=men()\my+men()\mvy
+						 If men()\my>230
+							If men()\mx>160
+								 lright+1
+							Else
+								 lleft+1
+							EndIf
+							KillItem men()
+						 Else
+							QBlit db,11,men()\px,men()\py
+							QBlit db,10,men()\mx,men()\my
+						 EndIf
+						Wend
+
+.checkkill
+					 ResetList men()
+					 USEPATH men()
+					 While NextItem(men())
+						 ResetList gunfire()
+						 USEPATH gunfire()
+						 While NextItem(gunfire())
+							 If SpritesHit(7,\ubx,\uby,11,men()\px,men()\py) OR SpritesHit (7,\ubx,\uby,11,men()\mx,men()\my)
+								 scr+20
+								 Sound 2,3
+								 KillItem men()
+								 KillItem gunfire()
+								 Goto kludge2
+							 EndIf
+						 Wend
+					kludge2
+					Wend
+If scr<0 scr=0
+Locate 20,0
+Print scr
+If lright=4 Then Goto gameover
+If lleft=4 Then Goto gameover
+If kill=killnum Then Goto endoflev
+
+Until Joyb(0)=1
+End
+; *********** SUB ROO TEENS ***********
+
+.endoflev
+killnum+10
+speed+1
+If speed >5 Then speed=5
+shgt+5
+If shgt>130 Then shgt=130
+lev+1
+lleft=0
+lright=0
+kill=0
+rand-5
+If rand<65 Then rand=65
+ClearList men()
+ClearList nme()
+ClearList gunfire()
+Use BitMap 0
+BitMapOutput 0
+BlockScroll 0
+Show 0
+Locate 5,10
+Print "GROOVY! YOU COMPLETED LEVEL "
+Locate 33,10
+Print lev
+scr+(50*lev)
+VWait 250
+
+FreeSlices
+Free BitMap 0
+Free BitMap 1
+Goto scrsetup
+
+
+Return
+
+.gameover
+ClearList men()
+ClearList nme()
+ClearList gunfire()
+Use BitMap 0
+BitMapOutput 0
+BlockScroll 0
+Show 0
+Locate 15,10
+NPrint "GAME OVER"
+Locate 14,11
+NPrint "CLICK MOUSE"
+MouseWait
+FreeSlices
+Free BitMap 0
+Free BitMap 1
+If scr>hscr Then hscr=scr
+kill=0
+lleft=0
+lright=0
+Goto newgame
+
+

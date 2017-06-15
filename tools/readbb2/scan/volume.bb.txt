@@ -1,0 +1,16 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Volume.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Volume.bb
+
+; 
+; sound fader program example 
+; 
+LoadSound 0,"MySound.iff" 
+Sound 0,1 
+
+For v=64 To 0 Step -16
+ VWait         ;wait a frame
+ Volume 1,v       ;set new volume
+Next
+
+MouseWait 
+End 
+

@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/testsort.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/testsort.bb
+Dim List a.q(10)
+
+While AddItem(a()):a()=Rnd(50):Wend
+
+SortList a()
+
+ResetList a():While NextItem(a()):NPrint a():Wend
+
+;MouseWait
+;End

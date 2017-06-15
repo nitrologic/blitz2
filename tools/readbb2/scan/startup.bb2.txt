@@ -1,0 +1,24 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/workbench/startup.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/workbench/startup.bb2
+;
+; $VER: startup.bb2 40.0 (01.03.94)
+;
+
+XInclude"exec/types.bb2"
+
+XInclude"exec/ports.bb2"
+
+XInclude"libraries/dos.bb2"
+
+NEWTYPE.WBStartup
+sm_Message.Message;/* a standard message structure */
+*sm_Process.MsgPort;/* the process descriptor for you */
+*sm_Segment.b ;/* a descriptor for your code */
+sm_NumArgs.l ;/* the number of elements in ArgList */
+*sm_ToolWindow.b ;/* description of window */
+*sm_ArgList.WBArg;/* the arguments themselves */
+End NEWTYPE
+
+NEWTYPE.WBArg
+*wa_Lock.b ;/* a lock descriptor */
+*wa_Name.b ;/* a string relative to that lock */
+End NEWTYPE

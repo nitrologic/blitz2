@@ -1,0 +1,4 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/XINCLUDE.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/XINCLUDE.bb
+
+XINCLUDE incfilename$   ;this will do nothing...'incfile' has already been ;included
+

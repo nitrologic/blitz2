@@ -1,0 +1,19 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SetErr.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SetErr.bb
+
+; 
+; error handler example program 
+; 
+
+SetErr             ;install error handler
+ NPrint "RUNTIME ERROR!"     ;this is our handler...
+ NPrint "Click Mouse Button." 
+ MouseWait
+ ErrFail
+End SetErr           ;end of error handler 
+
+Dim a(10)            ;dim an array 
+For k=1 To 11          ;going to cause an error! 
+ a(k)=k 
+NPrint a(k) 
+Next
+

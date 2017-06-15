@@ -1,0 +1,79 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/dev/opendevice.bb2
+;
+;example code for opening a device...
+;
+
+#allocsignal=-330
+#freesignal=-336
+#opendevice=-444
+#closedevice=-450
+#doio=-456
+#sendio=-462
+#checkio=-468
+#waitio=-474
+#abortio=-480
+
+#alloclen=34+48+64	;reply port+iostdreq+xtra
+
+	;*
+opendevice	;a0=device name ("trackdisk.device" etc)
+	;d0=unit
+	;d1=flags
+	;return:
+	;d0=device block
+	;*
+MOVEM.l a2/a6,-(a7):MOVE.l	4.w,a6:MOVEM.l d0-d1/a0,-(a7)
+MOVE.l	#alloclen,d0:MOVE.l	#$10001,d1:JSR -198(a6)
+MOVE.l	d0,-(a7):MOVEQ #-1,d0:JSR allocsignal(a6)
+MOVE.l	(a7)+,a0:LEA 34(a0),a1:MOVE.l	a0,14(a1)
+MOVE.b	d0,15(a0):MOVE.l	276(a6),16(a0):LEA 24(a0),a2
+MOVE.l	a2,20(a0):MOVE.l	a0,28(a0):MOVEM.l (a7)+,d0-d1/a0
+MOVE.l	a1,-(a7):JSR opendevice(a6):MOVE.l	(a7)+,d0
+MOVEM.l (a7)+,a2/a6:RTS
+
+	;*
+closedevice ;a1=device block
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4.w,a6:MOVE.l	a1,-(a7)
+MOVE.b	15(a1),d2:JSR closedevice(a6):MOVE.b	d2,d0
+JSR freesignal(a6):MOVE.l	(a7)+,a1:LEA -34(a1),a1
+MOVE.l	#alloclen,d0:JSR -210(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+doio	;a1.l=device block
+	;a0.l=data
+	;d0.w=command
+	;d1.l=length
+	;d2.l=offset
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4.w,a6:MOVE	d0,28(a1):MOVE.l	d1,36(a1)
+MOVE.l	a0,40(a1):MOVE.l	d2,44(a1):JSR doio(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+sendio	;a1.l=device block
+	;a0.l=data
+	;d0.w=command
+	;d1.l=length
+	;d2.l=offset
+	;*
+MOVEM.l d2/a6,-(a7):MOVE.l	4.w,a6:MOVE	d0,28(a1):MOVE.l	d1,36(a1)
+MOVE.l	a0,40(a1):MOVE.l	d2,44(a1):JSR sendio(a6):MOVEM.l (a7)+,d2/a6:RTS
+
+	;*
+checkio ;a1.l=device block
+	;return d0=io done else d0/eq if still going
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4.w,a6:JSR checkio(a6):MOVE.l	(a7)+,a6:TST.l d0:RTS
+
+	;*
+waitio	;a1.l=device block
+	;wait till io done then return!
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4.w,a6:JSR waitio(a6):MOVE.l	(a7)+,a6:RTS
+
+	;*
+abortio ;a1.l=device block
+	;give up on IO!
+	;return d0/eq if went ok else d0/ne if error
+	;*
+MOVE.l	a6,-(a7):MOVE.l	4.w,a6:JSR abortio(a6):MOVE.l	(a7)+,a6:TST.l d0:RTS

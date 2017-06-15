@@ -1,0 +1,142 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum4/resources.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum4/resources.bb
+;********************************************************
+;*																											*
+;*			 BlitzII resources.library Include file				 *
+;*																											*
+;********************************************************
+
+XInclude exec.bb
+
+;*****************File:potgo.h
+
+Macro POTGONAME "potgo.resource" End Macro
+
+;*****************File:battmembitsshared.h
+
+#RESOURCES_BATTMEMBITSSHARED_H= 1
+#BATTMEM_SHARED_AMNESIA_ADDR= 64
+#BATTMEM_SHARED_AMNESIA_LEN= 1
+#BATTMEM_SCSI_HOST_ID_ADDR= 65
+#BATTMEM_SCSI_HOST_ID_LEN= 3
+#BATTMEM_SCSI_SYNC_XFER_ADDR= 68
+#BATTMEM_SCSI_SYNC_XFER_LEN= 1
+
+;*****************File:cia.h
+
+Macro CIAANAME "ciaa.resource" End Macro
+Macro CIABNAME "ciab.resource" End Macro
+
+;*****************File:battmem.h
+
+Macro BATTMEMNAME "battmem.resource" End Macro
+
+;*****************File:battmembitsamiga.h
+
+#RESOURCES_BATTMEMBITSAMIGA_H= 1
+#BATTMEM_AMIGA_AMNESIA_ADDR= 0
+#BATTMEM_AMIGA_AMNESIA_LEN= 1
+#BATTMEM_SCSI_TIMEOUT_ADDR= 1
+#BATTMEM_SCSI_TIMEOUT_LEN= 1
+#BATTMEM_SCSI_LUNS_ADDR= 2
+#BATTMEM_SCSI_LUNS_LEN= 1
+
+;*****************File:battclock.h
+
+Macro BATTCLOCKNAME "battclock.resource" End Macro
+
+;*****************File:filesysres.h
+
+Macro FSRNAME "FileSystem.resource" End Macro
+
+NEWTYPE.FileSysResource
+fsr_Node.Node
+*fsr_Creator.b
+fsr_FileSysEntries.List
+End NEWTYPE
+
+NEWTYPE.FileSysEntry
+fse_Node.Node
+fse_DosType.l
+fse_Version.l
+fse_PatchFlags.l
+fse_Type.l
+*fse_Task.b
+*fse_Lock.b
+*fse_Handler.b
+fse_StackSize.l
+fse_Priority.l
+*fse_Startup.b
+*fse_SegList.b
+*fse_GlobalVec.b
+End NEWTYPE
+
+;*****************File:misc.h
+
+#MR_SERIALPORT= 0
+#MR_SERIALBITS= 1
+#MR_PARALLELPORT= 2
+#MR_PARALLELBITS= 3
+#MR_ALLOCMISCRESOURCE= (#LIB_BASE)
+#MR_FREEMISCRESOURCE= (#LIB_BASE-#LIB_VECTSIZE)
+Macro MISCNAME "misc.resource" End Macro
+
+;*****************File:disk.h
+
+NEWTYPE.DiscResourceUnit
+dru_Message.Message
+dru_DiscBlock.Interrupt
+dru_DiscSync.Interrupt
+dru_Index.Interrupt
+End NEWTYPE
+
+NEWTYPE.DiscResource
+dr_Library.Library
+*dr_Current.DiscResourceUnit
+dr_Flags.b
+dr_pad.b
+*dr_SysLib.Library
+*dr_CiaResource.Library
+dr_UnitID.l[4]
+dr_Waiting.List
+dr_DiscBlock.Interrupt
+dr_DiscSync.Interrupt
+dr_Index.Interrupt
+*dr_CurrTask.Task
+End NEWTYPE
+
+#DRB_ALLOC0= 0
+#DRB_ALLOC1= 1
+#DRB_ALLOC2= 2
+#DRB_ALLOC3= 3
+#DRB_ACTIVE= 7
+#DRF_ALLOC0= (1LSL0)
+#DRF_ALLOC1= (1LSL1)
+#DRF_ALLOC2= (1LSL2)
+#DRF_ALLOC3= (1LSL3)
+#DRF_ACTIVE= (1LSL7)
+#DSKDMAOFF= $4000
+Macro DISKNAME "disk.resource" End Macro
+#DR_ALLOCUNIT= (#LIB_BASE-0*#LIB_VECTSIZE)
+#DR_FREEUNIT= (#LIB_BASE-1*#LIB_VECTSIZE)
+#DR_GETUNIT= (#LIB_BASE-2*#LIB_VECTSIZE)
+#DR_GIVEUNIT= (#LIB_BASE-3*#LIB_VECTSIZE)
+#DR_GETUNITID= (#LIB_BASE-4*#LIB_VECTSIZE)
+#DR_LASTCOMM= (#DR_GETUNITID)
+#DRT_AMIGA= ($00000000)
+#DRT_37422D2S= ($55555555)
+#DRT_EMPTY= ($FFFFFFFF)
+
+;*****************File:mathresource.h
+
+NEWTYPE.MathIEEEResource
+MathIEEEResource_Node.Node
+MathIEEEResource_Flags.w
+*MathIEEEResource_BaseAddr.w
+*MathIEEEResource_DblBasInit.w
+*MathIEEEResource_DblTransInit.w
+*MathIEEEResource_SglBasInit.w
+*MathIEEEResource_SglTransInit.w
+*MathIEEEResource_ExtBasInit.w
+*MathIEEEResource_ExtTransInit.w
+End NEWTYPE
+

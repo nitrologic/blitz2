@@ -1,0 +1,95 @@
+Library Name:
+  rianimlib #57
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, looks pretty useful this one...
+
+Authors Docs:
+
+RIAnim Library v1.0
+===================
+
+By Stephen McNamara
+(c)1994 Reflective Images
+
+This library enables the playback of both Anim5 and Anim7 format
+animations.  It allows you to playback animations at any co-ordinate in a
+bitmap and supports different palettes for frames of the animation.  It
+also allows you to playback animations from FAST ram, thus you can now play
+massive animations that can only fit in FAST ram.
+
+When playing back animations you must make sure that your display is
+double-buffered.  Please refer to the Blitz manual for information about
+how anims can be played back properly - or look at the example program
+included with this file.
+
+Note: there may still be a few bugs in the animation playback routines - if
+you have any problems or spot any bugs then please contact us at the
+address given in the main file of this archive.
+
+
+Command list:
+    [suc=]RIAnimInit(address,bitmap#,palette#[,xy_offset])
+    [suc=]RINextAnimFrame bitmap#
+    AnimLoop
+
+Statement/Function: RIAnimInit
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: [suc=]RIAnimInit(address,bitmap#,palette#[,xy_offset])
+
+  This command attempts to take an animation held in memory (CHIP or FAST)
+and identify it as a supported animation format.  If it identifies it okay
+it will set up the animation by unpacking frame 1 of the anim onto the
+specified bitmap and copying the palette to the specified palette object.
+You must ensure that the bitmap is big and deep enough to actually hold the
+animation.  At the moment there is no checking of the bitmap size.  The
+palette object you give is automatically resized to the size of the palette
+in the animation.
+
+  The optional parameter allows you to play an animation at an offset into
+a bitmap.  Thus you could center a half screen animation on a bitmap.  The
+offset is given as a byte offset from the start of each bitplane.  It is
+calculated like this:
+
+      offset=(X/8)+(Y*(pixel_width/8))
+
+      where: X and Y are your co-ordinates
+             pixel_width is the width of your bitmap.
+
+  If used as a function, this command returns true for a successful
+initialise or false for failure.
+
+
+Statement/Function: RINextAnimFrame
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: [suc=]RINextAnimFrame bitmap#
+
+  This command attempts to unpack the next frame of a previously
+initialised animation onto the specified bitmap.  It returns true or false
+to say whether it succeeded or not.
+
+
+Statement: AnimLoop
+------------------------------------------------------------------------
+Modes : Amiga/Blitz
+Syntax: AnimLoop ON|OFF
+
+  This command allows you to control the looping mode of the animation.
+With animloop off, playback of an animation will stop at the last frame of
+it.  Any attempt to draw another frame will fail.  With it on, though, the
+animation will loop around.
+
+  Note: you must ensure that your animation has loop frames at the end of
+it if you want to loop the animation around.  The reverse of this is true
+for animloop off - the animation must not have loop frames if you don't
+want it to loop around.  If you select animloop off but have looping frames
+in your anim then the animation will end by displaying a copy of frame 2
+of the animation.
+
+
+>> END

@@ -1,0 +1,91 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/STARS.BB2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/STARS.BB2
+;
+; WB Starfield hack by Iain Catterick
+;
+
+WBStartup:WbToScreen 0:ScreensBitMap 0,0
+
+NEWTYPE .STAR
+	X.q
+	OLDX.q
+	Y.q
+	SPEED.q
+	FLAG.q
+End NEWTYPE
+
+#MAXSTARS=20
+
+Dim List MYSTAR.STAR(#MAXSTARS)
+
+.START:
+
+Window 0,0,0,100,11,$E,"STARS",2,1
+
+USEPATH MYSTAR()
+
+Repeat
+
+If AddItem(MYSTAR())
+	\X=WBWidth;-Int(Rnd(40))
+	\Y=Int(Rnd(WBHeight))
+	\SPEED=(Int(Rnd(3))+1)*5
+EndIf
+
+Gosub MOVESTARS
+
+;VWait
+
+Gosub DRAWSTARS
+
+EV.l=Event
+
+Until EV=$200
+
+End
+
+
+.MOVESTARS:
+
+ResetList MYSTAR()
+
+While NextItem(MYSTAR())
+
+	If \X-\SPEED<0
+		If \FLAG=True
+			Point \X,\Y,0
+		EndIf
+		KillItem MYSTAR()
+	Else
+		\OLDX=\X
+		\X-\SPEED
+	EndIf
+
+;	Gosub DRAWSTARS
+Wend
+
+Return
+
+.DRAWSTARS:
+
+ResetList MYSTAR()
+
+While NextItem(MYSTAR())
+
+;	VWait
+
+	If \FLAG=True
+		Point \OLDX,\Y,0
+	EndIf
+
+;	VWait
+
+	If Cls(\X,\Y)=0
+		Point \X,\Y,1
+		\FLAG=True
+	Else
+		\FLAG=False
+	EndIf
+
+Wend
+
+Return

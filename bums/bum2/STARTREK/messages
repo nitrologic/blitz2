@@ -1,0 +1,47 @@
+
+;introduction:
+;
+;@FS X    - friendly starbase
+;@FP X    - friendly planet
+;@ES X    - enemy starbase
+;@EP X    - enemy planet
+;@NS X    - neutral planet
+;
+;?T X     - if flag true
+;?F X     - if flag false
+;
+;*T X     - if true, and toggle
+;*F X     - if false, and toggle
+
+
+;starbase 1 stuff...
+;
+@FS 1     ; at friendly starbase 1...
+
+*F1       ; flag 1 false?
+
+"Please go to @FP 1."
+
+?T2       ; flag 2 true?
+
+"Congratulations!"
+
+?F2       ; else...
+
+"Wrong!"
+
+
+;friendly planet 1 stuff...
+;
+@FP 1     ; at friendly planet 1...
+
+*F3       ; first time message
+
+"Please return to starbase."
+
+*T3       ;second message
+
+"You've already been here, fool."
+
+
+

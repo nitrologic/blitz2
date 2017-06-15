@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/shit/go.bb
+If ReadMem(1,"contents1")
+	FileOutput 1
+
+	If WriteMem(0,"user.contents")
+		FileInput 0
+		pp=1
+		While NOT DosBuffLen(0)
+			a$=Edit$(128)
+			If Left$(a$,1)="`"
+				a$=Mid$(a$,2)
+				pp+1
+			EndIf
+			If a$<>""
+				NPrint a$,Chr$(9),pp
+			EndIf
+		Wend
+	EndIf
+
+EndIf
+
+End

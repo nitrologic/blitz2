@@ -1,0 +1,95 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/bum6old/trev/anim_dbram.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/trev/anim_dbram.bb2
+; This is my attempt at trying to animate from FAST RAM.
+; The only way I could think of doing this was to transfer
+; the .iff images from disk to RAM: using "LoadShape" and "SaveShape".
+; Then use "LoadBitMap" to load the .iff images from RAM: in the animation loop.
+; Hence, can have lots of pictures now (not restricted just to CHIP RAM).
+;
+; But it is too slow!
+;
+; Warning: crashes with hires/interlace 16 colour pictures!
+; (due to bug with "LoadShape" command).
+;
+WbToScreen 0
+MaxLen pa$=160
+MaxLen fi$=64
+pa$="pix:scripts"
+sfname$=FileRequest$("Select a script file",pa$,fi$)
+NPrint "sfname$ =	",sfname$
+npics.w=1
+If sfname$="" Then End
+
+If OpenFile(1,sfname$)
+		If WriteMem(1,sfname$)
+				FileInput 1
+				While NOT DosBuffLen(1)
+						fname$=Edit$(80)
+						LoadShape 1,fname$,1
+						sname$="RAM:" + Str$(npics)
+						SavePalette 1,sname$,1
+						If npics=1
+								ILBMDepth fname$
+								NPrint "ilbm width	 = ",ILBMViewMode
+								NPrint "ilbm height	= ",DecodeILBM
+								NPrint "ilbm depth	 = ",##[$D087]
+								swidth=ShapeWidth(npics)
+								sheight=ShapeHeight(npics)
+								NPrint "shape width	= ",swidth
+								NPrint "shape height = ",sheight
+						EndIf
+						NPrint npics," ",fname$
+						npics=npics+1
+				Wend
+				CloseFile 1
+				DefaultInput
+		EndIf
+EndIf
+npics = npics-1
+NPrint "npics = ",npics
+;MouseWait
+
+scrwidth=320
+scrheight=256
+If ILBMViewMode>320 Then scrwidth=640
+If DecodeILBM>256 Then scrheight=512
+NPrint "Screen width = ",scrwidth
+NPrint "Screen height = ",scrheight
+NPrint "ilbmdepth = ",##[$D087]
+
+viewmode=0
+If scrwidth=640 AND scrheight=512 Then viewmode=$8004
+If scrwidth<640 AND scrheight>256 Then viewmode=$4
+If scrwidth=640 AND scrheight<512 Then viewmode=$8000
+
+; Create two screens for double buffering...
+
+Screen 0,0,0,scrwidth,scrheight,##[$D087],viewmode,"",1,2
+ScreensBitMap 0,0
+Use SetCycle 1
+BlockScroll
+
+;Screen 1,0,0,scrwidth,scrheight,ILBMDepth,viewmode,"",1,2
+;ScreensBitMap 1,1
+;Use Palette 1
+;Cls
+; Make one of them a bitmap rather than a screen...
+; This improves multi-tasking (don't see hidden screen when multi-tasking).
+BitMap 1,scrwidth,scrheight,##[$D087]
+Use SetCycle 1
+
+dbuff.w = 1
+
+; Here's the main loop.
+; "LoadBitMap" is slow - it has to decompress an .iff file into CHIP RAM.
+; A bug in "Use Palette" causes flickering with .iff files with changing palettes.
+; This is because "Use Palette" appears to change the palette of both the
+; hidden bitmap AS WELL AS the front/shown bitmap (shouldn't do this).
+While Joyb(0)=0
+	For i=1 To npics
+		lname$="RAM:" + Str$(i)
+		LoadBitMap dbuff,lname$,dbuff
+		Use SetCycle dbuff
+		ShowBitMap dbuff
+		dbuff=1-dbuff
+	Next
+Wend

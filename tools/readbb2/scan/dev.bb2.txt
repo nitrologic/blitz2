@@ -1,0 +1,160 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/mark/misc/dev.bb2
+
+#io_command=28
+#io_flags=30
+#io_error=31
+#io_actual=32
+#io_length=36
+#io_data=40
+#io_offset=44
+;
+JMP start
+
+dosnode
+				Dc.l devname
+				Dc.l drivername
+				Dc.l 0
+				Dc.l 0
+				;
+disksize
+				Dc.l 16				 ;16 entries...
+				;
+				Dc.l 128				;longs per sector
+				Dc.l 0					;sector origin
+				Dc.l 1					;number of surfaces (per cyl?)
+				Dc.l 1					;number of sectors per block
+				Dc.l 1					;number of blocks per track
+				Dc.l 2					;number reserved
+				Dc.l 0					;prealloc
+				Dc.l 0					;interleave
+				Dc.l 0					;low cyl
+				Dc.l 127				;hi cyl
+				Dc.l 0					;number of cache blocks
+
+				Dc.l 1					;mem type for buffers
+				Dc.l 1024			 ;max transfer size
+				Dc.l -1				 ;address mask
+				Dc.l 0					;boot pri
+				Dc.l $444f5301	;fast file sys
+
+devname:Dc.b "JOY",0:Event
+
+drivername:Dc.b "joy.device",0:Event
+
+;------------------- NOW FOR MY DEVICE! -----------------;
+
+.joyjumps
+JMP joy_abortio
+JMP joy_beginio
+JMP joy_extfunc
+JMP joy_expunge
+JMP joy_close
+JMP joy_open
+.joydevice
+Dc.l 0,0
+Dc.b 3,0
+Dc.l joydevname
+Dc.b 4,0
+Dc 36,devend-joydevice
+Dc 1,0		;version,rev
+Dc.l 0,0
+Dc 0
+
+.joy_open
+MOVEQ #0,d0:RTS
+
+.joy_close
+MOVEQ #0,d0:RTS
+
+.joy_expunge
+MOVEQ #0,d0:RTS
+
+.joy_extfunc
+MOVEQ #0,d0:RTS
+
+.joy_abortio
+MOVE.b #1,io_flags(a1):CLR.b io_error(a1)
+RTS
+
+.joy_beginio
+MOVE io_command(a1),d0:BCLR #15,d0
+CMP #15,d0:BGT 'err:SUBQ #2,d0:BLT 'err
+'ok
+MOVEM.l a1-a2,-(a7)
+LSL #2,d0:LEA commtable(pc),a2:MOVE.l 0(a2,d0),a2
+MOVE.l io_data(a1),a0	 ;data
+MOVE.l io_length(a1),d0 ;length for read
+MOVE.l io_offset(a1),d1 ;offset
+MOVE.l joymem(pc),a1:CMP.l 128,a1:BEQ 'ok2
+;
+MOVEQ #15,d1:MOVEQ #-1,d0:'a:MOVE #$f00,$dff180:DBF d0,'a:DBF d1,'a
+LEA exitok,a2
+;
+'ok2:JSR (a2)
+;
+MOVEM.l (a7)+,a1-a2:MOVE.b d0,io_error(a1):MOVE.l d1,io_actual(a1)
+MOVE.b #1,io_flags(a1):RTS
+;
+'err:MOVE.b #1,io_flags(a1):MOVE.b #-3,io_error(a1):RTS
+
+.joy_read
+ADD.l d1,a1:MOVE.l d0,d1:BEQ 'skip
+'loop:MOVE.b (a1)+,(a0)+:SUBQ.l #1,d0:BNE 'loop
+'skip:RTS
+
+.joy_write
+ADD.l d1,a1:MOVE.l d0,d1:BEQ 'skip
+'loop:MOVE.b (a0)+,(a1)+:SUBQ.l #1,d0:BNE 'loop
+'skip:RTS
+
+.joy_changestate
+MOVEQ #0,d1:MOVEQ #0,d0:RTS
+
+joy_protstatus
+MOVEQ #0,d1:MOVEQ #0,d0:RTS
+
+joy_changenum
+MOVEQ #1,d1:MOVEQ #0,d0:RTS
+
+joy_update
+MOVE.l d0,d1:MOVEQ #0,d0:RTS
+
+joy_motor
+MOVEQ #1,d1:MOVEQ #0,d0:RTS
+
+.commtable
+Dc.l joy_read				 ;2	read
+Dc.l joy_write				;3	write
+Dc.l exiterr					;4	update
+Dc.l exitok					 ;5	declare invalid
+Dc.l exiterr					;6	;?
+Dc.l exiterr					;7	;?
+Dc.l exiterr					;8	;?
+Dc.l exiterr					;9	motor
+Dc.l exiterr					;10 seek
+Dc.l joy_write				;11 format
+Dc.l exiterr					;12 remove int
+Dc.l exiterr					;13 changenum
+Dc.l exiterr					;14 whether disk in drive!
+Dc.l exiterr					;15 test writeprotect
+commtablef
+
+exiterr:MOVEQ #0,d1:MOVEQ #-3,d0:RTS
+
+exitok:MOVEQ #0,d1:MOVEQ #0,d0:RTS
+
+joymem:Dc.l 0
+
+joydevname:Dc.b "joy.device",0:Event
+;
+devend
+
+start
+DEFTYPE.l
+
+jm=##[$FE97](65536*2,$10001):Poke.l ?joymem,jm:Poke.l 128,jm
+##[$FEBE] ?joydevice
+
+dn=##[$F694](?dosnode):##[$F695] 0,0,dn
+
+##[$FEAB] 0

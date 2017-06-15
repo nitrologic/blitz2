@@ -1,0 +1,91 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/3d/3d.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/3d/3d.bb
+
+MOVE #$8400,$dff096
+;
+NPrint "OK!"
+;
+;OK, polytest2
+;
+Dim t.w(100)
+
+BitMap 0,320,256,3
+BitMap 1,320,256,3
+
+NEWTYPE.obj
+x.w
+y.w
+z.w
+xr.w
+yr.w
+zr.w
+f.w ;flags
+End NEWTYPE
+
+Dim List o.obj(256)
+
+For zz.l=-1024 To 1024 Step 512
+For xx.l=-1024 To 1024 Step 512
+If AddLast(o())
+	no+1
+	o()\x=xx
+	o()\y=0
+	o()\z=zz
+	;
+EndIf
+Next xx,zz
+
+BLITZ
+
+Slice 0,44,3
+
+Green 4,2,4,0
+Green 5,0,2,8
+Green 6,15,15,15
+Green 7,15,8,0
+
+Dim p.w(100)
+
+SetInt 5
+	fc+1
+End SetInt
+
+WindowSize3D 320,256,8
+
+cy=-128
+
+While Joyb(0)=0
+	;
+	Repeat:VWait:Until fc>2:fc=0
+	Show db:db=1-db:Use BitMap db ;:Cls
+	;
+;	czr+64:cxr+113
+	;
+	Camera3D cx,cy,cz,cxr,cyr,czr
+	;
+	Horizon3D 4,5
+	;
+	ResetList o()
+	While NextItem(o())
+		If o()\f
+			KillItem o()
+		Else
+			Matrix3D 0,o()\x,o()\y,o()\z,o()\xr,o()\yr,o()\zr
+			ShapeTD 0,0
+		EndIf
+	Wend
+	;
+	ocx=cx:ocy=cy:ocz=cz
+	;
+	cyr+Joyx(1)LSL 8
+	;
+	Angle3D 0,cxr,cyr,czr
+	;
+	cx+XRot3D(0,-Joyy(1)LSL 5)
+	cy+YRot3D(0,-Joyy(1)LSL 5)
+	cz+ZRot3D(0,-Joyy(1)LSL 5)
+	;
+	Render3D
+	;
+Wend
+
+End

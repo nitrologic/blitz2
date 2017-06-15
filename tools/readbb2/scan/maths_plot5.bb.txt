@@ -1,0 +1,31 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/egj/maths_plot5.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/egj/maths_plot5.bb
+;Lattice symmetry is achieved by setting x and y to periodic
+;functions of x and y prior to calculating the z.
+;This is an easy way of filling the screen with smoothly fitting pieces.
+WBStartup
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
+Green 0,0,0,0:For i=16 To 31:Green i,i-16,31-i,0:Next
+p2.f=2*Pi
+ShowScreen 0:Use BitMap 0:BlockScroll 0
+For i=0 To 63
+	x.f=(6*i)/64:x=HSin((p2*x)/6)
+	If Joyb(1)<>0:Pop For:Goto l1:EndIf
+	For j=0 To 63
+		y.f=6-(6*j)/64:y=HSin((p2*y)/6)
+		z.f=HCos(y*y)-x-HCos(HTan(x-y+HCos(x+y)))
+		zz.f=Frac(z)
+		If zz<0:zz+1:EndIf
+		zz*2:If zz>1:zz=2-zz:EndIf
+		c.w=Int(zz*16+16)
+		If c=32:c=31:EndIf
+		Point i,j,c
+Next:Next
+GetaShape 0,0,0,64,64
+For i=0 To 256 Step 64:For j=0 To 192 Step 64
+	Blit 0,i,j
+Next:Next
+l1:MouseWait
+VWait 50
+
+

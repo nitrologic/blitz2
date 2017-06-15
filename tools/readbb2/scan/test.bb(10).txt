@@ -1,0 +1,101 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/skidw/junk/test/test.bb
+;
+; get right settings for skid
+;
+
+
+Statement shapetosprite{sh.l,sp.l}
+	;
+	MOVE.l d0,a0:MOVE 22(a0),d0:MOVE.l 14(a0),a0:LEA 0(a0,d0),a1
+	MOVE.l d1,a2:MOVE 4(a2),d0:SUBQ#1,d0:MOVE.l (a2),a2
+	;
+dom:
+	MOVE.l (a2),(a0):MOVE.l 4(a2),4(a0)		 ;bp0
+	MOVE.l 8(a2),(a1):MOVE.l 12(a2),4(a1)	 ;bp1
+	ADDQ#8,a0:ADDQ#8,a1:ADD#16,a2:DBRA d0,dom
+	AsmExit
+	;
+End Statement
+
+##[$CD10] 2,64,128,5
+
+SpriteMode 2
+LoadShape 0,"truck.iff"
+Scale 0,1,1
+GetaSprite 0,0
+
+DecodePalette 0,32
+
+BitMap 0,1024,516,5
+LoadBitMap 0,"track.iff",0
+
+##[$CD10] 2,64,128,5
+CludgeBitMap 2,2
+shapetosprite{Addr MidHandle(2),Addr Sprite(0)}
+Use BitMap 2:ReMap 1,17:ReMap 2,18:ReMap 3,19
+MakeCookie 2:Blit 2,10,10
+
+BitMap 1,608,38,4:Box 0,0,607,37,1:Box 0,0,639,37,1
+
+InitCopList 0,44,38,$904,8,32,0
+DisplayAdjust 0,-4,8,0,16,32
+DisplayBitMap 0,1
+
+InitCopList 1,84,112,$12004+$c00+$10,8,32,0			;single fetch normal
+DisplayAdjust 1,-4,	8,	 0,16,0
+
+For i=0 To 12 Step 4
+	StopCycle 0,16+i+1,4,4,4
+	StopCycle 0,16+i+2,12,12,12
+	StopCycle 0,16+i+3,0,15,0
+Next
+
+DisplayPalette 1,0
+
+BLITZ
+Mouse On
+CreateDisplay 0,1
+MouseArea 0,0,1024-(540),0
+
+For i=0 To 7
+	DisplaySprite 1,0,i*32+128,50,i
+Next
+
+While Joyb(0)=0
+	VWait
+	DisplayBitMap 1,0,MouseX,0
+Wend
+
+End
+
+
+	vmode.l=$414:sprmode.w=0:paloset.w=0:
+
+	If aga Then vmode+$10000
+
+	InitCopList	0,44,76,$114,8,16,18								;ui at top
+;	InitCopList	1,47+76,280-47-76,vmode,8,16,0
+	InitCopList	1,123,157,vmode,8,16,0
+
+	If aga Then vmode+$400:sprmode=2:paloset+1
+	SpriteMode sprmode
+
+	InitCopList	2,30			 ,267,vmode ,8,16,0 ;ONE player game
+
+	InitCopList	3,30			 ,128,vmode ,8,16,0 ;TWO PLAYER GAME
+	InitCopList	4,30+131	 ,128,vmode ,8,16,0 ;second player
+
+;	InitCopList	5,28			 ,93 ,vmode ,8,16,0 ;THREE PLAYER GAME
+;	InitCopList	6,28+95		,93 ,vmode ,8,16,0 ;THREE PLAYER GAME
+;	InitCopList	7,28+95+95 ,93 ,vmode ,8,16,0 ;THREE PLAYER GAME
+
+	InitCopList	8,30+131	 ,	8,vmode+$100-$3,0, 2,0 ;chatline
+
+	For cnt.w=0 To 8
+		If (cnt<5) OR (cnt>7)
+			roll.w=-2
+			If (cnt=8) OR (cnt=0) Then roll=-4
+			DisplayAdjust cnt,roll,	8,	 0,16,0
+			If (aga) AND (cnt>0) Then DisplayControls cnt,0,0,$2010
+		EndIf
+	Next

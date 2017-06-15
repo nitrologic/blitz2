@@ -1,0 +1,26 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Filter.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Filter.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Filter.bb
+
+; 
+; filter on program example 
+; 
+Filter On 
+DiskPlay "MySound",1
+
+
+
+
+
+
+
+
+
+
+Music Modules
+
+The Soundtracker and Noisetracker format for creating sequenced music has become pretty much an Amiga standard. Blitz 2 supports commands for the loading and playing of songs ('modules') created using Soundtracker or Noisetracker compatible sequencer programs.
+
+Blitz 2 uses module objects to keep track of different pieces of music, allowing you to have more than one module loaded at a time.
+
+
+
+

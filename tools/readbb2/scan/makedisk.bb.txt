@@ -1,0 +1,74 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sw/makedisk.bb
+;
+; make guardian pattern files
+;
+
+sphead.l=$80
+spdata.l=$20000	 ; 131072
+psize.l=$20080
+
+split.l=16384
+dither.l=256
+mapdata.l=8192
+msize.l=24832		 ; split+dither+mapdata
+
+NEWTYPE .h
+	spri.w:split.w:dith.w:map.w:pad.w
+End NEWTYPE
+
+LoadBank 2,"gameinfo"
+SaveBank 2,"disk1/info"
+*a.h=Bank(2)+44
+USEPATH *a
+
+num=1
+
+While \spri<>0
+	d$=Right$(Str$(100+num),2)
+	NPrint "Pattern",d$,"	",\spri,",",\split,",",\dith,",",\map,",",\pad
+	Gosub makesprite
+	Gosub makemapdata
+	num+1:*a+10
+Wend
+
+MouseWait
+End
+
+.makemapdata
+	FreeBank 0
+	InitBank 0,msize,65536
+	bb.l=Bank(0)
+	split$="splits/split"+Right$(Str$(100+*a\split),2)
+	dith$="dithers/dither"+Right$(Str$(100+*a\dith),2)
+	map$="maps/map"+Right$(Str$(100+*a\map),2)
+	If WriteMem(0,split$) Then ##[$BE14] 0,bb,split:bb+split:CloseFile 0
+	If WriteMem(0,dith$) Then ##[$BE14] 0,bb,dither:bb+dither:CloseFile 0
+	If WriteMem(0,map$) Then ##[$BE14] 0,bb,mapdata:bb+mapdata:CloseFile 0
+	If bb<>Bank(0)+msize
+		NPrint "Error in map ",d$
+	Else
+		If ReadMem(0,"disk1/da"+d$) Then Exists 0,Bank(0),msize:CloseFile 0
+	EndIf
+	Return
+
+.makesprite:
+	n$=Right$(Str$(100+*a\spri),2):
+	FreeBank 0
+	InitBank 0,psize,65536
+	bb.l=Bank(0)
+	If WriteMem(0,"sprites/sprhead"+n$) Then ##[$BE14] 0,bb,sphead:bb+sphead:CloseFile 0
+	If WriteMem(0,"sprites/spr"+n$) Then ##[$BE14] 0,bb,spdata:bb+spdata:CloseFile 0
+	If bb<>Bank(0)+psize
+		NPrint "Error in map ",n$
+	Else
+		If ReadMem(0,"disk1/sp"+d$) Then Exists 0,Bank(0),psize:CloseFile 0
+	EndIf
+	Return
+
+	split.l=16384
+	map.l=5200
+	psize.l=sphead+spdata+split+map
+
+	NPrint "DONE!"
+	MouseWait
+	End

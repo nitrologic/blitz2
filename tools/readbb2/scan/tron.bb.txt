@@ -1,0 +1,320 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum2/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/disks/crap/examples/BlitzUserProgs/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum2/TRON/Tron.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/BlitzUserProgs/TRON/Tron.bb
+;
+; This took about an hour to write !!!
+;
+
+Dim dirx(4),diry(4)
+dirx(0)=1:diry(0)=0
+dirx(1)=0:diry(1)=1
+dirx(2)=-1:diry(2)=0
+dirx(3)=0:diry(3)=-1
+
+BitMap 0,640,256,3
+BitMap 1,640,256,3					;play area
+BitMap 2,320,128,3					;scanner 1
+LoadBitMap 0,"tron.iff",0
+LoadPalette 0,"tron.iff",8
+ShapesBitMap 0,1
+
+BLITZ
+Use BitMap 0
+BitMapInput
+BitMapOutput 0
+Slice 0,$2c,320,128,$fffa,6,8,32,320,640
+Use SetCycle 0
+Slice 1,$2c+128,320,128,$fffa,6,8,32,320,640
+Use SetCycle 0
+p1x=0
+p2x=0
+
+.START:
+Use Slice 0
+ShowF 2,0,0
+ShowB 0,0,0
+Use Slice 1
+ShowF 2,0,0
+ShowB 0,0,0
+Colour 7
+If p1x=-1
+		Use BitMap 2
+		Locate 13,10
+		Print "PLAYER 2 WINS."
+EndIf
+If p2x=-1
+		Use BitMap 2
+		Locate 13,10
+		Print "PLAYER 1 WINS."
+EndIf
+If p1x=-1 OR p2x=-1
+		Use BitMap 2
+		Locate 15,13
+		Print "Press Fire"
+		bb:VWait:If Joyb(1)<>0 Then Goto bb
+		aa:VWait:If Joyb(1)=0 Then Goto aa
+EndIf
+
+Use BitMap 0
+BlockScroll
+ShapesBitMap 1,0
+
+p1x=0
+p1d=1
+p2x=319
+p2d=-1
+
+Restore dat
+wai=0
+xx=0:yy=0
+axx=0:ayy=0
+ccc=5
+
+Use BitMap 2
+BitMapOutput 2
+Colour 6
+Locate 4,11
+Print "PRESS 1 OR 2 PLAYER FIRE BUTTON."
+Colour 7
+Locate 3,13
+Print "WRITTEN IN BLITZ 2 BY PAUL ANDREWS"
+
+frontend:
+VWait
+Use Slice 0
+ShowF 2,0,0
+ShowB 0,p1x,0
+p1x+p1d
+If p1x=319 Then p1d=-p1d
+If p1x=0 Then p1d=-p1d
+Use Slice 1
+ShowF 2,0,0
+ShowB 0,p2x,0
+p2x+p2d
+If p2x=319 Then p2d=-p2d
+If p2x=0 Then p2d=-p2d
+
+Use BitMap 2
+BitMapOutput 2
+If wai=0
+getcom:
+		Read com.q
+		If com=999 Then Restore dat:ccc=(ccc+1 MOD 8):Goto getcom
+		If com=995 Then Read xx:Read yy:Goto getcom
+		If com=996 Then Read axx:Goto getcom
+		If com=997 Then Read ayy:Goto getcom
+		If com=998 Then Read wai
+Else
+		Boxf xx,yy,xx+2,yy+2,ccc
+		xx+axx
+		yy+ayy
+		wai-1
+EndIf
+
+If Joyb(1)=1 Then players=1:Goto STARTGAME
+If Joyb(0)=1 Then players=2:Goto STARTGAME
+Goto frontend
+
+.STARTGAME
+
+Use BitMap 0
+BlockScroll
+ShapesBitMap 1,0
+Use BitMap 2
+BlockScroll
+Box 219,79,301,113,4						;x/8,y/8
+
+thrust=0
+p1x=8
+p1y=64
+p2x=400
+p2y=64
+ax1=1
+ay1=0
+dir2=2
+ax2=dirx(dir2)
+ay2=diry(dir2)
+;----------------------------------------------------------
+Statement choosedir{}
+Shared p2x,p2y,ax2,ay2,dir2,dirx(),diry()
+
+				dd=1
+				If Rnd<.3 Then dd=-1
+				try=0
+haveago:
+				p1=Cls(p2x+ax2,p2y+ay2)
+				pt=0				;legal move
+				If p1=6 OR p1=7 Then pt=1
+				If p2x+ax2<3 OR p2x+ax2>637 Then pt=1
+				If p2y+ay2<3 OR p2y+ay2>252 Then pt=1
+				If pt=0 Then Goto ok
+
+				dir2=dir2+dd
+				If dir2=4 Then dir2=0
+				If dir2=-1 Then dir2=3
+				ax2=dirx(dir2)
+				ay2=diry(dir2)
+				try+1
+				If try=2
+						try+1
+						dir2=dir2+dd
+						If dir2=4 Then dir2=0
+						If dir2=-1 Then dir2=3
+						ax2=dirx(dir2)
+						ay2=diry(dir2)
+				EndIf
+				If try<4 Then Goto haveago
+				p2x=-1:p2y=-1
+ok:
+End Statement
+;----------------------------------------------------------
+.MAIN
+
+VWait
+Use Slice 0
+psx=QLimit(p1x-160,0,320)
+psy=QLimit(p1y-64,0,128)
+ShowF 2,0,0
+ShowB 0,psx,psy
+
+Use Slice 1
+ShowF 2,0,0
+psx=QLimit(p2x-160,0,320)
+psy=QLimit(p2y-64,0,128)
+ShowB 0,psx,psy
+
+Use BitMap 0
+BitMapOutput 0
+
+Gosub UpDate
+Gosub UpDate
+
+If Joyb(0)<>0 Then End
+
+Goto MAIN
+;-----------------------------------------------------------
+.UpDate
+
+;update player 1
+
+jx=Joyx(1)
+jy=Joyy(1)
+If jx<>0 Then ax1=jx:ay1=0
+If jy<>0 Then ay1=jy:ax1=0
+p1x=p1x+ax1
+p1y=p1y+ay1
+If p1x<3 OR p1x>637 Then p1x=-1:Pop Gosub:Goto START
+If p1y<3 OR p1y>252 Then p1x=-1:Pop Gosub:Goto START
+p=Cls(p1x,p1y)
+If p=6 OR p=7 Then p1x=-1:Pop Gosub:Goto START
+Point p1x,p1y,7
+
+If Joyb(1)<>0
+		jx=Joyx(1)
+		jy=Joyy(1)
+		If jx<>0 Then ax1=jx:ay1=0
+		If jy<>0 Then ay1=jy:ax1=0
+		p1x=p1x+ax1
+		p1y=p1y+ay1
+		If p1x<3 OR p1x>637 Then p1x=-1:Pop Gosub:Goto START
+		If p1y<3 OR p1y>252 Then p1x=-1:Pop Gosub:Goto START
+		p=Cls(p1x,p1y)
+		If p=6 OR p=7 Then p1x=-1:Pop Gosub:Goto START
+		Point p1x,p1y,7
+EndIf
+
+;update player 2
+If players=2
+		jx=Joyx(0)
+		jy=Joyy(0)
+		If jx<>0 Then ax2=jx:ay2=0
+		If jy<>0 Then ay2=jy:ax2=0
+		p2x=p2x+ax2
+		p2y=p2y+ay2
+		If p2x<3 OR p2x>637 Then p2x=-1:Pop Gosub:Goto START
+		If p2y<3 OR p2y>252 Then p2x=-1:Pop Gosub:Goto START
+		p=Cls(p2x,p2y)
+		If p=6 OR p=7 Then p2x=-1:Pop Gosub:Goto START
+		Point p2x,p2y,6
+
+		If Joyb(0)<>0
+				jx=Joyx(0)
+				jy=Joyy(0)
+				If jx<>0 Then ax2=jx:ay2=0
+				If jy<>0 Then ay2=jy:ax2=0
+				p2x=p2x+ax2
+				p2y=p2y+ay2
+				If p2x<3 OR p2x>637 Then p2x=-1:Pop Gosub:Goto START
+				If p2y<3 OR p2y>252 Then p2x=-1:Pop Gosub:Goto START
+				p=Cls(p2x,p2y)
+				If p=6 OR p=7 Then p2x=-1:Pop Gosub:Goto START
+				Point p2x,p2y,6
+		EndIf
+
+Else						;computer controlled
+
+		If Rnd<.001 AND thrust=0
+				thrust=Int(Rnd(100)+75)
+		EndIf
+		choosedir{}
+		If p2x=-1 Then Pop Gosub:Goto START
+		p2x=QLimit(p2x+ax2,3,637)
+		p2y=QLimit(p2y+ay2,3,252)
+		Point p2x,p2y,6
+
+		If Joyb(1)<>0 OR thrust>0	 ;player 1 thrust...
+				choosedir{}
+				If p2x=-1 Then Pop Gosub:Goto START
+				p2x=QLimit(p2x+ax2,3,637)
+				p2y=QLimit(p2y+ay2,3,252)
+				Point p2x,p2y,6
+		EndIf
+
+		If thrust>0 Then thrust-1
+EndIf
+
+;update scanner...
+Use BitMap 2
+BitMapOutput 2
+Point 220+(p1x/8),80+(p1y/8),7
+Point 220+(p2x/8),80+(p2y/8),6
+
+Use BitMap 0
+BitMapOutput 0
+Return
+
+;------------------------------------------------------------
+dat:
+Data.q 995,110,40
+Data.q 996,0,997,-2
+Data.q 998,16
+Data.q 996,-2,997,0
+Data.q 998,8
+Data.q 996,2,997,0
+Data.q 998,16
+Data.q 995,130,40
+Data.q 996,0,997,-2
+Data.q 998,16
+Data.q 996,2,997,0
+Data.q 998,10
+Data.q 996,0,997,2
+Data.q 998,7
+Data.q 996,-2,997,0
+Data.q 998,10
+Data.q 996,2,997,2
+Data.q 998,10
+Data.q 995,160,40
+Data.q 996,0,997,-2
+Data.q 998,16
+Data.q 996,2,997,0
+Data.q 998,10
+Data.q 996,0,997,2
+Data.q 998,16
+Data.q 996,-2,997,0
+Data.q 998,10
+Data.q 995,190,40
+Data.q 996,0,997,-2
+Data.q 998,16
+Data.q 996,1,997,2
+Data.q 998,16
+Data.q 996,0,997,-2
+Data.q 998,17
+Data.q 999

@@ -1,0 +1,83 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/crap/bridge.bb
+;
+; bridge converter
+;
+
+NEWTYPE .quad
+	x.w:y:w:h
+End NEWTYPE
+
+Dim List q.quad(20)
+
+Screen 0,4
+ScreensBitMap 0,0
+Window 0,0,0,320,256,$1800,"",1,2
+BlockScroll
+
+WindowInput 0
+BitMapOutput 0
+
+LoadShape 0,"start.iff",0
+FadePalette 0
+ClipBlit 0,0,0
+
+For y=0 To 19
+	For x=0 To 19
+		Box x*8,y*8,x*8+8,y*8+8,1
+	Next
+Next
+
+Dim p(4):p(1)=10:p(2)=30:p(3)=60
+
+For x=0 To 3
+	For y=0 To 3
+		Box 200+p(x),p(y),200+p(x)+8*(x+1),p(y)+8*(y+1),1
+	Next
+Next
+
+sp=0:sb=0
+
+Repeat
+	;
+	VWait:sx=SMouseX:sy=SMouseY:a$=Inkey$:key=Asc(a$)
+	;
+	Box bx,by,bx+bw,by+bh,-1
+	bx=sx AND $fff8:by=sy AND $fff8:bw=wx*8:bh=wy*8
+	Box bx,by,bx+bw,by+bh,-1
+	;
+	If Joyb(0)=1
+
+		If PColl(sx,sy,1,1,200,0,100,100)
+			For x=0 To 3
+				For y=0 To 3
+					If PColl (sx,sy,1,1,200+p(x),p(y),8*(x+1),8*(y+1))
+						wx=x+1:wy=y+1
+					EndIf
+				Next
+			Next
+		EndIf
+
+		If PColl(sx,sy,1,1,0,0,160,160)
+			Box bx,by,bx+bw,by+bh,5
+			If AddItem(q())
+				q()\x=bx,by,bw,bh:sp+1:sb+bw*bh/2
+			EndIf
+			While Joyb(0)<>0:VWait:Wend
+		EndIf
+
+	EndIf
+
+	If key=127
+		If LastItem(q())
+			USEPATH q()
+			Box \x,\y,\x+\w,\y+\h,1
+			KillItem q()
+		EndIf
+	EndIf
+
+	Locate 0,21:Print "Sprites=",sp," Bytes=",sb,"			 "
+	Locate 0,22:Print key,"	"
+
+Until key=27
+
+End

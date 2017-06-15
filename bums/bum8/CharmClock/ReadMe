@@ -1,0 +1,347 @@
+About CharmClock v 2.4
+
+Made by:	Vegard Riseng
+Made with:	Blitz Basic 2
+Date:		8. December 1994
+
+
+Why a new Workbench clock?
+--------------------------
+
+Why not? Isn't it nice?
+
+The reason why I made CharmClock, is that I wanted
+a clock that didn't have any annoying window. I Wanted
+it to fit right into the background. I also wanted
+a clock where I could select exactly which colours I
+wanted. All of this, and more, is offered by CharmClock.
+
+
+Lega stuff:
+-----------
+
+By using CharmClock, you agree in the following:
+
+The user (you) assumes all risk for his system. If Charm
+Clock, alone or together with other programs, should cause
+a system crash - it is the users responsability. Any damages
+related to the malfunction of CharmClock is at the users
+cost. This goes for hardware damage aswell as loss of data.
+
+CharmClock is a socalled "FreeWare" product. This means
+it is free of charge to use and copy. There are no limitations
+regarding the distribution of the program, except that beeing
+a "FreeWare"-product means it should not be sold for profit.
+It is the intention that all who wants to use the program,
+is supposed to get it free of charge. Magazines and PD libraries
+are, however, allowed to charge a nominal fee to cover their costs.
+
+CharmClock is released "AS-IS", and might be subject to changes
+without any further notice. The program is belived to be free of
+errors (except what is specified under "KNOWN BUGS"), but the
+programmer CAN NOT give any warranties about its functionallity
+in all configurations.
+
+If you disagree in any of the above, you CAN NOT use CharmClock.
+
+
+The functions of CharmClock:
+----------------------------
+
+If it's the first time you execute CharmClock, a borderless window
+will be opened. In this window the clock will be drawn. By clicking
+on the clock with the mouse, the window is activated. The Screen
+title will change to "CharmClock v2.4 © 1994 by Vegard Riseng -
+FreeWare", and the windows menus are now accessable.
+
+the "Project" Menu:
+-------------------
+
+-About CharmClock	...displays a small information requester.
+
+-Reset To Default	...resets all the environment variables
+			   to default. Thise values are designed
+			   for a 4 colours standard/interlaced
+			   Workbench screen.
+
+-Last Saved		...attempts to read the last saved 
+			   environment variables from the file
+			   "Env:CharmClock.pre". If the file
+			   don't exist, CharmClock will try to
+			   read the file "EnvArc:CharmClock.pre".
+			   If this file don't exist either, the
+			   variables will remain unchanged.
+
+-Save Settings		...attempts to save the settings as
+			   "Env:CharmClock.pre" and "EnvArc:
+			   CharmClock.pre".
+
+-Quit			...quits the program.
+
+
+The "Settings" menu:
+--------------------
+
+The 9 -nine- first items in the settings menu, are colour settings.
+Each of these brings up a submenu with 8 -eight- possible colours.
+"Pen 0" refers to the first colour in your Workbench palette, "Pen 1"
+refers to the next and so on. You can't adjust the colours from these
+settings, as they use colours from the Workbench palette.
+
+If CharmClock is opened on a four colour Workbench-screen, "Pen 4" will
+be the same colour as "Pen 0", even though it will be saved as "Pen 4"
+in the settings file. "Pen 5" will be the same colour as "Pen 1" and so
+on.
+
+If you open CharmClock on a sixteen colour Workbench-screen, things get 
+a little more complexed. This is because different versions of 
+Workbench behave different. On Workbench 3.0 and higher, the eight
+colours you can set trough the palette preferences are not placed 
+sequentially after eachother anymore, while Workbench 2.0 allows you
+to set all the 16 colours manually. If you use sixteen or more colours,
+the "4 Colours" option described below is handy...
+
+
+The "Window" submenu:
+---------------------
+
+-4 Colours		...if this option is checked, CharmClock
+			   will use only the 4 first colours of
+			   the Workbench palette, no matter how
+			   many colours Workbench has.
+
+-8 Colours		...allows you to use 8 colours, but only
+			   if Workbench-screen is in 8 or more
+			   colours.
+
+-Interlace?		...CharmClock was originally designed to
+			   look nice on a DBLPal (Nonflicker) display.
+			   To make it look better on standard Workbench
+			   screens, some changes were made. CharmClock
+			   will figure out for itself if your display is
+			   "interlaced" or not. However, some users might
+			   wish to change this setting. The setting will
+			   NOT be saved in the config-file.
+
+-Use Backdrop?		...with this setting checked, CharmClock will use
+			   a "Backdrop" type off window. The Backdrop
+			   windows are meant to be behind all othe windows
+			   and has therefore no depth arranging gadgets.
+			   However, while staying behind all other windows,
+			   backdrop windows will be infront of anything
+			   drawn directly on the screen.
+
+-Borderless?		...with this setting checked, the window will open
+			   without any frame - which is how it was meant
+			   to be. However, some people have advanced
+			   background graphics in Workbench. CharmClock
+			   will in case of conflict with background graphics
+			   appear to have a solid box around it. This is
+			   perhaps more annoying than having window borders.
+			   If you prefer borders, you will also get some
+			   system gadgets. Which gadgets you get, is
+			   depending on whether you use a backdrop window
+			   or not.
+--------------------------
+
+-Position/Size		...This function is disabeled if both "Use
+			   Backdrop?" and "Borderless?" are unchecked.
+			   It allows you to position and size the area
+			   CharmClock uses. When you select this option,
+			   CharmClock will open a new, blank window on top
+			   of itself. Move and resize this window until
+			   you are satisfied, then close it by hitting the
+			   system "close"-gadget. CharmClock will then
+			   resize and move to this new location.
+--------------------------
+
+The "Sound" submenu:
+--------------------
+
+Select one of the following:
+
+-Off			...for no sound, except for the alarm (See "Alarm")
+
+-Every Hour		...for a double beep each hour on the hour.
+
+-Every 30 Min		...for a double beep each hour on the hour, and 
+			   a single beep each half hour. 
+
+-Every 15 Min		...for a double beep each hour on the hour,
+			   a single beep each half hour, and
+			   a single beep each quarter to or past the hour.
+
+Note: There might be some problem with some programs if sound is on. 
+      See: KNOWN BUGS
+
+--------------------------
+
+The "Secounds hand" submenu:
+----------------------------
+
+Select whether to use a secounds hand or not.
+
+
+
+The "Alarm" menu:
+-----------------
+
+-Alarm 			...brings up a submenu where the alarm can be
+			   turned on or off.
+
+-Set Timer...		...brings up a new window where the alarm-time
+			   can be set.
+
+			   The time is adjusted by dragging the slider
+			   gadgets until the correct time is displayed.
+
+			   By hitting the "Set" gadget, the new alarm
+			   time is stored, and the alarm is turned on.
+			   The word "Alarm" will apear on the clock,
+			   if the size is big enough.
+
+			   By hitting the "Cancel" or system "close"
+			   gadget, the window is closed without any
+			   change of the settings.
+
+
+The "Task Priority" menu:
+-------------------------
+
+Select which priority to run CharmClock at. The higher numbers, the higher
+priority. Since displaying a clock is a task of no importance when things
+get rough, the highest possible priority is 0. This is the priority most
+commodities use. Default is -128.
+
+------------------------------------------------------------------
+
+Ok, that's about it, but let's have a look at CharmClock:
+
+     _____
+    /     \
+   /   |   \
+  |  Al|rm  |
+  |    |    |
+  |    +   8|
+  |   /     |
+  |  /harm  |
+   \       /
+    \_____/
+
+This is a clock which is either 7 or 8, So much for my drawing skills.. ;-)
+
+As you see on the far right side of the clock, it is the 8th day of the 
+month.
+
+The Alarm indicator is on, which means there is something to remeber...?!
+
+The word "Charm" is always present, and is simply the brand name...
+You can remove the word by altering the text colour, but setting the
+colour for this word also sets the colour for the alarm indicator.
+
+
+-----------------------------------------------------------
+
+When the alarm sounds:
+----------------------
+
+...The word "Alarm" start blinking. It will do so until either
+the alarm is turnes off, or one hour has passed since alarmtime.
+
+...The alarm will sound. The rapid and constant repeating of a
+digital beep makes considerable noise for either 6 minutes, or
+until the alarm is turned off.
+
+After one hour, CharmClock will give up it's attempt and turn the
+alarm off. However, if CharmClock is not running exectly one hour
+after alarm time, the alarm will not be turned off. This means:
+If you are 100% certain you turned the alarm on, and CharmClock shows
+no alarm indicator --- bad luck!!! You have forgotten something!
+
+-----------------------------------------------------------
+
+
+The configuration file:
+-----------------------
+
+The following information is stored:
+
+-The windows positionig and size
+-Number of colours used.
+-All the pen settings.
+-Window type (Backdrop/Borderless)
+-Alarm time, and whether the alarm is turned on or off.
+-Task Priority
+-Sound settings
+-Secounds on/off
+
+Interlace on/off is NOT stored!
+
+DO NOT EDIT THE FILE BY HAND!!!!
+
+You need to assign "Envarc:" to some directory on your (hard)disk,
+i.e.:
+
+Assign EnvArc: Sys:Prefs/EnvArc/
+
+Preferably, you have this assign aswell:
+
+Assign Env: RAM:Env/
+
+-----------------------------------------------------------
+
+Other vital information:
+------------------------
+
+KNOWN BUGS:
+-----------
+
+-Bugs with Eagleplayer. (When beeping)
+ (Shame on me! I do not allocate the audiochannels before I go
+ ahead and use them....   Sorry!!! Will be fixed some time.)
+
+
+TODO:
+-----
+
+-Add silent alarm option. (Use requester as alarm)
+-Allocate the audiochannels before use...
+-Reduce program size!
+-Increase program speed!!
+-Other things? Maybe expand to something like "Lotus Organizer"(TM) on
+ IBM and compatibles??? ;-)
+
+
+HOW TO REACH...
+---------------
+
+Vegard Riseng
+Krakkeplassvegen 11
+N-2900  FAGERNES
+NORWAY
+
+(Sorry! Snail-mail only!)
+
+DO NOT SEND:
+-Pirate copies
+-Bombs
+-Your bills...
+-Any illegal/stolen stuff
+
+
+Please send:
+-Suggestions on CharmClock or other tools.
+-Your own programs.
+-All the PD/SW etc. software you have!
+
+
+I will become very happy if you send:
+-A lot of money
+-Nice Hardware for A4000
+-Job offers
+-A new car
+
+...and so on... 
+
+
+THE END

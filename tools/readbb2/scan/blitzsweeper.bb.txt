@@ -1,0 +1,413 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/Games/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abc/bums/out/new/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/Games/Sweeper/BlitzSweeper.bb,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/new/Sweeper/BlitzSweeper.bb
+Ver$ = "Blitz Sweeper 18.7.1995 Timo Suoranta"
+
+; No graphics & colours like Workbench?
+; Yep - You once again forgot the CD button!
+
+; Hold down Left & Right MouseButton to Quit
+; Left MouseButton to check.
+; Right MouseButton to warningflag.
+
+
+SetErr:End:End SetErr								 ; Add ; to enable Debugger
+
+WBStartup														 ; A Must for WB progs
+CloseEd															 ; Editor run only; free mem.
+NoCli																 ; Editor run only; free mem.
+DEFTYPE .w														; Mostly sufficient, quite fast
+
+Gosub Variable_Init
+Gosub Graphics_Init
+Goto MAIN
+
+
+.
+.Variable_Init												; Define Variables
+
+	NEWTYPE .coord											; Coordinate Type
+		x.b
+		y
+	End NEWTYPE
+
+	#MMX	=	50												 ; Minefield Max. Width
+	#MMY	=	30												 ; Minefield Max. Height
+
+	#BXX	=	 8												 ; Block Shape Width
+	#BYY	=	10												 ; Block Shape Height
+	#DXX	=	10												 ; Digit Shape Width
+	#DYY	=	16												 ; Digit Shape Height
+	#PXX	=	22												 ; Panel Shape Width
+	#PYY	=	16												 ; Panel Shape Height
+
+	#GSC	=	 0												 ; Game Screen
+
+	#GBM	=	 0												 ; Game BitMap
+	#IBM	=	 1												 ; Init BitMap
+
+	#GPAL =	 0												 ; Game Palette
+
+	SXX	 = 320												 ; Game Screen Width
+	SYY	 = 256												 ; Game Screen Height
+	SBP	 =	 4												 ; Game Screen Depth, 2^4 = 16 Colour
+	ID		=	 0												 ; Game Screen ViewMode
+
+	#Blocks	= 19											 ; Number of Block Shapes
+	#Digits	= 12											 ; Number of Number Digit Shapes
+	#Buttons = 8												; Number of Panel Button Shapes
+
+	#Blk_Sps = 0												; Block Shapes Offset
+	#Dgt_Sps = 19											 ; Digital Number Shapes Offset
+	#Btn_Sps = 29											 ; Panel Button Shapes Offset
+
+	Dim mf.b(#MMX,#MMY)								 ; MineField Table
+	Dim mfs.b (32)											; MineField Table Data->Block Shape
+	Dim stack.coord (#MMX*#MMY)				 ; Stack for Uncheck Coords (AutoCheck)
+	Dim pm.coord (10)									 ; Position Modifires
+	pm(0)\x =	0, 0
+	pm(1)\x = -1,-1
+	pm(2)\x =	0,-1
+	pm(3)\x =	1,-1
+	pm(4)\x =	1, 0
+	pm(5)\x =	1, 1
+	pm(6)\x =	0, 1
+	pm(7)\x = -1, 1
+	pm(8)\x = -1, 0
+
+	For n=0	To	9 : mfs(n)=n+1 :Next
+	For n=10 To 21 : mfs(n)=n-9 :Next
+
+	; MineField Values
+	;
+	; Values	 What's it		Checked	 Shape
+	;
+	;		n<9 = n mines			Not			 0
+	;			9 = Mine Here		Not			 0
+	; 9<n<19 = n-10 mines	 Yes			 n-9
+	;		 19 = Mine Here		Yes			 10
+
+	; Block Shapes:
+	;
+	;	 0 = Not Checked
+	;	 1 = 0 mines
+	;	 2 = 1 mine
+	;	 3 = 2 mines
+	;	 4 = 3 mines
+	;	 5 = 4 mines
+	;	 6 = 5 mines
+	;	 7 = 6 mines
+	;	 8 = 7 mines
+	;	 9 = 8 mines
+	;	10 = Mine
+	;	11 = Flag
+	;	12 = Undecided
+	;	13 = Vertical Wall
+	;	14 = Horizontal Wall
+	;	15 = TopLeft WallCorner
+	;	16 = TopRight WallCorner
+	;	17 = BottomLeft WallCorner
+	;	18 = BottomRight WallCorner
+	Return
+
+
+
+
+.
+.Globals
+Macro Globals												 ; Global vars
+	Shared Ver$												 ; Version String
+	Shared SXX,SYY,SBP									; Screen Size & Depth
+	Shared GrS,GrY											; Grabber Shape Number & YPos
+	Shared MFX,MFY											; MineField Grfx Offset
+	Shared mf(),mfs(),pm.coord()				; MineField, Filed->Shape, Position Modifiers
+	Shared MXX,MYY,Mines								; MineField Specs.
+	Shared StackBottom,StackTop				 ; Stack Bottom & Top pointers
+	End Macro
+
+.MyBlit
+Macro MyBlit
+	Blit #Blk_Sps+(`1), MFX+(`2)*#BXX,MFY+(`3)*#BYY
+	End Macro
+
+
+
+
+.
+.Grab
+Statement Grab {Count,Width,Height}	 ; Shape Grabber
+	!Globals
+
+	For x=0 To Count-1
+		GetaShape GrS,x*Width,GrY,Width,Height
+		GrS + 1
+	Next
+	GrY + Height
+End Statement
+
+.Digi
+Statement Digi {Value$,xPos,yPos}
+	!Globals
+
+	For p=1 To Len(Value$)
+		v = Asc(Mid$(Value$,p,1))
+		Select v
+			Case 46 : v = 0	: XL = 3
+			Case 32 : v = 1	: XL = #DXX
+			Default : v - 46 : XL = #DXX
+		End Select
+		Blit #Dgt_Sps+v,xPos,yPos
+		xPos + XL
+	Next
+End Statement
+
+
+
+
+.
+.CheckMine
+Function.b CheckMine {x,y,modf}
+	!Globals
+
+	xModified = x + pm(modf)\x
+	yModified = y + pm(modf)\y
+
+	value = mf(xModified,yModified)
+
+	ret.b = 0
+
+	If xModified>0 AND yModified>0 AND xModified<=MXX AND yModified<=MYY
+		If value=9 OR value=19
+			ret.b = 1
+		EndIf
+	EndIf
+	Function Return ret
+	End Function
+
+
+
+
+.
+
+.Graphics_Init												; Set Up Graphics
+	Screen #GSC,0,0,SXX,SYY,SBP,ID,Ver$,0,2
+	ScreensBitMap #GSC,#GBM
+	BitMap #IBM,320,256,4
+
+	##[$A486] "Data/BlockShapes.Iff",#IBM,#GPAL
+	Use BitMap #IBM
+
+	GrS = 0 : GrY = 0									 ; Reset Grabber
+	Grab {#Blocks ,#BXX,#BYY}					 ; Grab Block Shapes
+	GetaShape GrS,11*#DXX,GrY,3,#DYY	: GrS + 1	; Grab comma
+	Grab {#Digits ,#DXX,#DYY}					 ; Grab Number Digit Shapes
+	Grab {#Buttons,#PXX,#PYY}					 ; Grab Panel Button Shapes
+	Free BitMap #IBM										; Free WorkBitMap
+
+	Use BitMap #GBM
+	Use SetCycle #GPAL
+	Format "####"
+	Return
+
+
+
+
+
+
+.
+.MAIN
+
+	MXX			= 38											 ; Set Map Size
+	MYY			= 20
+	Mines		= 150											; Number of Mines
+	NotMines = MXX*MYY-Mines						; Number of clear spots
+
+	MFX = 0														 ; Set MineField Grfx Offset
+	MFY = 12+#PYY
+
+	Repeat
+		Gosub Play
+		##[$B38C]
+	Forever
+	End
+
+
+.Play
+	Hit				= False									; 'Hit the Mine' ?
+	Checked		= 0											; Spots done
+	OldChecked = 1											; 'Old' Spots done
+
+	IX1 = MFX													 ; Calc InfoPanel Positions
+	IY1 = MFY-#PYY
+	IX2 = MFX+(MXX+2)*#BXX-4*#DXX-3
+	IY2 = IY1
+
+	Gosub InitMineField								 ; Set Up MineField
+	Gosub InitDrawMineField						 ; Draw it
+
+	Time.q		= 0
+	OldTime.l = ##[$A588]
+
+	Format "##0"	 : Digi {Str$(NotMines),IX1,IY1}		 ; Display 'Spots to be Checked'
+	Format "##0.0" : Digi {Str$(Time),IX2,IY2}				 ; Display Timer
+
+	Repeat															; Loop Until Success or Hit Mine
+
+		CurrTime.l = ##[$A588]								; Update Timer
+		If CurrTime>OldTime+5
+			OldTime = CurrTime
+			Time		+ .1
+			Format "###.#" : Digi {Str$(Time),IX2,IY2}
+			If Time=999										 ; Time Out!
+				Hit = True
+			EndIf
+		EndIf
+
+		If Joyb(0)>0											; User Action ?
+			x = (SMouseX-MFX)/#BXX					; Watch out SMouseX on overscanned screens..
+			y = (SMouseY-MFY)/#BYY
+			If x>0 AND y>0 AND x<=MXX AND y<=MYY
+				If Joyb(0)=1 : Gosub CheckIt :EndIf	; Check
+				If Joyb(0)=2 : Gosub MarkIt	:EndIf	; Mark
+				If Joyb(0)=3 : End					 :EndIf	; Quit
+			EndIf
+		EndIf
+
+	Until Hit OR Checked=NotMines			 ; End of Loop
+
+	If Checked<NotMines								 ; Fail
+		Gosub DrawMineField
+	EndIf
+	Return															; Back to Main 'Interface' :-)
+
+
+.CheckIt															; Manual Check single Spot
+	v = mf(x,y)
+	If v<10														 ; Not checked already?
+		If v=9
+			Hit = True											; Mine!
+		Else
+			If v=0
+				Gosub AutoCheck							 ; Activate AutoCheck
+			Else
+				mf(x,y) + 10									; Mark Checked
+				Checked +	1									; Count them
+				!MyBlit{ mfs(mf(x,y)),x,y }	 ; Update Grfx
+			EndIf
+			Format "###" : Digi {Str$(NotMines-Checked),IX1,IY1}
+		EndIf
+	EndIf
+	Return
+
+.AutoCheck														; AutoCheck empty areas
+	StackTop		= 0										 ; Here I put things I haven't checked
+	StackBottom = 0										 ; Here I am checking things
+
+	stack(StackTop)\x = x,y : StackTop + 1					; Put first item to stack
+	mf(x,y) + 10																		; Mark it checked!
+
+	While StackBottom<StackTop											; Check all what is put to stack
+
+		x = stack(StackBottom)\x											; Take one item from stack
+		y = stack(StackBottom)\y : StackBottom + 1
+		v = mf(x,y)
+
+		Checked + 1											 ; Count
+		!MyBlit { mfs(mf(x,y)),x,y }			; Update Grfx
+
+		If v=0 OR v=10										; If this was empty, put neighbours to stack
+
+			For modf=1 To 8								 ; Loop all directions..
+
+				xModified = x + pm(modf)\x		; Modified 'Neighbour' Position
+				yModified = y + pm(modf)\y
+
+				; It must be INSIDE MineField
+
+				If xModified>0 AND yModified>0 AND xModified<=MXX AND yModified<=MYY
+
+					; Only put UNCHECKED spot to stack
+
+					If mf(xModified,yModified)<10
+						stack(StackTop)\x = xModified,yModified : StackTop + 1
+						mf(xModified,yModified) + 10					; Mark this spot Checked
+					EndIf
+				EndIf
+
+			Next														; End of Directions.. loop
+		EndIf														 ; End of Neighbour checking loop
+	Wend																; End of Stack processing loop
+	Return
+
+.MarkIt															 ; Place WarningFlag
+	If mf(x,y)>9 : Return :EndIf				; If already checked, quit
+	!MyBlit { 11,x,y}
+	Return
+
+
+
+
+
+.
+.InitMineField												; Init MineField; place Mines etc.
+
+	For y=1 To MYY											; Clear it
+		For x=1 To MXX
+			mf(x,y)=0
+		Next
+	Next
+
+	For n=1 To Mines										; Place Mines
+		MineOk = False
+		Repeat
+			x = Rnd(MXX-1)+1								; Random Position
+			y = Rnd(MYY-1)+1
+			If mf(x,y)=0										; Must be empty
+				mf(x,y) =		9
+				MineOk	= True
+			EndIf
+		Until MineOk											; Retry until place ok
+	Next
+
+	For y=1 To MYY											; Precalculate MineField Values
+		For x=1 To MXX
+			If mf(x,y)=0										; Do not overwrite mines
+				For modf=1 To 8							 ; Calc Neighbour-Mines
+					mf(x,y) + CheckMine {x,y,modf}
+				Next
+			EndIf
+		Next
+	Next
+	Return
+
+
+.InitDrawMineField										; Draw Untouched MineField
+	For y=1 To MYY
+		!MyBlit { 13,		0,y }						; Left Wall
+		!MyBlit { 13,MXX+1,y }						; Right Wall
+		For x=1 To MXX
+			!MyBlit { 0,x,y }							 ; MineField
+		Next
+	Next
+	For x=1 To MXX
+		!MyBlit { 14,x,		0 }						; Top Wall
+		!MyBlit { 14,x,MYY+1 }						; Bottom Wall
+	Next
+	!MyBlit { 15,		0,		0 }					; TopLeft Corner
+	!MyBlit { 16,MXX+1,		0 }					; TopRight Corner
+	!MyBlit { 17,		0,MYY+1 }					; BottomLeft Corner
+	!MyBlit { 18,MXX+1,MYY+1 }					; BottomRight Corner
+	Return
+
+.DrawMineField												; Reaveal entire MineField
+	For y=1 To MYY
+		For x=1 To MXX
+			!MyBlit { mfs(mf(x,y)),x,y }
+		Next
+	Next
+	Return
+
+
+
+
+
+
+

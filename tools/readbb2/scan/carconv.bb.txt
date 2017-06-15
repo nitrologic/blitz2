@@ -1,0 +1,139 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/skid/imagine/carconv.bb
+
+NEWTYPE .frame
+	size.l
+	a.l[192]
+End NEWTYPE
+
+Dim fr.frame(800)
+
+f$="f1"
+
+Gosub getsprite
+
+BitMap 0,1280,320,3
+For i=1 To 4
+	LoadBitMap 0,"f1:skid/cars/logos/"+f$+Str$(i)+".8"
+	y=0
+	Repeat
+		gfr=Int(fr/32)*32+31-((fr+40) MOD 32)
+		GetaShape 0,x,y,64,32
+		Gosub dosprite
+		fr+1
+		x+64:If x=1280 Then y+32:x=0
+	Until y=320
+Next
+
+NPrint tot.l
+
+If ReadMem(0,"ram:"+f$+".aga")
+	FileOutput 0
+	stt.l=800*4
+	For i=0 To 799:Print Mkl$(stt):stt+fr(i)\size:Next
+	For i=0 To 799
+		Exists 0,&fr(i)\a[0],fr(i)\size ; Peek.l(Addr SpriteMode(i)),512
+	Next
+	CloseFile 0
+EndIf
+
+;SaveSprites 0,799,"ram:car3.spr"
+
+End
+
+
+Function.l compress{s.l,d.l}
+	UNLK a4:MOVE.l d0,a0:MOVE.l d1,a1
+	LEA space(pc),a2:MOVE#63,d0
+loop2:
+	MOVE.l 512(a0),(a2)+:MOVE.l 0(a0),(a2)+:MOVE.l 256(a0),(a2)+:
+	ADDQ#4,a0:DBRA d0,loop2
+	LEA space(pc),a0:LEA 768(a0),a2		;a0=strs a2=stop
+ nxch:CMP.l a0,a2:BEQ dunc
+			MOVE.b (a0)+,d3:CMP.l a0,a2:BEQ last1
+			MOVE.b (a0)+,d4:CMP.l a0,a2:BEQ last2
+			CMP.b d3,d4:BNE diff:CMP.b (a0),d3:BEQ same
+ diff:MOVEQ#0,d2:MOVE.l a0,a3
+ nxdc:CMP.b (a3),d4:BNE stif:CMP.b 1(a3),d4:BEQ gotd
+ stif:ADDQ#1,d2:CMP #127,d2:BEQ gotd
+			MOVE.b (a3)+,d4:CMP.l a3,a2:BNE nxdc
+ gotd:SUBQ#2,a0:MOVE.b d2,(a1)+
+ movd:MOVE.b (a0)+,(a1)+:DBRA d2,movd:BRA nxch
+ same:MOVE#255,d2
+ nxrp:CMP.b (a0),d3:BNE gotr:ADDQ#1,a0:SUBQ#1,d2:CMP #$81,d2:BEQ gotr
+			CMP.l a0,a2:BNE nxrp
+ gotr:MOVE.b d2,(a1)+:MOVE.b d3,(a1)+:BRA nxch
+ last2:MOVE.b #1,(a1)+:MOVE.b d3,(a1)+:MOVE.b d4,(a1)+:BRA dunc
+ last1:MOVE.b #0,(a1)+:MOVE.b d3,(a1)+
+ dunc:MOVE.l a1,d0:RTS
+ space:Ds.b 768
+End Function
+
+
+Statement getcopy{a.l,b.l,c.w}	;dest src color = byterun to 16 color
+	UNLK a4
+	MOVE.l d0,a0:MOVE.l d1,a1:LEA space2(pc),a2:LEA 768(a2),a3
+
+	nxbyte:MOVEQ#0,d0:MOVE.b (a1)+,d0:BMI dorept
+	dodiff:MOVE.b (a1)+,(a2)+:DBRA d0,dodiff:CMP.l a2,a3:BGT nxbyte:BRA gogo
+	dorept:NEG.b d0:MOVE.b(a1)+,d1
+	splat:MOVE.b d1,(a2)+:DBRA d0,splat:CMP.l a2,a3:BGT nxbyte
+
+gogo:
+	ASL#3,d2:LEA colid(pc),a2:MOVEM.l 0(a2,d2),a2-a3:MOVE #31,d0
+	LEA space2(pc),a1
+
+loop:
+	MOVEM.l (a1)+,d1-d3
+	MOVE.l d2,d4:MOVE.l d3,d5:AND.l d1,d2:AND.l d1,d3
+	NOT.l d1:AND.l d1,d4:AND.l d1,d5
+	NOT.l d1:MOVE.l a2,d6:MOVE.l a3,d7:AND.l d1,d6:AND.l d1,d7
+	OR.l d6,d4:OR.l d7,d5
+	MOVE.l d3,8(a0):MOVE.l d4,1280(a0):MOVE.l d5,1288(a0):MOVE.l d2,(a0)+
+	MOVEM.l (a1)+,d1-d3
+	MOVE.l d2,d4:MOVE.l d3,d5:AND.l d1,d2:AND.l d1,d3
+	NOT.l d1:AND.l d1,d4:AND.l d1,d5
+	NOT.l d1:MOVE.l a2,d6:MOVE.l a3,d7:AND.l d1,d6:AND.l d1,d7
+	OR.l d6,d4:OR.l d7,d5
+	MOVE.l d3,8(a0):MOVE.l d4,1280(a0):MOVE.l d5,1288(a0):MOVE.l d2,(a0)
+	ADD #12,a0:DBRA d0,loop
+	RTS
+
+colid:Dc.l 0,0,0,-1,-1,0,-1,-1
+
+space2:Ds.b 768
+
+			 ; Ds.b 2048
+
+End Statement
+
+dosprite
+	s.l=Peek.l(Addr MidHandle(0)+14)
+	p.l=Peek.l(Addr Sprite(0))
+	d.l=&fr(gfr)\a[0]
+	dd.l=compress{s,d}-d
+	fr(gfr)\size=dd:NPrint gfr,"	 ",dd:tot.l+dd
+	Return
+
+;	getcopy{p,d,0}	;sprite,address,car
+;	Gosub showspri
+;	MouseWait:End
+
+getsprite
+	SpriteMode 2
+	BitMap 1,320,256,4
+	Circlef 32,32,32,7
+	GetaShape 0,0,0,64,80
+	GetaSprite 0,0
+	Return
+
+showspri:
+	InitCopList 0,44,256,$801,8,32,0
+	LoadPalette 0,"testpalette",16
+	AGAGreen 0,0,64,240,64
+	BLITZ
+	CreateDisplay 0
+	DisplayBitMap 0,1
+	DisplayPalette 0,0
+	DisplaySprite 0,0,50,50,0
+	MouseWait
+	Return

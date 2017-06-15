@@ -1,0 +1,758 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/dev/scroll.bb
+.N
+
+
+
+#a=1
+#j=2
+#s=3
+
+#c=#j
+
+
+
+CNIF #c=#j
+	If Peek.w($f00004)=Peek.w($f00004)
+		End
+	EndIf
+
+CEND
+
+
+Statement Safe{}
+	CNIF #c=#j
+		MOVE.l #320000,d0
+		toplup
+			MOVE d0,$f0002a
+			SUBQ.l #1,d0
+		BGE toplup
+	CEND
+	CNIF #c=#a
+;		MouseWait
+	CEND
+
+End Statement
+
+
+CNIF #c=#j
+	BSR initjagos
+CEND
+
+
+Gosub InitOs
+Gosub InitMem
+Gosub InitVars
+Gosub SetUpWorld
+Gosub DoMain
+
+End
+
+
+
+
+.NTypes
+NEWTYPE .phrase:a.l:b.l:End NEWTYPE
+NEWTYPE .jbmap
+
+	dwidth.w	 ;0
+	dheight.w	;2
+	iwidth.w	 ;4
+	iheight.w	;6
+
+	dtype.w		;8
+	depth.w		;10
+	pitch.w		;12
+
+	idata.l		;14
+	ilink.l		;18
+
+	xpos.w		 ;22
+	ypos.w		 ;24
+	iscroll.w	;26
+	flags.w		;28
+
+	hscale.b	 ;30
+	vscale.b	 ;31
+
+	firstphrase.phrase ;32
+	secondphrase.phrase
+	thirdphrase.phrase
+
+	pixwidth.w
+	realflags.l
+	bltwidth.w
+	blitflags.l
+
+End NEWTYPE
+
+
+
+.DefTypes
+DEFTYPE.l sincos
+DEFTYPE.l trisize,tri
+
+CNIF #c=#j
+	DEFTYPE.l bld
+	DEFTYPE.jbmap *bmr1,*bmr2,*bmr
+	#framecnt=$440		;frames...
+
+CEND
+
+
+
+
+
+Function .q jsin{a.q} ;0..1=2*pi
+Shared sincos.l
+	myang=##[$C383](a)ASL 9:ad.l=sincos+((myang&511) ASL 2)
+	f=##[$C383](myang):qs=Peek.w(ad	)*(1-f)+Peek.w(ad+4)*f
+	Function Return ##[$C583](qs) ASL 1
+End Function
+
+Function .q jcos{a.q} ;0..1
+Shared sincos.l
+	myang=##[$C383](a)ASL 9:ad.l=sincos+((myang&511) ASL 2)
+	f=##[$C383](myang):of=1-f
+	qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+	Function Return ##[$C583](qc) ASL 1
+End Function
+
+
+Function.q jsqr{a.q}	;worlds slowest sqr command
+
+	If a=0 Then Function Return 0
+	ntry.q=1:try=0
+
+	While ##[$C385](try-ntry)>0.01
+		try=ntry:fx=try*try-a
+		ntry=try-fx/try*0.5
+	Wend
+	Function Return try
+End Function
+
+
+
+Function.l GetMem32{size.l}
+	CNIF #c=#j
+		MOVEQ #0,d1:ADD.l #16,d0:SysJsr $c002
+
+		ADD.l #31,d0
+		AND #$ffe0,d0
+		AsmExit
+	CELSE
+		MOVEQ #0,d1:SysJsr $c002:AsmExit
+	CEND
+End Function
+
+
+
+Function.l GetMem{size.l}
+	MOVEQ #0,d1:SysJsr $c002:AsmExit
+End Function
+
+
+
+
+
+
+
+;jaguar stuff
+
+CNIF #c=#j
+	Macro rungpu
+		MOVE.l `1 LSL 2+$f03000,$f02110:MOVE.l #1,$ff8:MOVE.l #1,$f02114
+	End Macro
+
+	Macro waitgpu
+		'w_g`@:MOVE.l $ff8,d0:BTST #0,d0:BNE 'w_g`@
+	End Macro
+
+	Macro rundsp
+		MOVE.l `1 LSL 2+$f1b000,$f1a110:MOVE.l #1,$ff0:MOVE.l #1,$f1a114
+	End Macro
+
+	Macro waitdsp
+		'w_d`@:MOVE.l $ff0,d0:BTST #0,d0:BNE 'w_d`@
+	End Macro
+
+	Macro waitblit
+		MOVE.l $f02238,d0
+		w_b`@
+		MOVE.l $f02238,d0:BTST #0,d0:BEQ w_b`@
+	End Macro
+
+
+.JagBlitter
+
+	Include jblit.inc
+
+	Macro bm SizeOf .jbmap\`1(a0):End Macro
+	Statement RefrBmap{*bmap.jbmap}
+		;
+		MOVE.l d0,a0
+		;
+		MOVE.l !bm{idata},d0:LSR.l#3,d0:MOVEQ#43-32,d2:ASL.l d2,d0
+		MOVE.l !bm{ilink},d1:LSR.l#3,d1:MOVE.l d1,d2:LSR.l#8,d2:OR d2,d0
+		MOVEQ#24,d2:LSL.ld2,d1
+		MOVE !bm{dheight},d2:EXT.l d2:MOVEQ#14,d3:ASL.ld3,d2:OR.ld2,d1
+		MOVE !bm{ypos},d2:ASL#3,d2:OR d2,d1:OR !bm{dtype},d1
+		MOVEM.l d0-d1,!bm{firstphrase}
+		;
+		MOVE !bm{iscroll},d0:EXT.l d0:ASL.l#8,d0:ASL.l#3,d0
+		OR !bm{flags},d0:ASL.l#6,d0
+		MOVE !bm{iwidth},d1:EXT.l d1:ROR.l#4,d1:OR d1,d0
+		ROL.l#8,d1:ROL.l#6,d1
+		OR!bm{dwidth},d1:ASL.l#3,d1:OR!bm{pitch},d1:ASL.l#3,d1:OR!bm{depth},d1
+		ASL.l#8,d1:ASL.l#4,d1:OR !bm{xpos},d1
+		MOVEM.l d0-d1,!bm{secondphrase}
+
+		MOVEQ #0,d0:MOVE.w !bm{hscale},d0:ROR.w #8,d0
+		MOVE.l d0,!bm{thirdphrase+4}
+
+		;
+		AsmExit
+		;
+	End Statement
+
+
+	Statement HeadBmap{*bmap1.jbmap}
+		ADD.l #32,d0:SWAP d0:MOVE.l d0,$f00020:AsmExit
+	End Statement
+
+	Statement Muntit{a.l}
+		SWAP d0:MOVE.l d0,$f00020:AsmExit
+	End Statement
+
+
+
+	Statement BlPoly{*bm.jbmap,dat.l,cols.l}
+	Shared bld
+
+		!waitblit
+		!waitgpu
+
+
+		Poke.l $f03f00,dat
+		Poke.l $f03f04,cols
+
+		!waitblit
+		Poke.l bld		,*bm\idata											;destination
+		Poke.l bld+	4,*bm\blitflags;+$10000					;
+		Poke.l bld+ $8,##[$C581](*bm\bltwidth,*bm\iheight)	;clip
+		Poke.l bld+$10,##[$C581](-24,1)	;step
+
+		!rungpu{0}
+
+	End Statement
+
+
+CEND
+
+
+.IOStuff
+
+	Statement GetJoy{x.l,y.l,butt.l}
+		CNIF #c=#j
+			MOVE.l d0,a0
+			MOVE.l d1,a1
+			MOVE.l d2,a2
+			MOVEQ #0,d3
+			MOVEQ #0,d4
+			MOVEQ #0,d5
+
+			MOVE #$800e,$f14000:MOVE $f14000,d0
+			BTST	#8,d0:BNE notup:ADDQ #1,d4:notup
+			BTST	#9,d0:BNE notdo:SUBQ #1,d4:notdo
+
+			BTST #10,d0:BNE notle:ADDQ #1,d3:notle
+			BTST #11,d0:BNE notri:SUBQ #1,d3:notri
+
+			MOVE #$800e,$f14000:MOVE $f14002,d0
+			BTST #1,d0:BNE notbc:ADDQ #2,d5:notbc
+			MOVE #$800b,$f14000:MOVE $f14002,d0
+			BTST #1,d0:BNE notba:ADDQ #1,d5:notba
+
+
+			MOVE.w d3,(a0)
+			MOVE.w d4,(a1)
+			MOVE.w d5,(a2)
+			AsmExit
+		CEND
+		CNIF #c=#a
+			Poke.l x,Joyx(1)
+			Poke.l y,Joyx(1)
+			Poke.l butt,Joyb(1)
+		CEND
+	End Statement
+;------------------------------------------------------
+
+
+
+
+
+
+.SetUpWorld
+
+	CNIF #c=#j
+		LEA vbdb(pc),a0:MOVEQ #1,d0:BSR initvbint:BSR vbinton
+
+		MOVE #$ffff,$f00058
+		MOVE.l #$418f418f,$f00058
+
+		MOVE #$6c7,$f00028	 ;RGB!
+
+
+		colbase.l=$f00400
+		For tr.w=0 To 255
+			mycol=tr ASL 1
+
+			blah.q=(##[$8481](15*tr+2.3,tr)+1)*127:mr=blah
+			blah.q=(##[$8481](tr,tr*7+3242)+1)*127:mg=blah
+			blah.q=(##[$8481](tr*31+32.6,tr*9+324)+1)*127:mb=blah
+
+			temp.l=(##[$C381](mr ASR 3) ASL 5 + ##[$C381](mb ASR 3)) ASL 6+ ##[$C381](mg ASR 2)
+	;		temp.l=$ffff;3333
+			Poke.w colbase+mycol,temp
+		Next
+
+		BlCls{*bmr1,0,0};$1010101,$10101010}
+		!waitblit
+
+		mydest.l=*bmr1\idata
+		Poke.l mydest,-1
+		For j.w=0 To 199
+			For i.w=0 To 39
+
+
+				If j&8<>((i&1) ASL 3)
+					col.l=$aaaaaaaa
+				Else
+					col.l=$bbbbbbbb
+				EndIf
+
+				Poke.l mydest,col:mydest+4
+				Poke.l mydest,col:mydest+4
+			Next
+		Next
+
+	CEND
+
+
+	myang=64
+
+
+	qs=0.2:qc=0.2
+	delta.l=0
+
+
+	RefrBmap{*bmr1}
+	mycopshowa.l=GetMem32{32768}
+	mycopshowb.l=GetMem32{32768}
+	mycopshow.l=mycopshowa
+	mycop.l=GetMem32{32768}
+
+
+	av2.l=(-1) LSL (42-32)
+	av1.l=(-1) LSR 8
+
+
+	mydest.l=mycop
+	For cnt.w=0 To 1
+
+
+		If cnt<1
+			*bmr1\ilink=mydest+32	 ;(+32-32)
+		Else
+			*bmr1\ilink=Peek.l($204)
+		EndIf
+		*bmr1\ypos=55 +(1-cnt)*20
+		*bmr1\hscale=16
+		*bmr1\vscale=16
+
+		RefrBmap{*bmr1}
+
+		Poke.l mydest	 ,Peek.l(*bmr1		+32)
+		Poke.l mydest+ 4,Peek.l(*bmr1+ 4 +32)
+
+		Poke.l mydest+ 8,Peek.l(*bmr1+ 8 +32)
+		Poke.l mydest+12,Peek.l(*bmr1+12 +32)
+
+		Poke.l mydest+16,Peek.l(*bmr1+16 +32)
+		Poke.l mydest+20,Peek.l(*bmr1+20 +32)
+
+
+;		If cnt<5
+;			nextdat.l=mydest+32
+;			newv2.l=nextdat LSR 11
+;			newv1.l=nextdat LSL 24
+;			Poke.l mydest	,(Peek.l(mydest	)&av2) OR newv2
+;			Poke.l mydest+4,(Peek.l(mydest+4)&av1) OR newv1
+;		EndIf
+
+		mydest+32
+
+	Next
+
+
+;	myval.l=(((-1) LSR 13) LSL 13 )+3
+;
+;	For cnt.w=0 To 4
+;		mydest=mycop+cnt*32
+;		Poke.w mydest+6,(Peek.w(mydest+6)&myval) +JInt(cnt*20)*8
+;	Next
+
+
+Return
+
+
+
+#bars=On;ff
+.
+.DoMain
+
+
+	Repeat
+
+
+;		!waitdsp:!waitgpu:!waitblit	;wait till previous frame rendered!
+
+
+
+;		Exchange *bmr1.jbmap,*bmr2.jbmap
+		MOVE framecnt,d7:'wdb:CMP framecnt,d7:BEQ 'wdb
+
+
+;		RefrBmap{*bmr1}
+;		HeadBmap{*bmr1}
+
+		Muntit{mycopshow}
+		Exchange mycopshowa,mycopshowb
+		mycopshow=mycopshowa
+
+		For cnt.w=0 To 1
+			mydest.l=mycop+32*cnt
+;			Poke.l mydest+20,32+mine ASL 8
+		Next
+		mine=1;(mine+1)&15;27
+
+		BlCopyMem{mycop,mycopshow,16384}
+
+
+;		*bmr=*bmr1
+
+
+;		BlCls{*bmr,0,0};$1010101,$10101010}
+;Safe{}
+	CNIF #bars
+		Poke.w $f0002a,0
+	CEND
+
+
+		!waitblit
+
+
+	CNIF #bars
+		Poke.l $f0002a,$ffff
+		Poke.w $f0002a,mysilly.w:mysilly+1
+	CEND
+
+
+;		GetJoy{&jox.w,&joy.w,&butt.w}
+
+	Until 1=0
+
+Return
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+vbdb	;vertical blank double buffer...
+	MOVEM.l d0/d2,-(a7)
+;	MOVE.l globalbase,a5
+
+	ADDQ #1,framecnt
+
+;	RefrBmap{*bmr2.jbmap}
+;	HeadBmap{*bmr2}
+
+;	HeadBmap{Peek.l($204)-32}
+
+	MOVEM.l (a7)+,d0/d2
+RTS
+
+
+
+
+
+
+CNIF #c=#j
+	;********************** JAGOS SUBS ******************************
+
+.jagos ;(thanx mark!)
+	;
+	;OK, well need some zero page locations...
+	;
+	#allocat=$200
+	#stopat=$204
+	#vbint=$208
+	#gpint=$20c
+	#obint=$210
+	#tiint=$214
+	#dsint=$218
+	#_INT1=$21c
+
+	#superstacksize=256
+	#userstacksize=256
+
+
+	copymem		 ;a0=src, a1=srcf, a2=dest
+	;
+	CMP.l a1,a0:BCC 'done:MOVE.l (a0)+,(a2)+:BRA copymem
+	'done:RTS
+
+	initjagos
+	;
+	CLR.l $ff0:CLR.l $ff8:
+	MOVE.l #$200000,allocat:MOVE.l (a7),a0
+	MOVE.l allocat,a7:SUB.l #superstacksize,allocat
+	MOVE #$0,sr
+	MOVE.l allocat,a7:SUB.l #userstacksize,allocat:MOVE.l a0,-(a7)
+	;
+	MOVE #$1f00,_INT1:LEA inthandler(pc),a0:MOVE.l a0,$100
+	;
+	MOVEQ #8,d0:BSR alloc:CLR.l (a0):MOVE.l #4,4(a0):MOVE.l a0,stopat
+	MOVE.l a0,d0:SWAP d0:MOVE.l d0,$f00020:RTS
+
+
+	alloc ;d0=size, return a0=mem
+	MOVE.l 4,a6:MOVEQ #0,d1:JSR -204(a6):MOVE.l d0,a0:RTS
+
+	vbinton:OR #1,_INT1:MOVE _INT1,$f000e0:RTS
+	vbintoff:ANDI #$fffe,_INT1:MOVE _INT1,$f000e0:RTS
+
+	inthandler
+	;
+	MOVEM.l d0-d7/a0-a6,-(a7)
+	;
+	MOVE $f000e0,d2:ANDI #$1f,d2:MOVE d2,d0
+	LSL #8,d0:OR d2,d0:MOVE d0,$f000e0
+	;
+	LSR #1,d2:BCC 'novbint:MOVE.l vbint,a0:JSR (a0):'novbint
+	LSR #1,d2:BCC 'nogpint:MOVE.l gpint,a0:JSR (a0):'nogpint
+	LSR #1,d2:BCC 'noobint:MOVE.l obint,a0:JSR (a0):'noobint
+	LSR #1,d2:BCC 'notiint:MOVE.l tiint,a0:JSR (a0):'notiint
+	LSR #1,d2:BCC 'nodsint:MOVE.l dsint,a0:JSR (a0):'nodsint
+	;
+	MOVE d0,$f000e2
+	;
+	MOVEM.l (a7)+,d0-d7/a0-a6:RTE
+
+
+	initvbint	;d0=scanline, a0=address of code
+	MOVE d0,$f0004e:MOVE.l a0,vbint:RTS
+CEND
+
+
+
+CNIF 1=0
+
+.printd2
+;
+;RTS
+;
+;print d2 at d0,d1
+;
+MOVEM.l d2-d4/a2,-(a7)
+;
+MOVE.l bmap1,a0							;where it goes
+MULU #320,d1:ADD.l d1,a0:LSL #2,d0:AND #$fff0,d0:ADD d0,a0
+MOVE.l d2,d0
+;
+MOVEQ #7,d4
+'loop
+ROL.l #4,d0:MOVE d0,d2:AND #15,d2
+LEA digs(pc),a1:LSL #4,d2:ADD d2,a1						 ;start of digit
+MOVEQ #7,d3:MOVE.l a0,a2
+'loop2
+MOVE.l (a1),(a2):MOVE.l 4(a1),4(a2)
+MOVE.l 8(a1),16(a2):MOVE.l 12(a1),20(a2)
+;
+LEA 576(a1),a1:LEA 1280(a2),a2
+DBF d3,'loop2
+LEA 32(a0),a0:DBF d4,'loop
+;
+MOVEM.l (a7)+,d2-d4/a2:RTS
+
+Event
+CEND
+
+
+
+
+
+	Event
+
+	gpu_1
+	IncBin "gpu"
+	gpu_1f
+
+	dsp_1
+	IncBin "dsp"
+	dsp_1f
+
+sincos
+	IncBin "sincos.bin"
+
+
+
+
+
+.InitOs
+	CNIF #c=#j
+;		BSR initjagos
+
+		MOVE.l #$00a600a6,$f00038:MOVE #$656,$f0003c
+		;MOVE #ypos,$f00046:MOVE #ypos+hite+hite,$f00048
+		MOVE #$2e,$f00046
+		;MOVE #$2e+240+240,$f00048
+		MOVE #$2e+199+199,$f00048
+
+		bld.l=$f02200
+		!waitgpu
+		!waitdsp
+
+
+		Poke.l $f1a100,(Peek.l($f1a100)&$f) OR (1 ASL 14)
+		BlCopyMem{?gpu_1,$f03000,?gpu_1f-?gpu_1}
+		BlCopyMem{?dsp_1,$f1b000,?dsp_1f-?dsp_1}
+
+;				LEA gpu_1(pc),a0:LEA gpu_1f(pc),a1:LEA $f03000,a2
+;				BSR copymem:!waitgpu;!rungpu(0)
+;				LEA dsp_1(pc),a0:LEA dsp_1f(pc),a1:LEA $f1b000,a2
+;				BSR copymem:!waitdsp;:!rundsp{0}						,
+
+	CEND
+
+Return
+
+.InitMem
+
+	trisize.l=(16*17/2)*8;SizeOf.xy
+	tri.l=GetMem32{trisize}
+	tritemp.l=$f1cf80-8-trisize;GetMem{dist.l} ;internal dsp ram!
+
+
+	CNIF #c=#j
+		*bmr1.jbmap=GetMem32{SizeOf.jbmap}
+		*bmr2.jbmap=GetMem32{SizeOf.jbmap}
+		*bmr.jbmap=*bmr1
+
+;		CreateBmap{320,200,3,1,0,*bmr1.jbmap}
+		CreateBmap{320,200,3,1,1,*bmr1.jbmap}
+		CreateBmap{320,200,3,1,0,*bmr2.jbmap}
+	CEND
+
+
+Return
+
+.InitVars
+	sincos.l=?sincos
+Return
+
+
+
+
+.LostCode
+
+	CNIF 1=0
+
+
+		jj=0
+		If butt&1 Then jj+1
+		If butt&2 Then jj-1
+		myangvel=(myangvel+jj) *0.98
+		myang=myang+myangvel ASR 4
+		If myang<0 Then myang+1024
+		If myang>=1024 Then myang-1024
+
+
+		ad.l=?sincos+((myang&1023) ASL 2)
+		f=jfrac{myang}:of=1-f
+
+
+
+		qs=Peek.w(ad	)*of+Peek.w(ad+4)*f
+		qc=Peek.w(ad+2)*of+Peek.w(ad+6)*f
+
+		qqs=jext{qs}
+		qqc=jext{qc}
+
+
+		xvel=(xvel+jox) *0.95
+		yvel=(yvel+joy) *0.95
+
+		xdif=xvel*qqc + yvel*qqs
+		ydif=xvel*-qqs + yvel*qqc
+		deadx=jlimit{deadx+xdif ASR 3 ,1,63-#sqs}
+		deady=jlimit{deady+ydif ASR 3 ,1,63-#sqs}
+
+		delta.l=jint{deadx} +jint{deady}ASL 6
+	CEND
+
+
+
+
+
+
+
+	CNIF 1=0
+		Use On
+
+		SUB Init
+		peat
+		VWait:DisplayBitMap 0,db:db=1-db:Use BitMap db:BlockScroll
+		BitMapOutput db
+		 sx3=MouseX:sy3=MouseY
+		Gosub Make
+		Gosub Rot
+		Gosub Draw
+
+	 Until Joyb(0)<>0
+	End
+	CEND
+
+
+	CNIF 1=0
+;		If (jcos{0}<0.9) OR (jcos{0}>1.1)
+			For i.w=0 To 320
+				hgh=i/320
+				BlLin{*bmr,i,128,i,jcos{hgh}*64+128,$ffffffff}
+			Next
+;		EndIf
+	CEND
+
+
+Return
+
+CNIF 1=0
+;simply set bld.l... ;=$f02200
+
+;Statement BlCopyMem{src.l,dest.l,size.l} ;less than 32K
+;Statement CreateBmap{wid.l,hth.l,depth.l,pitch.l,dtype.w,*bm.jbmap}
+;Statement SetBlitFlags{*bm.jbmap,depth.w,zoff.w,width.w}
+;Statement BlCls{*bm.jbmap,col1.l,col2.l}
+;Statement BlLin{*bm.jbmap,x1,y1,x2,y2,col1.l}
+CEND
+

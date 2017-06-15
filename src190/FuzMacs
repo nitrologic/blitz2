@@ -1,0 +1,116 @@
+
+;        gdbd     c1,c2,x,y,w,h
+;        stringgd id,x,y,w,ch,bf,ng,bd
+;        textgd   id,x,y,w,c1,tx,ng,bd
+
+GDBD     Macro
+         dc.w     \3,\4
+         dc.b     \1,0
+         dc.b     0
+         dc.b     5
+         dc.l     PRS1\@
+         dc.l     bord2\@
+         
+bord2\@  dc.w     \3,\4
+         dc.b     \2,0
+         dc.b     0
+         dc.b     5
+         dc.l     PRS2\@
+         dc.l     0
+
+PRS1\@   dc.w     -2,-1
+         dc.w     -2,\6
+         dc.w     -1,\6-1
+         dc.w     -1,-1
+         dc.w     \5,-1
+         
+PRS2\@   dc.w     \5,0
+         dc.w     \5,\6
+         dc.w     \5+1,-1
+         dc.w     \5+1,\6
+         dc.w     -1,\6
+         endm
+
+StringGD macro
+         dc.l     \7       ;1=GADID
+         dc.w     \2+4     ;2=X 3=Y
+         dc.w     \3+2     ;4=W 
+         dc.w     \4
+         dc.w     8        ;5=CHARS
+         dc.w     0        ;6=BUFFER
+         dc.w     1        ;7=NEXTG
+         dc.w     4        ;8=border
+         dc.l     \8
+         dc.l     0
+         dc.l     0
+         dc.l     0
+         dc.l     STRINFO\@
+         dc.w     \1
+         dc.l     0
+STRINFO\@         dc.l     \6
+         dc.l     UNDO\@
+         dc.w     0
+         dc.w     \5
+         dc.w     0
+         dc.w     0
+         dc.w     0
+         dc.w     0
+         dc.w     0
+         dc.w     0
+         dc.l     0
+         dc.l     0
+         dc.l     0
+UNDO\@   dcb.b    \5,0
+         dc.b     0
+         even
+         endm
+
+TextGd1  macro
+         dc.l     \7       ;1=GADID
+         dc.w     \2       ;2=X 3=Y
+         dc.w     \3       ;4=W
+         dc.w     \4       ;
+         dc.w     12       ;5=tCOLOR
+         dc.w     0        ;6=TEXT
+         dc.w     1        ;7=NEXTG
+         dc.w     1        ;8=border
+         dc.l     \8
+         dc.l     0
+         dc.l     TXT\@
+         dc.l     0
+         dc.l     0
+         dc.w     \1
+         dc.l     0
+TXT\@    dc.b     \5,0
+         dc.b     1
+         even
+         dc.w     4,2
+         dc.l     0
+         dc.l     \6
+         dc.l     0
+         EndM
+TextGd2  macro    ;toggle
+         dc.l     \7       ;1=GADID
+         dc.w     \2       ;2=X 3=Y
+         dc.w     \3       ;4=W
+         dc.w     \4       ;
+         dc.w     12       ;5=tCOLOR
+         dc.w     0        ;6=TEXT
+         dc.w     $100     ;7=NEXTG
+         dc.w     1        ;8=border
+         dc.l     \8
+         dc.l     0
+         dc.l     TXT\@
+         dc.l     0
+         dc.l     0
+         dc.w     \1
+         dc.l     0
+TXT\@    dc.b     \5,0
+         dc.b     1
+         even
+         dc.w     4,2
+         dc.l     0
+         dc.l     \6
+         dc.l     0
+         EndM
+

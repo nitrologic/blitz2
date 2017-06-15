@@ -1,0 +1,260 @@
+Library Name:
+  rianimlib #64
+
+Authors:
+  ReflectiveImages, 17 Mayles Road, Southsea, Portsmouth, Hampshire, UK PO4 8NP
+
+OverView:
+  Another Reflective Images Library, belongs in the amosfunclib no?
+
+Authors Docs:
+
+Reflective Images Zone-Joystick Library v1.2
+============================================
+
+By Stephen McNamara, original Joy Library by Steve Matty
+(c)1994 Reflective Images
+
+This version: 1.2
+        18/6/94
+
+This library contains commands for setting up zones and testing the status
+of the joysticks attached to the Amiga.
+
+New additions to this library allow you to have multiple lists of zones
+(refered to as zonetables in this doc).  To maintain compatibility with
+older versions of the library, zonetable 0 is equivalent of the original
+list of zones used in the library.  You cannot adjust the size of zonetable
+0 (its size is 256 zones), nor can you delete it.  The new zonetables can
+be from 1 to 65536 in size, there are 16 available zonetable numbers.
+
+All commands that change or test zones will work on the last zonetable that
+was selected with the command UseZoneTable.  The default table is number 0.
+
+Command list:
+      ZoneInit [zone_num]|[start_zone,end_zone]
+      Setzone zone#,x1,y1,radius
+      Setzone zone#,x1,y1,x2,y2
+      a.w=Zone(x,y)
+      a.w=ZoneTest(start_zone[,end_zone],x,y)
+      ad.l=ZoneTable
+    (*) size.l=ZoneTableSize (table#)
+    (*) UseZoneTable table#
+    (*) NewZoneTable table#,size
+    (*) FreeZoneTable table#
+
+      jf.b=JFire(joy#)
+      jv.b=JVert(joy#)
+      jh.b=JHoriz(joy#)
+      af.b=AllFire [bit_pattern]
+
+(*)=new for this version of the Zone-Joystick library.
+
+
+Statement: ZoneInit
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : ZoneInit [zone_num]|[start_zone,end_zone]
+
+  This command is used to clear any zones currently set.  The optional
+  parameters allow you to select either a single zone or a range of zones
+  to reset.
+
+
+Statement/Function: Setzone
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : Setzone zone#,x1,y1,radius
+         Setzone zone#,x1,y1,x2,y2
+
+  This command lets you set up zones for testing.  The first version is
+  used when you want to set up a circular zone and the second when you want
+  a rectangular one.  With rectangular zones, x1,y1 should be the top left
+  corner of the rectangle and x2,y2 should be the bottom left.
+
+  If used as a function, this command returns TRUE or FALSE to say whether
+  or not the change was made.
+
+  Note: The max zone number for zonetable 0 is 255.
+  A zone number outside the range of the current table will
+        cause this command to abort.
+        Zones can be defined in any order.
+        Circular zones are used in exactly the same way as rectangular
+        ones.
+
+
+Function: Zone
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : a.w=Zone(x,y)
+
+  This command takes the co-ordinates x,y and checks to see if they are
+  inside any of the defined zones.  The zones are searched in order,
+  starting at 0 and going through to the size of the zonetable-1.  This
+  command will return the first zone that the co-ordinates were found to
+  be inside, you should note that both types of zones are tested
+  (rectangular and circular).
+
+  This command returns either -1 for not inside a zone or the zone number.
+
+
+Function: ZoneTest
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : a.w=ZoneTest(start_num[,end_num],x,y)
+
+  This command is the same as the Zone command except that it allows you
+  to select either one individual zone to test or a range of zones.  You
+  should, though, ensure that end_num if greater than start_num.
+
+  This command returns either -1 for not inside a zone or the zone number.
+
+
+Function: ZoneTable
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : ad.l=ZoneTable
+
+  This function returns the address in memory of the zone information
+  storage area for the current zonetable. The zones are stored one after
+  the other, with each zone taking up 8 words (16 bytes) in the data area,
+  making a total size of 2048 bytes.  They are stored in the following way:
+
+    Rectangular:    +0: x1
+        +2: y1
+        +4: x2
+        +6: y2
+
+    Circular: +0: x1
+        +2: y1
+        +4: radius of zone
+        +6: -1 <-- this is set to show that the
+                   zone is circular.
+
+    Undefined zone: +0: -1
+        +2: -1
+        +4: -1
+        +6: -1
+
+  The first longword (4 bytes) of the zonetable is used to hold the size,
+in zones, of the table (thus the true size of the zonetable is 4+number of
+zones*8).
+
+
+Function: ZoneTableSize
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : size.l=ZoneTableSize
+
+  This function returns the size, in zones, of the current zonetable.  It
+is equivalent of doing: size.l=peek.l(ZoneTable).
+
+
+Statement/Function: NewZoneTable
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : NewZoneTable table#,size
+
+  This command will attempt to allocate a new zonetable with the given
+table number.  If the table already exists it will be deleted.  The maximum
+size for a zonetable is 65536 zones.  If used as a function, this command
+will return FALSE for failure or TRUE for success.  You should note that
+all zones are automatically reset in the new table and that creating a
+table does not make it the current table, this must be done with
+UseZoneTable.
+  Valid zonetable numbers range from 0 to 15.
+
+  IMPORTANT NOTE: you cannot define the size of zonetable 0.  You cannot
+use this command to alter it in any way.
+
+
+Statement/Function: UseZoneTable
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : UseZoneTable table#
+
+  This command is used to change the current zonetable to the selected one.
+If used as a function, it will return TRUE for success or FALSE for
+failure.
+  Valid zonetable numbers range from 0 to 15.
+
+
+Statement/Function: FreeZoneTable
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : FreeZoneTable table#
+
+  This command is used to free a zonetable from memory.  If used as a
+function, it will return TRUE or FALSE.  When successfully called, this
+command will free the zonetable and change the currently used zonetable to
+table number 0.
+  Valid zonetable numbers range from 0 to 15.
+
+  IMPORTANT NOTE: you cannot free zone table 0.
+
+
+Function: JFire
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : jf.b=JFire(joy#)
+
+  This command tests the fire button status of the joystick joy#, where
+  joy# is between 1 and 4.  You should note that, as with all the joystick
+  commmands, joy#=1 refers to the Amiga's joystick port, joy#=2 refers to
+  the mouse port, and joy#=3 or joy#=4 refer to the four player adapter
+  ports.
+
+  This command returns 0 for fire button not pressed or -1 for pressed
+
+
+Function: JHoriz
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : jh.b=JHoriz(joy#)
+
+  This command is used to test the horizontal direction of the selected
+  joystick.  It returns:
+
+    0: No horizontal direction
+           -1: Joystick left
+          1: Joystick right
+
+
+Function: JVert
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : jv.b=JVert(joy#)
+
+  This command is used to test the vertical direction of the selected
+  joystick.  It returns:
+
+    0: No vertical direction
+           -1: Joystick up
+          1: Joystick down
+
+
+Function: AllFire
+------------------------------------------------------------------------
+Modes  : Amiga/Blitz
+Syntax : af.b=AllFire [(bit_pattern)]
+
+  This command is used to test the fire button status of all four
+  joysticks.  It returns a byte with the first four bits giving the
+  joystick status, false=fire button not pressed, true=fire button pressed.
+  The following bits belong to joysticks:
+
+    bit 0: joystick 1 (joystick port)
+    bit 1: joystick 2 (mouse port)
+    bit 2: joystick 3 (four player adaptor)
+    bit 3: joystick 4 (four player adaptor)
+
+  The optional bit pattern can be used to restrict the testing of the fire
+  buttons.  If a bit in the pattern is clear (false) then the joystick it
+  belongs to will not have its fire button tested,
+
+    e.g. AllFire (%0011) will test joysticks 1 and 2 and return the
+             result.  It will return false for joysticks 3 and 4.
+
+
+
+>>END  

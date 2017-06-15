@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/Code/Source/PPDecrunch.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/Code/Source/PPDecrunch.bb
+Statement PPDec{Source$,Destination$}
+If WriteMem(0,Source$)
+	buf.l=##[$FEE5](FileSeek(0),0)
+	##[$BE14] 0,buf,FileSeek(0)
+	dbuf.l=##[$FEE5](400000,0)
+	PPDecrunch buf,buf+FileSeek(0),dbuf
+	If ReadMem(1,Destination$)
+		Exists 1,dbuf,400000
+	EndIf
+	##[$FEE6] dbuf
+	##[$FEE6] buf
+EndIf

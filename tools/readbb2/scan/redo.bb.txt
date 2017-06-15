@@ -1,0 +1,45 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/redo.bb
+LoadShapes 0,"overlays/shapes.shapes"
+LoadPalette 0,"overlays/shapes.iff"
+
+BitMap 0,320,512,4
+Screen 0,0,0,320,512,4,0,"",1,2,0
+FadePalette 0
+BlockScroll
+For i=0 To 31
+	Boxf i*9,0,i*9+7,7,2:Blit i,i*9,0
+	Boxf i*9,9,i*9+7,16,2:Blit i+32,i*9,9
+	For y=0 To 5
+		Boxf i*9,18+y*17,i*9+7,33+y*17,2
+
+		sh=i+y*32
+
+		f0=Int(sh/48):sh-f0*48
+		f1=sh AND 3
+		f3=Int(sh /12):sh-f3*12
+		f2=(sh LSR 2) AND 3
+
+;		sh=64+f0*48+f2*12+f3*4+f1
+		sh=64+f0*48+f3*4+f2*16+f1
+
+		Blit sh,i*9,18+y*17-ShapeHeight(sh)+16
+	Next
+Next
+
+sh=224+32:x=0:y=120:oh=ShapeHeight(sh)
+While Peek.w(Addr MidHandle(sh))>0
+	w=ShapeWidth(sh)
+	h=ShapeHeight(sh)
+	If h<>oh OR x+ShapeWidth(sh)>320
+		x=0:y+oh+1:oh=h
+	EndIf
+	Boxf x,y,x+w-1,y+h-1,2
+	Blit sh,x,y
+	x+w+1:sh+1
+Wend
+
+SaveBitmap 0,"overlays/shapes.iff",0
+
+;MouseWait
+
+End

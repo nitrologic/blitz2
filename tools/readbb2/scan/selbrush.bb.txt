@@ -1,0 +1,15 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/selbrush.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/selbrush.bb
+#G1=0
+#G1=5
+#G1=4
+#G1=3
+#G1=2
+#W1=0
+
+Screen 0,0,0,640,256,2,-32768,"TEST",0,1
+
+
+
+
+
+Window #W1,200,88,256,40,4102,"Select Brush",1,2:AttachGTList #W1,#W1

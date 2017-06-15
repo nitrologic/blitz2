@@ -1,0 +1,27 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/VoiceLoc.bb
+
+; 
+; voiceloc() example
+; 
+
+NEWTYPE .voicepars     ;new V37 parameters available 
+ flags.b 
+ f0enthusiasm:f0perturb
+ f1adj:f2adj:f3adj 
+ a1adj:a2adj:a3adj 
+ articulate:centralize:centphon$ 
+ avbias.b:afbias:priority:pad1 
+End NEWTYPE 
+
+*v.voicepars=VoiceLoc 
+
+*v\flags=1
+*v\f0enthusiasm=82,90 ;old aged highly excited voice
+*v\f1adj=0,0,0  ;these are fun to mess with 
+*v\a1adj=0,0,0
+*v\centralize=50,"AO" ;no effect
+*v\articulate=90
+*v\avbias=20,20 
+
+Speak "COME ON EVERYBODY, DANCE? boom boom !" 
+End 

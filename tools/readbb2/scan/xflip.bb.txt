@@ -1,0 +1,18 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/XFlip.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/XFlip.bb
+
+; 
+; xflip example 
+; 
+Screen 0,3           ;an intuition screen 
+ScreensBitMap 0,0       ;it's bitmap 
+Cls              ;clear it
+Circlef 32,32,32,3       ;draw... 
+Boxf 32,0,63,63,2       ;some weird shape
+GetaShape 0,0,0,64,64     ;pick it up off bitmap 
+Cls              ;clear bitmap again
+CopyShape 0,1         ;make a copy of shape
+XFlip 1            ;x flip copy 
+Blit 0,0,0           ;show original 
+Blit 1,0,100          ;show flipped copy 
+MouseWait 
+

@@ -1,0 +1,245 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/tools/shapesmaker.bb,/Users/simon/Google Drive/amiga/w/abc/eggs/tools/shapesmaker.bb
+WBStartup
+;
+;Marks shape gatherer prog.
+;
+Statement error{t$}
+	Window 1,0,50,320,100,$100f,"ERROR!",1,2
+	NPrint t$
+	NPrint "Click mouse to continue..."
+	MouseWait
+	Free Window 1:Use Window 0
+End Statement
+
+Statement row{y,l,r}
+Line l,y+24,r,y+24,-1
+End Statement
+
+Function chkrow{y,l,r}	;return 1 if any graphics on line.
+Shared fc
+row{y,l,r}
+a=0:For x=l To r
+If Cls(x,y+24)<>fc Then a=-1
+Next
+row{y,l,r}
+Function Return a
+End Function
+
+Statement col{x,t,b}
+Line x,t+24,x,b+24,-1
+End Statement
+
+Function chkcol{x,t,b}	;check a column
+Shared fc
+col{x,t,b}
+a=0:For y=t To b
+If Cls(x,y+24)<>fc Then a=-1
+Next
+col{x,t,b}
+Function Return a
+End Function
+
+MaxLen pa$=192
+MaxLen fi$=192	;input file,
+MaxLen fo$=192	;output file
+
+MenuTitle 0,0,"PROJECT"
+MenuItem 0,0,0,0,"LOAD					","L"
+MenuItem 0,0,0,1,"CONVERT			 ","X"
+MenuItem 0,0,0,2,"QUIT					","Q"
+
+MenuTitle 0,1,"OPTIONS"
+MenuItem 0,3,1,0,"	MAKE SHAPES?"
+MenuItem 0,1,1,1,"	MAKE SPRITES?"
+MenuItem 0,1,1,2,"	AUTO CENTRE?"
+
+MenuTitle 0,2,"COLOUR"
+MenuItem 0,1,2,0,"	REMOVE COLOUR?"
+
+Format "###"
+
+StringText$ On:SetString 1,2:StringText$ 4,2
+StringGadget 1,143,19,0,1,40,51
+ButtonGroup 0:SelectMode 1,0
+TextGadget 1,8,51,0,2," OK "
+TextGadget 1,130,51,0,3," CANCEL "
+
+
+Screen 0,0,0,320,200,2,0,"Iff Grabber",1,2
+Green 0,0,0,0:Green 1,15,15,15
+Green 2,8,0,15:Green 3,0,0,8
+Window 0,0,0,320,200,$1900,"",1,2
+SetMenu 0
+
+here2
+a.l=WaitEvent
+If a=256	;menu picked
+	Select MenuHit
+	Case 0	;project
+		Select ItemHit
+		Case 0	;load
+			f$=FileRequest$("ILBM File?",pa$,fi$)
+			If f$
+				;
+				SetErr
+					error{"Can't suss IFF file!"}
+					Goto here2
+				End SetErr
+				;
+				ILBMDepth f$
+				fw=ILBMViewMode:fh=DecodeILBM:fd=##[$D087]
+				fc=(1 LSL fd)-1
+				;
+				Free Window 0
+				;
+				bfw=fw:If fw<320 Then bfw=320
+				bfh=fh:If fh<200 Then bfh=200
+				BitMap 0,bfw,bfh+24,fd
+				Screen 0,0,0,320,200,fd,0,"",1,2,0
+				Window 0,0,0,320,200,$1900,"",1,2
+				MenusOff
+				;
+				LoadBitMap 0,f$,0
+				;
+				Scroll 0,0,fw,fh,0,24
+				;
+				Boxf 0,0,319,23,0
+				;
+				Use SetCycle 0:SetMenu 0
+				;
+				MenusOn
+			End If
+		Case 1	;convert
+			If f$ ;something to convert???
+				o$=FileRequest$("Output Filename?",pa$,fo$)
+				If o$
+					msh=MenuList(0,1,0)
+					msp=MenuList(0,1,1)
+					auc=MenuList(0,1,2)
+					MenusOff
+					Gosub doconvert
+					MenusOn
+					If nsh>=0
+						If msh
+							SetErr
+								error{"Can't save shapes!"}
+								Goto here2
+							End SetErr
+							SaveShapes 0,nsh,o$
+						End If
+						If msp
+							SetErr
+								error{"Can't save sprites!"}
+								Goto here2
+							End SetErr
+							SaveSprites 0,nsh,o$
+						End If
+					End If
+				End If
+			Else
+				##[$FF8C] 0
+			End If
+		Case 2	;quit
+			End
+		End Select
+	Case 1	;options
+	Case 2	;colour detect
+		cd2=cd
+		cd=MenuList(0,2,0)
+		If cd ;colour detect turned on!
+			os$=GadgetPens(1,1)
+			Window 1,54,66,210,69,$1006,"Colour detect",1,2,1
+			WLocate 3,10:WJam 0:WColour 1,0
+			Print "Colour to remove:"
+			ClearString 1,1
+			ex=0
+			Repeat
+				Repeat
+					a=WaitEvent
+				Until EventWindow=1
+				If a=64
+					If GadgetHit=3	;cancel
+						ButtonId 1,1,os$
+					Else
+						cdc=Val(GadgetPens(1,1))
+					EndIf
+					ex=-1
+				EndIf
+			Until ex
+			Free Window 1:Use Window 0
+		EndIf
+	End Select
+End If
+Goto here2
+
+doconvert
+;
+BitMapOutput 0:Locate 0,1.5:Print "Shape:	 "
+For k=0 To Maximum MidHandle-1
+Free MidHandle k
+Next
+For k=0 To Maximum SpriteMode-1
+Free SpriteMode k
+Next
+;
+y=0:nsh=-1 ;shape number to do!
+;
+;OK, process bitmap!
+;
+main
+While y<fh AND chkrow{y,0,fw-1}=0 AND Joyb(0)=0 Then y+1
+;
+If y<fh AND Joyb(0)=0
+	yt=y:row{yt,0,fw-1}:y+1
+	While y<fh AND chkrow{y,0,fw-1} Then y+1
+	yb=y-1:row{yt,0,fw-1}:x=0
+	main2
+	While x<fw AND chkcol{x,yt,yb}=0 Then x+1
+	If x<fw	;something here too!
+		lx=x:col{lx,yt,yb}:x+1
+		While x<fw AND chkcol{x,yt,yb} Then x+1
+		rx=x-1:col{lx,yt,yb}
+		;
+		;ok, we now have left and right edge of top left shape.
+		;
+		;we now have to zoom in the y's
+		;
+		yt2=yt:yb2=yb
+		;
+		While chkrow{yt,lx,rx}=0 Then yt+1
+		row{yt,lx,rx}
+		While chkrow{yb,lx,rx}=0 Then yb-1
+		row{yt,lx,rx}
+		;
+		nsh+1
+		;
+		Locate 6,1.5:Print nsh
+		;
+		If cd	;colour detect?
+			For zx=lx To rx
+			For zy=yt+24 To yb+24
+			If Cls(zx,zy)=cdc
+				Point zx,zy,0
+			EndIf
+			Next
+			Next
+		EndIf
+		;
+		GetaShape nsh,lx,yt+24,rx-lx+1,yb-yt+1
+		If auc Then DecodeShapes nsh
+		;
+		If msp
+			GetaSprite nsh,nsh
+			If msh=0 Then Free MidHandle nsh
+		End If
+		;
+		Boxf lx,yt+24,rx,yb+24,-1:VWait 2
+		Boxf lx,yt+24,rx,yb+24,0
+		;
+		yt=yt2:yb=yb2:Goto main2
+		;
+	End If
+	Goto main
+End If
+;
+Return

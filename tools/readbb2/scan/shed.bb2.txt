@@ -1,0 +1,198 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/map/shed.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/map/shed.bb2
+
+Dim qs(256),qc(256)
+
+co.f=Pi*2/256
+For k=0 To 255
+qs(k)=HSin(k*co):qc(k)=HCos(k*co)
+Next
+
+NEWTYPE.sh
+c.w ;colour ;-2 = end of shape table!
+x.w ;x move
+y.w ;y move
+End NEWTYPE
+
+sz=SizeOf.sh
+
+Statement drawshape{*sh.sh,x.q,y.q,sc.q,rot.q}
+;
+Shared qs(),qc()
+;
+qs=qs(rot):qc=qc(rot)
+;
+Repeat
+	c=*sh\c:If c=-2 Then Statement Return
+	x2=*sh\x
+	y2=*sh\y
+	If rot
+		x3=qc*x2-qs*y2
+		y2=qs*x2+qc*y2
+		x2=x3
+	EndIf
+	x2*sc+x:y2*sc+y:If c Then Line x,y,x2,y2,c
+	x=x2:y=y2:*sh+SizeOf.sh
+Forever
+;
+End Statement
+
+Dim sh.sh(64*64)	;64 moves max!
+
+GadgetStatus 1
+
+SelectMode 1,0
+TextGadget 0,256,0,512,1, "NO DRAW"
+For k=1 To 7
+SelectMode 0,k
+TextGadget 0,256,k*14,512,1+k,"COLOR "+Str$(k)
+Next
+
+TextGadget 0,256,128,0,100,"CLEAR"
+TextGadget 0,256,128+14,0,101,"UNDO"
+TextGadget 0,256,128+28,0,102,"NEXT"
+TextGadget 0,256,128+42,0,103,"PREV"
+TextGadget 0,256,128+56,0,104,"LOAD"
+TextGadget 0,256,128+70,0,105,"SAVE"
+TextGadget 0,256,128+84,0,106,"SAVE1"
+TextGadget 0,256,128+98,0,107,"QUIT"
+
+Borders 0,2,On
+
+MaxLen pa$=160
+MaxLen fi$=160
+;
+;shape editor!
+;
+Screen 0,3:ScreensBitMap 0,0
+Window 0,0,0,320,256,$1800,"",0,0,0:Menus Off
+
+Green 0,0,0,0
+Green 1,15,15,15
+Green 7,6,6,6
+
+For k=0 To 63
+sh(k*64)\c=-2
+Next
+
+col=1
+gs=4
+ga=$fffc
+gw=gs*2
+gh=gs*4
+gs2=gs/2
+sn=0	;shape number
+
+newshape
+Gosub startnew
+drawshape{sh(sn*64),128,128,1,0}
+WLocate 255,256-8:Print "Shape:",sn," "
+
+Repeat
+	ev.l=WaitEvent:mx=EMouseX-1:my=EMouseY
+	mx+gs2 AND ga
+	my+gs2 AND ga
+	If ev=1024
+		i$=Inkey$
+		If i$=Chr$(27) Then End
+	EndIf
+	If ev=8 ;mousebutton?
+		mb=MButtons
+		If mb=1	;left down?
+			Gosub showcurs
+			If col
+				Line lx,ly,mx,my,col
+			EndIf
+			sh(so)\c=col,mx-lx,my-ly:so+1
+			sh(so)\c=-2
+			lx=mx:ly=my
+			Gosub showcurs
+		EndIf
+		If mb=2	 ;rite down?
+			Gosub showcurs
+			sh(so)\c=0,mx-lx,my-ly:so+1
+			sh(so)\c=-2
+			lx=mx:ly=my
+			Gosub showcurs
+		EndIf
+	EndIf
+	If ev=64
+		g=GadgetHit
+		If g<100
+			col=GadgetHit-1
+		Else
+			Select g
+			Case 100	;clear
+				sh(sn*64)\c=-2
+			Case 101	;undo
+				If so>sn*64
+					so-1:sh(so)\c=-2
+				EndIf
+			Case 102	;next
+				If sn<63 Then sn+1
+			Case 103	;prev
+				If sn>0 Then sn-1
+			Case 104	;load
+				f$=FileRequest$("Load",pa$,fi$)
+				If f$
+					If WriteMem(0,f$)
+						##[$BE14] 0,&sh(0),64*64*sz
+						CloseFile 0:sn=0
+					EndIf
+				EndIf
+			Case 105	;save
+				f$=FileRequest$("Save",pa$,fi$)
+				If f$
+					If ReadMem(0,f$)
+						Exists 0,&sh(0),64*64*sz
+						CloseFile 0
+					EndIf
+				EndIf
+			Case 106	;save
+				f$=FileRequest$("Save",pa$,fi$)
+				If f$
+					If ReadMem(0,f$)
+						so2=sn*64
+						While sh(so2)\c<>-2
+							Exists 0,&sh(so2),sz
+							so2+1
+						Wend
+						Exists 0,&sh(so2),2 ;write last -2
+						CloseFile 0
+					EndIf
+				EndIf
+			Case 107	;quit
+				End
+			End Select
+			Goto newshape
+		EndIf
+	EndIf
+Forever
+
+startnew
+Boxf 0,0,255,255,0
+
+For x=128-gw To 128+gw Step gs
+Line x,0,x,255,7
+Next
+;
+For y=128-gh To 128+gh Step gs
+Line 0,y,255,y,7
+Next
+;
+Line 128,0,128,255,5
+Line 0,128,255,128,5
+;
+Point 128+(gw+gs)LSL 1,128,0
+;
+lx=128:ly=128
+so=sn*64
+While sh(so)\c<>-2
+	lx+sh(so)\x:ly+sh(so)\y
+	so+1
+Wend
+;
+;
+showcurs
+;
+Circle lx,ly,gs2,-1
+Return

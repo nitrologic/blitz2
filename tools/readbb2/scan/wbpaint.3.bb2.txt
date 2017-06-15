@@ -1,0 +1,1661 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/iain/WBPaint/WBPaint/WBPaint.3.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/iain/WBPaint/WBPaint/WBPaint.3.bb2
+VER$="V3.5"
+;*****************************************************
+;*	PROGRAM	 : WBPAINT															*
+;*	RELEASE	 : 1																		*
+;*	VERSION	 : 3																		*
+;*	REVISION	: 5.0																	*
+;*	PROGRAMMER: IAIN CATTERICK											 *
+;*	LANGUAGE	: BLITZ BASIC 2 V1.8									 *
+;*	WB VERSION: 37(2.04)+ ONLY											 *
+;*****************************************************
+;*	DISTRIBUTION:																		*
+;*				SORCE CODE:																*
+;*				FULL COMPILABLE CODE											 *
+;*				NOT FOR REDISTRIBUTION										 *
+;*				PROGRAM:																	 *
+;*				DISTRIBUTION VERSION ONE									 *
+;*				SEE DOC FOR DISTRIBUTION RIGHTS						*
+;*****************************************************
+;*	COPYRIGHT:																			 *
+;*				THIS CODE, IT'S EXECUTABLE AND						 *
+;*				ALL OTHER RELATED FILES ARE								*
+;*				COPYRIGHT 1994 IAIN CATTERICK							*
+;*				ALL RIGHTS RESERVED												*
+;*****************************************************
+;*	DESCRIPTION:																		 *
+;*				A SIMPLE DRAWING PROGRAM BASED ON THE			*
+;*	WINDOWS PROGRAM PAINTBRUSH. IT ALLOWS YOU TO		 *
+;*	DRAW SMALL IFF'S THAT CAN THEN BE USED AS ICON	 *
+;*	AND THINGS LIKE THAT.														*
+;*****************************************************
+;*	FUTURE:																					*
+;*			* AMIGAGUIDE ON-LINE HELP										*
+;*			* GET ICONIZE WORKING												*
+;*				(WORKING 4/4/94 (DIFFRENT APPROCH))				*
+;*			* USE A SUPERBITMAP WINDOW TO ALLOW LARGER	 *
+;*				IMAGES TO BE EDITED												*
+;*			* AUTOMATICALLY CHANGE WB DEPTH TO ALLOW FOR *
+;*				MORE COLOURS IN IMAGE											*
+;*				(MULTI DEPTH PALETTE AS OF 27/3/94)				*
+;*			* AGA WB SUPPORT														 *
+;*			* CLIPBOARD CUT/PASTE												*
+;*			* CUSTOM BRUSHES														 *
+;*				(WORKING 1/4/94)													 *
+;*			* BRUSH MANIPULATION TOOLS, SIZE, FLIP ECT.	*
+;*				(WORKING PARTLY, FINNISH!)								 *
+;*			* BUSY POINTER DURING OPARATION							*
+;*			* KEYFILE FOR REGISTRED USERS (DONE 29/5/94) *
+;*			* CBRUSH LOAD/SAVE													 *
+;*																									 *
+;*****************************************************
+
+WBStartup:NoCli
+##[$FFB5]:WbToScreen 0:ScreensBitMap 0,0
+
+Include "data/myfunctions.i"
+Include "data/mystatements.i"
+Include "data/amigaguide.i"
+Include "data/keyfiledecode.i"
+
+MaxLen PA$=160:MaxLen FI$=64 ; FOR FILEREQUESTERS
+
+;--------------------------------------------------
+; VARIABLES USED IN WBPAINT + DEFINITIONS
+;--------------------------------------------------
+
+.VERS
+;--DEFAULT MAX. X/Y POSTIONS (NOT USED)--
+DEFMAXX=500	: DEFMAXY=170
+
+;--MAXIMUM MAX. X/Y POSITIONS--
+MAXMAXX=500	: MAXMAXY=170
+
+;--MINIMUM MAX. X/Y POSITIONS--
+MINMAXX=90	 : MINMAXY=20
+
+;--CHANGEABLE MAX. X/Y POSITIONS--
+MAXX=DEFMAXX : MAXY=DEFMAXY
+
+;--DEFAULT OFFSETS FOR DRAWING AREA--
+DXOFFS=80		: DYOFFS=14
+
+;--MOUSE X/Y RETURNED BY GETMXMY{}--
+; MX				 : MY
+
+;--USED TO STORE OLD MOUSE POSITIONS--
+OLDMX=DXOFFS : OLDMY=DYOFFS;FIXES BUG WHEN THESE READ 0
+													 ;(SEE If YOU CAN SPOT WHAT IT WAS!)
+
+;--CURRENT DRAWING COLOUR--
+C=1
+
+;--ZOOM AREA SIZES--
+ZOOMHEIGHT=24: ZOOMWIDTH=48
+
+;--OLD ZOOM SELECT POSITIONS--
+OLDSELX=DXOFFS: OLDSELY=DYOFFS
+
+;--ZOOM ENLARGEMENT--
+ZSCALE=5
+
+;--USED BY READ AND FOR LOOPS--
+; A,B,N & T$
+
+;--CURRENT PAINTING MODE--
+; PMODE
+
+;--LATEST EVENT--
+; EV
+
+;--AFTER KEYPRESS = INKEY$ ELSE NULL ("")--
+; I$
+
+;--GADGET NO. PRESSED IN (BORDER GADGETS ONLY)--
+; GADIN
+
+;--GADGET NO. RELEASED (GENERAL USE)--
+; GAD
+
+;--MENU ITEM SELECTED--
+;	ARRAY: MENU(MENUHIT)=ITEMHIT
+
+;--UNDO BUFFER (5|6) IN USE--
+; BUFF
+
+;--INITIAL MOUSE X/Y AT START OF DRAWING--
+; IX				 : IY
+
+;--RESERVED FOR FILEREQUESTER--
+; PA$				: FI$
+
+;--FILE NAME FOR LOAD AND SAVE--
+; F$
+
+;--RAWKEY CODE OF LAST KEYPRESS--
+; RK
+
+;--BRUSH SIZE CURRENTLY IN USE--
+; BRUSH
+
+;--REQUESTERS RETURN VALUE--
+; RESULT
+
+;--VERIABLES USED BY THE ABOUT SUBROUTINE--
+; REQS, REQ, LINES, L & L$
+
+;--------------------------------------------------
+; LOAD SHAPE BANKS (OTHER USED BANKS ARE MARKED)
+;--------------------------------------------------
+
+.SHAPES
+SetErr
+	MYREQUEST{"Error","Couldn't access data file","","Exit",""}
+	End
+End SetErr
+
+;0 = LOAD/SAVE
+;1-4 = SPARE
+;5 = UNDO BUFFER\______________ THIS WAS THE BEST WAY OF DOING
+;6 = UNDO BUFFER/							 IT AT THE TIME !
+;7-22 = TOOLS
+;23-27 = BRUSHES
+;28 = STANDERD POINTER
+;29 = PAINTING POINTER
+;30-34 = BRUSH SELECT
+
+;--LOAD UM'--
+LSHAPE{7,?TOOLS,?END_TOOLS-?TOOLS}
+LSHAPE{23,?INCBRUSH,?END_BRUSH-?INCBRUSH}
+LSHAPE{28,?INCPOINTERS,?END_POINTERS-?INCPOINTERS}
+LSHAPE{30,?INCSELBRUSH,?END_SELBRUSH-?INCSELBRUSH}
+
+;--CENTRE OF PAINT POINTER--
+Handle 29,-7,-6
+
+;--SPECIAL BUFFERS--
+OTHERBUFF=35
+CBRUSHNUM=36 ;CUSTOM BRUSH ON LAST SHAPE SLOT
+
+ClrErr
+
+;--------------------------------------------------
+; SETS UP ALL THE WINDOWS GADGETS
+;--------------------------------------------------
+
+.GADGETS
+
+;0		= Palette gadget (GTLib)
+;1-10 = Misc
+;10-30= Paintmode gadgets
+;30-	= Brush gadgets
+
+SetString 2,1 ; OUTIES
+
+;----PAIN MODE TOOLS (SHAPE GADGETS)----
+
+Read A
+
+;--FIRST COLLOM--
+
+For N=0 To A
+	Read B,FLAG
+	ShapeGadget 0,17,72+(12*N),FLAG,10+N,B
+Next
+
+;--SECOND COLLOM--
+
+Read A
+For N=0 To A
+	Read B,FLAG
+	ShapeGadget 0,43,72+(12*N),FLAG,18+N,B
+Next
+Borders 0,10,On:PMODE=0:NEWMODE=True
+Data 7, 7,512, 8,512, 11,512, 13,512, 15,512, 16,0, 17,0, 18,0
+Data 7, 9,512, 10,512, 12,512, 14,512, 19,0, 20,0, 21,0, 22,0
+
+;----BRUSHES SELECTION GADGETS----
+
+For N=0 To 4
+	ShapeGadget 0,10+12*N,24,0,30+N,23+N
+Next
+
+TextGadget 0,13,31,0,1,"Shape "
+TextGadget 0,13,43,0,2,"Custom"
+
+;----BORDER MOVING ARROWS----
+
+;ShapeGadget 0,486,91,0,1,1
+;ShapeGadget 0,486,101,0,2,2
+;ShapeGadget 0,288,162,0,3,3
+;ShapeGadget 0,310,162,0,4,4
+
+;----PALETTE GADGET----
+DEPTH=WBDepth
+If DEPTH>4 Then DEPTH=4 ; MAX 16 COLOURS
+GTPalette 0,0,115,162,387,15,"",$1,DEPTH
+
+;--------------------------------------------------
+; A FEW MENUS (I WILL SOON ADD MORE MENUS AND TAKE
+; OUT SOME OF THE TEXT GADGETS)
+; * ADDED MORE GADGETS (MENUS REDUNDENT)
+;--------------------------------------------------
+
+.MENUS
+
+NOOFMENUS=2-1
+Dim MENU(NOOFMENUS)
+
+MenuGap 10,2
+SubItemOff 90,8
+MenuChecked 0
+
+MenuTitle 0,0,"Project"
+MenuItem 0,0,0,0,"Load		","L"
+MenuItem 0,0,0,1,"Save		","S"
+MenuItem 0,0,0,2,"-----------":MenuColour 0,0,2,Off
+MenuItem 0,0,0,3,"Print... ","P"
+MenuItem 0,0,0,4,"-----------":MenuColour 0,0,4,Off
+MenuItem 0,0,0,5,"About		","A"
+MenuItem 0,0,0,6,"Help		","H"
+MenuItem 0,0,0,7,"-----------":MenuColour 0,0,7,Off
+MenuItem 0,0,0,8,"Quit		","Q"
+
+MenuTitle 0,1,"Brush"
+
+MenuItem 0,0,1,0,"Load		"
+MenuItem 0,0,1,1,"Save		"
+
+MenuItem 0,0,1,2,"Flip		"+Chr$(187)
+SubItem 0,0,1,2,0,"X		","X"
+SubItem 0,0,1,2,1,"Y		","Y"
+
+MenuItem 0,0,1,3,"Rotate	"+Chr$(187)
+SubItem 0,0,1,3,0,"90 degrees"
+SubItem 0,0,1,3,1,"45 degrees"
+SubItem 0,0,1,3,2,"Any Angle"
+
+MenuItem 0,0,1,4,"Scale ..."
+
+;--------------------------------------------------
+; WINDOW SETUP AND PROGRAM STARTUP
+;--------------------------------------------------
+
+If REGISTERED=False
+	VER$+" UnRegistered"
+EndIf
+
+;--REPORT MOUSE MOVEMENT FOR SMOTHER DRAWING.--
+AddIDCMP $10
+
+;--OPEN THE NICE WINDOW--
+Window 0,64,32,512,192,$100E,"WBPaint"+VER$,2,1,0
+
+If REGISTERED=True
+	WTitle "WBPaint "+VER$,"Registered To: "+REGNAME$
+EndIf
+
+;--ATTACH GADTOOL GADGETS--
+AttachGTList 0,0
+
+;--INITIALISE GADGETBORDERS ETC--
+Gosub DRAWBORDERS
+SetString 2,1
+
+;--SMALL ABOUT REQUESTER--
+;*(FOR MORE ABOUT INFO PRESS 'A')
+MYREQUEST{"About","WBPaint "+VER$,"By Iain Catterick","OK",""}
+
+;--ANY CLI ARGUMENTS--
+;*(OR RAN FROM PROJECT ICON (E.G DEMO.PIC))
+If NumPars
+	F$=Par$(1)
+	If ##[$BE15](F$)
+		LOAD{F$}
+	Else
+		MYREQUEST{"Error","File doesn't exist","","OK",""}
+	EndIf
+Else
+	If REGISTERED=False
+		F$="DATA/DEFAULT.IFF"
+		If ##[$BE15](F$)
+			LOAD{F$}
+			VWait 500
+		Else
+			MYREQUEST{"Error","Missing File","Default.iff","OK",""}
+			End
+		EndIf
+	EndIf
+EndIf
+
+;--GET INITIAL BUFFER (OTHERBUFF)--
+GSHAPE{OTHERBUFF}
+SAVED=True
+
+;--------------------------------------------------
+; MAIN PROGRAM LOOP
+;--------------------------------------------------
+
+.MAIN:
+Repeat
+
+;--DEFAULT ERROR--
+SetErr
+	BeepScreen 0
+	End
+End SetErr
+
+;--STOP EVENT BACKLOG--
+FlushEvents $410
+
+;--READ EVENT
+EV.l=WaitEvent
+
+;--------------------------------------------------
+; EVENT CHECKING (WHAT HAPPENED)
+;--------------------------------------------------
+
+.EVENTS:
+
+;--KEYPRESS--
+If EV=$400
+	I$=LCase$(Inkey$)
+	RK=RawKey
+Else
+	I$=""
+	RK=-1
+EndIf
+
+;;--ARROWS PRESSED IN--
+;If EV=$20
+;	GADIN=GadgetHit
+;Else
+;	GADIN=-1
+;EndIf
+
+;--GADGET RELEASED--
+If EV=$40
+	GAD=GadgetHit
+Else
+	GAD=-1
+EndIf
+
+;--PALETTE SELECTED--
+If GAD=0
+	C=EventCode
+	WBox 81,175,123,185,C
+EndIf
+
+;--MENU ITEM SELECTED--
+If EV=$100
+	MENU(MenuHit)=ItemHit
+	SUBMENU=SubHit
+Else
+	For N=0 To NOOFMENUS
+		MENU(N)=-1
+	Next
+	SUBMENU=-1
+EndIf
+
+;--A MOUSE BUTTON PRESSED INSIDE DRAW AREA--
+If WMouseX>DXOFFS-1 AND WMouseX<MAXX AND WMouseY>DYOFFS-1 AND WMouseY<MAXY
+	If Joyb(0)=1
+		RMB=False
+		Gosub DRAW
+	Else
+		If Joyb(0)=2
+			RMB=True
+			Gosub DRAW
+		EndIf
+	EndIf
+EndIf
+
+Gosub DOSELECT
+
+;--------------------------------------------------
+; CHECK FOR USER INPUT FROM KB,GADGETS & MENUS
+; (I.E WORK ON EVENTS)
+;--------------------------------------------------
+.INPUT:
+
+If I$="z" OR MENU(0)=3 Then Gosub PRINTHARD
+If I$="l" OR GAD=15 OR MENU(0)=0 Then Gosub LOAD
+If I$="s" OR GAD=23 OR MENU(0)=1 Then Gosub SAVE
+If I$="u" OR GAD=24 Then Gosub UNDO
+If I$="c" OR GAD=16 Then GSHAPE{5}:BUFF=5:Gosub CLEAR:GSHAPE{OTHERBUFF}
+If I$="q" OR MENU(0)=8 OR EV=$200 Then Gosub QUIT
+If I$="i" OR GAD=17 Then Gosub ICONIZE
+If I$="a" OR GAD=25 OR MENU(0)=5 Then Gosub ABOUT
+If I$="p" OR GAD=22 Then ##[$FE1F] "SYS:PREFS/PALETTE",0,0
+If RK=$5F OR MENU(0)=6 Then Gosub HELP
+If I$="+" AND BRUSH<100 Then BRUSH+1
+If I$="-" AND BRUSH>1 Then BRUSH-1
+If GAD>29 AND GAD<40 Then BRUSH=GAD-30
+If GAD>9 AND GAD<15 Then PMODE=GAD-10:NEWMODE=True
+If GAD>17 AND GAD<22 Then PMODE=GAD-13:NEWMODE=True
+If GAD=1 Then Gosub SELBRUSH
+If GAD=2 Then BRUSH=-1:NEWMODE=True
+If NOT MENU(1)=-1 Then Gosub MANIPBRUSH
+
+;--------------------------------------------------
+; RESIZE ZOOM AREA (SCALE)
+;--------------------------------------------------
+
+If I$=">" AND ZSCALE>3
+	If PMODE=8
+		Gosub CLEARSELECT
+	EndIf
+	ZSCALE-1
+	ZOOMWIDTH=240/ZSCALE
+	ZOOMHEIGHT=120/ZSCALE
+	If PMODE=8
+		Box WindowX+SELX-(ZOOMWIDTH/2),WindowY+SELY-(ZOOMHEIGHT/2),WindowX+SELX+(ZOOMWIDTH/2),WindowY+SELY+(ZOOMHEIGHT/2),-1
+	EndIf
+EndIf
+
+If I$="<" AND ZSCALE<10
+	If PMODE=8
+		Gosub CLEARSELECT
+	EndIf
+	ZSCALE+1
+	ZOOMWIDTH=240/ZSCALE
+	ZOOMHEIGHT=120/ZSCALE
+	If PMODE=8
+		Box WindowX+SELX-(ZOOMWIDTH/2),WindowY+SELY-(ZOOMHEIGHT/2),WindowX+SELX+(ZOOMWIDTH/2),WindowY+SELY+(ZOOMHEIGHT/2),-1
+	EndIf
+EndIf
+
+
+;--------------------------------------------------
+; LOOP THE LOOP!
+;--------------------------------------------------
+
+VWait
+If REGISTERED=False
+	If TIMER=300
+		MYREQUEST{"UnRegistered Version","Please send me some cash","See main adout requester","Will Do",""}
+		TIMER=0
+	Else
+		TIMER+1
+	EndIf
+;WLocate 0,0:Print Str$(TIMER)+"	"
+EndIf
+;WLocate 0,1:Print Asc(I$)
+Forever
+
+;--------------------------------------------------
+; CONFIRM QUIT
+;--------------------------------------------------
+
+.QUIT:
+If SAVED=True
+	MYREQUEST{"Quit","Are you sure?","","Yes","No Way!"}
+	If RESULT=1
+;		WBenchToBack_ ; NON EXECUTABLE VERSION ONLY
+		End
+	EndIf
+Else
+	MYREQUEST{"Quit","Current Image Unsaved","Save before quitting?","Yes| No ","Cancle"}
+	If RESULT=1
+		Gosub SAVE
+		End
+	Else
+		If RESULT=2
+			End
+		EndIf
+	EndIf
+EndIf
+Return
+
+;--------------------------------------------------
+; LOAD PICTURE WITH FILEREQUEST (ASL)
+;--------------------------------------------------
+
+.LOAD:
+If SAVED=False
+	MYREQUEST{"Load","Current Image Unsaved","Save before continuing ?","Yes| No ","Cancle"}
+	If RESULT=1
+		Gosub SAVE
+	Else
+		If RESULT=0
+			Return
+		EndIf
+	EndIf
+EndIf
+	F$=ASLFileRequest$("Select IFF to load",PA$,FI$)
+	If F$
+		LOAD{F$}
+		SAVED=True
+	EndIf
+Return
+
+;--------------------------------------------------
+; GRAB AND SAVE (IFF) THE DRAW AREA
+;--------------------------------------------------
+
+.SAVE:
+	GSHAPE{0}
+	F$=ASLFileRequest$("Select name to save",PA$,FI$)
+	If F$
+		If ##[$BE15](F$)
+			MYREQUEST{"Save","File already exists","Overwright it?","Yes","No"}
+			If NOT RESULT=1 Then Return
+		EndIf
+		SavePalette 0,F$
+		SAVED=True
+	EndIf
+Return
+
+;--------------------------------------------------
+; UNDO WHICH ALLOWS UNDO OF UNDO!
+;--------------------------------------------------
+
+.UNDO
+If BUFF=5
+	GSHAPE{6}:Gosub CLEAR:BSHAPE{5}
+	GSHAPE{OTHERBUFF}
+	BUFF=6
+Else
+	If BUFF=6
+		GSHAPE{5}:Gosub CLEAR:BSHAPE{6}
+		GSHAPE{OTHERBUFF}
+		BUFF=5
+	EndIf
+EndIf
+Return
+
+;--------------------------------------------------
+.PRINTHARD:
+
+GTButton 1,6,156,53,80,12,"CANCLE",16
+GTButton 1,5,12,53,80,12,"PRINT",16
+GTInteger 1,3,88,37,40,14,"COPIES	:",1,1:PRNCOPIES=1
+GTCycle 1,2,88,25,152,12,"ASPECT	:",1,"LEFT|CENTRE"
+GTCycle 1,1,88,13,152,12,"QUALITY :",1,"POOR|AVERAGE|GOOD|V. GOOD"
+GTCycle 1,0,88,1,152,12,"SIZE		:",1,"SMALL|MEDIUM|LARGE "
+Window 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
+
+Repeat
+
+EV.l=WaitEvent
+
+If EV=$40
+	Select GadgetHit
+		Case 0:PRNSTMP=EventCode
+		Case 1:PRNQTMP=EventCode
+		Case 2:PRNATMP=EventCode
+		Case 3:PRNCOPIES=GTGetInteger(1,3)
+
+		Case 5
+
+			PRNX=DXOFFS
+			PRNY=DYOFFS
+			PRNW=MAXX-DXOFFS
+			PRNH=MAXY-DYOFFS
+			PRNXS=PRNSTMP+1
+			PRNYS=PRNXSCALE*2
+			PRNF=(PRNQTMP+1)*$100
+			If PRNATMP=1 Then PRNF+$40
+
+			WTitle "PRINTING ....","WorkBench Screen"
+			PRNSTATUS=##[$A304]
+
+			If PRNSTATUS=-4
+				CloseWindow 1:Use Window 0
+				For N=1 To PRNCOPIES
+					##[$A302] 0,WindowX+PRNX,WindowY+PRNY,PRNW,PRNH,PRNW*PRNXS,PRNH*PRNYS,PRNF
+				Next
+				Window 1,176,72,256,80,4102,"PRINTER OPTIONS",1,2:AttachGTList 1,1
+			Else
+				BeepScreen 0
+				MYREQUEST{"Error","Printer Not Responding","Check OnLine, Paper"," OK ",""}
+			EndIf
+
+			WTitle "PRINTER OPTIONS","WorkBench Screen"
+
+		Case 6:DONE=True
+
+	End Select
+EndIf
+
+Until DONE=True:DONE=False
+
+CloseWindow 1:Free GTList 1
+Use Window 0:Activate 0
+
+Return
+
+;--------------------------------------------------
+.SELBRUSH
+
+For N=0 To 4
+	ShapeGadget 1,25+(30*N),15,0,0+N,30+N
+Next
+TextGadget 1,74,26,0,5," OK "
+
+Window 1,255,90,180,42,$1006,"Select Brush Shape",2,1,1
+
+Repeat
+
+EV.l=WaitEvent
+
+If EV=$40 AND GadgetHit<5 Then BRUSHAPE=GadgetHit
+
+Until EV=$40 AND GadgetHit=5
+
+CloseWindow 1:Free GadgetJam 1
+Use Window 0:Activate 0
+
+Return
+;--------------------------------------------------
+; YOU WISH TO DRAW BUT WHICH MODE ?
+;--------------------------------------------------
+
+.DRAW:
+
+;--CLEAR SELECTION BOX---
+Gosub CLEARSELECT
+
+;--GET BEFORE DRAW BUFFER--
+GSHAPE{5}:BUFF=5
+
+;--GET INITIAL X,Y FOR SQUARE, CIRCLE ETC.--
+IX=WMouseX:IY=WMouseY
+
+;--GOTO APPROPRIATE DRAWING SUBROUTINE--
+Select PMODE
+	Case 0:Gosub BRUSH
+	Case 1:Gosub DOCIRCLE
+	Case 2:Gosub DOLINE
+	Case 3:Gosub DOTEXT
+	Case 4:Gosub AIRBRUSH
+	Case 5:Gosub GETCBRUSH
+	Case 6:Gosub DOSQUARE
+	Case 7:Gosub DOFILL
+	Case 8:Gosub ZOOM
+End Select
+
+GSHAPE{OTHERBUFF}
+
+SAVED=False
+
+Return
+
+;--------------------------------------------------
+; DRAWS A SQUARE THE SIZE OF BRUSH WITH CENTRE AT
+; MOUSE POINTER OR CUSTOM BRUSH (BRUSH=-1)
+;--------------------------------------------------
+
+BRUSH:
+While Joyb(0)=1
+
+;--GET MOUSE X,Y WITH BRUSH CONSIDERATION--
+GETMXMY{True}
+
+;--IF STILL IN DRAW AREA--
+If MX>DXOFFS-1 AND MX<MAXX AND MY>DYOFFS-1 AND MY<MAXY
+
+	If NOT BRUSH=-1
+
+			;--DRAW BOX AT MX,MY--
+			;--X=BRUSH*2 ;-)--
+			Select BRUSHAPE
+				Case 0:WBox MX-BRUSH,MY-(BRUSH/2),MX+BRUSH,MY+(BRUSH/2),C
+				Case 1:Circlef WindowX+MX,WindowY+MY,BRUSH,BRUSH/2,C
+				Case 2:WLine MX,MY-(BRUSH/2),MX,MY+(BRUSH/2),C
+				Case 3:WLine MX-BRUSH,MY,MX+BRUSH,MY,C
+				Case 4:WLine MX+BRUSH,MY-(BRUSH/2),MX-BRUSH,MY+(BRUSH/2),C
+			End Select
+
+	Else
+
+		;--CUSTOM BRUSH--
+		Blit CBRUSHNUM,WindowX+MX-(ShapeWidth(CBRUSHNUM)/2),WindowY+MY-(ShapeHeight(CBRUSHNUM)/2)
+
+	EndIf
+
+EndIf
+
+Wend
+Return
+
+;--------------------------------------------------
+; DRAW ELLIPSE IF MOUSE IS MOVED AND IT WONT GO OUT
+; OF DRAWING AREA.
+; *(FUTURE:- STOP IT FROM STOPPING TOO ABRUPTLY IF
+; *NOT CHECKSAFE)
+;--------------------------------------------------
+
+DOCIRCLE:
+OLDMX=IX : OLDMY=IY
+
+While Joyb(0)
+	GETMXMY{False}
+
+	;--WHEN MOUSE MOVES--
+	If Event=$10 AND CHECKSAFE{}
+
+		;--RUB OUT OLD ONE--
+		If RMB=True
+			Circlef WindowX+IX,WindowY+IY,XTOY{IX,OLDMX},XTOY{IY,OLDMY},0
+		Else
+			Circle WindowX+IX,WindowY+IY,XTOY{IX,OLDMX},XTOY{IY,OLDMY},0
+		EndIf
+
+		;--REPLACE BACKGROUND--
+		BSHAPE{5}
+
+		;--DRAW NEW POSITION--
+		If RMB=True
+			Circlef WindowX+IX,WindowY+IY,XTOY{IX,MX},XTOY{IY,MY},C
+		Else
+			Circle WindowX+IX,WindowY+IY,XTOY{IX,MX},XTOY{IY,MY},C
+		EndIf
+
+		;--STORE MX AND MY--
+		OLDMX=MX:OLDMY=MY:FlushEvents $10
+
+	EndIf
+
+Wend
+Return
+
+;--------------------------------------------------
+; DRAWS A LINE !
+;--------------------------------------------------
+
+DOLINE:
+
+While Joyb(0)=1
+	GETMXMY{False}
+
+	;--WHEN MOUSE MOVES--
+	If Event=$10
+
+		;--RUB OUT OLD--
+		WLine IX,IY,OLDMX,OLDMY,0
+
+		;--REDRAW BACKGROUND--
+		BSHAPE{5}
+
+		;--DRAW NEW POSITION--
+		WLine IX,IY,MX,MY,C
+
+		;--STORE MX,MY--
+		OLDMX=MX:OLDMY=MY:FlushEvents $10
+
+	EndIf
+
+Wend
+Return
+
+;--------------------------------------------------
+; IF 1 CHR WILL FIT ON DRAWING AREA PRINT USER TEXT
+; ELSE FLASH AT THEM!
+; * WORK ZONE! DIRECT TEXT TO SCREEN
+;--------------------------------------------------
+
+DOTEXT:
+
+;--IF ONE CHARACTER SPACE--
+If WMouseX<MAXX-8 AND WMouseY<MAXY-8
+
+	;--CURSOR AT MOUSE POINTER--
+	WLocate IX-2,IY-11
+
+	Repeat
+
+		;--GET AND PRINT TEXT--
+		;Print GETSTRING{Int((MAXX-IX)/8)}
+
+		WColour C,3:Print " "
+		WLocate WCursX-8,WCursY
+
+		If WaitEvent=$400
+			I$=Inkey$
+;			WLocate WCursX-8,WCursY
+			If WCursX+8<MAXX
+				If Asc(I$)>31 AND Asc(I$)<127
+					WColour C,0
+					Print I$
+				EndIf
+			EndIf
+			If WCursX-8>DXOFFS-1
+				If RawKey=$41
+					WLocate WCursX-8,WCursY
+					WColour C,3
+					Print " "
+					WColour C,0
+					Print " "
+					WLocate WCursX-16,WCursY
+				EndIf
+			EndIf
+		EndIf
+
+	Until Joyb(0) OR I$=Chr$(13)
+
+	;--RETURN TEXT COLOUR--
+	WColour 1,0:Print " "
+
+Else
+	;--FLASH SCREEN--
+	BeepScreen 0
+
+EndIf
+Return
+
+;--------------------------------------------------
+; TOOL FOR ALL YOU WOULD BE VANDLES!
+; SPERY CAN AIR BRUSH TYPE THING.
+;--------------------------------------------------
+AIRBRUSH:
+
+While Joyb(0)=1
+
+	;--PICK A RANDOM POSITION--
+	ABXOFFS=Int(Rnd(BRUSH*2))
+	ABYOFFS=Int(Rnd(BRUSH))
+
+	;--DRAW DOT--
+	GETMXMY{True}
+	If MX>DXOFFS-1 AND MX<MAXX AND MY>DYOFFS-1 AND MY<MAXY
+		WPlot MX-BRUSH+ABXOFFS,MY-(BRUSH/2)+ABYOFFS,C
+	EndIf
+
+	VWait ; NOT TO FAST NOW!
+Wend
+
+Return
+
+;--------------------------------------------------
+; CUSTOM BRUSH : PICKS UP AREA OF IMAGE AS SHAPE n
+; PLACED WITH BRUSH NO. -1
+;--------------------------------------------------
+
+GETCBRUSH:
+
+;--DRAW SELECTION BOX--
+While Joyb(0)
+	GETMXMY{False}
+	If Event=$10
+		Box WindowX+IX,WindowY+IY,WindowX+OLDMX,WindowY+OLDMY,0
+		BSHAPE{5}
+		Box WindowX+IX,WindowY+IY,WindowX+MX,WindowY+MY,-1
+		OLDMX=MX:OLDMY=MY:FlushEvents $10
+	EndIf
+Wend
+
+;--CLEAR SELECTION BOX--
+Box WindowX+IX,WindowY+IY,WindowX+OLDMX,WindowY+OLDMY,0
+BSHAPE{5}
+
+;--GET TOP LEFT X--
+If MX<IX
+	CBSX=MX
+Else
+	CBSX=IX
+EndIf
+
+;--GET TOP LEFT Y--
+If MY<IY
+	CBSY=MY
+Else
+	CBSY=IY
+EndIf
+
+;--GRAB BRUSH (CBRUSHNUM)
+GetaShape CBRUSHNUM,WindowX+CBSX,WindowY+CBSY,XTOY{MX,IX}+1,XTOY{MY,IY}+1
+
+;--IF RMB DELETE AREA UNDER BRUSH (CUT MODE)--
+If RMB=True
+	WBox IX,IY,MX,MY,0
+EndIf
+
+;--HEIGHT & WIDTH DATA--
+;--WHY NOT USE SHAPEWIDTH ETC ?--
+;CBRUSHWIDTH=XTOY{MX,IX}:CBRUSHHEIGHT=XTOY{MY,IY}
+
+;--CHANGE TO BRUSH DRAW MODE--
+Borders 0,18:Borders 0,10
+Redraw 0,18:Redraw 0,10
+PMODE=0:BRUSH=-1:NEWMODE=True
+
+;--BUGFIX--
+Menus On
+
+;--SMALL BUG FIX--
+;--PUT IN DOSELECT--
+;If OLDSELX+(ShapeWidth(CBRUSHNUM)/2)>MAXX Then OLDSELX-(ShapeWidth(CBRUSHNUM)/2)
+;If OLDSELY+(ShapeHeight(CBRUSHNUM)/2)>MAXY Then OLDSELY-(ShapeHeight(CBRUSHNUM)/2)
+;If OLDSELX-(ShapeWidth(CBRUSHNUM)/2)<DXOFFS Then OLDSELX+(ShapeWidth(CBRUSHNUM)/2)
+;If OLDSELY-(ShapeHeight(CBRUSHNUM)/2)<DYOFFS Then OLDSELY+(ShapeHeight(CBRUSHNUM)/2)
+
+Return
+
+;--------------------------------------------------
+; SIMPLE DRAW SQUARE
+; *(SAME FORM AS CIRCLE/LINE)
+; *(SEE THEM FOR COMMENTS)
+;--------------------------------------------------
+
+DOSQUARE:
+
+While Joyb(0)
+	GETMXMY{False}
+	If Event=$10
+		If RMB=True
+			Boxf WindowX+IX,WindowY+IY,WindowX+OLDMX,WindowY+OLDMY,0
+		Else
+			Box WindowX+IX,WindowY+IY,WindowX+OLDMX,WindowY+OLDMY,0
+		EndIf
+		BSHAPE{5}
+		If RMB=True
+			Boxf WindowX+IX,WindowY+IY,WindowX+MX,WindowY+MY,C
+		Else
+			Box WindowX+IX,WindowY+IY,WindowX+MX,WindowY+MY,C
+		EndIf
+		OLDMX=MX:OLDMY=MY:FlushEvents $10
+	EndIf
+Wend
+Return
+
+;--------------------------------------------------
+; FILL: BLITZ DOES ALL THE WORK FOR ME (YEARRR!)
+; BUG: CAN TRASH HOLE SCREEN IF USED BADLY)
+; MAYBE WORK ON MY OWN OR ASK ACID TO ADD A FILL
+; RESTRICTION OPTION.
+;--------------------------------------------------
+
+DOFILL:
+FloodFill WindowX+IX,WindowY+IY,C
+Return
+
+;--------------------------------------------------
+; ZOOM: WORKING (AT LAST!) 27/3/94
+; FUTURE: GET SELECTION BOX WORKING (DONE! 28/3/94)
+;--------------------------------------------------
+
+ZOOM:
+
+;--FIRST DIM AREA--
+Dim ZOOM(ZOOMWIDTH,ZOOMHEIGHT)
+
+;--NEXT SET TOP LEFT--
+ZOOMSTARTX=IX-(ZOOMWIDTH/2)
+ZOOMSTARTY=IY-(ZOOMHEIGHT/2)
+
+;--CHECK SAFE--
+If ZOOMSTARTX<DXOFFS
+	ZOOMSTARTX=DXOFFS
+EndIf
+If ZOOMSTARTX+ZOOMWIDTH>MAXX
+	ZOOMSTARTX=MAXX-ZOOMWIDTH
+EndIf
+If ZOOMSTARTY<DYOFFS
+	ZOOMSTARTY=DYOFFS
+EndIf
+If ZOOMSTARTY+ZOOMHEIGHT>MAXY
+	ZOOMSTARTY=MAXY-ZOOMHEIGHT
+EndIf
+
+;--FILL ZOOM ARRAY--
+For Y=1 To ZOOMHEIGHT
+	For X=1 To ZOOMWIDTH
+		ZOOM(X,Y)=Cls(WindowX+ZOOMSTARTX+X,WindowY+ZOOMSTARTY+Y)
+	Next
+Next
+
+;--OPEN A WINDOW--
+Window 1,0,0,240+9,120+14,$140E,"ZOOM",2,1
+WPointer 29
+
+;--DRAW ENLARGEMENT--
+For Y=1 To ZOOMHEIGHT
+	For X=1 To ZOOMWIDTH
+		Boxf WindowX+X*ZSCALE-ZSCALE,WindowY+Y*ZSCALE-ZSCALE,WindowX+X*ZSCALE,WindowY+Y*ZSCALE,ZOOM(X,Y)
+	Next
+Next
+
+Menus Off
+NEWZOOM=True
+
+;--DRAWING LOOP--
+Repeat
+
+EV.l=WaitEvent
+
+X=Int(WMouseX/ZSCALE)+1
+Y=Int(WMouseY/ZSCALE)+1
+.
+If X>0 AND X<ZOOMWIDTH+1 AND Y>0 AND Y<ZOOMHEIGHT+1
+	If NEWZOOM=False
+		WBox OLDX*ZSCALE-ZSCALE,OLDY*ZSCALE-ZSCALE,OLDX*ZSCALE-1,OLDY*ZSCALE-1,ZOOM(OLDX,OLDY)
+	Else
+		NEWZOOM=False
+	EndIf
+	WBox X*ZSCALE-ZSCALE,Y*ZSCALE-ZSCALE,X*ZSCALE-1,Y*ZSCALE-1,7-ZOOM(X,Y)
+	OLDX=X:OLDY=Y
+EndIf
+
+;--DRAW ENLARGED PIXLE--
+JB=Joyb(0)
+If JB<>0 AND EventWindow=1
+	If X>0 AND X<ZOOMWIDTH+1 AND Y>0 AND Y<ZOOMHEIGHT+1
+		If JB=1 Then ZOOM(X,Y)=C
+		If JB=2 Then ZOOM(X,Y)=0
+		WBox X*ZSCALE-ZSCALE,Y*ZSCALE-ZSCALE,X*ZSCALE-1,Y*ZSCALE-1,ZOOM(X,Y)
+		Use Window 0
+		WPlot ZOOMSTARTX+X,ZOOMSTARTY+Y,ZOOM(X,Y)
+		Use Window 1
+	EndIf
+EndIf
+
+;--CHANGE COLOUR--
+If EV=$40 AND GadgetHit=0
+	C=EventCode
+	Use Window 0
+	WBox 81,175,123,185,C
+	Use Window 1
+EndIf
+
+VWait:Until EV=$200
+
+;--CLEAN UP--
+CloseWindow 1
+Activate 0:Use Window 0
+Menus On
+
+EV=0
+
+Return
+
+;--------------------------------------------------
+; CREATE ABOUT WINDOW AND WRITE TEXT IN DATA$ AREA
+; FLEXIBLE TO ALLOW ANY TEXT I WISH :-)
+; FUTURE: USE STANDARD SYSTEM REQUESTER.
+;--------------------------------------------------
+
+.ABOUT:
+
+If REGISTERED=False
+	TITLE$="WBPaint UnRegistered Version"
+	TEXT$="To obtain key file to disable the anoying requesters"+Chr$(10)
+	TEXT$+"Send a small donation of "+Chr$(163)+"5 (sterling only) or more"+Chr$(10)
+	TEXT$+"To the address on the last of the about pages"+Chr$(10)
+	TEXT$+Centre$("THANKS ALOT",50)
+	GADGET$="I'll put the money in the post today"
+	##[$A281] TITLE$,TEXT$,GADGET$
+EndIf
+
+ABOUTMAIN:
+
+TITLE$="About WBPaint"
+TEXT$=Centre$("WorkBench Paint "+VER$,33)+Chr$(10)
+TEXT$+Centre$("By",33)+Chr$(10)
+TEXT$+Centre$("Iain 'The Master` Catterick",33)
+If REGISTERED=True
+	GADGET$="OWNER|"
+Else
+	GADGET$=""
+EndIf
+GADGET$+"DISCRIPTION|DISTRIBUTION|CONTACT|DONE"
+
+R=##[$A281](TITLE$,TEXT$,GADGET$)
+If REGISTERED=True Then R-1
+
+Select R
+	Case -1:Goto MAIN
+
+	Case 0:
+		If REGISTERED=False
+			Goto MAIN
+		Else
+			TITLE$="Registered Owner Information"
+			TEXT$="REGISTERED TO: "+REGNAME$+Chr$(10)
+			TEXT$+"STATUS: "+REGSTATUS$+Chr$(10)
+			TEXT$+"RIGHTS: "+REGRIGHTS$+Chr$(10)
+			TEXT$+Centre$("THANKS FOR REGISTERING",40)
+			GADGET$=" OK "
+		EndIf
+
+	Case 1:
+		TITLE$="Discription"
+		TEXT$="WBPaint is a simple drawing program based on the"+Chr$(10)
+		TEXT$+"Windows program PaintBrush. It allows you to draw"+Chr$(10)
+		TEXT$+"small IFF's that can then be used as icons etc."
+		GADGET$=" OK "
+
+	Case 2:
+		TITLE$="Distribution"
+		TEXT$="WBPaint is ShareWare. The Shareware archive"+Chr$(10)
+		TEXT$+"may be freely distributed. So long as no"+Chr$(10)
+		TEXT$+"profit is made from it."
+		GADGET$=" OK "
+
+	Case 3:
+		TITLE$="Contact"
+		TEXT$="My Address Is:"+Chr$(10)
+		TEXT$+"			26 FAIRFIELD ROAD			"+Chr$(10)
+		TEXT$+"			ALDEBURGH							"+Chr$(10)
+		TEXT$+"			SUFFOLK								"+Chr$(10)
+		TEXT$+"			IP15 5JN							 "+Chr$(10)
+		TEXT$+"			ENGLAND								"
+		GADGET$=" OK "
+
+End Select
+
+##[$A281] TITLE$,TEXT$,GADGET$
+
+Goto ABOUTMAIN
+
+Return
+
+;--------------------------------------------------
+; AMIGAGUIDE HELP :
+;						 I'M WORKING ON IT ! (WELL I WAS!)
+;--------------------------------------------------
+
+.HELP:
+;MYREQUEST{"HELP","Will bring up AmigaGuide help","Not yet implemented","OK",""}
+
+;INCLUDE "DATA/AMIGAGUIDE.I"
+
+If ##[$BE15]("WBPaint.guide")
+	nag.NewAmigaGuide\nag_Name="WBPaint.guide"
+
+	hand.l=##[$FC05](nag,0)
+
+	##[$FC07] hand
+Else
+	MYREQUEST{"Sorry","AmigaGuide OnLine help","Not Available","Ok",""}
+EndIf
+
+Return
+
+;--------------------------------------------------
+; TURN WINDOW INTO A LITTLE UN'
+; AND ENLARGE WHEN WINDOW CLOSED
+;--------------------------------------------------
+.ICONIZE:
+
+;--PRESERVE YOUR VALUBLE PAINTING--
+GSHAPE{5}
+
+;--OPEN A SMALL WINDOW--
+Window 1,0,0,115,11,$100E,"WBPaint",2,1
+
+;--CLOSE LARGE ONE--
+CloseWindow 0
+
+;--WAIT FOR WINDOW CLOSE--
+##[$B592] $200
+
+;--OPEN LARGE WINDOW--
+Window 0,64,32,512,192,$100E,"WBPaint "+VER$,2,1,0
+
+;--CLOSE SMALL--
+CloseWindow 1
+
+;--REDRAW SCREEN--
+Gosub DRAWBORDERS
+
+;--BORDER ROUND PALETTE REQUESTER--
+SetString 2,1:ResetString 133,175,369,11
+
+;--RESTORE IMAGE--
+BSHAPE{5}
+
+Return
+
+;--------------------------------------------------
+; INITIALISE ALL THE WINDOW BORDERS ETC.
+;--------------------------------------------------
+
+.DRAWBORDERS:
+
+;WJam 0
+
+;--SET UP MENU--
+SetMenu 0
+
+;--OUTIE BORDERS--
+SetString 2,1
+ResetString 81,175,43,11
+;GadgetBorder 82,15,418,155
+
+;--INNIES--
+SetString 1,2
+ResetString 82,15,418,155
+
+;--TOOL BOX (INIE)--
+ResetString 9,60,63,110:WLocate 17,52:Print "Tools"
+
+;--BRUSH HOLDER (INIE)--
+ResetString 9,15,63,40:WLocate 8,4:Print "Brushes"
+
+;--CURRENT COLOUR INDICATOR--
+WBox 81,175,123,185,C
+
+;--DRAW AREA BOUNDARIES--
+;LINES{3}
+
+Return
+
+;--------------------------------------------------
+; DRAW SELECTION BOXES AND BRUSHES
+;--------------------------------------------------
+.DOSELECT:
+
+Select PMODE
+	Case 0:Gosub BRUSHPREV
+	Case 1:Gosub CROSSHAIR
+	Case 5:Gosub CROSSHAIR
+	Case 6:Gosub CROSSHAIR
+	Case 8:Gosub SELZOOM
+End Select
+
+Gosub POINTERS
+
+Return
+
+;--DRAW BRUSH PREVIEW--
+BRUSHPREV:
+
+;--INSIDE DRAW AREA--
+If WMouseX>DXOFFS-1 AND WMouseX<MAXX AND WMouseY>DYOFFS-1 AND WMouseY<MAXY
+
+	;--YES, GET BEST PLACE TO PUT BRUSH--
+	GETMXMY{True}
+	SELX=MX
+	SELY=MY
+
+Else
+
+	;--NO, WHERE ARE WE THEN?--
+	SELX=WMouseX
+	SELY=WMouseY
+
+EndIf
+
+;--IN CUSTOM BRUSH MODE?--
+If NOT BRUSH=-1
+
+	;--NO, AND INSIDE DRAW AREA--
+	If SELX>DXOFFS-1 AND SELX<MAXX AND SELY>DYOFFS-1 AND SELY<MAXY
+
+		;--YES, DELETE OLD BRUSH,RESTORE IMAGE AND DRAW NEW--
+		If NEWMODE=False
+			Select BRUSHAPE
+				Case 0:WBox OLDSELX-BRUSH,OLDSELY-(BRUSH/2),OLDSELX+BRUSH,OLDSELY+(BRUSH/2),0
+				Case 1:Circlef WindowX+OLDSELX,WindowY+OLDSELY,BRUSH,BRUSH/2,0
+				Case 2:WLine OLDSELX,OLDSELY-(BRUSH/2),OLDSELX,OLDSELY+(BRUSH/2),0
+				Case 3:WLine OLDSELX-BRUSH,OLDSELY,OLDSELX+BRUSH,OLDSELY,0
+				Case 4:WLine OLDSELX+BRUSH,OLDSELY-(BRUSH/2),OLDSELX-BRUSH,OLDSELY+(BRUSH/2),0
+			End Select
+		Else
+			NEWMODE=False
+		EndIf
+		BSHAPE{OTHERBUFF}
+		Select BRUSHAPE
+			Case 0:WBox SELX-BRUSH,SELY-(BRUSH/2),SELX+BRUSH,SELY+(BRUSH/2),C
+			Case 1:Circlef WindowX+SELX,WindowY+SELY,BRUSH,BRUSH/2,C
+			Case 2:WLine SELX,SELY-(BRUSH/2),SELX,SELY+(BRUSH/2),C
+			Case 3:WLine SELX-BRUSH,SELY,SELX+BRUSH,SELY,C
+			Case 4:WLine SELX+BRUSH,SELY-(BRUSH/2),SELX-BRUSH,SELY+(BRUSH/2),C
+		End Select
+
+		;--SET VERIABLES TO REFLECT ABOVE ACTIONS--
+		OLDSELX=SELX:OLDSELY=SELY:SELDEL=True:FlushEvents $10
+
+	Else
+
+		;--NOT INSIDE DRAW AREA. FIRST TIME OUTSIDE?--
+		If SELDEL=True
+
+			;--YES, DELETE OLD BRUSH--
+			If NEWMODE=False
+				Select BRUSHAPE
+					Case 0:WBox OLDSELX-BRUSH,OLDSELY-(BRUSH/2),OLDSELX+BRUSH,OLDSELY+(BRUSH/2),0
+					Case 1:Circlef WindowX+OLDSELX,WindowY+OLDSELY,BRUSH,BRUSH/2,0
+					Case 2:WLine OLDSELX,OLDSELY-(BRUSH/2),OLDSELX,OLDSELY+(BRUSH/2),0
+					Case 3:WLine OLDSELX-BRUSH,OLDSELY,OLDSELX+BRUSH,OLDSELY,0
+					Case 4:WLine OLDSELX+BRUSH,OLDSELY-(BRUSH/2),OLDSELX-BRUSH,OLDSELY+(BRUSH/2),0
+				End Select
+			Else
+				NEWMODE=False
+			EndIf
+			BSHAPE{OTHERBUFF}
+			SELDEL=False
+
+		EndIf
+	EndIf
+
+Else
+
+	;--YES, CBW & CBH = HALF WIDTH & HEIGHT--
+	CBW=ShapeWidth(CBRUSHNUM)/2:CBH=ShapeHeight(CBRUSHNUM)/2
+
+	;--IN DRAWING AREA?--
+	If SELX>DXOFFS-1 AND SELX<MAXX AND SELY>DYOFFS-1 AND SELY<MAXY
+
+		;--YES, DELETE OLD, REDRAW IMAGE, DRAW NEW--
+		If NEWMODE=False
+			WBox OLDSELX-CBW,OLDSELY-CBH,OLDSELX+CBW,OLDSELY+CBH,0
+		Else
+			NEWMODE=False
+		EndIf
+		BSHAPE{OTHERBUFF}
+		Blit CBRUSHNUM,WindowX+SELX-CBW,WindowY+SELY-CBH
+
+		;--CHANGE VERIABLES--
+		OLDSELX=SELX:OLDSELY=SELY:SELDEL=True:FlushEvents $10
+
+	Else
+
+		;--FIRST TIME OUT?--
+		If SELDEL=True
+
+			;--YES, DELETE OLD BRUSH--
+			If NEWMODE=False
+				WBox OLDSELX-CBW,OLDSELY-CBH,OLDSELX+CBW,OLDSELY+CBH,0
+			Else
+				NEWMODE=False
+			EndIf
+			BSHAPE{OTHERBUFF}
+			SELDEL=False
+
+		EndIf
+
+	EndIf
+
+EndIf
+
+Return
+
+;--DRAW CROSSHAIRS--
+CROSSHAIR:
+
+SELX=WMouseX:SELY=WMouseY
+If SELX>DXOFFS-1 AND SELX<MAXX AND SELY>DYOFFS-1 AND SELY<MAXY
+	Menus Off
+	If NEWMODE=False
+		WLine DXOFFS,OLDSELY,MAXX,OLDSELY,0
+		WLine OLDSELX,DYOFFS,OLDSELX,MAXY,0
+	Else
+		NEWMODE=False
+	EndIf
+	BSHAPE{OTHERBUFF}
+	Line WindowX+DXOFFS,WindowY+SELY,WindowX+MAXX,WindowY+SELY,-1
+	Line WindowX+SELX,WindowY+DYOFFS,WindowX+SELX,WindowY+MAXY,-1
+	OLDSELX=SELX:OLDSELY=SELY:SELDEL=True:FlushEvents $10
+Else
+	If SELDEL=True
+		Menus On
+		If NEWMODE=False
+			WLine DXOFFS,OLDSELY,MAXX,OLDSELY,0
+			WLine OLDSELX,DYOFFS,OLDSELX,MAXY,0
+		Else
+			NEWMODE=False
+		EndIf
+		BSHAPE{OTHERBUFF}
+		SELDEL=False
+	EndIf
+EndIf
+
+Return
+
+;--DRAW ZOOM SELECTION BOX--
+SELZOOM:
+
+ZW=ZOOMWIDTH/2:ZH=ZOOMHEIGHT/2
+If WMouseX>DXOFFS-1 AND WMouseX<MAXX AND WMouseY>DYOFFS-1 AND WMouseY<MAXY
+	GETMXMY{1}
+	SELX=MX
+	SELY=MY
+Else
+	SELX=WMouseX
+	SELY=WMouseY
+EndIf
+If SELX>DXOFFS-1 AND SELX<MAXX AND SELY>DYOFFS-1 AND SELY<MAXY
+	If NEWMODE=False
+		Box WindowX+OLDSELX-ZW,WindowY+OLDSELY-ZH,WindowX+OLDSELX+ZW,WindowY+OLDSELY+ZH,0
+	Else
+		NEWMODE=False
+	EndIf
+	BSHAPE{OTHERBUFF}
+	Box WindowX+SELX-ZW,WindowY+SELY-ZH,WindowX+SELX+ZW,WindowY+SELY+ZH,-1
+	OLDSELX=SELX:OLDSELY=SELY:SELDEL=True:FlushEvents $10
+Else
+	If SELDEL=True
+		If NEWMODE=False
+			Box WindowX+OLDSELX-ZW,WindowY+OLDSELY-ZH,WindowX+OLDSELX+ZW,WindowY+OLDSELY+ZH,0
+		Else
+			NEWMODE=False
+		EndIf
+		BSHAPE{OTHERBUFF}
+		SELDEL=False
+	EndIf
+EndIf
+
+Return
+
+;--CHANGE WINDOW POINTERS--
+POINTERS:
+
+SELPX=WMouseX:SELPY=WMouseY
+
+If SELPX>DXOFFS-1 AND SELPX<MAXX AND SELPY>DYOFFS-1 AND SELPY<MAXY
+	If DRAWPOINT=False
+		WPointer 29
+		DRAWPOINT=True
+	EndIf
+Else
+	If DRAWPOINT=True
+		WPointer 28
+		DRAWPOINT=False
+	EndIf
+EndIf
+
+Return
+
+
+;--------------------------------------------------
+; CLEAR THE SELECTION THINGS DRAWEN ABOVE
+;--------------------------------------------------
+.CLEARSELECT:
+
+Select PMODE
+	Case 0:Gosub CLEARBRUSH
+	Case 1:Gosub CLEARCROSSHAIR
+	Case 5:Gosub CLEARCROSSHAIR
+	Case 6:Gosub CLEARCROSSHAIR
+	Case 8:Gosub CLEARZOOM
+End Select
+
+Return
+
+;--CLEAR BRUSH PREVIEW--
+CLEARBRUSH:
+
+If NOT BRUSH=-1
+	Select BRUSHAPE
+		Case 0:WBox OLDSELX-BRUSH,OLDSELY-(BRUSH/2),OLDSELX+BRUSH,OLDSELY+(BRUSH/2),0
+		Case 1:Circlef WindowX+OLDSELX,WindowY+OLDSELY,BRUSH,BRUSH/2,0
+		Case 2:WLine OLDSELX,OLDSELY-(BRUSH/2),OLDSELX,OLDSELY+(BRUSH/2),0
+		Case 3:WLine OLDSELX-BRUSH,OLDSELY,OLDSELX+BRUSH,OLDSELY,0
+		Case 4:WLine OLDSELX+BRUSH,OLDSELY-(BRUSH/2),OLDSELX-BRUSH,OLDSELY+(BRUSH/2),0
+	End Select
+	BSHAPE{OTHERBUFF}
+Else
+	WBox OLDSELX-CBW,OLDSELY-CBH,OLDSELX+CBW,OLDSELY+CBH,0
+	BSHAPE{OTHERBUFF}
+EndIf
+
+Return
+
+;--CLEAR CROSSHAIRS--
+CLEARCROSSHAIR:
+
+WLine DXOFFS,OLDSELY,MAXX,OLDSELY,0
+WLine OLDSELX,DYOFFS,OLDSELX,MAXY,0
+BSHAPE{OTHERBUFF}
+
+Return
+
+;--CLEAR ZOOM SELECTION BOX--
+CLEARZOOM:
+
+Box WindowX+OLDSELX-ZW,WindowY+OLDSELY-ZH,WindowX+OLDSELX+ZW,WindowY+OLDSELY+ZH,0
+BSHAPE{OTHERBUFF}
+
+Return
+
+;--------------------------------------------------
+; PROCESS BRUSH MANIPULATION REQUEST
+;--------------------------------------------------
+.MANIPBRUSH:
+
+If (NOT BRUSH=-1) AND (NOT MENU(1)=0) Then Return
+
+Select MENU(1)
+	Case 0:Gosub CBRUSHLOAD
+	Case 1:Gosub CBRUSHSAVE
+	Case 2:Gosub FLIP
+	Case 3:Gosub BROTATE
+	Case 4:Gosub SIZE
+End Select
+
+Return
+
+;--------------------------------------------------
+CBRUSHLOAD:
+
+F$=ASLFileRequest$("Select Brush to Load",PA$,FI$)
+
+If F$
+	If ##[$BE15](F$) AND ILBMDepth(F$)
+		LoadShape CBRUSHNUM,F$
+		If NOT PMODE=0
+			If PMODE<6 Then CURGAD=PMODE+10
+			If PMODE>5 Then CURGAD=PMODE+13
+			Borders 0,CURGAD,Off:Redraw 0,CURGAD
+			Borders 0,10,On:Redraw 0,10
+			PMODE=0:NEWMODE=True
+		EndIf
+		BRUSH=-1
+		;--BUGFIX--
+		Menus On
+
+		;--SMALL BUG FIX--
+		;--PUT IN DOSELECT--
+;		If OLDSELX+(ShapeWidth(CBRUSHNUM)/2)>MAXX Then OLDSELX-(ShapeWidth(CBRUSHNUM)/2)
+;		If OLDSELY+(ShapeHeight(CBRUSHNUM)/2)>MAXY Then OLDSELY-(ShapeHeight(CBRUSHNUM)/2)
+;		If OLDSELX-(ShapeWidth(CBRUSHNUM)/2)<DXOFFS Then OLDSELX+(ShapeWidth(CBRUSHNUM)/2)
+;		If OLDSELY-(ShapeHeight(CBRUSHNUM)/2)<DYOFFS Then OLDSELY+(ShapeHeight(CBRUSHNUM)/2)
+	Else
+		MYREQUEST{"ERROR","Sorry unable to load brush","","Ok",""}
+	EndIf
+EndIf
+
+Return
+;--------------------------------------------------
+CBRUSHSAVE:
+
+F$=ASLFileRequest$("Save Brush as",PA$,FI$)
+
+If F$
+	If ##[$BE15](F$)
+		MYREQUEST{"Save","File already exists","Overwright it?","Yes","No"}
+		If NOT RESULT=1 Then Return
+	EndIf
+	SavePalette CBRUSHNUM,F$
+EndIf
+
+Return
+;--------------------------------------------------
+
+FLIP:
+
+Select SUBMENU
+	Case 0:XFlip CBRUSHNUM
+	Case 1:YFlip CBRUSHNUM
+End Select
+
+Handle CBRUSHNUM,0,0
+
+NEWMODE=True
+
+Return
+
+;--------------------------------------------------
+
+BROTATE:
+
+Select SUBMENU
+	Case 0:Rotate CBRUSHNUM,0.25
+	Case 1:Rotate CBRUSHNUM,0.125
+;	Case 2:
+;		GTButton 1,0,204,29,104,12," Cancle ",16
+;		GTButton 1,1,12,29,104,12," Rotate ",16
+;		GTScroller 1,2,100,100,180,8,"Degrees: ",$201,360,360
+;		Window 1,176,56,328,60,4102,"Rotate",1,2:AttachGTList 1,1
+;		GadgetBorder 12,5,296,20
+;Repeat:VWait:Until WaitEvent=$40 AND GadgetHit=0
+;		CloseWindow 1:Free GTList 1:Use Window 0
+End Select
+
+Handle CBRUSHNUM,0,0
+
+NEWMODE=True
+
+Return
+
+;--------------------------------------------------
+
+SIZE:
+
+Return
+
+;--------------------------------------------------
+;SHAPE DATA (LSHAPE UM')
+;--------------------------------------------------
+
+TOOLS:
+IncBin "data/Tools.shapes"
+END_TOOLS:
+
+INCBRUSH:
+IncBin "data/brush.shapes"
+END_BRUSH:
+
+INCPOINTERS:
+IncBin "data/pointers.shapes"
+END_POINTERS:
+
+INCSELBRUSH:
+IncBin "data/selbrush.shapes"
+END_SELBRUSH:
+
+;--------------------------------------------------
+; SMALL TYPING TIME SAVER
+; CLEARS DRAWING AREA
+;--------------------------------------------------
+
+CLEAR: ; TIME SAVER
+	WBox DXOFFS,DYOFFS,MAXX,MAXY,0
+Return
+
+;--------------------------------------------------
+; VERSION STRING
+;--------------------------------------------------
+
+Dc.b "$VER: WBPaint V3.x By Iain Catterick (9/8/94)",0
+Event
+
+;--------------------------------------------------
+; THE FINAL WORD
+;--------------------------------------------------
+
+; "THIS IS NOT THE END, THIS IS NOT THE BEGINNING OF THE END,
+;	THIS IS THE END OF THE BEGINNING !"
+; (THE DROID AT THE END OF MILLENIUM (THE FILM))

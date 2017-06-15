@@ -1,0 +1,102 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/3D/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/bum6old/javier/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6crap/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum6/usercode/javier/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/3D/cubo_v1.1.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/bum6old/javier/javier/cubo_v1.1.bb2
+BLITZ
+BitMap 0,320,256,2
+BitMap 1,320,256,2
+Slice 0,44,2
+
+ox=320/2: oy=256/2		 ;centro de la pantalla de proyeccion
+theta=60*Pi/180
+phi=20*Pi/180
+angleinc=Pi/60				 ;r indica la distancia del ojo al objeto
+r=8: d=250						 ;d es la distancia del ojo a la pantalla
+
+NEWTYPE .vertice
+x.b: y: z
+End NEWTYPE
+
+Restore vertices
+Read nverts
+nverts-1
+Dim List ver.vertice(nverts)
+Dim xp.w(nverts),yp.w(nverts)
+For c.b=0 To nverts
+	 If AddItem(ver()) Then Read x,y,z: ver()\x=x*2,y*2,z*2
+Next
+
+NEWTYPE .arista
+p1.b: p2
+End NEWTYPE
+
+Restore aristas
+Read nar
+nar-1
+Dim List ar.arista(nar)
+For c.b=0 To nar
+	If AddItem(ar()) Then Read a,b: ar()\p1=a-1,b-1
+Next
+
+Repeat
+
+	VWait: Show db: db=1-db: Use BitMap db: BlockScroll
+	s1=HSin(theta): c1=HCos(theta): s2=HSin(phi): c2=HCos(phi)
+	s3=c1*s2: s4=s1*s2: s5=c1*c2: s6=s1*c2
+	;y si metiera todo esto en los registros??? (!)
+
+	USEPATH ver()
+	ResetList ver()
+	c.b=0
+	While NextItem(ver())
+		;posible asignacion a x,y,z para aceleracion
+		z0=-\x*s5-\y*s6-\z*s2+r
+		xp(c)=ox+d*(-\x*s1+\y*c1)/z0
+		yp(c)=oy-d*(-\x*s3-\y*s4+\z*c2)/z0
+		c+1
+	Wend
+
+	USEPATH ar()
+	ResetList ar()
+	While NextItem(ar())
+		If \p1<0
+			Line xp(\p2),yp(\p2),3
+		Else
+			Line xp(\p1),yp(\p1),xp(\p2),yp(\p2),3
+		EndIf
+	Wend
+
+	theta=QWrap(theta+angleinc/4,0,2*Pi)
+	phi=QWrap(phi+angleinc,0,2*Pi)
+
+Until Joyb(0)
+
+.vertices
+Data 12
+Data -1,-1,1
+Data 1,-1,1
+Data 1,1,1
+Data -1,1,1
+Data -1,-1,-1
+Data 1,-1,-1
+Data 1,1,-1
+Data -1,1,-1
+Data 0.5,1,-1
+Data 0.5,1,0.5
+Data -0.5,1,0.5
+Data -0.5,1,-1
+
+.aristas
+Data 15
+Data 1,2
+Data 0,3
+Data 0,4
+Data 0,1
+Data 0,5
+Data 0,6
+Data 0,7
+Data 0,8
+Data 0,5
+Data 2,6
+Data 3,7
+Data 4,8
+Data 9,10
+Data 10,11
+Data 11,12

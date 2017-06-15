@@ -1,0 +1,11 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/firstfpu.bb2
+WBStartup
+##[$EC82].s test,fp0	 ;dont use varnames begin with fpxx because of simple parser
+LEA test2,a0
+##[$EC84].x fp0,fp0
+##[$EC83].s test,fp0
+##[$EC82].d fp0,0(a0)
+End
+test Dc.s 2.13456
+test2 Dc.d 2.13456
+

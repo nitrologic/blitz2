@@ -1,0 +1,724 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/cool/test.bb
+;
+; hmmm demo of Blitz2 3D library
+;
+; not looking that cool at present....
+; poor man's 3d, wot a load of shit...
+
+Macro stopints:MOVE #$0020,$dff09a:End Macro
+Macro startints:MOVE #$8020,$dff09a:End Macro
+
+#iso=0				 ;change to 1 for red/blue 3d glasses
+
+LoadShape 0,"mouse.iff":GetaSprite 0,0
+
+LoadShape 0,"shape.iff"
+
+DEFTYPE .w
+
+NEWTYPE .xyz:x.q:y:z:End NEWTYPE
+
+NEWTYPE .matrix:m.w[9]:End NEWTYPE
+
+NEWTYPE .vert
+	flag.w			 ;0/1=projected (sx/sy valid)?
+	x:y:z				;projected position
+	sx:sy				;screen position
+	rx:ry				;stereo position
+End NEWTYPE
+
+NEWTYPE .part3d
+	*sister.part3d
+	*child.part3d
+	*brother.part3d	;who think's I'm their sister???
+	*parent.part3d	 ;who's my daddy???
+	*frame.w
+	rota.xyz:rotv:rot
+	posa.xyz:posv:pos
+	id.matrix
+	veepos.w[3]
+	view.matrix
+	atype.w					;0 0=static 1=multiply -1=shift
+	athrust.w				;1 fraction of z added to acceleration
+	adrag.w					;2 fraction of speed subtracted from acceleration
+	ardrag.w				 ;3 rotational drag as above
+	swing.w					;4 frames for swing
+	swingc.w				 ;5 swing framne count
+	lifecount.w			;6
+	pad.w[9]
+	verts.vert[64]
+End NEWTYPE
+
+NEWTYPE .handle:x.w:y:*p.part3d:End NEWTYPE
+
+Dim List shapes.part3d(200)
+Dim List parts.part3d(200)
+Dim List h.handle(200)
+
+NEWTYPE .rgb:r.w:g:b:End NEWTYPE
+NEWTYPE .p3d:x.w:y:z:End NEWTYPE
+NEWTYPE .face:v.w[4]:c.w:End NEWTYPE
+
+Dim c.rgb(16)
+Dim p.p3d(60)
+Dim f.face(60)
+
+.load3d
+	f$="robot":*robot.part3d=0:*t.part3d=0:*parent.part3d=0
+	If WriteMem(0,f$)
+		FileInput 0
+		a$=Inkey$(4)
+		If a$="COLR"
+			##[$BE14] 0,&c(0),96
+			For i=0 To 15:AGAGreen 0,i,c(i)\r,c(i)\g,c(i)\b:Next
+		EndIf
+		a$=Inkey$(4)
+		While NOT(DosBuffLen(0))
+			If a$="AXIS"
+				##[$BE14] 0,&p(0),6:i=1:j=1:a$=Inkey$(4)
+				If a$="PNTS"
+					Repeat
+						ff.l=&p(i):##[$BE14] 0,ff,4:a$=Peeks$(ff,4)
+						If a$<>"FACE"
+							##[$BE14] 0,ff+4,2
+							p(i)\x-p(0)\x:p(i)\y-p(0)\y:p(i)\z-p(0)\z:i+1
+						EndIf
+					Until a$="FACE"
+					Repeat
+						ff.l=&f(j):##[$BE14] 0,ff,4:a$=Peeks$(ff,4)
+						If a$<>"AXIS" Then ##[$BE14] 0,ff+4,6:j+1
+					Until a$="AXIS" OR DosBuffLen(0)
+				EndIf
+				If *robot=0
+					If AddItem(shapes())
+						USEPATH shapes()
+						##[$AA06] shapes(),i-1,&p(1),j-1,&f(1)
+						\atype=1:\pos\x=3000,-600,0:\rota\x=0,0,0:;\swing=24,12
+						rx=p(0)\x:ry=p(0)\y:rz=p(0)\z
+						*robot=shapes():*parent=shapes()
+					EndIf
+				Else
+					If AddItem(parts())
+						USEPATH parts()
+						##[$AA06] parts(),i-1,&p(1),j-1,&f(1)
+						z=16:\atype=1
+						\pos\x=(p(0)\x-rx)*z,(p(0)\y-ry)*-z,(p(0)\z-rz)*z
+						If *t<>0 Then \sister=*t:*t\brother=parts():*t\parent=0
+						*robot\child=parts():parts()\parent=*robot
+						suck+1:*t.part3d=parts()
+					EndIf
+				EndIf
+			EndIf
+		Wend
+	EndIf
+
+; add pivot for rest of shapes, shape becomes parent all others
+; become kids of new parent
+
+.globals
+	wx=0:wy=12:ww=320-64:wh=200:wsx=wx-ww/2:wsy=wy-wh/2
+
+.initialise
+	;
+	BitMap 2,320,32,5:For y=0 To 31:Line 0,y,319,y,y:Next ;colbmap
+	;
+	If #iso=0
+		BitMap 0,320,256,4
+		BitMap 1,320,256,4
+		##[$AB02] 0,0,1,2,2,50*65536+50,wx,wy,ww,wh
+;		InitDisplay3D 1,0,1,2,2,60*65536+60,256,0,64,64
+		##[$AB05] 3,3;13,5
+		InitCopList 0,44,256,$13004,8,16,0
+		Gosub palettergb:DisplayPalette 0,0
+	EndIf
+	If #iso=1
+		BitMap 0,320,512,2
+		BitMap 1,320,512,2
+		##[$AB02] 0,0,1,2,1,50*65536+50
+		##[$AB05] 0,0:##[$AB07] 0,7000,8
+		InitCopList 0,44,256,$12014,8,16,0
+		Gosub paletterb:DisplayPalette 0,0
+	EndIf
+	If #iso=2
+		BitMap 0,320,420,4
+		BitMap 1,320,420,4
+		##[$AB02] 0,0,1,2,1,50*65536+50
+		##[$AB05] 0,0:##[$AB07] 0,7000,8
+		InitCopList 0,44,210,$13014,8,16,0
+		Gosub palettergb:DisplayPalette 0,0
+	EndIf
+	;
+	BLITZ
+	CreateDisplay 0:
+	Mouse On:h=1024:MouseArea -h,-h,h,h
+
+	BlitzKeys On
+
+	DEFTYPE .part3d *ship,*curr,*scan
+	Gosub setupshapes
+	Gosub initui
+
+	*curr.part3d=*robot
+
+;--------------------------------------------------------------------
+; the main interupt handles mouse, doublebuffering
+; 3dmovement on the interupt means speed not related to rendering
+; should crash I suppose, na, linklistlib calls protect for outside
+; of interupt so that's cool and groovy, Mark's doing a
+; Stargate game soon!
+;--------------------------------------------------------------------
+
+.interupt:	 ; wow interupt routine can do the main move routine
+	SetInt 5
+		;
+.mousehandler
+	mx=MouseXSpeed:my=MouseYSpeed
+	If Joyb(0)<>2
+		px=QLimit(px+mx,0,320):py=QLimit(py+my,0,240)
+		DisplaySprite 0,0,px,py,0
+	Else
+		Select mmode
+			Case 2:*curr\rot\y+mx*8:*curr\rot\z+my*8
+		End Select
+	EndIf
+
+.displayhandler ;where's the cnif?
+	If #iso=0 Then DisplayBitMap 0,ddb
+	If #iso=1 Then DisplayBitMap 0,ddb,0,256,ddb,0,0
+	If #iso=2
+		If p Then p=0:yy=210 Else p=-128:yy=0	 ;alternate left/right eye vars
+		Poke.b $bfe201,3:j=Joyb(0)							;read joystick
+		Poke.b $bfe201,$c3:Poke.b $bfe001,p		 ;then poke shutter hardware
+		DisplayBitMap 0,ddb,0,yy
+	EndIf
+
+.movementhandler
+		;
+		update-1:If update<0
+			USEPATH *ship
+			##[$AA02] shapes()
+			If \pos\y>0 Then \pos\y=0
+			update=4
+		EndIf
+	End SetInt
+
+;--------------------------------------------------------------------
+; main loop looks after drawing and not much else
+;--------------------------------------------------------------------
+
+
+
+.mainloop
+	While Inkey$=""
+;		Gosub handleui
+		Gosub moveship
+		ddb=db:db=1-db:VWait 4							 ;display db for interupt
+		##[$AB06] 0,db,shapes(),*ship
+		Use BitMap db
+;		Gosub drawbones
+		Box wx,wy,wx+ww-1,wy+wh-1,1
+		Box wx+ww-1,wy+wh-1,wx|ww-5,wy+wh-5,1
+	Wend
+	VWait 4:Poke.b $bfe201,3:End
+
+;--------------------------------------------------------------------
+; object processing recursive stuff as first seen in dotheblitzman
+;--------------------------------------------------------------------
+
+Statement bone{x.w,y,*object.part3d}		 ;draw lines to all sisters
+	Shared wsx,wsy,h(),*curr
+	USEPATH *object
+	xx=\verts[0]\sx+wsx:yy=\verts[0]\sy+wsy
+	If AddItem(h()) Then h()\x=xx,yy,*object
+	If x+y<>0 Then Line x,y,xx,yy,0
+	c=-1:If *object=*curr Then c=0
+	Boxf xx,yy,xx+3,yy+3,c
+	If \child Then bone{xx,yy,\child}
+	If \sister Then bone{x,y,\sister}
+End Statement
+
+.drawbones
+	ClearList h():bone{0,0,*robot}:Return
+.
+.spotbone
+	*old.part3d=*curr
+	ResetList h():USEPATH h()
+	While NextItem(h())
+		If PColl(px,py,1,1,\x,\y,3,3) Then *curr=\p
+	Wend
+	If mmode=4 AND *old<>*curr						;newage connection
+		If *curr=*robot Then Return
+		If *curr\child=*old Then Return
+		If *curr\parent=*old Then Return
+		USEPATH *curr
+		!stopints
+			If \parent
+				If \sister Then \sister\parent=\parent
+				\parent\child=\sister
+			EndIf
+			If \sister Then \sister\brother=\brother
+			If \brother Then \brother\sister=\sister:\brother=0
+			\sister=*old\child
+			If \sister Then \sister\brother=*curr:\sister\parent=0
+			*old\child=*curr:\parent=*old
+			*curr\pos\x=*curr\veepos[0]-*old\veepos[0]
+			*curr\pos\y=*curr\veepos[1]-*old\veepos[1]
+			*curr\pos\z=*curr\veepos[2]-*old\veepos[2]
+		!startints
+	EndIf
+	Return
+;--------------------------------------------------------------------
+; user interface routines
+;--------------------------------------------------------------------
+
+Statement drawbutton{x.w,y,w,h,a$,c.w}
+	Colour c:offset=(w-Len(a$)*8)/2
+	For db=0 To 1 ;doublebuffered!
+		Use BitMap db:BitMapOutput db:Colour c
+		Box x,y,x+w-1,y+h-1,c
+		Locate (x+offset)/8,(y+2)/8:Print a$
+	Next
+End Statement
+
+NEWTYPE .button
+	id.w:x:y:w:h:txt$
+End NEWTYPE
+
+.initui
+	Dim List b.button(32)
+	Restore topui:id=10:c=3:Gosub addbuttons
+	Restore mainui:id=0:c=7:Gosub addbuttons
+	Return
+
+topui:
+	Data.w 0,0,56,11,58,0,4,1
+	Data$ ABOUT,LOAD,SAVE,QUIT
+
+mainui:
+	Data.w 260,12,60,11,0,13,1,4
+	Data$ "MOVE","ROTATE","CAMERA","LINK"
+
+.handleui:
+	px=QLimit(px+mx,0,320):py=QLimit(py+my,0,240):mx=0:my=0
+	If Joyb(0)=1
+		Gosub spotui
+		If id=-1 Then Gosub spotbone
+		If id>-1 AND id<10
+			Select id
+				Case 0:mmode=1
+				Case 1:mmode=2
+				Case 2:mmode=3
+				Case 3:mmode=4
+			End Select
+		EndIf
+		If id>9
+			Use BitMap 1-db
+			Gosub eorbutton:While Joyb(0)<>0:VWait:Wend:Gosub eorbutton
+			Select id
+				Case 13:End
+			End Select
+		EndIf
+	EndIf
+	Return
+
+.addbuttons
+	Read x,y,w,h,xa,ya,xn,yn
+	For i=0 To yn-1
+		For j=0 To xn-1
+			If AddItem(b())
+				USEPATH b()
+				b()\id=id,x+j*xa,y+i*ya,w,h:Read b()\txt
+				drawbutton{\x,\y,\w,\h,\txt,c}
+				id+1
+			EndIf
+		Next
+	Next
+	Return
+
+.eorbutton
+	Boxf \x,\y,\x+\w,\y+\h,-1:Return
+
+.spotui
+	id=-1
+	ResetList b()
+	While NextItem(b())
+		USEPATH b()
+		If PColl(px,py,1,1,\x,\y,\w,\h)
+			id=\id:Pop While:Return
+		EndIf
+	Wend
+	Return
+
+;--------------------------------------------------------------------
+; setup scene
+;--------------------------------------------------------------------
+
+.setupshapes
+	USEPATH shapes()
+	Gosub addviewer
+	Gosub adddarts
+	Return
+
+addviewer:
+	AddItem shapes()							;viewer
+	*ship.part3d=shapes()
+	*ship\pos\x=0,0,0
+	*ship\rot\x=0,1024,0
+	Return
+
+;--------------------------------------------------------------------
+; misc 3d operations
+;--------------------------------------------------------------------
+.
+.debug:
+	BitMapOutput db:Locate 0,0
+	For i=0 To 5
+		NPrint *robot\verts[i]\sx,"	",*robot\verts[i]\sy
+	Next
+	Return
+
+.palettergb
+	Restore rgbcols
+;	For i=0 To 7:Read rr.w,gg.w,bb.w:PalRGB 0,i,rr,gg,bb:Next
+	DisplayPalette 0,0
+	Return
+rgbcols:
+	Data.w 0,0,0,2,10,5,15,15,15,12,12,12
+	Data.w 8,8,8,13,9,0,8,10,14,12,3,2
+
+.paletterb
+	Restore rbcols
+	For i=0 To 15:Read rr.w,gg.w,bb.w:StopCycle 0,i,rr,gg,bb:Next
+	DisplayPalette 0,0
+	Return
+rbcols:
+	Data.w 4,4,4,15,4,0,4,8,15,15,8,15
+	Data.w 13,4,0,11,3,0,13,8,15,11,8,15
+	Data.w 4,7,13,15,7,13,3,6,11,15,6,11
+	Data.w 13,7,13,11,7,13,13,6,11,11,6,11
+
+
+adddarts:
+	For i=1 To 8
+		 If AddItem (shapes())
+			 \pos\x=Rnd(4000),-500,Rnd(4000)
+;			 \posv\x=40,0,0
+;			 \rot\x=10,0,0
+			 \rotv\x=0,30+Rnd(120),20					;10,20,30
+			 \frame=?dart	;sphere	;myshape				 ;grid		;sphere
+			 \atype=-1
+			 \athrust=6
+			 \adrag=3
+		 EndIf
+	Next
+	Return
+
+addground:
+	d=8000
+	For x=-3 To 3
+	 For y=-3 To 3
+		 If AddItem (shapes())
+			 \pos\x=x*d,0,y*d
+			 \rot\x=0,0,0
+			 \rotv\x=0,0,0					;10,20,30
+			 \frame=?pyramid
+			 \atype=1
+		 EndIf
+	 Next
+	Next
+	Return
+
+
+.dofire
+	USEPATH shapes()
+	If Joyb(0)&2 AND rl<1
+		If AddItem(shapes())
+			\pos\x=*ship\pos\x,*ship\pos\y,*ship\pos\z
+			\rot\x=*ship\rot\x,*ship\rot\y,*ship\rot\z
+			\rotv\x=0,0,0
+			\posv\x=0,0,0
+			\frame=?myshape				;sphere
+			\atype=-1
+			\athrust=8
+			\adrag=3
+			\lifecount=20 ;life time
+		EndIf
+		rl=16
+	Else
+		If Joyb(0)&2=0 Then rl=-1
+		rl-1
+	EndIf
+	Return
+
+.movenme
+	USEPATH shapes()
+	ResetList shapes():*curr=*ship
+	While NextItem(shapes())
+		Select \frame
+			Case ?dart
+				\rot\y=##[$AA03](shapes(),*ship)
+				\rot\x=##[$AA04](shapes(),*ship)
+				*curr=shapes()
+			Case ?sphere
+				\lifecount-1
+				If \lifecount<1 Then KillItem shapes()
+		End Select
+	Wend
+	Return
+
+.moveship:
+	USEPATH *ship ;shapes()
+	mx=MouseXSpeed
+	my=MouseYSpeed
+	j=Joyb(0)&1
+	\rot\z+mx ASL 2
+	\rot\y+\rot\z ASR 4				 ;(\rot\z ASR 5) *j
+;	\rot\x+my
+	\pos\y-my*4
+;(\pos\y+my,-100,-500)
+	\atype=-1
+	\athrust=j*7
+	\adrag=3
+	If \pos\y>0 Then \pos\y=0
+	Return
+
+
+.setup3d
+	USEPATH shapes()
+	d=10
+	For x=0 To 3
+	 For y=0 To 3
+		 If AddItem (shapes())
+			 \pos\x=x*d,0,y*d
+			 \rot\x=0,0,0
+			 \frame=?pyramid
+			 \atype=1
+		 EndIf
+	 Next
+	Next
+
+	For i=1 To 10								;16 boxes
+		If AddItem(shapes())
+			USEPATH shapes()
+			\pos\x=Rnd(15535),0,Rnd(15535)
+			\rot\x=0,0,0
+			\rotv\x=0,0,0
+			\frame=?dart
+			\atype=-1
+			\athrust=4
+			\adrag=3
+		EndIf
+	Next
+
+	AddItem shapes()							;viewer
+	*ship.part3d=shapes()
+
+	AddItem shapes()							;scanner
+	*scan.part3d=shapes()
+	\pos\x=0,-20000,0			;hi up
+	\rot\x=-1024,0,0			 ;pointing straight down
+	\atype=1
+
+	Return
+
+;-----------------------------------------------------------------------
+
+.frames:
+
+
+.dart
+	Dc.l 0,0
+	Dc.w $10,25000,0
+	Dc.w 6						 ;7 shifted verts
+	Dc 0,0,7
+	Dc -8,0,-8
+	Dc 8,0,-8
+	Dc -7,0,-8
+	Dc 7,0,-8
+	Dc 0,-7,-8
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc 3,0,$10,$30,$20,0,3,0,0 ;top
+	Dc 3,0,$60,$40,$10,0,4,0,0 ;rtop
+	Dc 3,0,$50,$60,$10,0,5,0,0 ;ltop
+	Dc 3,0,$40,$60,$50,0,6,0,0 ;back
+	Dc 3,0,$10,$20,$30,0,7,0,0 ;bottom
+	Dc 0,0
+
+.pyramid:
+	Dc.l 0,0
+	Dc.w $100,20000,0
+	#p=10:#q=-10:#h=-11
+	Dc.w 5
+	Dc #p,0,#q
+	Dc #p,0,#p
+	Dc #q,0,#p
+	Dc #q,0,#q
+	Dc 0,#h,0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 3,0,$20,$10,$50,0,$1,0,0
+	Dc.w 3,0,$30,$20,$50,0,$2,0,0
+	Dc.w 3,0,$40,$30,$50,0,$1,0,0
+	Dc.w 3,0,$10,$40,$50,0,$3,0,0
+	Dc.w 0,0
+
+.sphere:
+	Dc.l 0,0
+	Dc.w 400,6000,0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc 2,2,$00,150
+	Dc.l $3,0
+	Dc.w 0,0
+
+.plane:
+	#s=14:#m=-14
+	Dc.l 0,0
+	Dc.w $10,25000,0
+	Dc.w 4
+	Dc #m,#m,0
+	Dc #s,#m,0
+	Dc #s,#s,0
+	Dc #m,#s,0
+	Dc.w 0,0,0
+	Dc.w 4,0,$10,$20,$30,$40,$0000,$0000,0,0
+	Dc.w 4,0,$40,$30,$20,$10,$0000,$0000,0,0
+;	Dc.w 4,0,$10,$20,$30,$40,$0100,$0002,0,0
+;	Dc.w 4,0,$40,$30,$20,$10,$0100,$0002,0,0
+	Dc.w 0,0
+
+
+.cube:
+	Dc.l 0,0
+	Dc.w $10,16000,0
+
+	#s=8:#m=-8
+
+	Dc.w 8
+	Dc #m,#m,#s
+	Dc #s,#s,#m
+	Dc #s,#s,#s
+	Dc #m,#s,#m
+	Dc #s,#m,#m
+	Dc #s,#m,#s
+	Dc #m,#s,#s
+	Dc #m,#m,#m
+
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+
+	Dc.w 4,0,$10,$70,$30,$60,0,$1,0,0
+	Dc.w 4,0,$10,$80,$40,$70,0,$2,0,0
+	Dc.w 4,0,$10,$60,$50,$80,0,$3,0,0
+	Dc.w 4,0,$20,$50,$60,$30,0,$5,0,0
+	Dc.w 4,0,$20,$40,$80,$50,0,$6,0,0
+	Dc.w 4,0,$20,$30,$70,$40,0,$7,0,0
+;	Dc.w 4,0,$10,$70,$30,$60,$6666,$1,0,0
+;	Dc.w 4,0,$10,$80,$40,$70,$2222,$2,0,0
+;	Dc.w 4,0,$10,$60,$50,$80,$3333,$3,0,0
+;	Dc.w 4,0,$20,$50,$60,$30,$4444,$5,0,0
+;	Dc.w 4,0,$20,$40,$80,$50,$5555,$6,0,0
+;	Dc.w 4,0,$20,$30,$70,$40,$7777,$7,0,0
+
+	Dc.w 0,0
+
+.grid:
+	Dc.l 0,0
+	Dc.w $10,6000,0
+
+	#s=8:#m=-8
+
+	Dc.w 8
+	Dc #m,#m,#s
+	Dc #s,#s,#m
+	Dc #s,#s,#s
+	Dc #m,#s,#m
+	Dc #s,#m,#m
+	Dc #s,#m,#s
+	Dc #m,#s,#s
+	Dc #m,#m,#m
+
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+
+	Dc.w 32,1	;16 lines
+
+	Dc $10,$70,$70,$30,$30,$60,$60,$10
+	Dc $10,$80,$80,$40,$40,$70,$70,$10
+	Dc $10,$60,$60,$50,$50,$80,$80,$10
+	Dc $20,$50,$50,$60,$60,$30,$30,$20
+;	Dc $20,$40,$40,$80,$80,$50,$50,$20
+;	Dc $20,$30,$30,$70,$70,$40,$40,$20
+	Dc 2,0,0,0
+
+	Dc.w 0,0
+
+
+.myshape:
+	Dc.l 0,0
+	Dc.w 200,6000,0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc.w 0
+	Dc	 2,4,$00,0
+	Dc.l 0,0
+	Dc.w 0,0
+
+CELSE
+
+Statement readfigure{*temp.seg}
+	Shared segs()
+	Read numkids.w			 ;read next entry in data table
+	Read *temp\angle
+	Read *temp\length
+	*prev.seg=0
+	For i=1 To numkids	 ;no loop if numkids=0 (thanks Mark!)
+		AddItem segs()		 ;get a seg from the list array
+		segs()\bro=*prev	 ;link to last brother
+		*prev=segs()			 ;make last brother me
+		readfigure{segs()} ;and onto the next brother
+	Next
+	*temp\kid=*prev			;now join all the brothers to me
+End Statement
+
+.mandata:								;numbranches,angle,len (13 limbs)
+	Data.w 3,0,0					 ;origin
+		Data.w 1,32,40			 ;right thigh
+			Data.w 1,48,40		 ;right calf
+				Data.w 0,-80,16	;right foot
+		Data.w 1,96,40			 ;left thigh
+			Data.w 1,-48,40		;left calf
+				Data.w 0,80,16	 ;left foot
+		Data.w 3,192,20			;back bone
+			Data.w 1,76,40		 ;right top arm
+				Data.w 0,32,30	 ;right low arm
+			Data.w 1,192,40		;left top arm
+				Data.w 0,32,30	 ;left low arm
+			Data.w 0,128,-20
+
+;			mx=MouseXSpeed:my=MouseYSpeed
+			\pos\z-my*16:\pos\x-mx*16:\rot\y=256
+;			j=Joyb(0):d=1:If j AND 2 Then d=1:j=1 Else j=0
+			;
+;			\rot\z+mx ASL 3
+;			\rot\y+\rot\z ASR 3				 ;(\rot\z ASR 5) *j
+;		;	\rot\x+my
+;			\pos\y-my*4
+;		;(\pos\y+my,-100,-500)
+
+			\atype=-1
+			\athrust=j*7
+			\adrag=3
+
+
+
+CELSE
+

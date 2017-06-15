@@ -1,0 +1,117 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Objects.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Objects.bb2
+;================================================;
+; Blitz Basic 2 Library - 3d Object Manipulation ;
+;																								;
+; Author: Nigel Hughes													 ;
+; Date	: 2nd January 1995											 ;
+; Specifications:																;
+;		 o Matrix Data Structure										;
+;		 o concatenate_matrix											 ;
+;		 o build_translation_matrix								 ;
+;		 o build_rotation_matrix										;
+;		 o build_scale_matrix											 ;
+;		 o apply_matrix														 ;
+;		 o print_matrix														 ;
+;		 o build_all_rotate_matrix									;
+;																								;
+; This library and any routines and structures	 ;
+; within it, can be used freely in other programs;
+; provided I get credit for the routines used.	 ;
+; The librray it self can be destributed as long ;
+; as this file and the text file are distributed ;
+; togther. In the interests of consistency, any	;
+; changes and additions should be submitted to me;
+; and quthors will be given full credit for any	;
+; new routines or modifications to old routines. ;
+;																								;
+; This library forms a base for the simple 3d		;
+; library which is to be released in early 1995. ;
+;																								;
+; Please forward any comments to Nigel Hughes at ;
+; 2 Slimmons Drive, St.Albans, Herts, AL4 9AS, UK;
+;										 or												 ;
+;						 ngh94@aber.ac.uk									 ;
+;================================================;
+
+;---------------------------;
+; Set the Include Directory ;
+; to FUN_Math: and include	;
+; the vector library. This	;
+; means that you do not need;
+; to include it yourself		;
+; when using this matrix		;
+; library									 ;
+;---------------------------;
+
+;INCDIR	"FUN_Math:"
+Include "FUN_Matrix.bb2"
+
+;------------------------;
+; Name: .Point_Type			;
+; Type: Data Structure	 ;
+; Author: N. Hughes			;
+; Date: 2/1/95					 ;
+; Description:					 ;
+;------------------------;
+
+NEWTYPE.Point_Type
+	x.w
+	y.w
+End NEWTYPE
+
+;------------------------;
+; Name: .Facet_Type			;
+; Type: Data Structure	 ;
+; Author: N. Hughes			;
+; Date: 2/1/95					 ;
+; Description:					 ;
+;------------------------;
+
+NEWTYPE.Facet_Type
+	Points.w[4]
+	FColour.w
+	FCMask.w
+	FMode.w
+	FMSame.w
+End NEWTYPE
+
+;------------------------;
+; Name: .Object_Type		 ;
+; Type: Data Structure	 ;
+; Author: N. Hughes			;
+; Date: 2/1/95					 ;
+; Description:					 ;
+;------------------------;
+
+NEWTYPE.Object_Type
+	VCount.w
+	FCount.w
+	Position.Vector_Type
+	Vertices.Vector_Type[32]
+	Facets.Facet_Type[24]
+	WC_Vertices.Vector_Type[32]
+	SC_Vertices.Vector_Type[32]
+End NEWTYPE
+
+Statement Load_Object{fname.s,*NObject.Object_Type,x.w,y.w,z.w,s.q}
+	If WriteMem(0,fname)
+		FileInput 0
+		*NObject\VCount=Edit(80)
+		*NObject\FCount=Edit(80)
+		For count.w=0 To *NObject\VCount
+			*NObject\Vertices[count]\x=Edit(80)*s+x,Edit(80)*s+y,Edit(80)*s+z,1
+;			*NObject\Vertices[count]\x=Edit(80)*s,Edit(80)*s,Edit(80)*s,1
+		Next count
+		For count.w=0 To *NObject\FCount
+			For count2.w=0 To 3
+				*NObject\Facets[count]\Points[count2]=Edit(80)
+			Next count2
+			*NObject\Facets[count]\FColour=Edit(80),Edit(80),Edit(80),Edit(80)
+		Next count
+		CloseFile 0
+		*NObject\Position\x=x,y,z,1
+	Else
+		End
+	EndIf
+End Statement
+

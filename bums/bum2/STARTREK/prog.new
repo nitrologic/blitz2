@@ -1,0 +1,120 @@
+
+\
+\objects
+\
+
+#computerbanks
+*
+#
+#
+I9I9
+#
+
+#lithium   \object name
+@FP 2    \location
+#         \end of to ship code
+#         \end of from ship code
+@FS 1    \location 2
+_T 3
+#
+
+\
+\conversations
+\
+
+$1    \conversation 1
+welcome aboard, captain. starfleet have heard many good things about you,
+ and we feel sure you will live up to your reputation.
+ .before assigning you a priority mission, we must first ask you to perform
+ a simple but necessary task.
+#
+CERTAINLY SIR
+2
+NO WAY
+3
+#
+
+$2
+_T 1 thank you for your cooperation captain. the task simply involves travelling
+ to the mining station at @FP 02 and picking up up some lithium to be returned
+ to us at this starbase.
+#
+understood
+7
+#
+
+$3
+we appreciate your reluctance in performing simple tasks, but again we ask you
+ for your cooperation.
+#
+ALLRIGHT
+2
+FORGET IT
+4
+#
+
+$4
+_T 1 very well, captain. you leave us with no option but to request your stripes.
+#
+#
+
+$5
+_T 2 howdy captain. we have a container of lithium waiting for you here. feel free
+ to teleport it across at your leisure.
+#
+THANKS
+06
+#
+
+$6
+see ya later_
+#
+#
+
+$7
+over and out.
+#
+#
+
+$8
+thank you captain. you have been most helpful.
+#
+that's ok
+7
+#
+
+\
+\events at locations
+\
+\@FS X    - friendly starbase
+\@FP X    - friendly planet
+\@ES X    - enemy starbase
+\@EP X    - enemy planet
+\@NS X    - neutral planet
+\
+\?T X     - if flag true
+\?F X     - if flag false
+\
+\*T X     - if true, and toggle
+\*F X     - if false, and toggle
+\
+
+\starbase 1 stuff...
+\
+
+@FS 1          \ at friendly starbase 1...
+
+?F 1           \ flag 1 false?
+_C 1 backdrop1.iff human.iff
+#
+
+?TE 3           \got the lithium?
+_F 3 _T 4 _C 8 backdrop1.iff human.iff
+#
+
+@FP 2
+
+?F 2
+_C 5 backdrop1.iff human.iff
+#
+

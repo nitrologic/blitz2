@@ -1,0 +1,145 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum9/SteveMc/Sheet.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/shit/stevemc/Sheet.bb2
+;================================================================
+; Draw a nice 'sheet' of dots....
+; Written by Stephen McNamara of Leading Edge Software
+;
+; Alter #num_layers to change the number of dots in the sheet,
+;	must be between 1 and 79 though!
+; Higher numbers for faster processors!
+;================================================================
+
+#num_layers=79
+
+CNIF #num_layers<1 OR #num_layers>79
+	NPrint "Illegal number of layers!"
+	MouseWait
+	End
+CEND
+
+; Clear a four bitplane bitmap really quickly....
+Statement assembler_cls{a.l}
+	UNLK a4 : MOVE.l a6,-(a7) : MOVE.l d0,a6 : ADDQ.l #8,a6
+	MOVE.l (a6)+,a0:ADD.l #40*200,a0
+	MOVEQ #0,d0:MOVEQ #0,d1:MOVEQ #0,d2:MOVEQ #0,d3:MOVEQ #0,d4
+	MOVEQ #0,d5:MOVEQ #0,d6:MOVE.l d0,a1:MOVE.l d0,a2:MOVE.l d0,a3
+	MOVE #199,d7
+	loop1:MOVEM.l d0-d6/a1-a3,-(a0):DBRA d7,loop1
+
+	MOVE.l (a6)+,a0:ADD.l #40*200,a0
+	MOVE #199,d7
+	loop2:MOVEM.l d0-d6/a1-a3,-(a0):DBRA d7,loop2
+
+	MOVE.l (a6)+,a0:ADD.l #40*200,a0
+	MOVE #199,d7
+	loop3:MOVEM.l d0-d6/a1-a3,-(a0):DBRA d7,loop3
+
+	MOVE.l (a6)+,a0:ADD.l #40*200,a0
+	MOVE #199,d7
+	loop4:MOVEM.l d0-d6/a1-a3,-(a0):DBRA d7,loop4
+
+	MOVE.l (a7)+,a6
+	RTS
+
+End Statement
+
+Dim sn(719),sn2(719),bitaddress.l(1)
+Dim startx.w(99),starty.w(99)
+
+If DispHeight=200
+	offset.w=0
+Else
+	offset.w=28
+EndIf
+
+BitMap 0,320,200,4
+BitMap 1,320,200,4
+Use BitMap 0
+BitMapOutput 0
+BlockScroll
+BLITZ
+InitCopList 0,44+offset,200,$4,8,16,0
+
+DisplayBitMap 0,0
+
+For h=0 To 15
+	StopCycle 0,h,h,h,h
+Next h
+
+DisplayPalette 0,0
+CreateDisplay 0
+
+For h=0 To 359
+	a=(h*Pi)/180
+	sn(h)=HSin(a)
+	sn(h+360)=sn(h)
+Next h
+
+For h=0 To 359
+	sn2(h)=sn(h*2)
+	sn2(h+360)=sn(h*2)
+Next h
+
+step_value.w=80/(#num_layers+1)
+For h=0 To #num_layers
+	startx(h)=80-h*step_value : starty(h)=101-h*step_value
+Next h
+
+dbuffer=0
+
+bitaddress(0)=Addr BitMap(0)
+bitaddress(1)=Addr BitMap(1)
+
+startangl=0
+
+Repeat
+	VWait
+	DisplayBitMap 0,dbuffer
+	dbuffer=1-dbuffer
+	Use BitMap dbuffer
+	assembler_cls{bitaddress(dbuffer)}
+
+	ang=startangl
+	startangl+15 : If startangl>359 Then startangl=startangl MOD 360
+	For sta=0 To #num_layers
+		dist=startx(sta)
+		x.w=dist : ya.w=starty(sta)
+		x2.w=x : col.b=1+x2 ASR 3
+
+		ang+2 : If ang>359 Then ang-360
+		value.q=sn(ang)*dist
+
+		temp.w=x-x2
+		For h=0 To 52 Step 8
+			y.w=ya+sn2(temp)*value
+			Point x,y,col
+
+			y.w=ya+sn2(temp+4)*value
+			Point x+4,y,col
+
+			y.w=ya+sn2(temp+8)*value
+			Point x+8,y,col
+
+			y.w=ya+sn2(temp+12)*value
+			Point x+12,y,col
+
+			y.w=ya+sn2((temp+16))*value
+			Point x+16,y,col
+
+			y.w=ya+sn2((temp+20))*value
+			Point x+20,y,col
+
+			y.w=ya+sn2((temp+24))*value
+			Point x+24,y,col
+
+			y.w=ya+sn2((temp+28))*value
+			Point x+28,y,col
+
+			temp+32
+			x+32
+		Next h
+	Next sta
+
+Until Joyb(0)
+FreeSlices
+QAMIGA
+End

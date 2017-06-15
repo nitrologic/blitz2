@@ -1,0 +1,734 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/acid/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/abc/eggs/marksdemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/disks/crap/examples_old/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples/MarksDemos/cck/cck.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/examples_old/cck/cck.bb2
+WBStartup:NoCli:CloseEd
+;
+;Marks Computer Construction Kit.
+;
+;You'll notice I'm a great fan of GOSUBs.
+;
+;WHY?!? - mainly coz GOSUBs are quicker than Statements
+;or Functions, and I'm a SPEED KING!
+;
+;In the case of this program, such behaviour is probably
+;not called for, but in the case of such things as...
+;GAMES where speed is of the essence, it's good to
+;keep this in mind.
+;
+;Actually, the main overhead in calling Statements or Functions
+;is the time necessary to zero out the local variables
+;used, so if you write one using absolutely NO local
+;variables, it'll be just as fast as a GOSUB.
+
+mpu=64	;max pulses.
+mpt=16	;max parts
+;
+wid=79
+hit=39
+;
+mpp=32	;max on screen part counter
+
+NEWTYPE.bit ;one piece of the grid
+flags.w ;what type it is	;100+=bit of circuitry
+bmode.w	;blit mode for things blitted here
+End NEWTYPE
+;
+NEWTYPE.pulse ;a pulse of current
+x.w	 ;current x,y
+y.w
+lx.w	;last x,y
+ly.w
+ison.w	;+=1=on, -1=off
+End NEWTYPE
+;
+NEWTYPE.part
+p.w ;part number,
+x.w ;location..
+y.w
+End NEWTYPE
+
+Dim board.bit(wid,hit)
+Dim List pulse.pulse(mpu)
+Dim pname$(mpt),ix(8),ox(8)
+Dim List parts.part(mpp)
+
+.prox
+Function rw{}
+Function Return Cvi(Inkey$(2))	;read an int from disk.
+End Function
+
+For k=0 To 14:Read f$:LoadShape k,"shapes/"+f$+".brush"
+Handle k,0,-12:Next
+LoadPalette 0,"palette"
+
+MenuTitle 0,0,"Project"
+MenuItem 0,0,0,0,"NEW"
+MenuItem 0,0,0,1,"Load		","O"
+MenuItem 0,0,0,2,"Save","A"
+MenuItem 0,0,0,3,"Quit","Q"
+;
+MenuTitle 0,1,"Primitives"
+MenuItem 0,0,1,0,"Power Source		","P"
+MenuItem 0,0,1,1,"Switch","S"
+MenuItem 0,0,1,2,"LED","L"
+MenuItem 0,0,1,3,"Diode","D"
+MenuItem 0,0,1,4,"Transistor"
+MenuItem 0,0,1,5,"Inverter"
+MenuItem 0,0,1,6,"Track","T"
+MenuItem 0,0,1,7,"Remove Part"
+MenuItem 0,0,1,8,"Remove Track"
+;
+MenuTitle 0,2,"Parts"
+MenuItem 0,0,2,0,"Create"
+MenuItem 0,0,2,1,"Show All"
+MenuItem 0,0,2,2,"Show Parts"
+;
+pmn=2
+npt=0
+If WriteMem(0,"partslist")
+	FileInput 0
+	While NOT DosBuffLen(0)
+	 npt+1:pname$(npt)=Edit$("",40)	;read part name (AND etc.)
+		MenuItem 0,0,2,pmn+npt,pname$(npt)
+	End While
+	CloseFile 0:DefaultInput
+Else
+	End
+EndIf
+
+TextGadget 0,0,164,0,1,"RUN"
+TextGadget 0,40,164,0,2,"STOP"
+TextGadget 0,88,164,0,3,"PAUSE"
+TextGadget 0,144,164,0,4,"STEP"
+TextGadget 0,192,164,0,5,"RUN QUICK"
+
+Screen 0,0,0,320,200,3,0,"Computer Construction Kit",1,0
+Use SetCycle 0:ScreensBitMap 0,0
+Window 0,0,12,320,188,$1800,"",1,2,0
+CatchDosErrs:SetMenu 0 ;attach menus to window.
+
+Buffer 0,10240 ;for BBLIT
+MaxLen pa$=192:pa$="examples"	;for file requester
+MaxLen fi$=192	;ditto.
+;
+Gosub grid
+
+.main
+WLocate 0,180:Print String$(" ",40)
+WLocate 0,180
+a.l=WaitEvent
+Select a
+Case 256	;menupick
+	Select MenuHit
+	Case 0	;project
+		Select ItemHit
+		Case 0	;new
+				Gosub grid
+		Case 1	;load
+			f$=FileRequest$("Name of Board to Load",pa$,fi$)
+			If f$
+				If WriteMem(0,f$)
+					Gosub grid:Print "Loading..."
+					FileInput 0
+					If Inkey$(4)="BORD" ;an ID code
+						;
+						For x=0 To wid:For y=0 To hit
+						board(x,y)\flags=rw{}
+						Next:Next
+						;
+						ClearList parts()
+						;
+						While NOT DosBuffLen(0)
+							If AddLast(parts())
+								parts()\p=rw{},rw{},rw{}
+							End If
+						End While
+						Gosub refboard:Gosub showparts
+						;
+					Else
+						##[$FF8C] 0
+					End If
+					CloseFile 0:WindowInput 0
+				Else
+					##[$FF8C] 0
+				EndIf
+			End If
+		Case 2	;save
+			f$=FileRequest$("Name of Board to Save",pa$,fi$)
+			If f$
+				KillFile f$
+				If ReadMem(0,f$)
+					Print "Saving..."
+					FileOutput 0:Print "BORD" ;ID code
+					;
+					For x=0 To wid:For y=0 To hit
+					Print Mki$(board(x,y)\flags)
+					Next:Next
+					;
+					ResetList parts()
+					While NextItem(parts())
+						Print Mki$(parts()\p)
+						Print Mki$(parts()\x)
+						Print Mki$(parts()\y)
+					End While
+					;
+					CloseFile 0:WindowOutput 0
+				Else
+					##[$FF8C] 0
+				EndIf
+			End If
+		Case 3:End
+		End Select
+	Case 1	;primitives
+		Select ItemHit
+		Case 0	;power!
+			p=3:Gosub putpart:board(mx,my+1)\flags=3
+		Case 1	;switch
+			p=5:Gosub putpart:nsw+1
+			board(mx,my+1)\flags=5
+		Case 2	;led
+			p=6:Gosub putpart
+			board(mx,my+1)\flags=6
+		Case 3	;diode
+			p=8:Gosub putpart
+			board(mx,my+1)\flags=8
+		Case 4	;transistor
+			p=9:Gosub putpart
+			board(mx+1,my)\flags=9
+			board(mx,my+1)\flags=10
+		Case 5	;invertor
+			p=11:Gosub putpart
+			board(mx,my+1)\flags=11
+		Case 6	;lay down track!
+			remtrack
+			Print "From..."
+			p=2:Gosub putpart:Menus 0:sx=mx LSL 2:sy=my LSL 2
+			Print "To...	"
+			;
+			Gosub readm:mx=mx LSL 2:my=my LSL 2:trpf=-1
+			newline0
+			Gosub dtrack
+			omx=mx:omy=my
+			newline
+			k=MButtons:If k<>5
+				If k=2
+					tmode=1-tmode:UnBuffer 0:Goto newline0
+				End If
+				Gosub readm:mx=mx LSL 2:my=my LSL 2
+				If mx=omx AND my=omy Then Goto newline
+				UnBuffer 0:Goto newline0
+			End If
+			FlushBuffer 0:trpf=0:Gosub dtrack:Menus 1
+		Case 7	;remove part
+			Print "Select Part"
+			While MButtons<>1 Then a=WaitEvent
+			mx=(WMouseX AND $fffc)/4:my=(WMouseY AND $fffc)/4
+			For xa=-2 To 0
+			For ya=-1 To 1
+			nx=mx+xa:ny=my+ya
+			If nx>=0 AND nx<80 AND ny>=0 AND ny<40
+				bf=board(nx,ny)\flags
+				If bf>2 AND bf<12 AND bf<>9
+					Pop For:Pop For:BlitMode EraseMode
+					For xa2=0 To 2:For ya2=-1 To 1
+					mx=nx+xa2:my=ny+ya2
+					Blit 1,mx LSL 2,my LSL 2
+					board(mx,my)\flags=0
+					Next:Next:BlitMode CookieMode:Goto deldone
+				End If
+			End If
+			Next:Next
+			deldone:
+		End Select
+	Case 2	;parts menu!
+		Select ItemHit
+		Case 0	;create...
+			If npt<mpt
+				Print "Select Area..."
+				While MButtons<>1 Then a=WaitEvent
+				Gosub readm:sx=mx:sy=my
+				Gosub readm
+				dragsel
+				Boxf sx LSL 2,sy LSL 2+12,mx LSL 2+3,my LSL 2+15,-1
+				omx=mx:omy=my
+				newdrag
+				If MButtons<>5	;mouse up!
+					Gosub readm
+					If mx=omx AND my=omy Then Goto newdrag
+					Boxf sx LSL 2,sy LSL 2+12,omx LSL 2+3,omy LSL 2+15,-1
+					Goto dragsel
+				End If
+				;
+				WLocate 0,180:Print String$(" ",40)
+				WLocate 0,180
+				Print "Name:":f$=Edit$("",40)
+				If f$
+					;
+					;OK, done! - now for the tricky bit!
+					;
+					If mx<sx Then t=mx:mx=sx:sx=t
+					If my<sy Then t=my:my=sy:sy=t
+					w=mx-sx+1:h=my-sy+1:ni=0:no=0
+					For x=sx To mx
+					If board(x,sy)\flags>=100	 ;track there
+						ni+1
+						ix(ni)=x-sx
+					End If
+					If board(x,my)\flags>=100	 ;output
+						no+1
+						ox(no)=x-sx
+					End If
+					Next
+					;
+					pf$="parts/"+f$+".part"
+					If ReadMem(0,pf$)
+						FileOutput 0
+						Print Mki$(w),Mki$(h),Mki$(ni),Mki$(no)
+						;
+						For k=1 To ni:Print Mki$(ix(k)):Next
+						For k=1 To no:Print Mki$(ox(k)):Next
+						;
+						For x=sx To mx:For y=sy To my
+						Print Mki$(board(x,y)\flags)
+						Next:Next
+						;
+						CloseFile 0
+						If OpenFile(0,"partslist")
+							Loc 0,FileSeek(0)
+							NPrint f$:CloseFile 0
+						Else
+							##[$FF8C] 0
+						EndIf
+						WindowOutput 0
+					Else
+						##[$FF8C] 0
+					EndIf
+					;
+					npt+1:pname$(npt)=f$
+					;
+					For x=sx To mx:For y=sy To my
+					board(x,y)\bmode=0
+					Next:Next
+					Boxf sx LSL 2,sy LSL 2+12,mx LSL 2+3,my LSL 2+15,7
+					WLocate sx*4+(w*2-Len(f$)*4),h*2-4+sy*4
+					Print f$
+					For k=1 To ni
+					Blit 13,(sx+ix(k)) LSL 2,sy LSL 2
+					Next
+					For k=1 To no
+					Blit 14,(sx+ox(k)) LSL 2,my LSL 2
+					Next
+					MenuItem 0,0,2,pmn+npt,f$
+					SetMenu 0
+				Else
+					Boxf sx LSL 2,sy LSL 2+12,mx LSL 2+3,my LSL 2+15,-1
+				End If
+			End If
+			;
+		Case 1	;show all
+			Gosub refboard
+		Case 2	;show parts
+			Gosub showparts
+		Default ;lay down a part already made...
+			p=ItemHit-pmn
+			If AddLast(parts())
+				Menus 0:Print "Position..."
+				mx=-1:Gosub dopart
+				parts()\p=p,mx,my:Menus 1
+			End If
+		End Select
+	End Select
+Case 64 ;gadget up
+	zap=-1:stp=0:ste=0
+	Select GadgetHit
+	Case 1	;run
+		Gosub run
+	Case 4	;step
+		ste=-1:Gosub run
+	Case 5	;zap
+		zap=0:Gosub run
+	End Select
+End Select
+Goto main
+
+;******************* SUBROUTINES *****************
+.subs
+MouseWait
+End
+
+.dopart
+If p>0 AND p<=npt
+	f$=pname$(p)
+	If WriteMem(0,"parts/"+f$+".part")
+		FileInput 0
+		w=rw{}:h=rw{}
+		If mx<0
+			WindowInput 0:Gosub pospart:FileInput 0
+		End If
+		ni=rw{}:no=rw{}
+		For k=1 To ni:ix(k)=rw{}:Next
+		For k=1 To no:ox(k)=rw{}:Next
+		Boxf mx LSL 2,my LSL 2+12,(mx+w) LSL 2-1,(my+h) LSL 2+11,7
+		WLocate mx*4+(w*2-Len(f$)*4),h*2-4+my*4
+		Print f$
+		For k=1 To ni
+		Blit 13,(mx+ix(k)) LSL 2,my LSL 2
+		Next
+		For k=1 To no
+		Blit 14,(mx+ox(k)) LSL 2,(my+h-1) LSL 2
+		Next
+		For x=0 To w-1:For y=0 To h-1
+		board(mx+x,my+y)\flags=rw{},0
+		Next:Next
+		CloseFile 0:WindowInput 0
+	Else
+		##[$FF8C] 0
+	EndIf
+End If
+Return
+
+.dtrack	;draw track from sx,sy to mx,my
+If sx=mx AND sy=my
+	x=sx:y=sy:k=1:Goto puttrack
+End If
+Select tmode
+Case 0
+	If sx<>mx
+		y=sy:For x=sx To mx Step Sgn(mx-sx) LSL 2
+		k=0:If x=sx OR x=mx Then k=1
+		Gosub puttrack:Next
+	End If
+	If sy<>my
+		x=mx:For y=sy To my Step Sgn(my-sy) LSL 2
+		k=0:If y=sy OR y=my Then k=1
+		Gosub puttrack:Next
+	End If
+Case 1
+	If sy<>my
+		x=sx:For y=sy To my Step Sgn(my-sy) LSL 2
+		k=0:If y=sy OR y=my Then k=1
+		Gosub puttrack:Next
+	End If
+	If sx<>mx
+		y=my:For x=sx To mx Step Sgn(mx-sx) LSL 2
+		k=0:If x=sx OR x=mx Then k=1
+		Gosub puttrack:Next
+	End If
+End Select
+Return
+
+puttrack
+If trpf Then BBlit 0,1,x,y:Return
+;
+If trpf>0
+	Blit 1,x,y
+	board(x LSR 2,y LSR 2)\flags=0:Return
+End If
+;
+If board(x LSR 2,y LSR 2)\flags<100 OR k
+	board(x LSR 2,y LSR 2)\flags=100,CookieMode
+Else
+	board(x LSR 2,y LSR 2)\flags=12,CookieMode
+	Blit 12,x,y
+End If
+Return
+
+.showparts
+Menus 0:Print "Wait..."
+ResetList parts()
+While NextItem(parts())
+	p=parts()\p
+	mx=parts()\x
+	my=parts()\y
+	Gosub dopart
+End While
+Menus 1:Return
+
+.refboard	;redraw all parts on the board.
+;
+Menus 0:Print "Wait..."
+Boxf 0,12,319,159+12,0
+;
+For x=0 To wid:For y=0 To hit
+bf=board(x,y)\flags
+board(x,y)\bmode=CookieMode
+If bf>=100
+	Blit 1,x LSL 2,y LSL 2:Goto lmore
+End If
+If (bf>2 AND bf<9) OR bf=11
+	Blit bf,x LSL 2,y LSL 2-4:Goto lmore
+End If
+If bf=10
+	Blit 9,x LSL 2,y LSL 2-4:Goto lmore
+End If
+If bf=13 OR bf=14 OR bf=12
+	Blit bf,x LSL 2,y LSL 2:Goto lmore
+End If
+;
+lmore:Next:Next:Menus 1:Return
+
+.pospart	;position a part.
+Gosub readm2
+dragsel2
+Boxf mx LSL 2,my LSL 2+12,(mx+w) LSL 2-1,(my+h) LSL 2+11,-1
+omx=mx:omy=my
+newdrag2
+If MButtons<>1	;left button down.
+	Gosub readm2
+	If mx=omx AND my=omy Then Goto newdrag2
+	Boxf omx LSL 2,omy LSL 2+12,(omx+w) LSL 2-1,(omy+h) LSL 2+11,-1
+	Goto dragsel2
+End If
+Return
+
+.readm2:Gosub readm
+If mx+w>wid Then mx=wid-w+1
+If my+h>hit Then my=hit-h+1
+Return
+
+.readm
+mx=Int((WMouseX AND $fffc)LSR 2)
+my=WMouseY:If my<0 Then my=0
+;
+my=Int((my AND $fffc)LSR 2)
+;
+;If mx>wid Then mx=wid
+If my>hit Then my=hit
+;
+Return
+
+.poweron
+If AddLast(pulse())
+	pulse()\x=px+3,py,-1,-1,1
+End If
+Return
+
+.run	;The BIGGY!
+;
+Menus 0:Print "Wait..."
+;
+ClearList pulse()
+;
+For px=0 To wid:For py=0 To hit
+bf=board(px,py)\flags
+If bf
+	BlitMode board(px,py)\bmode
+	If bf>100
+		board(px,py)\flags=100
+		Blit 1,px LSL 2,py LSL 2
+	Else
+		Select board(px,py)\flags
+		Case 3
+			Gosub poweron
+		Case 11
+			Gosub poweron
+		Case 6
+			Blit 6,px LSL 2,py LSL 2-4
+		Case 10
+			Blit 9,px LSL 2,py LSL 2-4
+		Case 12
+			Blit 12,px LSL 2,py LSL 2
+		End Select
+	End If
+End If
+Next:Next
+;
+Print "Running..."
+;
+runmain
+If zap Then VWait
+;
+If ste
+	a=0:While a<>64 Then a=WaitEvent
+Else
+	a=Event
+End If
+;
+If a=64
+	handgad:ste=0
+	Select GadgetHit
+	Case 1	;run
+		zap=-1
+	Case 2	;stop
+		stp=-1
+	Case 3	;pause
+		a=0:While a<>64 Then a=WaitEvent
+		Pop Select:Goto handgad
+	Case 4	;step
+		Pop Select:ste=-1:Goto switches
+	Case 5	;zap!
+		zap=0
+	End Select
+End If
+;
+;Should I Stop?
+;
+If stp Then BlitMode CookieMode:Menus 1:Return
+;
+;Switch hit?
+;
+.switches
+;
+If MButtons=1
+	px=Int(WMouseX ASR 2):py=Int(WMouseY ASR 2)
+	If py>=0 AND py<40
+		BlitMode board(px,py)\bmode
+		If board(px,py)\flags=4
+			board(px,py)\flags=5	;switch on!
+			BlitMode EraseMode
+			Blit 4,px LSL 2,py LSL 2-4
+			BlitMode CookieMode
+			Blit 5,px LSL 2,py LSL 2-4
+			po=-1:If board(px-1,py)\flags>=101 Then po=1
+			Gosub newswitch
+		Else
+			If board(px,py)\flags=5
+				board(px,py)\flags=4	;switch off!
+				BlitMode EraseMode
+				Blit 5,px LSL 2,py LSL 2-4
+				BlitMode CookieMode
+				Blit 4,px LSL 2,py LSL 2-4
+				po=-1:Gosub newswitch
+			End If
+		End If
+	End If
+End If
+;
+;Update all pulses...
+;
+ResetList pulse()
+While NextItem(pulse())
+	px=pulse()\x:py=pulse()\y:po=pulse()\ison
+	lx=pulse()\lx:ly=pulse()\ly
+	board(px,py)\flags+po
+	BlitMode board(px,py)\bmode
+	If board(px,py)\flags<101
+		;it's off!
+		Blit 1,px LSL 2,py LSL 2
+		If board(px,py)\flags<100 Then board(px,py)\flags=100
+	Else
+		;it's on!
+		Blit 2,px LSL 2,py LSL 2
+	End If
+	KillItem pulse()	;delete this pulse.
+	ny=py:For xa=-1 To 1 Step 2
+	nx=px+xa:Gosub newpulse
+	Next
+	nx=px:For ya=-1 To 1 Step 2
+	ny=py+ya:Gosub newpulse
+	Next
+End While
+Goto runmain
+
+.newswitch
+nx=px+3:ny=py:lx=-1:ly=-1
+;
+.newpulse
+opo=po
+fboard:If nx=lx AND ny=ly Then po=opo:Return
+bf=board(nx,ny)\flags:If bf=0 Then po=opo:Return
+If bf>99
+	If po>0 OR (bf>100 AND po<0)
+		If AddItem(pulse())
+			pulse()\x=nx,ny,px,py,po:po=opo:Return
+		End If
+	End If
+Else
+	pf=board(px,py)\flags
+	If bf=11
+		If pf>=101
+			po=-1
+		Else
+			po=1
+		End If
+		nx+3:Goto fboard
+	End If
+	If bf=6 ;LED!
+		If pf>=101 ;led on!
+			Blit 7,nx LSL 2,ny LSL 2-4
+			nx+3:Goto fboard
+		End If
+		;led off!
+		BlitMode EraseMode
+		Blit 7,nx LSL 2,ny LSL 2-4
+		BlitMode CookieMode
+		Blit 6,nx LSL 2,ny LSL 2-4
+		nx+3:Goto fboard
+	End If
+	If bf=9	 ;transistor gate
+		tf=board(px-2,py+2)\flags
+		bm=board(px-2,py+2)\bmode
+		If bm
+			BlitMode EraseMode
+			Blit 7,px LSL 2-4,py LSL 2+4
+		End If
+		BlitMode bm
+		If pf>=101 ;gate closed
+			Blit 10,px LSL 2-4,py LSL 2+4
+			If tf<>board(px+2,py+2)\flags ;change!
+				po=-1:If tf>=101 Then po=1
+				nx+2:ny+1:Goto fboard
+			End If
+		Else
+			Blit 9,px LSL 2-4,py LSL 2+4	;gate open
+			If board(px+2,py+2)\flags>=101	;was outputing a 1...
+				po=-1:nx+2:ny+1:Goto fboard
+			End If
+		End If
+	End If
+	If bf=10	;transistor collector
+		If board(px+2,py-2)\flags>=101 ;is it switched on?
+			nx+3:Goto fboard
+		End If
+	End If
+	If bf=12
+		If nx=px
+			ny+ya:Goto fboard
+		Else
+			nx+xa:Goto fboard
+		End If
+	End If
+	If bf=5 OR bf=8 OR bf=13 OR bf=14 Then nx+3:Goto fboard
+End If
+po=opo:Return
+
+.putpart:;p=part #
+Menus 0:z=0
+While z<>1 AND z<>2 ;wait for click.
+	z=MButtons
+	VWait:UnBuffer 0:mx=WMouseX AND $fffc:my=WMouseY AND $fffc
+	If mx<4 Then mx=4
+	If mx+ShapeWidth(p)>=wid LSL 2
+		mx=wid LSL 2-ShapeWidth(p)
+	End If
+	If my+ShapeHeight(p)>=176
+		my=176-ShapeHeight(p)
+	Else
+		If my<0 Then my=0
+	End If
+	BBlit 0,p,mx,my
+End While
+FlushBuffer 0
+mx=Int(mx/4):my=Int(my/4)
+If p<>2
+	For x=0 To 2:For y=0 To 2
+	board(mx+x,my+y)\flags=0
+	Next:Next
+End If
+Menus 1
+Return
+
+.grid
+Menus 0:Boxf 0,12,319,159+12,0
+For x=0 To wid
+For y=0 To hit
+board(x,y)\flags=0,CookieMode
+Next
+Next
+np=0:ClearList parts():Menus 1:Return
+
+;****************** DATA STATEMENTS *****************
+
+Data$ empty,track,pulse
+Data$ power,"switch1","switch2"
+Data$ led1,led2,diode
+Data$ trans1,trans2,inverter
+Data$ xinter,"input","output"

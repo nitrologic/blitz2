@@ -1,0 +1,122 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/crap/art/af1/game/game.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/crap/art/af1/game/game.bb
+;
+; iso ball game thing
+;
+
+NEWTYPE .object
+	depth.q:id:x:y:z:vx:vy:rot:rot2:rotv:sx:sy
+End NEWTYPE
+
+Dim List bob.object(50)
+
+DEFTYPE .object *me
+
+Dim qsin(255),qcos(255)
+For r=0 To 255:qsin(r)=HSin(Pi*r/128):qcos(r)=HCos(Pi*r/128):Next
+
+Dim map.w(20,20)
+
+LoadPalette 0,"work.iff"
+LoadShapes 0,"blocks.shapes"
+LoadShapes 4,"balls.shapes"
+LoadShapes 16,"isoshapes"
+
+BitMap 0,320+64,256+80,3
+BitMap 1,320+64,256+80,3
+BitMap 2,640,512,3
+
+Queue 0,32:Queue 1,32
+
+Macro p 320+(`1-`2)ASL 4,128+(`1+`2-`3)ASL3:End Macro			 ;back
+Macro f 320+32-sx+(`1-`2)ASL4,128+32-sy+(`1+`2-`3)ASL3:End Macro	;front
+
+BLITZ
+Slice 0,44,320,256,$fffa,6,8,32,320+64,640
+Use SetCycle 0
+
+Gosub setupmap
+Gosub drawmap
+Gosub initgame
+
+n=16:sx=100:sy=100
+
+While Joyb(0)=0
+	VWait:ShowF db,32,40,sx:ShowB 2,sx,sy,32
+	db=1-db:Use BitMap db
+	Gosub moveme
+	Gosub movethem
+	UnQueue db:Gosub drawbobs
+;	MOVE#-1,$dff180
+Wend
+
+End
+
+.moveme:
+	USEPATH *me
+	\rot=QWrap(\rot-Joyx(1)/2,0,16)
+	If Joyb(1)=1
+		\vx+qsin(\rot ASL 4) ASR 6
+		\vy+qcos(\rot ASL 4) ASR 6
+	EndIf
+	\vx-\vx ASR 5
+	\vy-\vy ASR 5
+	\x=QLimit(\x+\vx,0,19)
+	\y=QLimit(\y+\vy,0,19)
+	\sx=!p{\x,\y,\z}
+	sx=QLimit(\sx-160,0,320):sy=QLimit(\sy-128,0,256)
+	\sx-sx+32:\sy-sy+32
+	\depth=\x+\y
+	If map(\x,\y)=1
+		Use BitMap 2:x=Int(\x):y=Int(\y):Blit 2,!p{x,y,0}:Use BitMap db
+	EndIf
+	Return
+
+.movethem:
+	USEPATH bob()
+	ResetList bob()
+	While NextItem(bob())
+		If \id=2
+			\rot=QWrap(\rot+\rotv,0,16)
+			\rot2=QWrap(\rot2+1,0,16)
+			\x+qsin(\rot ASL 4) ASR 4:\y+qcos(\rot ASL 4) ASR 4
+			\sx=!f{\x,\y,\z}
+			\depth=\x+\y
+		EndIf
+	Wend
+
+.drawbobs:
+	SortList bob()
+	ResetList bob()
+	USEPATH bob()
+	While NextItem(bob())
+		If PColl(\sx,\sy,1,1,16,40,320+31,256)
+			QBlit db,\id*16+\rot,\sx,\sy
+			If \id=2 Then QBlit db,\id*16+16+\rot2,\sx,\sy
+		EndIf
+	Wend
+	Return
+
+.initgame:
+	ClearList bob()
+	AddItem bob():*me.object=bob()
+	*me\id=1,.5,.5,0
+	For i=0 To 2
+		If AddItem(bob())
+			bob()\id=2,Rnd(19),Rnd(19):\rotv=(Rnd(1)-.5)ASR 2
+		EndIf
+	Next
+	Return
+
+.setupmap:
+	For x=0 To 19:For y=0 To 19:map(x,y)=1:Next:Next
+	For x=9 To 11:For y=9 To 11:map(x,y)=-1:Next:Next
+	Return
+
+.drawmap:
+	Use BitMap 2
+	For x=0 To 19
+		For y=0 To 19
+			If map(x,y)>-1 Then Blit map(x,y),!p{x,y,0}		 ;100,100
+		Next
+	Next
+	Return

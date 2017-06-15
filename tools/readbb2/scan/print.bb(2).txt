@@ -1,0 +1,18 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/disks/bums/bum5/PrinterStuff/Print.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/disks/bums/bum5/PrinterStuff/Print.bb
+NoCli
+WBStartup
+WbToScreen 0
+##[$FFB5]
+MaxLen pa$ = 160
+MaxLen fi$ = 64
+pa$ = "sys:"
+fil$ = FileRequest$("Select FILE to PRINT..",pa$,fi$)
+##[$FFB4]
+If fil$ <> ""
+	If WriteMem(0,fil$)
+		p.l = ##[$FE1F]("copy "+fil$+" prt:",0,0)
+		End
+	EndIf
+Else
+	End
+EndIf

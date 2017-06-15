@@ -1,0 +1,40 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/make.bb
+
+For i=1 To 24
+	Read a$
+	b$="track"+Str$(i)
+	x$="copy data/"+a$+".map "+b$+".map"
+	##[$FE1F] x$,0,0 ;NPrint x$
+	x$="copy data/"+a$+".pax "+b$+".pax"
+	##[$FE1F] x$,0,0 ;NPrint x$
+Next
+MouseWait
+End
+
+Data.s cross
+Data.s "format"
+Data.s blob
+Data.s power
+Data.s spot
+Data.s fold
+
+Data.s hook
+Data.s warble
+Data.s twirl
+Data.s jyro
+Data.s one
+Data.s twistie
+
+Data.s f1
+Data.s f2
+Data.s f8
+Data.s f9
+Data.s f5
+Data.s f3
+
+Data.s t11
+Data.s f4
+Data.s t13
+Data.s f14
+Data.s f7
+Data.s f6

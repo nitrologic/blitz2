@@ -1,0 +1,22 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Free.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Free.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Free.bb
+
+; 
+; screens and windows program example 
+; 
+
+Screen 0,3               ;open intuition screen & 4 windows... 
+
+Window 1,0,0,160,100,$f,"Window 1",1,2
+Window 2,160,0,160,100,$f,"Window 2",1,2
+Window 3,0,100,160,100,$f,"Window 3",1,2
+Window 4,160,100,160,100,$f,"Window 4",1,2
+
+c=0                   ;counter for number of windows closed 
+Repeat                 ;repeat...
+ a.l=WaitEvent          ;wait for something to happen
+ If a=512             ;close window ?
+  Free Window EventWindow    ;Yes, free window... 
+  c+1              ;and increment counter 
+ EndIf 
+Until c=4                ;until all windows closed.
+

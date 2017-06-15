@@ -1,0 +1,72 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/libsdev/amigaincludes/intuition/classes.bb2,/Users/simon/Google Drive/amiga/w/fdrive/junk/bum6/DEVELOPERS/Includes/intuition/classes.bb2
+;
+;	$VER: classes.bb2 40.0 (03.03.94)
+;
+
+XInclude"utility/hooks.bb2"
+
+XInclude"intuition/classusr.bb2"
+
+;/*******************************************/
+;/*** "White box" access to struct IClass ***/
+;/*******************************************/
+
+;/* This structure is READ-ONLY, and allocated only by Intuition */
+NEWTYPE.IClass
+cl_Dispatcher.Hook
+cl_Reserved.l ;/* must be 0	*/
+*cl_Super.IClass
+cl_ID.b ;ClassID (ClassID = typedef UBYTE)
+
+;/* where within an object is the instance data for this class? */
+cl_InstOffset.w
+cl_InstSize.w
+
+cl_UserData.l ;/* per-class data of your choice */
+cl_SubclassCount.l
+;/* how many direct subclasses? */
+cl_ObjectCount.l
+;/* how many objects created of this class? */
+cl_Flags.l
+End NEWTYPE
+
+#CLF_INLIST=$00000001;/* class is in public class List */
+
+;/* add offset for instance data to an object handle */
+;#INST_DATA(=#cl,#o#)((#VOID*#)(((#UBYTE*#)o)+cl->cl_InstOffset))
+
+;/* sizeof the instance data for a given class */
+;#SIZEOF_INSTANCE(=#cl#)((#cl)->cl_InstOffset+#(#cl)->cl_InstSize#\
+;+ sizeof (struct _Object ))
+
+;/**************************************************/
+;/*** "White box" access to struct _Object ***/
+;/**************************************************/
+
+;/*
+; * We have this, the instance data of the root class, PRECEDING
+; * the "object".	This is so that Gadget objects are Gadget pointers,
+; * and so on.	If this structure grows, it will always have o_Class
+; * at the end, so the macro OCLASS(o) will always have the same
+; * offset back from the pointer returned from NewObject().
+; *
+; * This data structure is subject to change.	Do not use the o_Node
+; * embedded structure.
+; */
+
+NEWTYPE._Object
+o_Node.MinNode
+*o_Class.IClass
+End NEWTYPE
+
+;/* convenient typecast */
+;#_OBJ(=#o#)((#struct#_Object*#)(o))
+
+;/* get "public" handle on baseclass instance from real beginning of obj data */
+;#BASEOBJECT(=#_obj#)(#(#Object*#)(#_OBJ(_obj)+1)#)
+
+;/* get back to object data struct from public handle */
+;#_OBJECT(=#o#)(#_OBJ(o)-#1)
+
+;/* get class pointer from an object handle */
+;#OCLASS(=#o#)(#(#_OBJECT(o))->o_Class#)

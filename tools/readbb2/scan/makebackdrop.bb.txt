@@ -1,0 +1,28 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/Car/MAKEBACKDROP.BB
+
+Screen 0,0,0,640,512,4,$8004,"",0,1
+ScreensBitMap 0,0
+BitMapOutput 0
+LoadBitMap 0,"BACKDROP1.IFF",0
+Use SetCycle 0
+Use BitMap 0
+Scroll 0,0,320,256,320,0
+Scroll 0,0,640,256,0,256
+
+SaveBitmap 0,"BACKDROP1.IFF",0
+
+*b.bitmap=Addr BitMap(0)
+
+c.l=ReadMem(0,"BACKDROP1.RAW")
+
+For y=0 To 511
+		For pl=0 To 3
+				base.l=*b\_data[pl]
+				base.l=base+(y*80)
+				Exists 0,base,80
+		Next
+Next
+CloseFile 0
+
+
+MouseWait

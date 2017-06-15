@@ -1,0 +1,5 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/UnLeft$.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/UnLeft$.bb
+
+Print UnLeft$("GoodBye",3): ; Will print Good 
+MouseWait 
+

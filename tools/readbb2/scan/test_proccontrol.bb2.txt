@@ -1,0 +1,43 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/out/net/debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/net/debugger/examples/Test_ProcControl.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/net/debugger/examples/Test_ProcControl.bb2
+;LES Debugger v1.21 Test program
+;Testing procedure control
+
+;Some dummy statements
+Statement Dummy1 {}
+	NPrint "Statement Dummy1 called"
+End Statement
+
+Statement Dummy2 {}
+	NPrint "Statement Dummy2 called"
+	Dummy1 {}
+End Statement
+
+Statement Dummy3 {}
+	##[$9986] Off
+	Stop															; Need a stop!
+	NPrint "Statement Dummy2 called"
+	Dummy1 {}
+End Statement
+
+NPrint "Press a mouse button.	Then step through this program, whilst toggling"
+NPrint "the procedure control gadget on and off (gadget PS)"
+NPrint "With PS toggled on, the debugger will not step inside the statements in"
+NPrint "this program will it?"
+NPrint "Trying switching on procedure control whilst inside Dummy2{} and stepping"
+NPrint "through it."
+
+MouseWait
+Stop
+
+Dummy1{}
+Dummy1{}
+Dummy2{}
+Dummy1{}
+Dummy2{}
+
+;Your program can switch on and off procedure control whenever it likes:
+##[$9986] On
+Dummy1{}
+
+Dummy3{}
+End

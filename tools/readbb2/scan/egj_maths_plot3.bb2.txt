@@ -1,0 +1,55 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/ABCSHIT/examplesb2.2/egj_maths_plot3.bb2
+;This programme shows what happens when convoluted iteration
+;is applied to a simple function.
+;Iterations 0,2,4,6,8 and 10 are drawn on the one screen.
+;The change in boundary with the higher iterations is because
+;floating point overflow has been reached.
+;If the calculation were based on the number of iterations
+;required to reach a certain domain I suppose a fractal
+;would result. I don't know this - I'm just guessing.
+WBStartup
+##[$ED11] 3					;change to 1 to switch fpu off
+BitMap 0,320,256,5
+Screen 0,0,0,320,256,5,0,"",1,2,0
+Green 0,0,0,0:For i=16 To 31:Green i,i-16,i-16,i-16:Next
+k.l+4
+ShowScreen 0:Use BitMap 0:BlockScroll 0
+k=-2
+For ib=0 To 1:For ia=0 To 2
+	k+2
+	For i=0 To 100
+		ip=i+109*ia
+		If Joyb(1)<>0:Pop For:Pop For:Pop For:Goto l1:EndIf
+		x.f=-2+(4*i)/100
+		For j=0 To 100
+			jp=j+128*ib
+			y.f=2-(4*j)/100
+			z1.f=x*x+y*y:z2.f=x+y
+;----------------------------------------------------------
+;The principle of convoluted iteration is very simple.
+;Set up a number of variables z1,z2,z3 ......
+;Set them initially to functions of x and y.
+;Calculate successive values of z1,z2,z3 ... from those which have
+;gone before.
+;The functions don't have to be simple explicit calculations.
+;They can be any programmed algorithms involving conditions
+;and branches. Remember to test for invalid arguments before using
+;division and mathematical functions though.
+;Convoluted periodic functions can produce especially luscious
+;effects.
+
+			For l=0 To k
+				nextz1.f=z1-z2:nextz2.f=z1*z2
+				z1=nextz1:z2=nextz2
+			Next
+			zz.f=Frac(z1)
+			If zz<0:zz+1:EndIf
+			zz*2:If zz>1:zz=2-zz:EndIf
+			c.w=Int(zz*16+16)
+			If c=32:c=31:EndIf
+			Point ip,jp,c
+	Next:Next
+Next:Next
+l1:MouseWait
+VWait 50
+

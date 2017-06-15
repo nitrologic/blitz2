@@ -1,0 +1,77 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/makehelp.bb
+;
+; makehelp 7/7/95
+;
+
+; compresses library help files useing crm.library
+; uses bcpl offsets (multiply by 4)
+; unknown token will be the calsl to cmAllocCrunchStructA_ & cmCrunchData_
+
+NEWTYPE.cmstruc ;	 STRUCTURE cmCrunchStruct,0
+	Src.l:Seclen.l
+	Dest.l
+	DestLen.l
+	DataHdr.l :Hook.l :pad1.w[4]
+	MaxOff.l
+	RealOff.l
+	MinSecDist.l
+	CrunLen.l	;*ADD 14!!*
+	pad3.l[6]:pad4.b[4]
+End NEWTYPE
+
+Dim offset.w(511)
+
+InitBank 0,32768,0	;help file
+InitBank 1,32768,0	;crunch buffer
+
+Dim tags.l(100):tags(0)=$80000001:tags(1)=1
+*mine.cmstruc=##[$E407](&tags(0))
+
+If ReadMem(0,"blitz2:help.dat")
+	;
+	Exists 0,&offset(0),1024:ptr.l=1024/4
+	;
+	i=0:f$="blitz2:helpdev/index":Gosub crunchlib
+	For i=1 To 511:f$="blitz2:helpdev/lib"+Str$(i):Gosub crunchlib:Next
+	;
+	Loc 0,0
+	Exists 0,&offset(0),1024
+	CloseFile 0
+	;
+EndIf
+
+End
+
+crunchlib:
+	If WriteMem(1,f$)
+		bsize.l=FileSeek(1)
+		##[$BE14] 1,Bank(0),bsize
+		CloseFile 1
+		*mine\Src=Bank(0),bsize,Bank(1)+14,BankSize(1):*mine\DataHdr=Bank(1)
+		##[$E406] *mine
+		offset(i)=ptr
+		csize.l=*mine\CrunLen+14
+		csize=(csize+3) LSR 2
+		Exists 0,Bank(1),csize*4
+		ptr+csize
+		NPrint ptr
+	Else
+		offset(i)=0
+	EndIf
+	Return
+
+test:
+
+LoadBank 0,"help.dat"
+For i=0 To 511
+	oo.l=Peek.w(Bank(0)+i*2)
+	oo=(oo AND $ffff) ASL 2
+	If oo>0
+		NPrint oo:aa.l=Bank(0)+oo
+		a$=Peeks$(aa,4)
+		NPrint a$
+		MouseWait
+	EndIf
+Next
+MouseWait
+End

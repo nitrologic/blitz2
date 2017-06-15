@@ -1,0 +1,402 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/bums/bum8/Bombs/BombsDisplay.bb2,/Users/simon/Google Drive/amiga/w/abc/bums/old/bum8/Games/Bombs/BombsDisplay.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/bum8/Bombs/BombsDisplay.bb2,/Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/old/bum8/Games/Bombs/BombsDisplay.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/bombs/BombsDisplay.bb2
+;
+;
+; Bombs Display
+;
+;
+; Created by ARV
+;
+; started 01-06-1994
+; BLITZ2 Version : 01-06-1994
+; last modified 22-12-1994
+
+; =======================================
+; =======================================
+
+Statement DrawSquare{ *bombptr.gameVars, num.l, xpos.l, ypos.l}
+; Checks if xpos and ypos are within bounds of the grid,
+; then draws a square at (xpos,ypos) with object "num"
+.DrawSquare
+USEPATH *bombptr
+		If (xpos>=\displayXCoord) AND (xpos<\displayXCoord+10*\displayWide)
+				If (ypos>=\displayYCoord) AND (ypos<\displayYCoord+10*\displayHigh)
+;						 coords are OK, now erase whatever is there
+						WBox xpos,ypos, xpos+9,ypos+9, 0
+						Select num
+							Case $EF									; blank box required
+							Case -1									 ; this is a bomb
+								WBlit 12, xpos, ypos
+							Default									 ; this is anything else
+								WBlit num, xpos,ypos
+						End Select
+				End If
+		End If
+End Statement	;DrawSquare
+
+; =======================================
+
+Statement UpdateTitleBar{ *bombptr.gameVars}
+; Custom titlebar for the game's display
+; Update the number of bombs flagged
+; This is hard-coded, change this if you add any "gadgets" in the title-bar!
+.UpdateTitleBar
+USEPATH *bombptr
+		WBox 64,5, 152,13, 11
+		WLocate 64,7:Print \markedBombs
+End Statement	;UpdateTitleBar
+
+; =======================================
+
+Statement UpdateProgressBar{ *bombptr.gameVars}
+; Updates the position of the runner
+.UpdateProgressBar
+USEPATH *bombptr
+		pctInc = (\openedSquares + \markedBombs - \falseBombs) * 100 / \totalSquares
+USEPATH *bombptr\progressBar
+		newX = \startXCoord + pctInc*(\endXCoord-\startXCoord)/100
+; need to change this still
+		WBox \xcoord,\ycoord, \xcoord+7,\ycoord+14, 0
+		If (pctInc>0) AND (newX>\xcoord)
+				\xcoord = \xcoord + 1
+				\currentFrame = \currentFrame + 1
+				If \currentFrame>#maxProgressFrame Then \currentFrame=0
+				If \currentFrame<>0 Then WBlit \currentFrame+31, \xcoord, \ycoord
+		Else
+				WBlit 32, \xcoord,\ycoord
+		End If
+End Statement	;UpdateProgressBar
+
+; =======================================
+
+Statement UpdateTime{ *bombptr.gameVars}
+; Executes a vwait, increases the time and displays
+; Calculates the rating
+; May try to change this to interrupts
+.UpdateTime
+USEPATH *bombptr
+		If \gameInProgress=1
+				VWait
+				\timeInProgress = \timeInProgress + 1
+				If \timeInProgress MOD #oneSecDelay=0
+; Time to display another second lapsed
+						timeStr$ = Str$(\timeInProgress/#oneSecDelay)
+						length.w = Len(timeStr$)
+						WBox 200,4, 320,13, 11
+						WLocate 300-8*length,7:Print timeStr$
+; Time to calculate the rating
+						divisor.l = \timeInProgress/#oneSecDelay+250
+						theRating.l = \percentageBombs*\percentageBombs*\markedBombs*(\openedSquares+\markedBombs)/divisor/100
+						If theRating>\rating Then \rating = \rating+3 Else \rating = theRating
+						WLocate 200,7:Print Str$(\rating)
+				End If
+				If \timeInProgress MOD (#oneSecDelay/2)=0
+						UpdateProgressBar{ *bombptr}
+				End If
+		End If
+End Statement	;UpdateTime
+
+; =======================================
+
+Statement ShowAllBombs{ *bombptr.gameVars, num.l}
+; Plays an explosion, animates an explosion, then
+; displays the positions of all bombs and ends the game
+.ShowAllBombs
+USEPATH *bombptr
+		\gameInProgress = 3
+		\rating = 0
+; play the explosion and the animation
+		xpos = \displayXCoord+(((num-1) MOD \wide)-\leftWide)*10
+		ypos = \displayYCoord+(num/\wide-\leftHigh)*10
+		If num MOD \wide=0 Then ypos = ypos-10
+		j.l=0
+		StartMedModule 1
+		For i.l=1 To 60
+				VWait
+				PlayMed
+				If i MOD 3=0 Then WBlit 52+j, xpos,ypos:j=j+1
+		Next i
+		For i=64 To 0 Step -1
+				VWait
+				SetMedVolume i
+		Next i
+		StopMed
+; show all the bombs
+		For i=1 To \totalSquares
+				If \square[i]\hasBomb<0
+						If \square[i]\state=0 Then \square[i]\state = 2
+						xpos = \displayXCoord+(((i-1) MOD \wide)-\leftWide)*10
+						ypos = \displayYCoord+(i/\wide-\leftHigh)*10
+						If i MOD \wide=0 Then ypos = ypos - 10
+						If \square[i]\state=4
+								\square[i]\hasBomb = 13
+								\square[i]\state = 2
+								DrawSquare{ *bombptr, 13, xpos, ypos}
+						Else
+								DrawSquare{ *bombptr, -1, xpos, ypos}
+						End If
+				End If
+		Next i
+End Statement	;ShowAllBombs
+
+; =======================================
+
+Statement RestoreRegion{ *bombptr.gameVars, theRegion.b}
+; If a gadget or square was clicked down on, but the button
+; was released outside of it's area, then this routine will
+; restore the gadget or square to before the down press
+.RestoreRegion
+USEPATH *bombptr
+		Select theRegion
+			Case #closeRegion
+				\closeState = 0
+				WBox 2,2, 18,18, 11
+				WBlit 15-\closeState, 2,2
+			Case #pauseRegion
+				WBox 20,2, 36,18, 11
+				WBlit 17-\pauseState, 20,2
+			Case #restartRegion
+				\restartState = 0
+				WBox 38,2, 54,18, 11
+				WBlit 19-\restartState, 38,2
+			Case #gridRegion
+				If \square[\downSquare[1]\num]\state=4
+						\square[\downSquare[1]\num]\state = 4
+						\downSquare[1]\num = 0
+						DrawSquare{ *bombptr, 11, \downSquare[1]\xpos, \downSquare[1]\ypos}
+				Else
+						For i.b=1 To \downSquare[0]\num
+								\square[\downSquare[i]\num]\state = 0
+								\downSquare[i]\num = 0
+								DrawSquare{ *bombptr, 0, \downSquare[i]\xpos, \downSquare[i]\ypos}
+						Next i
+				End If
+				\downSquare[0]\num = 0
+			End Select
+End Statement	;RestoreRegion
+
+; =======================================
+
+Statement DisplayTitleBar{ *bombptr.gameVars, titleString$}
+; Displays the state of the game in a bar at the top of the screen
+; This is hard-coded
+.DisplayTitleBar
+		WJam 0
+		WBox 0,0,320,20,11
+		RestoreRegion{ *bombptr, #closeRegion}
+		RestoreRegion{ *bombptr, #pauseRegion}
+		RestoreRegion{ *bombptr, #restartRegion}
+		WLocate 64,7:Print titleString$
+End Statement	;DisplayTitleBar
+
+; =======================================
+
+Statement DrawGrid{ *bombptr.gameVars}
+Shared ntscOffset
+; Draws a border around the displayed part of the field
+; This is hard-coded
+.DrawGrid
+USEPATH *bombptr
+		\displayXCoord = ( (320) - (\displayWide*10) )/2
+		\displayYCoord = ( (DispHeight+18) - (\displayHigh*10) )/2 + ntscOffset
+		endX = \displayXCoord + \displayWide*10
+		endY = \displayYCoord + \displayHigh*10
+; Now we can draw the border of the grid
+		WBox \displayXCoord-6,\displayYCoord-6, endX+5,endY+5, 1
+		WBox \displayXCoord-1,\displayYCoord-1, endX,endY, 0
+; Now we can draw the intermediate progress bar
+		\progressBar\xcoord = \displayXCoord
+		\progressBar\ycoord = \displayYCoord-22
+		\progressBar\startXCoord = \displayXCoord
+		\progressBar\startYCoord = \displayYCoord-22
+		\progressBar\endXCoord = endX-8
+		\progressBar\endYCoord = \displayYCoord-22
+		WLine \displayXCoord-6,\displayYCoord-7, endX+5,\displayYCoord-7, endX+5,\displayYCoord-24, 2
+		WLine \displayXCoord-6,\displayYCoord-7, \displayXCoord-6,\displayYCoord-24, endX+5,\displayYCoord-24, 1
+		UpdateProgressBar{ *bombptr}
+; And now we can draw the squares themselves
+		For j.b=0 To \displayHigh-1
+				For i.b=0 To \displayWide-1
+						DrawSquare{ *bombptr, 0, \displayXCoord+(i*10), \displayYCoord+(j*10)}
+				Next i
+		Next j
+End Statement	;DrawGrid
+
+; =======================================
+
+Statement DoScrolls{ *bombptr.gameVars, override.b}
+; Checks if any scroll-arrows need to be drawn and draws them
+; Refreshes the grid if a scroll-arrow was clicked on
+; NOTE: only button releases are taken into account
+; The arrows are numbered 20 thru' 29
+; Drawn from left to right, top to bottom,
+; using \displayXYCoords and \displayWideHigh offsets
+; "override" is used to display the arrows only without any
+; checks for clicks or redrawing of the grid at startup or restart
+.DoScrolls
+USEPATH *bombptr
+		arrowHit.b = False
+		If (\displayWide=\wide) AND (\displayHigh=\high)
+				Statement Return
+		Else
+				localY.w = \displayYCoord + \displayHigh*5 - 45
+				leftX.w = \displayXCoord-23
+				riteX.w = \displayXCoord + \displayWide*10 + 13
+				If override Then Goto skip1
+; check to see if an arrow was hit,
+; sets "arrowHit" to the number of the arrow that was clicked on
+				If (\xcoord>=leftX) AND (\xcoord<=leftX+9)
+						For i.b=0 To 4
+								If (\ycoord>=localY+i*20) AND (\ycoord<=localY+9+i*20)
+										If \scrollArrows[i+1]\displayed Then arrowHit = i+1
+								End If
+						Next i
+				Else
+						If (\xcoord>=riteX) AND (\xcoord<=riteX+9)
+								For i.b=0 To 4
+										If (\ycoord>=localY+i*20) AND (\ycoord<=localY+9+i*20)
+												If \scrollArrows[i+6]\displayed Then arrowHit = i+6
+										End If
+								Next i
+						End If
+				End If
+				Select arrowHit
+					Case 1
+						\leftHigh = \leftHigh-\displayHigh/2
+						If \leftHigh<0 Then \leftHigh=0
+					Case 2
+						\leftHigh = \leftHigh-\displayHigh/2
+						If \leftHigh<0 Then \leftHigh=0
+						\leftWide = \leftWide-\displayWide/2
+						If \leftWide<0 Then \leftWide=0
+					Case 3
+						\leftWide = \leftWide-\displayWide/2
+						If \leftWide<0 Then \leftWide=0
+					Case 4
+						\leftHigh = \leftHigh+\displayHigh/2
+						If \leftHigh>\high-\displayHigh Then \leftHigh=\high-\displayHigh
+						\leftWide = \leftWide-\displayWide/2
+						If \leftWide<0 Then \leftWide=0
+					Case 5
+						\leftHigh = \leftHigh+\displayHigh/2
+						If \leftHigh>\high-\displayHigh Then \leftHigh=\high-\displayHigh
+					Case 6
+						\leftHigh = \leftHigh-\displayHigh/2
+						If \leftHigh<0 Then \leftHigh=0
+					Case 7
+						\leftHigh = \leftHigh-\displayHigh/2
+						If \leftHigh<0 Then \leftHigh=0
+						\leftWide = \leftWide+\displayWide/2
+						If \leftWide>\wide-\displayWide Then \leftWide=\wide-\displayWide
+					Case 8
+						\leftWide = \leftWide+\displayWide/2
+						If \leftWide>\wide-\displayWide Then \leftWide=\wide-\displayWide
+					Case 9
+						\leftHigh = \leftHigh+\displayHigh/2
+						If \leftHigh>\high-\displayHigh Then \leftHigh=\high-\displayHigh
+						\leftWide = \leftWide+\displayWide/2
+						If \leftWide>\wide-\displayWide Then \leftWide=\wide-\displayWide
+					Case 10
+						\leftHigh = \leftHigh+\displayHigh/2
+						If \leftHigh>\high-\displayHigh Then \leftHigh=\high-\displayHigh
+					Default
+						Statement Return
+				End Select
+;redraw the grid
+				For j.l=0 To \displayHigh-1
+						For k.l=0 To \displayWide-1
+								num = (j+\leftHigh)*\wide + k+\leftWide+1
+								Select \square[num]\state
+									Case 0
+										DrawSquare{ *bombptr, 0, \displayXCoord+(k*10), \displayYCoord+(j*10)}
+									Case 2
+										If \square[num]\hasBomb=0
+												bombNum.l = $EF
+										Else
+												bombNum = \square[num]\hasBomb
+										End If
+										DrawSquare{ *bombptr, bombNum, \displayXCoord+(k*10), \displayYCoord+(j*10)}
+									Case 4
+										DrawSquare{ *bombptr, 11, \displayXCoord+(k*10), \displayYCoord+(j*10)}
+								End Select
+						Next k
+				Next j
+skip1
+;erase all scroll-arrows
+				WBox leftX,localY, leftX+9,localY+89, 0
+				WBox riteX,localY, riteX+9,localY+89, 0
+				For i=1 To 10
+						\scrollArrows[i]\displayed = False
+				Next i
+;draw the LHS arrows
+				If \leftHigh>0
+;draw the up arrows
+						\scrollArrows[1]\displayed = True
+						\scrollArrows[6]\displayed = True
+						If \leftWide>0
+;draw the up-left arrow
+								\scrollArrows[2]\displayed = True
+;draw the left arrow
+								\scrollArrows[3]\displayed = True
+						End If
+						If \wide-\displayWide>\leftWide
+;draw the up-right arrows
+								\scrollArrows[7]\displayed = True
+;draw the right arrow
+								\scrollArrows[8]\displayed = True
+						End If
+				End If
+				If \high-\displayHigh>\leftHigh
+;draw the down arrows
+						\scrollArrows[5]\displayed = True
+						\scrollArrows[10]\displayed = True
+						If \leftWide>0
+;draw the down-left arrow
+								\scrollArrows[4]\displayed = True
+;draw the left arrow
+								\scrollArrows[3]\displayed = True
+						End If
+						If \wide-\displayWide>\leftWide
+;draw the down-right arrow
+								\scrollArrows[9]\displayed = True
+;draw the right arrow
+								\scrollArrows[8]\displayed = True
+						End If
+				End If
+				If \leftWide>0
+;draw the left arrow
+						\scrollArrows[3]\displayed = True
+				End If
+				If \wide-\displayWide>\leftWide
+;draw the right arrow
+						\scrollArrows[8]\displayed = True
+				End If
+;redraw the valid arrows
+				For i=1 To 10
+USEPATH *bombptr\scrollArrows[i]
+						If \displayed Then WBlit \num, \xpos,\ypos
+				Next i
+		End If
+End Statement	;DoScrolls
+
+; =======================================
+
+Statement InitScrolls{ *bombptr.gameVars}
+; Initializes all variables for the scroll-arrows
+.InitScrolls
+USEPATH *bombptr
+		localY.w = \displayYCoord + \displayHigh*5 - 65
+		leftX.w = \displayXCoord-23
+		riteX.w = \displayXCoord + \displayWide*10 + 13
+		For i.b=1 To 5
+				\scrollArrows[i]\num = i+19
+				\scrollArrows[i]\xpos = leftX
+				\scrollArrows[i]\ypos = localY+i*20
+		Next i
+		For i.b=6 To 10
+				\scrollArrows[i]\num = i+19
+				\scrollArrows[i]\xpos = riteX
+				\scrollArrows[i]\ypos = localY+(i-5)*20
+		Next i
+End Statement	;InitScrolls
+
+;

@@ -1,0 +1,43 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/acid/bums/out/stuff/math/FUN_Example5.bb2,/Users/simon/Google Drive/amiga/w/lha/bbold/bum8/math/FUN_Example5.bb2
+NoCli
+WBStartup
+
+INCDIR	"FUN_Math:"
+Include "FUN_Objects.bb2"
+
+BitMap 0,320,136,4
+BitMap 1,320,136,4
+BitMap 2,320,64,4
+
+LoadBitMap 2,"fun_math:panel.iff",0
+
+physical.b=0
+logical.b=1
+
+BLITZ
+
+InitCopList 0,42,135,$00004,0,16,0	;$12016 <- does not work on 1200's!!!
+InitCopList 1,178,63,$00004,0,16,0
+CreateDisplay 0,1
+DisplayPalette 1,0
+DisplayBitMap 0,physical
+DisplayBitMap 1,2
+Use BitMap logical
+
+Repeat
+ VWait
+ BlockScroll Rnd(15)
+ If logical=0
+		logical=1
+		physical=0
+ Else
+		logical=0
+		physical=1
+ EndIf
+ DisplayBitMap 0,physical
+ Use BitMap logical
+Until Joyb(1)
+
+End
+
+

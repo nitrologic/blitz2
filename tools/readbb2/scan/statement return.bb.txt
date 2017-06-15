@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Statement Return.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Statement Return.bb
+
+; 
+; statement variable passing program example
+; 
+
+Statement printeven{a}          ;start of procedure 
+ If a/2<>Int(a/2) Then Statement Return ;if parameter is odd, exit. 
+ NPrint a                ;else print parameter 
+End Statement               ;end of procedure 
+
+For k=1 To 10              ;start of loop
+ printeven{a}              ;call statement 
+Next                  ;end of loop
+
+MouseWait 
+

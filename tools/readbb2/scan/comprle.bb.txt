@@ -1,0 +1,108 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/rk/pack/CompRLE.bb
+
+;
+;Go Backwards!!!!
+;
+
+##[$B081] 2
+##[$B082] 0,300000,0
+##[$B082] 1,300000,0
+
+
+fsrc$=Par$(1)
+
+h.l=##[$FE01](fsrc$,1005)
+If h.l=0
+		NPrint "Can't open ",fsrc$
+		End
+EndIf
+
+src.l=##[$B084](0)
+c.l=##[$FE03](h,src,300000)
+length.l=c
+
+c.l=##[$FE02](h)
+
+
+Dim lit.b(255)
+
+
+src.l=##[$B084](0)+length
+dest.l=##[$B084](1)+299900
+dests.l=dest
+
+dest-1
+
+lcount.l=0
+litlen.w=0
+complen.w=0
+
+cbyte.b=Peek.b(src):src-1:lcount+1
+While lcount<=length
+		byte.b=Peek.b(src):src-1:lcount+1
+
+		If byte=cbyte
+				complen=1
+				While byte=cbyte AND complen<127 AND lcount<=length
+						complen+1
+						byte.b=Peek.b(src):src-1:lcount+1
+				Wend
+				If lcount>length Then complen+1
+				Poke.b dest,complen-1:dest-1					;woz -1
+				Poke.b dest,cbyte:dest-1
+				complen=0
+				cbyte=byte
+				Goto nextc
+		EndIf
+
+		If	lcount>2
+				lit(litlen)=cbyte			 ;byte!!
+				litlen+1
+		EndIf
+		While byte<>cbyte AND litlen<127 AND lcount<=length
+				cbyte=byte
+				lit(litlen)=cbyte			 ;byte!!
+				litlen+1
+;				cbyte=byte
+				byte.b=Peek.b(src):src-1:lcount+1
+		Wend
+
+		If lcount>length
+				lit(litlen)=byte
+				litlen+1
+		EndIf
+
+		Poke.b dest,256-(litlen-1)
+		dest=dest-1
+		For l=0 To litlen-1
+				Poke.b dest,lit(l):dest-1
+		Next
+		litlen=0
+		cbyte=byte
+
+nextc:
+;;		cbyte.b=Peek.b(src):src-1:lcount+1
+Wend
+
+Poke.b dest,255:dest-1
+Poke.b dest,255:dest-1
+Poke.b dest,255:dest-1
+Poke.b dest,255:dest-1
+Poke.b dest,255:dest-1
+f.f=dest
+If f/2<>Int(f/2)
+		Poke.b dest,255:dest-1
+EndIf
+
+dest-4
+Poke.l dest,length
+dest-4
+Poke.b dest,Asc("P")
+Poke.b dest+1,Asc("A")
+Poke.b dest+2,Asc("C")
+Poke.b dest+3,Asc("K")
+
+##[$B087] fsrc$+".pak",dest,dests-dest
+
+NPrint "Original Size:",length
+NPrint "Compressed Size:",dests-dest

@@ -1,0 +1,607 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/m/u/NeilsIndicatorLib.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/m/u/NeilsIndicatorLib.bb
+;*****************************************************
+;*																									 *
+;*	Progress Indicator Lib													 *
+;*																									 *
+;*	Neil O'Rourke																		*
+;*																									 *
+;*****************************************************
+;*																									 *
+;* History:																					*
+;*																									 *
+;* 10/07/94	V1.00a	File created.									 *
+;* 16/07/94					Up and running									*
+;*					 V1.10a	Added a % counter							 *
+;* 17/07/94	V1.20a	No Stop gadget an option.			 *
+;*																									 *
+;*****************************************************
+
+;#neilsindicatorlib=55
+
+;Exec functions
+#_OpenLibrary			 =-$0228
+#_CloseLibrary			=-$019e
+#_RawDoFmt					=-$020a
+
+;ReqTools functions
+#_rtLockWindow			=-156
+#_rtUnlockWindow		=-162
+#_rtGetVScreenSize	=-120
+
+;Intuition functions
+#_OpenWindowTagList =-$025e
+#_CloseWindow			 =-$0048
+#_PrintIText				=-$00d8
+#_SetAPen					 =-$0156
+#_SetBPen					 =-$015c
+#_SetDrMd					 =-$0162
+#_RectFill					=-$0132
+
+;GadTools functions
+#_CreateGadget			=-$001e
+#_FreeGadgets			 =-$0024
+#_GT_GetIMsg				=-$0048
+#_GT_ReplyIMsg			=-$004e
+#_CreateContext		 =-$0072
+#_DrawBevelBox			=-$0078
+#_GetVisualInfo		 =-$007e
+#_FreeVisualInfo		=-$0084
+#_GT_RefreshWindow	=-$0054
+
+;MathFFP functions
+#_SPFlt						 =-$0024
+#_SPFix						 =-$001e
+#_SPMul						 =-$004e
+#_SPDiv						 =-$0054
+
+;Tags
+#WA_Dummy					 = $80000063
+#WA_Left						= #WA_Dummy+$01
+#WA_Top						 = #WA_Dummy+$02
+#WA_InnerWidth			= #WA_Dummy+$13
+#WA_InnerHeight		 = #WA_Dummy+$14
+#WA_DragBar				 = #WA_Dummy+$1f
+#WA_DepthGadget		 = #WA_Dummy+$20
+#WA_SmartRefresh		= #WA_Dummy+$2a
+#WA_AutoAdjust			= #WA_Dummy+$2d
+#WA_Title					 = #WA_Dummy+$0b
+#WA_CustomScreen		= #WA_Dummy+$0d
+#WA_IDCMP					 = #WA_Dummy+$07
+#WA_Activate				= #WA_Dummy+$26
+#WA_Gadgets				 = #WA_Dummy+$09
+#WA_Backfill				= #WA_Dummy+$1c
+
+#IDCMP_GADGETUP		 = $40
+
+#GT_VisualInfo			= $80080034
+#GTBB_Recessed			= $80080033
+
+!libheader{#neilsindicatorlib,init,0,finit,0}
+
+!afunction{#long}
+!args{#string,#long,#long,#long}
+!libs{#windowslib,#ua1}
+!subs{_piCreateReqNoGad,0,0}
+
+!args{#string,#long,#long}
+!libs{#windowslib,#ua1}
+!subs{_piCreateReq,0,0}
+!name{"PICreateRequest","(Title$,Min,Max [,NoGagdet])"}
+
+!astatement
+!args
+!libs
+!subs{_piendreq,0,0}
+!name{"PIEndRequest",""}
+
+!afunction{#long}
+!args{#long}
+!libs
+!subs{_piUpdate,0,0}
+!name{"PIUpdateRequest","(Value)"}
+
+;!afunction{#long}
+;!args{#string,#long,#array}
+;!libs{#windowslib,#ua1}
+;!subs{_piCreateMReq,0,0}
+;!name{"PICreateMultiRequest","(Title$,NumEntries,ArgArray)"}
+
+
+init:!nullsub{_initpilib,0,0}
+finit:!nullsub{_closepilib,0,0}
+
+!libfin
+
+;This is the libraries' main structure
+
+rtBase:		 Dc.l 0				;ReqToolsBase
+gtBase:		 Dc.l 0				;GadToolsBase
+iBase:			Dc.l 0				;IntuitionBase
+gBase:			Dc.l 0				;GraphicsBase
+fpBase:		 Dc.l 0				;FloatingPoint base
+
+piMin:			Dc.l 0				;The smallest value the requester displays
+piMax:			Dc.l 0				;The largest value
+piCurrent:	Dc.l 0				;The current value
+piParWin:	 Dc.l 0				;Pointer to the parent (calling) window
+piWinLock:	Dc.l 0				;The lock to that window
+piWindow:	 Dc.l 0				;The window that piCreateRequest creates
+piWinPort:	Dc.l 0				;The *Window\UserPort
+piScreen:	 Dc.l 0				;What screen all this is on.
+piBHeight:	Dc.w 0				;How tall the title bar is
+ReqActive:	Dc.w 0				;0=no requester
+NoGadgets:	Dc.w 1				;0=No Stop gadget
+vsWidth:		Dc.l 0				;The viewable screen size.
+vsHeight:	 Dc.l 0
+
+piTiText:	 Dcb.b 80,0
+
+._CopyString:
+	MOVE.b (a0)+,d1				 ;Get a byte
+	CMP.b #0,d1						 ;Is it null?
+	BEQ _EndCopy						;Yes, so end the copy
+	MOVE.b d1,(a3)+				 ;Copy this byte into the string
+	ADDI.l #1,d0						;Increment length counter
+	BRA _CopyString
+_EndCopy
+	RTS										 ;Exit
+
+._initpilib
+	MOVE.l 4,a6						 ;Get ExecBase
+	LEA rtName,a1					 ;ReqTools name
+	MOVE.l #37,d0					 ;And version (2.0>)
+	JSR _OpenLibrary(a6)		;Try and open it
+	CMP #0,d0							 ;Did it?
+	BEQ LibOpenFailed			 ;No, panic
+	MOVE.l d0,rtBase				;Save the base of the structure
+	LEA gtName,a1					 ;GadTools name
+	MOVE.l #37,d0					 ;And version (2.0>)
+	JSR _OpenLibrary(a6)		;Try and open it
+	CMP #0,d0							 ;Did it?
+	BEQ LibOpenFailed			 ;No, panic
+	MOVE.l d0,gtBase				;Save the base of the structure
+	LEA iName,a1						;Intuition name
+	MOVE.l #37,d0					 ;And version (2.0>)
+	JSR _OpenLibrary(a6)		;Try and open it
+	CMP #0,d0							 ;Did it?
+	BEQ LibOpenFailed			 ;No, panic
+	MOVE.l d0,iBase				 ;Save the base of the structure
+	LEA gName,a1						;Graphics name
+	MOVE.l #37,d0					 ;And version (2.0>)
+	JSR _OpenLibrary(a6)		;Try and open it
+	CMP #0,d0							 ;Did it?
+	BEQ LibOpenFailed			 ;No, panic
+	MOVE.l d0,gBase				 ;Save the base of the structure
+	LEA fpName,a1					 ;FloatingPoint name
+	MOVE.l #0,d0						;Any version
+	JSR _OpenLibrary(a6)		;Try and open it
+	CMP #0,d0							 ;Did it?
+	BEQ LibOpenFailed			 ;No, panic
+	MOVE.l d0,fpBase				;Save the base of the structure
+	RTS
+
+rtName:		 Dc.b "reqtools.library",0
+	Event
+gtName:		 Dc.b "gadtools.library",0
+	Event
+iName:			Dc.b "intuition.library",0
+	Event
+gName:			Dc.b "graphics.library",0
+	Event
+fpName:		 Dc.b "mathffp.library",0
+	Event
+
+LibOpenFailed:						;I should Alert() or something
+	MOVE.l #0,d0
+	TRAP #0
+
+._closepilib
+	MOVE.w ReqActive,d0		 ;Is there a requester already active
+	CMP.w #0,d0
+	BEQ ContExit						;No, dont worry
+	JSR piEndIt						 ;Cleanup
+ContExit:
+	MOVE.l 4,a6						 ;Get Exec back
+	MOVE.l rtBase,a1
+	JSR _CloseLibrary(a6)
+	MOVE.l gtBase,a1
+	JSR _CloseLibrary(a6)
+	MOVE.l iBase,a1
+	JSR _CloseLibrary(a6)
+	MOVE.l gBase,a1
+	JSR _CloseLibrary(a6)
+	MOVE.l fpBase,a1
+	JSR _CloseLibrary(a6)
+	RTS
+
+._piCreateReqNoGad
+	MOVE.w #0,NoGadgets
+	MOVE.l #36,piHeight+4
+._piCreateReq
+	CMP.w #0,ReqActive			;Is there a requester already up?
+	BNE exitfalse					 ;Yes, abort!
+	CMP.l d2,d1
+	BGT exitfalse					 ;Min>Max!
+	MOVEM.l d0-d7/a0-a6,-(a7)
+	MOVE.l d0,a0
+	LEA piTiText,a3
+	JSR _CopyString
+	MOVEM.l (a7)+,d0-d7/a0-a6
+	MOVE.l d1,piMin				 ;Minimum value (0%)
+	SUB.l d1,d2
+	MOVE.l d2,piMax				 ;maximum value (100%)
+	MOVE.l (a1),piParWin		;Save the pointer to the parent window
+	MOVE.l (a1),a0
+	MOVE.l rtBase,a6
+	JSR _rtLockWindow(a6)	 ;Lock the calling window
+	MOVE.l d0,piWinLock		 ;Save the lock
+;Now find out what screen we're on
+	MOVE.l piParWin,a1			;Get the address of the parent window
+	MOVE.l $2e(a1),piWScTag+4 ;Save the pointer in the window
+	MOVE.l $2e(a1),a0
+	MOVE.l a0,piScreen			;Save that pointer for later
+;How big is the window title bar?
+	MOVEQ #0,d0
+	MOVE.b $23(a0),d0
+	MOVE.w d0,d3						;Border height
+	ADD.w #1,d3						 ;Plus 1
+	MOVE.l $28(a0),a1			 ;The font used
+	MOVE.w $4(a1),d0
+	ADD.w d0,d3						 ;Add the font height
+	MOVE.w d3,piBHeight		 ;And save the heigh tof the title bar
+	MOVE.w #36,d0
+	ADD.w piBHeight,d0
+	MOVE.w d0,ng_TopEdge
+	MOVE.w #17,d0
+	ADD.w piBHeight,d0
+	MOVE.w d0,Txt1YPos
+	MOVE.w d0,Txt2YPos
+	MOVE.w d0,Txt3YPos
+;Now pick a nice place for the requester
+	MOVE.l rtBase,a6
+	MOVE.l piScreen,a0
+	LEA vsWidth,a1
+	LEA vsHeight,a2
+	JSR _rtGetVScreenSize(a6)
+	MOVE.l vsWidth,d0
+	SUBI.l #398,d0
+	LSR.l #1,d0
+	MOVE.l d0,piLeft+4
+	MOVE.l vsHeight,d0
+	SUBI.l #50,d0
+	LSR.l #1,d0
+	MOVE.l d0,piTop+4
+	MOVE.l gtBase,a6
+	MOVE.l piScreen,a0			;What screen
+	MOVE.l #0,a1						;No tags
+	JSR _GetVisualInfo(a6)	;Get what data GadTools wants
+	CMP.l #0,d0
+	BEQ exitfalse
+	MOVE.l d0,vi						;And save it
+	MOVE.l d0,BoxVI+4			 ;Also stick it in the BevelBox
+	MOVE.l d0,gadVI				 ;And the cancel gadget
+	LEA glist,a0
+	JSR _CreateContext(a6)
+	MOVE.l d0,gad
+	MOVE.l #1,d0						;BUTTON_KIND
+	MOVE.l gad,a0					 ;The gadget context data
+	LEA CanGadget,a1				;My gadget
+	MOVE.l #0,a2						;No tags
+	JSR _CreateGadget(a6)	 ;And make it.
+	MOVE.l d0,gad
+	CMPI.w #0,NoGadgets		 ;Are we to put in a stop gadget?
+	BEQ doOpenWin
+	MOVE.l glist,piCanGadget+4
+doOpenWin:
+	MOVE.l iBase,a6				 ;Get Intuition
+	MOVE.l #0,a0						;No NewWindow structure
+	LEA piWindowTL,a1			 ;The tag list
+	JSR _OpenWindowTagList(a6) ;Open the window
+	MOVE.l d0,piWindow			;and save the pointer
+	MOVE.w #1,ReqActive		 ;Inform my system that the requester is up
+	MOVE.l piWindow,a1			;This is my Window structure
+	MOVE.l $32(a1),rPort		;The RastPort
+	MOVE.l $56(a1),piWinPort;Where gadget clicks arrive
+	JSR BackFill						;Put in a nice backfill
+	MOVE.l rPort,a0				 ;The RastPort
+	MOVE.w #48,d0					 ;Left
+	MOVE.w #9,d1						;Top
+	ADD.w piBHeight,d1			;Allow for title bar
+	MOVE.w #285,d2					;Width
+	MOVE.w #11,d3					 ;Height
+	LEA BoxTagList,a1			 ;The boxes' tag list
+	MOVE.l gtBase,a6
+	JSR _DrawBevelBox(a6)	 ;Draw the box
+	MOVE.w #8,d0						;Left
+	MOVE.w #1,d1						;Top
+	ADD.w piBHeight,d1
+	MOVE.w #381,d2					;Width
+	MOVE.w #32,d3					 ;Height
+	MOVE.l rPort,a0				 ;The RastPort
+	LEA BoxTagList,a1			 ;The boxes' tag list
+	JSR _DrawBevelBox(a6)	 ;Draw the box
+	MOVE.l piWindow,a0
+	MOVE.l #0,a1
+	JSR _GT_RefreshWindow(a6)
+	MOVE.l rPort,a0
+	LEA Text1,a1
+	MOVE.l #0,d0
+	MOVE.l #-6,d1
+	MOVE.l iBase,a6
+	JSR _PrintIText(a6)
+	MOVE.l #-1,d0					 ;Requester up OK
+	MOVE.w #1,NoGadgets
+	MOVE.l #50,piHeight+4
+	RTS
+
+;Define the window for the requester
+piWindowTL:
+piLeft:		 Dc.l #WA_Left				,0
+piTop:			Dc.l #WA_Top				 ,0
+						Dc.l #WA_InnerWidth	,388
+piHeight:	 Dc.l #WA_InnerHeight ,50
+						Dc.l #WA_DragBar		 ,-1
+						Dc.l #WA_DepthGadget ,-1
+						Dc.l #WA_SmartRefresh,-1
+						Dc.l #WA_AutoAdjust	,-1
+						Dc.l #WA_Activate		,-1
+piWinTitle: Dc.l #WA_Title			 ,piTiText
+piWScTag:	 Dc.l #WA_CustomScreen,0
+						Dc.l #WA_IDCMP			 ,#IDCMP_GADGETUP
+piCanGadget:Dc.l #WA_Gadgets		 ,0
+						Dc.l 0							 ,0
+
+
+vi:				 Dc.l 0				;This is the pointer to the VisualInfo
+rPort:			Dc.l 0				;The RastPort my window uses
+
+BoxTagList: Dc.l #GTBB_Recessed	,-1
+BoxVI:			Dc.l #GT_VisualInfo	,0
+						Dc.l 0							 ,0
+
+topazname:	Dc.b "topaz.font",0
+	Event
+
+topaz80:		Dc.l topazname
+						Dc.w 8,0,0
+
+cantxt:		 Dc.b "Cancel",0
+	Event
+
+CanGadget:
+ng_LeftEdge:	Dc.w 168
+ng_TopEdge:	 Dc.w 0
+ng_Width:		 Dc.w 60
+ng_Height:		Dc.w 12
+ng_GadgetText:Dc.l cantxt
+ng_TextAttr:	Dc.l topaz80
+ng_GadgetID:	Dc.w 1
+ng_Flags:		 Dc.l 0
+gadVI:				Dc.l 0
+ng_UserData:	Dc.l 0
+
+glist:			Dc.l 0
+gad:				Dc.l 0
+
+mes1:			 Dc.b "0%",0
+mes2:			 Dc.b "100%",0
+	Event
+
+Text1:			Dc.b 1
+						Dc.b 0
+						Dc.w 0
+						Dc.w 20
+Txt1YPos:	 Dc.w 0
+						Dc.l topaz80
+						Dc.l mes1
+						Dc.l Text2
+
+Text2:			Dc.b 1
+						Dc.b 0
+						Dc.w 0
+						Dc.w 339
+Txt2YPos:	 Dc.w 0
+						Dc.l topaz80
+						Dc.l mes2
+						Dc.l 0
+
+exitfalse:
+	MOVE.l #0,d0
+	RTS
+
+patdat:		 Dc.w $aaaa
+						Dc.w $5555
+soldat:		 Dc.w $ffff
+
+.BackFill
+	MOVE.l rPort,a1
+	MOVE.l #patdat,$8(a1)	 ;Point the rastpost to my pattern data
+	MOVE.b #1,$1d(a1)			 ;Size of pattern 2^1
+	MOVE.l gBase,a6
+	MOVE.l #2,d0						;What pen
+	JSR _SetAPen(a6)
+	MOVE.w #4,d0
+	MOVE.w #0,d1
+	ADD.w piBHeight,d1
+	MOVE.w #391,d2
+	MOVE.w ng_TopEdge,d3
+	SUB.w #1,d3
+	JSR _RectFill(a6)			 ;And draw the rectangle
+	CMP.w #0,NoGadgets
+	BEQ blankbox
+	MOVE.l rPort,a1
+	MOVE.w #4,d0
+	MOVE.w ng_TopEdge,d1
+	ADD.w #12,d1
+	MOVE.w #391,d2
+	MOVE.w #49,d3
+	ADD.w piBHeight,d3
+	JSR _RectFill(a6)
+	MOVE.l rPort,a1
+	MOVE.w #4,d0
+	MOVE.w ng_TopEdge,d1
+	SUB.w #1,d1
+	MOVE.w #168,d2
+	MOVE.w #48,d3
+	ADD.w piBHeight,d3
+	JSR _RectFill(a6)
+	MOVE.l rPort,a1
+	MOVE.w #228,d0
+	MOVE.w ng_TopEdge,d1
+	SUB.w #1,d1
+	MOVE.w #391,d2
+	MOVE.w #48,d3
+	ADD.w piBHeight,d3
+	JSR _RectFill(a6)
+blankbox:
+	MOVE.l rPort,a1
+	MOVE.l #soldat,$8(a1)
+	MOVE.b #0,$1d(a1)
+	MOVE.l #0,d0						;What pen
+	JSR _SetAPen(a6)
+	MOVE.w #8,d0
+	MOVE.w #1,d1
+	ADD.w piBHeight,d1
+	MOVE.w #388,d2
+	MOVE.w #32,d3
+	ADD.w piBHeight,d3
+	JSR _RectFill(a6)			 ;And draw the rectangle
+	RTS
+
+._piendreq
+	CMP.w #0,ReqActive			;Is there a requester already up?
+	BEQ exitexit						;No, so abort the exit
+	MOVE.l rtBase,a6				;Now use ReqTools
+	MOVE.l piWinLock,a1		 ;Get the window's lock
+	MOVE.l piParWin,a0			;And the window we locked
+	JSR _rtUnlockWindow(a6) ;And unlock it.
+piEndIt:
+	MOVE.l iBase,a6				 ;Use Intuition
+	MOVE.l piWindow,a0			;The window we want to close
+	JSR _CloseWindow(a6)		;and close it
+	MOVE.l gtBase,a6				;Use GadTools
+	MOVE.l glist,a0				 ;Get the gadget list
+	JSR _FreeGadgets(a6)		;And free them
+	MOVE.l vi,a0
+	JSR _FreeVisualInfo(a6)
+	MOVE.w #0,ReqActive
+exitexit:
+	RTS
+
+._piUpdate
+	MOVE.l piMin,d1
+	CMP.l d1,d0						 ;First off, is this value less than the minimum?
+	BLT CheckForMsg				 ;Yes, so don't update anything
+	MOVE.l piMin,d1
+	SUB.l d1,d0						 ;Correct for piMin>0
+	MOVE.l d0,piCurrent		 ;Save the current value
+	MOVE.l piMax,d1				 ;Check against the maximum value
+	CMP.l d1,d0						 ;Compare
+	BGT CheckForMsg				 ;Some dope wanted more than 100%!
+	MOVE.l gBase,a6
+	MOVE.l rPort,a1				 ;What RastPort
+	MOVE.l #0,d0						;What pen
+	JSR _SetAPen(a6)
+	MOVE.l #326,d2
+	MOVE.l rPort,a1				 ;What RastPort
+	MOVE.l #50,d0
+	MOVE.l #10,d1
+	ADD.w piBHeight,d1
+	MOVE.l #18,d3
+	ADD.w piBHeight,d3
+	JSR _RectFill(a6)			 ;And draw the rectangle
+	MOVE.l rPort,a1
+	MOVE.l #3,d0						;What pen
+	JSR _SetAPen(a6)
+	MOVE.l fpBase,a6				;Use the floating point stuff
+	MOVE.l piCurrent,d0		 ;Current value
+	JSR _SPFlt(a6)					;Convert to a floating point
+	MOVE.l d0,fltC					;And save
+	MOVE.l piMax,d0				 ;Maximum possible value
+	JSR _SPFlt(a6)					;Convert to a floating point
+	MOVE.l d0,fltM					;And save
+	MOVE.l #278,d0					;The constant of multiplication
+	JSR _SPFlt(a6)					;Convert to a floating point
+	MOVE.l d0,fltCon				;And save
+	MOVE.l fltC,d0					;Arg2
+	MOVE.l fltM,d1					;Arg1
+	JSR _SPDiv(a6)					;Arg1=Arg2/Arg1
+	MOVE.l d0,fltPC
+	MOVE.l fltCon,d1				;Arg2
+	JSR _SPMul(a6)					;Arg1=Arg2*Arg1
+	JSR _SPFix(a6)					;Arg1 -> d0.l
+	MOVE.l d0,d2
+	ADDI.l #52,d2					 ;Offset for edge of window
+	MOVE.l rPort,a1				 ;What RastPort
+	MOVE.l #50,d0
+	MOVE.l #10,d1
+	ADD.w piBHeight,d1
+	MOVE.l #18,d3
+	ADD.w piBHeight,d3
+	MOVE.l gBase,a6
+	JSR _RectFill(a6)			 ;And draw the rectangle
+	MOVE.l fpBase,a6
+	MOVE.l #100,d0
+	JSR _SPFlt(a6)
+	MOVE.l d0,d1
+	MOVE.l fltPC,d0
+	JSR _SPMul(a6)
+	JSR _SPFix(a6)					;d0 now a % value
+	MOVE.l d0,PC						;And save
+	LEA mes3,a3						 ;Output string
+	LEA TxtFmt,a0					 ;Format string
+	LEA PC,a1							 ;Data stream
+	LEA stuffChar,a2
+	MOVE.l 4,a6
+	JSR _RawDoFmt(a6)
+	MOVE.l iBase,a6
+	MOVE.l rPort,a0
+	LEA Text3,a1
+	MOVE.l #0,d0
+	MOVE.l #-6,d1
+	JSR _PrintIText(a6)
+CheckForMsg:
+;Now see if the user hit the Cancel gadget
+	MOVE.l piWinPort,a0		 ;Get the UserPort
+	MOVE.l gtBase,a6
+	JSR _GT_GetIMsg(a6)		 ;See if there are any messages waiting
+	CMP.l #0,d0						 ;Are there?
+	BEQ Exit_StillUp				;No, so exit as normal
+;So there is a message.	It may not be a GagdetUp, though.
+	MOVE.l d0,a1
+	MOVE.l $14(a1),d2			 ;Get the Class of the message
+	JSR _GT_ReplyIMsg(a6)	 ;And reply
+	CMPI.l #IDCMP_GADGETUP,d2 ;Was it a GadgetUp?
+	BNE Exit_StillUp				;No, so don't worry (should not happen)
+;So the user wants to cancel.	Humph!
+	JSR _piendreq					 ;End the request
+	MOVE.l #0,d0						;Signal False (Requester gone away)
+	RTS
+
+Exit_StillUp:
+	MOVE.l #-1,d0					 ;Return True (requester still up)
+	RTS
+
+stuffChar:
+;Used in RawDoFmt()
+	MOVE.b d0,(a3)+
+	RTS
+
+fltC:	 Dc.l 0
+fltM:	 Dc.l 0
+fltCon: Dc.l 0
+fltPC:	Dc.l 0
+PC:		 Dc.l 0
+
+Text3:			Dc.b 1
+						Dc.b 0
+						Dc.w $200
+						Dc.w 187
+Txt3YPos:	 Dc.w 0
+						Dc.l topaz80
+						Dc.l mes3
+						Dc.l 0
+
+mes3:			 Dcb.b 10,0
+	Event
+TxtFmt:		 Dc.b "%ld%%",0

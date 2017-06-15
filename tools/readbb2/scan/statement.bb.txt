@@ -1,0 +1,14 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Statement.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Statement.bb
+
+;
+; declare a statement program example 
+; 
+
+Statement hexprint{a}  ;declare statement with one parameter 
+ NPrint Hex$(a)    ;print out hex value of parameter 
+End Statement      ;end of statement 
+
+hexprint{16384}     ;call statement 
+
+MouseWait 
+

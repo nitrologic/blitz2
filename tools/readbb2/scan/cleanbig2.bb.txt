@@ -1,0 +1,956 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/shit/cleanbig2.bb
+;16 May 94	- revamp..
+
+Use ##[$8526] 0
+
+scalfac=.75											 ;1.5
+
+BitMap 0,1024*scalfac,512*scalfac,8
+
+BitPlanesBitMap 0,1,3
+BitPlanesBitMap 0,2,$3f
+BitPlanesBitMap 0,4,$c0		;3+$40
+
+##[$CD10] 7,768,384,1:CludgeBitMap 7,7
+
+
+BitMapOutput 0
+
+#errs=On
+
+
+g$="shit/";
+LoadShape 0,g$+"pt.pt":GetaSprite 0,0:Free MidHandle 0
+;LoadPalette 0,"maps:blob.iff"
+
+
+
+;m$="maps/"
+;m$="Maps:":t$=Par$(1)
+
+m$="maps/"
+t$="track25"
+
+MaxLen p$=240
+MaxLen f$=240
+
+#dp=0
+NEWTYPE .rend
+	x.w:y.w
+End NEWTYPE
+
+Dim tri.rend(10)
+ad.l=&tri(0):ae.l=&tri(1)
+
+NEWTYPE .ij
+	i.q:j:k:l
+End NEWTYPE
+bez.ij\i=0
+io.l=&bez
+
+NEWTYPE .frend
+;	i.q:j.q:dx.w:dy.w:sx.w:sy.w
+	lti.w:ltj:rti:rtj
+End NEWTYPE
+Dim con.frend(80):condt.l=&con(0)
+SetConDt condt
+SetIO &bez.ij
+
+
+Dim circx.q(20),circy.q(20) ;for Linef{}
+
+For temp.q=0 To 14
+	circx(temp)=HSin(temp*Pi/30)*3*scalfac
+	circy(temp)=HCos(temp*Pi/30)*1.5*scalfac
+Next
+
+
+
+#MaxNam=24
+Dim nam.s(#MaxNam), com.s(#MaxNam)
+
+*con.frend=con(0):*conc.frend=con(1):*cona.frend=con(1)
+
+CNIF #errs:Runerrsoff:CEND
+
+
+Function rely{i,j,k}
+	Shared maptr.l
+	temp=(i+j)ASL 3-156-k+#dp
+	Function Return (temp) *2
+End Function
+
+
+
+Statement filltri{tri.l}
+	UNLK a4:MOVEM.l a4-a6,-(a7)
+	MOVE.l d0,a0:MOVEM.l 4(a0),d0-d2:MOVE.l (a0),a1
+;align against left border
+	MOVE.l d0,d3:CMP.l d1,d3:BMI g1:MOVE.l d1,d3:g1:CMP.l d2,d3:BMI g2:MOVE.l d2,d3:g2
+	MOVE.w#0,d3:SUB.l d3,d0:SUB.l d3,d1:SUB.l d3,d2:SWAP d3:NEG d3:MOVE d3,10(a1)
+;sort top to bottom
+	CMP d0,d1:BPL ns1:EXG d0,d1:ns1
+	CMP d0,d2:BPL ns2:EXG d0,d2:ns2
+	CMP.l d1,d2:BPL ns3:EXG d1,d2:ns3
+	SUB d0,d1:SUB d0,d2:NEG d0:
+
+;	MOVE $dff006,d4:AND#15,d4:MOVE d4,d5:ADD d4,d0
+	MOVE d0,12(a1)
+	MOVE.l 18(a1),a4:ADD 22(a1),a4:MOVE.l 18(a1),a1:;BRA cl1
+;	cl0:MOVE.l#0,(a1)+:cl1:DBRA d5,cl0
+:MOVE#0,d0
+
+;calc gradients
+	SWAP d0:ASL#2,d0:EXT.l d0:MOVE.l d0,d6:MOVE.l d0,d7	;d6 d7 = x0 x1
+calcgs:
+	TST d1:BNE dol0:SWAP d1:ASL#2,d1:EXT.l d1
+	CMP.l d1,d0:BMI xl:MOVE.l d1,d6:BRA xll:xl:MOVE.l d1,d7:xll:MOVE.l d2,d1
+dol0:
+	TST d2:BNE dol1:SWAP d2:ASL#2,d2:EXT.l d2
+	CMP.l d2,d0:BMI xr:MOVE.l d2,d6:BRA xrr:xr:MOVE.l d2,d7:xrr:MOVE.l d1,d2
+dol1:
+	TST d1:BEQ drw
+	MOVE.l d1,d4:SWAP d4:ASL #2,d4:MOVE.l d2,d5:SWAP d5:ASL #2,d5
+
+	MOVE d4,d0:SUB d6,d4:ASL#6,d4:EXT.l d4:DIVS d1,d4:EXT.l d4:ROR.l#8,d4:ASL#2,d4
+	SUB d5,d0:SUB d7,d5:ASL#6,d5:EXT.l d5:DIVS d2,d5:EXT.l d5:ROR.l#8,d5:ASL#2,d5
+
+	ASL#6,d0:EXT.l d0:MOVE d1,d3:SUB d2,d3:BEQ nogo:DIVS d3,d0:EXT.l d0
+	ROR.l#8,d0:ASL#2,d0:nogo:LEA lup1(pc),a2:LEA lup2(pc),a3
+	BCHG #31,d6:BCHG #31,d7	;:BRA lop
+
+
+drw:
+	MOVE.l 0(a2,d6),d3:AND.l 0(a3,d7),d3:MOVE.l d3,(a1)+
+lop:DBRA d1,nxy:TST d2:BMI dun:MOVE.l d0,d4
+nxy:DBRA d2,doadd:TST d1:BMI dun:MOVE.l d0,d5
+
+doadd:ADD.l d4,d6:BCC nox1:ADDQ#4,d6:nox1
+	ADD.l d5,d7:BCC drw:ADDQ#4,d7:BRA drw
+
+dun:MOVEQ#0,d0:clc:CMP.l a4,a1:BPL dun2:MOVE.l d0,(a1)+:BRA clc:dun2
+	MOVEM.l (a7)+,a4-a6:RTS
+
+lup1:
+	Dc.l $ffffffff,$7fffffff,$3fffffff,$1fffffff
+	Dc.l $fffffff,$7ffffff,$3ffffff,$1ffffff
+	Dc.l $ffffff,$7fffff,$3fffff,$1fffff
+	Dc.l $fffff,$7ffff,$3ffff,$1ffff
+	Dc.l $ffff,$7fff,$3fff,$1fff,$fff,$7ff,$3ff,$1ff
+	Dc.l $ff,$7f,$3f,$1f,$f,$7,$3,$1
+
+lup2:
+	Dc.l $80000000,$c0000000,$e0000000,$f0000000
+	Dc.l $f8000000,$fc000000,$fe000000,$ff000000
+	Dc.l $ff800000,$ffc00000,$ffe00000,$fff00000
+	Dc.l $fff80000,$fffc0000,$fffe0000,$ffff0000
+	Dc.l $ffff8000,$ffffc000,$ffffe000,$fffff000
+	Dc.l $fffff800,$fffffc00,$fffffe00,$ffffff00
+	Dc.l $ffffff80,$ffffffc0,$ffffffe0,$fffffff0
+	Dc.l $fffffff8,$fffffffc,$fffffffe,$ffffffff
+
+End Statement
+
+
+Statement FindLo {fldtp.q,flcon.l,flbez.l}
+	;WILL ONLY WORK IN ALL19.BB2!!!!!			 ; go scab Global7.bb..
+	UNLK a4
+
+	MOVE.l d0,d3:SWAP d3:EXT.l d3:ASL #3,d3
+	ADD.l d3,d1:MOVE.l d1,a0:MOVE.l d2,a1
+
+	MOVE d0,d1:			 MULU d1,d1:SWAP d1:LSR #1,d1
+	MOVE d0,d2:NOT d2:MULU d2,d2:SWAP d2:LSR #1,d2
+	MOVE d1,d0:NOT d0:SUB d2,d0
+
+	MOVEM.w (a0)+,d3-d6
+	MULU d2,d3:MULU d2,d4:MULU d2,d5:MULU d2,d6
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d3
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d4
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d5
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d6
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d3
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d4
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d5
+	MOVE.w (a0) ,d7:MULU d1,d7:ADD.l d7,d6
+	ASR.l #4,d3:ASR.l #5,d3:ASR.l #4,d4:ASR.l #5,d4
+	ASR.l #4,d5:ASR.l #5,d5:ASR.l #4,d6:ASR.l #5,d6
+	MOVEM.l d3-d6,(a1):RTS
+End Statement
+
+
+;------------------------------------------------------------------
+
+Statement FindDif {fldtp.q,flcon.l,flbez.l}
+;	to be used ONLY with all19.bb2!!!!!
+	UNLK a4
+
+	MOVE.l d0,d3:SWAP d3:EXT.l d3:ASL #3,d3
+	ADD.l d3,d1:MOVE.l d1,a0:MOVE.l d2,a1
+
+	MOVE d0,d1:MULU d1,d1:SWAP d1:LSR #1,d1
+	MOVE d0,d2:NOT d2:MULU d2,d2:SWAP d2:LSR #1,d2
+	MOVE d1,d0:NOT d0:SUB d2,d0
+
+	MOVEM.w	(a0)+,d3-d6
+	MULU d2,d3:MULU d2,d4:MULU d2,d5:MULU d2,d6
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d3
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d4
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d5
+	MOVE.w (a0)+,d7:MULU d0,d7:ADD.l d7,d6
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d3
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d4
+	MOVE.w (a0)+,d7:MULU d1,d7:ADD.l d7,d5
+	MOVE.w (a0) ,d7:MULU d1,d7:ADD.l d7,d6
+	ASR.l #4,d3:ASR.l #5,d3:SUB.l	 (a1),d3
+	ASR.l #4,d4:ASR.l #5,d4:SUB.l	4(a1),d4
+	ASR.l #4,d5:ASR.l #5,d5:SUB.l	8(a1),d5
+	ASR.l #4,d6:ASR.l #5,d6:SUB.l 12(a1),d6
+	MOVEM.l d3-d6,(a1):RTS
+End Statement
+
+CNIF #errs:Runerrson:CEND
+
+;---------------------------------------
+
+
+Dim map.w(63,63)
+maptr.l=&map(0,0)
+SetMaptr maptr
+
+#exo=Off:#map=Off:#exo24=On:#freq=On
+;INCLUDE "Src/LoadINC.BB"
+;SM
+;			Loaderface	 01/10/93
+;
+
+;BUGS:
+
+;CALLS:
+;Statement CopCon{src,dest}
+;Statement GetExo24{t$}	;all24 only!
+
+;NEEDS:
+; #map,#exo,#texo,#exo24,#freq,#centre
+
+;====================================================================
+
+Statement CopCon{src,dest}
+	Shared con(),centre()
+	con(dest)\lti=con(src)\lti
+	con(dest)\ltj=con(src)\ltj
+	con(dest)\rti=con(src)\rti
+	con(dest)\rtj=con(src)\rtj
+End Statement	 ;CopCon
+
+;--------------------------------------------------------------------
+
+DEFTYPE .w pts,pts1,pts2,pts3
+CNIF #exo24
+Statement GetExo24{fname$}	;all24 only!
+	Shared maptr.l,con(),condt,pts,pts1,pts2,pts3
+
+		bez.ij\i=0:io.l=&bez\i
+		extn$=".Exo":pax.w=Off
+		If ##[$BE15](fname$+".Pax") Then extn$=".Pax":pax.w=On
+
+		If WriteMem(0,fname$+extn$)
+			FileInput 0
+			##[$BE14] 0,maptr.l,2*64*64
+			pts=Cvi(Inkey$(2)):pts1=pts+1:pts2=pts+2:pts3=pts+3
+			For cnt2.w=0 To pts
+				cnt=cnt2-8
+				If cnt<0 Then cnt+pts1
+				If cnt=>pts1 Then cnt-pts1
+				con(cnt)\lti=Cvq(Inkey$(4)) ASL 9	 ;n.b. note the subtle asr #7's..
+				con(cnt)\ltj=Cvq(Inkey$(4)) ASL 9
+				con(cnt)\rti=Cvq(Inkey$(4)) ASL 9
+				con(cnt)\rtj=Cvq(Inkey$(4)) ASL 9
+				kringe.s=Inkey$(4)
+				If pax Then kringe.s=Inkey$(24)
+			Next
+			DefaultInput
+			CloseFile 0
+		Else
+			BitMapOutput 0:Locate 1,5:Print "Can't get "+fname$+".EXO"
+			VWait 100
+			End
+		EndIf
+		For src=0 To 6:CopCon{src,pts1+src}:Next
+
+		VWait 80
+	End Statement
+CEND
+
+; end of LoadINC.bb
+
+
+;
+
+GetExo24{m$+t$}
+
+BitMap 5,32,32,2
+Use BitMap 5
+Circle 4,4,4,4,1
+Circle 4,4,3,3,2
+GetaShape 0,0,0,16,8:GetaSprite 1,0
+Use BitMap 5:BlockScroll
+BitMapOutput 5:Locate 0,0:Print "1":GetaShape 0,0,0,16,8:GetaSprite 2,0
+BitMapOutput 5:Locate 0,0:Print "2":GetaShape 0,0,0,16,8:GetaSprite 3,0
+
+
+Free BitMap 5
+Use BitMap 1
+
+BitMapOutput 0
+
+
+;AGAPalRGB 0,63,0,0,0
+LoadBitMap 0,m$+t$+".bff",0
+
+CNIF Off
+	DecodePalette 0,256
+	##[$CE18] 0,10,73,	 0,64,0,0,240,0						 ;greens = 0..12
+	##[$CE18] 0,138,202, 192,128,64,64,32,0				 ;browns = 13..25
+	##[$CE18] 0,224,227, 64,64,64,192,192,192		 ;greys = 26..28
+	##[$CE18] 0,240,243, 64,0,0,192,0,0					 ;reds = 29..31
+	SaveBitmap 0,m$+t$+".bff",0
+	End
+CEND
+
+
+Use BitMap 2
+;Cls
+Use BitMap 1
+
+BLITZ
+
+
+InitCopList 0,44,256,$13118,8,256,0
+CreateDisplay 0
+
+
+For col.w=0 To 3
+	AGAGreen 0,128+col,64,32,0
+Next
+
+StopCycle 0,0,0,0,0
+StopCycle 0,1,15,15,15
+StopCycle 0,2,15,0,0
+
+StopCycle 0,17,0,8,0
+StopCycle 0,18,0,0,15
+
+
+DisplayBitMap 0,0
+DisplayPalette 0,0
+
+#shade=3
+bigx=1024*scalfac:bigy=516*scalfac:BlitzKeys On:BlitzRepeat -1,-1
+
+SetInt 5
+	mx=MouseX:my=MouseY
+	topleftx+(RawStatus($4f)-RawStatus($4e))*3
+	toplefty+(RawStatus($4c)-RawStatus($4d))*3
+	If (mx-topleftx)<32 Then topleftx=mx-32
+	If (mx-topleftx)>(640-32) Then topleftx=mx-640+32
+	If (my-toplefty)<32 Then toplefty=my-32
+	If (my-toplefty)>(256-32) Then toplefty=my-256+32
+	topleftx=QLimit(topleftx,0,bigx-640)
+	toplefty=QLimit(toplefty,0,bigy-256)
+
+	DisplayBitMap 0,0,topleftx,toplefty
+	DisplaySprite 0,direct,(mx-topleftx),(my-toplefty),0
+	tempx=QLimit( dpsx-topleftx-4,-50,740)
+	tempy=QLimit( dpsz-toplefty-4,-50,300)
+	DisplaySprite 0,1,tempx,tempy,2
+
+	mine.w=NOT mine
+	If mine
+		tempx=QLimit( tmpstx-topleftx-4,-50,740)
+		tempy=QLimit( tmpsty-toplefty-4,-50,300)
+		DisplaySprite 0,2,tempx,tempy,4
+	Else
+		tempx=QLimit( tmpfix-topleftx-4,-50,740)
+		tempy=QLimit( tmpfiy-toplefty-4,-50,300)
+		DisplaySprite 0,3,tempx,tempy,4
+	EndIf
+End SetInt
+
+Mouse On
+MouseArea 0,0,bigx,bigy
+
+dtf=5.5:lside=512:rside=512:dpsx=mx:dpsy=my
+wi=32:wj=10
+
+
+Gosub PreScan
+;Gosub DraScan
+
+
+start=5:fin=7:movb.w=On
+
+.Main
+
+Repeat
+;	If NOT actif.w Then VWait
+	If Joyb(0)<>2 Then VWait
+
+;	Use BitMap 0:Boxf 0,0,32,32,63
+
+	Gosub MoveIndiv
+
+
+	If movb
+		FindLo{start,condt,io}
+		If plus.w=0 Then di=bez\i:dj=bez\j	Else di=bez\k:dj=bez\l
+		tmpstx=MapX(di,dj)*scalfac
+		tmpsty=MapY(di,dj)*scalfac
+		FindLo{fin,condt,io}
+		If plus=0 Then di=bez\i:dj=bez\j	Else di=bez\k:dj=bez\l
+		tmpfix=MapX(di,dj)*scalfac
+		tmpfiy=MapY(di,dj)*scalfac
+
+
+		movb=Off
+	EndIf
+
+	If RawStatus ($03) Then Gosub DraScan
+
+	in$=Inkey$
+
+	down=job:job=Joyb(0)
+	If (down=2) AND (job=0) Then woosh=0
+	If job=2 Then woosh ASL 1
+	If Asc(in$)=32 Then plus.w=1-plus
+
+
+	If (down=0) AND (job=1)
+		stx=mx:sty=my
+	EndIf
+	If (down=1) AND (job=0)
+		fix=mx:fiy=my
+		If stx>fix Then Exchange stx,fix
+		If sty>fiy Then Exchange sty,fiy
+		Use BitMap 2
+		Boxf stx,sty,fix,fiy,0
+		Use BitMap 0
+	EndIf
+
+Until RawStatus($45)
+
+VWait 10
+AMIGA
+VWait 10
+
+	WbToScreen 0:##[$FFB5]
+	;p$=m#
+	p$="ram:":f$=t$+".iff2"
+	f$=FileRequest$("Save which IFF?",p$,f$)
+
+
+DecodePalette 1,8
+StopCycle 1,0,0,0,0
+StopCycle 1,1,15,15,15
+StopCycle 1,2,15,0,0
+
+	For col.w=3 To 7
+		StopCycle 1,col,0,0,0
+	Next
+
+
+	If f$<>""
+		SaveBitmap 4,f$,1
+	EndIf
+
+##[$FFB5]
+End
+
+BLITZ
+
+CNIF 1=0
+NEWTYPE .triangle
+	tshape.l						;0
+	x0.w:y0:x1:y1:x2:y2 ;4
+	x:y								 ;16
+End NEWTYPE
+
+DEFTYPE .triangle t
+
+MakeCookie 0
+
+t\tshape=gr(0),4,0,1,3,15,7
+filltri{t}
+Blit frcol1,stx,sty
+
+MouseWait
+End
+CEND
+
+Macro grey
+	If Cls(`1,`2)<>1 Then Point `1,`2,3
+End Macro
+
+
+
+a.w=7
+
+
+CNIF #errs:Runerrsoff:CEND
+Statement Linef{x,y,x2,y2}
+
+Shared circx(),circy()
+	Use BitMap 1
+
+;	For dx=-3.0 To 3.0
+;		For dy=-2.0 To 2.0
+;			Line x+dx,y+dy,x2+dx,y2+dy,1
+;		Next
+;	Next
+
+	For temp.q=0 To 14
+		dx=circx(temp)
+		dy=circy(temp)
+		Line x+dx,y+dy,x2+dx,y2+dy,1
+		Line x-dx,y+dy,x2-dx,y2+dy,1
+		Line x+dx,y-dy,x2+dx,y2-dy,1
+		Line x-dx,y-dy,x2-dx,y2-dy,1
+	Next
+
+	Use BitMap 0
+
+End Statement
+CNIF #errs:Runerrson:CEND
+
+
+
+.PreScan
+
+	Use BitMap 2
+	For plus.w=0 To 1
+		old.w=Off
+		For dtf=1 To pts2+0.5 Step 0.01
+			FindLo{dtf.q,condt,io}
+
+			If plus=0
+				dpri=bez\i:dprj=bez\j
+			Else
+				dpri=bez\k:dprj=bez\l
+			EndIf
+
+			fpsx=MapX(dpri,dprj)*scalfac
+			fpsz=MapY(dpri,dprj)*scalfac
+
+			If old
+				Linef{oldx,oldy,fpsx,fpsz}
+			Else
+				old.w=On
+			EndIf
+			oldx=fpsx:oldy=fpsz
+
+		Next
+	Next
+	plus.w=0
+
+Return
+
+
+
+.MoveIndiv
+		dtx=MapX(wi,wj)*scalfac:parta=(mx-dtx) ASR 6
+		dtz=MapY(wi,wj)*scalfac:partb=(my-dtz) ASR 5
+		wi+parta+partb
+		wj+partb-parta
+
+		Gosub MovIn
+
+		If plus=0
+			dpri=dtil:dprj=dtjl:di= dil:dj= djl
+		Else
+			dpri=dtir:dprj=dtjr:di=-dir:dj=-djr
+		EndIf
+		dnorm=4/Tan(di*di+dj*dj):di*dnorm:dj*dnorm
+		dpsx=MapX(dpri,dprj)*scalfac
+		dpsz=MapY(dpri,dprj)*scalfac
+
+
+		If RawStatus($01) Then start=dtf:movb=On
+		If RawStatus($02) Then fin=dtf:movb=On
+
+
+		actif.w=Off
+
+		If RawStatus($46) Then Linef{oldx,oldy,dpsx,dpsz}:actif=On
+		oldx=dpsx:oldy=dpsz
+
+		If NOT RawStatus($5f) Then ledge=0
+		If (ledge=0) AND RawStatus($5f) Then ledge=2
+		If ledge>0 Then Gosub DraLEdge
+
+
+Return
+
+
+.MovIn
+
+	Repeat
+		b.w=On
+		If (dtf>pts3) Then dtf-pts1:b.w=Off
+		If (dtf<	 2) Then dtf+pts1:b.w=Off
+	Until b
+
+	FindLo{dtf.q,condt,io}
+	dtil=bez\i:dtjl=bez\j:dtir=bez\k:dtjr=bez\l
+
+	difi=dtil-dtir:difj=dtjl-dtjr ;:pdist=1/Sqr(difi*difi+difj*difj)
+;	difi*pdist:difj*pdist
+
+	proi=wi-dtil:proj=wj-dtjl
+	If proi*difj<proj*difi
+		If woosh>0 Then woosh+0.01 Else woosh=0.002
+	Else
+		If woosh<0 Then woosh-0.01 Else woosh=-0.002
+	EndIf
+	woosh ASR 1: dtf+woosh
+
+	dtg.q=dtf+0.01125:FindDif{dtg,condt,io}
+	dil=bez\i:djl=bez\j:dir=bez\k:djr=bez\l
+
+	Repeat
+		b.w=On
+		If (dtf>pts3) Then dtf-pts1:b.w=Off
+		If (dtf<	 2) Then dtf+pts1:b.w=Off
+	Until b
+
+Return
+
+Macro qrnd
+	(Peek.w($dff006) AND 7)
+End Macro
+
+Macro midx
+	(`1*(dist-leng)+(`2)*leng)/dist
+End Macro
+Macro midy
+	(`1*(dist-lengy)+(`2)*lengy)/dist
+End Macro
+
+Statement pLine{x1.w,y1.w,x2.w,y2.w,col.w,flipped.w}
+	If flipped.w Then Exchange x1,y1:Exchange x2,y2
+	Line x1,y1,x2,y2,col
+End Statement
+
+NEWTYPE .aka
+	lastang.w:flipped
+	lastx.w:lasty
+	vstalex.w:vstaley
+End NEWTYPE
+
+in.aka\lastang=0:out.aka\lastang=0
+maincol=8:dithcol=14
+
+Statement dline{x1.w,y1.w,x2.w,y2.w,typ.l}
+Shared maincol,dithcol
+
+	*a.aka=typ
+	USEPATH *a
+
+	delx.w=\lastx-x1:dely.w=\lasty-y1
+
+	If QAbs(delx) > QAbs(dely) Then \flipped=On
+	If QAbs(delx) < QAbs(dely) Then \flipped=Off
+	;if delx=dely then keep flipped same..
+	If \flipped
+		Exchange delx,dely:Exchange x1,y1:Exchange x2,y2
+		Exchange \lastx	,\lasty		;:Exchange prevx,prevy
+		Exchange \vstalex,\vstaley
+	EndIf
+
+;	pLine{x1,y1,x2,y2,maincol}
+
+	saveang.w=\lastang:done.w=Off
+	stalex.w =\vstalex
+	staley.w =\vstaley
+
+	If x1=-1 Then \lastx=x1:\lasty=y1:\lastang=0:Goto die
+
+	If (\lastx<>x1) AND (\lasty<>y1)
+
+		If (delx=0) OR (dely=0) Then Goto die
+		\lastang=0
+
+		If (QAbs(delx)>1) AND (QAbs(dely)>1) Then MOVE #$f00,$dff180
+
+		If (NOT done) AND (QAbs(delx)=1); AND (QAbs(dely)>1)
+			y1+Sgn(dely)
+
+			If (Sgn(delx)=Sgn(x2-x1))
+				nux=x1:dely-Sgn(dely)
+				nuy=y1+Int((dely+dely)/3):pLine{nux,y1,nux,nuy,maincol,\flipped}
+				nuy=y1+Int( dely			/3):pLine{nux,y1,nux,nuy,dithcol,\flipped}
+
+			Else
+				\lastang=1:\vstalex=\lastx:\vstaley=\lasty
+			EndIf
+
+			done=On
+			y1-Sgn(dely)
+
+			If saveang=1
+				dely-Sgn(dely)
+				nux=stalex
+				nuy=\lasty-Int((dely+dely)/3):pLine{nux,\lasty,nux,nuy,maincol,\flipped}
+				nuy=\lasty-Int( dely			/3):pLine{nux,\lasty,nux,nuy,dithcol,\flipped}
+			EndIf
+		EndIf
+
+		If NOT done Then MOVE #-1,$dff180
+		\lastx=x1:\lasty=y1
+	EndIf
+
+die
+
+	If \flipped
+		Exchange delx,dely:Exchange x1,y1:Exchange x2,y2
+		Exchange \lastx,\lasty ;:Exchange prevx,prevy
+		Exchange \vstalex,\vstaley
+	EndIf
+
+End Statement
+
+
+
+CNIF 1=0
+	dtf=start
+	FindLo {dtf,condt,io}
+	olsxc=bez\i:olsyc=bez\j
+
+	While dtf<fin
+		dtf+0.1
+		FindLo {dtf,condt,io}
+		fpsx=MapX(bez\i,bez\j)*scalfac
+		fpsy=MapY(bez\i,bez\j)*scalfac
+
+
+		lex=fpsx-olsxc
+		ley=fpsy-olsyc
+		dist=Tan(lex*lex+ley*ley)
+		totdist+dist
+
+	Wend
+	Locate 0,0:Print totdist
+	jmpwidth=120*totdist/Int(totdist/120)
+CEND
+
+
+
+
+.DraScan
+	DEFTYPE .f olsxc,olsyc,fpsx,fpsy,olsco,olsyo,dist,leng
+
+	leng=1 ; remove me! (put me at the top)
+
+	totdist=0
+	hpts=pts ASR 1
+
+	For pass=0 To 1
+
+		dtf=start
+		FindLo {dtf,condt,io}
+		If plus=0 Then ti=bez\i:tj=bez\j	Else ti=bez\k:tj=bez\l
+
+		olsxc=MapX(ti,tj)*scalfac
+		olsyc=MapY(ti,tj)*scalfac
+		FindDif {dtf+0.03,condt,io}
+		If plus=0 Then di=bez\i:dj=bez\j	Else di=bez\k:dj=bez\l
+		dnorm=4/Tan(di*di+dj*dj)
+		di*dnorm:dj*dnorm
+		olsxo=olsxc+(dj+di)*scalfac:olsyo=olsyc+(dj-di)*scalfac*0.5:cola=0
+
+		While ( (dtf-fin+pts1) MOD pts1) > hpts
+			dtf+0.1
+
+			Repeat
+				b.w=On
+				If (dtf>pts3) Then dtf-pts1:b.w=Off
+				If (dtf<	 2) Then dtf+pts1:b.w=Off
+			Until b
+
+			If (dtf>fin) AND (dtf<fin+2) Then dtf=fin
+			FindLo {dtf,condt,io}
+			If plus=0 Then ti=bez\i:tj=bez\j	Else ti=bez\k:tj=bez\l
+			fpsx=MapX(ti,tj)*scalfac
+			fpsy=MapY(ti,tj)*scalfac
+
+			FindDif {dtf+0.03,condt,io}
+			If plus=0 Then di=bez\i:dj=bez\j	Else di=bez\k:dj=bez\l
+			dnorm=4/Tan(di*di+dj*dj)
+			di*dnorm:dj*dnorm
+
+			lex=fpsx-olsxc
+			ley=(fpsy-olsyc)
+			dist=Tan(lex*lex+ley*ley)
+			While dist>leng
+
+;				tri(0)\x=olsxc,olsyc
+				tri(0)\x=olsxc*2-olsxo,olsyc*2-olsyo
+				tri(1)\x=olsxo,olsyo
+
+
+				olsxc=!midx{olsxc,fpsx}
+				olsyc=!midx{olsyc,fpsy}
+				tmpx=fpsx+(dj+di)*scalfac
+				tmpy=fpsy+(dj-di)*scalfac*0.5
+				olsxo=!midx{olsxo,tmpx}
+				olsyo=!midx{olsyo,tmpy}
+
+
+				lex=fpsx-olsxc:ley=(fpsy-olsyc)
+				dist=Tan(lex*lex+ley*ley)
+				If pass=0
+					totdist=totdist+leng
+				Else
+					Use BitMap 2
+					If cola<jpwid1 Then col=1 Else col=2
+					If cola>jpwid2 Then cola-jpwid2
+
+
+					tri(2)\x=olsxc*2-olsxo,olsyc*2-olsyo
+					tri(3)\x=olsxo,olsyo
+
+					Polyf 3,ad,col
+					Polyf 3,ae,col
+					Use BitMap 0
+					cola+leng
+				EndIf
+			Wend
+		Wend
+
+		sects=Int(totdist/80)+0.48
+		jpwid2=totdist/sects
+		jpwid1=jpwid2 ASR 1
+
+	Next
+Return
+
+
+
+
+CNIF 1=0
+	If ledge=2
+		ledge=1:cola=0
+		olsxc=dpsx					:olsyc=dpsz
+		olsxo=dpsx+(dj+di)*scalfac:olsyo=dpsz+(dj-di)*scalfac*0.5
+		x1=-1 ;reset Dline..
+	Else
+		lex=dpsx-olsxc:temp=dpsx+(dj+di)		 -olsxo:If temp>lex Then lex=temp
+		ley=dpsz-olsyc:temp=dpsz+(dj-di)ASR 1-olsyo:If temp>ley Then ley=temp
+		dist=Tan(lex*lex+ley*ley)
+		While dist>leng
+			tri(0)\x=olsxc,olsyc
+			tri(1)\x=olsxo,olsyo
+
+			olsxc=!mid{olsxc,dpsx}
+			olsyc=!mid{olsyc,dpsz}
+			olsxo=!mid{olsxo,dpsx+(dj+di)*scalfac}
+			olsyo=!mid{olsyo,dpsz+(dj-di)*scalfac*0.5}
+
+			tri(2)\x=olsxc,olsyc
+			tri(3)\x=olsxo,olsyo
+
+
+			Use BitMap 2
+			If cola<60
+
+				Polyf 3,ad,1
+				Polyf 3,ae,1
+			Else
+				Polyf 3,ad,2
+				Polyf 3,ae,2
+
+				If cola>120 Then cola-120
+			EndIf
+			Use BitMap 0
+
+			dummy=dpsx-olsxc:the=dpsz-olsyc
+			dist=Tan(dummy*dummy+the*the)
+			cola+leng
+		Wend
+	EndIf
+CEND
+
+
+Return ;never used?
+
+
+
+
+
+.DraLEdge
+	leng=1 ; remove me! (put me at the top)
+
+;	MOVE #-1,$dff180
+	ad.l=&tri(0)
+	ae.l=&tri(1)
+	If ledge=2
+		ledge=1:cola=0
+		olsxc=dpsx					:olsyc=dpsz
+		olsxo=dpsx+(dj+di)*scalfac:olsyo=dpsz+(dj-di)*scalfac*0.5
+		x1=-1 ;reset Dline..
+	Else
+		lex=dpsx-olsxc:temp=dpsx+(dj+di)		 -olsxo:If temp>lex Then lex=temp
+		ley=dpsz-olsyc:temp=dpsz+(dj-di)ASR 1-olsyo:If temp>ley Then ley=temp
+		dist=Tan(lex*lex+ley*ley)
+		While dist>leng
+			tri(0)\x=olsxc,olsyc
+			tri(1)\x=olsxo,olsyo
+
+			olsxc=!midx{olsxc,dpsx}
+			olsyc=!midx{olsyc,dpsz}
+			olsxo=!midx{olsxo,dpsx+(dj+di)*scalfac}
+			olsyo=!midx{olsyo,dpsz+(dj-di)*scalfac*0.5}
+
+			tri(2)\x=olsxc,olsyc
+			tri(3)\x=olsxo,olsyo
+
+
+			Use BitMap 2
+			If cola<40
+;				Line olsxo,olsyo,olsxc,olsyc,0
+;				maincol=1:dithcol=14
+;				dline {olsxo,olsyo,olsxc,olsyc,&in}
+
+				Polyf 3,ad,1
+				Polyf 3,ae,1
+
+;				Line olsxo,olsyo,olsxc,olsyc,1
+
+
+
+;				maincol=9:dithcol=14
+;				dline {olsxc,olsyc,olsxo,olsyo,&out}
+;				Line olsxc,olsyc,olsxo,olsyo,1
+			Else
+
+				Polyf 3,ad,2
+				Polyf 3,ae,2
+;				Line olsxo,olsyo,olsxc,olsyc,2
+
+				If cola>80 Then cola-80:		x1=-1 ;reset Dline..
+			EndIf
+			Use BitMap 0
+
+			dummy=dpsx-olsxc:the=dpsz-olsyc
+			dist=Tan(dummy*dummy+the*the)
+			cola+leng
+		Wend
+	End If
+Return
+
+.CopCon
+	con(dest)\lti=con(src)\lti:con(dest)\ltj=con(src)\ltj
+	con(dest)\rti=con(src)\rti:con(dest)\rtj=con(src)\rtj
+Return
+
+.exit
+QAMIGA:Free BitMap 0: End

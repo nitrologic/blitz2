@@ -1,0 +1,60 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/fdrive/abcdoc/code/make2.bb
+;
+; converts standard print files (of bb2 source)
+;
+; create poo-write format ifftext file
+;
+
+f$="ram:cop1.prt"
+
+Function.s text{a$}
+	If (Len(a$) AND 1)=1 Then a$+Chr$(0)
+	Function Return "TEXT"+Mkl$(Len(a$))+a$
+End Function
+
+t$=Chr$(9)		;tab$
+e$=Chr$($1b)	;esc$
+n$=e$+"[22m"
+b$=e$+"[1m"
+
+f0$=Mkl$($55000008)+"Triumvirate"+Chr$(0)
+
+If ReadMem(0,f$+".doc")			;wowowow
+	FileOutput 0
+	Print "FORM",Mkl$(0),"WORD"
+	Print "FONT",Mkl$(Len(f0$)),f0$
+	If WriteMem(1,f$)
+		FileInput 1
+		While NOT DosBuffLen(1)
+			s$=Mkl$($00005500)+Mkl$(0) ;normal font first char
+			a$=Edit$(128)
+			a$=Replace$(a$,"	",t$)		;replace double spaces with tabs
+			j=1
+			Repeat
+				j=Instr(a$,b$,j)
+				If j<>0
+					s$+Mki$(j-1)+Mki$($5502)+Mkl$(0)	 ;go bold
+					a$=Left$(a$,j-1)+Mid$(a$,j+4)			;remove bold
+					j=Instr(a$,n$,j)									 ;find endofbold
+					If j<>0
+						s$+Mki$(j-1)+Mki$($5500)+Mkl$(0)	 ;go normal
+						a$=Left$(a$,j-1)+Mid$(a$,j+5)			;remove normal
+					EndIf
+				EndIf
+			Until j=0
+			j=Instr(a$,";")
+			If j<>0
+				s$+Mki$(j)+Mki$($5504)+Mkl$(0)		;go normal
+			EndIf
+			Print text{a$}
+			If s$<>"" Then Print "FSCC"+Mkl$(Len(s$))+s$
+		Wend
+	EndIf
+	;
+	a.l=FileSeek(0)-8:Loc 0,4:Print Mkl$(a)
+	CloseFile 0
+Else
+	Print "CAN'T OPEN FILE":MouseWait
+EndIf
+
+End

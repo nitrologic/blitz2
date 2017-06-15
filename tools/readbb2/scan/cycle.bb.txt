@@ -1,0 +1,13 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Cycle.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Cycle.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Cycle.bb
+
+; 
+; loading a palette and cycling colours program example 
+; 
+Screen 0,3            ;open a simple, 8 colour screen
+LoadScreen 0,"picture.iff"    ;load a picture into the screen
+LoadPalette 0,"picture.iff"   ;load pictures colours 
+Use Palette 0          ;display the colours.
+Cycle 0 
+MouseWait 
+End 
+

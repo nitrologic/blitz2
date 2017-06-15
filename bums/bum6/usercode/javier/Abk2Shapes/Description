@@ -1,0 +1,5 @@
+Abk2Shapes      Converts an Amos Object Bank into a Blitz 2 shape file.
+                Can be very useful when porting programs from one
+                language to the other. Supports both Sprite an Icon bank
+                types. Version 1.0. Includes source in Blitz2.
+                Author: Francisco Javier Diéguez Tirado

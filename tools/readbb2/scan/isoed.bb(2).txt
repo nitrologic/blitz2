@@ -1,0 +1,1520 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/sega/shit/dev/old/isoed.bb
+;
+; isometric lego ed
+;
+
+; test
+
+
+; spin
+; objects
+
+; symmetry
+; painting
+; front on view
+
+;	tau=plane
+;	s=front/back
+
+contrast=20
+
+sym=On
+
+SpriteMode 1
+
+;-----------------------------------------------------------
+; structures
+;-----------------------------------------------------------
+
+NEWTYPE .brick
+	t.w				 ; 0=none -1=inner %000001-%111111=wall (1-63)
+	c.w[6]			; x+ x- y+ y- z+ z-
+	pad.w
+End NEWTYPE
+
+NEWTYPE .pix
+	col.w
+	deep.w
+End NEWTYPE
+
+#x=16
+#y=34*#x
+#z=34*#y
+
+NEWTYPE .cols
+	r.q:g:b
+End NEWTYPE
+
+Dim col.cols(32)
+
+Macro p (`1-`3)/1.4142,(`1+`3-`2-`2)/5.2,(`1+`3+(`2)):End Macro			 ;5,3
+
+Macro d (`1-`3)ASL3,(`1+`3-`2-`2)ASL1:End Macro
+
+Macro dd (`1-`3)*8,(`1+`3-`2-`2)*2:End Macro
+
+Macro e (`1-`3)ASL3+262,(`1+`3-`2-`2)ASL1+130:End Macro
+
+Macro ex (`1-`3)ASL3+262:End Macro
+Macro ey (`1+`3-`2-`2)ASL1+130:End Macro
+
+Dim a.w(31,31,31)
+Dim b.brick(33,33,33)
+Dim t.brick(33,33,33)
+Dim p.pix(31,31)
+
+Dim fac1(20,256),fac2(20,256)
+
+NEWTYPE .xy
+	x.q:y
+End NEWTYPE
+
+NEWTYPE .pl
+	z.q
+	xy.xy[12]
+End NEWTYPE
+
+Dim tau.q(20),s(20)
+Dim List aa.pl(8)
+Dim srcimage.xy(256,256)
+
+Dim qsin(256),qcos(256)
+For i=0 To 255
+	qsin(i)=HSin(i*Pi/128)
+	qcos(i)=HCos(i*Pi/128)
+Next
+
+;-----------------------------------------------------------
+; functions and statements
+;-----------------------------------------------------------
+
+Statement mappix{b.l,p.l}
+	MOVE.ld0,a0:ADD.l #x*32+y*32+z*32,a0:MOVE.ld1,a3:MOVEQ#31,d7:
+	nxx0:MOVEQ#31,d6:MOVE.l a0,a1:SUB#y,a0
+	nxy0:MOVEQ#31,d5:MOVE.la1,a2
+	nxz0:BTST #0,1(a2):BNE gotc:SUB#x,a2:DBRA d5,nxz0
+	gotc:ADDQ#1,d5:MOVE 2(a2),d0:MOVEM d0/d5,(a3):ADDQ#4,a3
+	SUB#z,a1:DBRA d6,nxy0:DBRA d7,nxx0
+	AsmExit
+End Statement
+
+Statement roty{b.l,t.l}
+	MOVEM.la4-a6,-(a7)
+	MOVE.ld0,a0:MOVE.ld1,a3:ADD#x+y+z,a0:ADD.l#x+y+z*32,a3:MOVEQ#31,d7
+	nxz1:MOVEQ#31,d6:MOVE.la0,a1:ADD#z,a0:MOVE.la3,a4:ADD#x,a3
+	nxy1:MOVEQ#31,d5:MOVE.la1,a2:ADD#y,a1:MOVE.la4,a5:ADD#y,a4
+	nxx1:MOVE (a2),(a5)
+			 MOVE 4(a2),2(a5):MOVE 8(a2),4(a5):MOVE 6(a2),6(a5)
+			 MOVE 10(a2),8(a5):MOVE 2(a2),10(a5):MOVE 12(a2),12(a5)
+	ADD#x,a2:SUB#z,a5:DBRA d5,nxx1:DBRA d6,nxy1:DBRA d7,nxz1
+	MOVE.ld0,a0:MOVE.ld1,a1:MOVE.l#4*34*34*34,d0
+	mm1:MOVE.l (a1)+,(a0)+:SUBQ.l#1,d0:BNE mm1
+	MOVEM.l(a7)+,a4-a6:AsmExit
+End Statement
+
+Statement rotx{b.l,t.l}
+	MOVEM.la4-a6,-(a7)
+	MOVE.ld0,a0:MOVE.ld1,a3:ADD#x+y+z,a0:ADD.l#x+y*32+z,a3:MOVEQ#31,d7
+	nxz2:MOVEQ#31,d6:MOVE.la0,a1:ADD#z,a0:MOVE.la3,a4:SUB#y,a3
+	nxy2:MOVEQ#31,d5:MOVE.la1,a2:ADD#y,a1:MOVE.la4,a5:ADD#z,a4
+	nxx2:MOVE (a2),(a5)
+			 MOVE 2(a2),2(a5):MOVE 6(a2),4(a5):MOVE 10(a2),6(a5)
+			 MOVE 8(a2),8(a5):MOVE 12(a2),10(a5):MOVE 4(a2),12(a5)
+	ADD#x,a2:ADD#x,a5:DBRA d5,nxx2:DBRA d6,nxy2:DBRA d7,nxz2
+	MOVE.ld0,a0:MOVE.ld1,a1:MOVE.l#4*34*34*34,d0
+	mm2:MOVE.l (a1)+,(a0)+:SUBQ.l#1,d0:BNE mm2
+	MOVEM.l(a7)+,a4-a6:AsmExit
+End Statement
+
+Statement rotz{b.l,t.l}
+	MOVEM.la4-a6,-(a7)
+	MOVE.ld0,a0:MOVE.ld1,a3:ADD#x+y+z,a0:ADD.l#x*32+y+z,a3:MOVEQ#31,d7
+	nxz3:MOVEQ#31,d6:MOVE.la0,a1:ADD#z,a0:MOVE.la3,a4:ADD#z,a3
+	nxy3:MOVEQ#31,d5:MOVE.la1,a2:ADD#y,a1:MOVE.la4,a5:SUB#x,a4
+	nxx3:MOVE (a2),(a5)
+			 MOVE 12(a2),2(a5):MOVE 4(a2),4(a5):MOVE 2(a2),6(a5)
+			 MOVE 6(a2),8(a5):MOVE 10(a2),10(a5):MOVE 8(a2),12(a5)
+	ADD#x,a2:ADD#y,a5:DBRA d5,nxx3:DBRA d6,nxy3:DBRA d7,nxz3
+	MOVE.ld0,a0:MOVE.ld1,a1:MOVE.l#4*34*34*34,d0
+	mm3:MOVE.l (a1)+,(a0)+:SUBQ.l#1,d0:BNE mm3
+	MOVEM.l(a7)+,a4-a6:AsmExit
+End Statement
+
+Statement dolinks{b.l}
+	MOVE.l d0,a0:ADD.l#x+y+z,a0:MOVEQ#31,d7
+	nxz:MOVEQ#31,d6:MOVE.l a0,a1:ADD.l#z,a0
+	nxy:MOVEQ#31,d5:MOVE.l a1,a2:ADD.l#y,a1
+	nxx:TST(a2):BEQ nott:MOVEQ#0,d0
+			 TST x(a2):BNE nox1:BSET#0,d0			;:TST 2(a2):BNE nox1:MOVE#1,2(a2)
+	nox1:TST -x(a2):BNE nox2:BSET#3,d0		 ;:TST 4(a2):BNE nox2:MOVE#1,4(a2)
+	nox2:TST z(a2):BNE noy1:BSET#1,d0			;:TST 6(a2):BNE noy1:MOVE#1,6(a2)
+	noy1:TST -z(a2):BNE noy2:BSET#4,d0		 ;:TST 8(a2):BNE noy2:MOVE#1,8(a2)
+	noy2:TST y(a2):BNE noz1:BSET#2,d0			;:TST10(a2):BNE noz1:MOVE#1,10(a2)
+	noz1:TST -y(a2):BNE noz2:BSET#5,d0		 ;:TST12(a2):BNE noz2:MOVE#1,12(a2)
+	noz2:TST d0:BNE notneg:BSET#15,d0:notneg:MOVE d0,(a2)
+	nott:ADD#x,a2:DBRA d5,nxx:DBRA d6,nxy:DBRA d7,nxz
+	AsmExit
+End Statement
+
+NEWTYPE .quad
+	x0.w:y0.w:x1.w:y1.w:x2.w:y2.w:x3.w:y3.w
+End NEWTYPE
+
+q.quad\x0=0,0,20,0,50,50,0,50
+
+
+;-----------------------------------------------------------
+; nurb code
+;-----------------------------------------------------------
+
+Function.q nubs{u,i,k}
+	Shared s()
+	If k=2
+		If (s(i)<=u) AND (u<s(i+1))
+			Function Return (u-s(i	)) / (s(i+k-1)-s(i))
+		EndIf
+
+		If (s(i+1)<=u) AND (u<s(i+2))
+			Function Return (s(i+k)-u) / (s(i+k)-s(i+1))
+		EndIf
+		Function Return 0
+	EndIf
+	v1=0:v2=0
+	fac=nubs{u,i	,k-1}:If fac<>0 Then v1=(u-s(i	)) / (s(i+k-1)-s(i)) *fac
+	fac=nubs{u,i+1,k-1}:If fac<>0 Then v2=(s(i+k)-u) / (s(i+k)-s(i+1)) *fac
+	Function Return v1+v2
+End Function
+
+Function.q nub{u,i,k}
+	Shared tau()
+	If k=2
+		If (tau(i)<=u) AND (u<tau(i+1))
+			Function Return (u-tau(i	)) / (tau(i+k-1)-tau(i))
+		EndIf
+		If (tau(i+1)<=u) AND (u<tau(i+2))
+			Function Return (tau(i+k)-u) / (tau(i+k)-tau(i+1))
+		EndIf
+		Function Return 0
+	EndIf
+	If (u<tau(i)) OR (u> tau (i+3))
+		Function Return 0
+	EndIf
+	v1=0:v2=0
+	fac=nub{u,i	,k-1}:If fac<>0 Then v1=(u-tau(i	)) / (tau(i+k-1)-tau(i)) *fac
+	fac=nub{u,i+1,k-1}:If fac<>0 Then v2=(tau(i+k)-u) / (tau(i+k)-tau(i+1)) *fac
+	Function Return v1+v2
+End Function
+
+Statement nurb{s,t}
+	Shared fac1(),fac2(),aa(),mxx,myy,mzz,np
+	topx=0:topy=0:topz=0:bot=0:i=0
+	ResetList aa()
+	While NextItem(aa())
+		fa=fac2(i,s)
+		If fa<>0
+			For j.w=0 To np-1
+				fa1=fac1(j,t)		;				fac1=nub{u,j,3}
+				If fa1<>0
+					fac=fa1*fa
+					topx+aa()\xy[j]\x*fac
+					topy+aa()\xy[j]\y*fac
+					topz+aa()\z*fac
+					bot+fac
+				EndIf
+			Next
+		EndIf
+		i+1
+	Wend
+	mxx=topx/bot
+	myy=topy/bot
+	mzz=topz/bot
+End Statement
+
+
+;-----------------------------------------------------------
+; external files required
+;-----------------------------------------------------------
+
+;If ReadFile(0,"cow.dat")
+;	ReadMem 0,&a(0,0,0),32*32*32*2
+;	CloseFile 0
+;	For x=0 To 31:For y=0 To 31:For z=0 To 31
+;		If a(x,y,z)>0 Then b(x+1,y+1,z+1)\t=1
+;	Next z,y,x
+;	dolinks{&b(0,0,0)}
+;EndIf
+
+LoadShape 0,"crosshair.iff":DecodeShapes 0:GetaSprite 0,0
+LoadShape 1,"crossbox.iff":DecodeShapes 1:GetaSprite 1,1
+
+If WriteMem(0,"car.dat")
+	##[$BE14] 0,&b(0,0,0),34*34*34*16
+	##[$BE14] 0,&col(0),32*12
+	CloseFile 0
+EndIf
+
+;-----------------------------------------------------------
+; setup code
+;-----------------------------------------------------------
+
+BitMap 0,704,280,7
+BitPlanesBitMap 0,1,7
+BitPlanesBitMap 0,2,3
+BitPlanesBitMap 0,3,3
+BitPlanesBitMap 0,4,1
+
+InitCopList 0,32,280,$13907,8,256,0
+DisplayAdjust 0,8,-16,0,-48,8
+DisplayControls 0,0,0,$99					 ;sprite colors=128
+
+DecodePalette 0,256
+
+StopCycle 0,0,0,0,0
+StopCycle 0,1,15,15,15
+StopCycle 0,2,8,8,8
+StopCycle 0,3,12,12,12
+For i=1 To 31:AGAGreen 0,i*4,255,255,255:Next
+
+StopCycle 0,129,15,0,0
+StopCycle 0,130,0,15,0
+StopCycle 0,131,0,0,15
+
+For i=132 To 143:StopCycle 0,i,15,15,15:Next
+
+BLITZ
+
+Gosub setuppalette
+Gosub generategfx
+Gosub setupui
+
+Use ##[$BA81] 0
+
+Mouse On:MouseArea 0,0,704,280:BlitzKeys On:BitMapOutput 0
+
+CreateDisplay 0
+DisplayBitMap 0,0
+
+##[$BA85]
+
+##[$CD10] 32,128,92,8
+CludgeBitMap 32,2
+Use BitMap 2:BlockScroll1:MakeCookie 32:Use BitMap 0
+Poke.w Addr MidHandle(32)+4,7
+##[$A402] 0,128,92,2
+
+;Gosub drawcar
+;Locate 10,10
+;Gosub convertcar
+;Print n
+;Gosub rendercar
+
+;Gosub testdraw
+;MouseWait
+;End
+
+;-----------------------------------------------------------
+; main interupt
+;-----------------------------------------------------------
+
+.interupt
+
+SetInt 5
+
+	be=##[$BA92]
+
+	spp=0:sp=0:sx=MouseX:sy=MouseY:spx=sx:spy=sy
+
+	If nurb=0
+
+		If ##[$BA9C]=4															;pix window
+			px=QLimit(Int((MouseX-bx+3)/5),0,31)
+			py=QLimit(Int((MouseY-by+2)/3),0,31)
+			sx=bx+px*5-73:sy=by+py*3-5:sp=1
+		EndIf
+
+		If ##[$BA9C]=0
+			ix= (sx-262) ASR 3
+			iy= (sy-130) ASR 1
+
+			If ##[$BA8B](9)=0
+				vy=hi+1:vz=Int(vy-ix+iy):vx=Int(ix+ix+vz+1):sp=2
+			Else
+				For ty=32 To 1 Step -1
+					vy=ty:vx=((ix+iy+vy+vy) ASR 1):vz=vx-ix
+					If PColl(vz,vx,1,1,1,1,32,32)
+						If b(vx,vy-1,vz)\t AND 4 AND vy<33 Then sp=19:Pop For:Goto toot
+						vz=Int(vz):vx=ix+vz:vy=(vx+vz-iy) ASR 1
+						If PColl(vz,vx,1,1,1,1,32,32)
+							If b(vx,vy,vz-1)\t AND 2 AND vz<33 Then sp=18:Pop For:Goto toot
+							vx=Int(vx):vz=vx-ix:vy=(vx+vz-iy) ASR 1
+							If PColl(vz,vy,1,1,1,1,32,32)
+								If b(vx-1,vy,vz)\t AND 1 AND vx<33 Then sp=17:Pop For:Goto toot
+							EndIf
+						EndIf
+					EndIf
+				Next
+			EndIf
+
+			vz=0
+			toot:
+			If PColl(vz,vx,1,1,1,1,31,31)
+;				sp=(b(vx,vy,vz)\t AND 7)+2:If sp=2 Then sp=9
+				vx=Int(vx):vy=Int(vy):vz=Int(vz)
+				sx=!ex{vx,vy,vz}
+				sy=!ey{vx,vy,vz}
+				spp=1
+			EndIf
+		EndIf
+
+	EndIf
+
+	DisplaySprite 0,sp,sx-64,sy,0
+
+	DisplaySprite 0,spp,spx-64,spy,2
+
+End SetInt
+
+
+;-----------------------------------------------------------
+; initialise startup
+;-----------------------------------------------------------
+
+;Gosub formulate;SetBox 9,2:Gosub setupnurb:Gosub drawskele:nurb=1
+
+;Gosub drawblock
+
+;Gosub loadstuff
+
+##[$BA8A] 9,0:##[$BA86] 9
+
+;Gosub clearcar
+Gosub setupcols
+
+ox=-1:oy=-1:oz=-1
+
+bx=542:by=102
+Gosub drawpix
+
+;-----------------------------------------------------------
+; main loop
+;-----------------------------------------------------------
+
+.mainloop
+	Repeat
+		If rt>0 Then rt-1:If rt=0 Then Gosub drawcar
+
+		VWait
+;		Gosub rendercar:MOVE#-1,$dff180
+
+
+		bs=##[$BA8F]:jb=Joyb(0)			 ;setint gets the the event
+
+		If RawStatus($20) Then bs=13:be=1
+		If RawStatus($31) Then bs=14:be=1
+
+		a$=Inkey$
+
+		If be=-1
+			If bs=9 Then Gosub drawshape
+		EndIf
+		;
+		If be>0
+			;
+			If bs=0
+				Select ##[$BA8B](9)
+					Case 0:Gosub paintpix
+					Case 1:Gosub addbit
+					Case 2:Gosub paintbit
+				End Select
+			EndIf
+			;
+			If bs=4 Then Gosub paintpix
+
+			If bs=6 Then rotx{&b(0,0,0),&t(0,0,0)}:Gosub drawshape
+			If bs=7 Then roty{&b(0,0,0),&t(0,0,0)}:Gosub drawshape
+			If bs=8 Then rotz{&b(0,0,0),&t(0,0,0)}:Gosub drawshape
+
+			If bs=10 Then Gosub extrude
+			If bs=11 Then Gosub reflect
+			If bs=12 Then Gosub rendercar				;spin
+			If bs=13 Then Gosub docube
+
+;			If bs=15 Then Gosub rendercar
+			If bs=15 Then Gosub clearcar
+
+			If bs>15 AND bs<48
+				If cc<>bs-16 Then ##[$BA9B] 16+cc:##[$BA86] cc+16
+				cc=bs-16:Gosub updatecol
+			EndIf
+			If bs>47 AND bs<51 Then Gosub adjustcol
+		EndIf
+		If be<0
+			If bs>15 AND bs<48 Then ##[$BA9B] 16+cc:##[$BA86] cc+16
+		EndIf
+	Until RawStatus($45)			;Joyb(0)<>0
+	;
+	Gosub savestuff
+	;
+	End
+
+;-----------------------------------------------------------
+; new add block mode
+;-----------------------------------------------------------
+
+; convert builds table of vectors
+; forward, down, across and then multiple of each
+; use push and pop to restart scans
+
+; treat each block as solid
+; loop through x,z,y
+;
+
+.
+.convertcar
+	Dim d.b(16384):n=0:nn=0:nnn=0			 ;count bytes and pushes
+	NEWTYPE .xyz:x.w:y.w:z.w:End NEWTYPE
+	Dim List stack.xyz(128)
+	Dim List vec.xyz(128)
+	For xx=1 To 32
+		For zz=0 To 32
+			For yy=0 To 32
+				If b(xx,yy,zz+1)\t AND 4 Then Gosub scan
+			Next
+		Next
+	Next
+	For xx=1 To 32
+		For zz=0 To 32
+			For yy=0 To 32
+				If b(xx,yy,zz+1)\t AND 3 Then Gosub scan
+			Next
+		Next
+	Next
+	d(n)=128:d(n+1)=128
+	Return
+
+scan:
+	x=xx:y=yy:z=zz:ff=0
+	AddItem vec():vec()\x=x,y,z:nn+1
+	If b(xx,y,zz+1)\t AND 2 Then nnn+1:z+1:vec()\z+1:vec()\x-1
+	Gosub scanz
+	If ff=0
+		KillItem vec()
+	Else
+		d(n)=128:n+1
+		While LastItem(stack())
+			d(n)=0:n+1
+			x=stack()\x:y=stack()\y:z=stack()\z:KillItem stack()
+			Gosub scanx
+		Wend
+		d(n)=128:n+1
+	EndIf
+	Return
+
+scanz:
+	Repeat
+		f=0
+		If b(x,y,z+1)\t AND 4												;top
+			z+1:*p.brick=b(x,y,z)
+			d(n)=*p\c[2]:n+1
+			*p\t AND $fffb OR 8
+			f=1:ff=1
+			If (b(x+1,y,z)\t AND 4) OR (b(x,y,z)\t AND 1) ;t across
+				d(n)=0:n+1:AddLast stack():stack()\x=x,y,z
+			EndIf
+		EndIf
+
+		If b(x,y,z)\t AND 2													;front
+			d(n)=-b(x,y,z)\c[1]:n+1:b(x,y,z)\t-2+8; AND $fffd OR 8
+			If b(x+1,y,z)\t AND 2											;f across
+				d(n)=0:n+1:AddLast stack():stack()\x=-x,y,z
+			EndIf
+			y-1:f=1:ff=1
+		EndIf
+	Until f=0
+	Return
+
+scanx:
+	If x>0
+		Repeat
+			fg=0
+			If b(x+1,y,z)\t AND 4
+				x+1:*p.brick=b(x,y,z)
+				d(n)=*p\c[2]:n+1:fg=1:*p\t AND $fffb OR 8
+			EndIf
+			If b(x,y,z)\t AND 1
+				d(n)=-b(x,y,z)\c[0]:b(x,y,z)\t AND $fffe OR 8
+				n+1:fg=1:y-1
+			EndIf
+		Until fg=0
+	Else
+		x=-x
+		While b(x+1,y,z)\t AND 2
+			x+1:d(n)=b(x,y,z)\c[1]:b(x,y,z)\t AND $fffd OR 8:n+1
+		Wend
+	EndIf
+	Return
+
+.
+.rendercar:
+
+	Goto testnew
+
+	Macro g (`1-`3)ASL 1+64,(`1+`3-`2-`2)ASR1+32:End Macro
+	Macro gp
+		##[$A414] 0,!g{x,y,z},`1*4+2:##[$A414] 0,1+!g{x,y,z},`1*4+2
+	End Macro
+	InitBank 2,16384,0
+	bnk.l=Bank(2)+16:jj.w=0
+	For rx=0 To 1
+		For ry=0 To 3
+			dolinks{&b(0,0,0)}
+			Gosub convertcar
+			Poke.w Bank(2)+jj*2,bnk-Bank(2)
+
+			Poke.b bnk,-1:bnk+1				;insert handle at top of vecs
+			Poke.b bnk,16:bnk+1
+			Poke.b bnk,16:bnk+1
+			Poke.b bnk,16:bnk+1
+
+			ResetList vec()
+			While NextItem(vec())
+				Poke.b bnk,-1:bnk+1
+				Poke.b bnk,vec()\z:bnk+1
+				Poke.b bnk,vec()\y:bnk+1
+				Poke.b bnk,vec()\x:bnk+1
+			Wend
+			Poke.l bnk,0:bnk+4
+			n=(n+1) AND $fffe:##[$FEDB] &d(0),bnk,n:bnk+n:jj+1
+			Gosub docar
+			roty{&b(0,0,0),&t(0,0,0)}
+			dolinks{&b(0,0,0)}
+		Next
+		rotx{&b(0,0,0),&t(0,0,0)}
+		rotx{&b(0,0,0),&t(0,0,0)}
+	Next
+
+	QAMIGA
+	If ReadMem(0,"ram:car.tst")
+		Exists 0,Bank(2),bnk-Bank(2)
+		CloseFile 0
+	EndIf
+	BLITZ
+
+Statement mycar{cardat.l,frame.w,vecs.l,chunk.l}
+	MOVE.l d0,a0:ADD d1,d1:ADD 0(a0,d1),a0					;dat
+	MOVE.l d2,a1																		;vecs
+	MOVE.l d3,a2:MOVE.l 8(a2),a2
+	BRA clearchunk
+calcrot:
+	MOVEM (a1),d0-d5:MOVE.l a0,a3		;0xx 1xy 2yx 3yy 4zx 5zy
+	MOVE d4,d6:MULS d1,d6:MOVE d5,d7:MULS d0,d7:SUB.l d7,d6
+	BMI t1:ADDQ#8,a3:NEG 4(a1):NEG 6(a1):NEG 8(a1):NEG 10(a1):t1
+	MULS d3,d0:MULS d2,d1:MULS d5,d2:MULS d4,d3
+	SUB.l d1,d0:BMI t2:ADDQ#4,a3:NEG d4:NEG d5:MOVEM d4-d5,8(a1):t2
+	SUB.l d3,d2:BMI t3:ADDQ#2,a3:MOVEM (a1),d0-d1:NEG d0:NEG d1
+	MOVEM d4-d5,(a1):MOVEM d0-d1,8(a1):t3:ADD (a3),a0
+clearchunk:
+	MOVE.l a2,a3:ADD #46*128+64,a2	;chunky 128x92
+	MOVE#128*92/4-1,d0:MOVEQ#0,d1
+	clmem:MOVE.l d1,(a3)+:DBRA d0,clmem
+	LEA vecspace(pc),a3:BRA ss
+calcvecs:
+	tt:MOVE.l d6,(a3)+
+	ss:MOVEM.l (a1),d0-d2:MOVE.l (a0)+,d3:BEQ doit:MOVEQ#0,d6
+	xx:LSR.b #1,d3:BCC nox:ADD.l d0,d6:nox:BEQ xt:ADD.ld0,d0:BRA xx
+	xt:LSR#8,d3
+	yy:LSR.b #1,d3:BCC noy:ADD.l d1,d6:noy:BEQ yt:ADD.ld1,d1:BRA yy
+	yt:SWAP d3
+	zz:LSR.b #1,d3:BCC noz:ADD.l d2,d6:noz:BEQ tt:ADD.ld2,d2:BRA zz
+doit:									;d0-d2=x,y,z
+	MOVE.l #0,(a3):LEA vecspace(pc),a3
+	MOVE.l (a3)+,d3:MOVE d3,d5:ROL.l#8,d3:MOVE.b d3,d5:
+	ADD.b d5,d5:ASR#1,d5:SUB d5,a2
+
+Macro fplot
+	MOVE d3,d5:ROL.l#8,d3:MOVE.b d3,d5:ROR.l#8,d3
+	ASL#2,d4:ADDQ#2,d4:ADD.b d5,d5:ASR#1,d5:MOVE.b d4,0(a2,d5)
+End Macro
+
+nxv:
+	MOVE.l (a3)+,d3:BEQ dunvv
+
+npx:
+	MOVE.b (a0)+,d4:BMI xn:BEQ px:ADD.l d2,d3:!fplot:BRA npx
+	px:MOVE.l d3,-(a7):BRA npx:xn:NEG.b d4:BMI npz
+	SUB.l d1,d3:!fplot:BRA npx
+
+npz:
+	MOVE.b (a0)+,d4:BMI zn:BEQ pz:ADD.l d0,d3:!fplot:BRA npz
+	pz:MOVE.l (a7)+,d3:BRA npz:zn:NEG.b d4:BMI nxv
+	SUB.l d1,d3:!fplot:BRA npz
+
+dunvv:
+	AsmExit
+
+	vecspace:Ds.l 128
+
+End Statement
+
+
+;Statement mycar{cardat.l,frame.w,vecs.l,chunk.l}
+
+NEWTYPE .vec
+	xx.w:xy.w
+	yx.w:yy.w
+	zx.w:zy.w
+End NEWTYPE
+.
+;Macro e (`1-`3)ASL3+262,(`1+`3-`2-`2)ASL1+130:End Macro
+
+.testnew
+
+	NEWTYPE .mat
+		xa.q:ya:za
+		xb:yb:zb
+		xc:yc:zc
+	End NEWTYPE
+
+	px= 1:py=-1:pz=0
+	qx=0.7:qy=0.7:qz=-1
+
+	dist1=1/Tan(px*px+py*py+pz*pz)
+	dist2=1/Tan(qx*qx+qy*qy+qz*qz)
+	If dist1>dist2 Then dist=dist1:Else dist=dist2
+;	dist=93/Sqr(dist)
+	dist=120/Tan(dist)
+
+	px*dist:py*dist:pz*dist
+	qx*dist:qy*dist:qz*dist
+
+	While Joyb(0)<>2
+;		For x=0 To 127:For y=0 To 91:GPlot 0,x,y,0:Next:Next
+
+		fr=MouseX ASR 4
+		xang=fr;xang+0.2;fr;Sin(fr*2*Pi/30)*0.5
+		qc=HCos(xang)
+		qs=HSin(xang)
+		myrot.mat\xa=qc,-qs,0
+		myrot.mat\xb=qs,qc,0
+		myrot.mat\xc=0,0,1
+
+		fr=MouseY ASR4
+		ang=fr
+		qc=HCos(ang):qs=HSin(ang)
+		tempa=myrot.mat\xa*qc-myrot.mat\za*qs
+		tempb=myrot.mat\xa*qs+myrot.mat\za*qc
+		myrot.mat\xa=tempa
+		myrot.mat\za=tempb
+
+		tempa=myrot.mat\xb*qc-myrot.mat\zb*qs
+		tempb=myrot.mat\xb*qs+myrot.mat\zb*qc
+		myrot.mat\xb=tempa
+		myrot.mat\zb=tempb
+
+		tempa=myrot.mat\xc*qc-myrot.mat\zc*qs
+		tempb=myrot.mat\xc*qs+myrot.mat\zc*qc
+		myrot.mat\xc=tempa
+		myrot.mat\zc=tempb
+
+		DEFTYPE .vec v
+		USEPATH myrot
+
+		v\xx=\xa*px+\ya*py+\za*pz
+		v\xy=\xa*qx+\ya*qy+\za*qz
+
+		v\zx=\xb*px+\yb*py+\zb*pz
+		v\zy=\xb*qx+\yb*qy+\zb*qz
+
+		v\yx=\xc*px+\yc*py+\zc*pz
+		v\yy=\xc*qx+\yc*qy+\zc*qz
+
+;		v.vec\xx=256,64,0,-256,-256,64
+
+
+;		v.vec\xx=256,64,0,-256,-256,64
+
+
+;		MOVEM (a2),d0-d5:SUB.l a0,a0		;xx xy yx yy zx zy
+;		MOVE d4,d6:MULS d1,d6:MOVE d5,d7:MULS d0,d7:SUB.l d7,d6
+ ;	 BLE t1:ADDQ#4,a0:NEG.l 4(a2):NEG.l 8(a2):t1
+;		MULS d3,d0:MULS d2,d1:SUB.l d1,d0
+;		BLE t2:ADDQ#2,a0:NEG.l 8(a2):t2
+;		MULS d5,d2:MULS d4,d3:SUB.l d3,d2
+;		BLE t3:ADDQ#1,a0:MOVE.l (a2),d0
+;		MOVEM d4-d5,(a2):NEG.l d0:MOVE.l d0,8(a2):t3
+
+;		Goto gotit
+
+		basefr.w=0
+
+;		test1.l=(v\xy<0)					;=Sgn(v\xy)		;(v\xx*v\yy-v\xy*v\yx)>0
+;		test2.l=Abs(v\zy)>Abs(v\xy)		 ;(v\yx*v\zy-v\yy*v\zx)>0
+
+
+
+		test3.l=(v\zx*v\xy-v\zy*v\xx)>0
+		If v\zy>0 AND v\xy>0 Then test1=0:test2=0
+		If v\zy<0 AND v\xy>0 Then test1=1:test2=1
+		If v\zy<0 AND v\xy<0 Then test1=1:test2=0
+		If v\zy>0 AND v\xy<0 Then test1=0:test2=1
+
+		If test1
+			basefr+2
+			v\zy=-v\zy
+			v\zx=-v\zx
+			v\xy=-v\xy
+			v\xx=-v\xx
+		EndIf
+
+;		test2.l=(v\zy)>(v\xy)		 ;(v\yx*v\zy-v\yy*v\zx)>0
+;		Locate 10,10:Print test2
+		If test2
+			basefr+1
+			tempa=v\zx
+			tempb=v\zy
+			v\zx=-v\xx
+			v\zy=-v\xy
+			v\xx=tempa
+			v\xy=tempb
+		EndIf
+
+		If test3
+			basefr+4
+			v\yx=-v\yx
+			v\yy=-v\yy
+			v\xx=-v\xx			;z
+			v\xy=-v\xy			;z
+			Exchange test1,test2
+		EndIf
+
+
+gotit:
+
+		mycar{?car,basefr,&v,Addr ##[$A401](0)}		 ;,46*128+64}
+		##[$A412] 0,2
+		VWait
+		Blit 32,542,102
+dog:
+
+	Wend
+	End
+	Return
+
+car:IncBin car.tst
+
+
+docar:
+	Locate 10,10:Print n,"	 ",nn,"	",nnn
+	For x=0 To 127:For y=0 To 91:##[$A414] 0,x,y,0:Next:Next
+	ResetList vec()
+	n=0
+	While NextItem(vec())
+		x.q=vec()\x:y.q=vec()\y:z.q=vec()\z
+		While d(n)<>-128
+			If d(n)=0 Then If AddLast(stack()) Then stack()\x=x,y,z Else Stop
+			If d(n)>0 Then z+1:!gp{d(n)}
+			If d(n)<0 Then y-1:!gp{-d(n)}
+			n+1
+		Wend
+		n+1
+		While d(n)<>-128
+			If d(n)=0
+				x=stack()\x:y=stack()\y:z=stack()\z
+				KillItem stack();:If NOT LastItem(stack()) Then Stop
+			EndIf
+			If d(n)>0 Then x+1:!gp{d(n)}
+			If d(n)<0 Then y-1:!gp{-d(n)}
+			n+1
+		Wend
+		n+1
+	Wend
+	##[$A412] 0,2
+	Blit 32,542,102
+	Return
+
+.spin
+	For y=1 To 32
+		For z=1 To 15
+			If b(16,y,16+z)\t<>0
+				c=b(16,y,16+z)\c[0]
+				For r=1 To 255
+					rx.q=z*qsin(r):rz.q=z*qcos(r)
+					*p.brick=b(16+rx,y,16-rz)
+					*p\t=-1:For i=0 To 5:*p\c[i]=c:Next
+				Next
+			EndIf
+		Next
+	Next
+	Gosub drawshape
+	Return
+
+.drawshape
+	Select ##[$BA8B](9)
+		Case 0:Gosub drawpix
+		Case 1:Gosub drawcar
+		Case 2:Gosub drawcar
+	End Select
+	Return
+
+.drawpix:
+	bx=6:by=3
+	Boxf 2,1,521,259,0
+	mappix{&b(0,0,0),&p(0,0)}
+	Boxf bx-2,by-1,bx+160,by+95,0
+	For x=0 To 31
+		For y=0 To 31
+			c=p(x,y)\col
+			If c>0 Then Boxf bx+x*16,by+y*8,bx+x*16+14,by+y*8+6,c*4+2
+		Next
+	Next
+	Return
+
+.paintpix:
+	While Joyb(0)<>0
+		VWait
+		z=QLimit(Int((MouseX-bx)/16),0,31)
+		y=QLimit(Int((MouseY-by)/8),0,31)
+		p(z,y)\col=cc
+		x=p(z,y)\deep
+		If x=0
+			If Joyb(0)=1							 ;cc>0
+				p(z,y)\deep=15:x=15
+				*p.brick=b(x+1,32-y,32-z)
+				*p\t=-1
+				For i=0 To 5:*p\c[i]=cc:Next
+				Boxf bx+z*16,by+y*8,bx+z*16+14,by+y*8+6,cc*4+2
+			EndIf
+		Else
+			*p.brick=b(x,32-y,32-z)
+			If Joyb(0)=2							 ;cc=0
+				*p\t=0:p(z,y)\col=0,0
+				Boxf bx+z*16,by+y*8,bx+z*16+14,by+y*8+6,0
+			Else
+				*p\c[0]=cc
+				Boxf bx+z*16,by+y*8,bx+z*16+14,by+y*8+6,cc*4+2
+			EndIf
+		EndIf
+	Wend
+	Return
+
+.drawcar:
+	Boxf 2,1,521,259,0
+	dolinks{&b(0,0,0)}
+	##[$D182] &b(0,0,0)
+	Return
+
+
+.paintbit
+	Repeat
+		x=vx:y=vy:z=vz
+		If sp=17 Then x-1:b(x,y,z)\c[0]=cc:Blit 1,!e{x,y,z},cc
+		If sp=18 Then z-1:b(x,y,z)\c[1]=cc:Blit 2,!e{x,y,z},cc
+		If sp=19 Then y-1:b(x,y,z)\c[2]=cc:Blit 3,!e{x,y,z},cc
+		VWait
+	Until Joyb(0)=0
+	rt=20
+	Return
+
+.addbit
+	If sp>16
+		p=sp:x=vx:y=vy:z=vz
+		If (x=tx AND y=ty AND z=tz)=0 Then oox=ox:ooy=oy:ooz=oz
+		ox=x:oy=y:oz=z:tx=x:ty=y:tz=z
+		If jb=1
+			*p.brick=b(x,y,z):*p\t=0:tt=1
+			If b(x+1,y,z)\t=0 Then *p\t+1
+			If b(x,y+1,z)\t=0 Then *p\t+4
+			If b(x,y,z+1)\t=0 Then *p\t+2
+			For i=0 To 5:*p\c[i]=cc:Next
+			Gosub drawbrick
+			If p=17 Then ##[$B608] MouseX+8,MouseY+2:tx+1
+			If p=18 Then ##[$B608] MouseX-8,MouseY+2:tz+1
+			If p=19 Then ##[$B608] MouseX,MouseY-4:ty+1
+		Else
+			If p=17 Then ##[$B608] MouseX-8,MouseY-2:x-1
+			If p=18 Then ##[$B608] MouseX+8,MouseY-2:z-1
+			If p=19 Then ##[$B608] MouseX,MouseY+4:y-1
+			ox=x:oy=y:oz=z:tx=x:ty=y:tz=z
+			*p.brick=b(x,y,z):*p\t=0
+			dolinks{&b(0,0,0)}:tt=0
+		EndIf
+		While Joyb(0)<>0:VWait:Wend
+		rt=16
+	EndIf
+	Return
+
+.extrude:
+	For x=31 To 17 Step -1
+		For y=1 To 32
+			For z=1 To 32
+				##[$FEDB] &b(x-1,y,z),&b(x,y,z),SizeOf .brick
+			Next
+		Next
+	Next
+	Gosub drawshape
+	Return
+
+.docube:
+	If ox>-1 AND oox>-1
+		If ox>oox Then Exchange ox,oox
+		If oy>ooy Then Exchange oy,ooy
+		If oz>ooz Then Exchange oz,ooz
+		For x=ox To oox
+			For y=oy To ooy
+				For z=oz To ooz
+					b(x,y,z)\t=tt:For i=0 To 5:b(x,y,z)\c[i]=cc:Next
+				Next
+			Next
+		Next
+		Gosub drawshape
+		ox=-1:oox=-1
+	EndIf
+	Return
+
+.reflect:
+	For x=1 To 15
+		For y=1 To 32
+			For z=1 To 32
+				##[$FEDB] &b(32-x,y,z),&b(x,y,z),SizeOf .brick
+			Next
+		Next
+	Next
+	Gosub drawshape
+	Return
+
+
+.undo:
+	Return
+
+;-----------------------------------------------------------
+; nurb code
+;-----------------------------------------------------------
+
+.setupnurb
+
+	np=7
+
+	For i=0 To 19
+		tau(i)=(i-1)/(np)
+		s(i)=(i-1)/6
+	Next
+
+	For i=0 To 4
+		If AddItem(aa())
+			USEPATH aa()
+			\z=(i-2)*7.5
+			For j=0 To np-1
+				\xy[j]\x=HCos(j*Pi/np)*8,HSin(j*Pi/np)*8
+			Next
+		EndIf
+	Next
+
+	Gosub drawskele
+
+	Return
+
+
+.editskele
+	x=MouseX+5 -262
+	y=MouseY+2 -130
+	ResetList aa()
+	While NextItem(aa())
+		*cc.pl=aa()
+		mzz=*cc\z
+		mxx=x ASR 3 + mzz
+		myy=(mzz+mxx-(y ASR 1)) ASR 1
+		j=0
+		Repeat
+			If PColl(*cc\xy[j]\x,*cc\xy[j]\y,2,2,mxx,myy,2,2)
+				Gosub editpt:j=np:LastItem aa()
+			EndIf
+			j+1
+		Until j>=np
+	Wend
+	Return
+
+editpt
+	selj.w=j
+	While Joyb(0)<>0
+		x=MouseX+5 -262
+		y=MouseY+2 -130
+		mzz=*cc\z
+		mxx=x ASR 3 + mzz
+		myy=(mzz+mxx-(y ASR 1)) ASR 1
+		If selj=np-1-selj
+			*cc\xy[selj]\x=0,myy
+		Else
+			*cc\xy[selj]\x=mxx,myy
+			*cc\xy[np-1-selj]\x=-mxx,myy
+		EndIf
+		Gosub drawskele
+	Wend
+	Gosub drawinside
+	Return
+
+.drawskele
+	myc=5
+
+	Boxf 2,1,521,259,0
+	Line !e{0,0,-15},!e{0,0,15},1				;trunk
+
+	ResetList aa():USEPATH aa()
+	While NextItem(aa())
+		c=myc:If *cc=aa() Then c=2
+		oldsx=!ex{\xy[0]\x,\xy[0]\y,\z}
+		oldsy=!ey{\xy[0]\x,\xy[0]\y,\z}
+		For j=1 To np-1
+			newsx=!ex{\xy[j]\x,\xy[j]\y,\z}
+			newsy=!ey{\xy[j]\x,\xy[j]\y,\z}
+			Line oldsx,oldsy,newsx,newsy,c
+			oldsx=newsx:oldsy=newsy
+		Next
+	Wend
+
+	For j=0 To np-1
+		ResetList aa():NextItem aa()
+		oldsx=!ex{\xy[j]\x,\xy[j]\y,\z}
+		oldsy=!ey{\xy[j]\x,\xy[j]\y,\z}
+		While NextItem(aa())
+			newsx=!ex{\xy[j]\x,\xy[j]\y,\z}
+			newsy=!ey{\xy[j]\x,\xy[j]\y,\z}
+			Line oldsx,oldsy,newsx,newsy,myc
+			oldsx=newsx:oldsy=newsy
+		Wend
+	Next
+	Return
+
+.formulate
+	For t=0 To 15;255
+		For jj.w=0 To 10
+			fac1(jj,t)=nub{t/16,jj,3}
+		Next
+	Next
+	For s=0 To 15;255
+		For ii.w=0 To 10
+			fac2(ii,s)=nubs{s/16,ii,3}
+		Next
+	Next
+	Return
+
+
+.drawinside
+	small=1 ASR 6
+	outi=0
+	For s=0 To 15
+		For t=0 To 15
+			nurb{s,t}
+			ssx=!ex{mxx,myy,mzz}
+			ssy=!ey{mxx,myy,mzz}+80
+			srcimage(s,t)\x=ssx,ssy
+			If s>0
+				*mine.xy=srcimage(s-1,t)
+				Line *mine\x,*mine\y,ssx,ssy,1
+			EndIf
+			If t>0
+				*mine.xy=srcimage(s,t-1)
+				Line *mine\x,*mine\y,ssx,ssy,1
+			EndIf
+			Point ssx,ssy,1
+		Next
+	Next
+	Return
+
+;-----------------------------------------------------------
+; palette code
+;-----------------------------------------------------------
+
+.updatecol:
+	##[$BA8A] 48,col(cc)\r*128:##[$BA86] 48
+	##[$BA8A] 49,col(cc)\g*128:##[$BA86] 49
+	##[$BA8A] 50,col(cc)\b*128:##[$BA86] 50
+	Return
+
+.adjustcol
+	col(cc)\r=##[$BA8B](48)/128
+	col(cc)\g=##[$BA8B](49)/128
+	col(cc)\b=##[$BA8B](50)/128
+	Gosub setcol:DisplayPalette 0,0
+	Return
+
+.setuppalette
+	USEPATH col(i)
+	Restore cols
+	For i=1 To 31:Read \r,\g,\b:Next
+	For cc=1 To 31:Gosub setcol:Next
+	DisplayPalette 0,0
+	Return
+
+.setupcols:
+	For cc=1 To 31:Gosub setcol:Next:DisplayPalette 0,0
+	cc=1:##[$BA9B] 16+cc:##[$BA86] cc+16
+	Return
+
+.setcol
+	USEPATH col(cc)
+;	PaletteRange 0,cc*4,cc*4+3,\r+40,\g+40,\b+40,\r-20,\g-20,\b-20
+	For j=0 To 3
+		d=(2-j)*contrast
+		AGAGreen 0,cc*4+j,QLimit(\r+d,0,255),QLimit(\g+d,0,255),QLimit(\b+d,0,255)
+	Next
+	Return
+
+cols:
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,120
+	Data 120,180,180
+	Data 120,180,120
+	Data 180,180,180
+	Data 180,120,180
+	Data 180,120,180
+
+;-----------------------------------------------------------
+; user interface code
+;-----------------------------------------------------------
+
+.setupui
+	##[$BA82] 0,0,100
+
+	##[$BA84] 0,0,0,0,524,261,8				;work page
+
+	##[$BA84] 0,1,525,0,179,99,0			 ;funcs
+	##[$BA84] 0,2,525,200,179,61,0		 ;palette
+	##[$BA84] 0,3,0,262,704,18,0			 ;bottom strip
+	;
+;	bx=542:by=102
+;	AddBox 0,4,bx-4,by-2,166,99,8			 ;32*5
+	;
+	##[$BA84] 0,6,532,20,54,11,2,"ROTX"
+	##[$BA84] 0,7,588,20,54,11,2,"ROTY"
+	##[$BA84] 0,8,644,20,54,11,2,"ROTZ"
+	;
+	##[$BA84] 0,9,532,3,166,11,2,"DRAW|MODEL|PAINT"
+	;
+	##[$BA84] 0,10,532,32,54,11,2,"XTRUDE"
+	##[$BA84] 0,11,588,32,54,11,2,"REFLCT"
+	##[$BA84] 0,12,644,32,54,11,2,"SPIN"
+
+	##[$BA84] 0,13,532,44,54,11,2,"CUBE"
+	##[$BA84] 0,14,588,44,54,11,2,"POLY"
+	##[$BA84] 0,15,644,44,54,11,2,"CLEAR"
+
+	##[$BA84] 0,60,532,56,54,11,2,"TEST"
+	##[$BA84] 0,61,588,56,54,11,2,"TEST"
+	##[$BA84] 0,62,644,56,54,11,2,"TEST"
+
+	;
+;	AddBox 0,11,600,46,68,11,2,"PLOT|SQUARE|CIRCLE"
+;	AddBox 0,12,530,87,166,11,2,"COLOR ALL|COLOR FRONT|COLOR SIDE|COLOR TOP"
+	;
+;	AddBox 0,13,525,by-2,12,10,2,"^"
+;	AddBox 0,14,525,by-13+100,12,10,2,"v"
+;	AddBox 0,15,525,by+8,12,79,7:SetBox 15,0,1:hi=0
+	py=202							 ;palette boxes
+	For x=0 To 7
+		For y=0 To 3
+			c=y*8+x
+			##[$BA84] 0,16+c,530+x*21,py+y*8,21,8,2				;32*5
+			##[$BA91] 16+c,c*4+2
+		Next
+	Next
+	##[$BA9B] 16+cc
+
+	For y=0 To 2
+		##[$BA84] 0,48+y,530,py+34+y*8,168,7,7
+	Next
+
+;	AddBox 0,60,532,3,52,11,2,"BMAP"
+;	AddBox 0,61,588,3,52,11,2,"NURD"
+;	AddBox 0,62,644,3,52,11,2,"BLOK"
+
+	Return
+
+
+.drawgrid:
+;	Blit 4,!e{0,hi,0},0
+;	For i=0 To 31
+;		Line !e{i,hi,0},!e{i,hi,31},-1
+;		Line !e{0,hi,i},!e{31,hi,i},-1
+;	Next
+;	For x=0 To 31
+;		For z=0 To 31
+;			Plot !e{x,hi,z},-1
+;		Next
+;	Next
+	y=by+(31-hi)*3
+	Box bx-1,y-1,bx+161,y+2,1
+	Return
+
+;	For x=1 To 32:For y=1 To 32:For z=1 To 32
+;		If b(x,y,z)\t>0 Then Gosub drawbrick
+;	Next z,y,x
+;	Gosub drawpix
+;	Return
+
+.drawbrick
+	USEPATH b(x,y,z)
+	If \t AND 1 Then Blit 1,!e{x,y,z},\c[0]
+	If \t AND 2 Then Blit 2,!e{x,y,z},\c[2]
+	If \t AND 4 Then Blit 3,!e{x,y,z},\c[4]
+	Return
+
+.drawblock:
+	For x=1 To 32:For y=1 To 32:For z=1 To 32
+		If x=1 OR y=1 OR z=1
+			Blit 1,262+!d{x,y,z}+130,1
+			Blit 2,262+!d{x,y,z}+130,1
+			Blit 3,262+!d{x,y,z}+130,1
+		EndIf
+	Next z,y,x
+	Return
+
+.
+.generategfx
+	#s=-1
+	Use BitMap 2:BlockScroll:Box 0,0,7,3,1
+	GetaShape 1,0,0,8,4:Handle 1,-14,-4;:GetaSprite 2,1
+	;
+	Use BitMap 1:BitMapOrigin 1,160,128
+	BlockScroll
+	Line !d{0,0,0},!d{0,0,#s},4
+	Line !d{0,0,0},!d{0,#s,0},4
+	Line !d{0,#s,#s},!d{0,0,#s},4
+	Line !d{0,#s,#s},!d{0,#s,0},4
+	FloodFill 162,129,1
+	GetaShape 1,160,125,13,10:Handle 1,0,3
+	ReMap 4,1
+	GetaShape 5,160,125,13,10:Handle 5,0,3
+	;
+	BlockScroll
+	Line !d{0,0,0},!d{0,#s,0},4
+	Line !d{#s,#s,0},!d{0,#s,0},4
+	Line !d{#s,#s,0},!d{#s,0,0},4
+	Line !d{0,0,0},!d{#s,0,0},4
+	FloodFill 158,129,2:VWait 2
+	GetaShape 2,148,125,13,10:Handle 2,12,3
+	ReMap 4,2
+	GetaShape 6,148,125,13,10:Handle 6,12,3
+	;
+	BlockScroll
+	Line !d{0,0,0},!d{#s,0,0},4
+	Line !d{0,0,0},!d{0,0,#s},4
+	Line !d{#s,0,#s},!d{0,0,#s},4
+	Line !d{#s,0,#s},!d{#s,0,0},4
+	FloodFill 160,126,3:VWait 2
+	GetaShape 3,148,122,25,7:Handle 3,12,6
+	ReMap 4,3
+	GetaShape 7,148,122,25,7:Handle 7,12,6
+	;
+	BitMapOrigin 1,0,0:BlockScroll
+	For i=0 To 32
+		Line !e{i,0,0},!e{i,0,32},1
+		Line !e{0,0,i},!e{32,0,i},1
+	Next
+	GetaShape 4,6,130,512,129:Handle 4,270-14,0	;	Box 14-8,130,510+8,254+4,1
+	;
+	VWait 5
+	;
+	For i=1 To 7
+		MakeCookie i:Poke.w Addr MidHandle(i)+4,2
+	Next
+	;
+	Use BitMap 1:BlockScroll
+	;
+	For i=0 To 7
+		For j=0 To 2
+			k=j+1:If k=3 Then k=4
+			If i AND k Then Blit j+1,160,128
+		Next
+		GetaShape 8+i,160-8,128-4,16,8
+		Handle 8+i,8,4
+		Poke.w Addr MidHandle(8+i)+4,4
+		GetaSprite i+2,8+i
+		Poke.w Addr MidHandle(8+i)+4,2
+		BlockScroll
+	Next
+	;
+	Use BitMap 2:BitMapOrigin 2,160,128
+
+	BlockScroll:Line !dd{0,-.5,-.5},!dd{#s,-.5,-.5},1
+
+;	BitMapOrigin 2,0,0:Box 160-6,125,160+13,125+10,1:MouseWait:End
+	GetaShape 17,160-6,125,17,10:Handle 17,5,3:GetaSprite 17,17
+
+	BlockScroll:Line !dd{-.5,-.5,0},!dd{-.5,-.5,#s},1
+	GetaShape 18,160-6,125,17,10:Handle 18,6,3:GetaSprite 18,18
+
+	BlockScroll:Line !dd{-.5,0,-.5},!dd{-.5,#s,-.5},1
+	GetaShape 19,160-6,125,17,10:Handle 19,6,3:GetaSprite 19,19
+
+	Use BitMap 0
+	;
+	Return
+
+
+;-----------------------------------------------------------
+; old code
+;-----------------------------------------------------------
+
+.modelcar:
+	Select ##[$BA8B](11)
+	Case 0								 ;plot
+		While Joyb(0)<>0
+			VWait
+			If PColl(vz,vx,1,1,1,1,31,31)
+				x=vx:y=vy:z=vz:*p.brick=b(x,y,z)
+				If Joyb(0)=1
+					*p\t=0
+					If b(x+1,y,z)\t=0 Then *p\t+1
+					If b(x,y+1,z)\t=0 Then *p\t+4
+					If b(x,y,z+1)\t=0 Then *p\t+2
+					For i=0 To 5:*p\c[i]=cc:Next
+					Gosub drawbrick:Goto gopit
+				EndIf
+				If Joyb(0)=2
+					For i=0 To 5:*p\c[i]=0:Next
+					Gosub drawbrick:*p\t=0:Goto gopit
+				EndIf
+			EndIf
+			gopit
+		Wend
+	Case 1								 ;box
+		If PColl(vz,vx,1,1,1,1,31,31)
+			If ox=-1
+				ox=vx:oy=vy:oz=vz
+				b(vx,vy,vz)\t=1:For i=0 To 5:b(vx,vy,vz)\c[i]=cc:Next
+			Else
+				nx=vx:ny=vy:nz=vz
+				If (ox<>nx) OR (oy<>ny) OR (oz<>nz)
+					If ox>nx Then Exchange ox,nx
+					If oy>ny Then Exchange oy,ny
+					If oz>nz Then Exchange oz,nz
+					tt=1:If Joyb(0)=2 Then tt=0
+					For x=ox To nx
+						For y=oy To ny
+							For z=oz To nz
+								b(x,y,z)\t=tt:For i=0 To 5:b(x,y,z)\c[i]=cc:Next
+							Next
+						Next
+					Next
+					ox=-1:oy=-1
+				EndIf
+			EndIf
+			While Joyb(0)<>0:VWait:Wend
+		EndIf
+	End Select
+	Gosub drawcar
+	Gosub drawpix
+	Return
+
+.paintcar:
+	While Joyb(0)<>0
+		VWait
+		x=MouseX+5:y=MouseY+2
+		x=(x-262-4)ASR 4	;*.075
+		y=-(y-130+1)ASR 2			 ;ASR 1			;*.25
+		For vy=32 To 1 Step -1
+			vz=Int(vy-x-y)
+			vx=Int(x+x+vz+1)
+			If PColl(vz,vx,1,1,1,1,32,32)
+				If b(vx,vy,vz)\t>0 AND Joyb(0)=1
+					x=vx:y=vy:z=vz
+					Select ##[$BA8B](12)
+						Case 0:For i=0 To 5:b(vx,vy,vz)\c[i]=cc:Next
+						Case 1:b(vx,vy,vz)\c[2]=cc
+						Case 2:b(vx,vy,vz)\c[0]=cc
+						Case 3:b(vx,vy,vz)\c[4]=cc
+					End Select
+					Gosub drawbrick:Pop For:Goto popit
+				EndIf
+			EndIf
+		Next
+		popit
+	Wend
+	Gosub drawcar
+	Gosub drawpix
+	Return
+
+
+.clearcar:
+	For x=1 To 32
+		For y=1 To 32
+			For z=1 To 32
+				b(x,y,z)\t=0
+			Next
+		Next
+	Next
+	For i=1 To 32
+		b(16,16,i)\t=63:For j=0 To 5:b(16,16,i)\c[j]=1:Next
+	Next
+	Gosub drawshape
+	Return
+
+.savestuff
+	QAMIGA
+	If ReadMem(0,"ram:temp.dat")
+		Exists 0,&b(0,0,0),34*34*34*16
+		Exists 0,&col(0),32*12
+		CloseFile 0
+	EndIf
+	BLITZ
+	Return
+
+.loadstuff
+	QAMIGA
+	If WriteMem(0,"ram:temp.dat")
+		##[$BE14] 0,&b(0,0,0),34*34*34*16
+		##[$BE14] 0,&col(0),32*12
+		CloseFile 0
+	EndIf
+	BLITZ
+	Return
+
+
+;---------------------------------------------------------------
+; junk
+;---------------------------------------------------------------
+
+;			If bs=12 Then Gosub clearcar
+
+;			If bs>12 AND bs<16
+;				ohi=hi
+;				If bs=13 Then hi=QLimit(hi+1,0,31)
+;				If bs=14 Then hi=QLimit(hi-1,0,31)
+;				If bs=15 Then hi=31-Int(BoxPropY(15)*32)
+;				If hi<>ohi Then Gosub drawcar
+;				SetBox 15,0,1-hi/31:RedrawBox 15
+;			EndIf
+
+;Statement mappix{b.l,p.l}
+;	MOVE.ld0,a0:ADD.l #x+y*32+z*32,a0:MOVE.ld1,a3:MOVEQ#31,d7:
+;	nxx0:MOVEQ#31,d6:MOVE.l a0,a1:SUB#y,a0
+;	nxy0:MOVEQ#31,d5:MOVE.la1,a2
+;	nxz0:BTST #1,1(a2):BNE gotc:SUB#z,a2:DBRA d5,nxz0
+;	gotc:ADD#1,d5:MOVE 6(a2),d0:MOVEM d0/d5,(a3):ADDQ#4,a3
+;	ADD#x,a1:DBRA d6,nxy0:DBRA d7,nxx0
+;	AsmExit
+;End Statement

@@ -1,0 +1,18 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/ShapeGadget.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/ShapeGadget.bb
+
+; 
+;ShapeGadget example
+; 
+Screen 0,3
+ScreensBitMap 0,0 
+;generate 2 shapes for our shape gadget 
+Cls:Circlef 15,15,15,2:Circlef 8,8,9,5,3:Circlef 24,8,9,2,3 
+GetaShape 1,0,0,32,32:Circlef 24,8,9,5,3:GetaShape 0,0,0,32,32
+;
+ShapeGadget 0,148,50,0,1,0,1
+TextGadget 0,140,180,0,2,"EXIT" 
+Window 0,0,0,320,200,$100f,"ClickMe",1,2,0
+
+Repeat
+Until WaitEvent=64 AND GadgetHit=2
+

@@ -1,0 +1,17 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/Data.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/Data.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/Data.bb
+
+; 
+; read data program example 
+; 
+
+Read a$,b,c.w          ;read next 3 pieces of data. 
+NPrint a$            ;print them out... 
+NPrint b
+NPrint c
+MouseWait 
+End 
+
+Data$ "Some data to be read"  ;data to be read - string...
+Data 10                      ;quick... 
+Data.w -5                     ;and word.
+

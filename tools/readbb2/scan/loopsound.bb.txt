@@ -1,0 +1,12 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abc/helpdev/examples/LoopSound.bb,/Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/LoopSound.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/LoopSound.bb
+
+; 
+; loop sound program example
+; 
+LoadSound 0,"MySound.off"    ;load sound and loop info. 
+LoopSound 0,15
+MouseWait 
+
+
+
+

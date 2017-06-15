@@ -1,0 +1,25 @@
+; ascii translation of /Users/simon/Google Drive/amiga/w/abcstuff/dev/help/examples/SaveScreen.bb,/Users/simon/Google Drive/amiga/w/lha/bbold/doc/examples/SaveScreen.bb
+
+; 
+; draw, save and then load screen example program 
+; 
+Screen 0,3                 ;open Intuition screen.
+ScreensBitMap 0,0          ;pinch it's bitmap 
+BitMapOutput 0             ;send Print statements to screen's bitmap
+Print "Draw on screen with LMB" 
+Print "Press RMB to save picture as file RAM:picture" 
+
+While JB<>2               ;wait for RMB 
+ JB=Joyb(0)
+ If JB=1 Then Plot SMouseX,SMouseY,2 
+Wend
+
+Print "Saving the screen" 
+SaveScreen 0,"ram:picture"       ;save the screen
+Cls                           ;clear bitmap (will affect screen)
+Print "Press LMB to load it back in"
+MouseWait 
+LoadScreen 0,"ram:picture",0      ;load back in.
+Print "Press LMB to quit" 
+MouseWait 
+
