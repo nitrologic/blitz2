@@ -1,8 +1,0 @@
-BlitzBase V1.0
-66,6
-County,20,Text,,Left,0,0
-Area km2,8,Number,,Right,0,0
-Pop'tion,8,Number,,Right,0,0
-Density,8,Formula,f3/f2,Right,0,0
-Capital,20,Text,,Left,0,0
-Country,8,Text,,Left,0,0

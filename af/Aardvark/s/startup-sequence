@@ -1,7 +1,0 @@
-binddrivers
-echo ""
-echo "*E[33mAardvark!*E[32m (c) 1994 Andy Chandler."
-setpatch >nil:
-cd Aardvark:
-Aardvark
-endcli >nil:
