@@ -1,25 +1,3 @@
-AboutBlitz2.txt
-
-Type
-Text
-Size
-5 KB (5,353 bytes)
-Storage used
-5 KB (5,353 bytes)
-Location
-acidpd
-Owner
-me
-Modified
-Sep 11, 1995 by me
-Opened
-8:59 PM by me
-Created
-May 2, 2016
-Add a description
-Viewers can download
-\INTRODUCTION
-
                          ABOUT BLITZ BASIC 2
 
 
