@@ -1,0 +1,239 @@
+AboutBlitz2.txt
+
+Type
+Text
+Size
+5 KB (5,353 bytes)
+Storage used
+5 KB (5,353 bytes)
+Location
+acidpd
+Owner
+me
+Modified
+Sep 11, 1995 by me
+Opened
+8:59 PM by me
+Created
+May 2, 2016
+Add a description
+Viewers can download
+\INTRODUCTION
+
+                         ABOUT BLITZ BASIC 2
+
+
+
+Blitz BASIC 2 is a BASIC compiler for the Amiga computer from Acid Software a
+New Zealand company dedicated to producing top quality software for the Amiga
+user.
+
+Blitz 2 comprises of a fully integrated editor/compiler environment providing
+a serious, productive environment for the Amiga programmer.
+
+
+
+*** BLITZ MODE ***
+
+
+For the games programmer Blitz 2 offers a unique environment known as Blitz
+mode. Closing down the operating system and replacing it with
+
+- a kernal of super fast graphics
+
+- specialised sound commands
+
+- dedicated IO library
+
+- precise display control
+
+No longer does the Amiga programmer need to immerse themselves in assembler
+and complex hardware manipulation to produce fast, professional games.
+
+
+
+*** AMIGA MODE ***
+
+
+For the applications developer Blitz 2 offers complete control of the Amiga's
+multitasking, window based operating system. A comprehensive set of Workbench
+2.0 compatible commands allow full control of
+
+- screens
+
+- windows
+
+- menus
+
+- gadgets
+
+- intuitext
+
+- IDCMP reports
+
+An Intuition planner allows the creation of complex user interfaces quickly
+and easily generating Blitz 2 source code that can be inserted straight
+into Blitz 2 programs.
+
+
+\PROGRAMMING FEATURES
+
+                      *** PROGRAMMING FEATURES ***
+
+
+
+Types and NewTypes
+------------------
+
+Blitz 2 supports the following numeric types:
+
+  quick (fixed point)
+  byte, word, long (integer)
+  and fast floating point
+
+String handling is extensively supported.
+
+NewTypes can be defined (similar to C structures) allowing the BASIC
+programmer to dramatically simplify their code. Arrays of NewTypes not
+only dramatically reduces the number of arrays but speeds up the code.
+
+NewTypes also allow Blitz programmers lower level access to the operating
+system with all the structures used available as include files or resident
+in the Blitz 2 environment.
+
+
+
+Linked Lists
+------------
+
+As well as multi dimensional arrays Blitz 2 supports Linked-Lists. These
+are single dimension arrays with a powerful command set providing
+much greater control of the elements in the array. Elements can be
+added, inserted and deleted to lists, sorting order can be retained,
+processing of elements is simpler and quicker and code is not only easier
+to read but performance is increased.
+
+
+
+Extended BASIC program flow commands
+------------------------------------
+
+The following programming structures are supported in Blitz 2:
+
+For..Next
+While..Wend
+Repeat..Until
+Block If/Then/Else
+Select..Case..Default..EndSelect
+On..Goto & On..Gosub
+Statements and Functions with shared/global variable support.
+Multi levelled Interrupts
+
+and so on and so on.....
+
+
+
+\LIBRARIES
+
+                                Libraries
+                                ---------
+
+Blitz 2 features a serious command library system that enables expansion
+of the command set by the experienced machine code programmer. Utilities
+to convert standard Amiga libraries and their .fd files to Blitz libraries
+means that libraries such as midi.library, turtle.library and of course
+all the external hardware support type libraries can be converted to Blitz 2
+commands in a flash.
+
+Documentation is included for the user to develop their own libraries.
+Global variables from Blitz are available to commands added as well as
+full access to structures and all other commands. Memory control is all
+looked after by Blitz which will free up resources etc for the programmer.
+
+The first Blitz newsletter includes source for several new libraries,
+including a high speed serial port driver as well as commands to drive
+the Amiga's speech device.
+
+
+
+\AND MORE
+
+InLine Assembler
+----------------
+
+The Blitz 2 compiler also includes an inline assembler as well as commands
+to communicate between 68000 registers and BASIC variables etc. The assembler
+can also be used as a standalone machine code environment.
+
+
+
+Blitting
+--------
+
+
+Blitz 2 supports various modes of driving the Amiga's high speed Blitter
+chip:
+
+Blit will transfer a graphics image onto a bitmap
+
+SBlit will use a 1 of 7 stencil bitmaps for 8 levels of Blitting priority
+
+BBlit will buffer the background in memory so it may be restored afterward
+
+QBlit keeps all blit information in a 'Queue' so all blits can be quickly
+      erased
+
+Block is for map type blitting, super fast word boundary blitting.
+
+
+
+IFF support
+-----------
+
+Blitz 2 supports both IFF graphics and sound standards so files can be loaded
+straight without need of conversion.
+
+
+
+File Access
+-----------
+
+Sequential and Random access file handling are supported.
+
+
+
+BlitzUser Magazine
+------------------
+
+Published on a regular basis BUM keeps Blitz User's up to date, so far
+we have added MED support, anim brush and full scale anims, AGA palette
+control, serial port commands, date time extensions, an advanced
+runtime debugger, ARexx as well as publishing heaps and heaps of example
+code and tutorial material
+
+
+AND THERE'S MORE.................
+
+
+
+\CONTACTS
+
+
+For more information contact
+
+Acid Software
+10 St Kevins Arcade
+Karangahape Road
+Auckland
+New Zealand
+
+Fax/Phone   +649-358-1658
+
+
+In the U.S.A. contact David Maziarka on (608) 257 9057
+
+In the U.K. contact Benoit Varasse 0227 763 539
+
+In Germany contact Solaris Computers in Koln
+
+In Australia contact Computer Discounts 02-281-7411
