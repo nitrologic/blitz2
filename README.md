@@ -2,6 +2,10 @@
 
 Official Acid Software Amiga development tools by Mark Sibly with contributions from Simon Armstrong and the wider Amiga Blitz community.
 
+## Latest
+
+Added marksdemos and simonsdemos to new examples source folder. Ascii tokens planned.
+
 ## Blitz2 Source
 
 The source code to Blitz2 is here. It is 68000 assembler with tabs best set to 8 or 12.
